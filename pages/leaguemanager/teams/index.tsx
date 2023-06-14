@@ -3,10 +3,10 @@ import LayoutAdm from '../../../components/LayoutAdm';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 
-export default function Venues({
-  allVenuesData
+export default function Teams({
+  allTeamsData
 }: {
-  allVenuesData: {
+  allTeamsData: {
     name: string;
     id: string;
   }[]
@@ -15,13 +15,13 @@ export default function Venues({
     <LayoutAdm sidebar={<LmSidebar />} >
       <SectionHeader
         sectionData={{
-          title: 'Spielflächen',
-          newLink: `/leaguemanager/venues/new`
+          title: 'Mannschaften',
+          newLink: `/leaguemanager/teams/new`
         }}
         />
 
 
-      {allVenuesData && allVenuesData.map(({ id, name }) => {
+      {allTeamsData && allTeamsData.map(({ id, name }) => {
         return (<div key={id}>{name}</div>)
       }
       )}
@@ -30,12 +30,12 @@ export default function Venues({
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues/`);
-  const allVenuesData = await res.json();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/teams/`);
+  const allTeamsData = await res.json();
 
   return {
     props: {
-      allVenuesData,
+      allTeamsData,
       revalidate: 60,
     },
   };
