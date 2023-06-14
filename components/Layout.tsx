@@ -10,9 +10,9 @@ export default function Layout({
 }) {
 
   return (
-    <div className="">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="mx-auto max-w-7xl p-2 sm:px-4 md:px-8">
+      <main className="flex-1 max-w-7xl p-2 sm:px-4 md:px-8">
         {children}
       </main>
       <Footer />
