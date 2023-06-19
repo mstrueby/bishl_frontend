@@ -10,7 +10,7 @@ const LeagueManager: NextPage = () => {
         sectionData={{
           title: 'Dashboard',
         }}
-        />
+      />
     </LayoutAdm>
   );
 };
