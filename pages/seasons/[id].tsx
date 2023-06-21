@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/Layout';
 
 export default function Season({
@@ -7,7 +8,7 @@ export default function Season({
   season: {
     tournament: string
     year: number
-    standings: []
+    standings: { team: string, points: number }[]
   }
 }) {
   return (
@@ -30,7 +31,7 @@ export default function Season({
 }
 
 
-export const getStaticPaths = async () => {
+export const getStaticPaths: GetStaticPaths = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/seasons/`);
   const allSeasonsData = await res.json();
   const paths = allSeasonsData.map((season) => ({
