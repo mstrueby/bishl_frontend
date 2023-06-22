@@ -2,14 +2,17 @@ import Head from 'next/head';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/Layout';
 
+interface Season  {
+  _id: string;
+  tournament: string;
+  year: number;
+  standings: { team: string, points: number }[];
+};
+
 export default function Season({
   season
 }: {
-  season: {
-    tournament: string
-    year: number
-    standings: []
-  }
+  season: Season
 }) {
   return (
     <Layout>
@@ -34,7 +37,7 @@ export default function Season({
 export const getStaticPaths: GetStaticPaths = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/seasons/`);
   const allSeasonsData = await res.json();
-  const paths = allSeasonsData.map((season) => ({
+  const paths = allSeasonsData.map((season: Season) => ({
     params: { year: season.year.toString() },
   }));
   return { paths, fallback: "blocking" };
