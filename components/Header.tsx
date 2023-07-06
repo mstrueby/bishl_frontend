@@ -41,10 +41,10 @@ const Header = () => {
                   </Link>
 
                   <a
-                    href="#"
+                    href="/seasons/regionalliga-ost"
                     className={item}
                   >
-                    Nachwuchs
+                    Regionalliga Ost
                   </a>
                   <a
                     href="#"
