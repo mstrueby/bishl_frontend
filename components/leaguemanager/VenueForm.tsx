@@ -1,11 +1,11 @@
 import React from 'react'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
-/* import InputText from './form/InputText'
-import ButtonPrimary from './form/ButtonPrimary' */
+import InputText from '../ui/form/InputText'
+import ButtonPrimary from '../ui/form/ButtonPrimary' 
 import ButtonLight from '../ui/form/ButtonLight'
-/* import Toggle from './form/Toggle'
-import MyListbox from './form/Listbox' */
+import Toggle from '../ui/form/Toggle'
+import MyListbox from '../ui/form/Listbox'
 
 interface VenueFormProps {
   initialValues: any;
@@ -45,7 +45,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
         onSubmit={onSubmit}
       >
         <Form>
-          {/* <InputText
+          <InputText
                         name="name"
                         type="text"
                         label="Name"
@@ -75,7 +75,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
                         options={countries}
                         label="Land"
                     />
-                    <InputText
+          <InputText
                         name="latitude"
                         type="number"
                         label="Latitude"
@@ -89,7 +89,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
                         name="active"
                         type="checkbox"
                         label="Aktiv"
-                    /> */}
+                    /> 
           <div className="mt-4 flex justify-end py-4 px-4 sm:px-6">
             <ButtonLight
               name="btnLight"
@@ -97,11 +97,11 @@ const VenueForm: React.FC<VenueFormProps> = ({
               onClick={handleCancel}
               label="Abbrechen"
             />
-            {/*                         <ButtonPrimary
-                            name="btnPrimary"
-                            type="submit"
-                            children="Speichern"
-                        /> */}
+            <ButtonPrimary
+              name="btnPrimary"
+              type="submit"
+              label="Speichern"
+            />
           </div>
         </Form>
       </Formik>
