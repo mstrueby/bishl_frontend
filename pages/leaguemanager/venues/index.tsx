@@ -4,6 +4,8 @@ import LayoutAdm from '../../../components/LayoutAdm';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import Badge from '../../../components/ui/Badge';
+import Pagination from '../../../components/ui/Pagination';
+import { useState } from "react";
 
 export default function Venues({
   allVenuesData
@@ -17,15 +19,22 @@ export default function Venues({
     active: boolean;
   }[]
 }) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const onPageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <LayoutAdm sidebar={<LmSidebar />} >
       <SectionHeader
         sectionData={{
           title: 'Spielflächen',
-          newLink: `/leaguemanager/venues/new`
+          newLink: `/leaguemanager/venues/add`
         }}
       />
 
+{/* start table */}
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -77,13 +86,15 @@ export default function Venues({
         </div>
       </div>
 
+{/*       <Pagination 
+        items={allVenuesData.length} 
+        currentPage={currentPage} 
+        onPageChange={onPageChange} 
+      /> */}
+
     </LayoutAdm>
   );
 }
-
-
-
-
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues/`);
