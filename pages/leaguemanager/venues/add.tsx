@@ -8,7 +8,7 @@ import Layout from '../../components/Layout'
 import Backend from '../../components/Backend';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 
-let BASE_URL = "http://localhost:8000/venues/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
 
 
 export default function Add() {
@@ -41,11 +41,12 @@ export default function Add() {
 
     if (!response.ok) {
       let errArray = data.detail.map(el => {
-        return `${el.loc[1]} -${el.msg}`
+        return `${el.loc[1]} - ${el.msg}`
       })
       setError(errArray)
     } else {
       setError([])
+      router.push('/admin/venues')
       //navigate("/admin/venues", { state: { message: "Spielstätte erfolgreich angelegt." } });
     }
   };

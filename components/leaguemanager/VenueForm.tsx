@@ -90,7 +90,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
                         type="checkbox"
                         label="Aktiv"
                     /> 
-          <div className="mt-4 flex justify-end py-4 px-4 sm:px-6">
+          <div className="mt-4 flex justify-end py-4">
             <ButtonLight
               name="btnLight"
               type="button"
