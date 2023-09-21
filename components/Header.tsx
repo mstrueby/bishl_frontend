@@ -139,6 +139,15 @@ const Header = () => {
                       <Menu.Item>
                         {({ active }) => (
                           <Link
+                            href="/login"
+                          >
+                            <a className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>Login</a>
+                          </Link>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
                             href="#"
                           >
                             <a className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>Abmelden</a>
@@ -219,6 +228,13 @@ const Header = () => {
                   className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                 >
                   Profil
+                </Disclosure.Button>
+                <Disclosure.Button
+                  as="a"
+                  href="/login"
+                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                >
+                  Login
                 </Disclosure.Button>
                 <Disclosure.Button
                   as="a"
