@@ -1,31 +1,23 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import useAuth from '../hooks/useAuth';
 
-export default function Logout() {
+const Logout = () => {
+  const { user, setUser } = useAuth();
+  const removeCookies = async () => {
+    const res = await fetch('/api/logout', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const router = useRouter();
-
   useEffect(() => {
-    const logout = async () => {
-      const res = await fetch('/api/logout', {
-        method: 'POST',
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (res.ok) {
-        console.log("Logout success");
-        router.push('/');
-      } else {
-        // Handle error here
-        console.log("Logout failed");
-      }
-    };
-    
-    logout();
+    removeCookies();
+    setUser(null);
+    router.push('/');
   }, []);
 
-  return (
-    <div>
-      Logging out...
-    </div>
-  );
-}
+  return <></>;
+};
+
+export default Logout;

@@ -20,7 +20,7 @@ export default async (req, res) => {
           path: '/', 
           httpOnly: true,
           sameSite: 'strict',
-          maxAge: 3600
+          maxAge: 180
         }
       )).json({ 
         'email':data['user']['email'],
