@@ -12,7 +12,7 @@ export default function LayoutAdm({
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="relative">
+      <div className="min-h-screen relative">
         <div className="mx-auto max-w-screen-xl pb-6 lg:pb-16">
           <div className="overflow-hidden">
             <div className="divide-y divide-gray-200 md:grid md:grid-cols-12 md:divide-y-0 md:divide-x">

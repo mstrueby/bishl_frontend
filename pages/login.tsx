@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import useAuth from '../hooks/useAuth';
 import Layout from '../components/Layout';
-import { setDefaultResultOrder } from 'dns';
+import { Formik, Form } from 'formik';
+import InputText from '../components/ui/form/InputText';
+import ButtonPrimary from '../components/ui/form/ButtonPrimary';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,9 +14,7 @@ export default function LoginPage() {
   const { setUser } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     const res = await fetch('/api/login', {
       body: JSON.stringify({
         email,
@@ -54,6 +54,41 @@ export default function LoginPage() {
         <button type="submit">Login</button>
       </form>
 */}
+      
+      <Formik
+  initialValues={{
+    email: '',
+    password: ''
+  }}
+  onSubmit={handleSubmit}
+>
+  <Form>
+  <InputText
+    name="email"
+    type="text"
+    label="Email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+  />
+  <InputText
+    name="password"
+    type="password"
+    label="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+  />
+  <div className="mt-4 flex justify-end py-4">
+    <ButtonPrimary
+      name="btnPrimary"
+      type="submit"
+      label="Login"
+    />
+  </div>
+  </Form>
+  </Formik>
+
+
+      {/*
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
@@ -128,7 +163,7 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-      
+      */}
     </Layout>
   );
 }
