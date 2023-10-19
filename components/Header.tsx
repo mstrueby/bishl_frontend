@@ -2,7 +2,7 @@ import { Fragment, useEffect } from 'react'
 import Link from 'next/link'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 
 function classNames(...classes: string[]) {
@@ -35,6 +35,8 @@ const Header = () => {
         <>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
+              
+              {/* Navigation */}
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <img
@@ -55,8 +57,10 @@ const Header = () => {
                   </div>
                 </div>
               </div>
-              <div className="hidden sm:ml-6 sm:block">
-                <div className="flex items-center">
+
+              {/* Search, Notification, Profile menu */}
+              <div className="flex items-center block">
+                <div>
                   {/*
                   <button
                     type="button"
@@ -73,14 +77,11 @@ const Header = () => {
                   {user ? (
                   <Menu as="div" className="relative ml-3">
                     <div>
-                      <Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                      <Menu.Button className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                         <span className="absolute -inset-1.5" />
                         <span className="sr-only">Open user menu</span>
-                        <img
-                          className="h-8 w-8 rounded-full"
-                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                          alt=""
-                        />
+                        <UserIcon className="block h-6 w-6" aria-hidden="true" />
+
                       </Menu.Button>
                     </div>
                     <Transition
@@ -144,34 +145,27 @@ const Header = () => {
           
                   )}
                 </div>
-              </div>
 
-              {/* Mobile menu */}
-              <div className="-mr-2 flex sm:hidden items-center">
-                {loading ? <span>Loading...</span> : ""}
-                {user ? (
-                <div className="inline-block bg-orange-500 m-3 rounded-full">
-                  <p className="text-white table-cell align-middle text-center no-underline h-9 w-9 text-s">MS</p>
+              
+                {/* Mobile menu */}
+                <div className="-mr-2 ml-3 flex sm:hidden items-center">
+                  
+                  {/* Mobile menu button */}
+                  <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                    <span className="absolute -inset-0.5" />
+                    <span className="sr-only">Open main menu</span>
+                    {open ? (
+                      <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                    ) : (
+                      <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                    )}
+                  </Disclosure.Button>
                 </div>
-                ) : (
-                <Link href="/login">
-                  <a className={classNames("border-2 border-gray-100 mx-3", item)}>Anmelden</a>
-                </Link>
-                )}
-                {/* Mobile menu button */}
-                <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                  <span className="absolute -inset-0.5" />
-                  <span className="sr-only">Open main menu</span>
-                  {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                  ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                  )}
-                </Disclosure.Button>
               </div>
             </div>
           </div>
 
+          {/* mobile navigation */}
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2">
               {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
