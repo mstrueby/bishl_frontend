@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from 'react'
+import { Fragment, useEffect, forwardRef } from 'react'
 import Link from 'next/link'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
@@ -9,8 +9,31 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
+const men = [
+  { name: 'Regionalliga Ost', tiny_name: 'RLO', link: '#' },
+  { name: 'Landesliga', tiny_name: 'LL', link: '#' },
+]
+const youth = [
+  { name: 'Juniorenliga', tiny_name: 'U19', link: '#' },
+  { name: 'Jugendliga', tiny_name: 'U16', link: '#' },
+  { name: 'Schülerliga', tiny_name: 'U13', link: '#' },
+  { name: 'Bambini', tiny_name: 'U10', link: '#' },
+  { name: 'Mini', tiny_name: 'U8', link: '#' },
+]
+
 const item = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
 const itemActive = "inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
+
+const MyLink = forwardRef((props, ref) => {
+  let { href, children, ...rest } = props
+  return (
+    <Link href={href}>
+      <a ref={ref} {...rest}>
+        {children}
+      </a>
+    </Link>
+  )
+})
 
 const Header = () => {
   const { user, setUser, authError, setAuthError, loading, setLoading } = useAuth();
@@ -54,6 +77,68 @@ const Header = () => {
                     <Link href="/venues">
                       <a className={item}>Spielstätten</a>
                     </Link>
+                    <Menu as="div" className="relative inline-block text-left">
+                      <Menu.Button className={item}>Herren</Menu.Button>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          {men.map((item, index) => (
+                            <Menu.Item>
+                              {({ active }) => (
+                                <MyLink 
+                                  key={index}
+                                  href="/venues"
+                                  className={classNames(
+                                    active ? 'bg-gray-100' : '',
+                                    'block px-4 py-2 text-sm text-gray-700'
+                                  )}
+                                >
+                                  {item.name}
+                                </MyLink>
+                              )}
+                            </Menu.Item>
+                          ))}
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                    <Menu as="div" className="relative inline-block text-left">
+                      <Menu.Button className={item}>Nachwuchs</Menu.Button>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          {youth.map((item, index) => (
+                            <Menu.Item>
+                              {({ active }) => (
+                                <MyLink 
+                                  key={index}
+                                  href="/venues"
+                                  className={classNames(
+                                    active ? 'bg-gray-100' : '',
+                                    'block px-4 py-2 text-sm text-gray-700'
+                                  )}
+                                >
+                                  {item.name}
+                                </MyLink>
+                              )}
+                            </Menu.Item>
+                          ))}
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
                   </div>
                 </div>
               </div>
@@ -81,7 +166,6 @@ const Header = () => {
                         <span className="absolute -inset-1.5" />
                         <span className="sr-only">Open user menu</span>
                         <UserIcon className="block h-6 w-6" aria-hidden="true" />
-
                       </Menu.Button>
                     </div>
                     <Transition
