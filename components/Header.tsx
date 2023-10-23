@@ -10,15 +10,15 @@ function classNames(...classes: string[]) {
 }
 
 const men = [
-  { name: 'Regionalliga Ost', tiny_name: 'RLO', link: '#' },
-  { name: 'Landesliga', tiny_name: 'LL', link: '#' },
+  { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '#' },
+  { name: 'Landesliga', tiny_name: 'LL', href: '#' },
 ]
 const youth = [
-  { name: 'Juniorenliga', tiny_name: 'U19', link: '#' },
-  { name: 'Jugendliga', tiny_name: 'U16', link: '#' },
-  { name: 'Schülerliga', tiny_name: 'U13', link: '#' },
-  { name: 'Bambini', tiny_name: 'U10', link: '#' },
-  { name: 'Mini', tiny_name: 'U8', link: '#' },
+  { name: 'Juniorenliga', tiny_name: 'U19', href: '#' },
+  { name: 'Jugendliga', tiny_name: 'U16', href: '#' },
+  { name: 'Schülerliga', tiny_name: 'U13', href: '#' },
+  { name: 'Bambini', tiny_name: 'U10', href: '#' },
+  { name: 'Mini', tiny_name: 'U8', href: '#' },
 ]
 
 const item = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -267,113 +267,41 @@ const Header = () => {
               >
                 Spielstätten
               </Disclosure.Button>
-              <Disclosure.Button
-                as="panel"
-                className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
-                <Menu as="div">
-                    <Menu.Button as="div">Herren</Menu.Button>
-                    {/*<Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">*/}
-  
-                    <Menu.Items className="block rounded-md bg-white mt-2 py-1 text-base" as="div">
-                      {men.map((item, index) => (
-                        <Menu.Item>
-                          {({ active }) => (
-                            <MyLink 
-                              key={index}
-                              href="/venues"
-                              className={classNames(
-                                active ? 'bg-gray-100' : '',
-                                'block px-4 py-2 text-sm text-gray-700'
-                              )}
-                            >
-                              {item.name}
-                            </MyLink>
-                          )}
-                        </Menu.Item>
-                      ))}
-                    </Menu.Items>
-                </Menu>
-              </Disclosure.Button>
-              <Disclosure.Button
-                as="panel"
-                className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
-                <Menu as="div">
-                  <Menu.Button as="div">Nachwuchs</Menu.Button>
-                  {/*<Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">*/}
+              
+              <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
+                <span>Herren</span>
+              </div>
+              <div className="block left-0 ml-6 px-1 origin-top-right rounded-md bg-gray-700 py-1 text-gray-300">
+                {men.map((item, index) => (
+                  <Disclosure.Button
+                    as="a"
+                    key={index}
+                    href={item.href}
+                    className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
+                  >
+                    {item.name}
+                  </Disclosure.Button>
+                ))}
+              </div>
 
-                  <Menu.Items className="block rounded-md bg-white mt-2 py-1 text-base" as="div">
-                    {youth.map((item, index) => (
-                      <Menu.Item>
-                        {({ active }) => (
-                          <MyLink 
-                            key={index}
-                            href="/venues"
-                            className={classNames(
-                              active ? 'bg-gray-100' : '',
-                              'block px-4 py-2 text-sm text-gray-700'
-                            )}
-                          >
-                            {item.name}
-                          </MyLink>
-                        )}
-                      </Menu.Item>
-                    ))}
-                  </Menu.Items>
-                </Menu>
-              </Disclosure.Button>
+              <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
+                <span>Nachwuchs</span>
+              </div>
+              <div className="block left-0 ml-6 px-1 origin-top-right rounded-md bg-gray-700 py-1 text-gray-300">
+                {youth.map((item, index) => (
+                  <Disclosure.Button
+                    as="a"
+                    key={index}
+                    href={item.href}
+                    className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
+                  >
+                    {item.name}
+                  </Disclosure.Button>
+                ))}
+              </div>
+              
             </div>
             
-            {/*
-            <div className="border-t border-gray-700 pb-3 pt-4">
-              <div className="flex items-center px-5">
-                <div className="flex-shrink-0">
-                  <img
-                    className="h-10 w-10 #p
-                    ßounded-full"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt=""
-                  />
-                </div>
-                <div className="ml-3">
-                  <div className="text-base font-medium text-white">Tom Cook</div>
-                  <div className="text-sm font-medium text-gray-400">tom@example.com</div>
-                </div>
-                <button
-                  type="button"
-                  className="relative ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                >
-                  <span className="absolute -inset-1.5" />
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
-              </div>
-              <div className="mt-3 space-y-1 px-2">
-                <Disclosure.Button
-                  as="a"
-                  href="#"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                >
-                  Your Profile
-                </Disclosure.Button>
-                <Disclosure.Button
-                  as="a"
-                  href="#"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                >
-                  Settings
-                </Disclosure.Button>
-                <Disclosure.Button
-                  as="a"
-                  href="/logout"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                >
-                  Abmelden
-                </Disclosure.Button>
-              </div>
-            </div>
-            */}
           </Disclosure.Panel>
         </>
       )}
