@@ -10,15 +10,15 @@ function classNames(...classes: string[]) {
 }
 
 const men = [
-  { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '#', badge_color: 'bg-red-400/10 text-red-400 ring-red-400/20' },
-  { name: 'Landesliga', tiny_name: 'LL', href: '#', badge_color: 'bg-gray-400/10 text-gray-400 ring-gray-400/20' },
+  { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '#', bdg_col_dark: 'bg-red-400/10 text-red-400 ring-red-400/20', bdg_col_light: 'bg-red-50 text-red-700 ring-red-600/10' },
+  { name: 'Landesliga', tiny_name: 'LL', href: '#', bdg_col_dark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-500/10' },
 ]
 const youth = [
-  { name: 'Juniorenliga', tiny_name: 'U19', href: '#', badge_color: 'bg-green-500/10 text-green-400 ring-green-500/20' },
-  { name: 'Jugendliga', tiny_name: 'U16', href: '#', badge_color: 'bg-blue-400/10 text-blue-400 ring-blue-400/30' },
-  { name: 'Schülerliga', tiny_name: 'U13', href: '#', badge_color: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30' },
-  { name: 'Bambini', tiny_name: 'U10', href: '#', badge_color: 'bg-purple-400/10 text-purple-400 ring-purple-400/30' },
-  { name: 'Mini', tiny_name: 'U8', href: '#', badge_color: 'bg-pink-400/10 text-pink-400 ring-pink-400/20' },
+  { name: 'Juniorenliga', tiny_name: 'U19', href: '#', bdg_col_dark: 'bg-green-500/10 text-green-400 ring-green-500/20', bdg_col_light: 'bg-green-50 text-green-700 ring-green-600/20' },
+  { name: 'Jugendliga', tiny_name: 'U16', href: '#', bdg_col_dark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdg_col_light: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
+  { name: 'Schülerliga', tiny_name: 'U13', href: '#', bdg_col_dark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30', bdg_col_light: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10' },
+  { name: 'Bambini', tiny_name: 'U10', href: '#', bdg_col_dark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdg_col_light: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
+  { name: 'Mini', tiny_name: 'U8', href: '#', bdg_col_dark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20', bdg_col_light: 'bg-pink-50 text-pink-700 ring-pink-700/10' },
 ]
 
 const item = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -101,7 +101,7 @@ const Header = () => {
                                   )}
                                 >
                                   <span 
-                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}
+                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_light)}
                                     >
                                     {item.tiny_name}
                                   </span>
@@ -137,7 +137,7 @@ const Header = () => {
                                   )}
                                 >
                                   <span 
-                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}
+                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_light)}
                                     >
                                     {item.tiny_name}
                                   </span>
@@ -281,7 +281,7 @@ const Header = () => {
               <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
                 <span>Herren</span>
               </div>
-              <div className="block left-0 ml-6 px-1 origin-top-right rounded-md bg-gray-700 py-1 text-gray-300">
+              <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
                 {men.map((item, index) => (
                   <Disclosure.Button
                     as="a"
@@ -289,7 +289,7 @@ const Header = () => {
                     href={item.href}
                     className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
                   >
-                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}>{item.tiny_name}</span>
+                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
                     {item.name}
                   </Disclosure.Button>
                 ))}
@@ -298,7 +298,7 @@ const Header = () => {
               <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
                 <span>Nachwuchs</span>
               </div>
-              <div className="block left-0 ml-6 px-1 origin-top-right rounded-md bg-gray-700 py-1 text-gray-300">
+              <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
                 {youth.map((item, index) => (
                   <Disclosure.Button
                     as="a"
@@ -306,7 +306,7 @@ const Header = () => {
                     href={item.href}
                     className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
                   >
-                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}>{item.tiny_name}</span>
+                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
                     {item.name}
                   </Disclosure.Button>
                 ))}
