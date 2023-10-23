@@ -88,7 +88,7 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {men.map((item, index) => (
                             <Menu.Item>
                               {({ active }) => (
@@ -119,7 +119,7 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {youth.map((item, index) => (
                             <Menu.Item>
                               {({ active }) => (
@@ -266,6 +266,62 @@ const Header = () => {
                 className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 Spielstätten
+              </Disclosure.Button>
+              <Disclosure.Button
+                as="panel"
+                className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                <Menu as="div">
+                    <Menu.Button as="div">Herren</Menu.Button>
+                    {/*<Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">*/}
+  
+                    <Menu.Items className="block rounded-md bg-white mt-2 py-1 text-base" as="div">
+                      {men.map((item, index) => (
+                        <Menu.Item>
+                          {({ active }) => (
+                            <MyLink 
+                              key={index}
+                              href="/venues"
+                              className={classNames(
+                                active ? 'bg-gray-100' : '',
+                                'block px-4 py-2 text-sm text-gray-700'
+                              )}
+                            >
+                              {item.name}
+                            </MyLink>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    </Menu.Items>
+                </Menu>
+              </Disclosure.Button>
+              <Disclosure.Button
+                as="panel"
+                className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                <Menu as="div">
+                  <Menu.Button as="div">Nachwuchs</Menu.Button>
+                  {/*<Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">*/}
+
+                  <Menu.Items className="block rounded-md bg-white mt-2 py-1 text-base" as="div">
+                    {youth.map((item, index) => (
+                      <Menu.Item>
+                        {({ active }) => (
+                          <MyLink 
+                            key={index}
+                            href="/venues"
+                            className={classNames(
+                              active ? 'bg-gray-100' : '',
+                              'block px-4 py-2 text-sm text-gray-700'
+                            )}
+                          >
+                            {item.name}
+                          </MyLink>
+                        )}
+                      </Menu.Item>
+                    ))}
+                  </Menu.Items>
+                </Menu>
               </Disclosure.Button>
             </div>
             
