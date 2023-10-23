@@ -10,15 +10,15 @@ function classNames(...classes: string[]) {
 }
 
 const men = [
-  { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '#' },
-  { name: 'Landesliga', tiny_name: 'LL', href: '#' },
+  { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '#', badge_color: 'bg-red-400/10 text-red-400 ring-red-400/20' },
+  { name: 'Landesliga', tiny_name: 'LL', href: '#', badge_color: 'bg-gray-400/10 text-gray-400 ring-gray-400/20' },
 ]
 const youth = [
-  { name: 'Juniorenliga', tiny_name: 'U19', href: '#' },
-  { name: 'Jugendliga', tiny_name: 'U16', href: '#' },
-  { name: 'Schülerliga', tiny_name: 'U13', href: '#' },
-  { name: 'Bambini', tiny_name: 'U10', href: '#' },
-  { name: 'Mini', tiny_name: 'U8', href: '#' },
+  { name: 'Juniorenliga', tiny_name: 'U19', href: '#', badge_color: 'bg-green-500/10 text-green-400 ring-green-500/20' },
+  { name: 'Jugendliga', tiny_name: 'U16', href: '#', badge_color: 'bg-blue-400/10 text-blue-400 ring-blue-400/30' },
+  { name: 'Schülerliga', tiny_name: 'U13', href: '#', badge_color: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30' },
+  { name: 'Bambini', tiny_name: 'U10', href: '#', badge_color: 'bg-purple-400/10 text-purple-400 ring-purple-400/30' },
+  { name: 'Mini', tiny_name: 'U8', href: '#', badge_color: 'bg-pink-400/10 text-pink-400 ring-pink-400/20' },
 ]
 
 const item = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -88,7 +88,7 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {men.map((item, index) => (
                             <Menu.Item>
                               {({ active }) => (
@@ -100,6 +100,11 @@ const Header = () => {
                                     'block px-4 py-2 text-sm text-gray-700'
                                   )}
                                 >
+                                  <span 
+                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}
+                                    >
+                                    {item.tiny_name}
+                                  </span>
                                   {item.name}
                                 </MyLink>
                               )}
@@ -119,7 +124,7 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {youth.map((item, index) => (
                             <Menu.Item>
                               {({ active }) => (
@@ -131,6 +136,11 @@ const Header = () => {
                                     'block px-4 py-2 text-sm text-gray-700'
                                   )}
                                 >
+                                  <span 
+                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}
+                                    >
+                                    {item.tiny_name}
+                                  </span>
                                   {item.name}
                                 </MyLink>
                               )}
@@ -279,6 +289,7 @@ const Header = () => {
                     href={item.href}
                     className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
                   >
+                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}>{item.tiny_name}</span>
                     {item.name}
                   </Disclosure.Button>
                 ))}
@@ -295,6 +306,7 @@ const Header = () => {
                     href={item.href}
                     className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
                   >
+                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.badge_color)}>{item.tiny_name}</span>
                     {item.name}
                   </Disclosure.Button>
                 ))}
