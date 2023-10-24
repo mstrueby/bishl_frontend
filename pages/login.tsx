@@ -54,7 +54,21 @@ export default function LoginPage() {
         <button type="submit">Login</button>
       </form>
 */}
-      
+
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+        <img
+          className="mx-auto h-10 w-auto"
+          src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
+          alt="Your Company"
+        />
+        <h2 className="mt-10 text-center text-2xl leading-9 tracking-tight text-gray-900">
+          Melde dich mit deinem Account an
+        </h2>
+      </div>
+
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+
       <Formik
   initialValues={{
     email: '',
@@ -62,18 +76,19 @@ export default function LoginPage() {
   }}
   onSubmit={handleSubmit}
 >
-  <Form>
+
+  <Form className="space-y-6">
   <InputText
     name="email"
     type="text"
-    label="Email"
+    label="E-Mail"
     value={email}
     onChange={(e) => setEmail(e.target.value)}
   />
   <InputText
     name="password"
     type="password"
-    label="Password"
+    label="Passwort"
     value={password}
     onChange={(e) => setPassword(e.target.value)}
   />
@@ -81,11 +96,20 @@ export default function LoginPage() {
     <ButtonPrimary
       name="btnPrimary"
       type="submit"
-      label="Login"
+      label="Anmelden"
+      className="w-full"
     />
   </div>
   </Form>
   </Formik>
+
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+              Passwort vergessen?
+            </a>
+          </div>
+
+        </div>        </div>
 
 
       {/*

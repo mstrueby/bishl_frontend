@@ -6,10 +6,9 @@ const InputText = ({ label, ...props }) => {
     const classInputErr = "block w-full rounded-md border-0 py-2 pl-3 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
 
     return (
-        <div className="mt-6 grid grid-cols-12 gap-6">
-            <div className="col-span-12 sm:col-span-6">
+            <div>
                 <label htmlFor={props.id || props.name}
-                    className="block text-sm font-medium text-gray-900">
+                    className="block text-sm font-medium leading-6 text-gray-900">
                     {label}
                 </label>
                 <input
@@ -22,7 +21,6 @@ const InputText = ({ label, ...props }) => {
                     </p>
                 ) : null}
             </div>
-        </div>
     )
 };
 
