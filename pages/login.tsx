@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import { Formik, Form } from 'formik';
 import InputText from '../components/ui/form/InputText';
 import ButtonPrimary from '../components/ui/form/ButtonPrimary';
+import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -34,7 +35,8 @@ export default function LoginPage() {
       // Handle error here
       const errData = await res.json();
       console.log(errData);
-      setError(errData);
+      setError(errData.detail);
+      console.log(error);
     }
   };
 
@@ -56,52 +58,77 @@ export default function LoginPage() {
 */}
 
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          className="mx-auto h-14 w-auto"
-          src="https://bishl-frontend.marianstruby.repl.co/bishl.svg"
-          alt="Your Company"
-        />
-        <h2 className="mt-10 text-center text-2xl leading-9 tracking-tight text-gray-900">
-          Melde dich an
-        </h2>
-      </div>
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+          <img
+            className="mx-auto h-14 w-auto"
+            src="https://bishl-frontend.marianstruby.repl.co/bishl.svg"
+            alt="Your Company"
+          />
+          <h2 className="mt-10 text-center text-2xl leading-9 tracking-tight text-gray-900">
+            Melde dich an
+          </h2>
+
+        </div>
+
+        {error && 
+        <div className="mt-10 rounded-md bg-red-50 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-red-800">{error}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button
+                  type="button"
+                  className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+        
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <Formik
+            initialValues={{
+              email: '',
+              password: ''
+            }}
+            onSubmit={handleSubmit}
+          >
 
-      <Formik
-  initialValues={{
-    email: '',
-    password: ''
-  }}
-  onSubmit={handleSubmit}
->
-
-  <Form className="space-y-6">
-  <InputText
-    name="email"
-    type="text"
-    label="E-Mail"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-  />
-  <InputText
-    name="password"
-    type="password"
-    label="Passwort"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-  />
-  <div className="mt-4 flex justify-end py-4">
-    <ButtonPrimary
-      name="btnPrimary"
-      type="submit"
-      label="Anmelden"
-      className="w-full"
-    />
-  </div>
-  </Form>
-  </Formik>
+            <Form className="space-y-6">
+              <InputText
+                name="email"
+                type="text"
+                label="E-Mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <InputText
+                name="password"
+                type="password"
+                label="Passwort"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <div className="mt-4 flex justify-end py-4">
+                <ButtonPrimary
+                  name="btnPrimary"
+                  type="submit"
+                  label="Anmelden"
+                  className="w-full"
+                />
+              </div>
+            </Form>
+          </Formik>
 
           <div className="mt-6 text-center text-sm text-gray-500">
             <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
