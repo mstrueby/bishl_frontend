@@ -2,7 +2,7 @@ import React from 'react'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import InputText from '../ui/form/InputText'
-import ButtonPrimary from '../ui/form/ButtonPrimary' 
+import ButtonPrimary from '../ui/form/ButtonPrimary'
 import ButtonLight from '../ui/form/ButtonLight'
 import Toggle from '../ui/form/Toggle'
 import MyListbox from '../ui/form/Listbox'
@@ -46,50 +46,50 @@ const VenueForm: React.FC<VenueFormProps> = ({
       >
         <Form>
           <InputText
-                        name="name"
-                        type="text"
-                        label="Name"
-                    />
-                    <InputText
-                        name="shortName"
-                        type="text"
-                        label="Kurzname"
-                    />
-                    <InputText
-                        name="street"
-                        type="text"
-                        label="Straße"
-                    />
-                    <InputText
-                        name="zipCode"
-                        type="text"
-                        label="PLZ"
-                    />
-                    <InputText
-                        name="city"
-                        type="text"
-                        label="Stadt"
-                    />
-                    <MyListbox
-                        name="country"
-                        options={countries}
-                        label="Land"
-                    />
+            name="name"
+            type="text"
+            label="Name"
+          />
           <InputText
-                        name="latitude"
-                        type="number"
-                        label="Latitude"
-                    />
-                    <InputText
-                        name="longitude"
-                        type="number"
-                        label="Longitude"
-                    />
-                    <Toggle
-                        name="active"
-                        type="checkbox"
-                        label="Aktiv"
-                    /> 
+            name="shortName"
+            type="text"
+            label="Kurzname"
+          />
+          <InputText
+            name="street"
+            type="text"
+            label="Straße"
+          />
+          <InputText
+            name="zipCode"
+            type="text"
+            label="PLZ"
+          />
+          <InputText
+            name="city"
+            type="text"
+            label="Stadt"
+          />
+          <MyListbox
+            name="country"
+            options={countries}
+            label="Land"
+          />
+          <InputText
+            name="latitude"
+            type="number"
+            label="Latitude"
+          />
+          <InputText
+            name="longitude"
+            type="number"
+            label="Longitude"
+          />
+          <Toggle
+            name="active"
+            type="checkbox"
+            label="Aktiv"
+          />
           <div className="mt-4 flex justify-end py-4">
             <ButtonLight
               name="btnLight"

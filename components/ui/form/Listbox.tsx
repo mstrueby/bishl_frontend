@@ -3,7 +3,7 @@ import { useState, Fragment, useEffect } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 
-const MyListbox = ({ ...props }) => {
+const MyListbox = ({ name, ...props }) => {
   const options = props.options;
   const [field, meta, helpers] = useField(props);
   const [selected, setSelected] = useState({});
@@ -28,7 +28,7 @@ const MyListbox = ({ ...props }) => {
 
   return (
     <Listbox
-      name={field.name}
+      name={name}
       value={selected}
       onChange={handleChange}
     >
