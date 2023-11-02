@@ -3,52 +3,61 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
+import { format } from 'date-fns'
+
+interface Match {
+  match_id: number;
+  home_team: string;
+  away_team: string;
+  status: string;
+  venue: string;
+  home_score: number;
+  away_score: number;
+  overtime: boolean;
+  shootout: boolean;
+  start_time: Date;
+  published: boolean;
+}
+
+interface Matchday {
+  name: string;
+  type: string;
+  start_date: Date;
+  end_date: Date;
+  create_standings: boolean;
+  create_stats: boolean;
+  published: boolean;
+  matches: Match[];
+}
+
+interface Round {
+  name: string;
+  create_standings: boolean;
+  create_stats: boolean;
+  published: boolean;
+  matchdays: Matchday[];
+}
+
+interface Season {
+  year: number;
+  published: boolean;
+  rounds: Round[];
+}
 
 interface Tournament {
-  _id: string,
-  name: string,
-  alias: string,
-  tiny_name: string,
-  age_group: string,
-  published: boolean,
-  active: boolean,
-  external: boolean,
-  website: string,
-  seasons: {
-    year: number,
-    published: boolean,
-    rounds: {
-      name: string,
-      create_standings: boolean,
-      create_stats: boolean,
-      published: boolean,
-      matchdays: {
-        name: string,
-        type: string,
-        start_date: Date,
-        end_date: Date,
-        create_standings: boolean,
-        create_stats: boolean,
-        published: boolean,
-        matches: {
-          match_id: number,
-          home_team: string,
-          away_team: string,
-          status: string,
-          venue: string,
-          home_score: number,
-          away_score: number,
-          overtime: boolean,
-          shootout: boolean,
-          start_time: Date,
-          published: boolean,
-        }[]
-      }[]
-    }[]
-  }[];
-};
+  _id: string;
+  name: string;
+  alias: string;
+  tiny_name: string;
+  age_group: string;
+  published: boolean;
+  active: boolean;
+  external: boolean;
+  website: string;
+  seasons: Season[];
+}
 
 export default function Tournament({
   tournament
@@ -56,14 +65,29 @@ export default function Tournament({
   tournament: Tournament
 }) {
 
-  const years = tournament.seasons.map(season => season.year);
-  const [selectedYear, setSelectedYear] = useState(years.sort((a, b) => b - a)[0])
-  const rounds = tournament.seasons
-    .filter((season) => season.year === selectedYear)
-    .flatMap((season) => season.rounds)
-    .map((round) => round.name);
-  const [selectedRound, setSelectedRound] = useState(rounds[0])
-  console.debug(rounds)
+  let seasons: Season[] = tournament ? tournament.seasons : [];
+  const [selectedSeason, setSelectedSeason] = useState(seasons.reduce((prev, current) => (prev.year > current.year) ? prev : current));
+
+  let rounds: Round[] = selectedSeason ? selectedSeason.rounds : [];
+  const [selectedRound, setSelectedRound] = useState(rounds ? rounds[rounds.length - 1] : {} as Round)
+
+  let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays : [];
+  const [selectedMatchday, setSelectedMatchday] = useState(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
+
+
+  useEffect(() => {
+    setSelectedSeason(seasons.reduce((prev, current) => (prev.year > current.year) ? prev : current));
+    setSelectedRound(rounds ? rounds[rounds.length - 1] : {} as Round);
+    setSelectedMatchday(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday);
+  }, [tournament]);
+
+  useEffect(() => {
+    setSelectedRound(rounds ? rounds[rounds.length - 1] : {} as Round);
+  }, [selectedSeason]);
+
+  useEffect(() => {
+    setSelectedMatchday(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
+  }, [selectedRound]);
 
   const tabs = [
     { name: 'Spiele', href: '#', current: true },
@@ -94,14 +118,15 @@ export default function Tournament({
             {tournament.name}
           </h2>
         </div>
-        
+
         <div className="mt-4 flex sm:ml-4 sm:mt-0 justify-end">
-          <Listbox value={selectedYear} onChange={setSelectedYear}>
+          <Listbox value={selectedSeason} onChange={setSelectedSeason}>
             {({ open }) => (
               <>
+                <Listbox.Label className="sr-only">Change Season</Listbox.Label>
                 <div className="relative mt-2">
                   <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                    <span className="block truncate">{selectedYear}</span>
+                    <span className="block truncate">{selectedSeason.year}</span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                       <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </span>
@@ -115,16 +140,16 @@ export default function Tournament({
                     leaveTo="opacity-0"
                   >
                     <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      {tournament.seasons.map((season) => (
+                      {seasons.map((season, index) => (
                         <Listbox.Option
-                          key={season.year}
+                          key={index}
                           className={({ active }) =>
                             classNames(
                               active ? 'bg-indigo-600 text-white' : 'text-gray-900',
                               'relative cursor-default select-none py-2 pl-3 pr-9'
                             )
                           }
-                          value={season.year}
+                          value={season}
                         >
                           {({ selected, active }) => (
                             <>
@@ -156,15 +181,15 @@ export default function Tournament({
           <Listbox value={selectedRound} onChange={setSelectedRound}>
             {({ open }) => (
               <>
-                <Listbox.Label className="sr-only">Change round</Listbox.Label>
+                <Listbox.Label className="sr-only">Change Round</Listbox.Label>
                 <div className="relative mt-2 ml-3 ">
                   <div className="inline-flex divide-x divide-indigo-700 rounded-md shadow-sm ">
                     <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
-                      <CheckIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                      <p className="text-sm font-semibold">{selectedRound}</p>
+                      {//<CheckIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+                      }
+                      <p className="text-sm font-semibold">{selectedRound.name}</p>
                     </div>
                     <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
-                      <span className="sr-only">Change published status</span>
                       <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
                     </Listbox.Button>
                   </div>
@@ -177,7 +202,7 @@ export default function Tournament({
                     leaveTo="opacity-0"
                   >
                     <Listbox.Options className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      {rounds.map((round, index) => (
+                      {rounds?.map((round, index) => (
                         <Listbox.Option
                           key={index}
                           className={({ active }) =>
@@ -191,7 +216,7 @@ export default function Tournament({
                           {({ selected, active }) => (
                             <div className="flex flex-col">
                               <div className="flex justify-between">
-                                <p className={selected ? 'font-semibold' : 'font-normal'}>{round}</p>
+                                <p className={selected ? 'font-semibold' : 'font-normal'}>{round.name}</p>
                                 {selected ? (
                                   <span className={active ? 'text-white' : 'text-indigo-600'}>
                                     <CheckIcon className="h-5 w-5" aria-hidden="true" />
@@ -217,24 +242,10 @@ export default function Tournament({
 
 
 
-      <div className="relative border-b border-gray-200 pb-5 sm:pb-0">
-        <div className="mt-4">
-          <div className="sm:hidden">
-            <label htmlFor="current-tab" className="sr-only">
-              Select a tab
-            </label>
-            <select
-              id="current-tab"
-              name="current-tab"
-              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
-              defaultValue={tabs.find((tab) => tab.current).name}
-            >
-              {tabs.map((tab) => (
-                <option key={tab.name}>{tab.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="hidden sm:block">
+      <div className="relative mt-10 mb-6 border-b border-gray-200">
+        <div className="">
+
+          <div className="sm:block ">
             <nav className="-mb-px flex space-x-8">
               {tabs.map((tab) => (
                 <a
@@ -257,39 +268,94 @@ export default function Tournament({
       </div>
 
       <section>
+        {matchdays.length > 1 &&
+          <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
+            {({ open }) => (
+              <>
+                <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Spieltag:</Listbox.Label>
+                <Listbox.Label className="sr-only">Change Matchday</Listbox.Label>
+                <div className="relative mt-2">
+                  <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    <span className="inline-flex w-full truncate">
+                      <span className="truncate">{selectedMatchday.name}</span>
+                      <span className="ml-2 truncate text-gray-500">{selectedMatchday.start_date?.toString()}</span>
+                    </span>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    </span>
+                  </Listbox.Button>
 
+                  <Transition
+                    show={open}
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {matchdays.map((matchday, index) => (
+                        <Listbox.Option
+                          key={index}
+                          className={({ active }) =>
+                            classNames(
+                              active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                              'relative cursor-default select-none py-2 pl-3 pr-9'
+                            )
+                          }
+                          value={matchday}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <div className="flex">
+                                <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate')}>
+                                  {matchday.name}
+                                </span>
+                                <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
+                                  {matchday.start_date.toString()}
+                                </span>
+                              </div>
 
-        {tournament.seasons[0].rounds[0].matchdays[0].matches?.map(({ match_id, home_team, away_team, home_score, away_score, venue, start_time }) => (
-          <div key={match_id} className="flex justify-between gap-x-6 p-4 my-10 border rounded-xl">
+                              {selected ? (
+                                <span
+                                  className={classNames(
+                                    active ? 'text-white' : 'text-indigo-600',
+                                    'absolute inset-y-0 right-0 flex items-center pr-4'
+                                  )}
+                                >
+                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </div>
+              </>
+            )}
+          </Listbox>
+        }
+
+        {selectedMatchday.matches?.map((match, index) => (
+          <div key={index} className="flex justify-between gap-x-6 p-4 mt-4 mb-10 border rounded-xl">
             <div className="flex gap-x-4">
               <div className="min-w-0 flex-auto">
                 <img className="h-12 w-12 flex-none rounded-full bg-gray-50" src="" alt="" />
-                <p className="text-sm font-semibold leading-6 text-gray-900">{home_team}</p>
+                <p className="text-sm font-semibold leading-6 text-gray-900">{match.home_team}</p>
                 <img className="h-12 w-12 flex-none rounded-full bg-gray-50" src="" alt="" />
-                <p className="text-sm font-semibold leading-6 text-gray-900">{away_team}</p>
-                <p className="mt-1 truncate text-xs leading-5 text-gray-500">{venue}, <time dateTime={start_time}>{start_time}</time></p>
+                <p className="text-sm font-semibold leading-6 text-gray-900">{match.away_team}</p>
+                <p className="mt-1 truncate text-xs leading-5 text-gray-500">{match.venue},&nbsp;
+                  <time dateTime={match.start_time}>{format(new Date(match.start_time), 'd. MMM yy')}</time>
+                </p>
               </div>
             </div>
             <div className="sm:flex sm:flex-col sm:items-end">
-              <p className="text-sm font-semibold leading-6 text-gray-900">{home_score}</p>
-              <p className="text-sm font-semibold leading-6 text-gray-900">{away_score}</p>
-
-              {/*             {person.lastSeen ? (
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Last seen <time dateTime={person.lastSeenDateTime}>{person.lastSeen}</time>
-              </p>
-            ) : (
-              <div className="mt-1 flex items-center gap-x-1.5">
-                <div className="flex-none rounded-full bg-emerald-500/20 p-1">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                </div>
-                <p className="text-xs leading-5 text-gray-500">Online</p>
-              </div>
-            )} */}
+              <p className="text-sm font-semibold leading-6 text-gray-900">{match.home_score}</p>
+              <p className="text-sm font-semibold leading-6 text-gray-900">{match.away_score}</p>
             </div>
           </div>
         ))}
-
       </section>
     </Layout>
   )
