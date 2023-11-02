@@ -36,6 +36,8 @@ interface Round {
   name: string;
   create_standings: boolean;
   create_stats: boolean;
+  start_date: Date;
+  end_date: Date;
   published: boolean;
   matchdays: Matchday[];
 }
@@ -65,13 +67,13 @@ export default function Tournament({
   tournament: Tournament
 }) {
 
-  let seasons: Season[] = tournament ? tournament.seasons : [];
-  const [selectedSeason, setSelectedSeason] = useState(seasons.reduce((prev, current) => (prev.year > current.year) ? prev : current));
+  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => a.year - b.year) : [];
+  const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
 
-  let rounds: Round[] = selectedSeason ? selectedSeason.rounds : [];
+  let rounds: Round[] = selectedSeason ? selectedSeason.rounds.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()) : [];
   const [selectedRound, setSelectedRound] = useState(rounds ? rounds[rounds.length - 1] : {} as Round)
 
-  let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays : [];
+  let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()) : [];
   const [selectedMatchday, setSelectedMatchday] = useState(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
 
 
@@ -97,6 +99,10 @@ export default function Tournament({
     return classes.filter(Boolean).join(' ')
   }
 
+  function formatDate(date_from: Date, date_to: Date) {
+    return `${format(new Date(date_from), 'd. LLL')}${ (new Date(date_to) > new Date(date_from)) ? " - " + format(new Date(date_to), 'd. LLL') : "" }`
+  }
+  
   const router = useRouter()
 
   // If the page is not yet generated, this will be displayed
@@ -177,65 +183,67 @@ export default function Tournament({
               </>
             )}
           </Listbox>
-
-          <Listbox value={selectedRound} onChange={setSelectedRound}>
-            {({ open }) => (
-              <>
-                <Listbox.Label className="sr-only">Change Round</Listbox.Label>
-                <div className="relative mt-2 ml-3 ">
-                  <div className="inline-flex divide-x divide-indigo-700 rounded-md shadow-sm ">
-                    <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
-                      {//<CheckIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                      }
-                      <p className="text-sm font-semibold">{selectedRound.name}</p>
+          
+          {rounds.length > 1 &&
+            <Listbox value={selectedRound} onChange={setSelectedRound}>
+              {({ open }) => (
+                <>
+                  <Listbox.Label className="sr-only">Change Round</Listbox.Label>
+                  <div className="relative mt-2 ml-3 ">
+                    <div className="inline-flex divide-x divide-indigo-700 rounded-md shadow-sm ">
+                      <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
+                        {//<CheckIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+                        }
+                        <p className="text-sm font-semibold">{selectedRound.name}</p>
+                      </div>
+                      <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
+                        <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
+                      </Listbox.Button>
                     </div>
-                    <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
-                      <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
-                    </Listbox.Button>
-                  </div>
-
-                  <Transition
-                    show={open}
-                    as={Fragment}
-                    leave="transition ease-in duration-100"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                  >
-                    <Listbox.Options className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      {rounds?.map((round, index) => (
-                        <Listbox.Option
-                          key={index}
-                          className={({ active }) =>
-                            classNames(
-                              active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                              'cursor-default select-none p-4 text-sm'
-                            )
-                          }
-                          value={round}
-                        >
-                          {({ selected, active }) => (
-                            <div className="flex flex-col">
-                              <div className="flex justify-between">
-                                <p className={selected ? 'font-semibold' : 'font-normal'}>{round.name}</p>
-                                {selected ? (
-                                  <span className={active ? 'text-white' : 'text-indigo-600'}>
-                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                  </span>
-                                ) : null}
+  
+                    <Transition
+                      show={open}
+                      as={Fragment}
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <Listbox.Options className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        {rounds?.map((round, index) => (
+                          <Listbox.Option
+                            key={index}
+                            className={({ active }) =>
+                              classNames(
+                                active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                'cursor-default select-none p-4 text-sm'
+                              )
+                            }
+                            value={round}
+                          >
+                            {({ selected, active }) => (
+                              <div className="flex flex-col">
+                                <div className="flex justify-between">
+                                  <p className={selected ? 'font-semibold' : 'font-normal'}>{round.name}</p>
+                                  {selected ? (
+                                    <span className={active ? 'text-white' : 'text-indigo-600'}>
+                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <p className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'mt-2')}>
+                                  {formatDate(round.start_date, round.end_date)}
+                                </p>
                               </div>
-                              <p className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'mt-2')}>
-                                1. Apr. - 31. Aug.
-                              </p>
-                            </div>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </Transition>
-                </div>
-              </>
-            )}
-          </Listbox>
+                            )}
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Transition>
+                  </div>
+                </>
+              )}
+            </Listbox>
+          }
         </div>
       </div>
 
@@ -278,7 +286,7 @@ export default function Tournament({
                   <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                     <span className="inline-flex w-full truncate">
                       <span className="truncate">{selectedMatchday.name}</span>
-                      <span className="ml-2 truncate text-gray-500">{selectedMatchday.start_date?.toString()}</span>
+                      <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.start_date, selectedMatchday.end_date)}</span>
                     </span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                       <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -311,7 +319,7 @@ export default function Tournament({
                                   {matchday.name}
                                 </span>
                                 <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
-                                  {matchday.start_date.toString()}
+                                  {formatDate(matchday.start_date, matchday.end_date)}
                                 </span>
                               </div>
 
