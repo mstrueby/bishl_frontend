@@ -90,10 +90,9 @@ const Header = () => {
                       >
                         <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {men.map((item, index) => (
-                            <Menu.Item>
+                            <Menu.Item key={index}>
                               {({ active }) => (
                                 <MyLink
-                                  key={index}
                                   href={item.href}
                                   className={classNames(
                                     active ? 'bg-gray-100' : '',
@@ -126,10 +125,9 @@ const Header = () => {
                       >
                         <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {youth.map((item, index) => (
-                            <Menu.Item>
+                            <Menu.Item key={index}>
                               {({ active }) => (
                                 <MyLink
-                                  key={index}
                                   href={item.href}
                                   className={classNames(
                                     active ? 'bg-gray-100' : '',
