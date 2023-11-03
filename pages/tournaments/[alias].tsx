@@ -67,8 +67,6 @@ export default function Tournament({
   tournament: Tournament
 }) {
 
-  const [activeTab, setActiveTab] = useState('matches');
-
   let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.year - a.year) : [];
   const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
 
@@ -78,6 +76,7 @@ export default function Tournament({
   let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()) : [];
   const [selectedMatchday, setSelectedMatchday] = useState(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
 
+  const [activeTab, setActiveTab] = useState('matches');
 
   useEffect(() => {
     setSelectedSeason(seasons.reduce((prev, current) => (prev.year > current.year) ? prev : current));
@@ -257,37 +256,36 @@ export default function Tournament({
 
 
 
-
-      <div className="relative mt-10 mb-6 border-b border-gray-200">
-        <div className="">
-
-          <div className="sm:block ">
-            <nav className="-mb-px flex space-x-8">
-              {tabs.map((tab, index) => (
-                <a
-                  key={index}
-                  href={tab.href}
-                  className={classNames(
-                    tab.key == activeTab
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                    'whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium'
-                    , tab.key === 'standings' && selectedRound.create_standings === false ? 'hidden' : ''
-                  )}
-                  aria-current={tab.key == activeTab ? 'page' : undefined}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setActiveTab(tab.key)
-                  }}
-                >
-                  {tab.caption}
-                </a>
-              ))}
-            </nav>
+      <div className="relative mt-10 mb-6 ">
+        {selectedRound.create_standings && (
+          <div className="border-b border-gray-200">
+            <div className="sm:block ">
+              <nav className="-mb-px flex space-x-8">
+                {tabs.map((tab, index) => (
+                  <a
+                    key={index}
+                    href={tab.href}
+                    className={classNames(
+                      tab.key == activeTab
+                        ? 'border-indigo-500 text-indigo-600'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                      'whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium'
+                      , tab.key === 'standings' && selectedRound.create_standings === false ? 'hidden' : ''
+                    )}
+                    aria-current={tab.key == activeTab ? 'page' : undefined}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setActiveTab(tab.key)
+                    }}
+                  >
+                    {tab.caption}
+                  </a>
+                ))}
+              </nav>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-
 
       {activeTab == 'matches' && (
         <section>
