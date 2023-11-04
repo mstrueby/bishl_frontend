@@ -36,6 +36,8 @@ interface Round {
   name: string;
   create_standings: boolean;
   create_stats: boolean;
+  matchdays_type: string;
+  matchdays_sorted_by: string;
   start_date: Date;
   end_date: Date;
   published: boolean;
@@ -77,6 +79,7 @@ export default function Tournament({
   const [selectedMatchday, setSelectedMatchday] = useState(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
 
   const [activeTab, setActiveTab] = useState('matches');
+  const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
 
   useEffect(() => {
     setSelectedSeason(seasons.reduce((prev, current) => (prev.year > current.year) ? prev : current));
@@ -293,7 +296,7 @@ export default function Tournament({
             <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
               {({ open }) => (
                 <>
-                  <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Spieltag:</Listbox.Label>
+                  <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">{selectedRound.matchdays_type}:</Listbox.Label>
                   <Listbox.Label className="sr-only">Change Matchday</Listbox.Label>
                   <div className="relative mt-2">
                     <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
@@ -358,8 +361,35 @@ export default function Tournament({
             </Listbox>
           }
 
-          {selectedMatchday.matches?.map((match, index) => (
-            <div key={index} className="flex justify-between gap-x-6 p-4 mt-4 mb-10 border rounded-xl">
+          {selectedMatchday.create_standings && (
+            <div className="my-6">
+              <div className="sm:block">
+                <nav className="flex space-x-4" aria-label="Tabs">
+                  {tabs.map((tab, index) => (
+                    <a
+                      key={index}
+                      href={tab.href}
+                      className={classNames(
+                        tab.key == activeMatchdayTab ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500 hover:text-gray-700',
+                        'rounded-md px-3 py-2 text-sm font-medium'
+                      )}
+                      aria-current={tab.key == activeMatchdayTab ? 'page' : undefined}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setActiveMatchdayTab(tab.key)
+                      }}
+                    >
+                      {tab.caption}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          )}
+
+          
+          {activeMatchdayTab == 'matches' && selectedMatchday.matches?.map((match, index) => (
+            <div key={index} className="flex justify-between gap-x-6 p-4 my-10 border rounded-xl">
               <div className="flex gap-x-4">
                 <div className="min-w-0 flex-auto">
                   <img className="h-12 w-12 flex-none rounded-full bg-gray-50" src="" alt="" />
@@ -381,7 +411,7 @@ export default function Tournament({
       )}
 
 
-      {activeTab == 'standings' && (
+      {(activeTab == 'standings' || activeMatchdayTab == 'standings') && (
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-gray-900">Tabelle</h2>
 
