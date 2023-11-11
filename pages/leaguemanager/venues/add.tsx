@@ -14,7 +14,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
 export default function Add() {
   const [error, setError] = useState([])
   const router = useRouter();
-  
+
   const initialValues = {
     name: '',
     shortName: '',
@@ -76,7 +76,7 @@ export default function Add() {
           title: 'Neue Spielfläche',
         }}
       />
-      <VenueForm {...formProps}/>
+      <VenueForm {...formProps} />
     </LayoutAdm>
   )
 }

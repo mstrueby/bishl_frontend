@@ -200,24 +200,19 @@ const Header = () => {
                             )}
                           </Menu.Item>
                           <Menu.Item>
-                            {({ active }) => (
-                              <a
-                                href="#"
-                                className={classNames(
-                                  active ? 'bg-gray-100' : '',
-                                  'block px-4 py-2 text-sm text-gray-700'
-                                )}
-                              >
-                                Settings
-                              </a>
-                            )}
+                            <MyLink
+                              href="/leaguemanager"
+                              className='block px-4 py-2 text-sm text-gray-700'
+                            >
+                              Spielbetrieb
+                            </MyLink>
                           </Menu.Item>
                           <Menu.Item>
-                            <MyLink 
+                            <MyLink
                               href="/logout"
                               className='block px-4 py-2 text-sm text-gray-700'
-                              >
-                                Abmelden
+                            >
+                              Abmelden
                             </MyLink>
                           </Menu.Item>
                         </Menu.Items>
@@ -282,8 +277,8 @@ const Header = () => {
                     href={item.href}
                     className='block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white'
                   >
-                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
-                      {item.name}
+                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
+                    {item.name}
                   </Disclosure.Button>
                 ))}
               </div>

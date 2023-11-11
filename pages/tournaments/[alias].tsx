@@ -387,7 +387,7 @@ export default function Tournament({
             </div>
           )}
 
-          
+
           {activeMatchdayTab == 'matches' && selectedMatchday.matches?.map((match, index) => (
             <div key={index} className="flex justify-between gap-x-6 p-4 my-10 border rounded-xl">
               <div className="flex gap-x-4">
