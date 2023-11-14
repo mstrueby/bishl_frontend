@@ -47,6 +47,7 @@ export default function Venues({
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+  
   return (
     <LayoutAdm sidebar={<LmSidebar />} >
       <SectionHeader

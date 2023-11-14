@@ -19,6 +19,10 @@
 .DS_Store
 *.pem
 
+# images
+*.ico
+*.svg
+
 # debug
 npm-debug.log*
 yarn-debug.log*

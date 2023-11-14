@@ -1,27 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
+import { getCookie } from 'cookies-next';
+import axios from 'axios';
+import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import VenueForm from '../../../components/leaguemanager/VenueForm'
 import LayoutAdm from '../../../components/LayoutAdm';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
-import axios from 'axios';
-import { getCookie } from 'cookies-next';
-import { AxiosError } from 'axios';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
 
-export const getServerSideProps = ({ req, res }) => {
+interface AddProps {
+  jwt: string
+}
+
+interface VenueFormValues {
+  name: string;
+  alias: string;
+  shortName: string;
+  street: string;
+  zipCode: string;
+  city: string;
+  country: string;
+  latitude: string;
+  longitude: string;
+  active: boolean;
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const jwt = getCookie('jwt', { req, res });
   return { props: { jwt } };
 }
 
-export default function Add({ jwt }) {
-  const [error, setError] = useState('' as string);
+export default function Add({ jwt }: AddProps) {
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
-  const initialValues = {
+  const initialValues: VenueFormValues = {
     name: '',
     alias: '',
     shortName: '',
@@ -33,8 +51,15 @@ export default function Add({ jwt }) {
     longitude: '',
     active: false,
   };
-
-  const onSubmit = async (values) => {
+  
+  useEffect(() => {
+    if (error) {
+      // Scroll to the top of the page to show the error message
+      window.scrollTo(0, 0);
+    }
+  }, [error]);
+  
+  const onSubmit = async (values: VenueFormValues) => {
     //e.preventDefault();
     setLoading(true);
 
@@ -52,7 +77,7 @@ export default function Add({ jwt }) {
       if (response.status === 201) { // Assuming status 201 means created
         router.push({
           pathname: '/leaguemanager/venues',
-          query: { message: 'Venue created successfully' }
+          query: { message: `Die neue Spielfläche "${values.name}" wurde erfolgreich angelegt.` }
         }, '/leaguemanager/venues');
       } else {
         setError('An unexpected error occurred');
@@ -60,56 +85,30 @@ export default function Add({ jwt }) {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log(error);
-        setError(error?.response?.data.message || 'An error occurred');
-      }
-      router.push({
-        pathname: '/leaguemanager/venues',
-        query: { error: 'Failed to create venue' }
-      }, '/leaguemanager/venues');
+        setError(error?.response?.data.detail || 'An error occurred');
+      }      
     } finally {
       setLoading(false);
     }
-
-    /*
-        const response = await fetch(BASE_URL, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(values)
-        })
-        const data = await response.json()
-        if (!response.ok) {
-          let errArray = data.detail.map(el => {
-            return `${el.loc[1]} - ${el.msg}`
-          })
-          setError(errArray)
-        } else {
-          setError([])
-          router.push('/admin/venues')
-          //navigate("/admin/venues", { state: { message: "Spielstätte erfolgreich angelegt." } });
-        }
-        */
   };
 
   const handleCancel = () => {
     router.push('/leaguemanager/venues')
   }
 
-  /*const validate = (values: any) => {
-    const errors = venueValidator(values);
-    return errors;
+  // Handler to close the success message
+  const handleCloseMessage = () => {
+    setError(null);
   };
-*/
+
   const formProps = {
     initialValues,
-    //validate, // or validationSchema. Check example validation schema in validators.js file
     onSubmit,
     enableReinitialize: false,
     handleCancel,
     isNew: true,
   };
-
+  
   return (
     <LayoutAdm sidebar={<LmSidebar />} >
       <SectionHeader
@@ -117,7 +116,32 @@ export default function Add({ jwt }) {
           title: 'Neue Spielfläche',
         }}
       />
+      {error &&
+        <div className="border-l-4 border-red-400 rounded-md bg-red-50 p-4 my-4 md:mx-6 lg:mx-8">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-red-800">{error}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button
+                  type="button"
+                  className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                  onClick={handleCloseMessage}
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
       <VenueForm {...formProps} />
+      
     </LayoutAdm>
   )
 }
