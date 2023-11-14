@@ -1,5 +1,5 @@
 import React from 'react'
-import { Formik, Form } from 'formik'
+import { Formik, Form, useFormikContext } from 'formik'
 import * as Yup from 'yup'
 import InputText from '../ui/form/InputText'
 import ButtonPrimary from '../ui/form/ButtonPrimary'
@@ -22,6 +22,19 @@ const countries = [
   { key: 'GB', value: 'Großbritannien' }
 ]
 
+const handleAliasValue = (nameValue: string) => {
+  return nameValue.trim().toLowerCase().replace(/\./g, '').replace(/ /g, '-').replace(/ü/g, 'ue').replace(/ö/g, 'oe').replace(/ä/g, 'ae').replace(/ß/g, 'ss');
+}
+
+const AutoAlias = () => {
+  const { values, setFieldValue } = useFormikContext<any>();
+  React.useEffect(() => {
+    const transformedAlias = handleAliasValue(values.name);
+    setFieldValue('alias', transformedAlias);
+  }, [values.name, setFieldValue]);
+  return null;
+};
+
 const VenueForm: React.FC<VenueFormProps> = ({
   initialValues,
   onSubmit,
@@ -40,70 +53,86 @@ const VenueForm: React.FC<VenueFormProps> = ({
             .required('Name ist ein Pflichtfeld'),
           shortName: Yup.string()
             .max(15, 'Nicht mehr als 30 Zeichen')
-            .required('Kurzname ist ein Pflichtfeld')
+            .required('Kurzname ist ein Pflichtfeld'),
+          street: Yup.string()
+            .required('Straße ist ein Pflichtfeld'),
+          zipCode: Yup.string()
+            .required('PLZ ist ein Pflichtfeld'),
+          city: Yup.string()
+            .required('Stadt ist ein Pflichtfeld'),
         })}
         onSubmit={onSubmit}
       >
-        <Form>
-          <InputText
-            name="name"
-            type="text"
-            label="Name"
-          />
-          <InputText
-            name="shortName"
-            type="text"
-            label="Kurzname"
-          />
-          <InputText
-            name="street"
-            type="text"
-            label="Straße"
-          />
-          <InputText
-            name="zipCode"
-            type="text"
-            label="PLZ"
-          />
-          <InputText
-            name="city"
-            type="text"
-            label="Stadt"
-          />
-          <MyListbox
-            name="country"
-            options={countries}
-            label="Land"
-          />
-          <InputText
-            name="latitude"
-            type="number"
-            label="Latitude"
-          />
-          <InputText
-            name="longitude"
-            type="number"
-            label="Longitude"
-          />
-          <Toggle
-            name="active"
-            type="checkbox"
-            label="Aktiv"
-          />
-          <div className="mt-4 flex justify-end py-4">
-            <ButtonLight
-              name="btnLight"
-              type="button"
-              onClick={handleCancel}
-              label="Abbrechen"
+        {({ handleChange }) => (
+          <Form>
+            <InputText
+              name="name"
+              type="text"
+              label="Name"
+              onChange={handleChange}
             />
-            <ButtonPrimary
-              name="btnPrimary"
-              type="submit"
-              label="Speichern"
+            <AutoAlias />
+            <InputText
+              name="alias"
+              type="text"
+              label="Alias"
+              disabled
             />
-          </div>
-        </Form>
+            <InputText
+              name="shortName"
+              type="text"
+              label="Kurzname"
+            />
+            <InputText
+              name="street"
+              type="text"
+              label="Straße"
+            />
+            <InputText
+              name="zipCode"
+              type="text"
+              label="PLZ"
+            />
+            <InputText
+              name="city"
+              type="text"
+              label="Stadt"
+            />
+            <MyListbox
+              name="country"
+              options={countries}
+              label="Land"
+            />
+            <InputText
+              name="latitude"
+              type="number"
+              label="Latitude"
+            />
+            <InputText
+              name="longitude"
+              type="number"
+              label="Longitude"
+            />
+            <Toggle
+              name="active"
+              type="checkbox"
+              label="Aktiv"
+            />
+            <div className="mt-4 flex justify-end py-4">
+              <ButtonLight
+                name="btnLight"
+                type="button"
+                onClick={handleCancel}
+                label="Abbrechen"
+              />
+              <ButtonPrimary
+                name="btnPrimary"
+                type="submit"
+                label="Speichern"
+              />
+            </div>
+          </Form>
+        )}
       </Formik>
     </>
   )
