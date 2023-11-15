@@ -6,10 +6,11 @@ import ButtonPrimary from '../ui/form/ButtonPrimary'
 import ButtonLight from '../ui/form/ButtonLight'
 import Toggle from '../ui/form/Toggle'
 import MyListbox from '../ui/form/Listbox'
+import { VenueFormValues } from '../../pages/leaguemanager/venues/index'
 
 interface VenueFormProps {
-  initialValues: any;
-  onSubmit: (values: any) => void;
+  initialValues: VenueFormValues;
+  onSubmit: (values: VenueFormValues) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
 }

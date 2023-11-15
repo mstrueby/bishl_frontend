@@ -8,25 +8,14 @@ import VenueForm from '../../../components/leaguemanager/VenueForm'
 import LayoutAdm from '../../../components/LayoutAdm';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
-
+import { VenueFormValues } from './index'
+ 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
 
 interface AddProps {
   jwt: string
 }
 
-interface VenueFormValues {
-  name: string;
-  alias: string;
-  shortName: string;
-  street: string;
-  zipCode: string;
-  city: string;
-  country: string;
-  latitude: string;
-  longitude: string;
-  active: boolean;
-}
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const jwt = getCookie('jwt', { req, res });
@@ -51,14 +40,7 @@ export default function Add({ jwt }: AddProps) {
     longitude: '',
     active: false,
   };
-  
-  useEffect(() => {
-    if (error) {
-      // Scroll to the top of the page to show the error message
-      window.scrollTo(0, 0);
-    }
-  }, [error]);
-  
+ 
   const onSubmit = async (values: VenueFormValues) => {
     //e.preventDefault();
     setLoading(true);
@@ -77,14 +59,13 @@ export default function Add({ jwt }: AddProps) {
       if (response.status === 201) { // Assuming status 201 means created
         router.push({
           pathname: '/leaguemanager/venues',
-          query: { message: `Die neue Spielfläche "${values.name}" wurde erfolgreich angelegt.` }
+          query: { message: `Die neue Spielfläche ${values.name} wurde erfolgreich angelegt.` }
         }, '/leaguemanager/venues');
       } else {
         setError('An unexpected error occurred');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log(error);
         setError(error?.response?.data.detail || 'An error occurred');
       }      
     } finally {
@@ -96,6 +77,13 @@ export default function Add({ jwt }: AddProps) {
     router.push('/leaguemanager/venues')
   }
 
+  useEffect(() => {
+    if (error) {
+      // Scroll to the top of the page to show the error message
+      window.scrollTo(0, 0);
+    }
+  }, [error]);
+  
   // Handler to close the success message
   const handleCloseMessage = () => {
     setError(null);

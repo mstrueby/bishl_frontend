@@ -20,22 +20,22 @@ const MyListbox = ({ label, name, options, ...props }: ListboxProps) => {
 
   const handleChange = (event: ListboxOption) => {
     const index = options.findIndex(option => option.key === event.key)
-    console.log("event: ", event, "index: ", index)
+    //console.log("event: ", event, "index: ", index)
     setSelected(options[index]);
     helpers.setValue(options[index].value)
   }
 
-  {/*
   useEffect(() => {
     if (field.value) {
-      const index = options.findIndex(option => option.value === field.value)
-      console.log("useEffect - value: ", field.value, "index: ", index)
-      index > -1 && setSelected(options[index]);
-      return;
+      const index = options.findIndex(option => option.value === field.value);
+      if (index > -1) {
+        setSelected(options[index]);
+      }
+    } else {
+      setSelected(options[0]);
     }
-    setSelected(options[0])
-  }, [props, field.value])
-*/}
+  }, [field.value, options]);
+  
   return (
     <Listbox
       name={name}
@@ -91,8 +91,7 @@ const MyListbox = ({ label, name, options, ...props }: ListboxProps) => {
                       </>
                     )}
                   </Listbox.Option>
-                ))}
-              </Listbox.Options>
+                ))}              </Listbox.Options>
             </Transition>
           </div>
         </div>

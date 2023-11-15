@@ -9,17 +9,25 @@ import Badge from '../../../components/ui/Badge';
 import Pagination from '../../../components/ui/Pagination';
 import { useState, useEffect } from "react";
 
+export interface VenueFormValues {
+  _id: string;
+  name: string;
+  alias: string;
+  shortName: string;
+  street: string;
+  zipCode: string;
+  city: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  active: boolean;
+}
+
+
 export default function Venues({
   allVenuesData
 }: {
-  allVenuesData: {
-    _id: string;
-    name: string;
-    street: string;
-    city: string;
-    zipCode: string;
-    active: boolean;
-  }[]
+  allVenuesData: VenueFormValues[]
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -47,7 +55,7 @@ export default function Venues({
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
-  
+
   return (
     <LayoutAdm sidebar={<LmSidebar />} >
       <SectionHeader
@@ -104,7 +112,7 @@ export default function Venues({
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
 
-                  {allVenuesData && allVenuesData.map(({ _id, name, street, zipCode, city, active }) => {
+                  {allVenuesData && allVenuesData.map(({ _id, alias, name, street, zipCode, city, active }) => {
                     return (
 
                       <tr key={name}>
@@ -120,7 +128,7 @@ export default function Venues({
                           <Badge info={active === true ? 'aktiv' : 'inaktiv'} />
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                          <Link href={`/leaguemanager/venues/edit/${_id}`}>
+                          <Link href={`/leaguemanager/venues/${alias}/edit`}>
                             <a className="text-indigo-600 hover:text-indigo-900">Bearbeiten<span className="sr-only">, {name}</span></a>
                           </Link>
                         </td>
