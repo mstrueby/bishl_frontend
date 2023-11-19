@@ -6,7 +6,7 @@ import ButtonPrimary from '../ui/form/ButtonPrimary'
 import ButtonLight from '../ui/form/ButtonLight'
 import Toggle from '../ui/form/Toggle'
 import MyListbox from '../ui/form/Listbox'
-import { VenueFormValues } from '../../pages/leaguemanager/venues/index'
+import { VenueFormValues } from '../../types/VenueFormValues'
 
 interface VenueFormProps {
   initialValues: VenueFormValues;
@@ -42,7 +42,6 @@ const VenueForm: React.FC<VenueFormProps> = ({
   enableReinitialize,
   handleCancel,
 }) => {
-
   return (
     <>
       <Formik
@@ -50,17 +49,15 @@ const VenueForm: React.FC<VenueFormProps> = ({
         enableReinitialize={enableReinitialize}
         validationSchema={Yup.object({
           name: Yup.string()
-            .max(30, 'Nicht mehr als 30 Zeichen')
+            .max(30, 'Der Name darf nicht mehr als 30 Zeichen lang sein')
             .required('Name ist ein Pflichtfeld'),
           shortName: Yup.string()
-            .max(15, 'Nicht mehr als 30 Zeichen')
+            .max(15, 'Der Kurzname darf nicht mehr als 30 Zeichen lang sein')
             .required('Kurzname ist ein Pflichtfeld'),
-          street: Yup.string()
-            .required('Straße ist ein Pflichtfeld'),
-          zipCode: Yup.string()
-            .required('PLZ ist ein Pflichtfeld'),
-          city: Yup.string()
-            .required('Stadt ist ein Pflichtfeld'),
+          street: Yup.string().required('Straße ist ein Pflichtfeld'),
+          zipCode: Yup.string().required('PLZ ist ein Pflichtfeld'),
+          city: Yup.string().required('Stadt ist ein Pflichtfeld'),
+          country: Yup.string().required('Das Land ist erforderlich'),
         })}
         onSubmit={onSubmit}
       >

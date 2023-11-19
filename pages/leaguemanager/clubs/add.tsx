@@ -7,71 +7,74 @@ import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import LayoutAdm from '../../../components/LayoutAdm';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
-import VenueForm from '../../../components/leaguemanager/VenueForm'
-import { VenueFormValues } from '../../../types/VenueFormValues';
+import ClubForm from '../../../components/leaguemanager/ClubForm';
+import { ClubFormValues } from '../../../types/ClubFormValues';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
 
 interface AddProps {
-  jwt: string
+  jwt: string;
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const jwt = getCookie('jwt', { req, res });
+export const getServerSideProps: GetServerSideProps = async ({req, res}) => {
+  const jwt = getCookie('jwt' , { req, res });
   return { props: { jwt } };
 }
 
-export default function Add({ jwt }: AddProps) {
+export default function Add({ jwt}: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
-
-  const initialValues: VenueFormValues = {
+  
+  const initialValues: ClubFormValues = {
     name: '',
     alias: '',
-    shortName: '',
+    addressName: '',
     street: '',
     zipCode: '',
     city: '',
     country: 'Deutschland',
-    latitude: '',
-    longitude: '',
+    email: '',
+    yearOfFoundation: '',
+    description: '',
+    website: '',
+    ishdId: '',
     active: false,
   };
- 
-  const onSubmit = async (values: VenueFormValues) => {
+  
+  const onSubmit = async (values: ClubFormValues) => {
     setLoading(true);
     try {
       const response = await axios({
-        method: 'post',
+        method: 'POST',
         url: BASE_URL,
         data: JSON.stringify(values),
         headers: {
-          //'Content-Type': 'multipart/form-data',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`,
         },
       });
-      if (response.status === 201) { // Assuming status 201 means created
+      if (response.status === 201) {
         router.push({
-          pathname: '/leaguemanager/venues',
-          query: { message: `Die neue Spielfläche ${values.name} wurde erfolgreich angelegt.` }
-        }, '/leaguemanager/venues');
+          pathname: '/leaguemanager/clubs',
+          query: { message: `Der neue Verein ${values.name} wurde erfolgreich angelegt.` },
+        }, '/leaguemanager/clubs');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setError(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
-      }      
+        setError(error?.message?.data.detail || 'Ein Fehler ist aufgetreten.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/venues')
-  }
+    // Handle the cancel button action, redirecting back to clubs listing page
+    router.push('/leaguemanager/clubs');
+  };
 
   useEffect(() => {
     if (error) {
@@ -79,7 +82,7 @@ export default function Add({ jwt }: AddProps) {
       window.scrollTo(0, 0);
     }
   }, [error]);
-  
+
   // Handler to close the success message
   const handleCloseMessage = () => {
     setError(null);
@@ -96,7 +99,7 @@ export default function Add({ jwt }: AddProps) {
     <LayoutAdm sidebar={<LmSidebar />} >
       <SectionHeader
         sectionData={{
-          title: 'Neue Spielfläche',
+          title: 'Neuer Verein',
         }}
       />
       {error &&
@@ -123,7 +126,7 @@ export default function Add({ jwt }: AddProps) {
           </div>
         </div>
       }
-      <VenueForm {...formProps} />
+      <ClubForm {...formProps} />
     </LayoutAdm>
-  )
-}
+  );
+};

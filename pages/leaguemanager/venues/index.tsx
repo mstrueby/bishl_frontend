@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -6,30 +7,13 @@ import LayoutAdm from '../../../components/LayoutAdm';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import Badge from '../../../components/ui/Badge';
-import Pagination from '../../../components/ui/Pagination';
-import { useState, useEffect } from "react";
-
-export interface VenueFormValues {
-  _id: string;
-  name: string;
-  alias: string;
-  shortName: string;
-  street: string;
-  zipCode: string;
-  city: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-  active: boolean;
-}
-
+import VenueFormValues from '../../../types/VenueFormValues';
 
 export default function Venues({
   allVenuesData
 }: {
   allVenuesData: VenueFormValues[]
 }) {
-  const [currentPage, setCurrentPage] = useState(1);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
@@ -47,10 +31,6 @@ export default function Venues({
     }
   }, [router]);
 
-  const onPageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
@@ -65,7 +45,6 @@ export default function Venues({
         }}
       />
 
-      {/* start table */}
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
 
@@ -93,7 +72,8 @@ export default function Venues({
               </div>
             </div>
           }
-
+          
+          {/* start table */}
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
@@ -114,7 +94,6 @@ export default function Venues({
 
                   {allVenuesData && allVenuesData.map(({ _id, alias, name, street, zipCode, city, active }) => {
                     return (
-
                       <tr key={name}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                           <div className="flex items-center">
@@ -142,13 +121,6 @@ export default function Venues({
           </div>
         </div>
       </div>
-
-      {/*       <Pagination 
-        items={allVenuesData.length} 
-        currentPage={currentPage} 
-        onPageChange={onPageChange} 
-      /> */}
-
     </LayoutAdm>
   );
 }

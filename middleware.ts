@@ -7,7 +7,7 @@ export function middleware(req: NextRequest) {
   //console.log("Cookie: ", cookie);
   if (url.includes('/leaguemanager') && (cookie===undefined || cookie===null)) {
     let loginUrl = process.env['NEXT_FRONTEND_URL'] + '/login';
-    console.log("URL:" + loginUrl);
+    //console.log("URL:" + loginUrl);
     return NextResponse.redirect(loginUrl);
   }
   return NextResponse.next();

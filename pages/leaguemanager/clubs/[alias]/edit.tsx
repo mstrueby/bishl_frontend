@@ -1,54 +1,54 @@
-// pages/leaguemanager/venues/[alias]/edit.tsx
+// pages/leaguemanager/clubs/[alias]/edit.tsx
 import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import VenueForm from '../../../../components/leaguemanager/VenueForm';
+import ClubForm from '../../../../components/leaguemanager/ClubForm'; 
 import LayoutAdm from '../../../../components/LayoutAdm';
 import LmSidebar from '../../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../../components/leaguemanager/SectionHeader';
-import { VenueFormValues } from '../../../../types/VenueFormValues';
+import { ClubFormValues } from '../../../../types/ClubFormValues'; 
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/venues/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
 
 interface EditProps {
   jwt: string,
-  venue: VenueFormValues
+  club: ClubFormValues
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
   const { alias } = context.params as { alias: string };
 
-  // Fetch the existing venue data
-  let venue = null;
+  // Fetch the existing club data
+  let club = null; 
   try {
     const response = await axios.get(BASE_URL + alias, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
     });
-    venue = response.data;
+    club = response.data;
   } catch (error) {
     // Handle error (e.g., not found)
-    console.error('Could not fetch the venue data');
+    console.error('Could not fetch the club data');
   }
 
-  return venue ? { props: { jwt, venue } } : { notFound: true };
+  return club ? { props: { jwt, club } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
+const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   // Handler for form submission
-  const onSubmit = async (values: VenueFormValues) => {
+  const onSubmit = async (values: ClubFormValues) => { 
     setError(null);
     //console.log(values);
     try {
-      const response = await axios.patch(BASE_URL + venue._id, values, {
+      const response = await axios.patch(BASE_URL + club._id, values, { 
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`,
@@ -57,19 +57,19 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
 
       if (response.status === 200) { // Assuming status 200 means success
         router.push({
-          pathname: '/leaguemanager/venues',
-          query: { message: `Die Spielfläche ${values.name} wurde erfolgreich aktualisiert.` }
-        }, '/leaguemanager/venues');
+          pathname: '/leaguemanager/clubs',
+          query: { message: `Der Verein ${values.name} wurde erfolgreich aktualisiert.` } 
+        }, '/leaguemanager/clubs');
       } else {
-        setError('An unexpected error occurred while updating the venue.');
+        setError('An unexpected error occurred while updating the club.'); 
       }
     } catch (error) {
-      setError('Failed to update the venue.');
+      setError('Failed to update the club.');
     }
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/venues');
+    router.push('/leaguemanager/clubs'); 
   };
 
   useEffect(() => {
@@ -84,18 +84,20 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
     setError(null);
   };
 
-  // Form initial values with existing venue data
-  const initialValues: VenueFormValues = {
-    name: venue?.name || '',
-    alias: venue?.alias || '',
-    shortName: venue?.shortName || '',
-    street: venue?.street || '',
-    zipCode: venue?.zipCode || '',
-    city: venue?.city || '',
-    country: venue?.country || '',
-    latitude: venue?.latitude || '',
-    longitude: venue?.longitude || '',
-    active: venue?.active || false,
+  // Form initial values with existing club data
+  const initialValues: ClubFormValues = { 
+    name: club?.name || '',
+    addressName: club?.addressName || '',
+    street: club?.street || '',
+    zipCode: club?.zipCode || '',
+    city: club?.city || '',
+    country: club?.country || '',
+    email: club?.email || '',
+    yearOfFoundation: club?.yearOfFoundation || '',
+    description: club?.description || '',
+    website: club?.website || '',
+    ishdId: club?.ishdId || '',
+    active: club?.active || false,
   };
 
   // Render the form with initialValues and the edit-specific handlers
@@ -103,7 +105,7 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
     <LayoutAdm sidebar={<LmSidebar />}>
       <SectionHeader
         sectionData={{
-          title: `Spielfläche ${initialValues.name} bearbeiten`,
+          title: `Verein ${initialValues.name} bearbeiten`, 
         }}
       />
 
@@ -132,7 +134,7 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
         </div>
       }
 
-      <VenueForm
+      <ClubForm 
         initialValues={initialValues}
         onSubmit={onSubmit}
         enableReinitialize={true}
