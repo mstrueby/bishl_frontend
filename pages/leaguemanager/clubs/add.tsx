@@ -41,17 +41,24 @@ export default function Add({ jwt}: AddProps) {
     website: '',
     ishdId: '',
     active: false,
+    logo: '',
   };
   
   const onSubmit = async (values: ClubFormValues) => {
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(values)) {
+      formData.append(key, value);
+      console.log(key, value);
+    }
+    
     setLoading(true);
     try {
       const response = await axios({
         method: 'POST',
         url: BASE_URL,
-        data: JSON.stringify(values),
+        data: formData,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${jwt}`,
         },
       });

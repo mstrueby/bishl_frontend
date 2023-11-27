@@ -11,5 +11,6 @@ export interface ClubFormValues {
   website: string;
   ishdId: number;
   active: boolean;
+  logo: string;
   legacyId: number;
 }

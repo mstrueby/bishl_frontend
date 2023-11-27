@@ -113,7 +113,7 @@ export default function LoginPage() {
               <Form className="space-y-6">
                 <InputText
                   name="email"
-                  type="text"
+                  type="email"
                   label="E-Mail"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

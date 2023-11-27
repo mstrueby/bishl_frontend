@@ -6,6 +6,7 @@ import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
 import MyListbox from '../ui/form/Listbox'
+import LogoUpload from '../ui/form/LogoUpload';
 import { ClubFormValues } from '../../types/ClubFormValues';
 
 interface ClubFormProps {
@@ -69,6 +70,7 @@ const ClubForm: React.FC<ClubFormProps> = ({
           label="Alias"
           disabled
         />
+        <LogoUpload name="logo" label="Vereinslogo" />
         <InputText name="addressName" type="text" label="Adresse" />
         <InputText name="street" type="text" label="Straße" />
         <InputText name="zipCode" type="text" label="PLZ" />
