@@ -65,6 +65,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
           <Form>
             <InputText
               name="name"
+              autoComplete="off"
               type="text"
               label="Name"
               onChange={handleChange}
@@ -83,16 +84,19 @@ const VenueForm: React.FC<VenueFormProps> = ({
             />
             <InputText
               name="street"
+              autoComplete="off"
               type="text"
               label="Straße"
             />
             <InputText
               name="zipCode"
+              autoComplete="off"
               type="text"
               label="PLZ"
             />
             <InputText
               name="city"
+              autoComplete="off"
               type="text"
               label="Stadt"
             />

@@ -62,7 +62,7 @@ const ClubForm: React.FC<ClubFormProps> = ({
     >
     {({ handleChange }) => (
       <Form>
-        <InputText name="name" type="text" label="Name des Vereins" onChange={handleChange} />
+        <InputText name="name" autoComplete="off" type="text" label="Name des Vereins" onChange={handleChange} />
         <AutoAlias />
         <InputText
           name="alias"
@@ -76,7 +76,7 @@ const ClubForm: React.FC<ClubFormProps> = ({
         <InputText name="zipCode" type="text" label="PLZ" />
         <InputText name="city" type="text" label="Stadt" />
         <MyListbox name="country" options={countries} label="Land" />
-        <InputText name="email" type="email" label="E-Mail" />
+        <InputText name="email" autoComplete="off" type="email" label="E-Mail" />
         <InputText name="yearOfFoundation" type="number" label="Gründungsjahr" />
         <InputText name="description" type="text" label="Beschreibung" />
         <InputText name="website" type="text" label="Webseite" />

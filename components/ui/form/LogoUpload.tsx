@@ -14,7 +14,7 @@ const LogoUpload = ({ label, name, ...props }: LogoUploadProps) => {
     const file = e.target.files ? e.target.files[0] : null;
     helpers.setValue(file);
   }
-
+  props.id = props.id || props.name;
   return (
     <div>
       <label htmlFor={props.id || name} className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
@@ -24,7 +24,8 @@ const LogoUpload = ({ label, name, ...props }: LogoUploadProps) => {
         type="file"
         onChange={handleFileChange}
         className={classInputDef}
-        {...props}
+        {...field} {...props}
+        id={props.id || name}
       />
       {meta.touched && meta.error ? (
         <p className="mt-2 text-sm text-red-600">

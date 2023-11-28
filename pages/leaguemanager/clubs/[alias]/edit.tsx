@@ -45,12 +45,17 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
 
   // Handler for form submission
   const onSubmit = async (values: ClubFormValues) => { 
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(values)) {
+      formData.append(key, value);
+      //console.log(key, value);
+    }
+    
     setError(null);
-    //console.log(values);
     try {
       const response = await axios.patch(BASE_URL + club._id, values, { 
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${jwt}`,
         },
       });
@@ -61,7 +66,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
           query: { message: `Der Verein ${values.name} wurde erfolgreich aktualisiert.` } 
         }, '/leaguemanager/clubs');
       } else {
-        setError('An unexpected error occurred while updating the club.'); 
+        setError('Ein unerwarteter Fehler ist aufgetreten.'); 
       }
     } catch (error) {
       setError('Failed to update the club.');
