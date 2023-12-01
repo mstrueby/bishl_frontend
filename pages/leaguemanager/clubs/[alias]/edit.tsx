@@ -69,7 +69,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
         setError('Ein unerwarteter Fehler ist aufgetreten.'); 
       }
     } catch (error) {
-      setError('Failed to update the club.');
+      setError('Ein Fehler ist aufgetreten.');
     }
   };
 

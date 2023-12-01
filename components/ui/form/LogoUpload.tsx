@@ -24,7 +24,7 @@ const LogoUpload = ({ label, name, ...props }: LogoUploadProps) => {
         type="file"
         onChange={handleFileChange}
         className={classInputDef}
-        {...field} {...props}
+        {...props}
         id={props.id || name}
       />
       {meta.touched && meta.error ? (

@@ -2,12 +2,29 @@ import { useState, useEffect } from "react";
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
+import { buildUrl } from 'cloudinary-build-url'
 import LayoutAdm from '../../../components/LayoutAdm';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import Badge from '../../../components/ui/Badge';
 import ClubFormValues from '../../../components/types/ClubFormValues';
 import SuccessMessage from '../../../components/ui/SuccessMessage';
+
+const transformedUrl = (id) => buildUrl(id, {
+  cloud: {
+    cloudName: 'dajtykxvp',
+  },
+  transformations: {
+    effect: {
+      name: 'grayscale',
+    },
+    //effect: {
+    //  name: 'tint',
+    //  value: '60:blue:white'
+    //}
+  }
+});
 
 export default function Clubs({
   allClubsData
@@ -16,7 +33,8 @@ export default function Clubs({
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
-
+  const mySecret = process.env['CLOUDINARY_CLOUD_NAME']
+  
   useEffect(() => {
     if (router.query.message) {
       setSuccessMessage(router.query.message as string);
@@ -78,6 +96,11 @@ export default function Clubs({
                               <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
                             </div> */}
                             <div className="">
+                              {club.logo && 
+                                <div>
+                                  <Image src={transformedUrl(club.logo)} alt={club.name} objectFit="contain" height={50} width={50} />
+                                </div>
+                              }
                               <div className="font-medium text-gray-900">{club.name}</div>
                             </div>
                           </div>
