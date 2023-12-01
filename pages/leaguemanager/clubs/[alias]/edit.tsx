@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
+import Image from 'next/image';
 import axios from 'axios';
 import ClubForm from '../../../../components/leaguemanager/ClubForm'; 
 import LayoutAdm from '../../../../components/LayoutAdm';
@@ -47,13 +48,15 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   const onSubmit = async (values: ClubFormValues) => { 
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
+      if (key === 'logo' && typeof value === 'string') {
+        // If 'logo' field is a string, assume it's the path to the existing logo and it wasn't updated:
+        continue;
+      }
       formData.append(key, value);
-      //console.log(key, value);
     }
-    
     setError(null);
     try {
-      const response = await axios.patch(BASE_URL + club._id, values, { 
+      const response = await axios.patch(BASE_URL + club._id, formData, { 
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${jwt}`,
@@ -103,6 +106,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
     website: club?.website || '',
     ishdId: club?.ishdId || '',
     active: club?.active || false,
+    logo: club?.logo || '',
   };
 
   // Render the form with initialValues and the edit-specific handlers
@@ -116,6 +120,12 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} /> }
 
+      {club?.logo && (
+        <div className="mb-4">
+          <Image src={club.logo} alt={club.name} width={200} height={200} objectFit="contain" />
+        </div>
+      )}
+      
       <ClubForm 
         initialValues={initialValues}
         onSubmit={onSubmit}

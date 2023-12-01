@@ -48,7 +48,6 @@ export default function Add({ jwt}: AddProps) {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
       formData.append(key, value);
-      //onsole.log(key, value);
     }
     
     setLoading(true);
