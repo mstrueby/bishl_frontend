@@ -8,7 +8,7 @@ import LayoutAdm from '../../../components/LayoutAdm';
 import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import Badge from '../../../components/ui/Badge';
-import ClubFormValues from '../../../components/types/ClubFormValues';
+import { ClubFormValues } from '../../../types/ClubFormValues';
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 
 const transformedUrl = (id) => buildUrl(id, {
@@ -33,8 +33,7 @@ export default function Clubs({
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
-  const mySecret = process.env['CLOUDINARY_CLOUD_NAME']
-  
+
   useEffect(() => {
     if (router.query.message) {
       setSuccessMessage(router.query.message as string);
@@ -53,7 +52,7 @@ export default function Clubs({
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
-  
+
   return (
     <LayoutAdm sidebar={<LmSidebar />} >
       <SectionHeader
@@ -67,8 +66,8 @@ export default function Clubs({
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
 
-          { successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} /> }
-          
+          {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
@@ -92,17 +91,16 @@ export default function Clubs({
                       <tr key={club.name}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                           <div className="flex items-center">
-                            {/* <div className="h-10 w-10 flex-shrink-0">
-                              <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
-                            </div> */}
-                            <div className="">
-                              {club.logo && 
-                                <div>
-                                  <Image src={transformedUrl(club.logo)} alt={club.name} objectFit="contain" height={50} width={50} />
-                                </div>
-                              }
-                              <div className="font-medium text-gray-900">{club.name}</div>
+                            <div className="h-10 w-10 flex-shrink-0 mr-4">
+                              <Image className="h-10 w-10 rounded-full"
+                                src={club.logo ?
+                                  transformedUrl(club.logo) :
+                                  transformedUrl('https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png')}
+                                alt={club.name}
+                                objectFit="contain" height={50} width={50}
+                              />
                             </div>
+                            <div className="font-medium text-gray-900">{club.name}</div>
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
