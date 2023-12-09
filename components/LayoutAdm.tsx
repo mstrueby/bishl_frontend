@@ -4,9 +4,11 @@ import Footer from '../components/Footer';
 export default function LayoutAdm({
   children, 
   sidebar,
+  sectionHeader,
 }: {
   children: React.ReactNode
   sidebar: React.ReactNode
+  sectionHeader: React.ReactNode
 }) {
 
   return (
@@ -17,7 +19,8 @@ export default function LayoutAdm({
           <div className="overflow-hidden">
             <div className="divide-y divide-gray-200 md:grid md:grid-cols-12 md:divide-y-0 md:divide-x">
               {sidebar}
-              <main className="px-4 md:px-8 py-6 md:col-span-9">
+              {sectionHeader}
+              <main className="px-4 md:px-8 py-6 md:col-span-9 flex-auto clear-left">
                 {children}
               </main>
             </div>

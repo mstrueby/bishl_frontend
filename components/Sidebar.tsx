@@ -20,7 +20,7 @@ export default function Sidebar({
   }[];
 }) {
   return (
-    <Disclosure as="nav" className="py-6 md:col-span-3" aria-label="Sidebar">
+    <Disclosure as="nav" className="py-6 md:col-span-3  " aria-label="Sidebar">
       {({ open }) => (
         <>
           <div className="hidden md:ml-6 md:block space-y-1 bg-white">
@@ -41,16 +41,18 @@ export default function Sidebar({
           </div>
 
           {/* Disclosure Button */}
-          <Disclosure.Button className="px-4 py-2 text-sm font-medium text-left rounded-lg focus:outline-none focus-visible:ring focus-visible:ring-opacity-75 md:hidden">
-            <span className="absolute -inset-0.5" />
-            <span className="sr-only">Open main menu</span>
-            {open ? (
-              <XMarkIcon className="block w-6 h-6" aria-hidden="true" />
-            ) : (
-              <Bars3BottomLeftIcon className="block w-6 h-6" aria-hidden="true" />
-            )}
-            <span className="sr-only">{open ? 'Close sidebar' : 'Open sidebar'}</span>
-          </Disclosure.Button>
+          <div className="flex items-center h-16 pb-5 px-3 border-l-4 border-transparent">
+            <Disclosure.Button className="px-4 py-0 h-16 text-sm font-medium text-left rounded-lg focus:outline-none focus-visible:ring focus-visible:ring-opacity-75 md:hidden">
+              <span className="absolute -inset-0.5" />
+              <span className="sr-only">Open main menu</span>
+              {open ? (
+                <XMarkIcon className="block w-6 h-6" aria-hidden="true" />
+              ) : (
+                <Bars3BottomLeftIcon className="block w-6 h-6" aria-hidden="true" />
+              )}
+              <span className="sr-only">{open ? 'Close sidebar' : 'Open sidebar'}</span>
+            </Disclosure.Button>
+          </div>
 
           {/* Disclosure Panel */}
           <Disclosure.Panel className={`absolute z-10 left-auto transform ${open ? "translate-x-0" : "-translate-x-full"} bg-white w-64 h-full shadow-md p-4 transition-transform duration-300 ease-in-out md:hidden`}>

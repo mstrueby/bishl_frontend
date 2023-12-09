@@ -54,15 +54,15 @@ export default function Clubs({
   };
 
   return (
-    <LayoutAdm sidebar={<LmSidebar />} >
-      <SectionHeader
+    <LayoutAdm
+      sidebar={<LmSidebar />}
+      sectionHeader={<SectionHeader
         sectionData={{
-          title: 'Vereine',
+          title: "Spielstätten",
           newLink: `/leaguemanager/clubs/add`
         }}
-      />
-
-
+      />}
+    >
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
 
