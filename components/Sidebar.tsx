@@ -1,6 +1,6 @@
 // Sidebar.tsx
-
-import { Disclosure } from '@headlessui/react';
+import { Fragment, useState } from 'react'
+import { Dialog, Menu, Transition, Disclosure } from '@headlessui/react';
 import Link from 'next/link';
 import HeroIcon from './HeroIcon';
 import { XMarkIcon, Bars3BottomLeftIcon } from '@heroicons/react/24/outline';
@@ -19,65 +19,122 @@ export default function Sidebar({
     current: boolean;
   }[];
 }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <Disclosure as="nav" className="py-6 md:col-span-3  " aria-label="Sidebar">
-      {({ open }) => (
-        <>
-          <div className="hidden md:ml-6 md:block space-y-1 bg-white">
-            {NavData.map(({ name, href, icon }) => (
+    <>
+      <Transition.Root show={sidebarOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-linear duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-linear duration-300"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-900/80" />
+          </Transition.Child>
 
-              <Link href={href} key={name}>
-                <a className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
-                  <HeroIcon
-                    icon={icon}
-                    className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
-                    aria-hidden="true"
-                  />
-                  {name}
-                </a>
-              </Link>
+          <div className="fixed inset-0 flex">
+            <Transition.Child
+              as={Fragment}
+              enter="transition ease-in-out duration-300 transform"
+              enterFrom="-translate-x-full"
+              enterTo="translate-x-0"
+              leave="transition ease-in-out duration-300 transform"
+              leaveFrom="translate-x-0"
+              leaveTo="-translate-x-full"
+            >
+              <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-in-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in-out duration-300"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
+                    <button type="button" className="-m-2.5 p-2.5" onClick={() => setSidebarOpen(false)}>
+                      <span className="sr-only">Close sidebar</span>
+                      <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                    </button>
+                  </div>
+                </Transition.Child>  
 
-            ))}
+                {/* Sidebar component, swap this element with another sidebar if you like */}
+                <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+                  <div className="flex h-16 shrink-0 items-center">
+                    <span>Spielbetrieb</span>
+                  </div>
+
+                  <nav className="flex flex-1 flex-col">
+                    <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                      
+                      <li>
+                        <ul role="list" className="-mx-2 space-y-1">
+                          {NavData.map((item) => (
+                            <li key={item.name}>
+                              <Link href={item.href} key={item.name}>
+                                <a className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
+                                  <HeroIcon
+                                    icon={item.icon}
+                                    className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
+                                    aria-hidden="true"
+                                  />
+                                  {item.name}
+                                </a>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                      
+                    </ul>
+                  </nav>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
+        </Dialog>
+      </Transition.Root>
 
-          {/* Disclosure Button */}
-          <div className="flex items-center h-16 pb-5 px-3 border-l-4 border-transparent">
-            <Disclosure.Button className="px-4 py-0 h-16 text-sm font-medium text-left rounded-lg focus:outline-none focus-visible:ring focus-visible:ring-opacity-75 md:hidden">
-              <span className="absolute -inset-0.5" />
-              <span className="sr-only">Open main menu</span>
-              {open ? (
-                <XMarkIcon className="block w-6 h-6" aria-hidden="true" />
-              ) : (
-                <Bars3BottomLeftIcon className="block w-6 h-6" aria-hidden="true" />
-              )}
-              <span className="sr-only">{open ? 'Close sidebar' : 'Open sidebar'}</span>
-            </Disclosure.Button>
+      {/* Static sidebar for desktop */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+        {/* Sidebar component, swap this element with another sidebar if you like */}
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
+          <div className="flex h-16 shrink-0 items-center">
+            <span>Spielbetrieb</span>
           </div>
+          
+          <nav className="flex flex-1 flex-col">
+            <ul role="list" className="flex flex-1 flex-col gap-y-7">
+              
+              <li>
+                <ul role="list" className="-mx-2 space-y-1">
+                  {NavData.map((item) => (
+                    <li key={item.name}>
+                      <Link href={item.href} key={item.name}>
+                        <a className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
+                          <HeroIcon
+                            icon={item.icon}
+                            className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
+                            aria-hidden="true"
+                          />
+                          {item.name}
+                        </a>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
 
-          {/* Disclosure Panel */}
-          <Disclosure.Panel className={`absolute z-10 left-auto transform ${open ? "translate-x-0" : "-translate-x-full"} bg-white w-64 h-full shadow-md p-4 transition-transform duration-300 ease-in-out md:hidden`}>
-            <div className="space-y-1">
-              {NavData.map(({ name, href, icon, current }) => (
-                <Link href={href} key={name}>
-                  <a
-                    className={classNames(
-                      current ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                      "group flex items-center px-3 py-2 text-sm font-medium border-l-4 border-transparent"
-                    )}
-                  >
-                    <HeroIcon
-                      icon={icon}
-                      className="w-6 h-6 mr-3 text-gray-400 flex-shrink-0 group-hover:text-gray-500"
-                      aria-hidden="true"
-                    />
-                    {name}
-                  </a>
-                </Link>
-              ))}
-            </div>
-          </Disclosure.Panel>
-        </>
-      )}
-    </Disclosure>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </>
   );
 }

@@ -5,11 +5,11 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { buildUrl } from 'cloudinary-build-url'
 import LayoutAdm from '../../../components/LayoutAdm';
-import LmSidebar from '../../../components/leaguemanager/LmSidebar';
-import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import Badge from '../../../components/ui/Badge';
 import { ClubFormValues } from '../../../types/ClubFormValues';
 import SuccessMessage from '../../../components/ui/SuccessMessage';
+import { navData } from '../../../components/leaguemanager/navData';
+
 
 const transformedUrl = (id) => buildUrl(id, {
   cloud: {
@@ -55,13 +55,9 @@ export default function Clubs({
 
   return (
     <LayoutAdm
-      sidebar={<LmSidebar />}
-      sectionHeader={<SectionHeader
-        sectionData={{
-          title: "Spielstätten",
-          newLink: `/leaguemanager/clubs/add`
-        }}
-      />}
+      navData={navData}
+      sectionTitle='Vereine'
+      newLink={`/leaguemanager/clubs/add`}
     >
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">

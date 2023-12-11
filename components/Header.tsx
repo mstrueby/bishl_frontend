@@ -81,10 +81,10 @@ const Header = () => {
                       <Menu.Button className={item}>Herren</Menu.Button>
                       <Transition
                         as={Fragment}
-                        enter="transition ease-out duration-100"
+                        enter="transition ease-out duration-300"
                         enterFrom="transform opacity-0 scale-95"
                         enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
+                        leave="transition ease-in duration-300"
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
@@ -248,61 +248,70 @@ const Header = () => {
           </div>
 
           {/* mobile navigation */}
-          <Disclosure.Panel className="sm:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
-              {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-              <Disclosure.Button
-                as={MyLink}
-                href="/"
-                className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
-                Home
-              </Disclosure.Button>
-              <Disclosure.Button
-                as={MyLink}
-                href="/venues"
-                className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
-                Spielstätten
-              </Disclosure.Button>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Disclosure.Panel className="sm:hidden">
+              <div className="space-y-1 px-2 pb-3 pt-2">
+                {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
+                <Disclosure.Button
+                  as={MyLink}
+                  href="/"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  Home
+                </Disclosure.Button>
+                <Disclosure.Button
+                  as={MyLink}
+                  href="/venues"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  Spielstätten
+                </Disclosure.Button>
 
-              <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
-                <span>Herren</span>
-              </div>
-              <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
-                {men.map((item, index) => (
-                  <Disclosure.Button
-                    as={MyLink}
-                    key={index}
-                    href={item.href}
-                    className='block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white'
-                  >
-                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
-                    {item.name}
-                  </Disclosure.Button>
-                ))}
-              </div>
+                <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
+                  <span>Herren</span>
+                </div>
+                <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
+                  {men.map((item, index) => (
+                    <Disclosure.Button
+                      as={MyLink}
+                      key={index}
+                      href={item.href}
+                      className='block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white'
+                    >
+                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
+                      {item.name}
+                    </Disclosure.Button>
+                  ))}
+                </div>
 
-              <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
-                <span>Nachwuchs</span>
-              </div>
-              <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
-                {youth.map((item, index) => (
-                  <Disclosure.Button
-                    as={MyLink}
-                    key={index}
-                    href={item.href}
-                    className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
-                  >
-                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
-                    {item.name}
-                  </Disclosure.Button>
-                ))}
-              </div>
+                <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
+                  <span>Nachwuchs</span>
+                </div>
+                <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
+                  {youth.map((item, index) => (
+                    <Disclosure.Button
+                      as={MyLink}
+                      key={index}
+                      href={item.href}
+                      className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
+                    >
+                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
+                      {item.name}
+                    </Disclosure.Button>
+                  ))}
+                </div>
 
-            </div>
-
-          </Disclosure.Panel>
+              </div>
+            </Disclosure.Panel>
+          </Transition>
         </>
       )}
     </Disclosure>

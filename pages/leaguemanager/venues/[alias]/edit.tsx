@@ -10,6 +10,7 @@ import LmSidebar from '../../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../../components/leaguemanager/SectionHeader';
 import { VenueFormValues } from '../../../../types/VenueFormValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import { navData } from '../../../../components/leaguemanager/navData';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/venues/';
 
@@ -100,14 +101,12 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
 
   // Render the form with initialValues and the edit-specific handlers
   return (
-    <LayoutAdm sidebar={<LmSidebar />}>
-      <SectionHeader
-        sectionData={{
-          title: `Spielfläche ${initialValues.name} bearbeiten`,
-        }}
-      />
+    <LayoutAdm
+      navData={navData}
+      sectionTitle={`Spielfläche bearbeiten`}
+    >
 
-      {error && <ErrorMessage error={error} onClose={handleCloseMessage} /> }
+      {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
       <VenueForm
         initialValues={initialValues}

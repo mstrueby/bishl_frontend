@@ -3,13 +3,12 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import LayoutAdm from '../../../components/LayoutAdm';
-import SectionHeader from '../../../components/leaguemanager/SectionHeader';
-import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 import ClubForm from '../../../components/leaguemanager/ClubForm';
 import { ClubFormValues } from '../../../types/ClubFormValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
+import { navData } from '../../../components/leaguemanager/navData';
+
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
 
@@ -17,16 +16,16 @@ interface AddProps {
   jwt: string;
 }
 
-export const getServerSideProps: GetServerSideProps = async ({req, res}) => {
-  const jwt = getCookie('jwt' , { req, res });
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const jwt = getCookie('jwt', { req, res });
   return { props: { jwt } };
 }
 
-export default function Add({ jwt}: AddProps) {
+export default function Add({ jwt }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
-  
+
   const initialValues: ClubFormValues = {
     name: '',
     alias: '',
@@ -43,13 +42,13 @@ export default function Add({ jwt}: AddProps) {
     active: false,
     logo: '',
   };
-  
+
   const onSubmit = async (values: ClubFormValues) => {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
       formData.append(key, value);
     }
-    
+
     setLoading(true);
     try {
       const response = await axios({
@@ -101,15 +100,13 @@ export default function Add({ jwt}: AddProps) {
     handleCancel,
     isNew: true,
   };
-  
+
   return (
-    <LayoutAdm sidebar={<LmSidebar />} >
-      <SectionHeader
-        sectionData={{
-          title: 'Neuer Verein',
-        }}
-      />
-      {error && <ErrorMessage error={error} onClose={handleCloseMessage} /> }
+    <LayoutAdm
+      navData={navData}
+      sectionTitle='Neuer Verein'
+    >
+      {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
       <ClubForm {...formProps} />
     </LayoutAdm>
   );

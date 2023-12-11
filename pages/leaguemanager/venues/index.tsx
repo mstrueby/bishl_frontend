@@ -3,11 +3,11 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import LayoutAdm from '../../../components/LayoutAdm';
-import LmSidebar from '../../../components/leaguemanager/LmSidebar';
-import SectionHeader from '../../../components/leaguemanager/SectionHeader';
 import Badge from '../../../components/ui/Badge';
-import VenueFormValues from '../../../types/VenueFormValues';
+import { VenueFormValues } from '../../../types/VenueFormValues';
 import SuccessMessage from '../../../components/ui/SuccessMessage';
+import { navData } from '../../../components/leaguemanager/navData';
+
 
 export default function Venues({
   allVenuesData
@@ -37,14 +37,12 @@ export default function Venues({
   };
 
   return (
-    <LayoutAdm sidebar={<LmSidebar />} >
-      <SectionHeader
-        sectionData={{
-          title: 'Spielflächen',
-          newLink: `/leaguemanager/venues/add`
-        }}
-      />
-
+    <LayoutAdm
+      navData={navData}
+      sectionTitle="Spielflächen"
+      newLink={`/leaguemanager/venues/add`}
+    >
+    
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
 

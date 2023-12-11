@@ -5,12 +5,11 @@ import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import Image from 'next/image';
 import axios from 'axios';
-import ClubForm from '../../../../components/leaguemanager/ClubForm'; 
+import ClubForm from '../../../../components/leaguemanager/ClubForm';
 import LayoutAdm from '../../../../components/LayoutAdm';
-import LmSidebar from '../../../../components/leaguemanager/LmSidebar';
-import SectionHeader from '../../../../components/leaguemanager/SectionHeader';
-import { ClubFormValues } from '../../../../types/ClubFormValues'; 
+import { ClubFormValues } from '../../../../types/ClubFormValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import { navData } from '../../../../components/leaguemanager/navData';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
 
@@ -24,7 +23,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { alias } = context.params as { alias: string };
 
   // Fetch the existing club data
-  let club = null; 
+  let club = null;
   try {
     const response = await axios.get(BASE_URL + alias, {
       headers: {
@@ -45,7 +44,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   const router = useRouter();
 
   // Handler for form submission
-  const onSubmit = async (values: ClubFormValues) => { 
+  const onSubmit = async (values: ClubFormValues) => {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
       if (key === 'logo' && typeof value === 'string') {
@@ -56,7 +55,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
     }
     setError(null);
     try {
-      const response = await axios.patch(BASE_URL + club._id, formData, { 
+      const response = await axios.patch(BASE_URL + club._id, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${jwt}`,
@@ -66,10 +65,10 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
       if (response.status === 200) { // Assuming status 200 means success
         router.push({
           pathname: '/leaguemanager/clubs',
-          query: { message: `Der Verein ${values.name} wurde erfolgreich aktualisiert.` } 
+          query: { message: `Der Verein ${values.name} wurde erfolgreich aktualisiert.` }
         }, '/leaguemanager/clubs');
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.'); 
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
       setError('Ein Fehler ist aufgetreten.');
@@ -77,7 +76,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/clubs'); 
+    router.push('/leaguemanager/clubs');
   };
 
   useEffect(() => {
@@ -93,7 +92,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   };
 
   // Form initial values with existing club data
-  const initialValues: ClubFormValues = { 
+  const initialValues: ClubFormValues = {
     name: club?.name || '',
     addressName: club?.addressName || '',
     street: club?.street || '',
@@ -111,28 +110,28 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
 
   // Render the form with initialValues and the edit-specific handlers
   return (
-    <LayoutAdm sidebar={<LmSidebar />}>
-      <SectionHeader
-        sectionData={{
-          title: `Verein ${initialValues.name} bearbeiten`, 
-        }}
-      />
+    <LayoutAdm
+      navData={navData}
+      sectionTitle={`Verein bearbeiten`}
+    >
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} /> }
 
-      {club?.logo && (
-        <div className="mb-4">
-          <Image src={club.logo} alt={club.name} width={200} height={200} objectFit="contain" />
-        </div>
-      )}
-      
-      <ClubForm 
+      {
+        club?.logo && (
+          <div className="mb-4">
+            <Image src={club.logo} alt={club.name} width={200} height={200} objectFit="contain" />
+          </div>
+        )
+      }
+
+      <ClubForm
         initialValues={initialValues}
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
       />
-    </LayoutAdm>
+    </LayoutAdm >
   );
 };
 

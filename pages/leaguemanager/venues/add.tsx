@@ -9,6 +9,7 @@ import LmSidebar from '../../../components/leaguemanager/LmSidebar';
 import VenueForm from '../../../components/leaguemanager/VenueForm'
 import { VenueFormValues } from '../../../types/VenueFormValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
+import { navData } from '../../../components/leaguemanager/navData';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
 
@@ -93,12 +94,10 @@ export default function Add({ jwt }: AddProps) {
   };
   
   return (
-    <LayoutAdm sidebar={<LmSidebar />} >
-      <SectionHeader
-        sectionData={{
-          title: 'Neue Spielfläche',
-        }}
-      />
+    <LayoutAdm
+      navData={navData}
+      sectionTitle='Neue Spielfläche'
+    >
       {error && <ErrorMessage err={error} onClose={handleCloseMessage} /> }
       <VenueForm {...formProps} />
     </LayoutAdm>

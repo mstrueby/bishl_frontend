@@ -1,16 +1,17 @@
 import { NextPage } from 'next';
 import LayoutAdm from '../../components/LayoutAdm';
-import LmSidebar from '../../components/leaguemanager/LmSidebar';
-import SectionHeader from '../../components/leaguemanager/SectionHeader';
+import { navData } from '../../components/leaguemanager/navData';
+
 
 const LeagueManager: NextPage = () => {
   return (
-    <LayoutAdm sidebar={<LmSidebar />} >
-      <SectionHeader
-        sectionData={{
-          title: 'Dashboard',
-        }}
-      />
+    <LayoutAdm
+      navData={navData}
+      sectionTitle="Dashboard"
+    >
+      <div className="">
+        <span>Hier kommt die Dashboard-Ansicht</span>
+      </div>
     </LayoutAdm>
   );
 };
