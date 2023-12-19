@@ -64,23 +64,23 @@ export default function Venues({
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
 
-              {allVenuesData && allVenuesData.map(({ _id, alias, name, street, zipCode, city, active }) => {
+              {allVenuesData && allVenuesData.map((venue) => {
                 return (
-                  <tr key={name}>
+                  <tr key={venue.alias}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                       <div className="flex items-center">
                         <div className="">
-                          <div className="font-medium text-gray-900">{name}</div>
-                          <div className="text-gray-500">{street}, {zipCode} {city}</div>
+                          <div className="font-medium text-gray-900">{venue.name}</div>
+                          <div className="text-gray-500">{venue.street}, {venue.zipCode} {venue.city}</div>
                         </div>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
-                      <Badge info={active === true ? 'aktiv' : 'inaktiv'} />
+                      <Badge info={venue.active === true ? 'aktiv' : 'inaktiv'} />
                     </td>
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <Link href={`/leaguemanager/venues/${alias}/edit`}>
-                        <a className="text-indigo-600 hover:text-indigo-900">Bearbeiten<span className="sr-only">, {name}</span></a>
+                      <Link href={`/leaguemanager/venues/${venue.alias}/edit`}>
+                        <a className="text-indigo-600 hover:text-indigo-900">Bearbeiten<span className="sr-only">, {venue.name}</span></a>
                       </Link>
                     </td>
                   </tr>

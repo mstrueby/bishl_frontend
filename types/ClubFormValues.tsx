@@ -1,5 +1,6 @@
 export interface ClubFormValues {
   name: string;
+  alias: string;
   addressName: string;
   street: string;
   zipCode: string;

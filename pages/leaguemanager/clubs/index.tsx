@@ -85,7 +85,7 @@ export default function Clubs({
             <tbody className="divide-y divide-gray-200 bg-white">
               {allClubsData && allClubsData.map((club) => {
                 return (
-                  <tr key={club.name}>
+                  <tr key={club.alias}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0 mr-4">
