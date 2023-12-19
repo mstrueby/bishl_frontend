@@ -1,6 +1,6 @@
 export const navData = [
   { name: 'Dashboard', icon: 'RectangleGroupIcon', href: '/leaguemanager', current: false },
-  { name: 'Wettbewerbe', icon: 'TrophyIcon', href: '/', current: false },
+  { name: 'Wettbewerbe', icon: 'TrophyIcon', href: '/leaguemanager/tournaments', current: false },
   //{ name: 'Vereine & Mannschaften', icon: 'BookmarkIcon', href: '/leaguemanager/clubs', current: false },
   { name: 'Vereine & Mannschaften', icon: 'UserGroupIcon', href: '/leaguemanager/clubs', current: false },
   { name: 'Spielflächen', icon: 'RectangleStackIcon', href: '/leaguemanager/venues', current: false },
