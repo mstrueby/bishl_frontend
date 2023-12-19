@@ -1,45 +1,54 @@
 import Head from 'next/head';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import Layout from '../../components/Layout';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Fragment, useEffect, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 import { format } from 'date-fns'
+import { TournamentFormValues } from '../../types/TournamentFormValues';
+
+interface Team {
+  fullName: string;
+  shortName: string;
+  tinyName: string;
+  logo: string;
+}
 
 interface Match {
-  match_id: number;
-  home_team: string;
-  away_team: string;
+  matchId: number;
+  homeTeam: Team;
+  awayTeam: Team;
   status: string;
   venue: string;
-  home_score: number;
-  away_score: number;
+  homeScore: number;
+  awayScore: number;
   overtime: boolean;
   shootout: boolean;
-  start_time: Date;
+  startTime: Date;
   published: boolean;
 }
 
 interface Matchday {
   name: string;
   type: string;
-  start_date: Date;
-  end_date: Date;
-  create_standings: boolean;
-  create_stats: boolean;
+  startDate: Date;
+  endDate: Date;
+  createStandings: boolean;
+  createStats: boolean;
   published: boolean;
   matches: Match[];
 }
 
 interface Round {
   name: string;
-  create_standings: boolean;
-  create_stats: boolean;
-  matchdays_type: string;
-  matchdays_sorted_by: string;
-  start_date: Date;
-  end_date: Date;
+  createStandings: boolean;
+  createStats: boolean;
+  matchdaysType: string;
+  matchdaysSortedBy: string;
+  startDate: Date;
+  endDate: Date;
   published: boolean;
   matchdays: Matchday[];
 }
@@ -54,8 +63,8 @@ interface Tournament {
   _id: string;
   name: string;
   alias: string;
-  tiny_name: string;
-  age_group: string;
+  tinyName: string;
+  ageGroup: string;
   published: boolean;
   active: boolean;
   external: boolean;
@@ -72,10 +81,10 @@ export default function Tournament({
   let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.year - a.year) : [];
   const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
 
-  let rounds: Round[] = selectedSeason ? selectedSeason.rounds.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()) : [];
+  let rounds: Round[] = selectedSeason ? selectedSeason.rounds.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) : [];
   const [selectedRound, setSelectedRound] = useState(rounds ? rounds[rounds.length - 1] : {} as Round)
 
-  let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()) : [];
+  let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) : [];
   const [selectedMatchday, setSelectedMatchday] = useState(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
 
   const [activeTab, setActiveTab] = useState('matches');
@@ -241,7 +250,7 @@ export default function Tournament({
                                   ) : null}
                                 </div>
                                 <p className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'mt-2')}>
-                                  {formatDate(round.start_date, round.end_date)}
+                                  {formatDate(round.startDate, round.endDate)}
                                 </p>
                               </div>
                             )}
@@ -260,7 +269,7 @@ export default function Tournament({
 
 
       <div className="relative mt-10 mb-6 ">
-        {selectedRound.create_standings && (
+        {selectedRound.createStandings && (
           <div className="border-b border-gray-200">
             <div className="sm:block ">
               <nav className="-mb-px flex space-x-8">
@@ -273,7 +282,7 @@ export default function Tournament({
                         ? 'border-indigo-500 text-indigo-600'
                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                       'whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium'
-                      , tab.key === 'standings' && selectedRound.create_standings === false ? 'hidden' : ''
+                      , tab.key === 'standings' && selectedRound.createStandings === false ? 'hidden' : ''
                     )}
                     aria-current={tab.key == activeTab ? 'page' : undefined}
                     onClick={(event) => {
@@ -296,13 +305,13 @@ export default function Tournament({
             <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
               {({ open }) => (
                 <>
-                  <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">{selectedRound.matchdays_type}:</Listbox.Label>
+                  <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">{selectedRound.matchdaysType}:</Listbox.Label>
                   <Listbox.Label className="sr-only">Change Matchday</Listbox.Label>
                   <div className="relative mt-2">
                     <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                       <span className="inline-flex w-full truncate">
                         <span className="truncate">{selectedMatchday.name}</span>
-                        <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.start_date, selectedMatchday.end_date)}</span>
+                        <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
                       </span>
                       <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                         <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -335,7 +344,7 @@ export default function Tournament({
                                     {matchday.name}
                                   </span>
                                   <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
-                                    {formatDate(matchday.start_date, matchday.end_date)}
+                                    {formatDate(matchday.startDate, matchday.endDate)}
                                   </span>
                                 </div>
 
@@ -361,7 +370,7 @@ export default function Tournament({
             </Listbox>
           }
 
-          {selectedMatchday.create_standings && (
+          {selectedMatchday.createStandings && (
             <div className="my-6">
               <div className="sm:block">
                 <nav className="flex space-x-4" aria-label="Tabs">
@@ -392,18 +401,17 @@ export default function Tournament({
             <div key={index} className="flex justify-between gap-x-6 p-4 my-10 border rounded-xl">
               <div className="flex gap-x-4">
                 <div className="min-w-0 flex-auto">
-                  <img className="h-12 w-12 flex-none rounded-full bg-gray-50" src="" alt="" />
-                  <p className="text-sm font-semibold leading-6 text-gray-900">{match.home_team}</p>
-                  <img className="h-12 w-12 flex-none rounded-full bg-gray-50" src="" alt="" />
-                  <p className="text-sm font-semibold leading-6 text-gray-900">{match.away_team}</p>
+                  <Image className="h-12 w-12 flex-none" src={match.homeTeam.logo ? match.homeTeam.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.homeTeam.tinyName} objectFit="contain" height={50} width={50}/>
+                  <p className="text-sm font-semibold leading-6 text-gray-900">{match.homeTeam.fullName}</p>
+                  <Image className="h-12 w-12 flex-none" src={match.awayTeam.logo ? match.awayTeam.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.awayTeam.tinyName} objectFit="contain" height={50} width={50}/><p className="text-sm font-semibold leading-6 text-gray-900">{match.awayTeam.fullName}</p>
                   <p className="mt-1 truncate text-xs leading-5 text-gray-500">{match.venue},&nbsp;
-                    <time dateTime={match.start_time}>{format(new Date(match.start_time), 'd. MMM yy')}</time>
+                    <time dateTime={match.startTime}>{format(new Date(match.startTime), 'd. MMM yy')}</time>
                   </p>
                 </div>
               </div>
               <div className="sm:flex sm:flex-col sm:items-end">
-                <p className="text-sm font-semibold leading-6 text-gray-900">{match.home_score}</p>
-                <p className="text-sm font-semibold leading-6 text-gray-900">{match.away_score}</p>
+                <p className="text-sm font-semibold leading-6 text-gray-900">{match.homeScore}</p>
+                <p className="text-sm font-semibold leading-6 text-gray-900">{match.awayScore}</p>
               </div>
             </div>
           ))}

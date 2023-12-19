@@ -72,6 +72,9 @@ export default function Clubs({
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                       Verein
                     </th>
+                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      Mannschaften
+                    </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 text-center">
                       Status
                     </th>
@@ -96,8 +99,16 @@ export default function Clubs({
                                 objectFit="contain" height={50} width={50}
                               />
                             </div>
-                            <div className="font-medium text-gray-900">{club.name}</div>
+                            <div className="text-base font-medium text-gray-900">{club.name}</div>
                           </div>
+                        </td>
+                        <td className="px-3 py-4 text-xs text-left">
+                          {club.teams && club.teams.map((team) => {
+                            return (
+                              <p className="text-gray-500">{team.name}</p>
+                            )
+                          }
+                          )}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
                           <Badge info={club.active === true ? 'aktiv' : 'inaktiv'} />

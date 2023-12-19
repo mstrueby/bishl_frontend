@@ -106,6 +106,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
     ishdId: club?.ishdId || '',
     active: club?.active || false,
     logo: club?.logo || '',
+    teams: club?.teams || [],
   };
 
   // Render the form with initialValues and the edit-specific handlers
