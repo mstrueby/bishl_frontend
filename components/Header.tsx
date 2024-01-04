@@ -64,7 +64,7 @@ const Header = () => {
                 <div className="flex-shrink-0">
                   <img
                     className="h-12 w-auto"
-                    src="https://bishl-frontend.marianstruby.repl.co/bishl.svg"
+                    src="bishl.svg"
                     alt="Your Company"
                   />
                 </div>
