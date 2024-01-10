@@ -6,7 +6,7 @@ export interface TournamentFormValues {
   published: boolean;
   active: boolean;
   external: boolean;
-  website: string;
+  //website: string;
   seasons: {
     year: number;
     published: boolean;

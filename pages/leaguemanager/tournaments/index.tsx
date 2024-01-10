@@ -97,7 +97,7 @@ export default function Tournament({
                       <Badge info={tournament.active === true ? 'aktiv' : 'inaktiv'} />
                     </td>
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <Link href={`/leaguemanager/venues/${tournament.alias}/edit`}>
+                      <Link href={`/leaguemanager/tournaments/${tournament.alias}/edit`}>
                         <a className="text-indigo-600 hover:text-indigo-900">Bearbeiten<span className="sr-only">, {tournament.tinyName}</span></a>
                       </Link>
                     </td>
