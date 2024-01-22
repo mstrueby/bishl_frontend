@@ -1,5 +1,5 @@
 import React from 'react';
-import { Formik, Form, useFormikContext, FieldArray } from 'formik';
+import { Formik, Form, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
 import ButtonPrimary from '../ui/form/ButtonPrimary';

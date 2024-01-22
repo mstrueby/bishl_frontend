@@ -88,7 +88,9 @@ export default function Tournament({
                     <td className="px-3 py-4 text-xs text-left">
                       {tournament.seasons && tournament.seasons.map((season) => {
                         return (
-                          <p className="text-gray-500">{season.year}</p>
+                          <div 
+                            key= {season.year}
+                            className="text-gray-500">{season.year}</div>
                         )
                       }
                       )}
