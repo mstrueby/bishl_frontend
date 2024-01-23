@@ -14,6 +14,7 @@ export interface Team {
 }
 
 export interface ClubFormValues {
+  _id: string;
   name: string;
   alias: string;
   addressName: string;
