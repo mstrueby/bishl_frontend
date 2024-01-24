@@ -1,5 +1,5 @@
 // Define a Team interface
-export interface Team {
+export interface TeamFormValues {
   name: string;
   alias: string;
   fullName: string;
@@ -30,5 +30,5 @@ export interface ClubFormValues {
   active: boolean;
   logo: string;
   legacyId: number;
-  teams: Team[]; // Use the new Team interface
+  teams: TeamFormValues[]; // Use the new Team interface
 }

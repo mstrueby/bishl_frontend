@@ -4,11 +4,10 @@ import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import LayoutAdm from '../../../components/LayoutAdm';
-import ClubForm from '../../../components/leaguemanager/ClubForm';
-import { ClubFormValues } from '../../../types/ClubFormValues';
+import TeamForm from '../../../components/leaguemanager/TeamForm';
+import { TeamFormValues } from '../../../types/ClubFormValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 import { navData } from '../../../components/leaguemanager/navData';
-
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
 
@@ -26,24 +25,20 @@ export default function Add({ jwt }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: ClubFormValues = {
+  const initialValues: TeamFormValues = {
     name: '',
     alias: '',
-    addressName: '',
-    street: '',
-    zipCode: '',
-    city: '',
-    country: 'Deutschland',
-    email: '',
-    yearOfFoundation: '',
-    description: '',
-    website: '',
-    ishdId: '',
+    fullName: '',
+    shortName: '',
+    tinyName: '',
+    ageGroup: '',
+    teamNumber: 1,
     active: false,
-    logo: '',
+    external: false,
+    ishdId: '',
   };
 
-  const onSubmit = async (values: ClubFormValues) => {
+  const onSubmit = async (values: TeamFormValues) => {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
       formData.append(key, value);
@@ -56,15 +51,17 @@ export default function Add({ jwt }: AddProps) {
         url: BASE_URL,
         data: formData,
         headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${jwt}`,
-        },
+          'content-type': 'multipart/form-data',
+          'Authorization': `Bearer ${jwt}`,
+        }
       });
       if (response.status === 201) {
         router.push({
-          pathname: '/leaguemanager/clubs',
-          query: { message: `Der neue Verein ${values.name} wurde erfolgreich angelegt.` },
-        }, '/leaguemanager/clubs');
+          pathname: '/leaguemanager/teams',
+          query: {
+            message: `Die neue Mannschaft ${values.fullName} (${values.name}) wurde erfolgreich angelegt.`
+          },
+        }, '/leaguemaanger/teams');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
@@ -78,8 +75,7 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const handleCancel = () => {
-    // Handle the cancel button action, redirecting back to clubs listing page
-    router.push('/leaguemanager/clubs');
+    router.push('/leaguemanager/teams');
   };
 
   useEffect(() => {
@@ -89,7 +85,6 @@ export default function Add({ jwt }: AddProps) {
     }
   }, [error]);
 
-  // Handler to close the success message
   const handleCloseMessage = () => {
     setError(null);
   };
@@ -98,17 +93,16 @@ export default function Add({ jwt }: AddProps) {
     initialValues,
     onSubmit,
     handleCancel,
-    isNew: true,
     enableReinitialize: false,
   };
 
   return (
     <LayoutAdm
       navData={navData}
-      sectionTitle='Neuer Verein'
+      sectionTitle='Neue Mannschaft'
     >
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
-      <ClubForm {...formProps} />
+      <TeamForm {...formProps} />
     </LayoutAdm>
-  );
+  )
 };

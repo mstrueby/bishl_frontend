@@ -143,7 +143,7 @@ export default function LayoutAdm({
           </div>
 
           <div className="w-full">
-            <div className="sticky top-0 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+            <div className="z-50 sticky top-0 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
               <button type="button" className="-m-2.5 p-2.5 text-gray-700 lg:hidden" onClick={() => setSidebarOpen(true)}>
                 <span className="sr-only">Open sidebar</span>
                 <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
@@ -177,7 +177,7 @@ export default function LayoutAdm({
             <main className="py-2">
               <div className="px-4 sm:px-6 lg:px-8">
                 <div className="mt-8 flex flex-col">
-                  <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                  <div className="min-h-screen -my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     {children}
                   </div>
                 </div>
