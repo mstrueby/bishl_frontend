@@ -5,7 +5,7 @@ export const navData = [
   { name: 'Spieler', icon: 'UserIcon', href: '/', current: false },
   { name: 'Spielflächen', icon: 'RectangleStackIcon', href: '/leaguemanager/venues', current: false },
   { name: 'Wettbewerbe', icon: 'TrophyIcon', href: '/leaguemanager/tournaments', current: false },
-  { name: 'Saisons', icon: 'CalendarIcon', href: '/', current: false },
+  { name: 'Saisons', icon: 'CalendarIcon', href: '/leaguemanager/seasons', current: false },
   { name: 'Spieltage', icon: 'CalendarDaysIcon', href: '/', current: false },
   { name: 'Spiele', icon: 'QueueListIcon', href: '/', current: false },
 ];

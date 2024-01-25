@@ -47,7 +47,7 @@
   }
 
   // Define a Season interface
-  export interface Season {
+  export interface SeasonFormValues {
     year: number;
     published: boolean;
     rounds: Round[];
@@ -55,6 +55,7 @@
 
   // Update the TournamentFormValues interface to use new sub-interfaces
   export interface TournamentFormValues {
+    _id: string;
     name: string;
     alias: string;
     tinyName: string;
@@ -62,5 +63,5 @@
     published: boolean;
     active: boolean;
     external: boolean;
-    seasons: Season[];
+    seasons: SeasonFormValues[];
   }

@@ -36,6 +36,7 @@ export default function Add({ jwt }: AddProps) {
     active: false,
     external: false,
     ishdId: '',
+    legacyId: 0,
   };
 
   const onSubmit = async (values: TeamFormValues) => {

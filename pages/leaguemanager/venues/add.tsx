@@ -91,6 +91,7 @@ export default function Add({ jwt }: AddProps) {
     onSubmit,
     handleCancel,
     isNew: true,
+    enableReinitialize: false,
   };
   
   return (
@@ -98,7 +99,7 @@ export default function Add({ jwt }: AddProps) {
       navData={navData}
       sectionTitle='Neue Spielfläche'
     >
-      {error && <ErrorMessage err={error} onClose={handleCloseMessage} /> }
+      {error && <ErrorMessage error={error} onClose={handleCloseMessage} /> }
       <VenueForm {...formProps} />
     </LayoutAdm>
   )
