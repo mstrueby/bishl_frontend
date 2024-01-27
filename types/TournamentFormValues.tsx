@@ -48,7 +48,8 @@
 
   // Define a Season interface
   export interface SeasonFormValues {
-    year: number;
+    name: string;
+    alias: string;
     published: boolean;
     rounds: Round[];
   }

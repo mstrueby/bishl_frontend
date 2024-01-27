@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react'
+import React, { Fragment, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import LayoutAdm from '../../../components/LayoutAdm';
 import { navData } from '../../../components/leaguemanager/navData';
-import VenueForm from '../../../components/leaguemanager/VenueForm'
-import { VenueFormValues } from '../../../types/VenueFormValues';
+import TournamentForm from '../../../components/leaguemanager/TournamentForm'
+import { TournamentFormValues } from '../../types/TournamentFormValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/tournaments/"
 
 interface AddProps {
   jwt: string
@@ -25,20 +25,20 @@ export default function Add({ jwt }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: VenueFormValues = {
+  const initialValues: TournamentFormValues = {
     name: '',
     alias: '',
-    shortName: '',
-    street: '',
-    zipCode: '',
-    city: '',
-    country: 'Deutschland',
-    latitude: '',
-    longitude: '',
+    tinyName: '',
+    ageGroup: '',
+    published: false,
     active: false,
+    external: false,
+    website: '',
+    seasons: [],
+    legacyId: 0,
   };
- 
-  const onSubmit = async (values: VenueFormValues) => {
+
+  const onSubmit = async (values: TournamentFormValues) => {
     setLoading(true);
     try {
       const response = await axios({
@@ -53,9 +53,9 @@ export default function Add({ jwt }: AddProps) {
       });
       if (response.status === 201) { // Assuming status 201 means created
         router.push({
-          pathname: '/leaguemanager/venues',
-          query: { message: `Die neue Spielfläche ${values.name} wurde erfolgreich angelegt.` }
-        }, '/leaguemanager/venues');
+          pathname: '/leaguemanager/tournaments',
+          query: { message: `Der neue Wettbewerb ${values.name} wurde erfolgreich angelegt.` }
+        }, '/leaguemanager/tournaments');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
@@ -69,36 +69,34 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/venues')
+    router.push('/leaguemanager/tournaments')
   }
 
   useEffect(() => {
     if (error) {
-      // Scroll to the top of the page to show the error message
       window.scrollTo(0, 0);
     }
   }, [error]);
-  
-  // Handler to close the success message
-  const handleCloseMessage = () => {
+
+  const handleCloseMessaage = () => {
     setError(null);
-  };
+  }
 
   const formProps = {
     initialValues,
     onSubmit,
     handleCancel,
-    isNew: true,
     enableReinitialize: false,
   };
-  
+
   return (
     <LayoutAdm
       navData={navData}
-      sectionTitle='Neue Spielfläche'
+      sectionTitle='Neuer Wettbewerb'
     >
-      {error && <ErrorMessage error={error} onClose={handleCloseMessage} /> }
-      <VenueForm {...formProps} />
+      {error && <ErrorMessage error={error} onClose={handleCloseMessaage} />}
+      <TournamentForm {...formProps} />
     </LayoutAdm>
   )
+  
 }

@@ -31,7 +31,8 @@ export default function Add({ jwt, allTournamentsData }: AddProps) {
   const router = useRouter();
 
   const initialValues: SeasonFormValues = {
-    year: new Date().getFullYear(),
+    name: '',
+    alias: '',
     published: false,
     rounds: [],
   };
@@ -76,7 +77,7 @@ export default function Add({ jwt, allTournamentsData }: AddProps) {
       if (response.status === 201) {
         router.push({
           pathname: '/leaguemanager/seasons',
-          query: { message: `Die neue Saison ${values.year} wurde erfolgreich angelegt.` }
+          query: { message: `Die neue Saison ${values.alias} wurde erfolgreich angelegt.` }
         }, '/leaguemanager/seasons');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');

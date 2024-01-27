@@ -1,4 +1,3 @@
-// pages/leaguemanager/Tournaments/[alias]/edit.tsx
 import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -6,7 +5,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import TournamentForm from '../../../../components/leaguemanager/TournamentForm';
 import LayoutAdm from '../../../../components/LayoutAdm';
-import { TournamentFormValues, Season } from '../../../../types/TournamentFormValues';
+import { TournamentFormValues, SeasonFormValues } from '../../../../types/TournamentFormValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../components/leaguemanager/navData';
 import { Dialog, Transition } from '@headlessui/react';
@@ -22,7 +21,7 @@ interface EditProps {
 interface NewSeasonModalProps {
   isOpen: boolean,
   onClose: () => void,
-  addSeason: (season: Season) => void
+  addSeason: (season: SeasonFormValues) => void
 }
 
 const NewSeasonModal: React.FC<NewSeasonModalProps> = ({ isOpen, onClose, addSeason }) => {
@@ -91,8 +90,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
     tournament = response.data;
   } catch (error) {
-    // Handle error (e.g., not found)
-    console.error('Could not fetch the tournament data');
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching tournament:', error.message);
+    }
   }
 
   return tournament ? { props: { jwt, tournament } } : { notFound: true };
@@ -100,6 +100,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const Edit: NextPage<EditProps> = ({ jwt, tournament }) => {
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const [seasons, setSeasons] = useState(tournament?.seasons || []);
 
@@ -169,7 +170,7 @@ const Edit: NextPage<EditProps> = ({ jwt, tournament }) => {
   const handleOpenNewSeasonModal = () => setIsNewSeasonModalOpen(true);
   const handleCloseNewSeasonModal = () => setIsNewSeasonModalOpen(false);
 
-  const addSeason = async (season: Season) => {
+  const addSeason = async (season: SeasonFormValues) => {
     try {
       const response = await axios.post(`${BASE_URL}${tournament._id}/seasons`, season, {
         headers: {

@@ -41,17 +41,26 @@ const SeasonForm: React.FC<SeasonFormProps> = ({
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
         validationSchema={Yup.object({
-          year: Yup.number().required('Das Jahr ist erforderlich'),
+          name: Yup.string().required(
+            'Bitte geben Sie einen Namen für die Saison ein.')
         })}
         onSubmit={onSubmit}
       >
-        {({ handleChange }) => (
+        {(formikProps) => (
           <Form>
             <InputText
-              name="year"
+              name="name"
               autoComplete="off"
-              type="number"
-              label="Jahr"
+              type="text"
+              label="Name (Jahr)"
+              onChange={formikProps.handleChange}
+            />
+            <AutoAlias />
+            <InputText
+              name="alias"
+              type="text"
+              label="Alias"
+              disabled
             />
             
             <Toggle name="published" type="checkbox" label="Veröffentlicht" />
