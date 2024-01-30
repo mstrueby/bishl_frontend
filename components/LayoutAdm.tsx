@@ -5,19 +5,26 @@ import { Dialog, Menu, Transition, Disclosure } from '@headlessui/react';
 import Link from 'next/link';
 import { useRouter } from "next/router";
 import HeroIcon from './HeroIcon';
-import { XMarkIcon, Bars3BottomLeftIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, Bars3BottomLeftIcon, ChevronRightIcon, PencilIcon, PlusSmallIcon } from '@heroicons/react/24/solid';
 import { NavData } from '../types/NavData';
+import { Description } from '@headlessui/react/dist/components/description/description';
 
 export default function LayoutAdm({
   children,
   navData,
   sectionTitle,
-  newLink
+  description,
+  newLink,
+  editLink,
+  breadcrumbs
 }: {
   children: React.ReactNode
   navData: NavData[],
   sectionTitle: string,
-  newLink?: string
+  description?: string,
+  newLink?: string,
+  editLink?: string,
+  breadcrumbs?: { order: number, name: string; url: string }[]
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
@@ -143,7 +150,7 @@ export default function LayoutAdm({
           </div>
 
           <div className="w-full">
-            <div className="z-50 sticky top-0 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+            <div className="z-50 sticky top-0 flex py-4 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
               <button type="button" className="-m-2.5 p-2.5 text-gray-700 lg:hidden" onClick={() => setSidebarOpen(true)}>
                 <span className="sr-only">Open sidebar</span>
                 <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
@@ -155,21 +162,58 @@ export default function LayoutAdm({
               <div className="w-full">
 
                 {/* Section Header */}
-                <div className="border-b border-gray-200 h-16 flex items-center justify-between gap-x-4 lg:gap-x-6">
-                  <h1 className="text-xl font-medium leading-6 text-gray-900">{sectionTitle}</h1>
+                <div className="lg:flex lg:items-center lg:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <nav className="flex" aria-label="Breadcrumb">
+                      <ol role="list" className="flex items-center space-x-4">
+                        {breadcrumbs?.map((crumb, index) => (
+                          <li key={index}>
+                            <div className="flex">
+                              {index !== 0 && <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />}
+                              <Link href={crumb.url}>
+                                <a className={`${index === 0 ? '' : 'ml-4'} text-sm font-medium text-gray-500 hover:text-gray-700`}>
+                                  {crumb.name}
+                                </a>
+                              </Link>
+                            </div>
 
-                  {newLink && (
-                    <div className="mt-0 ml-4">
-                      <button
-                        type="button"
-                        className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        onClick={() => router.push(newLink)}
-                      >
-                        Neu
-                      </button>
+                          </li>
+                        ))}
+                      </ol>
+                    </nav>
+                    <h2 className="mt-2 text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                      {sectionTitle}
+                    </h2>
+                    <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6 font-light text-gray-400">
+                      {description}
                     </div>
-                  )}
-
+                  </div>
+                  <div className="mt-5 flex lg:ml-4 lg:mt-0">
+                    {editLink && (
+                      <span className="hidden sm:block">
+                        <button
+                          type="button"
+                          className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                          onClick={() => router.push(editLink)}
+                        >
+                          <PencilIcon className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+                          Bearbeiten
+                        </button>
+                      </span>
+                    )}
+                    {newLink && (
+      <span className="hidden sm:block">
+        <button
+          type="button"
+          className="ml-auto flex items-center gap-x-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          onClick={() => router.push(newLink)}
+          >
+          <PlusSmallIcon className="-ml-1.5 h-5 w-5" aria-hidden="true" />
+          Neu
+        </button>
+      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -183,6 +227,7 @@ export default function LayoutAdm({
                 </div>
               </div>
             </main>
+
           </div>
         </div>
       </div>

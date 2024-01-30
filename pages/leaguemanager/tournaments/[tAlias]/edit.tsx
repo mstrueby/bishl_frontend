@@ -1,3 +1,5 @@
+// page to edit a tournament
+// /leaguemanager/tournaments/[tAlias]/edit
 import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';

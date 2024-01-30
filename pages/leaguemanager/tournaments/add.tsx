@@ -1,3 +1,5 @@
+// page to add a new tournament
+// /leaguemanager/tournaments/add
 import React, { Fragment, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';

@@ -7,7 +7,8 @@
   }
  
 // Define a Match interface
-  export interface Match {
+  export interface MatchValues {
+    _id: string;
     matchId: string;
     homeTeam: Team;
     awayTeam: Team;
@@ -22,20 +23,22 @@
   }
 
   // Define a Matchday interface
-  export interface Matchday {
+  export interface MatchdayValues {
     name: string;
+    alias: string;
     type: string;
     startDate: Date;
     endDate: Date;
     createStandings: boolean;
     createStats: boolean;
     published: boolean;
-    matches: Match[];
+    matches: MatchValues[];
   }
 
   // Define a Round interface
-  export interface Round {
+  export interface RoundValues {
     name: string;
+    alias: string;
     createStandings: boolean;
     createStats: boolean;
     published: boolean;
@@ -43,19 +46,19 @@
     endDate: Date;
     matchdaysType: string;
     matchdaysSortedBy: string;
-    matchdays: Matchday[];
+    matchdays: MatchdayValues[];
   }
 
   // Define a Season interface
-  export interface SeasonFormValues {
+  export interface SeasonValues {
     name: string;
     alias: string;
     published: boolean;
-    rounds: Round[];
+    rounds: RoundValues[];
   }
 
   // Update the TournamentFormValues interface to use new sub-interfaces
-  export interface TournamentFormValues {
+  export interface TournamentValues {
     _id: string;
     name: string;
     alias: string;
@@ -64,5 +67,5 @@
     published: boolean;
     active: boolean;
     external: boolean;
-    seasons: SeasonFormValues[];
+    seasons: SeasonValues[];
   }

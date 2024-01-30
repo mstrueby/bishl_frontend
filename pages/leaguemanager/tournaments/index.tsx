@@ -1,18 +1,19 @@
+// page to list all tournaments
+// /leaguemanager/tournaments
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from 'next/link';
 import { GetServerSideProps } from 'next';
-import { TournamentFormValues } from "../../../types/TournamentFormValues";
+import { TournamentValues } from "../../../types/TournamentValues";
 import LayoutAdm from "../../../components/LayoutAdm";
 import navData from "../../../components/leaguemanager/navData";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import Badge from '../../../components/ui/Badge';
 
-
 export default function Tournament({
   allTournamentData,
 }: {
-  allTournamentData: TournamentFormValues[];
+  allTournamentData: TournamentValues[];
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -36,15 +37,16 @@ export default function Tournament({
     setSuccessMessage(null);
   };
 
-  const sortedTournaments = allTournamentData.sort((a, b) => a.name.localeCompare(b.name));
-  
+  const sortedTournaments = allTournamentData.sort((a, b) => a.alias.localeCompare(b.alias));
+
   // For each tournament, sort the seasons by year
   sortedTournaments.forEach(tournament => {
     if (tournament.seasons) {
-      tournament.seasons.sort((a, b) => b.year - a.year);
+      tournament.seasons.sort((a, b) => a.alias.localeCompare(b.alias));
     }
   });
-  
+
+
   return (
     <LayoutAdm
       navData={navData}
@@ -88,9 +90,9 @@ export default function Tournament({
                     <td className="px-3 py-4 text-xs text-left">
                       {tournament.seasons && tournament.seasons.map((season) => {
                         return (
-                          <div 
-                            key= {season.year}
-                            className="text-gray-500">{season.year}</div>
+                          <div
+                            key={season.alias}
+                            className="text-gray-500">{season.alias}</div>
                         )
                       }
                       )}
@@ -99,8 +101,8 @@ export default function Tournament({
                       <Badge info={tournament.active === true ? 'aktiv' : 'inaktiv'} />
                     </td>
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <Link href={`/leaguemanager/tournaments/${tournament.alias}/edit`}>
-                        <a className="text-indigo-600 hover:text-indigo-900">Bearbeiten<span className="sr-only">, {tournament.tinyName}</span></a>
+                      <Link href={`/leaguemanager/tournaments/${tournament.alias}`}>
+                        <a className="text-indigo-600 hover:text-indigo-900">Link<span className="sr-only">, {tournament.tinyName}</span></a>
                       </Link>
                     </td>
                   </tr>

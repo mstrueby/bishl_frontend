@@ -1,3 +1,5 @@
+// page to add a new season to a tournament
+// /leaguemanager/tournaments/[tAlias]/addSeason
 import { useState, useEffect } from 'react'
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';

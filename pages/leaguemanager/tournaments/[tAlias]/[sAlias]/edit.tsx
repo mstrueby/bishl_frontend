@@ -1,3 +1,5 @@
+// page to edit a season
+// /leaguenmanager/tournaments/[tAlias]/[sAlias]/edit
 import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
