@@ -8,6 +8,7 @@ import LayoutAdm from "../../../../../../components/LayoutAdm";
 import navData from "../../../../../../components/leaguemanager/navData";
 import SuccessMessage from '../../../../../../components/ui/SuccessMessage';
 import SectionHeader from '../../../../../../components/leaguemanager/SectionHeader';
+import DescriptionList from '../../../../../../components/leaguemanager/DescriptionList';
 import DataList from '../../../../../../components/leaguemanager/DataList';
 
 export default function Round({
@@ -36,6 +37,18 @@ export default function Round({
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+
+  const roundDetails = [
+    { label: 'ID', value: round._id },
+    { label: 'Name', value: round.name },
+    { label: 'Typ', value: round.matchdaysType },
+    { label: 'Spieltag-Sortierung', value: round.matchdaysSortedBy},
+    { label: 'Beginn', value: new Date(round.startDate).toLocaleDateString('de-DE') },
+    { label: 'Ende', value: new Date(round.endDate).toLocaleDateString('de-DE') },
+    { label: 'Tabelle erstellen', value: round.createStandings === true ? 'Ja' : 'Nein' },
+    { label: 'Statistiken erstellen', value: round.createStats === true ? 'Ja' : 'Nein' },
+    { label: 'Veröffentlicht', value: round.published === true ? 'Ja' : 'Nein' },
+  ]
 
   const dataListItems = round.matchdays
     .slice()
@@ -74,17 +87,10 @@ export default function Round({
       ]}
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-      
-      <div className="mt-5">
-        <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-          {Object.entries(round).filter(([key]) => key !== 'matchdays').map(([key, value]) => (
-            <div key={key} className="sm:col-span-1">
-              <dt className="text-sm font-medium text-gray-500">{key}</dt>
-              <dd className="mt-1 text-sm text-gray-900">{JSON.stringify(value)}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+
+      <DescriptionList
+        items={roundDetails}
+      />
 
       <SectionHeader
         title="Spieltage"

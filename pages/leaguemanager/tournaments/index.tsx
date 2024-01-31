@@ -7,6 +7,7 @@ import { TournamentValues } from "../../../types/TournamentValues";
 import LayoutAdm from "../../../components/LayoutAdm";
 import navData from "../../../components/leaguemanager/navData";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
+import DescriptionList from "../../../components/leaguemanager/DescriptionList";
 import DataList from "../../../components/leaguemanager/DataList";
 
 export default function Tournament({
@@ -35,6 +36,8 @@ export default function Tournament({
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+
+
 
   const dataLisItems = allTournamentData
     .slice()

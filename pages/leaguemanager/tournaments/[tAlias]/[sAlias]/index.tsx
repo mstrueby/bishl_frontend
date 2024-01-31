@@ -8,6 +8,7 @@ import LayoutAdm from "../../../../../components/LayoutAdm";
 import navData from "../../../../../components/leaguemanager/navData";
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import SectionHeader from '../../../../../components/leaguemanager/SectionHeader';
+import DescriptionList from '../../../../../components/leaguemanager/DescriptionList';
 import DataList from '../../../../../components/leaguemanager/DataList';
 
 export default function Season({
@@ -36,6 +37,12 @@ export default function Season({
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+
+  const seasonDetails = [
+    { label: 'ID', value: season._id},
+    { label: 'Name', value: season.name },
+    { label: 'Veröffentlicht', value: season.published === true ? 'Ja' : 'Nein' },    
+  ]
 
   const dataListItems = season.rounds
     .slice()
@@ -75,23 +82,9 @@ export default function Season({
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
-      <div className="mt-5">
-        <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Name</dt>
-            <dd className="mt-1 text-sm text-gray-900">{season?.name}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Alias</dt>
-            <dd className="mt-1 text-sm text-gray-900">{season?.alias}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Published</dt>
-            <dd className="mt-1 text-sm text-gray-900">{season?.published ? 'Yes' : 'No'}</dd>
-          </div>
-        </dl>
-      </div>
+      <DescriptionList
+        items={seasonDetails}
+      />
 
       <SectionHeader
         title="Runden"

@@ -24,6 +24,7 @@
 
   // Define a Matchday interface
   export interface MatchdayValues {
+    _id: string;
     name: string;
     alias: string;
     type: string;
@@ -37,6 +38,7 @@
 
   // Define a Round interface
   export interface RoundValues {
+    _id: string;
     name: string;
     alias: string;
     createStandings: boolean;
@@ -51,6 +53,7 @@
 
   // Define a Season interface
   export interface SeasonValues {
+    _id: string;
     name: string;
     alias: string;
     published: boolean;

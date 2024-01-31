@@ -2,14 +2,13 @@
 // /leaguemanager/tournaments/[tAlias]
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { GetStaticPropsContext } from 'next';
 import { TournamentValues, } from '../../../../types/TournamentValues';
 import LayoutAdm from '../../../../components/LayoutAdm';
 import navData from '../../../../components/leaguemanager/navData';
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
-import Badge from '../../../../components/ui/Badge';
 import SectionHeader from '../../../../components/leaguemanager/SectionHeader';
+import DescriptionList from '../../../../components/leaguemanager/DescriptionList';
 import DataList from '../../../../components/leaguemanager/DataList';
 
 export default function Tournament({
@@ -39,6 +38,16 @@ export default function Tournament({
     setSuccessMessage(null);
   };
 
+  const tournamentDetails = [
+    { label: 'ID', value: tournament._id },
+    { label: 'Name', value: tournament.name },
+    { label: 'Altersklasse', value: tournament.ageGroup },
+    { label: 'Abkürzung', value: tournament.tinyName },
+    { label: 'Veröffentlicht', value: tournament.published === true ? 'Ja' : 'Nein' },
+    { label: 'Aktiv', value: tournament.active === true ? 'Ja' : 'Nein' },
+    { label: 'Extern', value: tournament.external === true ? 'Ja' : 'Nein' },
+  ]
+
   const dataListItems = tournament.seasons
     .slice()
     .sort((a, b) => b.alias.localeCompare(a.alias))
@@ -60,42 +69,9 @@ export default function Tournament({
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
       
-      <div className="mt-5">
-        <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">ID</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament._id}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Name</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament.name}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Alias</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament.alias}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Tiny Name</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament.tinyName}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Age Group</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament.ageGroup}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Published</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament.published ? 'Yes' : 'No'}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">Active</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament.active ? 'Yes' : 'No'}</dd>
-          </div>
-          <div className="sm:col-span-1">
-            <dt className="text-sm font-medium text-gray-500">External</dt>
-            <dd className="mt-1 text-sm text-gray-900">{tournament.external ? 'Yes' : 'No'}</dd>
-          </div>
-        </dl>
-      </div>
+      <DescriptionList
+        items= {tournamentDetails}
+      />
 
       <SectionHeader
         title="Saisons"
