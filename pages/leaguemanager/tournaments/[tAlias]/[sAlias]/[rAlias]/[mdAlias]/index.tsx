@@ -9,7 +9,7 @@ import LayoutAdm from "../../../../../../../components/LayoutAdm";
 import navData from "../../../../../../../components/leaguemanager/navData";
 import SuccessMessage from '../../../../../../../components/ui/SuccessMessage';
 import Badge from '../../../../../../../components/ui/Badge';
-import SubSectionHeader from '../../../../../../../components/leaguemanager/SubSectionHeader';
+import SectionHeader from '../../../../../../../components/leaguemanager/SectionHeader';
 
 export default function Matchday({
   matchday
@@ -53,7 +53,18 @@ export default function Matchday({
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
-      <SubSectionHeader
+      <div className="mt-5">
+        <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+          {Object.entries(matchday).filter(([key]) => key !== 'matches').map(([key, value]) => (
+            <div key={key} className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500">{key}</dt>
+              <dd className="mt-1 text-sm text-gray-900">{JSON.stringify(value)}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      
+      <SectionHeader
         title="Spiele"
         newLink= {`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${mdAlias}/addMatch/`}
       />

@@ -67,7 +67,7 @@ export default function LoginPage() {
           <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             <img
               className="mx-auto h-14 w-auto"
-              src="https://bishl-frontend.marianstruby.repl.co/bishl.svg"
+              src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
               alt="Your Company"
             />
             <h2 className="mt-10 text-center text-2xl leading-9 tracking-tight text-gray-900">

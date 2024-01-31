@@ -150,7 +150,7 @@ export default function LayoutAdm({
           </div>
 
           <div className="w-full">
-            <div className="z-50 sticky top-0 flex py-4 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+            <div className="z-50 sticky top-0 flex py-4 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white shadow-sm sm:gap-x-6 px-4 sm:px-6 lg:px-8">
               <button type="button" className="-m-2.5 p-2.5 text-gray-700 lg:hidden" onClick={() => setSidebarOpen(true)}>
                 <span className="sr-only">Open sidebar</span>
                 <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
@@ -202,16 +202,16 @@ export default function LayoutAdm({
                       </span>
                     )}
                     {newLink && (
-      <span className="hidden sm:block">
-        <button
-          type="button"
-          className="ml-auto flex items-center gap-x-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          onClick={() => router.push(newLink)}
-          >
-          <PlusSmallIcon className="-ml-1.5 h-5 w-5" aria-hidden="true" />
-          Neu
-        </button>
-      </span>
+                      <span className="hidden sm:block">
+                        <button
+                          type="button"
+                          className="ml-auto flex items-center gap-x-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                          onClick={() => router.push(newLink)}
+                        >
+                          <PlusSmallIcon className="-ml-1.5 h-5 w-5" aria-hidden="true" />
+                          Neu
+                        </button>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -221,7 +221,7 @@ export default function LayoutAdm({
             <main className="py-2">
               <div className="px-4 sm:px-6 lg:px-8">
                 <div className="mt-8 flex flex-col">
-                  <div className="min-h-screen -my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                  <div className="min-h-screen">
                     {children}
                   </div>
                 </div>

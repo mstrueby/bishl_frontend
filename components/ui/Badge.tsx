@@ -3,12 +3,14 @@ const Badge = ({ info }: { info: string }) => {
 
   switch (info) {
     case 'aktiv':
+    case 'veröffentlicht':
       return (
         <span className={`inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20`}>
           {info}
         </span>
       )
     case 'inaktiv':
+    case 'nicht veröffentlicht':
       return (
         <span className={`inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20`}>
           {info}

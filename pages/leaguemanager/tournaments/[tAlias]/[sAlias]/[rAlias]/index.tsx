@@ -2,14 +2,13 @@
 // /leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Link from 'next/link';
 import { GetStaticPropsContext } from 'next';
 import { RoundValues } from "../../../../../../types/TournamentValues";
 import LayoutAdm from "../../../../../../components/LayoutAdm";
 import navData from "../../../../../../components/leaguemanager/navData";
 import SuccessMessage from '../../../../../../components/ui/SuccessMessage';
-import Badge from '../../../../../../components/ui/Badge';
-import SubSectionHeader from '../../../../../../components/leaguemanager/SubSectionHeader';
+import SectionHeader from '../../../../../../components/leaguemanager/SectionHeader';
+import DataList from '../../../../../../components/leaguemanager/DataList';
 
 export default function Round({
   round
@@ -38,6 +37,30 @@ export default function Round({
     setSuccessMessage(null);
   };
 
+  const dataListItems = round.matchdays
+    .slice()
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .map((matchday) => ({
+      name: matchday.name,
+      description: matchday.endDate && new Date(matchday.endDate).getTime() > new Date(matchday.startDate).getTime()
+        ? `${new Date(matchday.startDate).toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })} - ${new Date(matchday.endDate).toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })}`
+        : new Date(matchday.startDate).toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
+      published: matchday.published,
+      href: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${matchday.alias}`
+    }));
+  
   return (
     <LayoutAdm
       navData={navData}
@@ -51,59 +74,26 @@ export default function Round({
       ]}
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+      
+      <div className="mt-5">
+        <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+          {Object.entries(round).filter(([key]) => key !== 'matchdays').map(([key, value]) => (
+            <div key={key} className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500">{key}</dt>
+              <dd className="mt-1 text-sm text-gray-900">{JSON.stringify(value)}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
-      <SubSectionHeader
+      <SectionHeader
         title="Spieltage"
         newLink={`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/addMatchday/`}
       />
 
-      <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-300">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                  Spieltag
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 text-center">
-                  Status
-                </th>
-                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                  <span className="sr-only">Link</span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {round?.matchdays.sort((a, b) => b.alias.localeCompare(a.alias))
-                .map((matchday) => {
-                  return (
-                    <tr key={matchday.alias}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0 mr-4">
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900">{matchday.name}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
-                        <Badge info={matchday.published === true ? 'aktiv' : 'inaktiv'} />
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <Link href={`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${matchday.alias}`}>
-                          <a className="text-indigo-600 hover:text-indigo-900">Link<span className="sr-only">, {matchday.name}</span></a>
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                }
-                )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataList
+        items={dataListItems}
+      />
 
     </LayoutAdm>
   )

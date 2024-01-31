@@ -9,7 +9,8 @@ import LayoutAdm from '../../../../components/LayoutAdm';
 import navData from '../../../../components/leaguemanager/navData';
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
 import Badge from '../../../../components/ui/Badge';
-import SubSectionHeader from '../../../../components/leaguemanager/SubSectionHeader';
+import SectionHeader from '../../../../components/leaguemanager/SectionHeader';
+import DataList from '../../../../components/leaguemanager/DataList';
 
 export default function Tournament({
   tournament,
@@ -37,6 +38,15 @@ export default function Tournament({
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+
+  const dataListItems = tournament.seasons
+    .slice()
+    .sort((a, b) => b.alias.localeCompare(a.alias))
+    .map((season) => ({
+      name: season.name,
+      published: season.published,
+      href: `/leaguemanager/tournaments/${tAlias}/${season.alias}`,
+    }));
 
   return (
     <LayoutAdm
@@ -87,57 +97,14 @@ export default function Tournament({
         </dl>
       </div>
 
-      <SubSectionHeader
+      <SectionHeader
         title="Saisons"
         newLink= {`/leaguemanager/tournaments/${tAlias}/addSeasons/`}
       />
       
-      <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-300">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                  Saison
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 text-center">
-                  Status
-                </th>
-                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                  <span className="sr-only">Link</span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {tournament?.seasons && tournament?.seasons.sort((a, b) => b.alias.localeCompare(a.alias)).map((season) => {
-                return (
-                  <tr key={season.alias}>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0 mr-4">
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{season.name}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
-                      <Badge info={season.published === true ? 'aktiv' : 'inaktiv'} />
-                    </td>
-                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <Link href={`/leaguemanager/tournaments/${tAlias}/${season.alias}`}>
-                        <a className="text-indigo-600 hover:text-indigo-900">Link<span className="sr-only">, {season.name}</span></a>
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              }
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataList
+        items={dataListItems}
+      />
 
     </LayoutAdm>
   )
