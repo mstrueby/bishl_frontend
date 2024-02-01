@@ -62,7 +62,7 @@
 
   // Update the TournamentFormValues interface to use new sub-interfaces
   export interface TournamentValues {
-    _id: string;
+    _id?: string;
     name: string;
     alias: string;
     tinyName: string;

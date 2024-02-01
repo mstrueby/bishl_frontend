@@ -1,6 +1,6 @@
 // page to add a new tournament
 // /leaguemanager/tournaments/add
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
@@ -8,7 +8,7 @@ import axios from 'axios';
 import LayoutAdm from '../../../components/LayoutAdm';
 import { navData } from '../../../components/leaguemanager/navData';
 import TournamentForm from '../../../components/leaguemanager/TournamentForm'
-import { TournamentFormValues } from '../../types/TournamentFormValues';
+import { TournamentValues } from '../../../types/TournamentValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/tournaments/"
@@ -27,7 +27,7 @@ export default function Add({ jwt }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: TournamentFormValues = {
+  const initialValues: TournamentValues = {
     name: '',
     alias: '',
     tinyName: '',
@@ -35,13 +35,13 @@ export default function Add({ jwt }: AddProps) {
     published: false,
     active: false,
     external: false,
-    website: '',
     seasons: [],
-    legacyId: 0,
   };
 
-  const onSubmit = async (values: TournamentFormValues) => {
+  const onSubmit = async (values: TournamentValues) => {
+    setError(null);
     setLoading(true);
+    console.log("VALUES: ", values);
     try {
       const response = await axios({
         method: 'post',
@@ -88,6 +88,7 @@ export default function Add({ jwt }: AddProps) {
     initialValues,
     onSubmit,
     handleCancel,
+    isNew: true,
     enableReinitialize: false,
   };
 
@@ -96,7 +97,7 @@ export default function Add({ jwt }: AddProps) {
       navData={navData}
       sectionTitle='Neuer Wettbewerb'
     >
-      {error && <ErrorMessage error={error} onClose={handleCloseMessaage} />}
+      {error && <ErrorMessage error={error} onClose={handleCloseMessaage} /> }
       <TournamentForm {...formProps} />
     </LayoutAdm>
   )

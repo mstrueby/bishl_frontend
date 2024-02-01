@@ -6,11 +6,12 @@ import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
 import MyListbox from '../ui/form/Listbox'
-import { TournamentFormValues } from '../../types/TournamentFormValues';
+import { TournamentValues } from '../../types/TournamentValues';
+import { on } from 'events';
 
 interface TournamentFormProps {
-  initialValues: TournamentFormValues;
-  onSubmit: (values: TournamentFormValues) => void;
+  initialValues: TournamentValues;
+  onSubmit: (values: TournamentValues) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
 }
@@ -53,13 +54,12 @@ const TournamentForm: React.FC<TournamentFormProps> = ({
           name: Yup.string().required('Der Name des Wettbewerbs ist erforderlich'),
           tinyName: Yup.string().required('Das Kürzel des Wettbewerbs ist erforderlich'),
           ageGroup: Yup.string().required('Die Altersklasse des Wettbewerbs ist erforderlich'),
-          //active: Yup.boolean(),
         })}
         onSubmit={onSubmit}
       >
-        {(formikProps) => (
+        {({ handleChange }) => (
           <Form>
-            <InputText name="name" autoComplete="off" type="text" label="Name des Wettbewerbs" onChange={formikProps.handleChange} />
+            <InputText name="name" autoComplete="off" type="text" label="Name des Wettbewerbs" onChange={handleChange} />
             <AutoAlias />
             <InputText
               name="alias"
