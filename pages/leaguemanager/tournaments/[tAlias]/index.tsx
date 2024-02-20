@@ -75,7 +75,7 @@ export default function Tournament({
 
       <SectionHeader
         title="Saisons"
-        newLink= {`/leaguemanager/tournaments/${tAlias}/addSeasons/`}
+        newLink= {`/leaguemanager/tournaments/${tAlias}/addSeason/`}
       />
       
       <DataList

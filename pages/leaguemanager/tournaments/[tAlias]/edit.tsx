@@ -74,7 +74,8 @@ const Edit: NextPage<EditProps> = ({ jwt, tournament }) => {
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/tournaments');
+    const { tAlias } = router.query as { tAlias: string };
+    router.push(`/leaguemanager/tournaments/${tAlias}`);
   };
 
   useEffect(() => {

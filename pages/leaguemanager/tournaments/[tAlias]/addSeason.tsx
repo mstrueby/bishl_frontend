@@ -5,71 +5,48 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import LayoutAdm from '../../../components/LayoutAdm';
-import SeasonForm from '../../../components/leaguemanager/SeasonForm';
-import TournamentSelect from '../../../components/ui/TournamentSelect';
-import { SeasonFormValues, TournamentFormValues } from '../../../types/TournamentFormValues';
-import ErrorMessage from '../../../components/ui/ErrorMessage';
-import { navData } from '../../../components/leaguemanager/navData';
+import LayoutAdm from '../../../../components/LayoutAdm';
+import SeasonForm from '../../../../components/leaguemanager/SeasonForm';
+import { SeasonValues } from '../../../../types/TournamentValues';
+import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import { navData } from '../../../../components/leaguemanager/navData';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/tournaments/"
 
 interface AddProps {
   jwt: string;
-  allTournamentsData: TournamentFormValues[];
+  // allTournamentsData: TournamentFormValues[];
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const jwt = getCookie('jwt', { req, res });
-  const tournamentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
-  const allTournamentsData: TournamentFormValues[] = await tournamentsResponse.json();
-  return { props: { jwt, allTournamentsData } };
+  //const tournamentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+  //const allTournamentsData: TournamentFormValues[] = await tournamentsResponse.json();
+  return { props: { jwt } };
 }
 
-export default function Add({ jwt, allTournamentsData }: AddProps) {
+export default function Add({ jwt }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedTournament, setSelectedTournament] = useState<TournamentFormValues | null>(null);
   const router = useRouter();
+  const { tAlias } = router.query;
 
-  const initialValues: SeasonFormValues = {
+  const initialValues: SeasonValues = {
     name: '',
     alias: '',
     published: false,
     rounds: [],
   };
 
-  // Read the tournament alias from the query parameters
-  useEffect(() => {
-    const tournamentAlias = router.query.tournament;
-    if (tournamentAlias) {
-      const selected = allTournamentsData.find(t => t.alias === tournamentAlias);
-      if (selected) {
-        setSelectedTournament(selected);
-      }
-      const currentPath = router.pathname;
-      const currentQuery = { ...router.query };
-      delete currentQuery.tournament;
-      router.replace({
-        pathname: currentPath,
-        query: currentQuery,
-      }, undefined, { shallow: true });
-    }
-  }, [router.query, allTournamentsData]);
-
-  const onTournamentChange = (tournamentAlias: string) => {
-    const tournament = allTournamentsData.find(t => t.alias === tournamentAlias);
-    setSelectedTournament(tournament || null);
-  };
-
-  const onSubmit = async (values: SeasonFormValues) => {
+  const onSubmit = async (values: SeasonValues) => {
+    setError(null);
     setLoading(true);
     console.log(values);
-    const url = selectedTournament ? `${BASE_URL}${selectedTournament.alias}/seasons/` : BASE_URL;
+    //const url = selectedTournament ? `${BASE_URL}${selectedTournament.alias}/seasons/` : BASE_URL;
     try {
       const response = await axios({
         method: 'post',
-        url: url,
+        url: `${BASE_URL}${tAlias}/seasons/`,
         data: JSON.stringify(values),
         headers: {
           'Content-Type': 'application/json',
@@ -78,9 +55,9 @@ export default function Add({ jwt, allTournamentsData }: AddProps) {
       });
       if (response.status === 201) {
         router.push({
-          pathname: '/leaguemanager/seasons',
+          pathname: `/leaguemanager/tournaments/${tAlias}`,
           query: { message: `Die neue Saison ${values.alias} wurde erfolgreich angelegt.` }
-        }, '/leaguemanager/seasons');
+        }, `/leaguemanager/tournaments/${tAlias}`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
@@ -100,8 +77,7 @@ export default function Add({ jwt, allTournamentsData }: AddProps) {
 
   const handleCancel = () => {
     router.push({
-      pathname: '/leaguemanager/seasons',
-      query: { tournament: selectedTournament?.alias }
+      pathname: `/leaguemanager/tournaments/${tAlias}`,
     })
   }
 
@@ -130,14 +106,6 @@ export default function Add({ jwt, allTournamentsData }: AddProps) {
       sectionTitle='Neue Saison'
     >
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
-
-      {/* Tournament Select Form */}
-      <TournamentSelect
-        selectedTournament={selectedTournament}
-        onTournamentChange={onTournamentChange}
-        allTournamentsData={allTournamentsData}
-      />
-
       <SeasonForm {...formProps} />
     </LayoutAdm>
   )

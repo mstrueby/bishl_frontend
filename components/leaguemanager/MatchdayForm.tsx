@@ -1,39 +1,32 @@
 import React from 'react';
 import { Formik, Form, useFormikContext } from 'formik';
 import * as Yup from 'yup';
-import InputText from '../ui/form/InputText';
+import InputText from  '../ui/form/InputText';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
 import MyListbox from '../ui/form/Listbox'
 //import LogoUpload from '../ui/form/LogoUpload';
-import { SeasonValues } from '../../types/TournamentValues';
+import { MatchdayValues } from '../../types/TournamentValues';
+import { AutoAlias } from '../../tools/utils';
 
-interface SeasonFormProps {
-  initialValues: SeasonValues;
-  onSubmit: (values: SeasonValues) => void;
+interface MatchdayFormProps {
+  initialValues: MatchdayValues;
+  onSubmit: (values: MatchdayValues) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
 }
 
-const handleAliasValue = (nameValue: string) => {
-  return nameValue.trim().toLowerCase().replace(/\./g, '').replace(/ /g, '-').replace(/ü/g, 'ue').replace(/ö/g, 'oe').replace(/ä/g, 'ae').replace(/ß/g, 'ss');
-}
+const type = [
+  { key: '1', value: 'Round Robin' },
+  { key: '2', value: 'Playoffs' },
+];
 
-const AutoAlias = () => {
-  const { values, setFieldValue } = useFormikContext<any>();
-  React.useEffect(() => {
-    const transformedAlias = handleAliasValue(values.name);
-    setFieldValue('alias', transformedAlias);
-  }, [values.name, setFieldValue]);
-  return null;
-};
-
-const SeasonForm: React.FC<SeasonFormProps> = ({
+const MatchdayForm: React.FC<MatchdayFormProps> = ({
   initialValues,
   onSubmit,
-  enableReinitialize,
-  handleCancel
+  handleCancel,
+  enableReinitialize
 }) => {
   return (
     <>
@@ -42,7 +35,11 @@ const SeasonForm: React.FC<SeasonFormProps> = ({
         enableReinitialize={enableReinitialize}
         validationSchema={Yup.object({
           name: Yup.string().required(
-            'Bitte geben Sie einen Namen für die Saison ein.')
+            'Bitte geben Sie einen Namen für den Spieltag ein.'
+          ),
+          type: Yup.string().required(
+            'Bitte wählen Sie einen Typ für den Spieltag aus.'
+          ),
         })}
         onSubmit={onSubmit}
       >
@@ -52,7 +49,7 @@ const SeasonForm: React.FC<SeasonFormProps> = ({
               name="name"
               autoComplete="off"
               type="text"
-              label="Name (Jahr)"
+              label="Name"
               onChange={formikProps.handleChange}
             />
             <AutoAlias />
@@ -62,10 +59,11 @@ const SeasonForm: React.FC<SeasonFormProps> = ({
               label="Alias"
               disabled
             />
-            
+            <Toggle name="createStandings" type="checkbox" label="Tabelle erstellen" />
+            <Toggle name="createStats" type="checkbox" label="Statistiken erstellen" />
+            <MyListbox name="type" options={type} label="Spieltagtyp" />
             <Toggle name="published" type="checkbox" label="Veröffentlicht" />
-
-            <div className="mt-4 flex justify-end py-4">
+            <div className= "mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
               <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" />
             </div>
@@ -76,4 +74,4 @@ const SeasonForm: React.FC<SeasonFormProps> = ({
   )
 }
 
-export default SeasonForm;
+export default MatchdayForm;

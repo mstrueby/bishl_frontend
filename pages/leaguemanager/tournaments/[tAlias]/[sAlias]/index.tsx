@@ -46,26 +46,35 @@ export default function Season({
 
   const dataListItems = season.rounds
     .slice()
-    .sort((a, b) => b.alias.localeCompare(a.alias))
+    .sort((a, b) => {
+      if (a.startDate === null) return 1;
+      if (b.startDate === null) return -1;
+      const dateComparison = new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+      if (dateComparison !== 0) return dateComparison;
+      return a.alias.localeCompare(b.alias);
+    })
     .map((round) => ({
       name: round.name,
       published: round.published,
       href: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${round.alias}`,
-      description: round.endDate && new Date(round.endDate).getTime() > new Date(round.startDate).getTime()
-        ? `${new Date(round.startDate).toLocaleDateString('de-DE', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })} - ${new Date(round.endDate).toLocaleDateString('de-DE', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })}`
-        : new Date(round.startDate).toLocaleDateString('de-DE', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        }),
+      description: 
+        round.startDate === null || round.endDate === null
+        ? "-"
+        : round.endDate && new Date(round.endDate).getTime() > new Date(round.startDate).getTime()
+          ? `${new Date(round.startDate).toLocaleDateString('de-DE', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })} - ${new Date(round.endDate).toLocaleDateString('de-DE', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}`
+          : new Date(round.startDate).toLocaleDateString('de-DE', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            }),
     }));
   
   

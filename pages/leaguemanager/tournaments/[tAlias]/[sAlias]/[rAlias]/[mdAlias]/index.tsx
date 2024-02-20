@@ -46,8 +46,8 @@ export default function Matchday({
     { label: 'Name', value: matchday.name },
     { label: 'Typ', value: matchday.type },
     { label: 'Veröffentlicht', value: matchday.published ? 'Ja' : 'Nein' },
-    { label: 'Beginn', value: new Date(matchday.startDate).toLocaleDateString('de-DE') },
-    { label: 'Ende', value: new Date(matchday.endDate).toLocaleDateString('de-DE') },
+    { label: 'Beginn', value: matchday.startDate ? new Date(matchday.startDate).toLocaleDateString('de-DE') : '-' },
+    { label: 'Ende', value: matchday.endDate ? new Date(matchday.endDate).toLocaleDateString('de-DE') : '-' },
   ];
 
   return (
