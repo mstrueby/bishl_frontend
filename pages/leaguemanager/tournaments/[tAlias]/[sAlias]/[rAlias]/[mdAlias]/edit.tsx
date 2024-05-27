@@ -15,7 +15,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/tournaments/';
 
 interface EditProps {
   jwt: string;
-  round: RoundValues;
+  matchday: MatchdayValues;
   tAlias: string;
   sAlias: string;
   rAlias: string;
@@ -24,8 +24,9 @@ interface EditProps {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  const { tAlias, sAlias, rAlias, mdAlias } = context.params as { tAlias: string, sAlias: string, rAlias: string, mdAlias: string 
-};
+  const { tAlias, sAlias, rAlias, mdAlias } = context.params as {
+    tAlias: string, sAlias: string, rAlias: string, mdAlias: string
+  };
 
   // Fetch the matchday data
   let matchday = null;
@@ -68,14 +69,15 @@ const Edit: NextPage<EditProps> = ({ jwt, matchday, tAlias, sAlias, rAlias, mdAl
         router.push({
           pathname: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${mdAlias}`,
           query: {
-            message: `Der Spieltag ${values.alias} wurde erfolgreich aktualisiert.` }
-          }, `/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${mdAlias}` )
-        } else {
-          setError( 'Ein unerwarteter Fehler ist aufgetreten.');
-        }
-      } catch (error) {
-        setError( 'Failed to update the matchday.');
+            message: `Der Spieltag ${values.alias} wurde erfolgreich aktualisiert.`
+          }
+        }, `/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${mdAlias}`)
+      } else {
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
+    } catch (error) {
+      setError('Failed to update the matchday.');
+    }
   };
 
   const handleCancel = () => {
@@ -97,9 +99,12 @@ const Edit: NextPage<EditProps> = ({ jwt, matchday, tAlias, sAlias, rAlias, mdAl
     name: matchday?.name || '',
     alias: matchday?.alias || '',
     type: matchday?.type || '',
+    createStandings: matchday?.createStandings || false,
+    createStats: matchday?.createStats || false,
     startDate: matchday?.startDate || null,
     endDate: matchday?.endDate || null,
     published: matchday?.published || false,
+    matches: matchday?.matches || [],
   };
 
   const formProps = {
