@@ -9,30 +9,60 @@ import { Listbox, Transition } from '@headlessui/react'
 import { format } from 'date-fns'
 import { TournamentFormValues } from '../../types/TournamentFormValues';
 
+interface TeamStats {
+  goalsFor: number;
+  goalsAgainst: number;
+}
+
 interface Team {
+  clubAlias: string;
+  teamAlias: string;
+  name: string;
   fullName: string;
   shortName: string;
   tinyName: string;
   logo: string;
+  stats: TeamStats;
+  
 }
 
 interface Match {
   matchId: number;
-  homeTeam: Team;
-  awayTeam: Team;
-  status: string;
-  venue: string;
-  homeScore: number;
-  awayScore: number;
-  overtime: boolean;
-  shootout: boolean;
-  startTime: Date;
+  home: Team;
+  away: Team;
+  matchStatus: {key:string; value:string};
+  finishType: {key:string; value:string};
+  venue: {
+    name: string;
+    alias: string;
+  };
+  startDate: Date;
   published: boolean;
+}
+
+interface StandingsTeam {
+  fullName: string;
+  shortName: string;
+  tinyName: string;
+  logo: string;
+  gamesPlayed: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  points: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  otWins: number;
+  otLosses: number;
+  soWins: number;
+  soLosses: number;
+  streak: string[];
 }
 
 interface Matchday {
   name: string;
-  type: string;
+  alias: string;
+  type: { key: string; value: string };
   startDate: Date;
   endDate: Date;
   createStandings: boolean;
@@ -43,18 +73,27 @@ interface Matchday {
 
 interface Round {
   name: string;
+  alias: string;
   createStandings: boolean;
   createStats: boolean;
-  matchdaysType: string;
-  matchdaysSortedBy: string;
+  matchdaysType: {
+    key: string;
+    value: string;
+  };
+  matchdaysSortedBy: {
+    key: string;
+    value: string;
+  };
   startDate: Date;
   endDate: Date;
   published: boolean;
   matchdays: Matchday[];
+  standings: Record<string, StandingsTeam>;
 }
 
 interface Season {
-  year: number;
+  name: string;
+  alias: string;
   published: boolean;
   rounds: Round[];
 }
@@ -78,34 +117,66 @@ export default function Tournament({
   tournament: Tournament
 }) {
 
-  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.year - a.year) : [];
+  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
   const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
 
-  let rounds: Round[] = selectedSeason ? selectedSeason.rounds.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) : [];
-  const [selectedRound, setSelectedRound] = useState(rounds ? rounds[rounds.length - 1] : {} as Round)
+  const [rounds, setRounds] = useState<Round[]>([]);
+  const [selectedRound, setSelectedRound] = useState({} as Round);
 
+  const [matchdays, setMatchdays] = useState<Matchday[]>([]);
+  const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
+
+  const [matches, setMatches] = useState<Match[]>([]);
+  
+
+  /*
   let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) : [];
   const [selectedMatchday, setSelectedMatchday] = useState(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
-
+*/
   const [activeTab, setActiveTab] = useState('matches');
   const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
 
   useEffect(() => {
-    setSelectedSeason(seasons.reduce((prev, current) => (prev.year > current.year) ? prev : current));
-    setSelectedRound(rounds ? rounds[rounds.length - 1] : {} as Round);
-    setSelectedMatchday(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday);
-    setActiveTab('matches');
+    setSelectedSeason(seasons.reduce((prev, current) => (prev.name > current.name) ? prev : current));
   }, [tournament]);
 
   useEffect(() => {
-    setSelectedRound(rounds ? rounds[rounds.length - 1] : {} as Round);
-    setActiveTab('matches');
+    async function fetchRounds() {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+      const data = await response.json();
+      setRounds(data.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()));
+      setSelectedRound(data[data.length - 1] || {} as Round);
+    }
+    if (selectedSeason.name) {
+      fetchRounds();
+    }
   }, [selectedSeason]);
 
   useEffect(() => {
-    setSelectedMatchday(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
+    async function fetchMatchdays() {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`);
+      const data = await response.json();
+      setMatchdays(data.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()));
+      setSelectedMatchday(data[data.length - 1] || {} as Matchday);
+    }
+    if (selectedRound.name) {
+      fetchMatchdays();
+    }
     setActiveTab('matches');
   }, [selectedRound]);
+
+  useEffect(() => {
+    
+    async function fetchMatches() {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+      const data = await response.json();
+      setMatches(data);
+    }
+
+    if (selectedMatchday.name) {
+      fetchMatches();
+    }
+  }, [selectedMatchday]);
 
   const tabs = [
     { key: 'matches', caption: 'Spiele', href: '' },
@@ -116,7 +187,7 @@ export default function Tournament({
   }
 
   function formatDate(date_from: Date, date_to: Date) {
-    return `${format(new Date(date_from), 'd. LLL')}${(new Date(date_to) > new Date(date_from)) ? " - " + format(new Date(date_to), 'd. LLL') : ""}`
+    return `${format(new Date(date_from), 'd. LLL')}${(new Date(date_to).getDate() !== new Date(date_from).getDate()) ? " - " + format(new Date(date_to), 'd. LLL') : ""}`
   }
 
   const router = useRouter()
@@ -150,7 +221,7 @@ export default function Tournament({
                 <Listbox.Label className="sr-only">Change Season</Listbox.Label>
                 <div className="relative mt-2">
                   <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                    <span className="block truncate">{selectedSeason.year}</span>
+                    <span className="block truncate">{selectedSeason.name}</span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                       <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </span>
@@ -163,7 +234,7 @@ export default function Tournament({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                   >
-                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-28 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                       {seasons.map((season, index) => (
                         <Listbox.Option
                           key={index}
@@ -178,7 +249,7 @@ export default function Tournament({
                           {({ selected, active }) => (
                             <>
                               <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
-                                {season.year}
+                                {season.name}
                               </span>
 
                               {selected ? (
@@ -269,7 +340,7 @@ export default function Tournament({
 
 
       <div className="relative mt-10 mb-6 ">
-        {selectedRound.createStandings && (
+        {selectedRound && selectedRound.createStandings && (
           <div className="border-b border-gray-200">
             <div className="sm:block ">
               <nav className="-mb-px flex space-x-8">
@@ -300,12 +371,16 @@ export default function Tournament({
       </div>
 
       {activeTab == 'matches' && (
-        <section>
+        <section className="mt-10">
+          {/* <h2 className="text-2xl font-bold text-gray-900">Spiele</h2> */}
+
+          
+          {/* MATCHDAY dropdown */}
           {matchdays.length > 1 &&
             <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
               {({ open }) => (
                 <>
-                  <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">{selectedRound.matchdaysType}:</Listbox.Label>
+                  {/* <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">{selectedRound.matchdaysType.value}:</Listbox.Label> */}
                   <Listbox.Label className="sr-only">Change Matchday</Listbox.Label>
                   <div className="relative mt-2">
                     <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
@@ -370,7 +445,7 @@ export default function Tournament({
             </Listbox>
           }
 
-          {selectedMatchday.createStandings && (
+          {selectedMatchday && selectedMatchday.createStandings && (
             <div className="my-6">
               <div className="sm:block">
                 <nav className="flex space-x-4" aria-label="Tabs">
@@ -397,21 +472,23 @@ export default function Tournament({
           )}
 
 
-          {activeMatchdayTab == 'matches' && selectedMatchday.matches?.map((match, index) => (
+          {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
             <div key={index} className="flex justify-between gap-x-6 p-4 my-10 border rounded-xl">
               <div className="flex gap-x-4">
                 <div className="min-w-0 flex-auto">
-                  <Image className="h-12 w-12 flex-none" src={match.homeTeam.logo ? match.homeTeam.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.homeTeam.tinyName} objectFit="contain" height={50} width={50}/>
-                  <p className="text-sm font-semibold leading-6 text-gray-900">{match.homeTeam.fullName}</p>
-                  <Image className="h-12 w-12 flex-none" src={match.awayTeam.logo ? match.awayTeam.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.awayTeam.tinyName} objectFit="contain" height={50} width={50}/><p className="text-sm font-semibold leading-6 text-gray-900">{match.awayTeam.fullName}</p>
-                  <p className="mt-1 truncate text-xs leading-5 text-gray-500">{match.venue},&nbsp;
-                    <time dateTime={match.startTime}>{format(new Date(match.startTime), 'd. MMM yy')}</time>
+                  <Image className="h-12 w-12 flex-none" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={50} width={50} />
+                  <p className="text-sm font-semibold leading-6 text-gray-900">{match.home.fullName}</p>
+                  <Image className="h-12 w-12 flex-none" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={50} width={50} /><p className="text-sm font-semibold leading-6 text-gray-900">{match.away.fullName}</p>
+                  <p className="mt-1 truncate text-xs leading-5 text-gray-500">{match.venue.name},&nbsp;
+                    <time dateTime={format(new Date(match.startDate), 'yyyy-MM-dd')}>
+                      {format(new Date(match.startDate), 'd. MMM yy')}
+                    </time>
                   </p>
                 </div>
               </div>
               <div className="sm:flex sm:flex-col sm:items-end">
-                <p className="text-sm font-semibold leading-6 text-gray-900">{match.homeScore}</p>
-                <p className="text-sm font-semibold leading-6 text-gray-900">{match.awayScore}</p>
+                <p className="text-sm font-semibold leading-6 text-gray-900">{match.home.stats.goalsFor}</p>
+                <p className="text-sm font-semibold leading-6 text-gray-900">{match.away.stats.goalsFor}</p>
               </div>
             </div>
           ))}
@@ -421,7 +498,45 @@ export default function Tournament({
 
       {(activeTab == 'standings' || activeMatchdayTab == 'standings') && (
         <section className="mt-10">
-          <h2 className="text-2xl font-bold text-gray-900">Tabelle</h2>
+          {/* <h2 className="text-2xl font-bold text-gray-900">Tabelle</h2> */}
+
+            {selectedRound && selectedRound.standings && (
+              <div>
+                <table className="min-w-full mt-2">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2">Team</th>
+                      <th className="px-4 py-2">GP</th>
+                      <th className="px-4 py-2">W</th>
+                      <th className="px-4 py-2">L</th>
+                      <th className="px-4 py-2">D</th>
+                      <th className="px-4 py-2">GF</th>
+                      <th className="px-4 py-2">GA</th>
+                      <th className="px-4 py-2">GD</th>
+                      <th className="px-4 py-2">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.keys(selectedRound.standings).map((teamKey) => {
+                      const team = selectedRound.standings[teamKey];
+                      return (
+                        <tr key={teamKey}>
+                          <td className="border px-4 py-2">{team.fullName}</td>
+                          <td className="border px-4 py-2">{team.gamesPlayed}</td>
+                          <td className="border px-4 py-2">{team.wins}</td>
+                          <td className="border px-4 py-2">{team.losses}</td>
+                          <td className="border px-4 py-2">{team.draws}</td>
+                          <td className="border px-4 py-2">{team.goalsFor}</td>
+                          <td className="border px-4 py-2">{team.goalsAgainst}</td>
+                          <td className="border px-4 py-2">{team.goalsFor - team.goalsAgainst}</td>
+                          <td className="border px-4 py-2">{team.points}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
         </section>
       )}
@@ -441,7 +556,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${params.alias}`);
+  const alias = params?.alias;
+
+  if (!alias) {
+    // Handle the case where alias is undefined, possibly by returning a default response or throwing an error
+    throw new Error("Alias parameter is missing.");
+  }
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${alias}`);
   var tournament = await res.json();
   return {
     props: {
