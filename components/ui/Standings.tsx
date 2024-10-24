@@ -57,8 +57,10 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="py-3.5 px-1 text-center text-sm font-semibold text-gray-900 sm:px-1">Platz</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Team</th>
+                    <th scope="col" className="py-3.5 px-2 text-center text-sm font-semibold text-gray-900 sm:px-3">
+                      <span className="hidden md:block"></span>
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"></th>
                     <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">GS</th>
                     <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">S</th>
                     <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">N</th>
@@ -87,7 +89,7 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
                     const team = standingsData[teamKey];
                     return (
                       <tr key={teamKey}>
-                        <td className="whitespace-nowrap py-4 px-1 text-center text-sm sm:px-1">
+                        <td className="whitespace-nowrap py-4 px-2 text-center text-sm sm:px-3">
                           {index + 1}
                         </td>
                         <td className="whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500">
