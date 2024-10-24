@@ -204,7 +204,7 @@ export default function Tournament({
           } else {
             const now = new Date().getTime();
             const mostRecentPastMatchday = data.filter(matchday => new Date(matchday.startDate).getTime() <= now)
-                                            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+              .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
             setSelectedMatchday(mostRecentPastMatchday || {} as Matchday);
           }
         })
@@ -236,7 +236,7 @@ export default function Tournament({
 
   function formatDate(date_from: Date, date_to: Date) {
     return `${format(new Date(date_from), 'd. LLL', { locale: de })}` +
-           `${(new Date(date_to).getDate() !== new Date(date_from).getDate()) ? " - " + format(new Date(date_to), 'd. LLL', { locale: de }) : ""}`;
+      `${(new Date(date_to).getDate() !== new Date(date_from).getDate()) ? " - " + format(new Date(date_to), 'd. LLL', { locale: de }) : ""}`;
   }
 
   // Show loading spinner if any loading state is true
@@ -398,36 +398,43 @@ export default function Tournament({
 
 
           {/* ROUND sub menu */}
-          <div className="relative mt-10 mb-6 ">
-            {selectedRound && selectedRound.createStandings && (
-              <div className="border-b border-gray-200">
-                <div className="sm:block ">
-                  <nav className="-mb-px flex space-x-8">
-                    {tabs.map((tab, index) => (
-                      <a
-                        key={index}
-                        href={tab.href}
-                        className={classNames(
-                          tab.key == activeTab
-                            ? 'border-indigo-500 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                          'whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium'
-                          , tab.key === 'standings' && selectedRound.createStandings === false ? 'hidden' : ''
-                        )}
-                        aria-current={tab.key == activeTab ? 'page' : undefined}
-                        onClick={(event) => {
-                          event.preventDefault();
-                          setActiveTab(tab.key)
-                        }}
-                      >
-                        {tab.caption}
-                      </a>
-                    ))}
-                  </nav>
-                </div>
+          {selectedRound && selectedRound.createStandings && (
+            <div className="mt-10 mb-16 border border-gray-200 rounded-lg md:mx-28 lg:mx-56">
+              <div className="sm:block">
+                <nav aria-label="Tabs" className="isolate flex divide-x divide-gray-200 rounded-lg shadow">
+                  {tabs.map((tab, index) => (
+                    <a
+                      key={index}
+                      href={tab.href}
+                      className={classNames(
+                        tab.key == activeTab
+                          ? 'text-gray-900 bg-indigo-50'
+                          : 'text-gray-500 bg-white hover:text-gray-700 hover:bg-gray-50',
+                        index === 0 ? 'rounded-l-lg' : '',
+                        index === tabs.length - 1 ? 'rounded-r-lg' : '',
+                        'group relative min-w-0 flex-1 overflow-hidden bg-white px-4 py-4 text-center text-sm font-medium focus:z-10'
+                        , tab.key === 'standings' && selectedRound.createStandings === false ? 'hidden' : ''
+                      )}
+                      aria-current={tab.key == activeTab ? 'page' : undefined}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setActiveTab(tab.key)
+                      }}
+                    >
+                      <span>{tab.caption}</span>
+                      <span aria-hidden="true" className={classNames(
+                        tab.key == activeTab
+                          ? 'bg-indigo-500'
+                          : 'border-transparent',
+                        'absolute inset-x-0 bottom-0 h-0.5'
+                      )}
+                      />
+                    </a>
+                  ))}
+                </nav>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {activeTab == 'matches' && (
             <section className="mt-10">
@@ -450,7 +457,7 @@ export default function Tournament({
                           <span className="inline-flex w-full truncate">
                             <span className="truncate">{selectedMatchday.name}</span>
                             {selectedRound.matchdaysType.key !== 'GROUP' && (
-                                <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
+                              <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
                             )}
                           </span>
                           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">

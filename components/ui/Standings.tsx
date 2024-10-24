@@ -1,7 +1,9 @@
 // components/ui/Standings.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
+
+// Inside your component
 
 interface StandingsTeam {
   fullName: string;
@@ -48,12 +50,14 @@ const streakTitleMap = {
 };
 
 const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) => {
+  const [showLegend, setShowLegend] = useState(false);
+
   return (
     <section className="my-10">
       <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div className="overflow-hidden shadow-md ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+        <div className="overflow-x-auto px-1">
+          <div className="inline-block min-w-full py-2 align-middle ">
+            <div className="overflow-hidden shadow-md ring-1 ring-black ring-opacity-5 rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
@@ -144,31 +148,40 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
                 <tfoot className="bg-gray-50">
                   <tr>
                     <td colSpan={14} className="py-4 px-4">
-                      <div className="text-xs text-gray-700">
-                        <strong>Legende</strong>
-                        <ul className="list-none mt-2">
-                          <li><strong>GS</strong>: Gespielte Spiele</li>
-                          <li><strong>S</strong>: Siege</li>
-                          <li><strong>N</strong>: Niederlagen</li>
-                          <li><strong>U</strong>: Unentschieden</li>
-                          {matchSettings.overtime && (
-                            <>
-                              <li><strong>SV</strong>: Siege nach Verlängerung</li>
-                              <li><strong>NV</strong>: Niederlagen nach Verlängerung)</li>
-                            </>
-                          )}
-                          {matchSettings.shootout && (
-                            <>
-                              <li><strong>SPS</strong>: Siege nach Penalty-Schießen)</li>
-                              <li><strong>NPS</strong>: Niederlagen nach Penalty-Schießen)</li>
-                            </>
-                          )}
-                          <li><strong>Pkt</strong>: Punkte</li>
-                          <li><strong>T</strong>: Tore</li>
-                          <li><strong>GT</strong>: Gegentore</li>
-                          <li><strong>TD</strong>: Tordifferenz</li>
-                          <li><strong>Serie</strong>: Ergenisse der letzten 5 Spiele (neueste sind rechts)</li>
-                        </ul>
+                      <div>
+                        <button 
+                          className="text-xs text-gray-700 bg-gray-200 px-2 py-1 rounded" 
+                          onClick={() => setShowLegend(!showLegend)}
+                        >
+                          {showLegend ? 'Legende verbergen' : 'Legende anzeigen'}
+                        </button>
+                        {showLegend && (
+                          <div className="text-xs text-gray-700">
+                            <ul className="list-none mt-4 pl-2">
+                              <li><strong>GS</strong>: Gespielte Spiele</li>
+                              <li><strong>S</strong>: Siege</li>
+                              <li><strong>N</strong>: Niederlagen</li>
+                              <li><strong>U</strong>: Unentschieden</li>
+                              {matchSettings.overtime && (
+                                <>
+                                  <li><strong>SV</strong>: Siege nach Verlängerung</li>
+                                  <li><strong>NV</strong>: Niederlagen nach Verlängerung)</li>
+                                </>
+                              )}
+                              {matchSettings.shootout && (
+                                <>
+                                  <li><strong>SPS</strong>: Siege nach Penalty-Schießen)</li>
+                                  <li><strong>NPS</strong>: Niederlagen nach Penalty-Schießen)</li>
+                                </>
+                              )}
+                              <li><strong>Pkt</strong>: Punkte</li>
+                              <li><strong>T</strong>: Tore</li>
+                              <li><strong>GT</strong>: Gegentore</li>
+                              <li><strong>TD</strong>: Tordifferenz</li>
+                              <li><strong>Serie</strong>: Ergebnisse der letzten 5 Spiele (neueste sind rechts)</li>
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
