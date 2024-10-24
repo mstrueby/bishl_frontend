@@ -3,10 +3,12 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Layout from '../../components/Layout';
+import Standings from '../../components/ui/Standings';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Fragment, useEffect, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 import { format } from 'date-fns'
+import { de } from 'date-fns/locale'; // Import German locale
 import { TournamentFormValues } from '../../types/TournamentFormValues';
 import ClipLoader from 'react-spinners/ClipLoader';
 
@@ -69,6 +71,8 @@ interface Matchday {
   createStandings: boolean;
   createStats: boolean;
   published: boolean;
+  standings: Record<string, StandingsTeam>;
+  matchSettings: Record<string, any>;
   matches: Match[];
 }
 
@@ -88,6 +92,7 @@ interface Round {
   startDate: Date;
   endDate: Date;
   published: boolean;
+  matchSettings: Record<string, any>;
   matchdays: Matchday[];
   standings: Record<string, StandingsTeam>;
 }
@@ -170,7 +175,7 @@ export default function Tournament({
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
         .then((response) => response.json())
         .then((data) => {
-          setRounds(data.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()));
+          setRounds(data.sort((a, b) => a.sortOrder - b.sortOrder));
           setSelectedRound(data[data.length - 1] || {} as Round);
         })
         .finally(() => {
@@ -187,8 +192,22 @@ export default function Tournament({
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
         .then((response) => response.json())
         .then((data) => {
-          setMatchdays(data.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()));
-          setSelectedMatchday(data[data.length - 1] || {} as Matchday);
+          setMatchdays(data.sort((a, b) => {
+            if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
+              return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+            } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
+              return a.name.localeCompare(b.name);
+            }
+            return 0;
+          }));
+          if (selectedRound.matchdaysType.key === 'GROUP') {
+            setSelectedMatchday(data[0] || {} as Matchday);
+          } else {
+            const now = new Date().getTime();
+            const mostRecentPastMatchday = data.filter(matchday => new Date(matchday.startDate).getTime() <= now)
+                                            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+            setSelectedMatchday(mostRecentPastMatchday || {} as Matchday);
+          }
         })
         .finally(() => {
           setIsLoadingMatchdays(false);
@@ -217,7 +236,8 @@ export default function Tournament({
   }
 
   function formatDate(date_from: Date, date_to: Date) {
-    return `${format(new Date(date_from), 'd. LLL')}${(new Date(date_to).getDate() !== new Date(date_from).getDate()) ? " - " + format(new Date(date_to), 'd. LLL') : ""}`
+    return `${format(new Date(date_from), 'd. LLL', { locale: de })}` +
+           `${(new Date(date_to).getDate() !== new Date(date_from).getDate()) ? " - " + format(new Date(date_to), 'd. LLL', { locale: de }) : ""}`;
   }
 
   // Show loading spinner if any loading state is true
@@ -415,6 +435,11 @@ export default function Tournament({
               {/* <h2 className="text-2xl font-bold text-gray-900">Spiele</h2> */}
 
               {/* MATCHDAY dropdown */}
+              {/*
+              <div className="mt-4">
+                <span>{`${selectedRound.matchdaysType.key} / ${selectedRound.matchdaysSortedBy.key}`}</span>   
+              </div>  
+              */}
               {matchdays.length > 1 &&
                 <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
                   {({ open }) => (
@@ -425,7 +450,9 @@ export default function Tournament({
                         <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                           <span className="inline-flex w-full truncate">
                             <span className="truncate">{selectedMatchday.name}</span>
-                            <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
+                            {selectedRound.matchdaysType.key !== 'GROUP' && (
+                                <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
+                            )}
                           </span>
                           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                             <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -457,9 +484,11 @@ export default function Tournament({
                                       <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate')}>
                                         {matchday.name}
                                       </span>
-                                      <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
-                                        {formatDate(matchday.startDate, matchday.endDate)}
-                                      </span>
+                                      {selectedRound.matchdaysType.key !== 'GROUP' && (
+                                        <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
+                                          {formatDate(matchday.startDate, matchday.endDate)}
+                                        </span>
+                                      )}
                                     </div>
 
                                     {selected ? (
@@ -511,6 +540,7 @@ export default function Tournament({
                 </div>
               )}
 
+              {/* MATCHES */}
               {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
                 <div key={index} className="flex justify-between gap-x-6 p-4 my-10 border rounded-xl">
                   <div className="flex gap-x-4">
@@ -534,49 +564,16 @@ export default function Tournament({
             </section>
           )}
 
-          {(activeTab == 'standings' || activeMatchdayTab == 'standings') && (
-            <section className="mt-10">
-              {/* <h2 className="text-2xl font-bold text-gray-900">Tabelle</h2> */}
+          {(activeTab == 'standings' && selectedRound && selectedRound.standings) && (
+            <Standings standingsData={selectedRound.standings}
+              matchSettings={selectedRound.matchSettings}
+            />
+          )}
 
-              {selectedRound && selectedRound.standings && (
-                <div>
-                  <table className="min-w-full mt-2">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2">Team</th>
-                        <th className="px-4 py-2">GP</th>
-                        <th className="px-4 py-2">W</th>
-                        <th className="px-4 py-2">L</th>
-                        <th className="px-4 py-2">D</th>
-                        <th className="px-4 py-2">GF</th>
-                        <th className="px-4 py-2">GA</th>
-                        <th className="px-4 py-2">GD</th>
-                        <th className="px-4 py-2">Pts</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.keys(selectedRound.standings).map((teamKey) => {
-                        const team = selectedRound.standings[teamKey];
-                        return (
-                          <tr key={teamKey}>
-                            <td className="border px-4 py-2">{team.fullName}</td>
-                            <td className="border px-4 py-2">{team.gamesPlayed}</td>
-                            <td className="border px-4 py-2">{team.wins}</td>
-                            <td className="border px-4 py-2">{team.losses}</td>
-                            <td className="border px-4 py-2">{team.draws}</td>
-                            <td className="border px-4 py-2">{team.goalsFor}</td>
-                            <td className="border px-4 py-2">{team.goalsAgainst}</td>
-                            <td className="border px-4 py-2">{team.goalsFor - team.goalsAgainst}</td>
-                            <td className="border px-4 py-2">{team.points}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-            </section>
+          {(activeMatchdayTab == 'standings' && selectedMatchday && selectedMatchday.standings) && (
+            <Standings standingsData={selectedMatchday.standings}
+              matchSettings={selectedMatchday.matchSettings}
+            />
           )}
         </Fragment>
       )}
