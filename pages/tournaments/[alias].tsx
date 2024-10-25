@@ -236,7 +236,7 @@ export default function Tournament({
 
           <div className="sm:flex sm:items-center sm:justify-between">
             <div className="min-w-0 flex-1">
-              <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+              <h2 className="text-2xl font-medium uppercase leading-7 text-gray-900 tracking-tight sm:truncate sm:text-3xl sm:tracking-wider">
                 {tournament.name}
               </h2>
             </div>
@@ -313,7 +313,7 @@ export default function Tournament({
                           <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
                             {//<CheckIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
                             }
-                            <p className="text-sm font-semibold">{selectedRound.name}</p>
+                            <p className="text-sm font-semibold uppercase">{selectedRound.name}</p>
                           </div>
                           <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
                             <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
@@ -334,7 +334,7 @@ export default function Tournament({
                                 className={({ active }) =>
                                   classNames(
                                     active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                    'cursor-default select-none p-4 text-sm'
+                                    'cursor-default select-none p-4 text-sm uppercase'
                                   )
                                 }
                                 value={round}
@@ -391,7 +391,7 @@ export default function Tournament({
                         setActiveTab(tab.key)
                       }}
                     >
-                      <span>{tab.caption}</span>
+                      <span className="uppercase">{tab.caption}</span>
                       <span aria-hidden="true" className={classNames(
                         tab.key == activeTab
                           ? 'bg-indigo-500'
@@ -425,7 +425,7 @@ export default function Tournament({
                       <div className="relative mt-2">
                         <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                           <span className="inline-flex w-full truncate">
-                            <span className="truncate">{selectedMatchday.name}</span>
+                            <span className="truncate uppercase font-semibold">{selectedMatchday.name}</span>
                             {selectedRound.matchdaysType.key !== 'GROUP' && (
                               <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
                             )}
@@ -457,7 +457,7 @@ export default function Tournament({
                                 {({ selected, active }) => (
                                   <>
                                     <div className="flex">
-                                      <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate')}>
+                                      <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate uppercase')}>
                                         {matchday.name}
                                       </span>
                                       {selectedRound.matchdaysType.key !== 'GROUP' && (
