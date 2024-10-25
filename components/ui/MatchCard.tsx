@@ -27,8 +27,9 @@ function classNames(...classes: string[]) {
 const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   const { home, away, venue, startDate } = match;
   return (
-    <div className="flex gap-x-4 p-4 my-10 border rounded-xl shadow-md">
-      <div className="flex flex-col justify-between items-start w-1/4">
+    <div className="flex flex-col gap-x-4 p-4 my-10 border rounded-xl shadow-md">
+      <div className="flex flex-row justify-between">
+        {/* tournament */}
         <div className="">
           {tournaments.map(item =>
             item.name === match.tournament.name && (
@@ -41,17 +42,36 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             )
           )}
         </div>
+        {/* status */}
+        <div className="">
+          {status.map(item => (
+            item.key === match.matchStatus.key && (
+              <span key={item.key} className={classNames("inline-flex items-center gap-x-1.5 rounded-md text-xs font-medium ring-1 ring-inset py-1 px-3 uppercase", item.bdg_col_light)}>
+                {match.matchStatus.value}
+                {item.key === 'FINISHED' && match.finishType.key !== 'REGULAR' && (
+                  <span>
+                    {match.finishType.key === 'SHOOTOUT' ? '(PS)' : match.finishType.key === 'OVERTIME' ? '(V)' : match.finishType.value}
+                  </span>
+                )}
+              </span>
+            )))
+          }
+        </div>
+
+      </div>
+      <div className="flex flex-row justify-between mt-3 ">
+        {/* startDate */}
         <div className="flex items-center">
           <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-<p className="text-xs uppercase font-light text-gray-700 mb-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { weekday: 'long', day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</time></p>
+          <p className="text-xs uppercase font-light text-gray-700 mb-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { weekday: 'long', day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</time></p>
         </div>
+        {/* venue */}
         <div className="flex items-center">
-          <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
-          <p className="text-xs uppercase font-light text-gray-700">{venue.name}</p>
-        </div>
+        <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
+        <p className="text-xs uppercase font-light text-gray-700">{venue.name}</p>
       </div>
-
-      <div className="flex flex-col justify-start items-start w-1/2 pr-16">
+      </div>
+      <div className="flex flex-col justify-start items-start mt-6">
         <div className="flex flex-row items-center mb-4 w-full">
           <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
           <div className="flex-auto ml-6">
@@ -73,20 +93,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
         </div>
       </div>
 
-      <div className="flex flex-col items-end w-1/4">
-        {status.map(item => (
-          item.key === match.matchStatus.key && (
-            <span key={item.key} className={classNames("inline-flex items-center gap-x-1.5 rounded-md text-xs font-medium ring-1 ring-inset py-1 px-3 uppercase", item.bdg_col_light)}>
-              {match.matchStatus.value}
-              {item.key === 'FINISHED' && match.finishType.key !== 'REGULAR' && (
-                <span>
-                  {match.finishType.key === 'SHOOTOUT' ? '(PS)' : match.finishType.key === 'OVERTIME' ? '(V)' : match.finishType.value}
-                </span>
-              )}
-            </span>
-          )))
-        }
-      </div>
+
     </div>
   );
 };
