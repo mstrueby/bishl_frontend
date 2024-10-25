@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import Layout from '../../components/Layout';
 import Standings from '../../components/ui/Standings';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
@@ -10,37 +9,8 @@ import { Listbox, Transition } from '@headlessui/react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'; // Import German locale
 import ClipLoader from 'react-spinners/ClipLoader';
-
-interface TeamStats {
-  goalsFor: number;
-  goalsAgainst: number;
-}
-
-interface Team {
-  clubAlias: string;
-  teamAlias: string;
-  name: string;
-  fullName: string;
-  shortName: string;
-  tinyName: string;
-  logo: string;
-  stats: TeamStats;
-
-}
-
-interface Match {
-  matchId: number;
-  home: Team;
-  away: Team;
-  matchStatus: { key: string; value: string };
-  finishType: { key: string; value: string };
-  venue: {
-    name: string;
-    alias: string;
-  };
-  startDate: Date;
-  published: boolean;
-}
+import { Match } from '../../types/MatchValues';
+import MatchCard from '../../components/ui/MatchCard';
 
 interface StandingsTeam {
   fullName: string;
@@ -551,24 +521,8 @@ export default function Tournament({
 
               {/* MATCHES */}
               {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
-                <div key={index} className="flex justify-between gap-x-6 p-4 my-10 border rounded-xl">
-                  <div className="flex gap-x-4">
-                    <div className="min-w-0 flex-auto">
-                      <Image className="h-12 w-12 flex-none" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={50} width={50} />
-                      <p className="text-sm font-semibold leading-6 text-gray-900">{match.home.fullName}</p>
-                      <Image className="h-12 w-12 flex-none" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={50} width={50} /><p className="text-sm font-semibold leading-6 text-gray-900">{match.away.fullName}</p>
-                      <p className="mt-1 truncate text-xs leading-5 text-gray-500">{match.venue.name},&nbsp;
-                        <time dateTime={format(new Date(match.startDate), 'yyyy-MM-dd')}>
-                          {format(new Date(match.startDate), 'd. MMM yy')}
-                        </time>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="sm:flex sm:flex-col sm:items-end">
-                    <p className="text-sm font-semibold leading-6 text-gray-900">{match.home.stats.goalsFor}</p>
-                    <p className="text-sm font-semibold leading-6 text-gray-900">{match.away.stats.goalsFor}</p>
-                  </div>
-                </div>
+                <MatchCard key= {index} match={match} />
+                
               ))}
             </section>
           )}
