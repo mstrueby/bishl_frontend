@@ -93,7 +93,7 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
                     const team = standingsData[teamKey];
                     return (
                       <tr key={teamKey}>
-                        <td className="whitespace-nowrap py-4 px-2 text-center text-sm sm:px-3">
+                        <td className="whitespace-nowrap py-4 px-2 text-center text-xs sm:px-3">
                           {index + 1}
                         </td>
                         <td className="whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500">
@@ -102,7 +102,7 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
                               <Image className="h-8 w-8" src={team.logo ? team.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={team.tinyName} objectFit="contain" height={32} width={32} />
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-base font-medium text-gray-900">
                                 <span className="hidden lg:block">{team.fullName}</span>
                                 <span className="hidden md:block lg:hidden">{team.shortName}</span>
                                 <span className="block md:hidden">{team.tinyName}</span>

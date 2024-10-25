@@ -235,8 +235,8 @@ export default function Tournament({
           </Head>
 
           <div className="sm:flex sm:items-center sm:justify-between">
-            <div className="min-w-0 flex-1">
-              <h2 className="text-2xl font-medium uppercase leading-7 text-gray-900 tracking-tight sm:truncate sm:text-3xl sm:tracking-wider">
+            <div className="min-w-0 flex-1 mb-6 sm:mb-0">
+              <h2 className="text-2xl font-medium uppercase leading-7 text-gray-900 sm:truncate sm:text-3xl tracking-wider">
                 {tournament.name}
               </h2>
             </div>
@@ -369,7 +369,7 @@ export default function Tournament({
 
           {/* ROUND sub menu */}
           {selectedRound && selectedRound.createStandings && (
-            <div className="mt-10 mb-16 border border-gray-200 rounded-lg md:mx-28 lg:mx-56">
+            <div className="mt-8 mb-2 sm:mt-10 sm:mb-16 border border-gray-200 rounded-lg md:mx-28 lg:mx-56">
               <div className="sm:block">
                 <nav aria-label="Tabs" className="isolate flex divide-x divide-gray-200 rounded-lg shadow">
                   {tabs.map((tab, index) => (
@@ -382,7 +382,7 @@ export default function Tournament({
                           : 'text-gray-500 bg-white hover:text-gray-700 hover:bg-gray-50',
                         index === 0 ? 'rounded-l-lg' : '',
                         index === tabs.length - 1 ? 'rounded-r-lg' : '',
-                        'group relative min-w-0 flex-1 overflow-hidden bg-white px-4 py-4 text-center text-sm font-medium focus:z-10'
+                        'group relative min-w-0 flex-1 overflow-hidden bg-white px-2 py-2 sm:px-4 sm:py-4 text-center text-sm sm:text-md font-medium focus:z-10'
                         , tab.key === 'standings' && selectedRound.createStandings === false ? 'hidden' : ''
                       )}
                       aria-current={tab.key == activeTab ? 'page' : undefined}
@@ -422,7 +422,7 @@ export default function Tournament({
                     <>
                       {/* <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">{selectedRound.matchdaysType.value}:</Listbox.Label> */}
                       <Listbox.Label className="sr-only">Change Matchday</Listbox.Label>
-                      <div className="relative mt-2">
+                      <div className="relative mt-2 md:mx-28 lg:mx-56">
                         <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                           <span className="inline-flex w-full truncate">
                             <span className="truncate uppercase font-semibold">{selectedMatchday.name}</span>

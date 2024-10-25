@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
-import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline'; // Import the desired icons
+import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
 const tournaments = [
   { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '/tournaments/regionalliga-ost', bdg_col_dark: 'bg-red-400/10 text-red-400 ring-red-400/20', bdg_col_light: 'bg-red-50 text-red-700 ring-red-600/10' },
@@ -27,7 +27,8 @@ function classNames(...classes: string[]) {
 const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   const { home, away, venue, startDate } = match;
   return (
-    <div className="flex flex-col gap-x-4 p-4 my-10 border rounded-xl shadow-md">
+    <div className="flex flex-col gap-x-4 p-4 my-10 border-2 rounded-xl shadow-md">
+      {/* 1 tournament, status */}
       <div className="flex flex-row justify-between">
         {/* tournament */}
         <div className="">
@@ -57,43 +58,54 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             )))
           }
         </div>
-
       </div>
-      <div className="flex flex-row justify-between mt-3 ">
-        {/* startDate */}
-        <div className="flex items-center">
-          <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-          <p className="text-xs uppercase font-light text-gray-700 mb-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { weekday: 'long', day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</time></p>
-        </div>
-        {/* venue */}
-        <div className="flex items-center">
-        <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
-        <p className="text-xs uppercase font-light text-gray-700">{venue.name}</p>
-      </div>
-      </div>
-      <div className="flex flex-col justify-start items-start mt-6">
-        <div className="flex flex-row items-center mb-4 w-full">
-          <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
-          <div className="flex-auto ml-6">
-            <p className={`text-lg font-medium leading-6 ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} mx-2`}>{home.fullName}</p>
+      {/* 1-2  date, venue, scores, button */}
+      <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-x-2 justify-between">
+        {/* 2 date, venue */}
+        <div className="flex flex-row sm:flex-col justify-between sm:justify-around mt-3 sm:w-1/4">
+          {/* startDate */}
+          <div className="flex items-center">
+            <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
+            <p className="text-xs uppercase font-light text-gray-700 mb-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { weekday: 'long', day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</time></p>
           </div>
-          <div className="flex-auto">
-            <p className={`text-lg font-medium leading-6 ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
+          {/* venue */}
+          <div className="flex items-center">
+            <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
+            <p className="text-xs uppercase font-light text-gray-700">{venue.name}</p>
           </div>
         </div>
-
-        <div className="flex flex-row items-center w-full">
-          <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
-          <div className="flex-auto ml-6">
-            <p className={`text-lg font-medium leading-6 ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} mx-2`}>{away.fullName}</p>
+        {/* 3 scores */}
+        <div className="flex flex-col justify-start items-start mt-4 sm:mt-3 sm:w-1/2">
+          {/* home */}
+          <div className="flex flex-row items-center mb-4 w-full">
+            <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
+            <div className="flex-auto ml-6">
+              <p className={`text-lg font-medium leading-6 ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} mx-2`}>{home.fullName}</p>
+            </div>
+            <div className="flex-auto">
+              <p className={`text-lg font-medium leading-6 ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
+            </div>
           </div>
-          <div className="flex-auto">
-            <p className={`text-lg font-medium leading-6 ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
+          {/* away */}
+          <div className="flex flex-row items-center w-full">
+            <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
+            <div className="flex-auto ml-6">
+              <p className={`text-lg font-medium leading-6 ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} mx-2`}>{away.fullName}</p>
+            </div>
+            <div className="flex-auto">
+              <p className={`text-lg font-medium leading-6 ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
+            </div>
           </div>
         </div>
+        {/* 4 button Spielberich */}
+        <div className="flex sm:flex-none flex-col justify-center sm:items-end sm:w-1/6 mt-2">
+          <button
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-700 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            Spielbericht
+          </button>
+        </div>
       </div>
-
-
     </div>
   );
 };
