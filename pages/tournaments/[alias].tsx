@@ -378,7 +378,7 @@ export default function Tournament({
                       href={tab.href}
                       className={classNames(
                         tab.key == activeTab
-                          ? 'text-gray-900 bg-indigo-50'
+                          ? 'text-gray-900 bg-indigo-200/10'
                           : 'text-gray-500 bg-white hover:text-gray-700 hover:bg-gray-50',
                         index === 0 ? 'rounded-l-lg' : '',
                         index === tabs.length - 1 ? 'rounded-r-lg' : '',
