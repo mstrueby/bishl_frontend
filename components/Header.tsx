@@ -94,7 +94,7 @@ const Header = () => {
                                   href={item.href}
                                   className={classNames(
                                     active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm text-gray-700'
+                                    'block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900'
                                   )}
                                 >
                                   <span
@@ -129,7 +129,7 @@ const Header = () => {
                                   href={item.href}
                                   className={classNames(
                                     active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm text-gray-700'
+                                    'block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900'
                                   )}
                                 >
                                   <span
@@ -220,7 +220,7 @@ const Header = () => {
 
                     /* Login Menu Link */
                     <Link href="/login">
-                      <a className={classNames("border-2 border-gray-100", item)}>Anmelden</a>
+                      <a className={classNames("border-2 border-gray-100 hover:no-underline", item)}>Anmelden</a>
                     </Link>
 
                   )}
@@ -267,7 +267,7 @@ const Header = () => {
                       as={MyLink}
                       key={index}
                       href={item.href}
-                      className='block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white'
+                      className='block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 text-gray-300 hover:text-white hover:no-underline'
                     >
                       <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
                       {item.name}
@@ -284,7 +284,7 @@ const Header = () => {
                       as={MyLink}
                       key={index}
                       href={item.href}
-                      className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 hover:text-white"
+                      className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 text-gray-300 hover:text-white hover:no-underline"
                     >
                       <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
                       {item.name}

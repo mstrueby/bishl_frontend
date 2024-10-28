@@ -313,7 +313,7 @@ export default function Tournament({
                           <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
                             {//<CheckIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
                             }
-                            <p className="text-sm font-semibold uppercase">{selectedRound.name}</p>
+                            <p className="mt-0 text-sm font-semibold text-white uppercase">{selectedRound.name}</p>
                           </div>
                           <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
                             <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
@@ -342,7 +342,7 @@ export default function Tournament({
                                 {({ selected, active }) => (
                                   <div className="flex flex-col">
                                     <div className="flex justify-between">
-                                      <p className={selected ? 'font-semibold' : 'font-normal'}>{round.name}</p>
+                                      <p className={classNames(selected ? 'font-semibold' : 'font-normal', active ? 'text-white' : 'text-gray-900', 'mt-0')}>{round.name}</p>
                                       {selected ? (
                                         <span className={active ? 'text-white' : 'text-indigo-600'}>
                                           <CheckIcon className="h-5 w-5" aria-hidden="true" />
@@ -382,7 +382,7 @@ export default function Tournament({
                           : 'text-gray-500 bg-white hover:text-gray-700 hover:bg-gray-50',
                         index === 0 ? 'rounded-l-lg' : '',
                         index === tabs.length - 1 ? 'rounded-r-lg' : '',
-                        'group relative min-w-0 flex-1 overflow-hidden bg-white px-2 py-2 sm:px-4 sm:py-4 text-center text-sm sm:text-md font-medium focus:z-10'
+                        'group relative min-w-0 flex-1 overflow-hidden bg-white px-2 py-2 sm:px-4 sm:py-4 text-center text-sm sm:text-md font-medium focus:z-10 hover:no-underline'
                         , tab.key === 'standings' && selectedRound.createStandings === false ? 'hidden' : ''
                       )}
                       aria-current={tab.key == activeTab ? 'page' : undefined}
@@ -423,15 +423,15 @@ export default function Tournament({
                       {/* <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">{selectedRound.matchdaysType.value}:</Listbox.Label> */}
                       <Listbox.Label className="sr-only">Change Matchday</Listbox.Label>
                       <div className="relative mt-2 md:mx-28 lg:mx-56">
-                        <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                           <span className="inline-flex w-full truncate">
                             <span className="truncate uppercase font-semibold">{selectedMatchday.name}</span>
                             {selectedRound.matchdaysType.key !== 'GROUP' && (
-                              <span className="ml-2 truncate text-gray-500">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
+                              <span className="ml-2 truncate text-indigo-100">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
                             )}
                           </span>
                           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                            <ChevronUpDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
                           </span>
                         </Listbox.Button>
 
@@ -502,7 +502,7 @@ export default function Tournament({
                             tab.key == activeMatchdayTab
                               ? 'border-indigo-500 text-indigo-600'
                               : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                            'whitespace-nowrap border-b-2 px-8 pb-4 text-sm font-medium'
+                            'whitespace-nowrap border-b-2 px-8 pb-4 text-sm font-medium uppercase hover:no-underline'
                             , tab.key === 'standings' && selectedMatchday.createStandings === false ? 'hidden' : ''
                           )}
                           aria-current={tab.key == activeMatchdayTab ? 'page' : undefined}

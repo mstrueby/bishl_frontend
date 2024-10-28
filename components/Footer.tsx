@@ -58,7 +58,7 @@ const Footer = () => {
                   {navigation.bishl.map((item) => (
                     <li key={item.name}>
                       <Link href={item.href}>
-                        <a className="text-sm/6 text-gray-400 hover:text-white">
+                        <a className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
                           {item.name}
                         </a>
                       </Link>
@@ -72,7 +72,7 @@ const Footer = () => {
                   {navigation.company.map((item) => (
                     <li key={item.name}>
                       <Link href={item.href}>
-                        <a className="text-sm/6 text-gray-400 hover:text-white">
+                        <a className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
                           {item.name}
                         </a>
                       </Link>
@@ -87,7 +87,7 @@ const Footer = () => {
                 <ul role="list" className="mt-6 space-y-4">
                   {navigation.associations.map((item) => (
                     <li key={item.name}>
-                      <a href={item.href} target="_blank" className="text-sm/6 text-gray-400 hover:text-white">
+                      <a href={item.href} target="_blank" className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
                         {item.name}
                       </a>
                     </li>
@@ -100,7 +100,7 @@ const Footer = () => {
                   {navigation.legal.map((item) => (
                     <li key={item.name}>
                       <Link href={item.href}>
-                        <a className="text-sm/6 text-gray-400 hover:text-white">
+                        <a className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
                           {item.name}
                         </a>
                       </Link>

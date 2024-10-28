@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 const Datenschutz = () => (
   <Layout home={false}>
 
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <h1>Datenschutz&shy;erkl&auml;rung</h1>
       <h2>1. Datenschutz auf einen Blick</h2>
