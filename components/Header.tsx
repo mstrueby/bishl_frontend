@@ -62,21 +62,19 @@ const Header = () => {
               {/* Navigation */}
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <img
-                    className="h-12 w-auto"
-                    src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
-                    alt="Your Company"
-                  />
+                  <Link href="/">
+                    <a>
+                      <img
+                        className="h-12 w-auto"
+                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                        alt="BISHL"
+                      />
+                    </a>
+                  </Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-                    <Link href="/">
-                      <a className={item}>Home</a>
-                    </Link>
-                    <Link href="/venues">
-                      <a className={item}>Spielstätten</a>
-                    </Link>
                     <Menu as="div" className="relative inline-block text-left">
                       <Menu.Button className={item}>Herren</Menu.Button>
                       <Transition
@@ -260,21 +258,6 @@ const Header = () => {
             <Disclosure.Panel className="sm:hidden">
               <div className="space-y-1 px-2 pb-3 pt-2">
                 {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-                <Disclosure.Button
-                  as={MyLink}
-                  href="/"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                >
-                  Home
-                </Disclosure.Button>
-                <Disclosure.Button
-                  as={MyLink}
-                  href="/venues"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                >
-                  Spielstätten
-                </Disclosure.Button>
-
                 <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
                   <span>Herren</span>
                 </div>
