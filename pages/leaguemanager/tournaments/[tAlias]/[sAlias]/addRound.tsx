@@ -36,8 +36,14 @@ export default function Add({ jwt }: AddProps) {
     published: false,
     startDate: null,
     endDate: null,
-    matchdaysType: '',
-    matchdaysSortedBy: '',
+    matchdaysType: {
+      key: '',
+      value: ''
+    },
+    matchdaysSortedBy: {
+      key: '',
+      value: ''
+    },
     matchdays: [],
   };
 
@@ -110,4 +116,3 @@ export default function Add({ jwt }: AddProps) {
     </LayoutAdm>
   )
 }
-  

@@ -1,5 +1,6 @@
-import { Fragment, useEffect, forwardRef } from 'react'
+import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
+import Image from 'next/image';
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Bars3Icon, BellIcon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline'
@@ -24,16 +25,15 @@ const youth = [
 const item = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
 const itemActive = "inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
 
-const MyLink = forwardRef((props, ref) => {
-  let { href, children, ...rest } = props
-  return (
+const MyLink = forwardRef<HTMLAnchorElement, { href: string; children: ReactNode; className?: string }>(
+  ({ href, children, ...rest }, ref) => (
     <Link href={href}>
-      <a ref={ref} {...rest}>
+      <a ref={ref as any} {...rest}>
         {children}
       </a>
     </Link>
   )
-})
+);
 
 const Header = () => {
   const { user, setUser, authError, setAuthError, loading, setLoading } = useAuth();
@@ -50,7 +50,7 @@ const Header = () => {
       }
     })();
     setLoading(false);
-  }, []);
+  }, [setLoading, setUser, setAuthError]);
 
   return (
     <Disclosure as="nav" className="bg-gray-800 sticky top-0 z-50 shadow-md">
@@ -64,10 +64,12 @@ const Header = () => {
                 <div className="flex-shrink-0">
                   <Link href="/">
                     <a>
-                      <img
+                      <Image
                         className="h-12 w-auto"
                         src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
                         alt="BISHL"
+                        width={48}
+                        height={48}
                       />
                     </a>
                   </Link>
@@ -301,4 +303,7 @@ const Header = () => {
   )
 };
 
-export default Header
+MyLink.displayName = 'MyLink';
+Header.displayName = 'Header';
+
+export default Header;

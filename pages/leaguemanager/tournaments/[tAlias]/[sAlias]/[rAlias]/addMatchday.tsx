@@ -31,7 +31,10 @@ export default function Add({ jwt }: AddProps) {
   const initialValues: MatchdayValues = {
     name: '',
     alias: '',
-    type: '',
+    type: {
+      key: '',
+      value: '',
+    },
     startDate: null,
     endDate: null,
     createStandings: false,

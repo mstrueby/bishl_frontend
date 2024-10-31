@@ -31,7 +31,10 @@ export default function Add({ jwt }: AddProps) {
     name: '',
     alias: '',
     tinyName: '',
-    ageGroup: '',
+    ageGroup: {
+      key: '',
+      value: ''
+    },
     published: false,
     active: false,
     external: false,

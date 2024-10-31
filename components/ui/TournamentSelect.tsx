@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { TournamentFormValues } from '../../types/TournamentFormValues';
+import { TournamentValues } from '../../types/TournamentValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 
 function classNames(...classes: string[]) {
@@ -8,16 +8,16 @@ function classNames(...classes: string[]) {
 }
 
 interface TournamentSelectProps {
-  selectedTournament: TournamentFormValues | null;
-  onTournamentChange: (tournament: TournamentFormValues) => void;
-  allTournamentsData: TournamentFormValues[];
+  selectedTournament: TournamentValues | null;
+  onTournamentChange: (tournament: TournamentValues) => void;
+  allTournamentsData: TournamentValues[];
 }
 const TournamentSelect: React.FC<TournamentSelectProps> = ({ 
   selectedTournament: propSelectedTournament,
   onTournamentChange, 
   allTournamentsData 
 }) => {
-  const [selectedTournament, setSelectedTournament] = useState<TournamentFormValues | null>(propSelectedTournament);
+  const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(propSelectedTournament);
 
   // When the 'propSelectedTournament' changes, update the local state
   useEffect(() => {

@@ -9,13 +9,13 @@ const Logout = () => {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
     });
-  }
+  };
   const router = useRouter();
   useEffect(() => {
     removeCookies();
     setUser(null);
     router.push('/');
-  }, []);
+  }, [router, setUser]);
 
   return <></>;
 };

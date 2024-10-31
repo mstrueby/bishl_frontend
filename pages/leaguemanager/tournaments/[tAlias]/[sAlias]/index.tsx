@@ -39,10 +39,10 @@ export default function Season({
   };
 
   const seasonDetails = [
-    { label: 'ID', value: season._id},
-    { label: 'Name', value: season.name },
-    { label: 'Veröffentlicht', value: season.published === true ? 'Ja' : 'Nein' },    
-  ]
+    { label: 'ID', value: season._id || '' },
+    { label: 'Name', value: season.name || '' },
+    { label: 'Veröffentlicht', value: season.published === true ? 'Ja' : 'Nein' },
+  ];
 
   const dataListItems = season.rounds
     .slice()
@@ -57,11 +57,11 @@ export default function Season({
       name: round.name,
       published: round.published,
       href: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${round.alias}`,
-      description: 
+      description:
         round.startDate === null || round.endDate === null
-        ? "-"
-        : round.endDate && new Date(round.endDate).getTime() > new Date(round.startDate).getTime()
-          ? `${new Date(round.startDate).toLocaleDateString('de-DE', {
+          ? "-"
+          : round.endDate && new Date(round.endDate).getTime() > new Date(round.startDate).getTime()
+            ? `${new Date(round.startDate).toLocaleDateString('de-DE', {
               day: '2-digit',
               month: '2-digit',
               year: 'numeric'
@@ -70,14 +70,14 @@ export default function Season({
               month: '2-digit',
               year: 'numeric'
             })}`
-          : new Date(round.startDate).toLocaleDateString('de-DE', {
+            : new Date(round.startDate).toLocaleDateString('de-DE', {
               day: '2-digit',
               month: '2-digit',
               year: 'numeric'
             }),
     }));
-  
-  
+
+
   return (
     <LayoutAdm
       navData={navData}
@@ -86,7 +86,7 @@ export default function Season({
       editLink={`/leaguemanager/tournaments/${tAlias}/${sAlias}/edit`}
       breadcrumbs={[
         { order: 1, name: "Wettbewerbe", url: `/leaguemanager/tournaments` },
-        { order: 2, name: tAlias, url: `/leaguemanager/tournaments/${tAlias}` }
+        { order: 2, name: tAlias as string, url: `/leaguemanager/tournaments/${tAlias}` }
       ]}
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}

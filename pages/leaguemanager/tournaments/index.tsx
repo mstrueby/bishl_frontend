@@ -43,7 +43,7 @@ export default function Tournament({
     .sort((a, b) => a.alias.localeCompare(b.alias))
     .map((tournament: TournamentValues) => ({
       name: tournament.name,
-      description: `${tournament.tinyName} / ${tournament.ageGroup}`,
+      description: `${tournament.tinyName} / ${tournament.ageGroup.value}`,
       published: tournament.published,
       href: `/leaguemanager/tournaments/${tournament.alias}`,
   }));

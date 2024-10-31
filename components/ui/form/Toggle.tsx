@@ -28,7 +28,7 @@ const Toggle = ({ name, label, description, ...props }: ToggleProps) => {
     } else {
       setEnabled(false)
     }
-  })
+  }, [field.value])
 
   return (
     <Switch.Group as="li" className="flex items-center justify-between mt-6 mb-2">

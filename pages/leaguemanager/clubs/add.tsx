@@ -5,7 +5,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import LayoutAdm from '../../../components/LayoutAdm';
 import ClubForm from '../../../components/leaguemanager/ClubForm';
-import { ClubFormValues } from '../../../types/ClubFormValues';
+import { ClubValues } from '../../../types/ClubValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 import { navData } from '../../../components/leaguemanager/navData';
 
@@ -26,7 +26,7 @@ export default function Add({ jwt }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: ClubFormValues = {
+  const initialValues: ClubValues = {
     name: '',
     alias: '',
     addressName: '',
@@ -41,11 +41,14 @@ export default function Add({ jwt }: AddProps) {
     ishdId: '',
     active: false,
     logo: '',
-  };
+    legacyId: '',
+    teams: [],
+  };;
 
-  const onSubmit = async (values: ClubFormValues) => {
+  const onSubmit = async (values: ClubValues) => {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
+      console.log(key, value);
       formData.append(key, value);
     }
 
@@ -70,7 +73,10 @@ export default function Add({ jwt }: AddProps) {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setError(error?.message?.data.detail || 'Ein Fehler ist aufgetreten.');
+        const errorMessage = error.response?.data?.detail || 'Ein Fehler ist aufgetreten.';
+        setError(errorMessage);
+      } else {
+        setError('Ein Fehler ist aufgetreten.');
       }
     } finally {
       setLoading(false);

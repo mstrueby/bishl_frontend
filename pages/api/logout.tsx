@@ -1,6 +1,7 @@
 import cookie from 'cookie'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async (req, res) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {  
   res.status(200).setHeader('Set-Cookie', cookie.serialize(
     'jwt', 
     '', 
@@ -12,3 +13,5 @@ export default async (req, res) => {
     }
   )).end()
 }
+
+export default handler

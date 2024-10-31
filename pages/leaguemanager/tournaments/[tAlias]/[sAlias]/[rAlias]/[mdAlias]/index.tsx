@@ -39,12 +39,12 @@ export default function Matchday({
     setSuccessMessage(null);
   };
 
-  
+
   // Create an array with matchday values in label name pairs
   const matchdayDetails = [
-    { label: 'ID', value: matchday._id},
-    { label: 'Name', value: matchday.name },
-    { label: 'Typ', value: matchday.type },
+    { label: 'ID', value: matchday._id || '' },
+    { label: 'Name', value: matchday.name || '' },
+    { label: 'Typ', value: matchday.type.value || '' },
     { label: 'Veröffentlicht', value: matchday.published ? 'Ja' : 'Nein' },
     { label: 'Beginn', value: matchday.startDate ? new Date(matchday.startDate).toLocaleDateString('de-DE') : '-' },
     { label: 'Ende', value: matchday.endDate ? new Date(matchday.endDate).toLocaleDateString('de-DE') : '-' },
@@ -58,9 +58,9 @@ export default function Matchday({
       editLink={`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${mdAlias}/edit`}
       breadcrumbs={[
         { order: 1, name: "Wettbewerbe", url: `/leaguemanager/tournaments` },
-        { order: 2, name: tAlias, url: `/leaguemanager/tournaments/${tAlias}` },
-        { order: 3, name: sAlias, url: `/leaguemanager/tournaments/${tAlias}/${sAlias}` },
-        { order: 4, name: rAlias, url: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}` }
+        { order: 2, name: tAlias as string, url: `/leaguemanager/tournaments/${tAlias}` },
+        { order: 3, name: sAlias as string, url: `/leaguemanager/tournaments/${tAlias}/${sAlias}` },
+        { order: 4, name: rAlias as string, url: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}` }
       ]}
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
@@ -68,12 +68,12 @@ export default function Matchday({
       <DescriptionList
         items={matchdayDetails}
       />
-            
+
       <SectionHeader
         title="Spiele"
-        newLink= {`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${mdAlias}/addMatch/`}
+        newLink={`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${mdAlias}/addMatch/`}
       />
-      
+
       <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
         <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
           <table className="min-w-full divide-y divide-gray-300">
@@ -92,7 +92,8 @@ export default function Matchday({
             </thead>
 
             <tbody className="divide-y divide-gray-200 bg-white">
-              {matchday?.matches.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+              {matchday?.matches ? matchday.matches
+                .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
                 .map((match) => {
                   return (
                     <tr key={match._id}>
@@ -115,8 +116,9 @@ export default function Matchday({
                       </td>
                     </tr>
                   )
-                }
-                )}
+                })
+                : <div>No matches available.</div>
+              }
             </tbody>
           </table>
         </div>
@@ -145,6 +147,9 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       };
     }
     const matchdayData = await res.json();
+    if (!matchdayData || !Array.isArray(matchdayData.matches)) {
+      return { notFound: true };
+    }
 
     return {
       props: {
@@ -152,7 +157,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       },
       revalidate: 60,
     };
-  
+
   } catch (error) {
     console.error('Failed to fetch matchday data:', error);
     return {
@@ -174,7 +179,7 @@ export async function getStaticPaths() {
       const rounds = await roundsRes.json();
       for (const round of rounds) {
         const matchdaysRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias
-        }/seasons/${season.alias}/rounds/${round.alias}/matchdays`);
+          }/seasons/${season.alias}/rounds/${round.alias}/matchdays`);
         const matchdays = await matchdaysRes.json();
         for (const matchday of matchdays) {
           paths.push({

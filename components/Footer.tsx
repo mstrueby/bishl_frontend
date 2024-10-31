@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -37,10 +38,12 @@ const Footer = () => {
           <div className="space-y-8">
             <Link href="/">
               <a>
-                <img
-                  className="h-12 xl:h-32"
+                <Image
+                  className="h-12 xl:h-32 w-56"
                   src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
                   alt="BISHL"
+                  width={48} // Specify the width attribute
+                  height={48} // Specify the height attribute
                 />
               </a>
             </Link>
@@ -87,7 +90,7 @@ const Footer = () => {
                 <ul role="list" className="mt-6 space-y-4">
                   {navigation.associations.map((item) => (
                     <li key={item.name}>
-                      <a href={item.href} target="_blank" className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
+                      <a href={item.href} target="_blank" rel="noreferrer noopener nofollow" className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
                         {item.name}
                       </a>
                     </li>

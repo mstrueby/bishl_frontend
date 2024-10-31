@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { buildUrl } from 'cloudinary-build-url'
 import LayoutAdm from '../../../components/LayoutAdm';
 import Badge from '../../../components/ui/Badge';
-import { ClubFormValues, TeamFormValues } from '../../../types/ClubFormValues';
+import { ClubValues, TeamValues } from '../../../types/ClubValues';
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { navData } from '../../../components/leaguemanager/navData';
 import ClubSelect from '../../../components/ui/ClubSelect';
@@ -15,10 +15,10 @@ import ClubSelect from '../../../components/ui/ClubSelect';
 export default function Teams({
   allClubsData
 }: {
-  allClubsData: ClubFormValues[];
+  allClubsData: ClubValues[];
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [teams, setTeams] = useState<TeamFormValues[]>([]);
+  const [teams, setTeams] = useState<TeamValues[]>([]);
   const router = useRouter();
 
   useEffect(() => {

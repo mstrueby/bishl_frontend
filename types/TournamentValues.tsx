@@ -27,7 +27,10 @@
     _id?: string;
     name: string;
     alias: string;
-    type: string;
+    type: {
+      key: string;
+      value: string;
+    };
     startDate: Date | null;
     endDate: Date | null;
     createStandings: boolean;
@@ -46,8 +49,14 @@
     published: boolean;
     startDate: Date | null;
     endDate: Date | null;
-    matchdaysType: string;
-    matchdaysSortedBy: string;
+    matchdaysType: {
+      key: string;
+      value: string;
+    };
+    matchdaysSortedBy: {
+      key: string;
+      value: string;
+    };
     matchdays: MatchdayValues[];
   }
 
@@ -66,7 +75,10 @@
     name: string;
     alias: string;
     tinyName: string;
-    ageGroup: string;
+    ageGroup: {
+      key: string;
+      value: string;
+    };
     published: boolean;
     active: boolean;
     external: boolean;

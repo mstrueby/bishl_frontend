@@ -2,11 +2,11 @@ import { useField, FieldAttributes } from 'formik';
 
 interface ButtonProps extends FieldAttributes<any> {
   label: string;
+  name: string; // Ensure that name is a required property of ButtonProps
 }
 
-export default function ButtonLight({ label, ...props }: ButtonProps) {
-  const [field, meta] = useField(props);
-
+export default function ButtonLight({ label, name, ...props }: ButtonProps) {
+  const [field, meta] = useField({ name, ...props }); // Ensure name is passed to useField
   return (
     <button
       {...field} {...props}

@@ -1,5 +1,6 @@
 // Define a Team interface
-export interface TeamFormValues {
+export interface TeamValues {
+  _id?: string;
   name: string;
   alias: string;
   fullName: string;
@@ -13,8 +14,8 @@ export interface TeamFormValues {
   legacyId: number;
 }
 
-export interface ClubFormValues {
-  _id: string;
+export interface ClubValues {
+  _id?: string;
   name: string;
   alias: string;
   addressName: string;
@@ -23,12 +24,12 @@ export interface ClubFormValues {
   city: string;
   country: string;
   email: string;
-  yearOfFoundation: number;
+  yearOfFoundation: number | '';
   description: string;
   website: string;
-  ishdId: number;
+  ishdId: number | '';
   active: boolean;
   logo: string;
-  legacyId: number;
-  teams: TeamFormValues[]; // Use the new Team interface
+  legacyId: number | '';
+  teams: TeamValues[]; // Use the new Team interface
 }

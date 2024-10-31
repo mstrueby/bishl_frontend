@@ -6,19 +6,20 @@ import Image from 'next/image';
 import { buildUrl } from 'cloudinary-build-url'
 import LayoutAdm from '../../../components/LayoutAdm';
 import Badge from '../../../components/ui/Badge';
-import { ClubFormValues } from '../../../types/ClubFormValues';
+import { ClubValues } from '../../../types/ClubValues';
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { navData } from '../../../components/leaguemanager/navData';
+import DataList from '../../../components/leaguemanager/DataList';
 
 
-const transformedUrl = (id) => buildUrl(id, {
+const transformedUrl = (id: string) => buildUrl(id, {
   cloud: {
     cloudName: 'dajtykxvp',
   },
   transformations: {
-    effect: {
-      name: 'grayscale',
-    },
+    //effect: {
+    //  name: 'grayscale',
+    //},
     //effect: {
     //  name: 'tint',
     //  value: '60:blue:white'
@@ -29,7 +30,7 @@ const transformedUrl = (id) => buildUrl(id, {
 export default function Clubs({
   allClubsData
 }: {
-  allClubsData: ClubFormValues[];
+  allClubsData: ClubValues[];
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -53,6 +54,18 @@ export default function Clubs({
     setSuccessMessage(null);
   };
 
+  const dataLisItems = allClubsData
+    .slice()
+    .sort((a, b) => a.alias.localeCompare(b.alias))
+    .map((club: ClubValues) => ({
+      name: club.name,
+      //description: `${club.alias} / ${club.ageGroup}`,
+      active: club.active,
+      href: `/leaguemanager/clubs/${club.alias}`,
+      imageUrl: club.logo ? transformedUrl(club.logo) : transformedUrl('https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'),
+    }));
+
+  
   return (
     <LayoutAdm
       navData={navData}
@@ -62,68 +75,10 @@ export default function Clubs({
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
-      <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-300">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                  Verein
-                </th>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                  Mannschaften
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 text-center">
-                  Status
-                </th>
-                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                  <span className="sr-only">Bearbeiten</span>
-                </th>
-              </tr>
-            </thead>
-            
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {allClubsData && allClubsData.map((club) => {
-                return (
-                  <tr key={club.alias}>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0 mr-4">
-                          <Image className="h-10 w-10 rounded-full"
-                            src={club.logo ?
-                              transformedUrl(club.logo) :
-                              transformedUrl('https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png')}
-                            alt={club.name}
-                            objectFit="contain" height={50} width={50}
-                          />
-                        </div>
-                        <div className="text-base font-medium text-gray-900">{club.name}</div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-4 text-xs text-left">
-                      {club.teams && club.teams.map((team) => {
-                        return (
-                          <p className="text-gray-500">{team.name}</p>
-                        )
-                      }
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
-                      <Badge info={club.active === true ? 'aktiv' : 'inaktiv'} />
-                    </td>
-                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <Link href={`/leaguemanager/clubs/${club.alias}/edit`}>
-                        <a className="text-indigo-600 hover:text-indigo-900">Bearbeiten<span className="sr-only">, {club.name}</span></a>
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              }
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataList
+        items={dataLisItems}
+      />
+      
     </LayoutAdm>
   );
 }

@@ -11,6 +11,8 @@ import { de } from 'date-fns/locale'; // Import German locale
 import ClipLoader from 'react-spinners/ClipLoader';
 import { Match } from '../../types/MatchValues';
 import MatchCard from '../../components/ui/MatchCard';
+import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]';
+import { MatchdayValues } from '../../types/TournamentValues';
 
 interface StandingsTeam {
   fullName: string;
@@ -48,6 +50,7 @@ interface Matchday {
 interface Round {
   name: string;
   alias: string;
+  sortOrder: number;
   createStandings: boolean;
   createStats: boolean;
   matchdaysType: {
@@ -91,11 +94,22 @@ export default function Tournament({
 }: {
   tournament: Tournament
 }) {
-
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
+
+  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
+  const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
+  const [rounds, setRounds] = useState<Round[]>([]);
+  const [selectedRound, setSelectedRound] = useState({} as Round);
+  const [matchdays, setMatchdays] = useState<Matchday[]>([]);
+  const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
+  const [matches, setMatches] = useState<Match[]>([]);
+
+  const [activeTab, setActiveTab] = useState('matches');
+  const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
+
   const router = useRouter();
 
   useEffect(() => {
@@ -103,38 +117,13 @@ export default function Tournament({
     setIsLoadingRounds(true);
     setIsLoadingMatchdays(true);
     setIsLoadingMatches(true);
-    if (!router.isFallback && tournament) {
+    if (!router.isFallback && tournament && tournament.seasons.length > 0) {
       // Set the initial selected season
       const sortedSeasons = tournament.seasons.sort((a, b) => b.name.localeCompare(a.name));
       setSelectedSeason(sortedSeasons[0]);
     }
     setIsLoadingInitial(false);
   }, [router.isFallback, tournament]);
-
-  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
-  const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
-
-  const [rounds, setRounds] = useState<Round[]>([]);
-  const [selectedRound, setSelectedRound] = useState({} as Round);
-
-  const [matchdays, setMatchdays] = useState<Matchday[]>([]);
-  const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
-
-  const [matches, setMatches] = useState<Match[]>([]);
-
-
-  /*
-  let matchdays: Matchday[] = selectedRound ? selectedRound.matchdays.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) : [];
-  const [selectedMatchday, setSelectedMatchday] = useState(matchdays ? matchdays[matchdays.length - 1] : {} as Matchday)
-*/
-  const [activeTab, setActiveTab] = useState('matches');
-  const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
-
-  {/*
-  useEffect(() => {
-    setSelectedSeason(seasons.reduce((prev, current) => (prev.name > current.name) ? prev : current));
-  }, [tournament]);
-  */}
 
   useEffect(() => {
     if (selectedSeason.name) {
@@ -144,7 +133,7 @@ export default function Tournament({
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
         .then((response) => response.json())
         .then((data) => {
-          setRounds(data.sort((a, b) => a.sortOrder - b.sortOrder));
+          setRounds(data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder));
           setSelectedRound(data[data.length - 1] || {} as Round);
         })
         .finally(() => {
@@ -152,7 +141,7 @@ export default function Tournament({
           setActiveTab('matches');
         });
     }
-  }, [selectedSeason]);
+  }, [selectedSeason, tournament.alias]);
 
   useEffect(() => {
     if (selectedRound.name) {
@@ -161,7 +150,7 @@ export default function Tournament({
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
         .then((response) => response.json())
         .then((data) => {
-          setMatchdays(data.sort((a, b) => {
+          setMatchdays(data.sort((a: Matchday, b: Matchday) => {
             if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
               return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
             } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
@@ -173,8 +162,8 @@ export default function Tournament({
             setSelectedMatchday(data[0] || {} as Matchday);
           } else {
             const now = new Date().getTime();
-            const mostRecentPastMatchday = data.filter(matchday => new Date(matchday.startDate).getTime() <= now)
-              .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+            const mostRecentPastMatchday = data.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+              .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
             setSelectedMatchday(mostRecentPastMatchday || {} as Matchday);
           }
         })
@@ -184,7 +173,7 @@ export default function Tournament({
           setActiveMatchdayTab('matches');
         });
     }
-  }, [selectedRound]);
+  }, [selectedRound, tournament.alias, selectedSeason.alias]);
 
   useEffect(() => {
     if (selectedMatchday.name) {
@@ -194,14 +183,19 @@ export default function Tournament({
         .then((data) => setMatches(data))
         .finally(() => setIsLoadingMatches(false));
     }
-  }, [selectedMatchday]);
+  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
+
+  if (!tournament) {
+    return <div>Error loading tournament data.</div>;
+  }
 
   const tabs = [
-    { key: 'matches', caption: 'Spiele', href: '' },
-    { key: 'standings', caption: 'Tabelle', href: '' },
+    { key: 'matches', caption: 'Spiele', href: '#' },
+    { key: 'standings', caption: 'Tabelle', href: '#' },
   ]
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
+
+  function classNames(...classes: string[]): string {
+    return classes.filter(Boolean).join(' ');
   }
 
   function formatDate(date_from: Date, date_to: Date) {
@@ -521,8 +515,8 @@ export default function Tournament({
 
               {/* MATCHES */}
               {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
-                <MatchCard key= {index} match={match} />
-                
+                <MatchCard key={index} match={match} />
+
               ))}
             </section>
           )}
@@ -551,23 +545,32 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const paths = allTournamentsData.map((tournament: Tournament) => ({
     params: { alias: tournament.alias },
   }));
-  return { paths, fallback: true };
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const alias = params?.alias;
 
   if (!alias) {
-    // Handle the case where alias is undefined, possibly by returning a default response or throwing an error
-    throw new Error("Alias parameter is missing.");
+    return { notFound: true };
   }
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${alias}`);
-  var tournament = await res.json();
-  return {
-    props: {
-      tournament,
-    },
-    revalidate: 10,
-  };
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${alias}`);
+    const tournamentData = await res.json();
+
+    if (!tournamentData) {
+      return { notFound: true };
+    }
+
+    return {
+      props: {
+        tournament: tournamentData
+      },
+      revalidate: 10 // or your preferred revalidation time
+    };
+  } catch (error) {
+    console.error(error);
+    return { notFound: true };
+  }
 };

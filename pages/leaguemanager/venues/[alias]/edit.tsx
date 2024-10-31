@@ -87,6 +87,7 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
 
   // Form initial values with existing venue data
   const initialValues: VenueFormValues = {
+    _id: venue?._id || '',
     name: venue?.name || '',
     alias: venue?.alias || '',
     shortName: venue?.shortName || '',
@@ -94,8 +95,8 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
     zipCode: venue?.zipCode || '',
     city: venue?.city || '',
     country: venue?.country || '',
-    latitude: venue?.latitude || '',
-    longitude: venue?.longitude || '',
+    latitude: venue?.latitude !== undefined && venue?.latitude !== null ? venue.latitude : 0,
+    longitude: venue?.longitude !== undefined && venue?.longitude !== null ? venue.longitude : 0,
     active: venue?.active || false,
   };
 

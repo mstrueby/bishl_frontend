@@ -7,7 +7,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import ClubForm from '../../../../components/leaguemanager/ClubForm';
 import LayoutAdm from '../../../../components/LayoutAdm';
-import { ClubFormValues, Team } from '../../../../types/ClubFormValues';
+import { ClubValues } from '../../../../types/ClubValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../components/leaguemanager/navData';
 
@@ -15,18 +15,19 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
 
 interface EditProps {
   jwt: string,
-  club: ClubFormValues
+  club: ClubValues,
+  cAlias: string,
 }
 
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  const { alias } = context.params as { alias: string };
+  const { cAlias } = context.params as { cAlias: string };
 
   // Fetch the existing club data
   let club = null;
   try {
-    const response = await axios.get(BASE_URL + alias, {
+    const response = await axios.get(BASE_URL + cAlias, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -37,15 +38,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error('Could not fetch the club data');
   }
 
-  return club ? { props: { jwt, club } } : { notFound: true };
+  return club ? { props: { jwt, club, cAlias } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, club }) => {
+const Edit: NextPage<EditProps> = ({ jwt, club, cAlias }) => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   // Handler for form submission
-  const onSubmit = async (values: ClubFormValues) => {
+  const onSubmit = async (values: ClubValues) => {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
       if (key === 'logo' && typeof value === 'string') {
@@ -55,15 +56,15 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
       formData.append(key, value);
     }
     setError(null);
-    
+
     // remove teams from formdata
     formData.delete('teams');
 
     // Print FormData to console for debugging purposes
-    for (const pair of formData.entries()) {
+    for (const pair of Array.from(formData.entries())) {
       console.log(`${pair[0]}: ${pair[1]}`);
     }
-    
+
     try {
       const response = await axios.patch(BASE_URL + club._id, formData, {
         headers: {
@@ -74,9 +75,9 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
 
       if (response.status === 200) { // Assuming status 200 means success
         router.push({
-          pathname: '/leaguemanager/clubs',
+          pathname: `/leaguemanager/clubs/${cAlias}`,
           query: { message: `Der Verein ${values.name} wurde erfolgreich aktualisiert.` }
-        }, '/leaguemanager/clubs');
+        }, `/leaguemanager/clubs/${cAlias}`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
@@ -86,7 +87,8 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/clubs');
+    const { cAlias } = router.query as { cAlias: string };
+    router.push(`/leaguemanager/clubs/${cAlias}`);
   };
 
   useEffect(() => {
@@ -102,8 +104,9 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   };
 
   // Form initial values with existing club data
-  const initialValues: ClubFormValues = {
+  const initialValues: ClubValues = {
     name: club?.name || '',
+    alias: club?.alias || '',
     addressName: club?.addressName || '',
     street: club?.street || '',
     zipCode: club?.zipCode || '',
@@ -117,6 +120,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
     active: club?.active || false,
     logo: club?.logo || '',
     teams: club?.teams || [],
+    legacyId: club?.legacyId || '',
   };
 
   // Render the form with initialValues and the edit-specific handlers

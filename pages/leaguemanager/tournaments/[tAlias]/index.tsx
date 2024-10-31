@@ -39,14 +39,14 @@ export default function Tournament({
   };
 
   const tournamentDetails = [
-    { label: 'ID', value: tournament._id },
-    { label: 'Name', value: tournament.name },
-    { label: 'Altersklasse', value: tournament.ageGroup },
-    { label: 'Abkürzung', value: tournament.tinyName },
-    { label: 'Veröffentlicht', value: tournament.published === true ? 'Ja' : 'Nein' },
-    { label: 'Aktiv', value: tournament.active === true ? 'Ja' : 'Nein' },
-    { label: 'Extern', value: tournament.external === true ? 'Ja' : 'Nein' },
-  ]
+    { label: 'ID', value: tournament._id || '' },
+    { label: 'Name', value: tournament.name || '' },
+    { label: 'Altersklasse', value: tournament.ageGroup.value || '' },
+    { label: 'Abkürzung', value: tournament.tinyName || '' },
+    { label: 'Veröffentlicht', value: tournament.published ? 'Ja' : 'Nein' },
+    { label: 'Aktiv', value: tournament.active ? 'Ja' : 'Nein' },
+    { label: 'Extern', value: tournament.external ? 'Ja' : 'Nein' },
+  ];
 
   const dataListItems = tournament.seasons
     .slice()

@@ -39,16 +39,16 @@ export default function Round({
   };
 
   const roundDetails = [
-    { label: 'ID', value: round._id },
-    { label: 'Name', value: round.name },
-    { label: 'Typ', value: round.matchdaysType },
-    { label: 'Spieltag-Sortierung', value: round.matchdaysSortedBy},
+    { label: 'ID', value: round._id || '-' },
+    { label: 'Name', value: round.name || '-' },
+    { label: 'Typ', value: round.matchdaysType.value || '-' },
+    { label: 'Spieltag-Sortierung', value: round.matchdaysSortedBy.value || '-' },
     { label: 'Beginn', value: round.startDate ? new Date(round.startDate).toLocaleDateString('de-DE') : '-' },
     { label: 'Ende', value: round.endDate ? new Date(round.endDate).toLocaleDateString('de-DE') : '-' },
     { label: 'Tabelle erstellen', value: round.createStandings === true ? 'Ja' : 'Nein' },
     { label: 'Statistiken erstellen', value: round.createStats === true ? 'Ja' : 'Nein' },
     { label: 'Veröffentlicht', value: round.published === true ? 'Ja' : 'Nein' },
-  ]
+  ];
 
   const dataListItems = round.matchdays
     .slice()
@@ -90,8 +90,8 @@ export default function Round({
       editLink={`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/edit`}
       breadcrumbs={[
         { order: 1, name: "Wettbewerbe", url: `/leaguemanager/tournaments` },
-        { order: 2, name: tAlias, url: `/leaguemanager/tournaments/${tAlias}` },
-        { order: 3, name: sAlias, url: `/leaguemanager/tournaments/${tAlias}/${sAlias}` }
+        { order: 2, name: tAlias as string, url: `/leaguemanager/tournaments/${tAlias}` },
+        { order: 3, name: sAlias as string, url: `/leaguemanager/tournaments/${tAlias}/${sAlias}` }
       ]}
     >
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}

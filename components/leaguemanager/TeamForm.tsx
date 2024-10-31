@@ -7,11 +7,11 @@ import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
 import MyListbox from '../ui/form/Listbox'
 //import LogoUpload from '../ui/form/LogoUpload';
-import { TeamFormValues } from '../../types/TeamFormValues';
+import { TeamValues } from '../../types/ClubValues';
 
 interface TeamFormProps {
-  initialValues: TeamFormValues;
-  onSubmit: (values: TeamFormValues) => void;
+  initialValues: TeamValues;
+  onSubmit: (values: TeamValues) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
 }

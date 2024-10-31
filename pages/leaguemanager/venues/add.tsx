@@ -26,6 +26,7 @@ export default function Add({ jwt }: AddProps) {
   const router = useRouter();
 
   const initialValues: VenueFormValues = {
+    _id: '',
     name: '',
     alias: '',
     shortName: '',
@@ -33,8 +34,8 @@ export default function Add({ jwt }: AddProps) {
     zipCode: '',
     city: '',
     country: 'Deutschland',
-    latitude: '',
-    longitude: '',
+    latitude: 0,
+    longitude: 0,
     active: false,
   };
  

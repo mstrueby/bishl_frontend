@@ -1,7 +1,7 @@
 import cookie from 'cookie'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const { email, password } = req.body
     const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
@@ -40,3 +40,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return
   }  
 }
+
+export default loginHandler;

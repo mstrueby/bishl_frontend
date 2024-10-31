@@ -6,7 +6,7 @@ interface LogoUploadProps extends ComponentPropsWithoutRef<'input'> {
   name: string;
 }
 
-const LogoUpload = ({ label, name, ...props }: LogoUploadProps) => {
+const LogoUpload = ({ label, name, ...props }: LogoUploadProps & { name: string }) => {
   const [field, meta, helpers] = useField(name);
   const classInputDef = "block w-full text-sm text-gray-900 file:mr-4 file:rounded file:border-0 file:py-2 file:px-4 file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100";
 
@@ -14,7 +14,6 @@ const LogoUpload = ({ label, name, ...props }: LogoUploadProps) => {
     const file = e.target.files ? e.target.files[0] : null;
     helpers.setValue(file);
   }
-  props.id = props.id || props.name;
   return (
     <div>
       <label htmlFor={props.id || name} className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">

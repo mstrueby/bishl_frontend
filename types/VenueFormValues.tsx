@@ -1,4 +1,5 @@
 export interface VenueFormValues {
+  _id: string;
   name: string;
   alias: string;
   shortName: string;
