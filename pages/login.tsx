@@ -54,11 +54,10 @@ const LoginPage = () => {
           <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             <div className="flex justify-center">
               <Image
-                className="h-14 w-auto"
                 src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
-                alt="Your Company"
-                width={56}
-                height={56}
+                alt="BISHL"
+                width={128}
+                height={117}
               />
             </div>
             <h2 className="mt-10 text-center text-2xl leading-9 tracking-tight text-gray-900">

@@ -5,7 +5,7 @@ import { Dialog, Menu, Transition, Disclosure } from '@headlessui/react';
 import Link from 'next/link';
 import { useRouter } from "next/router";
 import HeroIcon from './HeroIcon';
-import { XMarkIcon, Bars3BottomLeftIcon, ChevronRightIcon, PencilIcon, PlusSmallIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, Bars3BottomLeftIcon, ChevronRightIcon, PencilIcon, PlusCircleIcon } from '@heroicons/react/24/solid';
 import { NavData } from '../types/NavData';
 import { Description } from '@headlessui/react/dist/components/description/description';
 
@@ -30,11 +30,11 @@ export default function LayoutAdm({
   const router = useRouter();
 
   return (
-    <div className="">
+    <div className="flex flex-col min-h-screen">
       <Header />
 
       <Transition.Root show={sidebarOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
+        <Dialog as="div" className="relative z-30 lg:hidden" onClose={setSidebarOpen}>
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -113,9 +113,9 @@ export default function LayoutAdm({
       </Transition.Root>
 
       {/* Static sidebar for desktop */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex min-h-screen">
-          <div className="hidden  lg:z-50 lg:flex lg:w-72 lg:flex-col">
+      <main className="flex-grow w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex ">
+          <div className="hidden lg:z-40 lg:flex lg:w-72 lg:flex-col">
             {/* Sidebar component, swap this element with another sidebar if you like */}
             <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
               <div className="flex h-16 shrink-0 items-center">
@@ -130,7 +130,7 @@ export default function LayoutAdm({
                       {navData?.map((item) => (
                         <li key={item.name}>
                           <Link href={item.href} key={item.name}>
-                            <a className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
+                            <a className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group hover:no-underline flex items-center px-3 py-2 text-sm font-medium border-l-4">
                               <HeroIcon
                                 icon={item.icon}
                                 className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
@@ -150,7 +150,7 @@ export default function LayoutAdm({
           </div>
 
           <div className="w-full">
-            <div className="z-50 sticky top-0 flex py-4 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white shadow-sm sm:gap-x-6 px-4 sm:px-6 lg:px-8">
+            <div className="z-35 sticky top-16 flex py-4 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white shadow-sm sm:gap-x-6 px-4 sm:px-6 lg:px-8">
               <button type="button" className="-m-2.5 p-2.5 text-gray-700 lg:hidden" onClick={() => setSidebarOpen(true)}>
                 <span className="sr-only">Open sidebar</span>
                 <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
@@ -208,7 +208,7 @@ export default function LayoutAdm({
                           className="ml-auto flex items-center gap-x-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                           onClick={() => router.push(newLink)}
                         >
-                          <PlusSmallIcon className="-ml-1.5 h-5 w-5" aria-hidden="true" />
+                          <PlusCircleIcon className="-ml-1.5 h-5 w-5" aria-hidden="true" />
                           Neu
                         </button>
                       </span>
@@ -218,19 +218,19 @@ export default function LayoutAdm({
               </div>
             </div>
 
-            <main className="py-2">
+            <section className="py-2">
               <div className="px-4 sm:px-6 lg:px-8">
                 <div className="mt-8 flex flex-col">
-                  <div className="min-h-screen">
+                  <div className="">
                     {children}
                   </div>
                 </div>
               </div>
-            </main>
+            </section>
 
           </div>
         </div>
-      </div>
+      </main>
 
       {/*
       <div className="min-h-screen relative">
