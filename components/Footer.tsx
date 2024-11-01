@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image';
+import { CldImage } from 'next-cloudinary';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -35,24 +36,39 @@ const Footer = () => {
     <footer className="bg-gray-900">
       <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          <div className="space-y-8">
+          <div className="space-y-8 block xl:hidden">
             <Link href="/">
-              <a>
+              <div className="hover:cursor-pointer flex justify-center items-center">
                 <Image
-                  className="h-12 xl:h-32 w-56"
-                  src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                  src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
                   alt="BISHL"
-                  width={48} // Specify the width attribute
-                  height={48} // Specify the height attribute
+                  width={64}
+                  height={64}
+                  layout="fixed"
                 />
-              </a>
-            </Link>
-            {/*
-            <p className="text-balance text-sm/6 text-gray-300">
-              Making the world a better place through constructing elegant hierarchies.
+              </div>
+            </Link>  
+            <p className="text-balance text-sm/6 text-gray-300 text-center uppercase">
+              Berliner Inline-Skater-Hockey-Liga
             </p>
-            */}
           </div>
+          <div className="space-y-8 hidden xl:block pr-12">
+            <Link href="/">
+              <div className="hover:cursor-pointer flex justify-center items-center">
+                <Image
+                  src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                  alt="BISHL"
+                  width={128}
+                  height={128}
+                  layout="fixed"
+                />
+              </div>
+            </Link>
+            <p className="text-balance text-sm/6 text-gray-300 text-center uppercase">
+              Berliner Inline-Skater-Hockey-Liga
+            </p>
+          </div>
+          
           <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>

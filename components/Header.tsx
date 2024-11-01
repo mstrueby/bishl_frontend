@@ -5,6 +5,8 @@ import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Bars3Icon, BellIcon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
+import { CldImage } from 'next-cloudinary';
+
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -61,19 +63,20 @@ const Header = () => {
 
               {/* Navigation */}
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Link href="/">
-                    <a>
-                      <Image
-                        className="h-12 w-auto"
-                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
-                        alt="BISHL"
-                        width={48}
-                        height={48}
-                      />
-                    </a>
-                  </Link>
-                </div>
+                
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <Link href="/">
+                  <div className="hover:cursor-pointer flex justify-center items-center">
+                  <Image
+                    src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                    alt="Logo"
+                    width={48}
+                    height={48}
+                    className="block h-8 w-auto flex flex-row items-center justify-center"
+                  />
+                  </div>
+                </Link>
+              </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
