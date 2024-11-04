@@ -98,10 +98,10 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           <div className="flex items-center">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
             <p className="text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { 
-              weekday: isTablet ? 'short' : 'long', 
+              weekday: (isTablet || isMobile) ? 'short' : 'long', 
               day: 'numeric', 
               month: 'short', 
-              year: '2-digit', 
+              year: isMobile ? undefined : '2-digit', 
               hour: '2-digit', 
               minute: '2-digit' 
             })}</time></p>
@@ -109,7 +109,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* venue */}
           <div className="flex items-center">
             <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
-            <p className="text-xs uppercase font-light text-gray-700 truncate mt-0">{venue.name}</p>
+            <p className="text-xs uppercase font-light text-gray-700 truncate">{venue.name}</p>
           </div>
         </div>
       </div>
@@ -119,20 +119,20 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
         <div className="flex flex-row items-center w-full">
           <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
           <div className="flex-auto ml-6">
-            <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium leading-6 mt-0 ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
+            <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
           </div>
           <div className="flex-auto">
-            <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium leading-6 mt-0 ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
+            <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
           </div>
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
             <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
             <div className="flex-auto ml-6">
-              <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium leading-6 mt-0 ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
+              <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
             </div>
             <div className="flex-auto">
-              <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium leading-6 mt-0 ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
+              <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
             </div>
           </div>
       </div>

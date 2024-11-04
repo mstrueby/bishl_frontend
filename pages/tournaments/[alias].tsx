@@ -307,7 +307,7 @@ export default function Tournament({
                           <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
                             {//<CheckIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
                             }
-                            <p className="mt-0 text-sm font-semibold text-white uppercase">{selectedRound.name}</p>
+                            <p className="text-sm font-semibold text-white uppercase">{selectedRound.name}</p>
                           </div>
                           <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
                             <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
@@ -336,7 +336,7 @@ export default function Tournament({
                                 {({ selected, active }) => (
                                   <div className="flex flex-col">
                                     <div className="flex justify-between">
-                                      <p className={classNames(selected ? 'font-semibold' : 'font-normal', active ? 'text-white' : 'text-gray-900', 'mt-0')}>{round.name}</p>
+                                      <p className={classNames(selected ? 'font-semibold' : 'font-normal', active ? 'text-white' : 'text-gray-900')}>{round.name}</p>
                                       {selected ? (
                                         <span className={active ? 'text-white' : 'text-indigo-600'}>
                                           <CheckIcon className="h-5 w-5" aria-hidden="true" />

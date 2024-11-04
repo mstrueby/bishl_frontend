@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 
 const Impressum = () => (
   <Layout>
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="legal max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1>Impressum</h1>
 
       <p>Sportkommission Skaterhockey des IRVB<br />

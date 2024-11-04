@@ -204,6 +204,14 @@ const Header = () => {
                           </Menu.Item>
                           <Menu.Item>
                             <MyLink
+                              href="/admin/posts"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
+                            >
+                              Beiträge
+                            </MyLink>
+                          </Menu.Item>
+                          <Menu.Item>
+                            <MyLink
                               href="/leaguemanager"
                               className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
                             >
