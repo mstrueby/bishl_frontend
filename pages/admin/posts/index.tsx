@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { PostValues } from '../../../types/PostValues';
-import { PlusCircleIcon, EllipsisVerticalIcon } from '@heroicons/react/24/solid'
+import {
+  PlusCircleIcon, EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
+  DocumentArrowUpIcon, DocumentArrowDownIcon,
+  TrashIcon,
+} from '@heroicons/react/24/solid'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import LayoutAdm from "../../../components/LayoutAdm";
 import Layout from "../../../components/Layout";
@@ -124,37 +128,45 @@ export default function Posts({
                 </MenuButton>
                 <MenuItems
                   transition
-                  className="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+                  className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                 >
                   <MenuItem>
                     <a
                       href="#"
-                      className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
                     >
+                      <PencilSquareIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
                       Bearbeiten<span className="sr-only">, {post.title}</span>
                     </a>
                   </MenuItem>
                   <MenuItem>
                     <a
                       href="#"
-                      className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
                     >
+                      <StarIcon className={`h-4 w-4 mr-2 ${post.featured ? 'text-gray-500' : 'text-indigo-500'}`} aria-hidden="true" />
                       {post.featured ? 'Loslösen' : 'Anheften'}<span className="sr-only">, {post.title}</span>
                     </a>
                   </MenuItem>
                   <MenuItem>
                     <a
                       href="#"
-                      className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
                     >
+                      {post.published ? (
+                        <DocumentArrowDownIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
+                      ) : (
+                        <DocumentArrowUpIcon className="h-4 w-4 mr-2 text-green-500" aria-hidden="true" />
+                      )}
                       {post.published ? 'Entwurf' : 'Veröffentlichen'}<span className="sr-only">, {post.title}</span>
                     </a>
                   </MenuItem>
                   <MenuItem>
                     <a
                       href="#"
-                      className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
                     >
+                      <TrashIcon className="h-4 w-4 mr-2 text-red-500" aria-hidden="true" />
                       Löschen<span className="sr-only">, {post.title}</span>
                     </a>
                   </MenuItem>
