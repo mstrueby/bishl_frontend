@@ -322,7 +322,10 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
           setPostTitle(null);
           setIsModalOpen(false);
         }}
-        postTitle={postTitle}
+        title={"Beitrag löschen"}
+        description= {`Möchtest du wirklich den Beitrag ${postTitle} löschen?`}
+        descriptionStrong={postTitle}
+        descriptionSubText= {`Dies kann nicht rückgängig gemacht werden.`}
       />
       }
 
