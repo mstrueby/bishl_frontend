@@ -60,7 +60,7 @@ const Edit: NextPage<EditProps> = ({ jwt, tournament }) => {
         },
       });
 
-      if (response.status === 200) { // Assuming status 200 means success
+      if (response.status === 200) {
         router.push({
           pathname: '/leaguemanager/tournaments',
           query: { message: `Der Wettbewerb ${valuesToSend.name} wurde erfolgreich aktualisiert.` }
