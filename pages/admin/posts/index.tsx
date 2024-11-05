@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
+import axios from 'axios';
+import { getCookie } from 'cookies-next';
 import { PostValues } from '../../../types/PostValues';
+import { PlusCircleIcon } from '@heroicons/react/24/solid'
 import {
-  PlusCircleIcon, EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
+  EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
   DocumentArrowUpIcon, DocumentArrowDownIcon,
   TrashIcon,
-} from '@heroicons/react/24/solid'
+} from '@heroicons/react/24/outline'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import LayoutAdm from "../../../components/LayoutAdm";
 import Layout from "../../../components/Layout";
@@ -18,13 +21,99 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Posts({
-  postValues
-}: {
-  postValues: PostValues[]
-}) {
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
+
+interface PostsProps {
+  jwt: string,
+  posts: PostValues[]
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const jwt = getCookie('jwt', context);
+  let posts = null;
+  try {
+    const res = await axios.get(BASE_URL, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    posts = res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching posts:', error);
+    }
+  }
+  return posts ? { props: { jwt, posts } } : { props: { jwt } };
+};
+
+const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
+  const [posts, setPosts] = useState<PostValues[]>(inittialPosts);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
+
+  const fetchPosts = async () => {
+    try {
+      const res = await axios.get(BASE_URL, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      setPosts(res.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  const togglePublished = async (postId: string, currentStatus: boolean) => {
+    try {
+      const formData = new FormData();
+      formData.append('published', (!currentStatus).toString()); // Toggle the status
+
+      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        },
+      });
+      if (response.status === 200) {
+        // Handle successful response
+        console.log(`Post ${postId} published successfully.`);
+        await fetchPosts();
+      } else if (response.status === 304) {
+        // Handle not modified response
+        console.log('No changes were made to the post.');
+      } else {
+        // Handle error response
+        console.error('Failed to publish the post.');
+      }
+    } catch (error) {
+      console.error('Error publishing the post:', error);
+    }
+  }
+
+  const toggleFeatured = async (postId: string, currentStatus: boolean) => {
+    try {
+      const formData = new FormData();
+      formData.append('featured', (!currentStatus).toString()); // Toggle the status
+      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        },
+      });
+      if (response.status === 200) {
+        // Handle successful response
+        console.log(`Post ${postId} featured successfully.`);
+        await fetchPosts();
+      } else if (response.status === 304) {
+        // Handle not modified response
+        console.log('No changes were made to the post.');
+      } else {
+        // Handle error response
+        console.error('Failed to feature the post.');
+      }
+    } catch (error) {
+      console.error('Error featuring the post:', error);
+    }
+  }
 
   useEffect(() => {
     if (router.query.message) {
@@ -45,7 +134,7 @@ export default function Posts({
     setSuccessMessage(null);
   };
 
-  const dataListItems = postValues
+  const dataListItems = posts
     .slice()
     .sort((a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime())
     .map((post: PostValues) => ({
@@ -143,8 +232,13 @@ export default function Posts({
                     <a
                       href="#"
                       className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      onClick={() => post._id && toggleFeatured(post._id, post.featured)}
                     >
-                      <StarIcon className={`h-4 w-4 mr-2 ${post.featured ? 'text-gray-500' : 'text-indigo-500'}`} aria-hidden="true" />
+                      {post.featured ? (
+                        <StarIcon className={`h-4 w-4 mr-2 text-gray-500`} aria-hidden="true" />
+                      ) : (
+                        <StarIcon className={`h-4 w-4 mr-2 text-indigo-500`} aria-hidden="true" />
+                      )}
                       {post.featured ? 'Loslösen' : 'Anheften'}<span className="sr-only">, {post.title}</span>
                     </a>
                   </MenuItem>
@@ -152,6 +246,7 @@ export default function Posts({
                     <a
                       href="#"
                       className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      onClick={() => post._id && togglePublished(post._id, post.published)}
                     >
                       {post.published ? (
                         <DocumentArrowDownIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
@@ -181,19 +276,4 @@ export default function Posts({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  const postValues = await res.json();
-
-  return {
-    props: {
-      postValues,
-      revalidate: 60,
-    },
-  };
-}
+export default Posts;
