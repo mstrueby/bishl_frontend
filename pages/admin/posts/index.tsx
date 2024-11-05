@@ -15,6 +15,7 @@ import LayoutAdm from "../../../components/LayoutAdm";
 import Layout from "../../../components/Layout";
 import NavDataPosts from "../../../components/admin/navDataPosts";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
+import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { getFuzzyDate } from '../../../tools/dateUtils';
 
 function classNames(...classes: string[]) {
@@ -49,6 +50,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
   const [posts, setPosts] = useState<PostValues[]>(inittialPosts);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
+  const [postTitle, setPostTitle] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchPosts = async () => {
@@ -114,6 +118,33 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       console.error('Error featuring the post:', error);
     }
   }
+
+  const deletePost = async (postId: string) => {
+    if (!postId) return;
+    try {
+      const formData = new FormData();
+      formData.append('deleted', 'true'); // Mark the post as deleted
+
+      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+
+      if (response.status === 200) {
+        console.log(`Post ${postId} successfully deleted.`);
+        await fetchPosts(); // Refresh posts
+      } else if (response.status === 304) {
+        console.log('No changes were made to the post.');
+      } else {
+        console.error('Failed to delete post.');
+      }
+    } catch (error) {
+      console.error('Error mdeleting post:', error);
+    } finally {
+      setIsModalOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (router.query.message) {
@@ -260,6 +291,13 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
                     <a
                       href="#"
                       className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      onClick={() => {
+                        if (post._id) {
+                          setPostIdToDelete(post._id);
+                          setPostTitle(post.title);
+                          setIsModalOpen(true);
+                        }
+                      }}
                     >
                       <TrashIcon className="h-4 w-4 mr-2 text-red-500" aria-hidden="true" />
                       Löschen<span className="sr-only">, {post.title}</span>
@@ -271,6 +309,22 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
           </li>
         ))}
       </ul>
+
+      {isModalOpen && 
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={() => {
+          if (postIdToDelete !== null) {
+            deletePost(postIdToDelete);
+          }
+          setPostIdToDelete(null);
+          setPostTitle(null);
+          setIsModalOpen(false);
+        }}
+        postTitle={postTitle}
+      />
+      }
 
     </Layout>
   );

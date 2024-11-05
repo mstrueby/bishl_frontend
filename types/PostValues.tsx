@@ -1,5 +1,5 @@
 export interface PostValues {
-  _id?: string;
+  _id: string;
   title: string;
   alias: string;
   content: string;
