@@ -7,14 +7,15 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import PostForm from '../../../../components/admin/PostForm';
 import Layout from '../../../../components/Layout';
-import { PostValues } from '../../../../types/PostValues';
+import SectionHeader from "../../../../components/admin/SectionHeader";
+import { PostValuesEdit } from '../../../../types/PostValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface EditProps {
   jwt: string,
-  post: PostValues
+  post: PostValuesEdit
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -44,7 +45,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
   const router = useRouter();
 
   // Handler for form submission
-  const onSubmit = async (values: PostValues) => {
+  const onSubmit = async (values: PostValuesEdit) => {
     setError(null);
     console.log(values);
     try {
@@ -57,8 +58,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
         }
       });
 
-      
-      console.log('FormData Debug:', ...formData.entries());
+      //console.log('FormData Debug:', ...formData.entries());
 
       const response = await axios.patch(BASE_URL + post._id, formData, {
         headers: {
@@ -68,7 +68,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
       if (response.status === 200 || response.status === 304) {
         router.push({
           pathname: '/admin/posts',
-          query: { message: `Der Beitrag ${values.title} wurde erfolgreich aktualisiert.` }
+          query: { message: `Der Beitrag <strong>${values.title}</strong> wurde erfolgreich aktualisiert.` }
         }, `/admin/posts`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -93,7 +93,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
     setError(null);
   };
 
-  const intialValues: PostValues = {
+  const intialValues: PostValuesEdit = {
     _id: post._id,
     title: post.title,
     alias: post.alias,
@@ -106,12 +106,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
 
   return (
     <Layout>
-      {/* Section Header */}
-      <div className="border-b border-gray-200 mb-6 flex items-center justify-between">
-        <h2 className="my-4 text-2xl font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-          {sectionTitle}
-        </h2>
-      </div>
+      <SectionHeader title={sectionTitle} />
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
@@ -120,8 +115,8 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
-      />          
-      
+      />
+
     </Layout>
   )
 };

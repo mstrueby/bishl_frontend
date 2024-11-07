@@ -1,16 +1,16 @@
 import React from 'react'
-import { Formik, Form, useFormikContext } from 'formik'
+import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import InputText from '../ui/form/InputText'
+import { AutoAlias } from '../../tools/autoAlias';
 import ButtonPrimary from '../ui/form/ButtonPrimary'
 import ButtonLight from '../ui/form/ButtonLight'
 import Toggle from '../ui/form/Toggle'
-import MyListbox from '../ui/form/Listbox'
-import { PostValues } from '../../types/PosetValues'
+import { PostValuesAdd } from '../../types/PostValues'
 
 interface PostFormProps {
-  initialValues: PostValues;
-  onSubmit: (values: PostValues) => void;
+  initialValues: PostValuesAdd;
+  onSubmit: (values: PostValuesAdd) => void;
   enableReinitialize?: boolean;
   handleCancel: () => void;
 }
@@ -40,19 +40,12 @@ const PostForm: React.FC<PostFormProps> = ({
             <InputText
               name="title"
               label="Titel"
-              placeholder="Geben Sie den Titel des Beitrags ein"
               onChange={handleChange}
             />
-            <InputText
-              name="alias"
-              label="Alias"
-              placeholder="Geben Sie den Alias des Beitrags ein"
-              onChange={handleChange}
-            />
+            <AutoAlias field="title" targetField="alias" />
             <InputText
               name="content"
               label="Inhalt"
-              placeholder="Geben Sie den Inhalt des Beitrags ein"
               onChange={handleChange}
             />
             <Toggle

@@ -2,6 +2,7 @@ import React from 'react';
 import { Formik, Form, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
+import { AutoAlias } from '../../tools/autoAlias';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
@@ -16,18 +17,6 @@ interface SeasonFormProps {
   handleCancel: () => void;
 }
 
-const handleAliasValue = (nameValue: string) => {
-  return nameValue.trim().toLowerCase().replace(/\./g, '').replace(/ /g, '-').replace(/ü/g, 'ue').replace(/ö/g, 'oe').replace(/ä/g, 'ae').replace(/ß/g, 'ss');
-}
-
-const AutoAlias = () => {
-  const { values, setFieldValue } = useFormikContext<any>();
-  React.useEffect(() => {
-    const transformedAlias = handleAliasValue(values.name);
-    setFieldValue('alias', transformedAlias);
-  }, [values.name, setFieldValue]);
-  return null;
-};
 
 const SeasonForm: React.FC<SeasonFormProps> = ({
   initialValues,
@@ -55,7 +44,7 @@ const SeasonForm: React.FC<SeasonFormProps> = ({
               label="Name (Jahr)"
               onChange={formikProps.handleChange}
             />
-            <AutoAlias />
+            <AutoAlias field="name" targetField="alias"/>
             <InputText
               name="alias"
               type="text"

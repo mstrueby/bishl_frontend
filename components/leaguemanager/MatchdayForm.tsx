@@ -8,7 +8,7 @@ import Toggle from '../ui/form/Toggle';
 import MyListbox from '../ui/form/Listbox'
 //import LogoUpload from '../ui/form/LogoUpload';
 import { MatchdayValues } from '../../types/TournamentValues';
-import { AutoAlias } from '../../tools/utils';
+import { AutoAlias } from '../../tools/autoAlias';
 
 interface MatchdayFormProps {
   initialValues: MatchdayValues;
@@ -52,7 +52,7 @@ const MatchdayForm: React.FC<MatchdayFormProps> = ({
               label="Name"
               onChange={formikProps.handleChange}
             />
-            <AutoAlias />
+            <AutoAlias field="name" targetField="alias"/>
             <InputText
               name="alias"
               type="text"

@@ -1,4 +1,4 @@
-export interface PostValues {
+export interface PostValuesDisplay {
   _id: string;
   title: string;
   alias: string;
@@ -7,7 +7,7 @@ export interface PostValues {
     firstName: string;
     lastName: string;
   };
-  tags: string[];
+  //tags: string[];
   image: string;
   published: boolean;
   featured: boolean;
@@ -25,4 +25,16 @@ export interface PostValues {
     firstName: string;
     lastName: string;
   }
+}
+
+export interface PostValuesAdd {
+  title: string;
+  alias: string;
+  content: string;
+  published: boolean;
+  featured: boolean;
+}
+
+export interface PostValuesEdit extends PostValuesAdd {
+  _id: string;
 }

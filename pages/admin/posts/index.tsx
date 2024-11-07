@@ -4,17 +4,15 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
-import { PostValues } from '../../../types/PostValues';
-import { PlusCircleIcon } from '@heroicons/react/24/solid'
+import { PostValuesDisplay } from '../../../types/PostValues';
 import {
   EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
   DocumentArrowUpIcon, DocumentArrowDownIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import LayoutAdm from "../../../components/LayoutAdm";
 import Layout from "../../../components/Layout";
-import NavDataPosts from "../../../components/admin/navDataPosts";
+import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { getFuzzyDate } from '../../../tools/dateUtils';
@@ -27,7 +25,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface PostsProps {
   jwt: string,
-  posts: PostValues[]
+  posts: PostValuesDisplay[]
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -49,7 +47,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
-  const [posts, setPosts] = useState<PostValues[]>(inittialPosts);
+  const [posts, setPosts] = useState<PostValuesDisplay[]>(inittialPosts);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
@@ -169,10 +167,11 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
   const dataListItems = posts
     .slice()
     .sort((a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime())
-    .map((post: PostValues) => ({
+    .map((post: PostValuesDisplay) => ({
       _id: post._id,
       title: post.title,
       alias: post.alias,
+      author: post.author.firstName + ' ' + post.author.lastName,
       createUser: post.createUser.firstName + ' ' + post.createUser.lastName,
       createDate: new Date(new Date(post.createDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
       updateUser: post.updateUser ? (post.updateUser.firstName + ' ' + post.updateUser.lastName) : '-',
@@ -191,25 +190,11 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
 
   return (
     <Layout>
-      {/* Section Header */}
-      <div className="border-b border-gray-200 mb-6 flex items-center justify-between">
-        <h2 className="my-4 text-2xl font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-          {sectionTitle}
-        </h2>
-        <div className="flex lg:ml-4">
-          {newLink && (
-            <button
-              type="button"
-              className="ml-auto flex items-center gap-x-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              onClick={() => router.push(newLink)}
-            >
-              <PlusCircleIcon className="-ml-1.5 h-5 w-5" aria-hidden="true" />
-              Neu
-            </button>
-          )}
-        </div>
-      </div>
-
+      <SectionHeader
+        title={sectionTitle}
+        newLink= {newLink}
+      />
+      
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
       <ul role="list" className="divide-y divide-gray-100">
@@ -231,7 +216,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
               </div>
               <div className="mt-1 flex items-center gap-x-2 text-xs/5 text-gray-500">
                 <p className="whitespace-nowrap">
-                  erstellt von {post.createUser}
+                  erstellt von {post.author}
                 </p>
                 <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
                   <circle r={1} cx={1} cy={1} />

@@ -1,3 +1,4 @@
+import React from 'react';
 import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 
 interface SuccessMessageProps {
@@ -7,6 +8,16 @@ interface SuccessMessageProps {
 
 const SuccessMessage: React.FC<SuccessMessageProps> = ({ message, onClose }) => {
   if (!message) return null;
+  
+  // Replace <em> tags with <strong> tags
+  const formatMessage = (msg: string) => {
+    const regex = /<strong>(.*?)<\/strong>/g;
+    const parts = msg.split(regex);
+    return parts.map((part, index) => 
+      index % 2 === 1 ? <strong key={index}>{part}</strong> : part
+    );
+  };
+  
   return (
       <div className="border-l-4 border-green-400 rounded-md bg-green-50 p-4 mb-4 md:mx-6 lg:mx-8">
         <div className="flex">
@@ -14,7 +25,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ message, onClose }) => 
             <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-green-800">{message}</p>
+            <p className="text-sm font-medium text-green-800">{formatMessage(message)}</p>
           </div>
           <div className="ml-auto pl-3">
             <div className="-mx-1.5 -my-1.5">

@@ -8,7 +8,7 @@ import Toggle from '../ui/form/Toggle';
 import MyListbox from '../ui/form/Listbox'
 //import LogoUpload from '../ui/form/LogoUpload';
 import { RoundValues } from '../../types/TournamentValues';
-import { AutoAlias } from '../../tools/utils';
+import { AutoAlias } from '../../tools/autoAlias';
 
 interface RoundFormProps {
   initialValues: RoundValues;
@@ -59,7 +59,7 @@ const RoundForm: React.FC<RoundFormProps> = ({
               label="Name"
               onChange={formikProps.handleChange}
             />
-            <AutoAlias />
+            <AutoAlias field="name" targetField="alias"/>
             <InputText
               name="alias"
               type="text"
