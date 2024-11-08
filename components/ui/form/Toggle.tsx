@@ -1,6 +1,6 @@
 import { useField } from 'formik';
 import { useState, useEffect, ComponentPropsWithoutRef } from 'react';
-import { Switch } from '@headlessui/react'
+import { Field, Label, Description, Switch } from '@headlessui/react'
 
 interface ToggleProps extends ComponentPropsWithoutRef<'input'> {
   name: string;
@@ -31,14 +31,14 @@ const Toggle = ({ name, label, description, ...props }: ToggleProps) => {
   }, [field.value])
 
   return (
-    <Switch.Group as="li" className="flex items-center justify-between mt-6 mb-2">
+    <Field as="li" className="flex items-center justify-between mt-6 mb-2">
       <div className="flex flex-col">
-        <Switch.Label as="p" className="text-sm font-medium text-gray-900" passive>
+        <Label as="span" className="text-sm font-medium text-gray-900" passive>
           {label}
-        </Switch.Label>
-        <Switch.Description className="text-sm text-gray-500">
+        </Label>
+        <Description as="span" className="text-xs sm:text-sm text-gray-500">
           {description}
-        </Switch.Description>
+        </Description>
       </div>
       <Switch
         value="true"
@@ -47,7 +47,7 @@ const Toggle = ({ name, label, description, ...props }: ToggleProps) => {
         onChange={handleChange}
         className={classNames(
           enabled ? 'bg-indigo-600' : 'bg-gray-200',
-          'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+          'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2'
         )}
       >
         <span className="sr-only">{label}</span>
@@ -59,7 +59,7 @@ const Toggle = ({ name, label, description, ...props }: ToggleProps) => {
           )}
         />
       </Switch>
-    </Switch.Group>
+    </Field>
   )
 };
 

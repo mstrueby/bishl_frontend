@@ -43,10 +43,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const Edit: NextPage<EditProps> = ({ jwt, club, cAlias }) => {
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   // Handler for form submission
   const onSubmit = async (values: ClubValues) => {
+    setLoading(true);
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
       if (key === 'logo' && typeof value === 'string') {
@@ -83,6 +85,8 @@ const Edit: NextPage<EditProps> = ({ jwt, club, cAlias }) => {
       }
     } catch (error) {
       setError('Ein Fehler ist aufgetreten.');
+    } finally {
+      setLoading(false);
     }
   };
 

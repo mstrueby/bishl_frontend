@@ -16,6 +16,7 @@ interface PostFormProps {
   onSubmit: (values: PostValuesAdd) => void;
   enableReinitialize?: boolean;
   handleCancel: () => void;
+  loading: boolean;
 }
 
 const PostForm: React.FC<PostFormProps> = ({
@@ -23,14 +24,17 @@ const PostForm: React.FC<PostFormProps> = ({
   onSubmit,
   enableReinitialize,
   handleCancel,
+  loading,
 }) => {
+
   return (
     <Formik
       initialValues={initialValues}
       enableReinitialize={enableReinitialize}
       validationSchema={Yup.object({
-        title: Yup.string().required('Das Feld "Titel" ist erforderlich.'),
-        alias: Yup.string().required('Das Feld "Alias" ist erforderlich.'),
+        title: Yup.string()
+          .required('Das Feld "Titel" ist erforderlich.')
+          .max(100, 'Das Feld "Titel" darf maximal 100 Zeichen enthalten.'),
         content: Yup.string().required('Das Feld "Inhalt" ist erforderlich.'),
         published: Yup.boolean(),
         featured: Yup.boolean(),
@@ -64,11 +68,13 @@ const PostForm: React.FC<PostFormProps> = ({
             name="published"
             type="checkbox"
             label="Veröffentlicht"
+            description="Der Beitrag ist generell auf der Website auffindbar."
           />
           <Toggle
             name="featured"
             type="checkbox"
             label="Angeheftet"
+            description="Der Beitrag wird als oberster Beitrag auf der Startseite angezeigt."
           />
           <div className="mt-4 flex justify-end py-4">
             <ButtonLight
@@ -81,6 +87,7 @@ const PostForm: React.FC<PostFormProps> = ({
               name="btnPrimary"
               type="submit"
               label="Speichern"
+              isLoading={loading}
             />
           </div>
         </Form>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useField } from 'formik';
 import type { ChangeEvent, ComponentPropsWithoutRef } from 'react';
-import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 
 interface ImageUploadProps extends ComponentPropsWithoutRef<'input'> {
@@ -42,10 +41,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ name, label, imageUrl, ...pro
       <input
         type="file"
         onChange={handleFileChange}
-        className="block w-full text-sm text-gray-900 file:mr-4 file:rounded file:border-0 file:py-2 file:px-4 file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+        className="block w-full text-sm text-gray-900 file:mr-4 file:rounded-md file:border-0 file:py-2 file:px-4 file:bg-indigo-600 file:text-white hover:file:bg-indigo-800"
         {...props}
         id={props.id || name}
       />
+      <p id="image-upload-description" className="mt-2 text-xs sm:text-sm text-gray-500">
+        Das neue Bild wird erst nach <em>Speichern</em> hochgeladen und angezeigt.
+      </p>
       {meta.touched && meta.error ? (
         <p className="mt-2 text-sm text-red-600">
           {meta.error}

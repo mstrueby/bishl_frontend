@@ -47,6 +47,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
   // Handler for form submission
   const onSubmit = async (values: PostValuesEdit) => {
     setError(null);
+    setLoading(true);
     console.log(values);
     try {
       const formData = new FormData();
@@ -75,6 +76,8 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
       }
     } catch (error) {
       setError('Ein Fehler ist aufgetreten.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,6 +119,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
+        loading={loading}
       />
 
     </Layout>
