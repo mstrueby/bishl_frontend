@@ -8,7 +8,7 @@ export interface PostValuesDisplay {
     lastName: string;
   };
   //tags: string[];
-  image: string;
+  imageUrl: string;
   published: boolean;
   featured: boolean;
   publishDateFrom: Date;
@@ -30,6 +30,7 @@ export interface PostValuesDisplay {
 export interface PostValuesAdd {
   title: string;
   alias: string;
+  imageUrl: string;
   content: string;
   published: boolean;
   featured: boolean;

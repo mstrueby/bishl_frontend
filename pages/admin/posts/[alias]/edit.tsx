@@ -97,6 +97,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
     _id: post._id,
     title: post.title,
     alias: post.alias,
+    imageUrl: post.imageUrl,
     content: post.content,
     published: post.published,
     featured: post.featured,

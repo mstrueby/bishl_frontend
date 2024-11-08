@@ -8,6 +8,7 @@ import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
 import { PostValuesAdd } from '../../types/PostValues';
 import RichEditor from '../ui/form/RichEditor';
+import ImageUpload from '../ui/form/ImageUpload';
 
 // Define Props
 interface PostFormProps {
@@ -44,6 +45,7 @@ const PostForm: React.FC<PostFormProps> = ({
             onChange={handleChange}
           />
           <AutoAlias field="title" targetField="alias" />
+          <ImageUpload name="image" label="Beitragsbild" imageUrl={initialValues.imageUrl} />
           <label
             htmlFor="content"
             className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
