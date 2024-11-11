@@ -6,7 +6,7 @@ import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import PostForm from '../../../components/admin/PostForm'
-import { PostValuesAdd } from '../../../types/PostValues';
+import { PostValuesForm } from '../../../types/PostValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/posts/"
@@ -25,7 +25,8 @@ export default function Add({ jwt }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: PostValuesAdd = {
+  const initialValues: PostValuesForm = {
+    _id: '',
     title: '',
     alias: '',
     content: '',
@@ -33,7 +34,7 @@ export default function Add({ jwt }: AddProps) {
     featured: false,
   };
 
-  const onSubmit = async (values: PostValuesAdd) => {
+  const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
 
@@ -81,13 +82,6 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
-  const formProps = {
-    initialValues,
-    onSubmit,
-    enableReinitialize: true,
-    handleCancel,
-  };
-
   const sectionTitle = 'Beitrag erstellen';
   
   return (
@@ -101,6 +95,7 @@ export default function Add({ jwt }: AddProps) {
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
+        loading={loading}
       />
     </Layout>
   )

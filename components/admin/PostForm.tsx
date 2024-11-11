@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, Form, Field, FieldProps } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
@@ -6,15 +6,16 @@ import { AutoAlias } from '../../tools/autoAlias';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
-import { PostValuesAdd } from '../../types/PostValues';
+import { PostValuesForm } from '../../types/PostValues';
 import RichEditor from '../ui/form/RichEditor';
 import ImageUpload from '../ui/form/ImageUpload';
+import { CldImage } from 'next-cloudinary'; // To display the image
 
-// Define Props
+// Define the PostFormProps interface
 interface PostFormProps {
-  initialValues: PostValuesAdd;
-  onSubmit: (values: PostValuesAdd) => void;
-  enableReinitialize?: boolean;
+  initialValues: PostValuesForm;
+  onSubmit: (values: PostValuesForm) => void;
+  enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
 }
@@ -26,7 +27,6 @@ const PostForm: React.FC<PostFormProps> = ({
   handleCancel,
   loading,
 }) => {
-
   return (
     <Formik
       initialValues={initialValues}
@@ -49,7 +49,32 @@ const PostForm: React.FC<PostFormProps> = ({
             onChange={handleChange}
           />
           <AutoAlias field="title" targetField="alias" />
-          <ImageUpload name="image" label="Beitragsbild" imageUrl={initialValues.imageUrl} />
+
+          {values.imageUrl ? (
+
+            <div>
+              <div>
+                <span className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
+                  Beitragsbild
+                </span>
+                <CldImage src={values.imageUrl} alt="Uploaded image" width={600} height={337} aspectRatio="16:9"
+                  crop="fill"
+                  gravity="auto"
+                  className="aspect-[16/9] w-full rounded-xl object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setFieldValue("imageUrl", null)}
+                className="mt-2 inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 sm:ml-0 sm:w-auto"
+              >
+                Bild entfernen
+              </button>
+            </div>
+          ) : (
+            <ImageUpload name="image" label="Beitragsbild" imageUrl={initialValues.imageUrl} />
+          )}
+
           <label
             htmlFor="content"
             className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">

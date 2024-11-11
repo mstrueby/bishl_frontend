@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
-import { PostValuesDisplay } from '../../../types/PostValues';
+import { PostValues } from '../../../types/PostValues';
 import {
   EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
   DocumentArrowUpIcon, DocumentArrowDownIcon,
@@ -16,6 +16,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { getFuzzyDate } from '../../../tools/dateUtils';
+import { CldImage } from 'next-cloudinary';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -25,7 +26,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface PostsProps {
   jwt: string,
-  posts: PostValuesDisplay[]
+  posts: PostValues[]
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -47,7 +48,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
-  const [posts, setPosts] = useState<PostValuesDisplay[]>(inittialPosts);
+  const [posts, setPosts] = useState<PostValues[]>(inittialPosts);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
@@ -67,10 +68,13 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     }
   };
 
-  const togglePublished = async (postId: string, currentStatus: boolean) => {
+  const togglePublished = async (postId: string, currentStatus: boolean, imageUrl: string | null) => {
     try {
       const formData = new FormData();
       formData.append('published', (!currentStatus).toString()); // Toggle the status
+      if (imageUrl) {
+        formData.append('imageUrl', imageUrl);
+      }
 
       const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
         headers: {
@@ -93,10 +97,13 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     }
   }
 
-  const toggleFeatured = async (postId: string, currentStatus: boolean) => {
+  const toggleFeatured = async (postId: string, currentStatus: boolean, imageUrl: string | null) => {
     try {
       const formData = new FormData();
       formData.append('featured', (!currentStatus).toString()); // Toggle the status
+      if (imageUrl) {
+        formData.append('imageUrl', imageUrl);
+      }
       const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
@@ -167,11 +174,12 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
   const dataListItems = posts
     .slice()
     .sort((a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime())
-    .map((post: PostValuesDisplay) => ({
+    .map((post: PostValues) => ({
       _id: post._id,
       title: post.title,
       alias: post.alias,
       author: post.author.firstName + ' ' + post.author.lastName,
+      imageUrl: post.imageUrl,
       createUser: post.createUser.firstName + ' ' + post.createUser.lastName,
       createDate: new Date(new Date(post.createDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
       updateUser: post.updateUser ? (post.updateUser.firstName + ' ' + post.updateUser.lastName) : '-',
@@ -192,15 +200,29 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     <Layout>
       <SectionHeader
         title={sectionTitle}
-        newLink= {newLink}
+        newLink={newLink}
       />
-      
+
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
       <ul role="list" className="divide-y divide-gray-100">
         {dataListItems.map((post, index) => (
           <li key={post._id} className="flex items-center justify-between gap-x-6 py-5">
-            <div className="min-w-0">
+            <div className="hidden sm:inline-block flex-none ">
+              <CldImage
+                src={post.imageUrl || 'placeholder-image-url'}
+                alt="Post Thumbnail"
+                className="object-cover rounded-lg"
+                width={128} height={72} // Changed size to fit aspect ratio 16:9
+                //layout="fill"
+                //sizes="100vw"
+                crop="fill" // Change from "thumb" to "fit" to make it a rectangle
+                gravity="auto" // Changed from "face" to "auto" for rectangle cropping
+                radius="18" // Use specific value to create rounded corners
+                aspectRatio="16:9" // Set the aspect ratio to 16:9
+              />
+            </div>
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-x-3">
                 <div className={classNames(statuses[post.published ? 'Published' : 'Draft'], 'flex-none rounded-full p-1')}>
                   <div className="h-2 w-2 rounded-full bg-current" />
@@ -226,7 +248,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
             </div>
 
             {/* Context Menu */}
-            <div className="flex flex-none items-center gap-x-4">
+            <div className="flex-none gap-x-4">
               <Menu as="div" className="relative flex-none">
                 <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
                   <span className="sr-only">Open options</span>
@@ -250,7 +272,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
                     <a
                       href="#"
                       className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => post._id && toggleFeatured(post._id, post.featured)}
+                      onClick={() => post._id && toggleFeatured(post._id, post.featured, post.imageUrl)}
                     >
                       {post.featured ? (
                         <StarIcon className={`h-4 w-4 mr-2 text-gray-500`} aria-hidden="true" />
@@ -264,7 +286,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
                     <a
                       href="#"
                       className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => post._id && togglePublished(post._id, post.published)}
+                      onClick={() => post._id && togglePublished(post._id, post.published, post.imageUrl)}
                     >
                       {post.published ? (
                         <DocumentArrowDownIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
@@ -297,23 +319,23 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
         ))}
       </ul>
 
-      {isModalOpen && 
-      <DeleteConfirmationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={() => {
-          if (postIdToDelete !== null) {
-            deletePost(postIdToDelete);
-          }
-          setPostIdToDelete(null);
-          setPostTitle(null);
-          setIsModalOpen(false);
-        }}
-        title={"Beitrag löschen"}
-        description= {`Möchtest du wirklich den Beitrag ${postTitle} löschen?`}
-        descriptionStrong={postTitle}
-        descriptionSubText= {`Dies kann nicht rückgängig gemacht werden.`}
-      />
+      {isModalOpen &&
+        <DeleteConfirmationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={() => {
+            if (postIdToDelete !== null) {
+              deletePost(postIdToDelete);
+            }
+            setPostIdToDelete(null);
+            setPostTitle(null);
+            setIsModalOpen(false);
+          }}
+          title={"Beitrag löschen"}
+          description={`Möchtest du wirklich den Beitrag ${postTitle} löschen?`}
+          descriptionStrong={postTitle}
+          descriptionSubText={`Dies kann nicht rückgängig gemacht werden.`}
+        />
       }
 
     </Layout>

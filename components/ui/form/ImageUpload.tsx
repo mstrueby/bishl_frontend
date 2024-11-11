@@ -1,7 +1,6 @@
 import React from 'react';
 import { useField } from 'formik';
 import type { ChangeEvent, ComponentPropsWithoutRef } from 'react';
-import { CldImage } from 'next-cloudinary';
 
 interface ImageUploadProps extends ComponentPropsWithoutRef<'input'> {
   label: string;
@@ -21,23 +20,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ name, label, imageUrl, ...pro
       <label htmlFor={props.id || name} className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
         {label}
       </label>
-      {
-        imageUrl && (
-          //<div className="flex items-center justify-center w-full h-64 bg-gray-200">
-          <div className="flex justify-left mb-2">
-            <CldImage
-              src={imageUrl}
-              alt="Uploaded image"
-              width={600}
-              height={337}
-              aspectRatio="16:9"
-              crop="fill"
-              gravity="auto"
-              className="aspect-[16/9] w-full rounded-xl object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-            />
-          </div>
-        )
-      }
       <input
         type="file"
         onChange={handleFileChange}

@@ -8,14 +8,14 @@ import axios from 'axios';
 import PostForm from '../../../../components/admin/PostForm';
 import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
-import { PostValuesEdit } from '../../../../types/PostValues';
+import { PostValuesForm } from '../../../../types/PostValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface EditProps {
   jwt: string,
-  post: PostValuesEdit
+  post: PostValuesForm
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -45,22 +45,22 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
   const router = useRouter();
 
   // Handler for form submission
-  const onSubmit = async (values: PostValuesEdit) => {
+  const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
-    console.log(values);
+    console.log('Submitted values:', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else {
+        } else if (key === 'imageUrl' && value !== null) {
+          // Only append imageUrl if it is not null
+          formData.append(key, value);
+        } else if (key !== 'imageUrl') {
           formData.append(key, value);
         }
       });
-
-      //console.log('FormData Debug:', ...formData.entries());
-
       const response = await axios.patch(BASE_URL + post._id, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -96,7 +96,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
     setError(null);
   };
 
-  const intialValues: PostValuesEdit = {
+  const intialValues: PostValuesForm = {
     _id: post._id,
     title: post.title,
     alias: post.alias,

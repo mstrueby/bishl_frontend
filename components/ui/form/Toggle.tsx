@@ -31,14 +31,14 @@ const Toggle = ({ name, label, description, ...props }: ToggleProps) => {
   }, [field.value])
 
   return (
-    <Field as="li" className="flex items-center justify-between mt-6 mb-2">
+    <li as="li" className="flex items-center justify-between mt-6 mb-2">
       <div className="flex flex-col">
-        <Label as="span" className="text-sm font-medium text-gray-900" passive>
+        <span className="text-sm font-medium text-gray-900">
           {label}
-        </Label>
-        <Description as="span" className="text-xs sm:text-sm text-gray-500">
+        </span>
+        <span className="text-xs sm:text-sm text-gray-500">
           {description}
-        </Description>
+        </span>
       </div>
       <Switch
         value="true"
@@ -59,7 +59,7 @@ const Toggle = ({ name, label, description, ...props }: ToggleProps) => {
           )}
         />
       </Switch>
-    </Field>
+    </li>
   )
 };
 

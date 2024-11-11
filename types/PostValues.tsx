@@ -1,4 +1,4 @@
-export interface PostValuesDisplay {
+export interface PostValues {
   _id: string;
   title: string;
   alias: string;
@@ -27,15 +27,12 @@ export interface PostValuesDisplay {
   }
 }
 
-export interface PostValuesAdd {
+export interface PostValuesForm {
+  _id: string;
   title: string;
   alias: string;
-  imageUrl: string;
+  imageUrl?: string;
   content: string;
   published: boolean;
   featured: boolean;
-}
-
-export interface PostValuesEdit extends PostValuesAdd {
-  _id: string;
 }
