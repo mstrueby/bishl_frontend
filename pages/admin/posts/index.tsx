@@ -208,20 +208,20 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       <ul role="list" className="divide-y divide-gray-100">
         {dataListItems.map((post, index) => (
           <li key={post._id} className="flex items-center justify-between gap-x-6 py-5">
-            <div className="hidden sm:inline-block flex-none ">
+
+            {post.imageUrl ? (
               <CldImage
-                src={post.imageUrl || 'placeholder-image-url'}
+                src={post.imageUrl}
                 alt="Post Thumbnail"
-                className="object-cover rounded-lg"
-                width={128} height={72} // Changed size to fit aspect ratio 16:9
-                //layout="fill"
-                //sizes="100vw"
-                crop="fill" // Change from "thumb" to "fit" to make it a rectangle
-                gravity="auto" // Changed from "face" to "auto" for rectangle cropping
-                radius="18" // Use specific value to create rounded corners
-                aspectRatio="16:9" // Set the aspect ratio to 16:9
+                className="rounded-lg object-cover"
+                width={128} height={72}
+                crop="fill"
+                gravity="auto"
+                radius={18}
               />
-            </div>
+            ) : (
+              <div className="relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-x-3">
                 <div className={classNames(statuses[post.published ? 'Published' : 'Draft'], 'flex-none rounded-full p-1')}>

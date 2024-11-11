@@ -14,7 +14,7 @@ const navigation = {
     { name: 'Dokumente', href: '#' },
   ],
   company: [
-    { name: 'About', href: '#' },
+    { name: 'News', href: '/posts' },
     { name: 'Blog', href: '#' },
     { name: 'Jobs', href: '#' },
     { name: 'Press', href: '#' },
