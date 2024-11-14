@@ -1,17 +1,9 @@
-import { useState, useEffect } from "react";
 import { GetServerSideProps, NextPage } from 'next';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
 import Head from 'next/head';
+import Link from 'next/link';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { PostValues } from '../types/PostValues';
-import {
-  EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
-  DocumentArrowUpIcon, DocumentArrowDownIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import Layout from "../components/Layout";
 import { getFuzzyDate } from '../tools/dateUtils';
 import { ArrowLongRightIcon } from '@heroicons/react/20/solid';
@@ -24,15 +16,18 @@ function classNames(...classes: string[]) {
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface PostsProps {
-  jwt: string,
+  jwt: string | null,
   posts: PostValues[]
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = getCookie('jwt', context) || null;
   let posts = null;
   try {
     const res = await axios.get(BASE_URL, {
+      params: {
+        published: true
+      },
       headers: {
         'Content-Type': 'application/json',
       }
@@ -98,6 +93,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts }) => {
                         crop="fill"
                         gravity="auto"
                         radius={18}
+                        priority
                       />
                     ) : (
                       <div className="inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10 aspect-[16/9] w-full bg-gray-100 object-cover"></div>
@@ -118,10 +114,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts }) => {
                     </div>
                     <div className="group relative">
                       <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                        <a href="#">
-                          <span className="absolute inset-0" />
-                          {post.title}
-                        </a>
+                        <Link href={`/posts/${post.alias}`} passHref>
+                          <a>
+                            <span className="absolute inset-0" />
+                            {post.title}
+                          </a>
+                        </Link>
                       </h3>
                       <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                     </div>
@@ -143,14 +141,16 @@ const Home: NextPage<PostsProps> = ({ jwt, posts }) => {
                 </article>
               ))}
             </div>
-            <div className="flex justify-center sm:justify-end w-full mt-20 sm:mt-12">
-              <Link href="/posts" passHref>
-                <a className="w-full sm:w-auto rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 flex items-center gap-2">
-                  Weitere Artikel
-                  <ArrowLongRightIcon className="h-5 w-5" aria-hidden="true" />
-                </a>
-              </Link>
-            </div>
+            {postItems.length > 0 && (
+              <div className="flex justify-center sm:justify-end w-full mt-20 sm:mt-12">
+                <Link href="/posts" passHref>
+                  <a className="inline-flex items-center justify-center w-full sm:w-auto rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 flex items-center gap-2">
+                    Weitere Artikel
+                    <ArrowLongRightIcon className="h-5 w-5" aria-hidden="true" />
+                  </a>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </Layout>

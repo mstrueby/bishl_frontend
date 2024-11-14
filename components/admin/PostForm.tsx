@@ -89,6 +89,22 @@ const PostForm: React.FC<PostFormProps> = ({
               )}
             </Field>
           </div>
+          <div className="border-b border-gray-900/10 pb-10 mb-12">
+            <h2 className="text-base/7 font-semibold text-gray-900 mt-6">Author</h2>
+            <p className="mt-1 text-sm/6 text-gray-500">Gib einen abweichenden Author ein</p>
+            <InputText
+              name="author.firstName"
+              label="Vorname"
+              onChange={handleChange}
+              value={values.author.firstName}
+            />
+            <InputText
+              name="author.lastName"
+              label="Nachname"
+              onChange={handleChange}
+              value={values.author.lastName}
+            />
+          </div>
           <Toggle
             name="published"
             type="checkbox"

@@ -12,15 +12,38 @@ import ErrorMessage from '../../../components/ui/ErrorMessage';
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/posts/"
 
 interface AddProps {
-  jwt: string
+  jwt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+  }
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const jwt = getCookie('jwt', { req, res });
-  return { props: { jwt } };
+  let user = {
+    firstName: "",
+    lastName: ""
+  };
+  try {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+    user = res.data;
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+  }
+  return {
+    props: {
+      jwt,
+      user
+    }
+  }
 }
 
-export default function Add({ jwt }: AddProps) {
+export default function Add({ jwt, user }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -32,16 +55,24 @@ export default function Add({ jwt }: AddProps) {
     content: '',
     published: false,
     featured: false,
+    author: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+    },
   };
 
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
-
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value);
+        if (key === 'author') {
+          // Convert author object to JSON string before appending
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value as string); // Ensure value is of string type
+        }
       });
 
       const response = await axios.post(BASE_URL, formData, {
@@ -83,7 +114,7 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const sectionTitle = 'Beitrag erstellen';
-  
+
   return (
     <Layout>
       <SectionHeader title={sectionTitle} />

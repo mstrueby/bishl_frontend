@@ -35,4 +35,8 @@ export interface PostValuesForm {
   content: string;
   published: boolean;
   featured: boolean;
+  author: {
+    firstName: string;
+    lastName: string;
+  }
 }

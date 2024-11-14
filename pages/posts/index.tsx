@@ -1,17 +1,9 @@
-import { useState, useEffect } from "react";
 import Head from "next/head";
 import { GetServerSideProps, NextPage } from 'next';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
 import axios from 'axios';
+import Link from 'next/link';
 import { getCookie } from 'cookies-next';
 import { PostValues } from '../../types/PostValues';
-import {
-  EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
-  DocumentArrowUpIcon, DocumentArrowDownIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import Layout from "../..//components/Layout";
 import { getFuzzyDate } from '../../tools/dateUtils';
 import { CldImage } from 'next-cloudinary';
@@ -32,6 +24,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let posts = null;
   try {
     const res = await axios.get(BASE_URL, {
+      params: {
+        published: true
+      },
       headers: {
         'Content-Type': 'application/json',
       },
@@ -85,10 +80,13 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
             <div className="mx-auto max-w-2xl lg:max-w-4xl">
               <h2 className="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Aktuelles</h2>
               {/*<p className="mt-2 text-lg/8 text-gray-600">Learn how to grow your business with our expert advice.</p>*/}
-              <div className="mt-16 space-y-20 lg:mt-20 lg:space-y-20">
+              {postItems.length === 0 ? (
+                <p className="mt-20 text-lg/8 text-gray-500">Keine Beiträge vorhanden.</p>
+              ) : (
+                <div className="mt-16 space-y-20 lg:mt-20 lg:space-y-20">
                 {postItems.map((post) => (
-                  <article key={post._id} className="relative isolate flex flex-col gap-8 lg:flex-row">
-                    <div className="relative w-1/3">
+                  <article key={post._id} className="relative isolate flex flex-col gap-8 sm:flex-row">
+                    <div className="relative w-full sm:w-1/2 lg:w-1/3">
                       {post.imageUrl ? (
                         <CldImage
                           alt="Post Thumbnail"
@@ -106,48 +104,54 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
                       )}
                     </div>
                     <div>
-                      <div className="flex items-center gap-x-4 text-xs">
-                        <time dateTime={post.createDate} className="text-gray-500">
+                      <div className="flex flex-wrap items-center gap-y-1 overflow-hidden text-sm/6 text-gray-500">
+                        <time dateTime={post.createDate} className="mr-8">
                           {getFuzzyDate(post.createDate)}
                         </time>
-                        {/*
-                        <a
-                          href={post.category.href}
-                          className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
-                        >
-                          {post.category.title}
-                        </a>
-                        */}
+                        <div className="-ml-4 flex items-center gap-x-4">
+                          <svg viewBox="0 0 2 2" className="-ml-0.5 h-0.5 w-0.5 flex-none fill-black/50">
+                            <circle r={1} cx={1} cy={1} />
+                          </svg>
+                          <div className="flex items-center gap-x-2.5">
+                            <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                              {`${post.author_firstname[0]}${post.author_lastname[0]}`}
+                            </div>
+                            <div className="text-sm/6">
+                              <p className="font-extralight text-gray-900">
+                                <a href="#">
+                                  <span className="absolute inset-0" />
+                                  {post.author_firstname}
+                                </a>
+                              </p>
+                              {/*<p className="text-gray-600">{post.author.role}</p>*/}
+                            </div>
+                          </div>
+                          {/*
+                          <a
+                            href={post.category.href}
+                            className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
+                          >
+                            {post.category.title}
+                          </a>
+                          */}
+                        </div>
                       </div>
                       <div className="group relative max-w-xl">
                         <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                          <a href="#">
-                            <span className="absolute inset-0" />
-                            {post.title}
-                          </a>
+                          <Link href={`/posts/${post.alias}`} passHref>
+                            <a href="#">
+                              <span className="absolute inset-0" />
+                              {post.title}
+                            </a>
+                          </Link>
                         </h3>
-                        <div className="mt-5 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
-                      </div>
-                      <div className="mt-6 flex border-t border-gray-900/5 pt-6">
-                        <div className="relative flex items-center gap-x-4">
-                          <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                            {`${post.author_firstname[0]}${post.author_lastname[0]}`}
-                          </div>
-                          <div className="text-sm/6">
-                            <p className="font-extralight text-gray-900">
-                              <a href="#">
-                                <span className="absolute inset-0" />
-                                {post.author_firstname}
-                              </a>
-                            </p>
-                            {/*<p className="text-gray-600">{post.author.role}</p>*/}
-                          </div>
-                        </div>
+                        <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                       </div>
                     </div>
                   </article>
                 ))}
               </div>
+              )}
             </div>
           </div>
         </div>

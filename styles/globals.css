@@ -75,5 +75,24 @@ div.ql-toolbar {
   @apply rounded-b-md p-0 shadow-sm ;
 }
 div.ql-editor {
-  @apply py-2 px-3 rounded-b-md focus:ring-2 focus:ring-inset focus:ring-indigo-600 min-h-24; 
+  @apply py-2 px-3 rounded-b-md focus:ring-2 focus:ring-inset focus:ring-indigo-600 min-h-48; 
+}
+
+div.post h2 {
+  @apply mt-16 text-pretty text-3xl font-semibold tracking-tight text-gray-900;
+}
+div.post h3 {
+  @apply mt-6 text-lg font-semibold tracking-tight text-gray-900;;
+}
+div.post p {
+  @apply mt-6;
+}
+div.post ul, div.post ol {
+  @apply mt-6 max-w-xl space-y-2 text-gray-600;
+}
+div.post ul {
+  @apply list-disc pl-8;
+}
+div.post ol {
+  @apply list-decimal pl-8 ;
 }

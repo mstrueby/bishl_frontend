@@ -48,25 +48,30 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
-    console.log('Submitted values:', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (key === 'imageUrl' && value !== null) {
-          // Only append imageUrl if it is not null
-          formData.append(key, value);
-        } else if (key !== 'imageUrl') {
-          formData.append(key, value);
+        } else if (key === 'author') {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          // Handle imageUrl specifically to ensure it's only appended if not null
+          if (key === 'imageUrl' && value !== null) {
+            formData.append(key, value);
+          } else if (key !== 'imageUrl') {
+            formData.append(key, value);
+          }
         }
       });
+
       const response = await axios.patch(BASE_URL + post._id, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       });
-      if (response.status === 200 || response.status === 304) {
+      console.log('Response:', response.status);
+      if (response.status === 200) {
         router.push({
           pathname: '/admin/posts',
           query: { message: `Der Beitrag <strong>${values.title}</strong> wurde erfolgreich aktualisiert.` }
@@ -75,7 +80,19 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      setError('Ein Fehler ist aufgetreten.');
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 304) {
+          // Handle when a 304 status is caught by error
+          router.push({
+            pathname: '/admin/posts',
+            query: { message: `Keine Änderungen am Beitrag <strong>${values.title}</strong> vorgenommen.` }
+          }, `/admin/posts`);
+        } else {
+          setError('Ein Fehler ist aufgetreten.');
+        }
+      } else {
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
+      }
     } finally {
       setLoading(false);
     }
@@ -104,6 +121,10 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
     content: post.content,
     published: post.published,
     featured: post.featured,
+    author: {
+      firstName: post.author.firstName,
+      lastName: post.author.lastName,
+    },
   };
 
   const sectionTitle = 'Beitrag bearbeiten';
