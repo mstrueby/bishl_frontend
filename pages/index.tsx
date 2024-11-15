@@ -21,12 +21,13 @@ interface PostsProps {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) || null;
+  const jwt = getCookie('jwt', context) || null;
   let posts = null;
   try {
     const res = await axios.get(BASE_URL, {
       params: {
-        published: true
+        published: true,
+        limit: 3
       },
       headers: {
         'Content-Type': 'application/json',

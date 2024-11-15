@@ -48,6 +48,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
+    console.log('submitted values', values)
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -64,6 +65,11 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
           }
         }
       });
+      
+      // Debug FormData by logging key-value pairs to the console
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
 
       const response = await axios.patch(BASE_URL + post._id, formData, {
         headers: {
