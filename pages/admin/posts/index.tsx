@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -64,8 +65,15 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       });
       setPosts(res.data);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error fetching docs:', error);
+      }
     }
+  };
+
+
+  const editPost = (alias: string) => {
+    router.push(`/admin/posts/${alias}/edit`);
   };
 
   const togglePublished = async (postId: string, currentStatus: boolean, imageUrl: string | null) => {
@@ -171,7 +179,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     setSuccessMessage(null);
   };
 
-  const dataListItems = posts
+  const post_values = posts
     .slice()
     .sort((a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime())
     .map((post: PostValues) => ({
@@ -196,6 +204,37 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
+  const dataListItems = post_values.map((item) => {
+    return {
+      _id: item._id,
+      title: item.title,
+      alias: item.alias,
+      description: ["erstellt von ", item.author, getFuzzyDate(item.createDate)],
+      image: {
+        src: item.imageUrl,
+        width: 128,
+        height: 72,
+        gravity: 'auto',
+      },
+      published: item.published,
+      featured: item.featured,
+      menu: [
+        { "edit": { onClick: () => editPost(item.alias) } },
+        { "publish": { onClick: () => togglePublished(item._id, item.published, item.imageUrl || null) } },
+        { "feature": { onClick: () => toggleFeatured(item._id, item.featured, item.imageUrl || null) } },
+        {
+          "delete": {
+            onClick: () => {
+              setPostIdToDelete(item._id);
+              setPostTitle(item.title);
+              setIsModalOpen(true);
+            },
+          }
+        },
+      ]
+    };
+  });
+
   return (
     <Layout>
       <SectionHeader
@@ -206,17 +245,17 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
       <ul role="list" className="divide-y divide-gray-100">
-        {dataListItems.map((post, index) => (
-          <li key={post._id} className="flex items-center justify-between gap-x-6 py-5">
+        {dataListItems.map((item) => (
+          <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
 
-            {post.imageUrl ? (
+            {item.image ? (
               <CldImage
-                src={post.imageUrl}
+                src={item.image.src}
                 alt="Post Thumbnail"
                 className="rounded-lg object-cover"
-                width={128} height={72}
+                width={item.image.width} height={item.image.height}
                 crop="fill"
-                gravity="auto"
+                gravity={item.image.gravity}
                 radius={18}
               />
             ) : (
@@ -224,11 +263,11 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-x-3">
-                <div className={classNames(statuses[post.published ? 'Published' : 'Draft'], 'flex-none rounded-full p-1')}>
+                <div className={classNames(statuses[item.published ? 'Published' : 'Draft'], 'flex-none rounded-full p-1')}>
                   <div className="h-2 w-2 rounded-full bg-current" />
                 </div>
-                <p className="text-sm/6 font-semibold text-gray-900 truncate">{post.title}</p>
-                {post.featured && (
+                <p className="text-sm/6 font-semibold text-gray-900 truncate">{item.title}</p>
+                {item.featured && (
                   <p
                     className='inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10'
                   >
@@ -236,15 +275,21 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
                   </p>
                 )}
               </div>
-              <div className="mt-1 flex items-center gap-x-2 text-xs/5 text-gray-500">
-                <p className="whitespace-nowrap">
-                  erstellt von {post.author}
-                </p>
-                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                  <circle r={1} cx={1} cy={1} />
-                </svg>
-                <p className="truncate">{getFuzzyDate(post.createDate)}</p>
-              </div>
+
+              {item.description && (
+                <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500">
+                  {item.description.map((descItem: string, index: number) => (
+                    <React.Fragment key={`${item._id}-${index}`}>
+                      <span key={index} className="whitespace-nowrap truncate">
+                        {descItem}
+                      </span>
+                      <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                        <circle r={1} cx={1} cy={1} />
+                      </svg>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Context Menu */}
@@ -259,41 +304,40 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
                   className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                 >
                   <MenuItem>
-                    <Link
-                      href={`/admin/posts/${post.alias}/edit`}
-                    >
-                      <a className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none">
-                        <PencilSquareIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
-                        Bearbeiten<span className="sr-only">, {post.title}</span>
-                      </a>
-                    </Link>
-                  </MenuItem>
-                  <MenuItem>
                     <a
                       href="#"
-                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => post._id && toggleFeatured(post._id, post.featured, post.imageUrl)}
-                    >
-                      {post.featured ? (
-                        <StarIcon className={`h-4 w-4 mr-2 text-gray-500`} aria-hidden="true" />
-                      ) : (
-                        <StarIcon className={`h-4 w-4 mr-2 text-indigo-500`} aria-hidden="true" />
-                      )}
-                      {post.featured ? 'Loslösen' : 'Anheften'}<span className="sr-only">, {post.title}</span>
+                      onClick={() => item._id && editPost(item.alias)}
+                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none">
+                      <PencilSquareIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
+                      Bearbeiten<span className="sr-only">, {item.title}</span>
                     </a>
                   </MenuItem>
                   <MenuItem>
                     <a
                       href="#"
                       className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => post._id && togglePublished(post._id, post.published, post.imageUrl)}
+                      onClick={() => item._id && toggleFeatured(item._id, item.featured, item.image?.src)}
                     >
-                      {post.published ? (
+                      {item.featured ? (
+                        <StarIcon className={`h-4 w-4 mr-2 text-gray-500`} aria-hidden="true" />
+                      ) : (
+                        <StarIcon className={`h-4 w-4 mr-2 text-indigo-500`} aria-hidden="true" />
+                      )}
+                      {item.featured ? 'Loslösen' : 'Anheften'}<span className="sr-only">, {item.title}</span>
+                    </a>
+                  </MenuItem>
+                  <MenuItem>
+                    <a
+                      href="#"
+                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                      onClick={() => item._id && togglePublished(item._id, item.published, item.image.src)}
+                    >
+                      {item.published ? (
                         <DocumentArrowDownIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
                       ) : (
                         <DocumentArrowUpIcon className="h-4 w-4 mr-2 text-green-500" aria-hidden="true" />
                       )}
-                      {post.published ? 'Entwurf' : 'Veröffentlichen'}<span className="sr-only">, {post.title}</span>
+                      {item.published ? 'Entwurf' : 'Veröffentlichen'}<span className="sr-only">, {item.title}</span>
                     </a>
                   </MenuItem>
                   <MenuItem>
@@ -301,15 +345,15 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
                       href="#"
                       className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
                       onClick={() => {
-                        if (post._id) {
-                          setPostIdToDelete(post._id);
-                          setPostTitle(post.title);
+                        if (item._id) {
+                          setPostIdToDelete(item._id);
+                          setPostTitle(item.title);
                           setIsModalOpen(true);
                         }
                       }}
                     >
                       <TrashIcon className="h-4 w-4 mr-2 text-red-500" aria-hidden="true" />
-                      Löschen<span className="sr-only">, {post.title}</span>
+                      Löschen<span className="sr-only">, {item.title}</span>
                     </a>
                   </MenuItem>
                 </MenuItems>
