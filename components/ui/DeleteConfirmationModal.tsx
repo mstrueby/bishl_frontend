@@ -7,9 +7,8 @@ const DeleteConfirmationModal: React.FC<{
   onConfirm: () => void,
   title: string | null,
   description: string | null,
-  descriptionStrong: string | null,
   descriptionSubText: string | null
-}> = ({ isOpen, onClose, onConfirm, title, description, descriptionStrong, descriptionSubText }) => {
+}> = ({ isOpen, onClose, onConfirm, title, description, descriptionSubText }) => {
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} as="div"
@@ -31,12 +30,13 @@ const DeleteConfirmationModal: React.FC<{
               {description !== null && (
                 <div className="mb-3">
                   <p className="text-base text-gray-800">
-                    {description.split(descriptionStrong ?? '').map((part, index, arr) => (
-                      <Fragment key={index}>
-                        {part}
-                        {index < arr.length - 1 && <strong className="font-bold">{descriptionStrong}</strong>}
-                      </Fragment>
-                    ))}
+                    {description.split(/(<strong>.*?<\/strong>)/).map((part, index) => {
+                      if (/<strong>.*<\/strong>/.test(part)) {
+                        const text = part.replace(/<\/?strong>/g, '');
+                        return <strong key={index} className="font-bold">{text}</strong>;
+                      }
+                      return <Fragment key={index}>{part}</Fragment>;
+                    })}
                   </p>
                 </div>
               )}

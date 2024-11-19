@@ -17,7 +17,8 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { getFuzzyDate } from '../../../tools/dateUtils';
-import { CldImage } from 'next-cloudinary';
+import { CldImage, CloudinaryUploadWidgetInstanceMethodCloseOptions } from 'next-cloudinary';
+import DataList from '../../../components/admin/ui/DataList';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -210,28 +211,20 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       title: item.title,
       alias: item.alias,
       description: ["erstellt von ", item.author, getFuzzyDate(item.createDate)],
-      image: {
+      image: item.imageUrl ? {
         src: item.imageUrl,
         width: 128,
         height: 72,
         gravity: 'auto',
-      },
+      } : undefined,
       published: item.published,
       featured: item.featured,
       menu: [
-        { "edit": { onClick: () => editPost(item.alias) } },
-        { "publish": { onClick: () => togglePublished(item._id, item.published, item.imageUrl || null) } },
-        { "feature": { onClick: () => toggleFeatured(item._id, item.featured, item.imageUrl || null) } },
-        {
-          "delete": {
-            onClick: () => {
-              setPostIdToDelete(item._id);
-              setPostTitle(item.title);
-              setIsModalOpen(true);
-            },
-          }
-        },
-      ]
+        { edit: { onClick: () => editPost(item.alias) } },
+        { feature: { onClick: () => { toggleFeatured(item._id, item.featured, item.imageUrl || null) } } },
+        { publish: { onClick: () => { togglePublished(item._id, item.published, item.imageUrl || null) } } },
+        { delete: { } }
+      ],
     };
   });
 
@@ -244,125 +237,16 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
-      <ul role="list" className="divide-y divide-gray-100">
-        {dataListItems.map((item) => (
-          <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
+      <DataList
+        items={dataListItems}
+        statuses={statuses}
+        onDeleteConfirm={deletePost}
+        deleteModalTitle="Beitrag löschen"
+        deleteModalDescription="Möchtest du den Beitrag <strong>{{title}}</strong> wirklich löschen?"
+        deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
+      />
 
-            {item.image ? (
-              <CldImage
-                src={item.image.src}
-                alt="Post Thumbnail"
-                className="rounded-lg object-cover"
-                width={item.image.width} height={item.image.height}
-                crop="fill"
-                gravity={item.image.gravity}
-                radius={18}
-              />
-            ) : (
-              <div className="relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-x-3">
-                <div className={classNames(statuses[item.published ? 'Published' : 'Draft'], 'flex-none rounded-full p-1')}>
-                  <div className="h-2 w-2 rounded-full bg-current" />
-                </div>
-                <p className="text-sm/6 font-semibold text-gray-900 truncate">{item.title}</p>
-                {item.featured && (
-                  <p
-                    className='inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10'
-                  >
-                    Angeheftet
-                  </p>
-                )}
-              </div>
-
-              {item.description && (
-                <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500">
-                  {item.description.map((descItem: string, index: number) => (
-                    <React.Fragment key={`${item._id}-${index}`}>
-                      <span key={index} className="whitespace-nowrap truncate">
-                        {descItem}
-                      </span>
-                      <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                        <circle r={1} cx={1} cy={1} />
-                      </svg>
-                    </React.Fragment>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Context Menu */}
-            <div className="flex-none gap-x-4">
-              <Menu as="div" className="relative flex-none">
-                <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
-                  <span className="sr-only">Open options</span>
-                  <EllipsisVerticalIcon aria-hidden="true" className="h-5 w-5" />
-                </MenuButton>
-                <MenuItems
-                  transition
-                  className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                >
-                  <MenuItem>
-                    <a
-                      href="#"
-                      onClick={() => item._id && editPost(item.alias)}
-                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none">
-                      <PencilSquareIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
-                      Bearbeiten<span className="sr-only">, {item.title}</span>
-                    </a>
-                  </MenuItem>
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => item._id && toggleFeatured(item._id, item.featured, item.image?.src)}
-                    >
-                      {item.featured ? (
-                        <StarIcon className={`h-4 w-4 mr-2 text-gray-500`} aria-hidden="true" />
-                      ) : (
-                        <StarIcon className={`h-4 w-4 mr-2 text-indigo-500`} aria-hidden="true" />
-                      )}
-                      {item.featured ? 'Loslösen' : 'Anheften'}<span className="sr-only">, {item.title}</span>
-                    </a>
-                  </MenuItem>
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => item._id && togglePublished(item._id, item.published, item.image.src)}
-                    >
-                      {item.published ? (
-                        <DocumentArrowDownIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
-                      ) : (
-                        <DocumentArrowUpIcon className="h-4 w-4 mr-2 text-green-500" aria-hidden="true" />
-                      )}
-                      {item.published ? 'Entwurf' : 'Veröffentlichen'}<span className="sr-only">, {item.title}</span>
-                    </a>
-                  </MenuItem>
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => {
-                        if (item._id) {
-                          setPostIdToDelete(item._id);
-                          setPostTitle(item.title);
-                          setIsModalOpen(true);
-                        }
-                      }}
-                    >
-                      <TrashIcon className="h-4 w-4 mr-2 text-red-500" aria-hidden="true" />
-                      Löschen<span className="sr-only">, {item.title}</span>
-                    </a>
-                  </MenuItem>
-                </MenuItems>
-              </Menu>
-            </div>
-          </li>
-        ))}
-      </ul>
-
+      {/*
       {isModalOpen &&
         <DeleteConfirmationModal
           isOpen={isModalOpen}
@@ -381,6 +265,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
           descriptionSubText={`Dies kann nicht rückgängig gemacht werden.`}
         />
       }
+      */}
 
     </Layout>
   );

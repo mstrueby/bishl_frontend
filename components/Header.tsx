@@ -1,7 +1,7 @@
 import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
-import { Disclosure, Menu, Transition } from '@headlessui/react'
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Bars3Icon, BellIcon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
@@ -61,7 +61,7 @@ const Header = () => {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
 
-              {/* Navigation */}
+              {/* Navigation (tablet, desktop) */}
               <div className="flex items-center">
                 
               <div className="flex-shrink-0 flex items-center justify-center">
@@ -81,7 +81,7 @@ const Header = () => {
                   <div className="flex space-x-4">
                     {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
                     <Menu as="div" className="relative inline-block text-left">
-                      <Menu.Button className={item}>Herren</Menu.Button>
+                      <MenuButton className={item}>Herren</MenuButton>
                       <Transition
                         as={Fragment}
                         enter="transition ease-out duration-300"
@@ -91,9 +91,9 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {men.map((item, index) => (
-                            <Menu.Item key={index}>
+                            <MenuItem key={index}>
                               {({ active }) => (
                                 <MyLink
                                   href={item.href}
@@ -110,13 +110,13 @@ const Header = () => {
                                   {item.name}
                                 </MyLink>
                               )}
-                            </Menu.Item>
+                            </MenuItem>
                           ))}
-                        </Menu.Items>
+                        </MenuItems>
                       </Transition>
                     </Menu>
                     <Menu as="div" className="relative inline-block text-left">
-                      <Menu.Button className={item}>Nachwuchs</Menu.Button>
+                      <MenuButton className={item}>Nachwuchs</MenuButton>
                       <Transition
                         as={Fragment}
                         enter="transition ease-out duration-100"
@@ -126,9 +126,9 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {youth.map((item, index) => (
-                            <Menu.Item key={index}>
+                            <MenuItem key={index}>
                               {({ active }) => (
                                 <MyLink
                                   href={item.href}
@@ -145,9 +145,9 @@ const Header = () => {
                                   {item.name}
                                 </MyLink>
                               )}
-                            </Menu.Item>
+                            </MenuItem>
                           ))}
-                        </Menu.Items>
+                        </MenuItems>
                       </Transition>
                     </Menu>
                   </div>
@@ -173,11 +173,11 @@ const Header = () => {
                   {user ? (
                     <Menu as="div" className="relative ml-3">
                       <div>
-                        <Menu.Button className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                        <MenuButton className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                           <span className="absolute -inset-1.5" />
                           <span className="sr-only">Open user menu</span>
                           <UserIcon className="block h-6 w-6" aria-hidden="true" />
-                        </Menu.Button>
+                        </MenuButton>
                       </div>
                       <Transition
                         as={Fragment}
@@ -188,8 +188,8 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <Menu.Item>
+                        <MenuItems className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <MenuItem>
                             {({ active }) => (
                               <a
                                 href="#"
@@ -201,32 +201,40 @@ const Header = () => {
                                 Your Profile
                               </a>
                             )}
-                          </Menu.Item>
-                          <Menu.Item>
+                          </MenuItem>
+                          <MenuItem>
+                            <MyLink
+                              href="/admin/documents"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
+                            >
+                              Dokumente
+                            </MyLink>
+                          </MenuItem>
+                          <MenuItem>
                             <MyLink
                               href="/admin/posts"
                               className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
                             >
                               Beiträge
                             </MyLink>
-                          </Menu.Item>
-                          <Menu.Item>
+                          </MenuItem>
+                          <MenuItem>
                             <MyLink
                               href="/leaguemanager"
                               className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
                             >
                               Spielbetrieb
                             </MyLink>
-                          </Menu.Item>
-                          <Menu.Item>
+                          </MenuItem>
+                          <MenuItem>
                             <MyLink
                               href="/logout"
                               className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
                             >
                               Abmelden
                             </MyLink>
-                          </Menu.Item>
-                        </Menu.Items>
+                          </MenuItem>
+                        </MenuItems>
                       </Transition>
                     </Menu>
                   ) : (

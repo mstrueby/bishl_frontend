@@ -64,6 +64,7 @@ export default function Add({ jwt, user }: AddProps) {
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
+    console.log(values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
