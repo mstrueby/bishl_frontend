@@ -198,6 +198,8 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
         width: 128,
         height: 72,
         gravity: 'auto',
+        className: "rounded-lg object-cover",
+        radius: 18,
       } : undefined,
       published: post.published,
       featured: post.featured,

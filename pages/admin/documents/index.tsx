@@ -170,12 +170,47 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
   }
 
   const dataListItems = doc_values.map((doc) => {
+    // Determine the image source based on the file extension
+    const fileExtension = doc.fileName.split('.').pop();
+    let imageSrc = null;
+    switch (fileExtension) {
+      case 'pdf':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112186/icons/pdf.png';
+        break;
+      case 'docx':
+      case 'doc':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112198/icons/docx.png';
+        break;
+      case 'xlsx':
+      case 'xls':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/xlsx.png';
+        break;
+      case 'pptx':
+      case 'ppt':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/ppt.png';
+        break;
+      case 'txt':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/txt.png';
+        break;
+      case 'csv':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/csv.png';
+        break;
+    }
+
     return {
       _id: doc._id,
       title: doc.title,
       alias: doc.alias,
       description: [doc.fileName, formatFileSize(doc.fileSizeByte), getFuzzyDate(doc.updateDate)],
       published: doc.published,
+      image: imageSrc ? {
+        src: imageSrc,
+        width: 32,
+        height: 32,
+        gravity: 'auto',
+        className: 'object-cover',
+        radius: 0,
+      } : undefined,
       menu: [
         { edit: { onClick: () => editDoc(doc.alias) } },
         { publish: { onClick: () => tooglePublished(doc._id, doc.published, doc.url) } },

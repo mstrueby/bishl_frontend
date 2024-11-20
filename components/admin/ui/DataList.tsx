@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, DocumentArrowDownIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
@@ -17,6 +17,8 @@ interface DataListProps {
       width: number;
       height: number;
       gravity: string;
+      className: string;
+      radius: number;
     };
     published?: boolean;
     featured?: boolean;
@@ -34,12 +36,26 @@ interface DataListProps {
   deleteModalDescriptionSubText: string;
 }
 
+
 const DataList: React.FC<DataListProps> = ({ items, statuses, onDeleteConfirm,
                                            deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText}) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
 
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  const isMobile = windowWidth < 640;
+  
   const handleDeleteClick = (id: string, title: string) => {
     setPostIdToDelete(id);
     setPostTitle(title);
@@ -52,25 +68,24 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, onDeleteConfirm,
     setIsModalOpen(false);
   };
 
+
   return (
     <ul role="list" className="divide-y divide-gray-100">
       {items.map((item) => (
         <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
-          {item.image ? (
-            <div className="hidden sm:block flex justify-center">
-              <CldImage
-                src={item.image.src}
-                alt="Thumbnail"
-                className="rounded-lg object-cover"
-                width={item.image.width} height={item.image.height}
-                crop="fill"
-                gravity={item.image.gravity}
-                radius={18}
-              />
-            </div>
+          {!isMobile && (item.image ? (
+            <CldImage
+              src={item.image.src}
+              alt="Thumbnail"
+              className={item.image.className}
+              width={item.image.width} height={item.image.height}
+              crop="fill"
+              gravity={item.image.gravity}
+              radius={item.image.radius}
+            />
           ) : (
             <div className="hidden sm:block relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
-          )}
+          ))}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-x-3">
               <div className={`${statuses[item.published ? 'Published' : 'Unpublished']} flex-none rounded-full p-1`}>
