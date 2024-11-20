@@ -16,8 +16,11 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { getFuzzyDate } from '../../../tools/dateUtils';
+import { formatFileSize } from '../../../tools/utils';
 import { CldImage } from 'next-cloudinary';
 import { setISODay } from "date-fns";
+import DataList from '../../../components/admin/ui/DataList';
+
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -27,12 +30,14 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
 
 interface DocsProps {
   jwt: string;
-  posts: DocumentsValues[];
+  docs: DocumentsValues[];
 }
 
 export const getServerSideProps: GetServerSideProps<DocsProps> = async (context) => {
-  const jwt = getCookie('jwt', { req: context.req });
-  let docs = null;
+  // Ensure jwt is a string or an empty string if undefined
+  const jwt = (getCookie('jwt', context) ?? '') as string;
+  let docs: DocumentsValues[] = [];
+
   try {
     const res = await axios.get(BASE_URL, {
       headers: {
@@ -45,16 +50,15 @@ export const getServerSideProps: GetServerSideProps<DocsProps> = async (context)
       console.error('Error fetching docs:', error);
     }
   }
-  return docs ? { props: { jwt, docs } } : { props: { jwt } };
+
+  // Ensure we provide an empty array for docs if it's undefined
+  return { props: { jwt, docs } };
 }
 
 const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
   const router = useRouter();
   const [docs, setDocs] = useState<DocumentsValues[]>(initialDocs);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [docIdToDelete, setDocIdToDelete] = useState<string | null>(null);
-  const [docTitle, setDocTitle] = useState<string | null>(null);
 
   const fetchDocs = async () => {
     try {
@@ -71,7 +75,11 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     }
   };
 
-  const tooglePublished = async (docId: string, currentStatus: boolean, url: string | null) => {
+  const editDoc = (alias: string) => {
+    router.push(`/admin/documents/${alias}/edit`);
+  }
+
+  const tooglePublished = async (docId: string, currentStatus: boolean, url: string | null) => {
     try {
       const formData = new FormData();
       formData.append('published', (!currentStatus).toString());
@@ -79,7 +87,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
         formData.append('url', url);
       }
 
-      const res = await axios.post(`${BASE_URL}${docId}`, formData, {
+      const res = await axios.patch(`${BASE_URL}${docId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
         }
@@ -95,25 +103,25 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     } catch (error) {
       console.error('Error toggling published status:', error);
     }
-  }
-  const deleteDoc = async (docId: string) => {
-    if (!docId) return;
+  };
+
+  const deleteDoc = async (alias: string) => {
+    if (!alias) return;
+    console.log(`${BASE_URL}${alias}`)
     try {
-      const res = await axios.delete(`${BASE_URL}${docId}`, {
+      const res = await axios.delete(`${BASE_URL}${alias}`, {
         headers: {
           Authorization: `Bearer ${jwt}`
         }
       });
       if (res.status === 204) {
-        console.log(`Document ${docId} deleted successfully`);
+        console.log(`Document ${alias} successfully deleted.`);
         await fetchDocs();
       } else {
-        console.log(`Failed to delete document ${docId}`);
+        console.log(`Failed to delete document ${alias}`);
       }
     } catch (error) {
       console.error('Error deleting document:', error);
-    } finally {
-      setIsModalOpen(false);
     }
   };
 
@@ -135,7 +143,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     setSuccessMessage(null);
   };
 
-  const dataListItems = docs
+  const doc_values = docs
     .slice()
     .map((doc: DocumentsValues) => ({
       _id: doc._id,
@@ -161,117 +169,39 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     Unpublished: 'text-gray-500 bg-gray-800/10',
   }
 
+  const dataListItems = doc_values.map((doc) => {
+    return {
+      _id: doc._id,
+      title: doc.title,
+      alias: doc.alias,
+      description: [doc.fileName, formatFileSize(doc.fileSizeByte), getFuzzyDate(doc.updateDate)],
+      published: doc.published,
+      menu: [
+        { edit: { onClick: () => editDoc(doc.alias) } },
+        { publish: { onClick: () => tooglePublished(doc._id, doc.published, doc.url) } },
+        { delete: {} },
+      ]
+    }
+  });
+
   return (
     <Layout>
       <SectionHeader
-        title= {sectionTitle}
-        newLink= {newLink}
+        title={sectionTitle}
+        newLink={newLink}
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
-      <ul role="list" className="divide-y divide-gray-100">
-        {dataListItems.map((doc, index) => (
-          <li key={doc._id} className="flex items-center justify-between gap-x-6 py-5">
+      <DataList
+        items={dataListItems}
+        statuses={statuses}
+        onDeleteConfirm={deleteDoc}
+        deleteModalTitle="Dokument löschen"
+        deleteModalDescription="Möchtest du das Dokument <strong>{{title}}</strong> wirklich löschen?"
+        deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
+      />
 
-            {doc.url ? (
-              <CldImage
-                src={doc.url}
-                alt="Post Thumbnail"
-                className="rounded-lg object-cover"
-                width={128} height={72}
-                crop="fill"
-                gravity="auto"
-                radius={18}
-              />
-            ) : (
-              <div className="relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-x-3">
-                <div className={classNames(statuses[doc.published ? 'Published' : 'Unpublished'], 'flex-none rounded-full p-1')}>
-                  <div className="h-2 w-2 rounded-full bg-current" />
-                </div>
-                <p className="text-sm/6 font-semibold text-gray-900 truncate">{doc.title}</p>
-              </div>
-              <div className="mt-1 flex items-center gap-x-2 text-xs/5 text-gray-500">
-                <p className="truncate">
-                  {doc.fileName}
-                </p>
-                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                  <circle r={1} cx={1} cy={1} />
-                </svg>
-                <p className="truncate">
-                  {doc.filSizeByte}
-                </p>
-                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                  <circle r={1} cx={1} cy={1} />
-                </svg>
-                <p className="truncate">geändert {getFuzzyDate(doc.updateDate)}</p>
-                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                  <circle r={1} cx={1} cy={1} />
-                </svg>
-              </div>
-            </div>
-
-            {/* Context Menu */}
-            <div className="flex-none gap-x-4">
-              <Menu as="div" className="relative flex-none">
-                <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
-                  <span className="sr-only">Open options</span>
-                  <EllipsisVerticalIcon aria-hidden="true" className="h-5 w-5" />
-                </MenuButton>
-                <MenuItems
-                  transition
-                  className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                >
-                  <MenuItem>
-                    <Link
-                      href={`/admin/documents/${doc.alias}/edit`}
-                    >
-                      <a className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none">
-                        <PencilSquareIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
-                        Bearbeiten<span className="sr-only">, {post.title}</span>
-                      </a>
-                    </Link>
-                  </MenuItem>
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => doc._id && togglePublished(doc._id, doc.published, doc.url)}
-                    >
-                      {doc.published ? (
-                        <DocumentArrowDownIcon className="h-4 w-4 mr-2 text-gray-500" aria-hidden="true" />
-                      ) : (
-                        <DocumentArrowUpIcon className="h-4 w-4 mr-2 text-green-500" aria-hidden="true" />
-                      )}
-                      {doc.published ? 'Entwurf' : 'Veröffentlichen'}<span className="sr-only">, {doc.title}</span>
-                    </a>
-                  </MenuItem>
-                  <MenuItem>
-                    <a
-                      href="#"
-                      className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={() => {
-                        if (doc._id) {
-                          setPostIdToDelete(doc._id);
-                          setPostTitle(doc.title);
-                          setIsModalOpen(true);
-                        }
-                      }}
-                    >
-                      <TrashIcon className="h-4 w-4 mr-2 text-red-500" aria-hidden="true" />
-                      Löschen<span className="sr-only">, {doc.title}</span>
-                    </a>
-                  </MenuItem>
-                </MenuItems>
-              </Menu>
-            </div>
-          </li>
-        ))}
-      </ul>
-      
     </Layout>
   )
 }

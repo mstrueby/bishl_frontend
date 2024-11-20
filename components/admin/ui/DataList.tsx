@@ -11,15 +11,15 @@ interface DataListProps {
     _id: string;
     title: string;
     alias: string;
-    description: string[];
+    description?: string[];
     image?: {
       src: string;
       width: number;
       height: number;
       gravity: string;
     };
-    published: boolean;
-    featured: boolean;
+    published?: boolean;
+    featured?: boolean;
     menu: Array<{
       edit?: { onClick: () => void };
       feature?: { onClick: () => void };
@@ -73,7 +73,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, onDeleteConfirm,
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-x-3">
-              <div className={`${statuses[item.published ? 'Published' : 'Draft']} flex-none rounded-full p-1`}>
+              <div className={`${statuses[item.published ? 'Published' : 'Unpublished']} flex-none rounded-full p-1`}>
                 <div className="h-2 w-2 rounded-full bg-current" />
               </div>
               <p className="text-sm/6 font-semibold text-gray-900 truncate">{item.title}</p>
@@ -88,14 +88,16 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, onDeleteConfirm,
 
             {item.description && (
               <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500">
-                {item.description.map((descItem: string, index: number) => (
+                {item.description.map((descItem: string, index: number, array: string[]) => (
                   <React.Fragment key={`${item._id}-${index}`}>
                     <span key={index} className="whitespace-nowrap truncate">
                       {descItem}
                     </span>
-                    <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                      <circle r={1} cx={1} cy={1} />
-                    </svg>
+                    {index < array.length - 1 && (
+                      <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                        <circle r={1} cx={1} cy={1} />
+                      </svg>
+                    )}
                   </React.Fragment>
                 ))}
               </div>

@@ -2,27 +2,14 @@ import { useState, useEffect } from "react";
 import React from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { PostValues } from '../../../types/PostValues';
-import {
-  EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
-  DocumentArrowUpIcon, DocumentArrowDownIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
-import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { getFuzzyDate } from '../../../tools/dateUtils';
-import { CldImage, CloudinaryUploadWidgetInstanceMethodCloseOptions } from 'next-cloudinary';
 import DataList from '../../../components/admin/ui/DataList';
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
-}
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
@@ -52,9 +39,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
   const [posts, setPosts] = useState<PostValues[]>(inittialPosts);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
-  const [postTitle, setPostTitle] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchPosts = async () => {
@@ -156,8 +140,6 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       }
     } catch (error) {
       console.error('Error mdeleting post:', error);
-    } finally {
-      setIsModalOpen(false);
     }
   };
 
@@ -201,28 +183,28 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
   const newLink = '/admin/posts/add';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
-    Draft: 'text-gray-500 bg-gray-800/10',
+    Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const dataListItems = post_values.map((item) => {
+  const dataListItems = post_values.map((post) => {
     return {
-      _id: item._id,
-      title: item.title,
-      alias: item.alias,
-      description: ["erstellt von ", item.author, getFuzzyDate(item.createDate)],
-      image: item.imageUrl ? {
-        src: item.imageUrl,
+      _id: post._id,
+      title: post.title,
+      alias: post.alias,
+      description: ["erstellt von " + post.author, getFuzzyDate(post.updateDate)],
+      image: post.imageUrl ? {
+        src: post.imageUrl,
         width: 128,
         height: 72,
         gravity: 'auto',
       } : undefined,
-      published: item.published,
-      featured: item.featured,
+      published: post.published,
+      featured: post.featured,
       menu: [
-        { edit: { onClick: () => editPost(item.alias) } },
-        { feature: { onClick: () => { toggleFeatured(item._id, item.featured, item.imageUrl || null) } } },
-        { publish: { onClick: () => { togglePublished(item._id, item.published, item.imageUrl || null) } } },
+        { edit: { onClick: () => editPost(post.alias) } },
+        { feature: { onClick: () => { toggleFeatured(post._id, post.featured, post.imageUrl || null) } } },
+        { publish: { onClick: () => { togglePublished(post._id, post.published, post.imageUrl || null) } } },
         { delete: { } }
       ],
     };
@@ -245,27 +227,6 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
         deleteModalDescription="Möchtest du den Beitrag <strong>{{title}}</strong> wirklich löschen?"
         deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
       />
-
-      {/*
-      {isModalOpen &&
-        <DeleteConfirmationModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onConfirm={() => {
-            if (postIdToDelete !== null) {
-              deletePost(postIdToDelete);
-            }
-            setPostIdToDelete(null);
-            setPostTitle(null);
-            setIsModalOpen(false);
-          }}
-          title={"Beitrag löschen"}
-          description={`Möchtest du wirklich den Beitrag ${postTitle} löschen?`}
-          descriptionStrong={postTitle}
-          descriptionSubText={`Dies kann nicht rückgängig gemacht werden.`}
-        />
-      }
-      */}
 
     </Layout>
   );
