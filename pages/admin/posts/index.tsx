@@ -207,7 +207,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
         { edit: { onClick: () => editPost(post.alias) } },
         { feature: { onClick: () => { toggleFeatured(post._id, post.featured, post.imageUrl || null) } } },
         { publish: { onClick: () => { togglePublished(post._id, post.published, post.imageUrl || null) } } },
-        { delete: { } }
+        { delete: { onClick: () => {} } },
       ],
     };
   });

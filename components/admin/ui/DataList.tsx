@@ -5,6 +5,12 @@ import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, 
 import { CldImage } from 'next-cloudinary';
 import DeleteConfirmationModal from '../../ui/DeleteConfirmationModal';
 
+type MenuItemType = {
+  edit?: { onClick: () => void };
+  feature?: { onClick: () => void };
+  publish?: { onClick: () => void };
+  delete?: { onClick?: () => void };
+};
 
 interface DataListProps {
   items: {
@@ -27,7 +33,7 @@ interface DataListProps {
       edit?: { onClick: () => void };
       feature?: { onClick: () => void };
       publish?: { onClick: () => void };
-      delete?: { onClick?: () => void };
+      delete?: { onClick: () => void };
     }>;
   }[];
   statuses: { [key: string]: string };
@@ -169,7 +175,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                       IconComponent = TrashIcon;
                       caption = "Löschen";
                       iconColor = "text-red-500";
-                      menuItem[key].onClick = () => handleDeleteClick(item._id, item.title);
+                      //if (menuItem[key]) { menuItem[key].onClick = () => handleDeleteClick(item._id, item.title); }
                       break;
                     default:
                       break;
@@ -178,7 +184,13 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                     <MenuItem key={index}>
                       <a
                         href="#"
-                        onClick={menuItem[key].onClick}
+                        onClick={() => {
+                          if (key === 'delete') {
+                            handleDeleteClick(item._id, item.title);
+                          } else if (key in menuItem && menuItem[key as keyof MenuItemType]?.onClick) {
+                            menuItem[key as keyof MenuItemType]?.onClick();
+                          }
+                        }}
                         className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none">
                         <IconComponent className={`h-4 w-4 mr-2 ${iconColor}`} aria-hidden="true" />
                         {caption}<span className="sr-only">, {item.title}</span>

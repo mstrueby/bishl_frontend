@@ -205,7 +205,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
       menu: [
         { edit: { onClick: () => editDoc(doc.alias) } },
         { publish: { onClick: () => tooglePublished(doc._id, doc.published, doc.url) } },
-        { delete: {} },
+        { delete: { onClick: () => {} } },
       ]
     }
   });
