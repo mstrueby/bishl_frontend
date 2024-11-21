@@ -1,5 +1,3 @@
-// page to edit a tournament
-// /leaguemanager/tournaments/[tAlias]/edit
 import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -19,7 +17,7 @@ interface EditProps {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = getCookie('jwt', context) as string | undefined;
   const { alias } = context.params as { alias: string };
 
   // Fetch the existing Post data
@@ -76,7 +74,6 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
           Authorization: `Bearer ${jwt}`,
         },
       });
-      console.log('Response:', response.status);
       if (response.status === 200) {
         router.push({
           pathname: '/admin/posts',

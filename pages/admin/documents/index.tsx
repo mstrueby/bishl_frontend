@@ -1,30 +1,15 @@
 import { useState, useEffect } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { DocumentsValues } from '../../../types/DocumentsValues';
-import {
-  EllipsisVerticalIcon, PencilSquareIcon, StarIcon,
-  DocumentArrowUpIcon, DocumentArrowDownIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
-import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import { formatFileSize } from '../../../tools/utils';
-import { CldImage } from 'next-cloudinary';
-import { setISODay } from "date-fns";
 import DataList from '../../../components/admin/ui/DataList';
-
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
-}
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
 
@@ -168,6 +153,11 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
   }
+  const categories = {
+    allgemein: 'text-indigo-700 bg-indigo-50 ring-indigo-700/10 ',
+    spielbetrieb: 'text-red-700 bg-red-50 ring-red-600/10 ',
+    hobbyliga: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20 ',
+  }
 
   const dataListItems = doc_values.map((doc) => {
     // Determine the image source based on the file extension
@@ -202,6 +192,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
       title: doc.title,
       alias: doc.alias,
       description: [doc.fileName, formatFileSize(doc.fileSizeByte), getFuzzyDate(doc.updateDate)],
+      category: doc.category,
       published: doc.published,
       image: imageSrc ? {
         src: imageSrc,
@@ -231,6 +222,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
       <DataList
         items={dataListItems}
         statuses={statuses}
+        categories={categories}
         onDeleteConfirm={deleteDoc}
         deleteModalTitle="Dokument löschen"
         deleteModalDescription="Möchtest du das Dokument <strong>{{title}}</strong> wirklich löschen?"

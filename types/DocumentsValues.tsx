@@ -28,10 +28,7 @@ export interface DocumentsValuesForm{
   title: string;
   alias: string;
   category: string;
-  url: string;
-  publicId: string;
-  fileName: string;
-  fileType: string;
-  fileSizeByte: number;
   published: boolean;
+  url?: string;
+  fileName?: string;
 }

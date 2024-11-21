@@ -12,6 +12,7 @@ interface DataListProps {
     title: string;
     alias: string;
     description?: string[];
+    category?: string;
     image?: {
       src: string;
       width: number;
@@ -30,6 +31,7 @@ interface DataListProps {
     }>;
   }[];
   statuses: { [key: string]: string };
+  categories?: { [key: string]: string };
   onDeleteConfirm: (id: string) => void;
   deleteModalTitle: string;
   deleteModalDescription: string;
@@ -37,8 +39,8 @@ interface DataListProps {
 }
 
 
-const DataList: React.FC<DataListProps> = ({ items, statuses, onDeleteConfirm,
-                                           deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText}) => {
+const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDeleteConfirm,
+  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
@@ -55,7 +57,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, onDeleteConfirm,
     };
   }, []);
   const isMobile = windowWidth < 640;
-  
+
   const handleDeleteClick = (id: string, title: string) => {
     setPostIdToDelete(id);
     setPostTitle(title);
@@ -97,6 +99,13 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, onDeleteConfirm,
                   className='inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10'
                 >
                   Angeheftet
+                </p>
+              )}
+              {item.category && (
+                <p
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${categories && categories[item.category.toLowerCase()]}`}
+                >
+                  {item.category}
                 </p>
               )}
             </div>
