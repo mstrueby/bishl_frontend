@@ -14,11 +14,13 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { setUser } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async () => {
+    setLoading(true);
     const res = await fetch('/api/login', {
       body: JSON.stringify({
         email,
@@ -41,6 +43,7 @@ const LoginPage = () => {
       setError(errData.detail);
       console.log(error);
     }
+    setLoading(false);
   };
 
   return (
@@ -56,11 +59,11 @@ const LoginPage = () => {
               <Image
                 src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
                 alt="BISHL"
-                width={128}
-                height={117}
+                width={64}
+                height={59}
               />
             </div>
-            <h2 className="mt-10 text-center text-2xl leading-9 tracking-tight text-gray-900">
+            <h2 className="mt-6 text-center text-2xl leading-9 tracking-tight text-gray-900">
               Melde dich an
             </h2>
           </div>
@@ -90,7 +93,7 @@ const LoginPage = () => {
             </div>
           )}
 
-          <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
             <Formik
               initialValues={{
                 email: '',
@@ -120,6 +123,7 @@ const LoginPage = () => {
                     type="submit"
                     label="Anmelden"
                     className="w-full"
+                    isLoading={loading}
                   />
                 </div>
               </Form>

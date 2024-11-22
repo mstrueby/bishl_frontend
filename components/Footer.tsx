@@ -11,7 +11,7 @@ const navigation = {
     { name: 'Vereine', href: '#' },
     { name: 'Spielflächen', href: '/venues' },
     { name: 'Schiedsrichterwesen', href: '#' },
-    { name: 'Dokumente', href: '#' },
+    { name: 'Dokumente', href: '/documents' },
   ],
   company: [
     { name: 'News', href: '/posts' },
