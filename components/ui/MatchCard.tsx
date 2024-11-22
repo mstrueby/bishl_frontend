@@ -95,7 +95,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
         {/* 1-2 date, venue */}
         <div className="flex flex-row sm:flex-col justify-between sm:justify-end mt-3 sm:mt-0 sm:pr-4 sm:gap-y-2 sm:h-full">
           {/* date */}
-          <div className="flex items-center">
+          <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
             <p className="text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { 
               weekday: (isTablet || isMobile) ? 'short' : 'long', 
@@ -107,7 +107,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             })}</time></p>
           </div>
           {/* venue */}
-          <div className="flex items-center">
+          <div className="flex items-center truncate">
             <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
             <p className="text-xs uppercase font-light text-gray-700 truncate">{venue.name}</p>
           </div>

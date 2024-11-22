@@ -124,13 +124,12 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, documents }) => {
                 alt={`${doc.fileType} icon`}
                 width={32}
                 height={32}
-                gravity='auto'
                 className="object-contain"
                 radius={0}
               />
               <div className="min-w-0 flex-auto">
                 <p className="text-sm/6 font-semibold text-gray-900">
-                  <a href={doc.url} target="_blank">
+                  <a href={doc.url} target="_blank" rel="noreferrer nofollow">
                     <span className="absolute inset-x-0 -top-px bottom-0" />
                     {doc.title}
                   </a>
