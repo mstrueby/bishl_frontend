@@ -16,6 +16,7 @@ interface Team {
 }
 
 export interface Match {
+  _id: string;
   matchId: number;
   tournament: {
     name: string;

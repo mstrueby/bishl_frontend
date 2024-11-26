@@ -1,6 +1,7 @@
 // File: pages/documents/[category].tsx
 
 import { GetServerSideProps, NextPage } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
 import axios from 'axios';
 import Layout from '../../components/Layout';
@@ -48,6 +49,7 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, documents }) => {
 
   return (
     <Layout>
+      <Head><title>Dokumente</title></Head>
       <div className="border-b border-gray-200 pb-5 sm:pb-0 mb-8">
         <h1 className="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Dokumente</h1>
         <div className="mt-3 sm:mt-4">
@@ -115,7 +117,7 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, documents }) => {
 
 
 
-      <ul role="list" className="divide divide-gray-100">
+      <ul role="list" className="divide-y divide-gray-100">
         {documents.map((doc) => (
           <li key={doc._id} className="relative flex justify-between gap-x-6 py-5">
             <div className="flex min-w-0 gap-x-4">

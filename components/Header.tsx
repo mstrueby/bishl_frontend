@@ -2,8 +2,7 @@ import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
-import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 import { CldImage } from 'next-cloudinary';
 
@@ -63,20 +62,20 @@ const Header = () => {
 
               {/* Navigation (tablet, desktop) */}
               <div className="flex items-center">
-                
-              <div className="flex-shrink-0 flex items-center justify-center">
-                <Link href="/">
-                  <div className="hover:cursor-pointer flex justify-center items-center">
-                  <Image
-                    src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
-                    alt="Logo"
-                    width={48}
-                    height={48}
-                    className="block h-8 w-auto flex flex-row items-center justify-center"
-                  />
-                  </div>
-                </Link>
-              </div>
+
+                <div className="flex-shrink-0 flex items-center justify-center">
+                  <Link href="/">
+                    <div className="hover:cursor-pointer flex justify-center items-center">
+                      <Image
+                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                        alt="Logo"
+                        width={48}
+                        height={48}
+                        className="block h-8 w-auto flex flex-row items-center justify-center"
+                      />
+                    </div>
+                  </Link>
+                </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
@@ -204,34 +203,44 @@ const Header = () => {
                           </MenuItem>
                           <MenuItem>
                             <MyLink
-                              href="/admin/documents"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
+                              href="/admin/posts"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
                             >
-                              Dokumente
+                              <PencilSquareIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <span>Beiträge</span>
                             </MyLink>
                           </MenuItem>
                           <MenuItem>
                             <MyLink
-                              href="/admin/posts"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
+                              href="/admin/documents"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
                             >
-                              Beiträge
+                              <DocumentIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <span>Dokumente</span>
+                            </MyLink>
+                          </MenuItem>
+                          <MenuItem>
+                            <MyLink
+                              href="/admin/myref"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
+                            >
+                              <HandRaisedIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <span>My Ref</span>
                             </MyLink>
                           </MenuItem>
                           <MenuItem>
                             <MyLink
                               href="/leaguemanager"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
-                            >
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                               Spielbetrieb
                             </MyLink>
                           </MenuItem>
                           <MenuItem>
                             <MyLink
-                              href="/logout"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline'
-                            >
-                              Abmelden
+                              href="/leaguemanager"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                              <ArrowLeftStartOnRectangleIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <span>Abmelden</span>
                             </MyLink>
                           </MenuItem>
                         </MenuItems>
