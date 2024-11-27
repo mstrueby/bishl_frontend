@@ -3,7 +3,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
-import { DocumentsValues } from '../../../types/DocumentsValues';
+import { DocumentValues } from '../../../types/DocumentValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
@@ -15,13 +15,13 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
 
 interface DocsProps {
   jwt: string;
-  docs: DocumentsValues[];
+  docs: DocumentValues[];
 }
 
 export const getServerSideProps: GetServerSideProps<DocsProps> = async (context) => {
   // Ensure jwt is a string or an empty string if undefined
   const jwt = (getCookie('jwt', context) ?? '') as string;
-  let docs: DocumentsValues[] = [];
+  let docs: DocumentValues[] = [];
 
   try {
     const res = await axios.get(BASE_URL, {
@@ -42,7 +42,7 @@ export const getServerSideProps: GetServerSideProps<DocsProps> = async (context)
 
 const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
   const router = useRouter();
-  const [docs, setDocs] = useState<DocumentsValues[]>(initialDocs);
+  const [docs, setDocs] = useState<DocumentValues[]>(initialDocs);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const fetchDocs = async () => {
@@ -130,7 +130,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
 
   const doc_values = docs
     .slice()
-    .map((doc: DocumentsValues) => ({
+    .map((doc: DocumentValues) => ({
       _id: doc._id,
       title: doc.title,
       alias: doc.alias,

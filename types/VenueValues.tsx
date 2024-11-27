@@ -1,4 +1,4 @@
-export interface VenueFormValues {
+export interface VenueValues {
   _id: string;
   name: string;
   alias: string;

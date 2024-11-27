@@ -5,16 +5,19 @@
  */
 
 export function getFuzzyDate(pastDate: Date | string): string {
-  // Convert to Date object if pastDate is a string
-  if (typeof pastDate === 'string') {
-    pastDate = new Date(pastDate);
-  }
+  // Convert to Date object if pastDate is a string and ensure UTC handling
+  const utcPastDate = typeof pastDate === 'string'
+    ? new Date(pastDate)
+    : pastDate;
   // Ensure pastDate is a Date object
-  if (!(pastDate instanceof Date) || isNaN(pastDate.getTime())) {
+  if (!(utcPastDate instanceof Date) || isNaN(utcPastDate.getTime())) {
     throw new Error('Invalid date');
   }
+  // Use UTC timestamps for comparison to avoid timezone issues
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - pastDate.getTime()) / 1000);
+  const diffInSeconds = Math.floor(
+    (now.getTime() - utcPastDate.getTime()) / 1000
+  );
 
   if (diffInSeconds < 60) {
     return 'gerade eben';

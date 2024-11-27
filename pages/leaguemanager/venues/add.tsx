@@ -6,7 +6,7 @@ import axios from 'axios';
 import LayoutAdm from '../../../components/LayoutAdm';
 import { navData } from '../../../components/leaguemanager/navData';
 import VenueForm from '../../../components/leaguemanager/VenueForm'
-import { VenueFormValues } from '../../../types/VenueFormValues';
+import { VenueValues } from '../../../types/VenueValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
@@ -25,7 +25,7 @@ export default function Add({ jwt }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: VenueFormValues = {
+  const initialValues: VenueValues = {
     _id: '',
     name: '',
     alias: '',
@@ -39,7 +39,7 @@ export default function Add({ jwt }: AddProps) {
     active: false,
   };
  
-  const onSubmit = async (values: VenueFormValues) => {
+  const onSubmit = async (values: VenueValues) => {
     setLoading(true);
     try {
       const response = await axios({

@@ -5,7 +5,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { jwt } = req.cookies;
 
     if (!jwt) {
-      res.status(401).end();
       return;
     }
 

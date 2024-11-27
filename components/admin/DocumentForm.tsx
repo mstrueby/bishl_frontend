@@ -7,12 +7,12 @@ import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import MyListBox from '../ui/form/Listbox';
 import Toggle from '../ui/form/Toggle';
-import { DocumentsValuesForm } from '../../types/DocumentsValues';
+import { DocumentValuesForm } from '../../types/DocumentValues';
 import ImageUpload from '../ui/form/ImageUpload';
 
 interface DocumentFormProps {
-  initialValues: DocumentsValuesForm;
-  onSubmit: (values: DocumentsValuesForm) => void;
+  initialValues: DocumentValuesForm;
+  onSubmit: (values: DocumentValuesForm) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;

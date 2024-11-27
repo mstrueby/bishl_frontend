@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
-import { CldImage } from 'next-cloudinary';
 
 
 function classNames(...classes: string[]) {
@@ -37,21 +36,21 @@ const MyLink = forwardRef<HTMLAnchorElement, { href: string; children: ReactNode
 );
 
 const Header = () => {
-  const { user, setUser, authError, setAuthError, loading, setLoading } = useAuth();
+  const { user, setUser, loading, setLoading } = useAuth();
   useEffect(() => {
     setLoading(true);
     (async () => {
-      const userData = await fetch('/api/user');
       try {
+        const userData = await fetch('/api/user');
         const user = await userData.json();
         setUser(user);
       } catch (error) {
+        // Silently handle authentication failure
         setUser(null);
-        setAuthError(error);
       }
     })();
     setLoading(false);
-  }, [setLoading, setUser, setAuthError]);
+  }, [setLoading, setUser]);
 
   return (
     <Disclosure as="nav" className="bg-gray-800 sticky top-0 z-50 shadow-md">

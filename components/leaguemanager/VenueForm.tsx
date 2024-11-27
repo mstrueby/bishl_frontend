@@ -7,11 +7,11 @@ import ButtonPrimary from '../ui/form/ButtonPrimary'
 import ButtonLight from '../ui/form/ButtonLight'
 import Toggle from '../ui/form/Toggle'
 import MyListbox from '../ui/form/Listbox'
-import { VenueFormValues } from '../../types/VenueFormValues'
+import { VenueValues } from '../../types/VenueValues'
 
 interface VenueFormProps {
-  initialValues: VenueFormValues;
-  onSubmit: (values: VenueFormValues) => void;
+  initialValues: VenueValues;
+  onSubmit: (values: VenueValues) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
 }

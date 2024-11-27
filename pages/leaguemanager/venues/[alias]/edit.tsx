@@ -8,7 +8,7 @@ import VenueForm from '../../../../components/leaguemanager/VenueForm';
 import LayoutAdm from '../../../../components/LayoutAdm';
 import LmSidebar from '../../../../components/leaguemanager/LmSidebar';
 import SectionHeader from '../../../../components/leaguemanager/SectionHeader';
-import { VenueFormValues } from '../../../../types/VenueFormValues';
+import { VenueValues } from '../../../../types/VenueValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../components/leaguemanager/navData';
 
@@ -16,7 +16,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/venues/';
 
 interface EditProps {
   jwt: string,
-  venue: VenueFormValues
+  venue: VenueValues
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -45,7 +45,7 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
   const router = useRouter();
 
   // Handler for form submission
-  const onSubmit = async (values: VenueFormValues) => {
+  const onSubmit = async (values: VenueValues) => {
     setError(null);
     //console.log(values);
     try {
@@ -86,7 +86,7 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
   };
 
   // Form initial values with existing venue data
-  const initialValues: VenueFormValues = {
+  const initialValues: VenueValues = {
     _id: venue?._id || '',
     name: venue?.name || '',
     alias: venue?.alias || '',

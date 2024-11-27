@@ -6,7 +6,7 @@ import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import DocumentForm from '../../../components/admin/DocumentForm'
-import { DocumentsValuesForm } from '../../../types/DocumentsValues';
+import { DocumentValuesForm } from '../../../types/DocumentValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/documents/"
@@ -48,7 +48,7 @@ export default function Add({ jwt, user }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: DocumentsValuesForm = {
+  const initialValues: DocumentValuesForm = {
     _id: '',
     title: '',
     alias: '',
@@ -56,7 +56,7 @@ export default function Add({ jwt, user }: AddProps) {
     published: false,
   };
 
-  const onSubmit = async (values: DocumentsValuesForm) => {
+  const onSubmit = async (values: DocumentValuesForm) => {
     setError(null)
     setLoading(true)
     console.log(values)

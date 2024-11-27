@@ -1,4 +1,4 @@
-export interface DocumentsValues{
+export interface DocumentValues{
   _id: string;
   title: string;
   alias: string;
@@ -23,7 +23,7 @@ export interface DocumentsValues{
   }
 }
 
-export interface DocumentsValuesForm{
+export interface DocumentValuesForm{
   _id: string;
   title: string;
   alias: string;

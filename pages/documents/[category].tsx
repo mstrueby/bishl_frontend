@@ -5,47 +5,80 @@ import Head from 'next/head';
 import Link from 'next/link';
 import axios from 'axios';
 import Layout from '../../components/Layout';
-import { DocumentsValues } from '../../types/DocumentsValues';
+import { DocumentValues as DocumentValues } from '../../types/DocumentValues';
 import { classNames } from '../../tools/utils';
 import { CldImage } from 'next-cloudinary';
 import { getFuzzyDate } from '../../tools/dateUtils';
 import { formatFileSize } from '../../tools/utils';
+import DataList from '../../components/ui/DataList';
 
 interface DocumentPageProps {
   category: string;
-  documents: DocumentsValues[];
+  docs: DocumentValues[];
 }
 
-const getIconUrl = (fileExtension: string): string => {
-  switch (fileExtension.toLowerCase()) {
-    case 'pdf':
-      return 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112186/icons/pdf.png';
-    case 'docx':
-    case 'doc':
-      return 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112198/icons/docx.png';
-    case 'xlsx':
-    case 'xls':
-      return 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/xlsx.png';
-    case 'pptx':
-    case 'ppt':
-      return 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/ppt.png';
-    case 'txt':
-      return 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/txt.png';
-    case 'csv':
-      return 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/csv.png';
-    default:
-      return '';
-  }
-};
-
-const DocumentPage: NextPage<DocumentPageProps> = ({ category, documents }) => {
+const DocumentPage: NextPage<DocumentPageProps> = ({ category, docs }) => {
   const categories = [
     { name: 'Allgemein', href: 'allgemein', current: category === 'allgemein' },
     { name: 'Spielbetrieb', href: 'spielbetrieb', current: category === 'spielbetrieb' },
     { name: 'Hobbyliga', href: 'hobbyliga', current: category === 'hobbyliga' },
   ];
 
+  const docValues = docs
+  .slice()
+  .map((doc: DocumentValues) => ({
+    ...doc
+  }))
+  .sort((a, b) => {
+    if (a.title < b.title) return -1;
+    if (a.title > b.title) return 1;
+    return 0;
+  });
 
+  const dataListItems = docValues.map((doc: DocumentValues) => {
+    const fileExtension = doc.fileName.split('.').pop();
+    let imageSrc = null;
+    switch (fileExtension) {
+      case 'pdf':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112186/icons/pdf.png';
+        break;
+      case 'docx':
+      case 'doc':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112198/icons/docx.png';
+        break;
+      case 'xlsx':
+      case 'xls':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/xlsx.png';
+        break;
+      case 'pptx':
+      case 'ppt':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/ppt.png';
+        break;
+      case 'txt':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/txt.png';
+        break;
+      case 'csv':
+        imageSrc = 'https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/csv.png';
+        break;
+    }
+
+    return {
+      _id: doc._id,
+      title: doc.title,
+      alias: doc.alias,
+      url: doc.url,
+      description: [doc.fileName, formatFileSize(doc.fileSizeByte), getFuzzyDate(doc.updateDate)],
+      image: imageSrc ? {
+        src: imageSrc,
+        width: 32,
+        height: 32,
+        gravity: '',
+        className: 'object-contain',
+        radius: 0,
+      } : undefined,
+    }
+  });
+  
 
   return (
     <Layout>
@@ -90,83 +123,28 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, documents }) => {
         </div>
       </div>
 
+      <DataList
+        items={dataListItems}
+      />
 
-
-
-
-      {/* Sub-navigation */}
-      {/*
-      <nav className="mb-4">
-        <ul className="flex space-x-4">
-          {categories.map((cat) => (
-            <li key={cat}>
-              <Link href={`/documents/${cat}`}>
-                <a
-                  className={`py-2 px-4 ${cat === category ? 'text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}
-                >
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </a>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      */}
-      {/* Document List */}
-
-
-
-
-      <ul role="list" className="divide-y divide-gray-100">
-        {documents.map((doc) => (
-          <li key={doc._id} className="relative flex justify-between gap-x-6 py-5">
-            <div className="flex min-w-0 gap-x-4">
-              <CldImage
-                src={getIconUrl(doc.fileName.split('.').pop() || '')}
-                alt={`${doc.fileType} icon`}
-                width={32}
-                height={32}
-                className="object-contain"
-                radius={0}
-              />
-              <div className="min-w-0 flex-auto">
-                <p className="text-sm/6 font-semibold text-gray-900">
-                  <a href={doc.url} target="_blank" rel="noreferrer nofollow">
-                    <span className="absolute inset-x-0 -top-px bottom-0" />
-                    {doc.title}
-                  </a>
-                </p>
-                <div className="flex items-center gap-x-2 text-xs/5 text-gray-500">
-                  <span className="whitespace-nowrap truncate">{doc.fileName}
-                  </span>
-                  <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                    <circle r={1} cx={1} cy={1} />
-                  </svg>
-                  <span className="whitespace-nowrap truncate">{formatFileSize(doc.fileSizeByte)}
-                  </span>
-                  <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                    <circle r={1} cx={1} cy={1} />
-                  </svg>
-                  <span className="whitespace-nowrap truncate">{getFuzzyDate(doc.updateDate)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="legal mt-8 text-sm text-gray-500 italic">
+        Icons made by <a href="https://www.flaticon.com/authors/awicon" rel="noreferrer nofollow" target="_blank" title="Awicon">Awicon</a> from <a href="https://www.flaticon.com/" title="Flaticon">https://www.flaticon.com</a>
+      </div>
+      
     </Layout>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const category = context.params ? context.params.category : undefined;
-  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/documents/categories/${category}`);
+  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/documents/categories/${category}`, {
+    params: { published: true },
+  });
 
   return {
     props: {
       category,
-      documents: res.data,
+      docs: res.data,
     },
   };
 };

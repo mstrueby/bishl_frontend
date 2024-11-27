@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import LayoutAdm from '../../../components/LayoutAdm';
 import Badge from '../../../components/ui/Badge';
-import { VenueFormValues } from '../../../types/VenueFormValues';
+import { VenueValues } from '../../../types/VenueValues';
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { navData } from '../../../components/leaguemanager/navData';
 
@@ -12,7 +12,7 @@ import { navData } from '../../../components/leaguemanager/navData';
 export default function Venues({
   allVenuesData
 }: {
-  allVenuesData: VenueFormValues[]
+  allVenuesData: VenueValues[]
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();

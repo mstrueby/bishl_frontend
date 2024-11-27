@@ -6,14 +6,14 @@ import axios from 'axios';
 import DocumentForm from '../../../../components/admin/DocumentForm';
 import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
-import { DocumentsValuesForm } from '../../../../types/DocumentsValues';
+import { DocumentValuesForm } from '../../../../types/DocumentValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
 
 interface EditProps {
   jwt: string;
-  doc: DocumentsValuesForm;
+  doc: DocumentValuesForm;
 }
 
 export const getServerSideProps: GetServerSideProps<EditProps> = async (context) => {
@@ -47,7 +47,7 @@ const Edit: NextPage<EditProps> = ({ jwt, doc }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const onSubmit = async (values: DocumentsValuesForm) => {
+  const onSubmit = async (values: DocumentValuesForm) => {
     setError(null)
     setLoading(true)
     console.log('submitted values', values)
@@ -108,7 +108,7 @@ const Edit: NextPage<EditProps> = ({ jwt, doc }) => {
     setError(null);
   }; 
 
-  const initialValues: DocumentsValuesForm = {
+  const initialValues: DocumentValuesForm = {
     _id: doc._id,
     title: doc.title,
     alias: doc.alias,

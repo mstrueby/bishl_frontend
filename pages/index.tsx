@@ -58,9 +58,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts }) => {
       content: post.content,
       imageUrl: post.imageUrl,
       createUser: post.createUser.firstName + ' ' + post.createUser.lastName,
-      createDate: new Date(new Date(post.createDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
+      createDate: new Date(post.createDate).toISOString(),
       updateUser: post.updateUser ? (post.updateUser.firstName + ' ' + post.updateUser.lastName) : '-',
-      updateDate: new Date(new Date(post.updateDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
+      updateDate: new Date(post.updateDate).toISOString(),
       published: post.published,
       featured: post.featured,
     }));
