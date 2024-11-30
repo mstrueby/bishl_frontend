@@ -5,12 +5,10 @@ import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import VenueForm from '../../../../components/leaguemanager/VenueForm';
-import LayoutAdm from '../../../../components/LayoutAdm';
-import LmSidebar from '../../../../components/leaguemanager/LmSidebar';
-import SectionHeader from '../../../../components/leaguemanager/SectionHeader';
+import Layout from '../../../../components/Layout';
+import SectionHeader from '../../../../components/admin/SectionHeader';
 import { VenueValues } from '../../../../types/VenueValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
-import { navData } from '../../../../components/leaguemanager/navData';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/venues/';
 
@@ -20,7 +18,7 @@ interface EditProps {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = getCookie('jwt', context) as string | undefined;
   const { alias } = context.params as { alias: string };
 
   // Fetch the existing venue data
@@ -33,54 +31,85 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
     venue = response.data;
   } catch (error) {
-    // Handle error (e.g., not found)
-    console.error('Could not fetch the venue data');
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching venue:', error.message);
+    }
   }
-
   return venue ? { props: { jwt, venue } } : { notFound: true };
 };
 
 const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   // Handler for form submission
   const onSubmit = async (values: VenueValues) => {
     setError(null);
-    //console.log(values);
+    setLoading(true);
+    console.log('submitted values', values);
     try {
-      const response = await axios.patch(BASE_URL + venue._id, values, {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        if (value instanceof FileList) {
+          Array.from(value).forEach((file) => formData.append(key, file));
+        } else {
+          // Handle imageUrl specifically to ensure it's only appended if not null
+          if (key === 'imageUrl' && value !== null) {
+            formData.append(key, value);
+          } else if (key !== 'imageUrl') {
+            formData.append(key, value);
+          }
+        }
+      });
+
+      // Debug FormData by logging key-value pairs to the console
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
+      const response = await axios.patch(BASE_URL + venue._id, formData, {
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`,
         },
       });
-
-      if (response.status === 200) { // Assuming status 200 means success
+      if (response.status === 200) {
         router.push({
-          pathname: '/leaguemanager/venues',
-          query: { message: `Die Spielfläche ${values.name} wurde erfolgreich aktualisiert.` }
-        }, '/leaguemanager/venues');
+          pathname: '/admin/venues',
+          query: { message: `Die Spjielfläche <strong>${values.name}</strong> wurde erfolgreich aktualisiert.` }
+        }, `/admin/venues`);
       } else {
-        setError('An unexpected error occurred while updating the venue.');
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      setError('Failed to update the venue.');
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 304) {
+          // Handle when a 304 status is caught by error
+          router.push({
+            pathname: '/admin/venues',
+            query: { message: `Keine Änderungen für Spielfläche <strong>${values.name}</strong> vorgenommen.` }
+          }, `/admin/venues`);
+        } else {
+          setError('Ein Fehler ist aufgetreten.');
+        }
+      } else {
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/venues');
+    router.push('/admin/venues');
   };
 
   useEffect(() => {
     if (error) {
-      // Scroll to the top of the page to show the error message
       window.scrollTo(0, 0);
     }
   }, [error]);
 
-  // Handler to close the success message
   const handleCloseMessage = () => {
     setError(null);
   };
@@ -90,6 +119,7 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
     _id: venue?._id || '',
     name: venue?.name || '',
     alias: venue?.alias || '',
+    imageUrl: venue?.imageUrl || '',
     shortName: venue?.shortName || '',
     street: venue?.street || '',
     zipCode: venue?.zipCode || '',
@@ -100,12 +130,12 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
     active: venue?.active || false,
   };
 
+  const sectionTitle = 'Spielfläche bearbeiten';
+
   // Render the form with initialValues and the edit-specific handlers
   return (
-    <LayoutAdm
-      navData={navData}
-      sectionTitle={`Spielfläche bearbeiten`}
-    >
+    <Layout>
+      <SectionHeader title={sectionTitle} />
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
@@ -114,8 +144,9 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
+        loading={loading}
       />
-    </LayoutAdm>
+    </Layout>
   );
 };
 

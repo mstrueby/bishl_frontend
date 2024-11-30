@@ -9,7 +9,7 @@ import Toggle from '../ui/form/Toggle';
 import { PostValuesForm } from '../../types/PostValues';
 import RichEditor from '../ui/form/RichEditor';
 import ImageUpload from '../ui/form/ImageUpload';
-import { CldImage } from 'next-cloudinary'; // To display the image
+import { CldImage } from 'next-cloudinary';
 
 // Define the PostFormProps interface
 interface PostFormProps {

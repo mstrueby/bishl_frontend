@@ -13,37 +13,18 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/documents/"
 
 interface AddProps {
   jwt: string;
-  user: {
-    firstName: string;
-    lastName: string;
-  }
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let user = {
-    firstName: '',
-    lastName: '',
-  };
-  try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    user = response.data;
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-  }
   return {
     props: {
-      jwt,
-      user
+      jwt
     }
   }
 }
 
-export default function Add({ jwt, user }: AddProps) {
+export default function Add({ jwt }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();

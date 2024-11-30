@@ -9,5 +9,6 @@ export interface VenueValues {
   country: string;
   latitude: number;
   longitude: number;
+  imageUrl: string;
   active: boolean;
 }

@@ -107,7 +107,6 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
 
   useEffect(() => {
     if (error) {
-      // Scroll to the top of the page to show the error message
       window.scrollTo(0, 0);
     }
   }, [error]);

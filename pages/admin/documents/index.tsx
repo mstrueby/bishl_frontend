@@ -92,7 +92,6 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
 
   const deleteDoc = async (alias: string) => {
     if (!alias) return;
-    console.log(`${BASE_URL}${alias}`)
     try {
       const res = await axios.delete(`${BASE_URL}${alias}`, {
         headers: {
@@ -128,7 +127,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     setSuccessMessage(null);
   };
 
-  const doc_values = docs
+  const docValues = docs
     .slice()
     .map((doc: DocumentValues) => ({
       _id: doc._id,
@@ -159,7 +158,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     hobbyliga: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20 ',
   }
 
-  const dataListItems = doc_values.map((doc) => {
+  const dataListItems = docValues.map((doc) => {
     // Determine the image source based on the file extension
     const fileExtension = doc.fileName.split('.').pop();
     let imageSrc = null;

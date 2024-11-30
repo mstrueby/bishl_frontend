@@ -3,7 +3,8 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import LayoutAdm from '../../../components/LayoutAdm';
+import Layout from '../../../components/Layout';
+import SectionHeader from "../../../components/admin/SectionHeader";
 import { navData } from '../../../components/leaguemanager/navData';
 import VenueForm from '../../../components/leaguemanager/VenueForm'
 import { VenueValues } from '../../../types/VenueValues';
@@ -15,8 +16,8 @@ interface AddProps {
   jwt: string
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const jwt = getCookie('jwt', { req, res });
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const jwt = getCookie('jwt', context);
   return { props: { jwt } };
 }
 
@@ -36,70 +37,68 @@ export default function Add({ jwt }: AddProps) {
     country: 'Deutschland',
     latitude: 0,
     longitude: 0,
+    imageUrl: '',
     active: false,
   };
- 
+
   const onSubmit = async (values: VenueValues) => {
+    setError(null)
     setLoading(true);
+    console.log(values)
     try {
-      const response = await axios({
-        method: 'post',
-        url: BASE_URL,
-        data: JSON.stringify(values),
-        headers: {
-          //'Content-Type': 'multipart/form-data',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`,
-        },
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value as string);
       });
-      if (response.status === 201) { // Assuming status 201 means created
+      const response = await axios.post(BASE_URL, formData, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        }
+      });
+      if (response.status === 201) {
         router.push({
-          pathname: '/leaguemanager/venues',
-          query: { message: `Die neue Spielfläche ${values.name} wurde erfolgreich angelegt.` }
-        }, '/leaguemanager/venues');
+          pathname: '/admin/venues',
+          query: { message: `Die neue Spielfläche <strong>${values.name}</strong> wurde erfolgreich angelegt.` }
+        }, '/admin/venues');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setError(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
-      }      
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    router.push('/leaguemanager/venues')
+    router.push('/admin/venues')
   }
 
   useEffect(() => {
     if (error) {
-      // Scroll to the top of the page to show the error message
       window.scrollTo(0, 0);
     }
   }, [error]);
-  
-  // Handler to close the success message
+
   const handleCloseMessage = () => {
     setError(null);
   };
 
-  const formProps = {
-    initialValues,
-    onSubmit,
-    handleCancel,
-    isNew: true,
-    enableReinitialize: false,
-  };
-  
+  const sectionTitle = 'Neue Spielfläche';
+
   return (
-    <LayoutAdm
-      navData={navData}
-      sectionTitle='Neue Spielfläche'
-    >
-      {error && <ErrorMessage error={error} onClose={handleCloseMessage} /> }
-      <VenueForm {...formProps} />
-    </LayoutAdm>
+    <Layout>
+      <SectionHeader title={sectionTitle} />
+      {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
+      <VenueForm 
+        initialValues={initialValues}
+        onSubmit={onSubmit}
+        enableReinitialize= {true}
+        handleCancel={handleCancel}
+        loadding={loading}
+      />
+    </Layout>
   )
 }

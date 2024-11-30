@@ -8,12 +8,15 @@ import ButtonLight from '../ui/form/ButtonLight'
 import Toggle from '../ui/form/Toggle'
 import MyListbox from '../ui/form/Listbox'
 import { VenueValues } from '../../types/VenueValues'
+import ImageUpload from '../ui/form/ImageUpload';
+import { CldImage } from 'next-cloudinary';
 
 interface VenueFormProps {
   initialValues: VenueValues;
   onSubmit: (values: VenueValues) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
+  loading: boolean;
 }
 
 const countries = [
@@ -29,6 +32,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
   onSubmit,
   enableReinitialize,
   handleCancel,
+  loading
 }) => {
   return (
     <>
@@ -49,7 +53,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
         })}
         onSubmit={onSubmit}
       >
-        {({ handleChange }) => (
+        {({ values, handleChange, setFieldValue }) => (
           <Form>
             <InputText
               name="name"
@@ -58,13 +62,31 @@ const VenueForm: React.FC<VenueFormProps> = ({
               label="Name"
               onChange={handleChange}
             />
-            <AutoAlias field="name" targetField="alias"/>
-            <InputText
-              name="alias"
-              type="text"
-              label="Alias"
-              disabled
-            />
+            <AutoAlias field="name" targetField="alias" />
+            {values.imageUrl ? (
+
+              <div>
+                <div>
+                  <span className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
+                    Bild
+                  </span>
+                  <CldImage src={values.imageUrl} alt="Uploaded image" width={600} height={337} aspectRatio="16:9"
+                    crop="fill"
+                    gravity="auto"
+                    className="aspect-[16/9] w-full rounded-xl object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFieldValue("imageUrl", null)}
+                  className="mt-2 inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 sm:ml-0 sm:w-auto"
+                >
+                  Bild entfernen
+                </button>
+              </div>
+            ) : (
+              <ImageUpload name="image" label="Bild" imageUrl={initialValues.imageUrl || ''} />
+            )}
             <InputText
               name="shortName"
               type="text"

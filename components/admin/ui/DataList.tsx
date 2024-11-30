@@ -1,14 +1,16 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, DocumentArrowDownIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, DocumentArrowDownIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import DeleteConfirmationModal from '../../ui/DeleteConfirmationModal';
+import { classNames } from '../../../tools/utils';
 
 type MenuItemType = {
   edit?: { onClick: () => void };
   feature?: { onClick: () => void };
   publish?: { onClick: () => void };
+  active?: { onClick: () => void };
   delete?: { onClick?: () => void };
 };
 
@@ -33,6 +35,7 @@ interface DataListProps {
       edit?: { onClick: () => void };
       feature?: { onClick: () => void };
       publish?: { onClick: () => void };
+      active?: { onClick: () => void };
       delete?: { onClick: () => void };
     }>;
   }[];
@@ -51,19 +54,6 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
 
-  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-    window.addEventListener('resize', handleResize);
-    // Clean up the event listener on component unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-  const isMobile = windowWidth < 640;
-
   const handleDeleteClick = (id: string, title: string) => {
     setPostIdToDelete(id);
     setPostTitle(title);
@@ -76,24 +66,23 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
     setIsModalOpen(false);
   };
 
-
   return (
     <ul role="list" className="divide-y divide-gray-100">
       {items.map((item) => (
         <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
-          {!isMobile && (item.image ? (
-            <CldImage
+          {item.image ? (
+            <span className="hidden sm:block"><CldImage
               src={item.image.src}
               alt="Thumbnail"
-              className={item.image.className}
+              className={classNames(item.image.className, '')}
               width={item.image.width} height={item.image.height}
               crop="fill"
               gravity={item.image.gravity}
               radius={item.image.radius}
-            />
+            /></span>
           ) : (
             <div className="hidden sm:block relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
-          ))}
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-x-3">
               <div className={`${statuses[item.published ? 'Published' : 'Unpublished']} flex-none rounded-full p-1`}>
@@ -161,6 +150,11 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                       caption = item.published ? "Entwurf" : "Veröffentlichen";
                       iconColor = item.published ? "text-gray-500" : "text-green-500";
                       break;
+                    case "active":
+                      IconComponent = item.published ? XCircleIcon : CheckCircleIcon;
+                      caption = item.published ? "Deaktivieren" : "Aktivieren";
+                      iconColor = item.published ? "text-gray-500" : "text-green-500";
+                      break;
                     case "feature":
                       IconComponent = item.featured ? StarIcon : StarIcon;
                       caption = item.featured ? "Loslösen" : "Anheften";
@@ -182,8 +176,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                   }
                   return (
                     <MenuItem key={index}>
-                      <a
-                        href="#"
+                      <button
                         onClick={() => {
                           if (key === 'delete') {
                             handleDeleteClick(item._id, item.title);
@@ -194,7 +187,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                         className="block flex items-center px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none">
                         <IconComponent className={`h-4 w-4 mr-2 ${iconColor}`} aria-hidden="true" />
                         {caption}<span className="sr-only">, {item.title}</span>
-                      </a>
+                      </button>
                     </MenuItem>
                   );
                 })}
