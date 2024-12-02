@@ -54,7 +54,7 @@ const MyListbox = ({ label, name, options, ...props }: ListboxProps) => {
             <div className="relative">
               <Listbox.Button type="button" className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
                 {selected?.value ? (
-                  <span className="ml-3 block truncate">{selected.value}</span>
+                  <span className="block truncate">{selected.value}</span>
                 ) : (
                   <Placeholder />
                 )}

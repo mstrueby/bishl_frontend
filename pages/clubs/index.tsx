@@ -3,7 +3,6 @@ import Layout from '../../components/Layout';
 import Head from 'next/head';
 import { ClubValues } from '../../types/ClubValues';
 import axios from 'axios';
-import { getCookie } from 'cookies-next';
 import DataList from '../../components/ui/DataList';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
@@ -47,7 +46,7 @@ const Clubs: NextPage<ClubPageProps> = ({ clubs }) => {
       //url: `/clubs/${club.alias}`,
       //description: [club.street, club.zipCode + ' ' + club.city]
       image: {
-        src: club.logo ? club.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
+        src: club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
         width: 32,
         height: 32,
         gravity: 'center',

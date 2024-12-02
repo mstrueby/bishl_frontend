@@ -76,7 +76,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
               alt="Thumbnail"
               className={classNames(item.image.className, '')}
               width={item.image.width} height={item.image.height}
-              crop="fill"
+              //crop="fill"
               gravity={item.image.gravity}
               radius={item.image.radius}
             /></span>

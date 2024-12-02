@@ -5,7 +5,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
-import VenueForm from '../../../components/leaguemanager/VenueForm'
+import VenueForm from '../../../components/admin/VenueForm'
 import { VenueValues } from '../../../types/VenueValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 

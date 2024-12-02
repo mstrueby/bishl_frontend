@@ -38,7 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return club ? { props: { jwt, club, cAlias } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, club, cAlias }) => {
+const Edit: NextPage<EditProps> = ({ jwt, club }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();

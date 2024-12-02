@@ -4,7 +4,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import VenueForm from '../../../../components/leaguemanager/VenueForm';
+import VenueForm from '../../../../components/admin/VenueForm';
 import Layout from '../../../../components/Layout';
 import SectionHeader from '../../../../components/admin/SectionHeader';
 import { VenueValues } from '../../../../types/VenueValues';
