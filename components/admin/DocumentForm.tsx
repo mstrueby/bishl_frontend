@@ -58,7 +58,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
               <span className="mt-2 text-xs sm:text-sm text-gray-500">{values.fileName}</span>
             </div>
           )}
-          <ImageUpload name="file" label="Datei" description="Das neue Datei wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.url || ''} />
+          <ImageUpload name="file" label="Datei" description="Die neue Datei wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.url || ''} />
           <MyListBox
             name="category"
             label="Kategorie"

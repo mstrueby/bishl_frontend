@@ -5,7 +5,6 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
-import { navData } from '../../../components/leaguemanager/navData';
 import VenueForm from '../../../components/leaguemanager/VenueForm'
 import { VenueValues } from '../../../types/VenueValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
@@ -44,7 +43,7 @@ export default function Add({ jwt }: AddProps) {
   const onSubmit = async (values: VenueValues) => {
     setError(null)
     setLoading(true);
-    console.log(values)
+    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -97,7 +96,7 @@ export default function Add({ jwt }: AddProps) {
         onSubmit={onSubmit}
         enableReinitialize= {true}
         handleCancel={handleCancel}
-        loadding={loading}
+        loading={loading}
       />
     </Layout>
   )

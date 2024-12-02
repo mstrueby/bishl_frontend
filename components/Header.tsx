@@ -2,7 +2,7 @@ import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 
 
@@ -36,21 +36,21 @@ const MyLink = forwardRef<HTMLAnchorElement, { href: string; children: ReactNode
 );
 
 const Header = () => {
-  const { user, setUser, loading, setLoading } = useAuth();
+  const { user, setUser, authError, setAuthError, loading, setLoading } = useAuth();
   useEffect(() => {
     setLoading(true);
     (async () => {
+      const userData = await fetch('/api/user');
       try {
-        const userData = await fetch('/api/user');
         const user = await userData.json();
         setUser(user);
       } catch (error) {
-        // Silently handle authentication failure
         setUser(null);
+        setAuthError(error);
       }
     })();
     setLoading(false);
-  }, [setLoading, setUser]);
+  }, [setLoading, setUser, setAuthError]);
 
   return (
     <Disclosure as="nav" className="bg-gray-800 sticky top-0 z-50 shadow-md">
@@ -168,7 +168,7 @@ const Header = () => {
 
                   {/* Profile dropdown */}
                   {loading ? <span>Loading...</span> : ""}
-                  {user ? (
+                  {user !== null ? (
                     <Menu as="div" className="relative ml-3">
                       <div>
                         <MenuButton className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
@@ -187,6 +187,7 @@ const Header = () => {
                         leaveTo="transform opacity-0 scale-95"
                       >
                         <MenuItems className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <p className="block px-4 py-2 text-sm font-bold text-gray-900 border-b border-gray-200">Hallo {user.firstName}</p>
                           <MenuItem>
                             {({ active }) => (
                               <a
@@ -229,8 +230,17 @@ const Header = () => {
                           </MenuItem>
                           <MenuItem>
                             <MyLink
-                              href="/admin/venues"
+                              href="/admin/clubs"
                               className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'
+                            >
+                              <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <span>Vereine</span>
+                            </MyLink>
+                          </MenuItem>
+                          <MenuItem>
+                            <MyLink
+                              href="/admin/venues"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
                             >
                               <RectangleStackIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                               <span>Spielflächen</span>
@@ -245,8 +255,8 @@ const Header = () => {
                           </MenuItem>
                           <MenuItem>
                             <MyLink
-                              href="/leaguemanager"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                              href="/logout"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
                               <ArrowLeftStartOnRectangleIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                               <span>Abmelden</span>
                             </MyLink>

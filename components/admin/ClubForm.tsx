@@ -1,5 +1,5 @@
 import React from 'react';
-import { Formik, Form, useFormikContext } from 'formik';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
 import { AutoAlias } from '../../tools/autoAlias';
@@ -7,14 +7,16 @@ import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
 import MyListbox from '../ui/form/Listbox'
-import LogoUpload from '../ui/form/LogoUpload';
 import { ClubValues } from '../../types/ClubValues';
+import ImageUpload from '../ui/form/ImageUpload';
+import { CldImage } from 'next-cloudinary';
 
 interface ClubFormProps {
   initialValues: ClubValues;
   onSubmit: (values: ClubValues) => void;
   enableReinitialize: boolean;
   handleCancel: () => void;
+  loading: boolean;
 }
 
 const countries = [
@@ -30,6 +32,7 @@ const ClubForm: React.FC<ClubFormProps> = ({
   onSubmit,
   enableReinitialize,
   handleCancel,
+  loading,
 }) => {
   return (
     <>
@@ -46,17 +49,34 @@ const ClubForm: React.FC<ClubFormProps> = ({
         })}
         onSubmit={onSubmit}
       >
-        {({ handleChange }) => (
+        {({ values, handleChange, setFieldValue }) => (
           <Form>
             <InputText name="name" autoComplete="off" type="text" label="Name des Vereins" onChange={handleChange} />
-            <AutoAlias field="name" targetField="alias"/>
-            <InputText
-              name="alias"
-              type="text"
-              label="Alias"
-              disabled
-            />
-            <LogoUpload name="logo" label="Vereinslogo" />
+            <AutoAlias field="name" targetField="alias" />
+            {values.logoUrl ? (
+
+              <div>
+                <div>
+                  <span className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
+                    Logo
+                  </span>
+                  <CldImage src={values.logoUrl} alt="Uploaded logo" width={96} height={96}
+                    crop="fit"
+                    gravity="center"
+                    className=" w-full object-contain"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFieldValue("logoUrl", null)}
+                  className="mt-2 inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 sm:ml-0 sm:w-auto"
+                >
+                  Logo entfernen
+                </button>
+              </div>
+            ) : (
+              <ImageUpload name="logo" label="Logo" imageUrl={initialValues.logoUrl || ''} />
+            )}
             <InputText name="addressName" type="text" label="Adresse" />
             <InputText name="street" autoComplete="off" type="text" label="Straße" />
             <InputText name="zipCode" autoComplete="off" type="text" label="PLZ" />
@@ -70,7 +90,7 @@ const ClubForm: React.FC<ClubFormProps> = ({
             <Toggle name="active" type="checkbox" label="Aktiv" />
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
-              <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" />
+              <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />
             </div>
           </Form>
         )}

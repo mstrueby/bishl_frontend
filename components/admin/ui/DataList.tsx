@@ -41,10 +41,10 @@ interface DataListProps {
   }[];
   statuses: { [key: string]: string };
   categories?: { [key: string]: string };
-  onDeleteConfirm: (id: string) => void;
-  deleteModalTitle: string;
-  deleteModalDescription: string;
-  deleteModalDescriptionSubText: string;
+  onDeleteConfirm?: (id: string) => void;
+  deleteModalTitle?: string;
+  deleteModalDescription?: string;
+  deleteModalDescriptionSubText?: string;
 }
 
 
@@ -60,7 +60,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
     setIsModalOpen(true);
   };
   const handleConfirmDelete = () => {
-    if (postIdToDelete) {
+    if (postIdToDelete && onDeleteConfirm) {
       onDeleteConfirm(postIdToDelete);
     }
     setIsModalOpen(false);
@@ -201,10 +201,10 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
         <DeleteConfirmationModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onConfirm={handleConfirmDelete}
-          title={deleteModalTitle}
-          description={deleteModalDescription.replace('{{title}}', postTitle!)}
-          descriptionSubText={deleteModalDescriptionSubText}
+          onConfirm={onDeleteConfirm ? handleConfirmDelete : () => setIsModalOpen(false)}
+          title={deleteModalTitle ?? ''}
+          description={deleteModalDescription?.replace('{{title}}', postTitle!) ?? ''}
+          descriptionSubText={deleteModalDescriptionSubText ?? ''}
         />
       )}
 

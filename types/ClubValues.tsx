@@ -29,7 +29,7 @@ export interface ClubValues {
   website: string;
   ishdId: number | '';
   active: boolean;
-  logo: string;
+  logoUrl: string;
   legacyId: number | '';
   teams: TeamValues[]; // Use the new Team interface
 }

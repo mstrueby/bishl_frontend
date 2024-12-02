@@ -130,7 +130,7 @@ const Edit: NextPage<EditProps> = ({ jwt, venue }) => {
     active: venue?.active || false,
   };
 
-  const sectionTitle = 'Spielfläche bearbeiten';
+  const sectionTitle = 'Spielstätte bearbeiten';
 
   // Render the form with initialValues and the edit-specific handlers
   return (

@@ -61,7 +61,7 @@ const Clubs: NextPage<ClubPageProps> = ({ clubs }) => {
     <Layout>
       <Head><title>Vereine</title></Head>
       <div className="border-b border-gray-200 pb-5 sm:pb-0 mb-8">
-        <h1 className="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Vereine</h1>
+        <h1 className="my-4 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Vereine</h1>
         <div className="mt-3 sm:mt-4" />
       </div>
       <DataList

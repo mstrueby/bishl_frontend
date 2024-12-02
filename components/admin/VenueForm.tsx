@@ -32,7 +32,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
   onSubmit,
   enableReinitialize,
   handleCancel,
-  loading
+  loading,
 }) => {
   return (
     <>
@@ -141,6 +141,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
                 name="btnPrimary"
                 type="submit"
                 label="Speichern"
+                isLoading={loading}
               />
             </div>
           </Form>

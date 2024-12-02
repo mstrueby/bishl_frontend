@@ -9,7 +9,7 @@ function classNames(...classes: string[]) {
 const navigation = {
   bishl: [
     { name: 'Vereine', href: '/clubs' },
-    { name: 'Spielflächen', href: '/venues' },
+    { name: 'Spielstätten', href: '/venues' },
     { name: 'Schiedsrichterwesen', href: '#' },
     { name: 'Dokumente', href: '/documents' },
   ],

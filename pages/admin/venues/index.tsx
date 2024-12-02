@@ -59,7 +59,7 @@ const Venues: NextPage<VenuesProps> = ({ jwt, venues: initialVenues }) => {
     router.push(`/admin/venues/${alias}/edit`);
   };
 
-  const togglePublished = async (venueId: string, currentStatus: boolean, imageUrl: string | null) => {
+  const toggleActive = async (venueId: string, currentStatus: boolean, imageUrl: string | null) => {
     try {
       const formData = new FormData();
       formData.append('active', (!currentStatus).toString()); // Toggle the status
@@ -134,7 +134,7 @@ const Venues: NextPage<VenuesProps> = ({ jwt, venues: initialVenues }) => {
       ...venue
     }));
 
-  const sectionTitle = 'Spielflächen';
+  const sectionTitle = 'Spielstätten';
   const newLink = '/admin/venues/add';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
@@ -159,7 +159,7 @@ const Venues: NextPage<VenuesProps> = ({ jwt, venues: initialVenues }) => {
       published: venue.active,
       menu: [
         { edit: { onClick: () => editVenue(venue.alias) } }, 
-        { active: { onClick: () => { togglePublished(venue._id, venue.active, venue.imageUrl || null) } } },
+        { active: { onClick: () => { toggleActive(venue._id, venue.active, venue.imageUrl || null) } } },
         { delete: { onClick: () => { deleteVenue(venue._id) } } }, 
       ],
     };
