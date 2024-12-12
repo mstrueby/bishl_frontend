@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
@@ -12,7 +12,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
 
   const allStatuses = [
     { key: 'AVAILABLE', title: 'Verfügbar', current: true },
-    { key: 'REQUESTED', title: 'Draft', current: false },
+    { key: 'REQUESTED', title: 'Angefragt', current: false },
     { key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false },
     { key: 'ASSIGNED', title: 'Eingeteilt', current: false },
     { key: 'ACCEPTED', title: 'Bestätigt', current: false },
@@ -23,13 +23,13 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
       case 'AVAILABLE':
         return ['REQUESTED', 'UNAVAILABLE'];
       case 'REQUESTED':
-        return ['AVAILABLE', 'ASSIGNED', 'UNAVAILABLE'];
+        return ['UNAVAILABLE'];
       case 'ASSIGNED':
-        return ['ACCEPTED', 'AVAILABLE'];
+        return ['ACCEPTED'];
       case 'ACCEPTED':
-        return ['ASSIGNED'];
+        return [];
       case 'UNAVAILABLE':
-        return ['AVAILABLE'];
+        return ['AVAILABLE', 'REQUESTED'];
       default:
         return ['AVAILABLE'];
     }
