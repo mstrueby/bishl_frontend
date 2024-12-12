@@ -7,7 +7,8 @@ import Layout from "../../../components/Layout";
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import { CldImage } from 'next-cloudinary';
 import { Match } from '../../../types/MatchValues';
-
+import SectionHeader from '../../../components/admin/SectionHeader';
+import MatchCardRef from '../../../components/admin/MatchCardRef';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/matches/"
 
@@ -19,11 +20,15 @@ interface MyRefProps {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
   let matches = null;
+  const currentDate = new Date().toISOString().split('T')[0]; // Get the current date in YYYY-MM-DD format
   try {
     const res = await axios.get(BASE_URL, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwt}`,
+      },
+      params: {
+        date_from: currentDate,
       }
     });
     matches = res.data;
@@ -37,25 +42,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const MyRef: NextPage<MyRefProps> = ({ jwt, matches }) => {
 
+  const sectionTitle= "Meine Schiedsrichtereinsätze";
+  
   return (
     <Layout>
       <Head>
-        <title>Meine Schiedsrichtereinsätze</title>
+        <title>{sectionTitle}</title>
       </Head>
-      <div className="border-b border-gray-200 pb-5 sm:pb-0 mb-8">
-        <h1 className="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Meine Schiedsrichtereinsätze</h1>
-        <div className="mt-3 sm:mt-4" />
-      </div>
+      <SectionHeader
+        title={sectionTitle}
+      />
 
       <ul>
         {matches && matches.length > 0 ? (
           matches.map((match: Match) => (
-            <li key={match._id}>
-              {match.home.fullName} vs {match.away.fullName}
-            </li>
+            <MatchCardRef key={match._id} match={match} />
           ))
         ) : (
-          <p>No matches found</p>
+          <p>Keine Spiele vorhanden</p>
         )}
       </ul>
     </Layout >

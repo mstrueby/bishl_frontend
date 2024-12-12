@@ -2,16 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
-
-const tournaments = [
-  { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '/tournaments/regionalliga-ost', bdg_col_dark: 'bg-red-400/10 text-red-400 ring-red-400/20', bdg_col_light: 'bg-red-50 text-red-700 ring-red-600/10' },
-  { name: 'Landesliga', tiny_name: 'LL', href: '/tournaments/landesliga', bdg_col_dark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-500/10' },
-  { name: 'Juniorenliga', tiny_name: 'U19', href: '/tournaments/juniorenliga', bdg_col_dark: 'bg-green-500/10 text-green-400 ring-green-500/20', bdg_col_light: 'bg-green-50 text-green-700 ring-green-600/20' },
-  { name: 'Jugendliga', tiny_name: 'U16', href: '/tournaments/jugendliga', bdg_col_dark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdg_col_light: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
-  { name: 'Schülerliga', tiny_name: 'U13', href: '/tournaments/schuelerliga', bdg_col_dark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30', bdg_col_light: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10' },
-  { name: 'Bambini', tiny_name: 'U10', href: '/tournaments/bambini', bdg_col_dark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdg_col_light: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
-  { name: 'Mini', tiny_name: 'U8', href: '/tournaments/mini', bdg_col_dark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20', bdg_col_light: 'bg-pink-50 text-pink-700 ring-pink-700/10' },
-]
+import { tournamentConfigs } from '../../tools/consts';
+import { classNames } from '../../tools/utils';
 
 const status = [
   { key: 'LIVE', value: 'Live', bdg_col_light: 'bg-red-600 text-white ring-red-700' },
@@ -19,10 +11,6 @@ const status = [
   { key: 'CANCELLED', value: 'abgesagt', bdg_col_light: 'bg-amber-100 text-amber-700 ring-amber-700/10' },
   { key: 'FORFEITED', value: 'gewertet', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-400' },
 ]
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
 
 const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusValue: string, finishTypeValue?: string }> = ({ statusKey, finishTypeKey, statusValue, finishTypeValue }) => {
   return (
@@ -49,20 +37,6 @@ const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusV
 const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   const { home, away, venue, startDate } = match;
 
-  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-    window.addEventListener('resize', handleResize);
-    // Clean up the event listener on component unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-  const isMobile = windowWidth < 640; // Example breakpoint for 'sm
-  const isTablet = windowWidth >= 640 && windowWidth < 768; // Example breakpoint for 'md
-  
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
@@ -71,7 +45,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
         <div className="flex flex-row justify-between">
           {/* tournament */}
           <div className="">
-            {tournaments.map(item =>
+            {tournamentConfigs.map(item =>
               item.name === match.tournament.name && (
                 <span
                   key={item.tiny_name}
@@ -97,11 +71,19 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* date */}
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { 
-              weekday: (isTablet || isMobile) ? 'short' : 'long', 
+            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { 
+              weekday: 'short', 
               day: 'numeric', 
               month: 'short', 
-              year: isMobile ? undefined : '2-digit', 
+              year: undefined, 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}</time></p>
+            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { 
+              weekday: 'long', 
+              day: 'numeric', 
+              month: 'short', 
+              year: '2-digit', 
               hour: '2-digit', 
               minute: '2-digit' 
             })}</time></p>
@@ -119,20 +101,20 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
         <div className="flex flex-row items-center w-full">
           <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
           <div className="flex-auto ml-6">
-            <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
+            <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
           </div>
           <div className="flex-auto">
-            <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
+            <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
           </div>
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
             <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
             <div className="flex-auto ml-6">
-              <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
+              <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
             </div>
             <div className="flex-auto">
-              <p className={`${isTablet ? 'text-base' : 'text-lg'} font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
+              <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
             </div>
           </div>
       </div>
