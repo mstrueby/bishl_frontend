@@ -15,29 +15,56 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/matches/"
 interface MyRefProps {
   jwt: string;
   matches: Match[];
+  assignments: any[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
   let matches = null;
-  const currentDate = new Date().toISOString().split('T')[0]; // Get the current date in YYYY-MM-DD format
+  let assignments = null;
+  const currentDate = new Date().toISOString().split('T')[0];
+
   try {
-    const res = await axios.get(BASE_URL, {
+    // Get user ID
+    const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${jwt}`,
       },
-      params: {
-        date_from: currentDate,
-      }
     });
-    matches = res.data;
+    const userId = userRes.data._id;
+
+    // Get matches and assignments in parallel
+    const [matchesRes, assignmentsRes] = await Promise.all([
+      axios.get(BASE_URL, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+        params: {
+          date_from: currentDate,
+        }
+      }),
+      axios.get(`${process.env.NEXT_PUBLIC_API_URL}/assignments/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        }
+      })
+    ]);
+
+    matches = matchesRes.data;
+    assignments = assignmentsRes.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error('Error fetching matches:', error);
+      console.error('Error fetching data:', error);
     }
   }
-  return matches ? { props: { jwt, matches } } : { props: { jwt } };
+
+  return {
+    props: {
+      jwt,
+      matches: matches || [],
+      assignments: assignments || []
+    }
+  };
 };
 
 const MyRef: NextPage<MyRefProps> = ({ jwt, matches }) => {
