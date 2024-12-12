@@ -44,7 +44,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
   const validStatuses = useMemo(() => {
     const validKeys = getValidTransitions(selected.key);
     return allStatuses.filter(status => 
-      status.key === selected.key || validKeys.includes(status.key)
+      validKeys.includes(status.key)
     );
   }, [selected.key]);
 
