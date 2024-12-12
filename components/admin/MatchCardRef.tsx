@@ -10,14 +10,43 @@ import { classNames } from '../../tools/utils';
 const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = ({ match, assignment }) => {
   const { home, away, startDate, venue } = match;
 
-  const statuses = [
+  const allStatuses = [
     { key: 'AVAILABLE', title: 'Verfügbar', current: true },
     { key: 'REQUESTED', title: 'Draft', current: false },
     { key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false },
     { key: 'ASSIGNED', title: 'Eingeteilt', current: false },
     { key: 'ACCEPTED', title: 'Bestätigt', current: false },
   ]
-  const [selected, setSelected] = useState(statuses[0])
+
+  const getValidTransitions = (currentStatus: string) => {
+    switch (currentStatus) {
+      case 'AVAILABLE':
+        return ['REQUESTED', 'UNAVAILABLE'];
+      case 'REQUESTED':
+        return ['AVAILABLE', 'ASSIGNED', 'UNAVAILABLE'];
+      case 'ASSIGNED':
+        return ['ACCEPTED', 'AVAILABLE'];
+      case 'ACCEPTED':
+        return ['ASSIGNED'];
+      case 'UNAVAILABLE':
+        return ['AVAILABLE'];
+      default:
+        return ['AVAILABLE'];
+    }
+  }
+
+  const [selected, setSelected] = useState(
+    assignment ? 
+    allStatuses.find(s => s.key === assignment.status) || allStatuses[0] : 
+    allStatuses[0]
+  )
+
+  const validStatuses = useMemo(() => {
+    const validKeys = getValidTransitions(selected.key);
+    return allStatuses.filter(status => 
+      status.key === selected.key || validKeys.includes(status.key)
+    );
+  }, [selected.key]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
@@ -57,7 +86,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
                   transition
                   className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
                 >
-                  {statuses.map((option) => (
+                  {validStatuses.map((option) => (
                     <ListboxOption
                       key={option.title}
                       value={option}
