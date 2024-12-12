@@ -7,6 +7,7 @@ import Layout from "../../../components/Layout";
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import { CldImage } from 'next-cloudinary';
 import { Match } from '../../../types/MatchValues';
+import { AssignmentValues } from '../../../types/AssignmentValues';
 import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
 
@@ -15,7 +16,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/matches/"
 interface MyRefProps {
   jwt: string;
   matches: Match[];
-  assignments: any[];
+  assignments: AssignmentValues[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -67,7 +68,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const MyRef: NextPage<MyRefProps> = ({ jwt, matches }) => {
+const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
 
   const sectionTitle= "Meine Schiedsrichtereinsätze";
   
@@ -82,9 +83,15 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, matches }) => {
 
       <ul>
         {matches && matches.length > 0 ? (
-          matches.map((match: Match) => (
-            <MatchCardRef key={match._id} match={match} />
-          ))
+          matches.map((match: Match) => {
+            const assignment = assignments.find((assignment: AssignmentValues) => assignment.matchId === match._id);
+            return (
+              <MatchCardRef 
+                key={match._id} 
+                match={match} 
+                assignment={assignment} />
+            );
+          })
         ) : (
           <p>Keine Spiele vorhanden</p>
         )}

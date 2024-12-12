@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
+import { AssignmentValues } from '../../types/AssignmentValues';
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRef: React.FC<{ match: Match }> = ({ match }) => {
+const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = ({ match, assignment }) => {
   const { home, away, startDate, venue } = match;
 
-  const publishingOptions = [
-    { title: 'Published', current: true },
-    { title: 'Draft', current: false },
+  const statuses = [
+    { key: 'AVAILABLE', title: 'Verfügbar', current: true },
+    { key: 'REQUESTED', title: 'Draft', current: false },
+    { key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false },
+    { key: 'ASSIGNED', title: 'Eingeteilt', current: false },
+    { key: 'ACCEPTED', title: 'Bestätigt', current: false },
   ]
-  const [selected, setSelected] = useState(publishingOptions[0])
+  const [selected, setSelected] = useState(statuses[0])
 
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
@@ -53,7 +57,7 @@ const MatchCardRef: React.FC<{ match: Match }> = ({ match }) => {
                   transition
                   className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
                 >
-                  {publishingOptions.map((option) => (
+                  {statuses.map((option) => (
                     <ListboxOption
                       key={option.title}
                       value={option}
@@ -121,6 +125,7 @@ const MatchCardRef: React.FC<{ match: Match }> = ({ match }) => {
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
+          <p>{assignment ? assignment.status : 'AVAILABLE'}</p>
           {/*<StatusBadge
             statusKey={match.matchStatus.key}
             finishTypeKey={match.finishType.key}
