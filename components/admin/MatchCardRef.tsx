@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
@@ -7,7 +7,7 @@ import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/o
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = ({ match, assignment }) => {
+const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues }> = ({ match, assignment }) => {
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [

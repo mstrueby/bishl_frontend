@@ -70,8 +70,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
 
-  const sectionTitle= "Meine Schiedsrichtereinsätze";
-  
+  const sectionTitle = "Meine Schiedsrichtereinsätze";
+
   return (
     <Layout>
       <Head>
@@ -86,10 +86,11 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
           matches.map((match: Match) => {
             const assignment = assignments.find((assignment: AssignmentValues) => assignment.matchId === match._id);
             return (
-              <MatchCardRef 
-                key={match._id} 
-                match={match} 
-                assignment={assignment} />
+              <MatchCardRef
+                key={match._id}
+                match={match}
+                assignment={assignment}
+              />
             );
           })
         ) : (
