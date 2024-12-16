@@ -92,18 +92,23 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   )
 
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
-    if (!assignment) return;
-    
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`, {
-        method: 'PATCH',
+      const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
+      const endpoint = (!assignment || selected.key === 'AVAILABLE') ? 
+        `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
+        `${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`;
+      
+      const body = (!assignment || selected.key === 'AVAILABLE') ?
+        { matchId: match._id, status: newStatus.key } :
+        { status: newStatus.key };
+
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`,
         },
-        body: JSON.stringify({
-          status: newStatus.key
-        })
+        body: JSON.stringify(body)
       });
 
       if (!response.ok) {
