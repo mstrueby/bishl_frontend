@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { useState } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import axios from 'axios';
 import Link from 'next/link';
@@ -73,15 +74,8 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
   const sectionTitle = "Meine Schiedsrichtereinsätze";
 
   const filteredMatches = matches.filter(match => {
-    const assignment = assignments.find(a => a.matchId === match._id);
-    switch (filter) {
-      case 'available':
-        return !assignment || assignment.status === 'AVAILABLE';
-      case 'requested':
-        return assignment?.status === 'REQUESTED';
-      default:
-        return true;
-    }
+    if (filter === 'all') return true;
+    return match.tournament.alias === filter;
   });
 
   return (
