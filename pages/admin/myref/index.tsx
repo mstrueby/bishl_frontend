@@ -69,20 +69,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
-  const [filter, setFilter] = useState('all');
-  const sectionTitle = "Meine Schiedsrichtereinsätze";
 
-  const filteredMatches = matches.filter(match => {
-    const assignment = assignments.find(a => a.matchId === match._id);
-    switch (filter) {
-      case 'available':
-        return !assignment || assignment.status === 'AVAILABLE';
-      case 'requested':
-        return assignment?.status === 'REQUESTED';
-      default:
-        return true;
-    }
-  });
+  const sectionTitle = "Meine Schiedsrichtereinsätze";
 
   return (
     <Layout>
@@ -91,13 +79,11 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
       </Head>
       <SectionHeader
         title={sectionTitle}
-        filter="true"
-        onFilterChange={setFilter}
       />
 
       <ul>
-        {filteredMatches && filteredMatches.length > 0 ? (
-          filteredMatches.map((match: Match) => {
+        {matches && matches.length > 0 ? (
+          matches.map((match: Match) => {
             const assignment = assignments.find((assignment: AssignmentValues) => assignment.matchId === match._id);
             return (
               <MatchCardRef
