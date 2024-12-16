@@ -3,9 +3,11 @@ import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
-import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, ChevronDownIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
   const { home, away, startDate, venue } = match;
@@ -180,7 +182,57 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
         {/* 1-1 tournament, status (mobile) */}
         <div className="flex flex-row justify-between">
           {/* tournament */}
-          <div className="">
+          <div className="flex items-center gap-2">
+            <Menu as="div" className="relative inline-block text-left">
+              <Menu.Button className="inline-flex items-center gap-x-1 text-sm font-semibold text-gray-900 hover:text-gray-500">
+                <FunnelIcon className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Show filters</span>
+              </Menu.Button>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="absolute left-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="py-1">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button className={classNames(
+                          active ? 'bg-gray-100' : '',
+                          'block px-4 py-2 text-sm text-gray-700 w-full text-left'
+                        )}>
+                          Alle Spiele
+                        </button>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button className={classNames(
+                          active ? 'bg-gray-100' : '',
+                          'block px-4 py-2 text-sm text-gray-700 w-full text-left'
+                        )}>
+                          Verfügbar
+                        </button>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button className={classNames(
+                          active ? 'bg-gray-100' : '',
+                          'block px-4 py-2 text-sm text-gray-700 w-full text-left'
+                        )}>
+                          Angefragt
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
             {tournamentConfigs.map(item =>
               item.name === match.tournament.name && (
                 <span
