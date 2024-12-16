@@ -90,6 +90,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
                 key={match._id}
                 match={match}
                 assignment={assignment}
+                jwt={jwt}
               />
             );
           })

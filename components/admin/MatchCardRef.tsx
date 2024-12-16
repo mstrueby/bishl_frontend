@@ -7,7 +7,7 @@ import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/o
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues }> = ({ match, assignment }) => {
+const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [
@@ -91,6 +91,35 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues }> = 
       allStatuses[0]
   )
 
+  const updateAssignmentStatus = async (newStatus: typeof selected) => {
+    if (!assignment) return;
+    
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`,
+        },
+        body: JSON.stringify({
+          status: newStatus.key
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update assignment status');
+      }
+    } catch (error) {
+      console.error('Error updating assignment:', error);
+      setSelected(selected); // Revert on error
+    }
+  }
+
+  const handleStatusChange = (newStatus: typeof selected) => {
+    setSelected(newStatus);
+    updateAssignmentStatus(newStatus);
+  }
+
   const validStatuses = useMemo(() => {
     const validKeys = getValidTransitions(selected.key);
     return allStatuses.filter(status =>
@@ -119,7 +148,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues }> = 
           </div>
           {/* status */}
           <div className="sm:hidden">
-            <Listbox value={selected} onChange={setSelected}>
+            <Listbox value={selected} onChange={handleStatusChange}>
               <Label className="sr-only">Change workflow status</Label>
               <div className="relative">
                 <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
