@@ -19,7 +19,7 @@ const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusV
         item.key === statusKey && (
           <span
             key={item.key}
-            className={classNames("inline-flex items-center gap-x-1.5 rounded-md text-xs font-medium ring-1 ring-inset py-1 px-3 uppercase", item.bdg_col_light)}
+            className={classNames("inline-flex items-center gap-x-1.5 rounded-md text-xs font-medium ring-1 ring-inset py-0.5 px-2 uppercase", item.bdg_col_light)}
           >
             {statusValue}
             {item.key === 'FINISHED' && finishTypeKey !== 'REGULAR' && (

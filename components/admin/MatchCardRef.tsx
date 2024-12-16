@@ -11,11 +11,61 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [
-    { key: 'AVAILABLE', title: 'Verfügbar', current: true },
-    { key: 'REQUESTED', title: 'Angefragt', current: false },
-    { key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false },
-    { key: 'ASSIGNED', title: 'Eingeteilt', current: false },
-    { key: 'ACCEPTED', title: 'Bestätigt', current: false },
+    {
+      key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
+        divide: 'divide-gray-500/10',
+        background: 'bg-gray-50',
+        text: 'text-gray-600',
+        ring: 'ring-gray-500/10',
+        hover: 'hover:bg-gray-100',
+        focus: 'focus-visible:outline-gray-500/10',
+        dot: 'fill-gray-400'
+      }
+    },
+    {
+      key: 'REQUESTED', title: 'Angefragt', current: false, color: {
+        divide: 'divide-yellow-600/20',
+        background: 'bg-yellow-50',
+        text: 'text-yellow-800',
+        ring: 'ring-yellow-600/20',
+        hover: 'hover:bg-yellow-100',
+        focus: 'focus-visible:outline-yellow-600/20',
+        dot: 'fill-yellow-500'
+      }
+    },
+    {
+      key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
+        divide: 'divide-red-600/10',
+        background: 'bg-red-50',
+        text: 'text-red-700',
+        ring: 'ring-red-600/10',
+        hover: 'hover:bg-red-100',
+        focus: 'focus-visible:outline-red-600/10',
+        dot: 'fill-red-500'
+      }
+    },
+    {
+      key: 'ASSIGNED', title: 'Eingeteilt', current: false, color: {
+        divide: 'divide-green-600/20',
+        background: 'bg-green-50',
+        text: 'text-green-700',
+        ring: 'ring-green-600/20',
+        hover: 'hover:bg-green-100',
+        focus: 'focus-visible:outline-green-600/20',
+        dot: 'fill-green-500'
+      }
+    },
+    {
+      key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
+        divide: 'divide-green-100',
+        background: 'bg-green-100',
+        text: 'text-green-700', 
+        ring: 'ring-green-100',
+        hover: 'hover:bg-green-100',
+        focus: 'focus-visible:outline-green-100',
+        dot: 'fill-green-600'
+      }
+    },
   ]
 
   const getValidTransitions = (currentStatus: string) => {
@@ -36,14 +86,14 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
   }
 
   const [selected, setSelected] = useState(
-    assignment ? 
-    allStatuses.find(s => s.key === assignment.status) || allStatuses[0] : 
-    allStatuses[0]
+    assignment ?
+      allStatuses.find(s => s.key === assignment.status) || allStatuses[0] :
+      allStatuses[0]
   )
 
   const validStatuses = useMemo(() => {
     const validKeys = getValidTransitions(selected.key);
-    return allStatuses.filter(status => 
+    return allStatuses.filter(status =>
       validKeys.includes(status.key)
     );
   }, [selected.key]);
@@ -72,13 +122,16 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
             <Listbox value={selected} onChange={setSelected}>
               <Label className="sr-only">Change workflow status</Label>
               <div className="relative">
-                <div className="inline-flex divide-x divide-indigo-700 rounded-md outline-none">
-                  <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white">
-                    <p className="text-sm font-semibold">{selected.title}</p>
+                <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
+                  <div className={classNames("inline-flex items-center gap-x-1.5 rounded-l-md ring-1 ring-inset py-0.5 px-2", selected.color.background, selected.color.text, selected.color.ring)}>
+                    <svg viewBox="0 0 6 6" aria-hidden="true" className={classNames("size-1.5", selected.color.dot)}>
+                      <circle r={3} cx={3} cy={3} />
+                    </svg>
+                    <p className="text-xs font-medium uppercase">{selected.title}</p>
                   </div>
-                  <ListboxButton className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 outline-none hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-400">
+                  <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
                     <span className="sr-only">Change workflow status</span>
-                    <ChevronDownIcon aria-hidden="true" className="size-5 text-white forced-colors:text-[Highlight]" />
+                    <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
                   </ListboxButton>
                 </div>
 
@@ -95,7 +148,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment: AssignmentValues }> = (
                       <div className="flex flex-col">
                         <div className="flex justify-between">
                           <p className="font-normal group-data-[selected]:font-semibold">{option.title}</p>
-                          
+
                         </div>
                       </div>
                     </ListboxOption>
