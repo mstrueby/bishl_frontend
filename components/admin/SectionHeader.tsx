@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router';
 import { PlusCircleIcon, FunnelIcon } from '@heroicons/react/24/solid'
-import { Menu, Transition } from '@headlessui/react'
-import { Fragment } from 'react'
+import RefMatchFilter from './RefMatchFilter';
 
 export default function SectionHeader({ title, filter, newLink, onFilterChange }: {
   title: string,
