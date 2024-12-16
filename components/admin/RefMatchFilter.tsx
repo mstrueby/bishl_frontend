@@ -43,9 +43,10 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       </button>
 
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto" onClose={handleCancel}>
+        <Dialog as="div" className="fixed inset-0 z-10" onClose={handleCancel}>
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-          <div className="flex items-center justify-center min-h-screen">
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-full p-4">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -84,6 +85,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                 </div>
               </Dialog.Panel>
             </Transition.Child>
+          </div>
           </div>
         </Dialog>
       </Transition>
