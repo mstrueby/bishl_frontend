@@ -2,12 +2,8 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { FunnelIcon } from '@heroicons/react/24/solid';
-
-interface Tournament {
-  _id: string;
-  name: string;
-  alias: string;
-}
+import TournamentSelect from '../ui/TournamentSelect';
+import type { TournamentValues } from '../../types/TournamentValues';
 
 interface RefMatchFilterProps {
   onFilterChange: (tournament: string) => void;
@@ -15,8 +11,9 @@ interface RefMatchFilterProps {
 
 const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [selectedTournament, setSelectedTournament] = useState<string>('all');
+  const [tournaments, setTournaments] = useState<TournamentValues[]>([]);
+  const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
+  const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`)
@@ -25,9 +22,14 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       .catch(error => console.error('Error fetching tournaments:', error));
   }, []);
 
-  const handleFilterChange = (tournamentAlias: string) => {
-    setSelectedTournament(tournamentAlias);
-    onFilterChange(tournamentAlias);
+  const handleApplyFilter = () => {
+    setSelectedTournament(tempSelectedTournament);
+    onFilterChange(tempSelectedTournament?.alias || 'all');
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    setTempSelectedTournament(selectedTournament);
     setIsOpen(false);
   };
 
@@ -38,11 +40,11 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
         className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
         <FunnelIcon className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
-        Wettbewerb
+        {selectedTournament ? selectedTournament.name : 'Wettbewerb'}
       </button>
 
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={() => setIsOpen(false)}>
+        <Dialog as="div" className="relative z-10" onClose={handleCancel}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -67,31 +69,31 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 mb-4">
                     Wettbewerb auswählen
                   </Dialog.Title>
-                  <div className="mt-4">
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => handleFilterChange('all')}
-                        className={`w-full text-left px-4 py-2 rounded-md ${
-                          selectedTournament === 'all' ? 'bg-indigo-100' : 'hover:bg-gray-100'
-                        }`}
-                      >
-                        Alle Wettbewerbe
-                      </button>
-                      {tournaments.map((tournament) => (
-                        <button
-                          key={tournament._id}
-                          onClick={() => handleFilterChange(tournament.alias)}
-                          className={`w-full text-left px-4 py-2 rounded-md ${
-                            selectedTournament === tournament.alias ? 'bg-indigo-100' : 'hover:bg-gray-100'
-                          }`}
-                        >
-                          {tournament.name}
-                        </button>
-                      ))}
-                    </div>
+                  
+                  <TournamentSelect
+                    selectedTournament={tempSelectedTournament}
+                    onTournamentChange={setTempSelectedTournament}
+                    allTournamentsData={tournaments}
+                  />
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={handleCancel}
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={handleApplyFilter}
+                    >
+                      Anwenden
+                    </button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
