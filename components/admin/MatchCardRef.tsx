@@ -59,7 +59,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
         divide: 'divide-green-100',
         background: 'bg-green-100',
-        text: 'text-green-700', 
+        text: 'text-green-700',
         ring: 'ring-green-100',
         hover: 'hover:bg-green-100',
         focus: 'focus-visible:outline-green-100',
@@ -79,7 +79,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       case 'ACCEPTED':
         return [];
       case 'UNAVAILABLE':
-        return ['AVAILABLE', 'REQUESTED'];
+        return ['REQUESTED'];
       default:
         return ['AVAILABLE'];
     }
@@ -94,10 +94,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
     try {
       const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
-      const endpoint = (!assignment || selected.key === 'AVAILABLE') ? 
+      const endpoint = (!assignment || selected.key === 'AVAILABLE') ?
         `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
         `${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`;
-      
+
       const body = (!assignment || selected.key === 'AVAILABLE') ?
         { matchId: match._id, status: newStatus.key } :
         { status: newStatus.key };
@@ -132,6 +132,47 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     );
   }, [selected.key]);
 
+  const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[] }> = ({ selected, handleStatusChange, validStatuses }) => (
+    <Listbox value={selected} onChange={handleStatusChange}>
+      <Label className="sr-only">Change workflow status</Label>
+      <div className="relative">
+        <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
+          <div className={classNames("inline-flex items-center gap-x-1.5 rounded-l-md ring-1 ring-inset py-0.5 px-2", selected.color.background, selected.color.text, selected.color.ring)}>
+            <svg viewBox="0 0 6 6" aria-hidden="true" className={classNames("size-1.5", selected.color.dot)}>
+              <circle r={3} cx={3} cy={3} />
+            </svg>
+            <p className="text-xs font-medium uppercase">{selected.title}</p>
+          </div>
+          <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
+            <span className="sr-only">Change workflow status</span>
+            <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
+          </ListboxButton>
+        </div>
+
+        <ListboxOptions
+          transition
+          className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
+        >
+          {validStatuses.map((option) => (
+            <ListboxOption
+              key={option.title}
+              value={option}
+              className="group cursor-default select-none p-4 text-sm text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
+            >
+              <div className="flex flex-col">
+                <div className="flex justify-between">
+                  <p className="font-normal group-data-[selected]:font-semibold">{option.title}</p>
+
+                </div>
+              </div>
+            </ListboxOption>
+          ))}
+        </ListboxOptions>
+      </div>
+    </Listbox>
+  );
+
+
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
@@ -151,45 +192,9 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
               )
             )}
           </div>
-          {/* status */}
+          {/* workflow dropdown */}
           <div className="sm:hidden">
-            <Listbox value={selected} onChange={handleStatusChange}>
-              <Label className="sr-only">Change workflow status</Label>
-              <div className="relative">
-                <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
-                  <div className={classNames("inline-flex items-center gap-x-1.5 rounded-l-md ring-1 ring-inset py-0.5 px-2", selected.color.background, selected.color.text, selected.color.ring)}>
-                    <svg viewBox="0 0 6 6" aria-hidden="true" className={classNames("size-1.5", selected.color.dot)}>
-                      <circle r={3} cx={3} cy={3} />
-                    </svg>
-                    <p className="text-xs font-medium uppercase">{selected.title}</p>
-                  </div>
-                  <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
-                    <span className="sr-only">Change workflow status</span>
-                    <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
-                  </ListboxButton>
-                </div>
-
-                <ListboxOptions
-                  transition
-                  className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
-                >
-                  {validStatuses.map((option) => (
-                    <ListboxOption
-                      key={option.title}
-                      value={option}
-                      className="group cursor-default select-none p-4 text-sm text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
-                    >
-                      <div className="flex flex-col">
-                        <div className="flex justify-between">
-                          <p className="font-normal group-data-[selected]:font-semibold">{option.title}</p>
-
-                        </div>
-                      </div>
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </div>
-            </Listbox>
+            <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
           </div>
         </div>
         {/* 1-2 date, venue */}
@@ -241,13 +246,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
-          <p>{assignment ? assignment.status : 'AVAILABLE'}</p>
-          {/*<StatusBadge
-            statusKey={match.matchStatus.key}
-            finishTypeKey={match.finishType.key}
-            statusValue={match.matchStatus.value}
-            finishTypeValue={match.finishType.value}
-          />*/}
+          <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
 
