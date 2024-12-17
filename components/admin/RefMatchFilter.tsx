@@ -1,13 +1,14 @@
-
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition, Switch } from '@headlessui/react';
 import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline';
 import { FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid';
 import TournamentSelect from '../ui/TournamentSelect';
 import type { TournamentValues } from '../../types/TournamentValues';
+import DatePicker from 'react-datepicker'; // Import DatePicker component
+import 'react-datepicker/dist/react-datepicker.css'; // Import DatePicker CSS
 
 interface RefMatchFilterProps {
-  onFilterChange: (filter: { tournament: string, showUnassignedOnly: boolean }) => void;
+  onFilterChange: (filter: { tournament: string; showUnassignedOnly: boolean; date_from?: string; date_to?: string }) => void;
 }
 
 const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
@@ -16,6 +17,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
+  const [dateFrom, setDateFrom] = useState(new Date().toISOString().split('T')[0]);
+  const [dateTo, setDateTo] = useState('');
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`)
@@ -28,7 +31,9 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setSelectedTournament(tempSelectedTournament);
     onFilterChange({
       tournament: tempSelectedTournament?.alias || 'all',
-      showUnassignedOnly
+      showUnassignedOnly,
+      date_from: dateFrom,
+      date_to: dateTo || undefined
     });
     setIsOpen(false);
   };
@@ -36,6 +41,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   const handleCancel = () => {
     setTempSelectedTournament(selectedTournament);
     setShowUnassignedOnly(false);
+    setDateFrom(new Date().toISOString().split('T')[0]);
+    setDateTo('');
     setIsOpen(false);
   };
 
@@ -43,7 +50,13 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setTempSelectedTournament(null);
     setSelectedTournament(null);
     setShowUnassignedOnly(false);
-    onFilterChange({ tournament: 'all', showUnassignedOnly: false });
+    setDateFrom(new Date().toISOString().split('T')[0]);
+    setDateTo('');
+    onFilterChange({ 
+      tournament: 'all', 
+      showUnassignedOnly: false,
+      date_from: new Date().toISOString().split('T')[0]
+    });
     setIsOpen(false);
   };
 
@@ -54,7 +67,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
         className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
         {(selectedTournament || showUnassignedOnly) ? (
-          <FunnelIconSolid className="-ml-0.5 mr-1.5 h-5 w-5 text-indigo-600" aria-hidden="true" />
+          <FunnelIconSolid className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
         ) : (
           <FunnelIconOutline className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
         )}
@@ -104,6 +117,28 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                     </Switch>
                     <span className="ml-3 text-sm text-gray-900">Nur offene Spiele</span>
                   </div>
+
+                  <div className="mt-4 flex space-x-4"> {/* Added flex and space-x-4 for alignment */}
+                    <div className="flex flex-col">
+                      <label htmlFor="date_from" className="text-gray-700 text-sm font-bold mb-2">From:</label>
+                      <DatePicker
+                        id="date_from"
+                        selected={new Date(dateFrom)}
+                        onChange={(date) => setDateFrom(date ? date.toISOString().split('T')[0] : '')}
+                        dateFormat="yyyy-MM-dd"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label htmlFor="date_to" className="text-gray-700 text-sm font-bold mb-2">To:</label>
+                      <DatePicker
+                        id="date_to"
+                        selected={dateTo ? new Date(dateTo) : null}
+                        onChange={(date) => setDateTo(date ? date.toISOString().split('T')[0] : '')}
+                        dateFormat="yyyy-MM-dd"
+                      />
+                    </div>
+                  </div>
+
 
                   <div className="mt-6 flex justify-between items-center">
                     <button
