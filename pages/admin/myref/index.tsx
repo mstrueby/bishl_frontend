@@ -1,23 +1,26 @@
+
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import axios from 'axios';
-import Link from 'next/link';
 import { getCookie } from 'cookies-next';
 import Layout from "../../../components/Layout";
-import { getFuzzyDate } from '../../../tools/dateUtils';
-import { CldImage } from 'next-cloudinary';
 import { Match } from '../../../types/MatchValues';
 import { AssignmentValues } from '../../../types/AssignmentValues';
 import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/matches/"
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL + "/matches/";
 
 interface MyRefProps {
   jwt: string;
-  matches: Match[];
-  assignments: AssignmentValues[];
+  initialMatches: Match[];
+  initialAssignments: AssignmentValues[];
+}
+
+interface FilterState {
+  tournament: string;
+  showUnassignedOnly: boolean;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -27,29 +30,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const currentDate = new Date().toISOString().split('T')[0];
 
   try {
-    // Get user ID
     const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
+      headers: { Authorization: `Bearer ${jwt}` },
     });
     const userId = userRes.data._id;
 
-    // Get matches and assignments in parallel
     const [matchesRes, assignmentsRes] = await Promise.all([
       axios.get(BASE_URL, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-        params: {
-          date_from: currentDate,
-          assigned: filter?.showUnassignedOnly ? false : undefined
-        }
+        headers: { Authorization: `Bearer ${jwt}` },
+        params: { date_from: currentDate }
       }),
       axios.get(`${process.env.NEXT_PUBLIC_API_URL}/assignments/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
+        headers: { Authorization: `Bearer ${jwt}` }
       })
     ]);
 
@@ -64,20 +56,55 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       jwt,
-      matches: matches || [],
-      assignments: assignments || []
+      initialMatches: matches || [],
+      initialAssignments: assignments || []
     }
   };
 };
 
-const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
-  const [filter, setFilter] = useState('all');
+const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }) => {
+  const [matches, setMatches] = useState<Match[]>(initialMatches);
+  const [assignments, setAssignments] = useState<AssignmentValues[]>(initialAssignments);
+  const [filter, setFilter] = useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Meine Schiedsrichtereinsätze";
 
-  const filteredMatches = matches.filter(match => {
-    if (filter === 'all') return true;
-    return match.tournament.alias === filter;
-  });
+  const fetchData = async (filterParams: FilterState) => {
+    try {
+      const currentDate = new Date().toISOString().split('T')[0];
+      const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      const userId = userRes.data._id;
+
+      const params: any = { date_from: currentDate };
+      if (filterParams.tournament !== 'all') {
+        params.tournament = filterParams.tournament;
+      }
+      if (filterParams.showUnassignedOnly) {
+        params.assigned = false;
+      }
+
+      const [matchesRes, assignmentsRes] = await Promise.all([
+        axios.get(BASE_URL, {
+          headers: { Authorization: `Bearer ${jwt}` },
+          params
+        }),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/assignments/users/${userId}`, {
+          headers: { Authorization: `Bearer ${jwt}` }
+        })
+      ]);
+
+      setMatches(matchesRes.data);
+      setAssignments(assignmentsRes.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleFilterChange = (newFilter: FilterState) => {
+    setFilter(newFilter);
+    fetchData(newFilter);
+  };
 
   return (
     <Layout>
@@ -87,13 +114,13 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
       <SectionHeader
         title={sectionTitle}
         filter="true"
-        onFilterChange={setFilter}
+        onFilterChange={handleFilterChange}
       />
 
       <ul>
-        {filteredMatches && filteredMatches.length > 0 ? (
-          filteredMatches.map((match: Match) => {
-            const assignment = assignments.find((assignment: AssignmentValues) => assignment.matchId === match._id);
+        {matches && matches.length > 0 ? (
+          matches.map((match: Match) => {
+            const assignment = assignments.find((a: AssignmentValues) => a.matchId === match._id);
             return (
               <MatchCardRef
                 key={match._id}
@@ -107,7 +134,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, matches, assignments }) => {
           <p>Keine Spiele vorhanden</p>
         )}
       </ul>
-    </Layout >
+    </Layout>
   );
 };
 

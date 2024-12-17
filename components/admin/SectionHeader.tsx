@@ -1,12 +1,18 @@
+
 import { useRouter } from 'next/router';
-import { PlusCircleIcon, FunnelIcon } from '@heroicons/react/24/solid'
+import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import RefMatchFilter from './RefMatchFilter';
+
+interface FilterChangeParams {
+  tournament: string;
+  showUnassignedOnly: boolean;
+}
 
 export default function SectionHeader({ title, filter, newLink, onFilterChange }: {
   title: string,
   filter?: string,
   newLink?: string,
-  onFilterChange?: (value: string) => void
+  onFilterChange?: (filter: FilterChangeParams) => void
 }) {
   const router = useRouter();
 
@@ -16,7 +22,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange }
         {title}
       </h2>
       <div className="flex lg:ml-4">
-        {filter && <RefMatchFilter onFilterChange={onFilterChange} />}
+        {filter && <RefMatchFilter onFilterChange={onFilterChange!} />}
         {newLink && (
           <button
             type="button"
@@ -29,5 +35,5 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange }
         )}
       </div>
     </div>
-  )
+  );
 }
