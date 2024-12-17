@@ -139,13 +139,17 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
                   'Authorization': `Bearer ${jwt}`,
                 },
                 body: JSON.stringify(body)
-              }).catch(() => null); // Ignore errors for individual updates
+              }).catch(() => null);
             });
 
             await Promise.all(promises);
-            await fetchData(filter); // Refresh the data with await to ensure completion
+            // Add delay to ensure backend has processed all updates
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await fetchData(filter);
+            return true; // Signal successful completion
           } catch (error) {
             console.error('Error in bulk update:', error);
+            return false;
           }
         }}
       />
