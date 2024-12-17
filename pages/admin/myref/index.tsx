@@ -43,6 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
         params: {
           date_from: currentDate,
+          assigned: filter?.showUnassignedOnly ? false : undefined
         }
       }),
       axios.get(`${process.env.NEXT_PUBLIC_API_URL}/assignments/users/${userId}`, {

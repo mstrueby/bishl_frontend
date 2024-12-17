@@ -5,7 +5,7 @@ import TournamentSelect from '../ui/TournamentSelect';
 import type { TournamentValues } from '../../types/TournamentValues';
 
 interface RefMatchFilterProps {
-  onFilterChange: (tournament: string, showUnassignedOnly?: boolean) => void;
+  onFilterChange: (filter: { tournament: string, showUnassignedOnly: boolean }) => void;
 }
 
 const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
@@ -24,7 +24,10 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
 
   const handleApplyFilter = () => {
     setSelectedTournament(tempSelectedTournament);
-    onFilterChange(tempSelectedTournament?.alias || 'all', showUnassignedOnly);
+    onFilterChange({
+      tournament: tempSelectedTournament?.alias || 'all',
+      showUnassignedOnly
+    });
     setIsOpen(false);
   };
 
@@ -95,7 +98,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                       setTempSelectedTournament(null);
                       setSelectedTournament(null);
                       setShowUnassignedOnly(false);
-                      onFilterChange('all', false);
+                      onFilterChange({ tournament: 'all', showUnassignedOnly: false });
                       setIsOpen(false);
                     }}
                   >
