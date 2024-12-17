@@ -1,11 +1,11 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, Switch } from '@headlessui/react';
 import { FunnelIcon } from '@heroicons/react/24/solid';
 import TournamentSelect from '../ui/TournamentSelect';
 import type { TournamentValues } from '../../types/TournamentValues';
 
 interface RefMatchFilterProps {
-  onFilterChange: (tournament: string) => void;
+  onFilterChange: (tournament: string, showUnassignedOnly?: boolean) => void;
 }
 
 const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
@@ -13,6 +13,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   const [tournaments, setTournaments] = useState<TournamentValues[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
+  const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`)
@@ -23,7 +24,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
 
   const handleApplyFilter = () => {
     setSelectedTournament(tempSelectedTournament);
-    onFilterChange(tempSelectedTournament?.alias || 'all');
+    onFilterChange(tempSelectedTournament?.alias || 'all', showUnassignedOnly);
     setIsOpen(false);
   };
 
@@ -44,7 +45,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
 
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog as="div" className="fixed inset-0 z-10" onClose={handleCancel}>
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+          <div className="fixed inset-0 bg-black/30 transition-opacity"></div>
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex items-center justify-center min-h-full p-4">
             <Transition.Child
@@ -56,9 +57,9 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+              <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
                 <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 mb-4">
-                  Wettbewerb auswählen
+                  Spiele filtern
                 </Dialog.Title>
                 
                 <TournamentSelect
@@ -66,6 +67,25 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                   onTournamentChange={setTempSelectedTournament}
                   allTournamentsData={tournaments}
                 />
+
+                <div className="mt-4 flex items-center">
+                  <Switch
+                    checked={showUnassignedOnly}
+                    onChange={setShowUnassignedOnly}
+                    className={`${
+                      showUnassignedOnly ? 'bg-indigo-600' : 'bg-gray-200'
+                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                  >
+                    <span className="sr-only">Nur offene Spiele anzeigen</span>
+                    <span
+                      aria-hidden="true"
+                      className={`${
+                        showUnassignedOnly ? 'translate-x-5' : 'translate-x-0'
+                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                    />
+                  </Switch>
+                  <span className="ml-3 text-sm text-gray-900">Nur offene Spiele</span>
+                </div>
 
                 <div className="mt-6 flex justify-end space-x-3">
                   <button
