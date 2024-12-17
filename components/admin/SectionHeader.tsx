@@ -21,6 +21,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
   onBulkUpdate?: (status: string) => void
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const router = useRouter();
 
   return (
@@ -45,8 +46,11 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
             <BulkStatusDialog 
               isOpen={isDialogOpen} 
               onClose={() => setIsDialogOpen(false)}
-              onConfirm={(status) => {
-                onBulkUpdate?.(status);
+              isLoading={isUpdating}
+              onConfirm={async (status) => {
+                setIsUpdating(true);
+                await onBulkUpdate?.(status);
+                setIsUpdating(false);
                 setIsDialogOpen(false);
               }}
             />
