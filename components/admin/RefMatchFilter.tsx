@@ -87,14 +87,28 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                   <span className="ml-3 text-sm text-gray-900">Nur offene Spiele</span>
                 </div>
 
-                <div className="mt-6 flex justify-end space-x-3">
+                <div className="mt-6 flex justify-between items-center">
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    onClick={handleCancel}
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                    onClick={() => {
+                      setTempSelectedTournament(null);
+                      setSelectedTournament(null);
+                      setShowUnassignedOnly(false);
+                      onFilterChange('all', false);
+                      setIsOpen(false);
+                    }}
                   >
-                    Abbrechen
+                    Filter zurücksetzen
                   </button>
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={handleCancel}
+                    >
+                      Abbrechen
+                    </button>
                   <button
                     type="button"
                     className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -102,6 +116,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                   >
                     Anwenden
                   </button>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
