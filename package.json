@@ -11,6 +11,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.5",
+    "@types/react-datepicker": "^7.0.0",
     "axios": "^1.6.1",
     "cloudinary": "^2.5.1",
     "cloudinary-build-url": "^0.2.4",
@@ -23,6 +24,7 @@
     "next-cloudinary": "^6.16.0",
     "prismjs": "^1.29.0",
     "react": "18.2.0",
+    "react-datepicker": "^7.5.0",
     "react-dom": "18.2.0",
     "react-quill": "^2.0.0",
     "react-spinners": "^0.14.1",
