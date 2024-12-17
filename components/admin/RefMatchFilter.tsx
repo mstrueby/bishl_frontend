@@ -1,7 +1,8 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition, Switch } from '@headlessui/react';
-import { FunnelIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline';
+import { FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid';
 import TournamentSelect from '../ui/TournamentSelect';
 import type { TournamentValues } from '../../types/TournamentValues';
 
@@ -52,7 +53,11 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
         onClick={() => setIsOpen(true)}
         className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
-        <FunnelIcon className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+        {(selectedTournament || showUnassignedOnly) ? (
+          <FunnelIconSolid className="-ml-0.5 mr-1.5 h-5 w-5 text-indigo-600" aria-hidden="true" />
+        ) : (
+          <FunnelIconOutline className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+        )}
         Filter
       </button>
 
