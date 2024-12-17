@@ -143,7 +143,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
             });
 
             await Promise.all(promises);
-            fetchData(filter); // Refresh the data
+            await fetchData(filter); // Refresh the data with await to ensure completion
           } catch (error) {
             console.error('Error in bulk update:', error);
           }
