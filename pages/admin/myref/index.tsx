@@ -1,4 +1,3 @@
-
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import { GetServerSideProps, NextPage } from 'next';
@@ -21,6 +20,8 @@ interface MyRefProps {
 interface FilterState {
   tournament: string;
   showUnassignedOnly: boolean;
+  date_from?: string;
+  date_to?: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -70,13 +71,17 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
 
   const fetchData = async (filterParams: FilterState) => {
     try {
-      const currentDate = new Date().toISOString().split('T')[0];
       const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       const userId = userRes.data._id;
 
-      const params: any = { date_from: currentDate };
+      const params: any = { 
+        date_from: filterParams.date_from || new Date().toISOString().split('T')[0]
+      };
+      if (filterParams.date_to) {
+        params.date_to = filterParams.date_to;
+      }
       if (filterParams.tournament !== 'all') {
         params.tournament = filterParams.tournament;
       }
