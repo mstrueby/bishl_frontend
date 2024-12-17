@@ -1,19 +1,26 @@
 
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import RefMatchFilter from './RefMatchFilter';
+import BulkStatusDialog from './BulkStatusDialog';
 
 interface FilterChangeParams {
   tournament: string;
   showUnassignedOnly: boolean;
+  date_from?: string;
+  date_to?: string;
 }
 
-export default function SectionHeader({ title, filter, newLink, onFilterChange }: {
+export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate }: {
   title: string,
   filter?: string,
   newLink?: string,
-  onFilterChange?: (filter: FilterChangeParams) => void
+  onFilterChange?: (filter: FilterChangeParams) => void,
+  onBulkUpdate?: (status: string) => void
 }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
   return (
@@ -22,7 +29,29 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange }
         {title}
       </h2>
       <div className="flex lg:ml-4">
-        {filter && <RefMatchFilter onFilterChange={onFilterChange!} />}
+        {filter && (
+          <>
+            <RefMatchFilter onFilterChange={onFilterChange!} />
+            {onBulkUpdate && (
+              <button
+                type="button"
+                onClick={() => setIsDialogOpen(true)}
+                className="ml-2 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                <ArrowPathIcon className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+                Status
+              </button>
+            )}
+            <BulkStatusDialog 
+              isOpen={isDialogOpen} 
+              onClose={() => setIsDialogOpen(false)}
+              onConfirm={(status) => {
+                onBulkUpdate?.(status);
+                setIsDialogOpen(false);
+              }}
+            />
+          </>
+        )}
         {newLink && (
           <button
             type="button"

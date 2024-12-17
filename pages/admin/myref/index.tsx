@@ -120,6 +120,34 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         title={sectionTitle}
         filter="true"
         onFilterChange={handleFilterChange}
+        onBulkUpdate={async (status) => {
+          try {
+            const promises = matches.map(match => {
+              const assignment = assignments.find(a => a.matchId === match._id);
+              const method = !assignment ? 'POST' : 'PATCH';
+              const endpoint = !assignment ? 
+                `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
+                `${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`;
+              const body = !assignment ?
+                { matchId: match._id, status } :
+                { status };
+              
+              return fetch(endpoint, {
+                method,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${jwt}`,
+                },
+                body: JSON.stringify(body)
+              }).catch(() => null); // Ignore errors for individual updates
+            });
+
+            await Promise.all(promises);
+            fetchData(filter); // Refresh the data
+          } catch (error) {
+            console.error('Error in bulk update:', error);
+          }
+        }}
       />
 
       <ul>
