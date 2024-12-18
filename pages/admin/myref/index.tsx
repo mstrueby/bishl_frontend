@@ -146,6 +146,8 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
             // Add delay to ensure backend has processed all updates
             await new Promise(resolve => setTimeout(resolve, 500));
             await fetchData(filter);
+            setMatches([]); // Clear matches temporarily
+            const refreshedData = await fetchData(filter); // Fetch fresh data
             return true; // Signal successful completion
           } catch (error) {
             console.error('Error in bulk update:', error);

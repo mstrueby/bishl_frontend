@@ -49,9 +49,11 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
               isLoading={isUpdating}
               onConfirm={async (status) => {
                 setIsUpdating(true);
-                await onBulkUpdate?.(status);
+                const success = await onBulkUpdate?.(status);
                 setIsUpdating(false);
-                setIsDialogOpen(false);
+                if (success) {
+                  setIsDialogOpen(false);
+                }
               }}
             />
           </>
