@@ -86,21 +86,26 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
     }
   }
 
-  const [selected, setSelected] = useState(
-    assignment ?
-      allStatuses.find(s => s.key === assignment.status) || allStatuses[0] :
-      allStatuses[0]
-  )
+  const [assignmentStatuses, setAssignmentStatuses] = useState<{[key: string]: typeof allStatuses[0]}>({});
 
-  const updateAssignmentStatus = async (newStatus: typeof selected) => {
+  useEffect(() => {
+    const initialStatuses = {};
+    assignments.forEach(assignment => {
+      initialStatuses[assignment.referee.userId] = allStatuses.find(s => s.key === assignment.status) || allStatuses[0];
+    });
+    setAssignmentStatuses(initialStatuses);
+  }, [assignments]);
+
+  const updateAssignmentStatus = async (refereeId: string, newStatus: typeof allStatuses[0]) => {
     try {
-      const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
-      const endpoint = (!assignment || selected.key === 'AVAILABLE') ?
+      const existingAssignment = assignments.find(a => a.referee.userId === refereeId);
+      const method = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ? 'POST' : 'PATCH';
+      const endpoint = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ?
         `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
-        `${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`;
+        `${process.env.NEXT_PUBLIC_API_URL}/assignments/${existingAssignment._id}`;
 
-      const body = (!assignment || selected.key === 'AVAILABLE') ?
-        { matchId: match._id, status: newStatus.key } :
+      const body = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ?
+        { matchId: match._id, refereeId: refereeId, status: newStatus.key } :
         { status: newStatus.key };
 
       const response = await fetch(endpoint, {
@@ -210,8 +215,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                selectedReferee={null} 
-                onRefereeChange={(referee) => console.log('Referee 1 selected:', referee)} 
+                selectedReferee={match.referee1}
+                onRefereeChange={(referee) => {
+                  if (referee) {
+                    updateAssignmentStatus(referee._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                  }
+                }}
                 assignments={assignments}
                 matchId={match._id}
               />
