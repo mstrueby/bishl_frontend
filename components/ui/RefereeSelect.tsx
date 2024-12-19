@@ -16,10 +16,11 @@ interface RefereeSelectProps {
 }
 const RefereeSelect: React.FC<RefereeSelectProps> = ({ 
   selectedReferee: propSelectedReferee,
-  onRefereeChange, 
-  allRefereesData 
+  onRefereeChange,
+  assignments,
+  matchId
 }) => {
-  const [selectedReferee, setselectedReferee] = useState<TournamentValues | null>(propSelectedReferee);
+  const [selectedReferee, setselectedReferee] = useState<UserValues | null>(propSelectedReferee);
 
   // When the 'propSelectedReferee' changes, update the local state
   useEffect(() => {
@@ -64,23 +65,23 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               leaveTo="opacity-0"
             >
               <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                {allRefereesData?.map((referee) => (
+                {assignments?.map((assignment) => (
                   <Listbox.Option
-                    key={referee._id}
+                    key={assignment.referee.userId}
                     className={({ active }) =>
                       classNames(
                         active ? 'bg-indigo-600 text-white' : 'text-gray-900',
                         'relative cursor-default select-none py-2 pl-3 pr-9'
                       )
                     }
-                    value={referee}
+                    value={assignment._id}
                   >
                     {({ selected, active }) => (
                       <>
                         <div className="flex items-center">
                           <span className="flex-shrink-0 h-2 w-2 rounded-full mr-2" 
                                 style={{ 
-                                  backgroundColor: assignments[`${matchId}-${referee._id}`]?.status === 'REQUESTED' 
+                                  backgroundColor: assignment.status === 'REQUESTED' 
                                     ? '#FCD34D' 
                                     : '#D1D5DB'
                                 }} 
@@ -88,7 +89,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                           <span
                             className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}
                           >
-                            {referee.firstName} {referee.lastName}
+                            {assignment.referee.firstName} {assignment.referee.lastName}
                           </span>
                         </div>
 
