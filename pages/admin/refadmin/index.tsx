@@ -9,6 +9,7 @@ import { UserValues } from '../../../types/UserValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import MatchCardRefAdmin from "../../../components/admin/MatchCardRefAdmin";
+import { AssignmentValues } from '../../../types/AssignmentValues';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -34,42 +35,65 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
 
   const fetchData = async (filterParams: FilterState) => {
     try {
+      // Build query parameters
       const params: any = {
         date_from: filterParams.date_from || new Date().toISOString().split('T')[0]
       };
-      if (filterParams.date_to) {
-        params.date_to = filterParams.date_to;
-      }
-      if (filterParams.tournament !== 'all') {
-        params.tournament = filterParams.tournament;
-      }
-      if (filterParams.showUnassignedOnly) {
-        params.assigned = false;
+      if (filterParams.date_to) params.date_to = filterParams.date_to;
+      if (filterParams.tournament !== 'all') params.tournament = filterParams.tournament;
+      if (filterParams.showUnassignedOnly) params.assigned = false;
+
+      // Fetch matches with error handling
+      const matchesRes = await axios.get(`${BASE_URL}/matches`, { 
+        params,
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
+
+      if (!matchesRes.data || !Array.isArray(matchesRes.data)) {
+        throw new Error('Invalid matches data received');
       }
 
-      const matchesRes = await axios.get(`${BASE_URL}/matches`, { params });
       const matches = matchesRes.data;
 
-      // Fetch assignments for each match
-      const assignmentPromises = matches.map(match => 
-        axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
-          params: {
-            assignmentStatus: ['AVAILABLE', 'REQUESTED']
-          },
-          headers: { Authorization: `Bearer ${jwt}` }
-        })
-      );
+      // Only proceed with assignments if we have matches
+      if (matches.length > 0) {
+        // Fetch assignments for each match
+        const assignmentPromises = matches.map((match: Match) =>
+          axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
+            params: {
+              assignmentStatus: ['AVAILABLE', 'REQUESTED']
+            },
+            headers: { Authorization: `Bearer ${jwt}` }
+          }).catch(error => {
+            console.error(`Error fetching assignments for match ${match._id}:`, error);
+            return { data: [] }; // Return empty array on error for individual match
+          })
+        );
 
-      const assignmentResults = await Promise.all(assignmentPromises);
-      const assignmentsMap = assignmentResults.reduce((acc, result, index) => {
-        acc[matches[index]._id] = result.data;
-        return acc;
-      }, {});
+        const assignmentResults = await Promise.all(assignmentPromises);
+        const assignmentsMap = assignmentResults.reduce((acc, result, index) => {
+          if (result && Array.isArray(result.data)) {
+            acc[matches[index]._id] = result.data as AssignmentValues[];
+          }
+          return acc;
+        }, {} as { [key: string]: AssignmentValues[] });
+
+        setMatchAssignments(assignmentsMap);
+      } else {
+        setMatchAssignments({});
+      }
 
       setMatches(matches);
-      setMatchAssignments(assignmentsMap);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setMatches([]);
+      setMatchAssignments({});
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          // Handle unauthorized error
+          window.location.href = '/login';
+        }
+      }
     }
   };
 
