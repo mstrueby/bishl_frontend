@@ -61,9 +61,14 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
         const assignmentPromises = matches.map((match: Match) =>
           axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
             params: {
-              assignmentStatus: ['AVAILABLE', 'REQUESTED']
+              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE']
             },
             headers: { Authorization: `Bearer ${jwt}` }
+          }).then(response => {
+            if (response.data && Array.isArray(response.data) && response.data.length === 0) {
+              console.log(`Empty assignments data for match ${match._id} at URL: ${BASE_URL}/assignments/matches/${match._id}`);
+            }
+            return response;
           }).catch(error => {
             console.error(`Error fetching assignments for match ${match._id}:`, error);
             return { data: [] }; // Return empty array on error for individual match
@@ -80,6 +85,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
 
         setMatchAssignments(assignmentsMap);
       } else {
+        console.log('No matches found');
         setMatchAssignments({});
       }
 
@@ -115,6 +121,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
       />
       
       <ul>
+        {console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
         {matches && matches.length > 0 ? (
           matches.map((match: Match) => {
             return (
