@@ -35,9 +35,9 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
 
   return (
     <Listbox value={selectedReferee} onChange={(referee) => {
-      setselectedReferee(referee);
-      if (referee) {
-        onRefereeChange(referee);
+      if (referee?.referee) {
+        setselectedReferee(referee.referee);
+        onRefereeChange(referee.referee);
       }
     }}>
       {({ open }) => (
@@ -74,7 +74,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                         'relative cursor-default select-none py-2 pl-3 pr-9'
                       )
                     }
-                    value={assignment._id}
+                    value={assignment}
                   >
                     {({ selected, active }) => (
                       <>
