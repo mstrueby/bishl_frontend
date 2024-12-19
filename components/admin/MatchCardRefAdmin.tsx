@@ -202,12 +202,21 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues,
       </div>
       {/* 3 Referee Select Panel */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
-        <div className="flex flex-row justify-end">
-          <RefereeSelect 
-            selectedReferee={null} 
-            onRefereeChange={(referee) => console.log('Referee selected:', referee)} 
-            allRefereesData={refereesData}
-          />
+        <div className="flex flex-col space-y-2">
+          <div className="w-full">
+            <RefereeSelect 
+              selectedReferee={null} 
+              onRefereeChange={(referee) => console.log('Referee 1 selected:', referee)} 
+              allRefereesData={refereesData}
+            />
+          </div>
+          <div className="w-full">
+            <RefereeSelect 
+              selectedReferee={null} 
+              onRefereeChange={(referee) => console.log('Referee 2 selected:', referee)} 
+              allRefereesData={refereesData}
+            />
+          </div>
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
 
