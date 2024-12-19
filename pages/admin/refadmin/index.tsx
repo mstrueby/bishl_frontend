@@ -16,7 +16,7 @@ let BASE_URL = process.env.NEXT_PUBLIC_API_URL
 interface RefAdminProps {
   jwt: string;
   initialMatches: Match[];
-  referees: UserValues[];
+  initialAssignments: { [key: string]: AssignmentValues[] };
 }
 
 interface FilterState {
@@ -26,14 +26,14 @@ interface FilterState {
   date_to?: string;
 }
 
-const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) => {
+const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignments }) => {
   const [matches, setMatches] = React.useState<Match[]>(initialMatches);
-  const [refereesData, setRefereesData] = React.useState<UserValues[]>(referees);
-  const [matchAssignments, setMatchAssignments] = React.useState<{[key: string]: any}>({});
+  const [matchAssignments, setMatchAssignments] = React.useState<{[key: string]: AssignmentValues[]}>(initialAssignments);
   const [filter, setFilter] = React.useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Schiedsrichter einteilen";
 
   const fetchData = async (filterParams: FilterState) => {
+    console.log("lets fetch data")
     try {
       // Build query parameters
       const params: any = {
@@ -56,12 +56,13 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
       const matches = matchesRes.data;
 
       // Only proceed with assignments if we have matches
+      console.log("Matches length", matches.length)
       if (matches.length > 0) {
         // Fetch assignments for each match
         const assignmentPromises = matches.map((match: Match) =>
           axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
             params: {
-              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE']
+              assignmentStatus: ['AVAILABLE', 'REQUESTED']
             },
             headers: { Authorization: `Bearer ${jwt}` }
           }).then(response => {
@@ -144,32 +145,45 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
   let matches = null;
-  let referees = null;
+  let assignments = null;
   const currentDate = new Date().toISOString().split('T')[0];
 
   try {
-    const [refereesRes, matchesRes] = await Promise.all([
-      axios.get(`${BASE_URL}/users/referees`, {
-        headers: { Authorization: `Bearer ${jwt}` }
-      }),
+    const [matchesRes] = await Promise.all([
       axios.get(`${BASE_URL}/matches`, {
-        params: { date_from: currentDate }
+        params: { date_from: currentDate },
+        headers: { Authorization: `Bearer ${jwt}` }
       })
     ]);
     matches = matchesRes.data;
-    referees = refereesRes.data;
+
+    const assignmentPromises = matches.map((match: Match) =>
+      axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
+        params: {
+          assignmentStatus: ['AVAILABLE', 'REQUESTED']
+        },
+        headers: { Authorization: `Bearer ${jwt}` }
+      })
+    )
+    const assignmentResults = await Promise.all(assignmentPromises);
+    assignments = assignmentResults.reduce((acc, result, index) => {
+      if (result && Array.isArray(result.data)) {
+        acc[matches[index]._id] = result.data as AssignmentValues[];
+      }
+      return acc;
+    }, {} as { [key: string]: AssignmentValues[] });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching data:', error);
     }
-    return { props: { referees: [], matches: [] } };
+    return { props: { initialMatches: [], initialAssignments: {} } };
   }
 
   return {
     props: {
       jwt,
       initialMatches: matches || [],
-      referees: referees || []
+      initialAssignments: assignments || {}
     }
   };
 };
