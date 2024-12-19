@@ -204,18 +204,30 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues,
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="flex flex-col space-y-2">
           <div className="w-full">
-            <RefereeSelect 
-              selectedReferee={match.referee1 || null} 
-              onRefereeChange={(referee) => console.log('Referee 1 selected:', referee)} 
-              allRefereesData={refereesData}
-            />
+            {match.referee1 ? (
+              <div className="py-1.5 px-3 rounded-md bg-gray-50 text-sm text-gray-900">
+                {match.referee1.firstName} {match.referee1.lastName}
+              </div>
+            ) : (
+              <RefereeSelect 
+                selectedReferee={null} 
+                onRefereeChange={(referee) => console.log('Referee 1 selected:', referee)} 
+                allRefereesData={refereesData}
+              />
+            )}
           </div>
           <div className="w-full">
-            <RefereeSelect 
-              selectedReferee={match.referee2 || null} 
-              onRefereeChange={(referee) => console.log('Referee 2 selected:', referee)} 
-              allRefereesData={refereesData}
-            />
+            {match.referee2 ? (
+              <div className="py-1.5 px-3 rounded-md bg-gray-50 text-sm text-gray-900">
+                {match.referee2.firstName} {match.referee2.lastName}
+              </div>
+            ) : (
+              <RefereeSelect 
+                selectedReferee={null} 
+                onRefereeChange={(referee) => console.log('Referee 2 selected:', referee)} 
+                allRefereesData={refereesData}
+              />
+            )}
           </div>
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
