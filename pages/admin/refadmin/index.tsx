@@ -28,17 +28,12 @@ interface FilterState {
 const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) => {
   const [matches, setMatches] = React.useState<Match[]>(initialMatches);
   const [refereesData, setRefereesData] = React.useState<UserValues[]>(referees);
-  const [assignments, setAssignments] = React.useState({});
+  const [matchAssignments, setMatchAssignments] = React.useState<{[key: string]: any}>({});
   const [filter, setFilter] = React.useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Schiedsrichter einteilen";
 
   const fetchData = async (filterParams: FilterState) => {
     try {
-      const userRes = await axios.get(`${BASE_URL}/users/me`, {
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
-      const userId = userRes.data._id;
-
       const params: any = {
         date_from: filterParams.date_from || new Date().toISOString().split('T')[0]
       };
@@ -52,17 +47,27 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
         params.assigned = false;
       }
 
-      const [matchesRes, refereesRes] = await Promise.all([
-        axios.get(`${BASE_URL}/matches`, {
-          params
-        }),
-        axios.get(`${BASE_URL}/users/referees`, {
+      const matchesRes = await axios.get(`${BASE_URL}/matches`, { params });
+      const matches = matchesRes.data;
+
+      // Fetch assignments for each match
+      const assignmentPromises = matches.map(match => 
+        axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
+          params: {
+            assignmentStatus: ['AVAILABLE', 'REQUESTED']
+          },
           headers: { Authorization: `Bearer ${jwt}` }
         })
-      ]);
+      );
 
-      setMatches(matchesRes.data);
-      setRefereesData(refereesRes.data)
+      const assignmentResults = await Promise.all(assignmentPromises);
+      const assignmentsMap = assignmentResults.reduce((acc, result, index) => {
+        acc[matches[index]._id] = result.data;
+        return acc;
+      }, {});
+
+      setMatches(matches);
+      setMatchAssignments(assignmentsMap);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -93,7 +98,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
                 key={match._id}
                 match={match}
                 jwt={jwt}
-                refereesData={refereesData}
+                assignments={matchAssignments[match._id] || []}
               />
             );
           })

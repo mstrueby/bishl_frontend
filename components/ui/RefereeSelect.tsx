@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { UserValues } from '../../types/UserValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { AssignmentValues } from '../../types/AssignmentValues';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -10,9 +11,8 @@ function classNames(...classes: string[]) {
 interface RefereeSelectProps {
   selectedReferee: UserValues | null;
   onRefereeChange: (referee: UserValues) => void;
-  allRefereesData: UserValues[];
+  assignments: AssignmentValues[];
   matchId: string;
-  assignments: { [key: string]: { status: string } };
 }
 const RefereeSelect: React.FC<RefereeSelectProps> = ({ 
   selectedReferee: propSelectedReferee,

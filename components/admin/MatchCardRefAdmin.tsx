@@ -8,7 +8,7 @@ import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string, refereesData: UserValues[] }> = ({ match, assignment, jwt, refereesData }) => {
+const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [
@@ -212,9 +212,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues,
               <RefereeSelect 
                 selectedReferee={null} 
                 onRefereeChange={(referee) => console.log('Referee 1 selected:', referee)} 
-                allRefereesData={refereesData}
+                assignments={assignments}
                 matchId={match._id}
-                assignments={assignment || {}}
               />
             )}
           </div>
