@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
@@ -8,7 +8,7 @@ import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
+const MatchCardRefAdmin: React.FC<{ key: string, match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [
@@ -87,6 +87,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   }
 
   const [assignmentStatuses, setAssignmentStatuses] = useState<{[key: string]: typeof allStatuses[0]}>({});
+  const [selected, setSelected] = useState<typeof allStatuses[0]>(allStatuses[0]);
 
   useEffect(() => {
     const initialStatuses = {};
@@ -128,8 +129,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
   const handleStatusChange = (newStatus: typeof selected) => {
     setSelected(newStatus);
-    updateAssignmentStatus(newStatus);
-  }
+    updateAssignmentStatus(newStatus.key, newStatus); // Pass the refereeId as well
+  };
 
   const validStatuses = useMemo(() => {
     const validKeys = getValidTransitions(selected.key);
@@ -233,9 +234,14 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                selectedReferee={null} 
-                onRefereeChange={(referee) => console.log('Referee 2 selected:', referee)} 
-                allRefereesData={refereesData}
+                selectedReferee={match.referee2}
+                onRefereeChange={(referee) => {
+                  if (referee) {
+                    updateAssignmentStatus(referee._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                  }
+                }}
+                assignments={assignments}
+                matchId={match._id}
               />
             )}
           </div>
