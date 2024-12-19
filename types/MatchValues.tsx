@@ -44,4 +44,6 @@ export interface Match {
   };
   startDate: Date;
   published: boolean;
+  referee1?: UserValues;
+  referee2?: UserValues;
 }

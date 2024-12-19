@@ -205,14 +205,14 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues,
         <div className="flex flex-col space-y-2">
           <div className="w-full">
             <RefereeSelect 
-              selectedReferee={null} 
+              selectedReferee={match.referee1 || null} 
               onRefereeChange={(referee) => console.log('Referee 1 selected:', referee)} 
               allRefereesData={refereesData}
             />
           </div>
           <div className="w-full">
             <RefereeSelect 
-              selectedReferee={null} 
+              selectedReferee={match.referee2 || null} 
               onRefereeChange={(referee) => console.log('Referee 2 selected:', referee)} 
               allRefereesData={refereesData}
             />
