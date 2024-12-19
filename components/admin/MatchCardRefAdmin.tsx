@@ -4,10 +4,11 @@ import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
+const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string, refereesData: UserValues[] }> = ({ match, assignment, jwt, refereesData }) => {
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [
@@ -199,10 +200,14 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues,
           </div>
         </div>
       </div>
-      {/* 3 button Spielberich, status (tablet) */}
+      {/* 3 Referee Select Panel */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="flex flex-row justify-end">
-          <span>REFEREE PANEL</span>
+          <RefereeSelect 
+            selectedReferee={null} 
+            onRefereeChange={(referee) => console.log('Referee selected:', referee)} 
+            allRefereesData={refereesData}
+          />
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
 

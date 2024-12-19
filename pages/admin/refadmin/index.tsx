@@ -93,6 +93,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, referees }) =>
                 key={match._id}
                 match={match}
                 jwt={jwt}
+                refereesData={refereesData}
               />
             );
           })
