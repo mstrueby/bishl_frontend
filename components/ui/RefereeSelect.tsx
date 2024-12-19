@@ -11,6 +11,8 @@ interface RefereeSelectProps {
   selectedReferee: UserValues | null;
   onRefereeChange: (referee: UserValues) => void;
   allRefereesData: UserValues[];
+  matchId: string;
+  assignments: { [key: string]: { status: string } };
 }
 const RefereeSelect: React.FC<RefereeSelectProps> = ({ 
   selectedReferee: propSelectedReferee,
@@ -76,11 +78,17 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                     {({ selected, active }) => (
                       <>
                         <div className="flex items-center">
-
+                          <span className="flex-shrink-0 h-2 w-2 rounded-full mr-2" 
+                                style={{ 
+                                  backgroundColor: assignments[`${matchId}-${referee._id}`]?.status === 'REQUESTED' 
+                                    ? '#FCD34D' 
+                                    : '#D1D5DB'
+                                }} 
+                          />
                           <span
-                            className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}
+                            className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}
                           >
-                            {referee.firstName}
+                            {referee.firstName} {referee.lastName}
                           </span>
                         </div>
 

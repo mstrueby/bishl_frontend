@@ -213,6 +213,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignment?: AssignmentValues,
                 selectedReferee={null} 
                 onRefereeChange={(referee) => console.log('Referee 1 selected:', referee)} 
                 allRefereesData={refereesData}
+                matchId={match._id}
+                assignments={assignment || {}}
               />
             )}
           </div>
