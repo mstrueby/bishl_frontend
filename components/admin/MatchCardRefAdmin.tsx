@@ -8,11 +8,7 @@ import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt = '' }) => {
-  if (!jwt) {
-    console.error('JWT token is missing');
-    return null;
-  }
+const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [
@@ -92,6 +88,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
   const [assignmentStatuses, setAssignmentStatuses] = useState<{[key: string]: typeof allStatuses[0]}>({});
   const [selected, setSelected] = useState<typeof allStatuses[0]>(allStatuses[0]);
+  const [temporaryReferee1, setTemporaryReferee1] = useState<any>(null);
+  const [temporaryReferee2, setTemporaryReferee2] = useState<any>(null);
 
   useEffect(() => {
     const initialStatuses = {};
@@ -223,13 +221,23 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 selectedReferee={match.referee1 || null}
                 onRefereeChange={(referee) => {
                   if (referee) {
-                    updateAssignmentStatus(referee._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                    setTemporaryReferee1(referee);
                   }
                 }}
                 assignments={assignments}
                 matchId={match._id}
                 position={1}
                 jwt={jwt}
+                onConfirm={() => {
+                  if (temporaryReferee1) {
+                    updateAssignmentStatus(temporaryReferee1._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                    setTemporaryReferee1(null);
+                  }
+                }}
+                onCancel={() => {
+                  setTemporaryReferee1(null);
+                }}
+                temporarySelection={temporaryReferee1}
               />
             )}
           </div>
@@ -243,13 +251,23 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 selectedReferee={match.referee2 || null}
                 onRefereeChange={(referee) => {
                   if (referee) {
-                    updateAssignmentStatus(referee._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                    setTemporaryReferee2(referee);
                   }
                 }}
                 assignments={assignments}
                 matchId={match._id}
                 position={2}
                 jwt={jwt}
+                onConfirm={() => {
+                  if (temporaryReferee2) {
+                    updateAssignmentStatus(temporaryReferee2._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                    setTemporaryReferee2(null);
+                  }
+                }}
+                onCancel={() => {
+                  setTemporaryReferee2(null);
+                }}
+                temporarySelection={temporaryReferee2}
               />
             )}
           </div>

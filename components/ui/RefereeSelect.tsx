@@ -1,7 +1,8 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { UserValues } from '../../types/UserValues';
-import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { Referee } from '../../types/MatchValues';
+import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { AssignmentValues } from '../../types/AssignmentValues';
 
 function classNames(...classes: string[]) {
@@ -9,12 +10,15 @@ function classNames(...classes: string[]) {
 }
 
 interface RefereeSelectProps {
-  selectedReferee: UserValues | null;
-  onRefereeChange: (referee: UserValues) => void;
+  selectedReferee: Referee | null;
+  onRefereeChange: (referee: Referee) => void;
   assignments: AssignmentValues[];
   matchId: string;
   position: number;
   jwt: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  temporarySelection: Referee | null;
 }
 const RefereeSelect: React.FC<RefereeSelectProps> = ({ 
   selectedReferee: propSelectedReferee,
@@ -24,7 +28,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   position,
   jwt
 }) => {
-  const [selectedReferee, setselectedReferee] = useState<UserValues | null>(propSelectedReferee);
+  const [selectedReferee, setselectedReferee] = useState<Referee | null>(propSelectedReferee);
 
   // When the 'propSelectedReferee' changes, update the local state
   useEffect(() => {
@@ -38,21 +42,10 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox value={selectedReferee} onChange={(assignment: AssignmentValues) => {
-      if (assignment?.referee) {
-        const refereeData: UserValues = {
-          _id: assignment.referee.userId,
-          firstName: assignment.referee.firstName,
-          lastName: assignment.referee.lastName,
-          email: '',
-          club: {
-            clubId: assignment.referee.clubId,
-            clubName: assignment.referee.clubName
-          },
-          roles: []
-        };
-        setselectedReferee(refereeData);
-        onRefereeChange(refereeData);
+    <Listbox value={selectedReferee} onChange={(selectedReferee: Referee | null) => {
+      if (selectedReferee) {
+        setselectedReferee(selectedReferee);
+        onRefereeChange(selectedReferee);
       }
     }}>
       {({ open }) => (
@@ -72,47 +65,21 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               </span>
             </Listbox.Button>
 
-            {selectedReferee && (
-              <button
-                onClick={async () => {
-                  const assignment = assignments.find(a => a.referee.userId === selectedReferee._id);
-                  const endpoint = !assignment ? 
-                    `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
-                    `${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`;
-                  
-                  const method = !assignment ? 'POST' : 'PATCH';
-                  const body = {
-                    matchId,
-                    status: 'ASSIGNED',
-                    ...(method === 'POST' && { userId: selectedReferee._id }),
-                    position,
-                    refadmin: true
-                  };
-
-                  try {
-                    const response = await fetch(endpoint, {
-                      method,
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${jwt}`,
-                      },
-                      body: JSON.stringify(body)
-                    });
-
-                    if (!response.ok) {
-                      throw new Error('Failed to assign referee');
-                    }
-                    
-                    // Refresh page to show updated assignment
-                    window.location.reload();
-                  } catch (error) {
-                    console.error('Error assigning referee:', error);
-                  }
-                }}
-                className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                <CheckIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </button>
+            {temporarySelection && (
+              <div className="flex gap-2">
+                <button
+                  onClick={onConfirm}
+                  className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  <CheckIcon className="h-5 w-5 text-green-600" aria-hidden="true" />
+                </button>
+                <button
+                  onClick={onCancel}
+                  className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  <XMarkIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                </button>
+              </div>
             )}
 
             <Transition
