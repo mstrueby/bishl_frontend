@@ -32,12 +32,18 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   onCancel
 }) => {
   const [selectedReferee, setselectedReferee] = useState<Referee | null>(propSelectedReferee);
+  const [displayedReferee, setDisplayedReferee] = useState<Referee | null>(propSelectedReferee);
 
-  // When the 'propSelectedReferee' changes, update the local state
   useEffect(() => {
     setselectedReferee(propSelectedReferee);
+    setDisplayedReferee(propSelectedReferee);
   }, [propSelectedReferee]);
 
+  useEffect(() => {
+    if (!temporarySelection) {
+      setDisplayedReferee(null);
+    }
+  }, [temporarySelection]);
 
   // Placeholder component for the listbox
   const Placeholder = () => (
@@ -45,10 +51,10 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox value={selectedReferee} onChange={(selectedReferee: Referee | null) => {
-      if (selectedReferee) {
-        setselectedReferee(selectedReferee);
-        onRefereeChange(selectedReferee);
+    <Listbox value={displayedReferee} onChange={(referee: Referee | null) => {
+      if (referee) {
+        setDisplayedReferee(referee);
+        onRefereeChange(referee);
       }
     }}>
       {({ open }) => (
