@@ -83,6 +83,8 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                                 style={{ 
                                   backgroundColor: assignment.status === 'REQUESTED' 
                                     ? '#FCD34D' 
+                                    : assignment.status === 'UNAVAILABLE'
+                                    ? '#EF4444'  
                                     : '#D1D5DB'
                                 }} 
                           />
