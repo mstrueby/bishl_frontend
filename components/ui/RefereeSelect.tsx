@@ -20,7 +20,9 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   selectedReferee: propSelectedReferee,
   onRefereeChange,
   assignments,
-  matchId
+  matchId,
+  position,
+  jwt
 }) => {
   const [selectedReferee, setselectedReferee] = useState<UserValues | null>(propSelectedReferee);
 
@@ -36,10 +38,21 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox value={selectedReferee} onChange={(referee) => {
-      if (referee?.referee) {
-        setselectedReferee(referee.referee);
-        onRefereeChange(referee.referee);
+    <Listbox value={selectedReferee} onChange={(assignment: AssignmentValues) => {
+      if (assignment?.referee) {
+        const refereeData: UserValues = {
+          _id: assignment.referee.userId,
+          firstName: assignment.referee.firstName,
+          lastName: assignment.referee.lastName,
+          email: '',
+          club: {
+            clubId: assignment.referee.clubId,
+            clubName: assignment.referee.clubName
+          },
+          roles: []
+        };
+        setselectedReferee(refereeData);
+        onRefereeChange(refereeData);
       }
     }}>
       {({ open }) => (
