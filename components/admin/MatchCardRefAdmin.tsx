@@ -8,7 +8,11 @@ import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
+const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt = '' }) => {
+  if (!jwt) {
+    console.error('JWT token is missing');
+    return null;
+  }
   const { home, away, startDate, venue } = match;
 
   const allStatuses = [
@@ -216,7 +220,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                selectedReferee={match.referee1}
+                selectedReferee={match.referee1 || null}
                 onRefereeChange={(referee) => {
                   if (referee) {
                     updateAssignmentStatus(referee._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
@@ -236,7 +240,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                selectedReferee={match.referee2}
+                selectedReferee={match.referee2 || null}
                 onRefereeChange={(referee) => {
                   if (referee) {
                     updateAssignmentStatus(referee._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);

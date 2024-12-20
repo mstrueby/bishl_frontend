@@ -135,7 +135,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
               <MatchCardRefAdmin
                 key={match._id}
                 match={match}
-                jwt={jwt}
+                jwt={jwt || ''}
                 assignments={matchAssignments[match._id] || []}
               />
             );
