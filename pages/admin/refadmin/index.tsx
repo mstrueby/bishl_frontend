@@ -79,7 +79,13 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         const assignmentResults = await Promise.all(assignmentPromises);
         const assignmentsMap = assignmentResults.reduce((acc, result, index) => {
           if (result && Array.isArray(result.data)) {
-            acc[matches[index]._id] = result.data as AssignmentValues[];
+            // Only include AVAILABLE and REQUESTED assignments
+            const filteredAssignments = result.data.filter(assignment => 
+              ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
+            );
+            if (filteredAssignments.length > 0) {
+              acc[matches[index]._id] = filteredAssignments as AssignmentValues[];
+            }
           }
           return acc;
         }, {} as { [key: string]: AssignmentValues[] });
@@ -168,7 +174,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const assignmentResults = await Promise.all(assignmentPromises);
     assignments = assignmentResults.reduce((acc, result, index) => {
       if (result && Array.isArray(result.data)) {
-        acc[matches[index]._id] = result.data as AssignmentValues[];
+        // Only include AVAILABLE and REQUESTED assignments
+        const filteredAssignments = result.data.filter(assignment => 
+          ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
+        );
+        if (filteredAssignments.length > 0) {
+          acc[matches[index]._id] = filteredAssignments as AssignmentValues[];
+        }
       }
       return acc;
     }, {} as { [key: string]: AssignmentValues[] });
