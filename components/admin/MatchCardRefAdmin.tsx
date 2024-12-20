@@ -224,6 +224,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 }}
                 assignments={assignments}
                 matchId={match._id}
+                position={1}
+                jwt={jwt}
               />
             )}
           </div>
@@ -242,6 +244,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 }}
                 assignments={assignments}
                 matchId={match._id}
+                position={2}
+                jwt={jwt}
               />
             )}
           </div>
