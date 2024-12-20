@@ -26,7 +26,10 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   assignments,
   matchId,
   position,
-  jwt
+  jwt,
+  temporarySelection,
+  onConfirm,
+  onCancel
 }) => {
   const [selectedReferee, setselectedReferee] = useState<Referee | null>(propSelectedReferee);
 

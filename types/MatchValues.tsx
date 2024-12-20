@@ -15,6 +15,15 @@ interface Team {
 
 }
 
+export interface Referee {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  clubId?: string;
+  clubName?: string;
+  points: number;
+}
+
 export interface Match {
   _id: string;
   matchId: number;
@@ -44,6 +53,6 @@ export interface Match {
   };
   startDate: Date;
   published: boolean;
-  referee1?: UserValues;
-  referee2?: UserValues;
+  referee1?: Referee;
+  referee2?: Referee;
 }
