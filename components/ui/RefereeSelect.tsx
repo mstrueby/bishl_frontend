@@ -16,7 +16,7 @@ interface RefereeSelectProps {
   matchId: string;
   position: number;
   jwt: string;
-  onConfirm: () => void;
+  onConfirm: (jwt: string) => void;
   onCancel: () => void;
   temporarySelection: Referee | null;
 }
@@ -77,7 +77,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
             {temporarySelection && (
               <div className="flex gap-2">
                 <button
-                  onClick={onConfirm}
+                  onClick={() => onConfirm(jwt)}
                   className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
                   <CheckIcon className="h-5 w-5 text-green-600" aria-hidden="true" />
