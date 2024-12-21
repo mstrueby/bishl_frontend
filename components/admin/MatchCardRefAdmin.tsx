@@ -99,7 +99,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
     setAssignmentStatuses(initialStatuses);
   }, [assignments]);
 
-  const updateAssignmentStatus = async (refereeId: string, newStatus: typeof allStatuses[0]) => {
+  const updateAssignmentStatus = async (refereeId: string, newStatus: typeof allStatuses[0], jwt: string) => {
     try {
       const existingAssignment = assignments.find(a => a.referee.userId === refereeId);
       const method = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ? 'POST' : 'PATCH';
@@ -131,7 +131,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
   const handleStatusChange = (newStatus: typeof selected) => {
     setSelected(newStatus);
-    updateAssignmentStatus(newStatus.key, newStatus); // Pass the refereeId as well
+    updateAssignmentStatus(newStatus.key, newStatus, jwt); // Pass the refereeId as well
   };
 
   const validStatuses = useMemo(() => {
@@ -230,7 +230,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 jwt={jwt}
                 onConfirm={() => {
                   if (temporaryReferee1) {
-                    updateAssignmentStatus(temporaryReferee1._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                    updateAssignmentStatus(temporaryReferee1._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0], jwt);
                     setTemporaryReferee1(null);
                   }
                 }}
@@ -260,7 +260,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 jwt={jwt}
                 onConfirm={() => {
                   if (temporaryReferee2) {
-                    updateAssignmentStatus(temporaryReferee2._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0]);
+                    updateAssignmentStatus(temporaryReferee2._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0], jwt);
                     setTemporaryReferee2(null);
                   }
                 }}
