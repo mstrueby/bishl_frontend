@@ -16,7 +16,7 @@ interface Team {
 }
 
 export interface Referee {
-  _id: string;
+  userId: string;
   firstName: string;
   lastName: string;
   clubId?: string;
