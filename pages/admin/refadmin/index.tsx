@@ -28,7 +28,7 @@ interface FilterState {
 
 const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignments }) => {
   const [matches, setMatches] = React.useState<Match[]>(initialMatches);
-  const [matchAssignments, setMatchAssignments] = React.useState<{[key: string]: AssignmentValues[]}>(initialAssignments);
+  const [matchAssignments, setMatchAssignments] = React.useState<{ [key: string]: AssignmentValues[] }>(initialAssignments);
   const [filter, setFilter] = React.useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Schiedsrichter einteilen";
 
@@ -44,9 +44,8 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
       if (filterParams.showUnassignedOnly) params.assigned = false;
 
       // Fetch matches with error handling
-      const matchesRes = await axios.get(`${BASE_URL}/matches`, { 
-        params,
-        headers: { Authorization: `Bearer ${jwt}` }
+      const matchesRes = await axios.get(`${BASE_URL}/matches`, {
+        params
       });
 
       if (!matchesRes.data || !Array.isArray(matchesRes.data)) {
@@ -80,7 +79,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         const assignmentsMap = assignmentResults.reduce((acc, result, index) => {
           if (result && Array.isArray(result.data)) {
             // Only include AVAILABLE and REQUESTED assignments
-            const filteredAssignments = result.data.filter(assignment => 
+            const filteredAssignments = result.data.filter(assignment =>
               ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
             );
             if (filteredAssignments.length > 0) {
@@ -126,7 +125,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         filter="true"
         onFilterChange={handleFilterChange}
       />
-      
+
       <ul>
         {console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
         {matches && matches.length > 0 ? (
@@ -157,8 +156,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const [matchesRes] = await Promise.all([
       axios.get(`${BASE_URL}/matches`, {
-        params: { date_from: currentDate },
-        headers: { Authorization: `Bearer ${jwt}` }
+        params: { date_from: currentDate }
       })
     ]);
     matches = matchesRes.data;
@@ -173,9 +171,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     )
     const assignmentResults = await Promise.all(assignmentPromises);
     assignments = assignmentResults.reduce((acc, result, index) => {
-      if (result && Array.isArray(result.data)) {
+      if (result && Array.isArray((result as any).data)) {
         // Only include AVAILABLE and REQUESTED assignments
-        const filteredAssignments = result.data.filter(assignment => 
+        const filteredAssignments = result.data.filter((assignment: AssignmentValues) =>
           ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
         );
         if (filteredAssignments.length > 0) {
@@ -183,7 +181,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
       }
       return acc;
-    }, {} as { [key: string]: AssignmentValues[] });
+    }, {} as { [key: string]: AssignmentValues[] });    
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching data:', error);

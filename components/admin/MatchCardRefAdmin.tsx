@@ -111,6 +111,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         { matchId: match._id, refereeId: refereeId, status: newStatus.key } :
         { status: newStatus.key };
 
+      console.log("enpoint", endpoint)
+      {console.log('JWT: ', jwt)}
+      {console.log('Body: ', body)}
+
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -119,6 +123,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         },
         body: JSON.stringify(body)
       });
+
+      console.log('Response:', response)
 
       if (!response.ok) {
         throw new Error('Failed to update assignment status');
