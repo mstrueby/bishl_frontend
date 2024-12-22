@@ -246,7 +246,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 jwt={jwt}
                 onConfirm={(jwt) => {
                   if (temporaryReferee1) {
-                    updateAssignmentStatus(temporaryReferee1._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0], jwt);
+                    updateAssignmentStatus(temporaryReferee1._id, allStatuses.find(s => s.key === 'ASSIGNED') || allStatuses[0], jwt);
                     setTemporaryReferee1(null);
                   }
                 }}
@@ -276,7 +276,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 jwt={jwt}
                 onConfirm={(jwt) => {
                   if (temporaryReferee2) {
-                    updateAssignmentStatus(temporaryReferee2._id, allStatuses.find(s => s.key === 'REQUESTED') || allStatuses[0], jwt);
+                    updateAssignmentStatus(temporaryReferee2._id, allStatuses.find(s => s.key === 'ASSIGNED') || allStatuses[0], jwt);
                     setTemporaryReferee2(null);
                   }
                 }}
