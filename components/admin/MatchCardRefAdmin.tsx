@@ -107,18 +107,20 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
         `${process.env.NEXT_PUBLIC_API_URL}/assignments/${existingAssignment._id}`;
 
+      const assignmentSelect: AssignmentSelect = {
+        matchId: match._id,
+        userId: refereeId,
+        status: newStatus.key,
+        refAdmin: true,
+        position: temporaryReferee1 ? 1 : temporaryReferee2 ? 2 : 1
+      };
+
       const body = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ?
+        assignmentSelect :
         { 
-          matchId: match._id,
-          userId: refereeId,
-          status: newStatus.key,
-          refAdmin: true,
-          position: temporaryReferee1 ? 1 : temporaryReferee2 ? 2 : 1
-        } :
-        { 
-          status: newStatus.key,
-          refAdmin: true,
-          position: temporaryReferee1 ? 1 : temporaryReferee2 ? 2 : 1
+          status: assignmentSelect.status,
+          refAdmin: assignmentSelect.refAdmin,
+          position: assignmentSelect.position
         };
 
       console.log("enpoint", endpoint)

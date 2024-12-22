@@ -51,11 +51,19 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox value={assignments.find(a => a.referee === displayedReferee) || null} onChange={(assignment: AssignmentValues | null) => {
-      if (assignment) {
-        setDisplayedReferee(assignment.referee);
-        onRefereeChange(assignment.referee);
-      }
+    <Listbox value={assignments.find(a => a.referee === displayedReferee) || null} 
+      onChange={(assignment: AssignmentValues | null) => {
+        if (assignment) {
+          const assignmentSelect: AssignmentSelect = {
+            matchId: matchId,
+            userId: assignment.referee.userId,
+            status: assignment.status,
+            refAdmin: true,
+            position: position
+          };
+          setDisplayedReferee(assignment.referee);
+          onRefereeChange(assignment.referee);
+        }
     }}>
       {({ open }) => (
         <>
