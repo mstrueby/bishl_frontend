@@ -83,7 +83,11 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
               ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
             );
             if (filteredAssignments.length > 0) {
-              acc[matches[index]._id] = filteredAssignments as AssignmentValues[];
+              acc[matches[index]._id] = filteredAssignments.map(assignment => ({
+                ...assignment,
+                refAdmin: true,
+                position: assignment.position || 1
+              })) as AssignmentValues[];
             }
           }
           return acc;
@@ -177,7 +181,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
         );
         if (filteredAssignments.length > 0) {
-          acc[matches[index]._id] = filteredAssignments as AssignmentValues[];
+          acc[matches[index]._id] = filteredAssignments.map(assignment => ({
+                ...assignment,
+                refAdmin: true,
+                position: assignment.position || 1
+              })) as AssignmentValues[];
         }
       }
       return acc;
