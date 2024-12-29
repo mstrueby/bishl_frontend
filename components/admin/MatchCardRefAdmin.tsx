@@ -2,11 +2,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
+import { AssignmentSelect } from '../../types/AssignmentSelect';
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;
@@ -99,31 +102,21 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
     setAssignmentStatuses(initialStatuses);
   }, [assignments]);
 
-  const updateAssignmentStatus = async (refereeId: string, newStatus: typeof allStatuses[0], jwt: string) => {
+  const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     try {
-      const existingAssignment = assignments.find(a => a.referee.userId === refereeId);
-      const method = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ? 'POST' : 'PATCH';
-      const endpoint = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ?
-        `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
-        `${process.env.NEXT_PUBLIC_API_URL}/assignments/${existingAssignment._id}`;
+      //const existingAssignment = assignments.find(a => a.referee.userId === refereeId);
+      const method = assignment?._id ? 'PATCH' : 'POST';
+      const endpoint = `${BASE_URL}/assignments${assignment?._id ? `/${assignment._id}` : ''}`;
 
-      const assignmentSelect: AssignmentSelect = {
-        matchId: match._id,
-        userId: refereeId,
-        status: newStatus.key,
+      const body = {
+        matchId: assignment.matchId,
+        userId: assignment.referee.userId,
+        status: 'ASSIGNED',
         refAdmin: true,
-        position: temporaryReferee1 ? 1 : temporaryReferee2 ? 2 : 1
+        position: position
       };
 
-      const body = (!existingAssignment || existingAssignment.status === 'AVAILABLE') ?
-        assignmentSelect :
-        { 
-          status: assignmentSelect.status,
-          refAdmin: assignmentSelect.refAdmin,
-          position: assignmentSelect.position
-        };
-
-      console.log("enpoint", endpoint)
+      {console.log("enpoint", endpoint)}
       {console.log('JWT: ', jwt)}
       {console.log('Body: ', body)}
 
@@ -246,12 +239,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 matchId={match._id}
                 position={1}
                 jwt={jwt}
-                onConfirm={(jwt) => {
-                  if (temporaryReferee1) {
-                    updateAssignmentStatus(temporaryReferee1._id, allStatuses.find(s => s.key === 'ASSIGNED') || allStatuses[0], jwt);
-                    setTemporaryReferee1(null);
-                  }
-                }}
+                onConfirm={updateAssignmentStatus}
                 onCancel={() => {
                   setTemporaryReferee1(null);
                 }}

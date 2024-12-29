@@ -4,6 +4,7 @@ import { UserValues } from '../../types/UserValues';
 import { Referee } from '../../types/MatchValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { AssignmentValues } from '../../types/AssignmentValues';
+import { AssignmentSelect } from '../../types/AssignmentSelect';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -16,7 +17,7 @@ interface RefereeSelectProps {
   matchId: string;
   position: number;
   jwt: string;
-  onConfirm: (jwt: string) => void;
+  onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => void;
   onCancel: () => void;
   temporarySelection: Referee | null;
 }
@@ -33,6 +34,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
 }) => {
   const [selectedReferee, setselectedReferee] = useState<Referee | null>(propSelectedReferee);
   const [displayedReferee, setDisplayedReferee] = useState<Referee | null>(propSelectedReferee);
+  const [selected, setSelected] = useState<AssignmentValues | null>(null);
 
   useEffect(() => {
     setselectedReferee(propSelectedReferee);
@@ -51,28 +53,17 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox value={assignments.find(a => a.referee === displayedReferee) || null} 
-      onChange={(assignment: AssignmentValues | null) => {
-        if (assignment) {
-          const assignmentSelect: AssignmentSelect = {
-            matchId: matchId,
-            userId: assignment.referee.userId,
-            status: assignment.status,
-            refAdmin: true,
-            position: position
-          };
-          setDisplayedReferee(assignment.referee);
-          onRefereeChange(assignment.referee);
-        }
-    }}>
+    <Listbox value={selected} 
+      onChange={setSelected}
+    >
       {({ open }) => (
         <>
          {/*<Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Wettbewerb:</Listbox.Label>*/}
           <div className="relative mt-2 mb-4 flex gap-2">
             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
               <span className="flex items-center">
-                {displayedReferee ? (
-                  <span className="ml-3 block truncate">{displayedReferee.firstName} {displayedReferee.lastName}</span>
+                {selected ? (
+                  <span className="ml-3 block truncate">{selected.referee.firstName} {selected.referee.lastName}</span>
                 ) : (
                   <Placeholder />
                 )}
@@ -82,16 +73,16 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               </span>
             </Listbox.Button>
 
-            {temporarySelection && (
+            {selected && (
               <div className="flex gap-2">
                 <button
-                  onClick={() => onConfirm(jwt)}
+                  onClick={() => onConfirm(jwt, selected, position)}
                   className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
                   <CheckIcon className="h-5 w-5 text-green-600" aria-hidden="true" />
                 </button>
                 <button
-                  onClick={onCancel}
+                  onClick={() => setSelected(null)}
                   className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
                   <XMarkIcon className="h-5 w-5 text-red-600" aria-hidden="true" />

@@ -131,9 +131,10 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
       />
 
       <ul>
-        {console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
+        {/*console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
         {matches && matches.length > 0 ? (
           matches.map((match: Match) => {
+            {console.log('Match Assignments:', matchAssignments[match._id])}
             return (
               <MatchCardRefAdmin
                 key={match._id}
@@ -153,7 +154,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let matches = null;
+  let matches: Match[] = null;
   let assignments = null;
   const currentDate = new Date().toISOString().split('T')[0];
 
