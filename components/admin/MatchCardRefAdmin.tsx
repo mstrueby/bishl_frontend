@@ -228,11 +228,15 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                   'No assignment found' 
                 }</div>
                 <div>{assignments.find(a => a.referee.userId === referee2?.userId)?.status}</div>
-                <svg className={`h-2 w-2 ${allStatuses.find(
-                  status => status.key === assignments.find(
-                    a => a.referee.userId === referee2?.userId)?.status)?.color.dot}`} viewBox="0 0 8 8">
-                  <circle cx="4" cy="4" r="4" />
-                </svg>
+                {(() => {
+                  const referee2Assignment = assignments.find(a => a.referee.userId === referee2?.userId);
+                  const statusColor = allStatuses.find(status => status.key === referee2Assignment?.status)?.color.dot;
+                  return (
+                    <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
+                      <circle cx="4" cy="4" r="4" />
+                    </svg>
+                  );
+                })()}
                 <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
                   {referee2.firstName.charAt(0)}{referee2.lastName.charAt(0)}
                 </div>
