@@ -2,8 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
-import { AssignmentSelect } from '../../types/AssignmentSelect';
-import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
+import { Referee } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
@@ -13,9 +12,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;
-  const [referee1, setReferee1] = useState(match.referee1);
-  const [referee2, setReferee2] = useState(match.referee2);
-
+  const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
+  const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
+  
   const allStatuses = [
     {
       key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
@@ -91,19 +90,6 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
     }
   }
 
-  const [assignmentStatuses, setAssignmentStatuses] = useState<{[key: string]: typeof allStatuses[0]}>({});
-  const [selected, setSelected] = useState<typeof allStatuses[0]>(allStatuses[0]);
-  const [temporaryReferee1, setTemporaryReferee1] = useState<any>(null);
-  const [temporaryReferee2, setTemporaryReferee2] = useState<any>(null);
-
-  useEffect(() => {
-    const initialStatuses = {};
-    assignments.forEach(assignment => {
-      initialStatuses[assignment.referee.userId] = allStatuses.find(s => s.key === assignment.status) || allStatuses[0];
-    });
-    setAssignmentStatuses(initialStatuses);
-  }, [assignments]);
-
   const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     try {
       //const existingAssignment = assignments.find(a => a.referee.userId === refereeId);
@@ -138,22 +124,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
       }
     } catch (error) {
       console.error('Error updating assignment:', error);
-      setSelected(selected); // Revert on error
     }
   }
-
-  const handleStatusChange = (newStatus: typeof selected) => {
-    setSelected(newStatus);
-    updateAssignmentStatus(newStatus.key, newStatus, jwt); // Pass the refereeId as well
-  };
-
-  const validStatuses = useMemo(() => {
-    const validKeys = getValidTransitions(selected.key);
-    return allStatuses.filter(status =>
-      validKeys.includes(status.key)
-    );
-  }, [selected.key]);
-
 
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">

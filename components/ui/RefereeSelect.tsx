@@ -15,7 +15,7 @@ interface RefereeSelectProps {
   position: number;
   jwt: string;
   onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => Promise<void>;
-  onAssignmentComplete: (referee: { firstName: string; lastName: string }) => void;
+  onAssignmentComplete: (referee: Referee) => void;
 }
 const RefereeSelect: React.FC<RefereeSelectProps> = ({ 
   assignments,
