@@ -12,9 +12,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;
-  const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
+  const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
-  
+
   const allStatuses = [
     {
       key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
@@ -104,9 +104,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         position: position
       };
 
-      {console.log("enpoint", endpoint)}
-      {console.log('JWT: ', jwt)}
-      {console.log('Body: ', body)}
+      { console.log("enpoint", endpoint) }
+      { console.log('JWT: ', jwt) }
+      { console.log('Body: ', body) }
 
       const response = await fetch(endpoint, {
         method,
@@ -198,11 +198,11 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         <div className="flex flex-col space-y-2">
           <div className="w-full">
             {referee1 ? (
-              <div className="py-1.5 px-3 rounded-md bg-gray-50 text-sm text-gray-900">
+              <div className="py-1.5 px-3 rounded-md text-sm text-gray-900">
                 {referee1.firstName} {referee1.lastName}
               </div>
             ) : (
-              <RefereeSelect 
+              <RefereeSelect
                 assignments={assignments.filter(a => !referee2 || a.referee.userId !== referee2.userId)}
                 position={1}
                 jwt={jwt}
@@ -213,11 +213,33 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
           </div>
           <div className="w-full">
             {referee2 ? (
-              <div className="py-1.5 px-3 rounded-md bg-gray-50 text-sm text-gray-900">
+              <div className="py-1.5 px-3 text-sm text-gray-700 flex items-center gap-x-4">
+                
+                <ul>
+                  {assignments.map(assignment => (
+                    <li key={assignment._id}>
+                      {`Referee: ${assignment.referee.firstName} ${assignment.referee.lastName}, Status: ${assignment.status}`}
+                    </li>
+                  ))}
+                </ul>
+                
+                <div>{assignments.filter(a => a.referee.userId === referee2.userId).length > 0 ? 
+                  JSON.stringify(assignments.filter(a => a.referee.userId === referee2.userId)) :
+                  'No assignment found' 
+                }</div>
+                <div>{assignments.find(a => a.referee.userId === referee2?.userId)?.status}</div>
+                <svg className={`h-2 w-2 ${allStatuses.find(
+                  status => status.key === assignments.find(
+                    a => a.referee.userId === referee2?.userId)?.status)?.color.dot}`} viewBox="0 0 8 8">
+                  <circle cx="4" cy="4" r="4" />
+                </svg>
+                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  {referee2.firstName.charAt(0)}{referee2.lastName.charAt(0)}
+                </div>
                 {referee2.firstName} {referee2.lastName}
               </div>
             ) : (
-              <RefereeSelect 
+              <RefereeSelect
                 assignments={assignments.filter(a => !referee1 || a.referee.userId !== referee1.userId)}
                 position={2}
                 jwt={jwt}
