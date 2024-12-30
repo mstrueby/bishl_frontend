@@ -229,11 +229,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                assignments={assignments.filter(a => !match.referee2 || a.referee.userId !== match.referee2.userId)}
+                assignments={assignments}
                 position={1}
                 jwt={jwt}
                 onConfirm={updateAssignmentStatus}
-                onAssignmentComplete={() => window.location.reload()}
               />
             )}
           </div>
@@ -244,11 +243,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                assignments={assignments.filter(a => !match.referee1 || a.referee.userId !== match.referee1.userId)}
+                assignments={assignments}
                 position={2}
                 jwt={jwt}
                 onConfirm={updateAssignmentStatus}
-                onAssignmentComplete={() => window.location.reload()}
               />
             )}
           </div>
