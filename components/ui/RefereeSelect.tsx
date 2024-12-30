@@ -1,3 +1,4 @@
+
 import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { UserValues } from '../../types/UserValues';
@@ -14,17 +15,26 @@ interface RefereeSelectProps {
   assignments: AssignmentValues[];
   position: number;
   jwt: string;
-  onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => void;
+  onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => Promise<void>;
+  onAssignmentComplete: () => void;
 }
+
 const RefereeSelect: React.FC<RefereeSelectProps> = ({ 
   assignments,
   position,
   jwt,
-  onConfirm
+  onConfirm,
+  onAssignmentComplete
 }) => {
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
 
-  // Placeholder component for the listbox
+  const handleConfirm = async () => {
+    if (selected) {
+      await onConfirm(jwt, selected, position);
+      onAssignmentComplete();
+    }
+  };
+
   const Placeholder = () => (
     <span className="block truncate text-gray-400">(auswählen)</span>
   );
@@ -35,7 +45,6 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
     >
       {({ open }) => (
         <>
-         {/*<Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Wettbewerb:</Listbox.Label>*/}
           <div className="relative mt-2 mb-4 flex gap-2">
             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
               <span className="flex items-center">
@@ -53,7 +62,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
             {selected && (
               <div className="flex gap-2">
                 <button
-                  onClick={() => onConfirm(jwt, selected, position)}
+                  onClick={handleConfirm}
                   className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
                   <CheckIcon className="h-5 w-5 text-green-600" aria-hidden="true" />
@@ -127,4 +136,5 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
     </Listbox>
   );
 };
+
 export default RefereeSelect;
