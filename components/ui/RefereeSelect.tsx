@@ -21,7 +21,8 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   assignments,
   position,
   jwt,
-  onConfirm
+  onConfirm,
+  onAssignmentComplete
 }) => {
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
 
