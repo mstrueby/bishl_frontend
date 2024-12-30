@@ -11,41 +11,18 @@ function classNames(...classes: string[]) {
 }
 
 interface RefereeSelectProps {
-  selectedReferee: Referee | null;
-  onRefereeChange: (referee: Referee) => void;
   assignments: AssignmentValues[];
-  matchId: string;
   position: number;
   jwt: string;
   onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => void;
-  onCancel: () => void;
-  temporarySelection: Referee | null;
 }
 const RefereeSelect: React.FC<RefereeSelectProps> = ({ 
-  selectedReferee: propSelectedReferee,
-  onRefereeChange,
   assignments,
-  matchId,
   position,
   jwt,
-  temporarySelection,
-  onConfirm,
-  onCancel
+  onConfirm
 }) => {
-  const [selectedReferee, setselectedReferee] = useState<Referee | null>(propSelectedReferee);
-  const [displayedReferee, setDisplayedReferee] = useState<Referee | null>(propSelectedReferee);
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
-
-  useEffect(() => {
-    setselectedReferee(propSelectedReferee);
-    setDisplayedReferee(propSelectedReferee);
-  }, [propSelectedReferee]);
-
-  useEffect(() => {
-    if (!temporarySelection) {
-      setDisplayedReferee(null);
-    }
-  }, [temporarySelection]);
 
   // Placeholder component for the listbox
   const Placeholder = () => (

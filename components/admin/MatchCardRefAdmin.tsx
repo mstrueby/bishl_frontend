@@ -229,21 +229,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                selectedReferee={match.referee1 || null}
-                onRefereeChange={(referee) => {
-                  if (referee) {
-                    setTemporaryReferee1(referee);
-                  }
-                }}
                 assignments={assignments}
-                matchId={match._id}
                 position={1}
                 jwt={jwt}
                 onConfirm={updateAssignmentStatus}
-                onCancel={() => {
-                  setTemporaryReferee1(null);
-                }}
-                temporarySelection={temporaryReferee1}
               />
             )}
           </div>
@@ -254,26 +243,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect 
-                selectedReferee={match.referee2 || null}
-                onRefereeChange={(referee) => {
-                  if (referee) {
-                    setTemporaryReferee2(referee);
-                  }
-                }}
                 assignments={assignments}
-                matchId={match._id}
                 position={2}
                 jwt={jwt}
-                onConfirm={(jwt) => {
-                  if (temporaryReferee2) {
-                    updateAssignmentStatus(temporaryReferee2._id, allStatuses.find(s => s.key === 'ASSIGNED') || allStatuses[0], jwt);
-                    setTemporaryReferee2(null);
-                  }
-                }}
-                onCancel={() => {
-                  setTemporaryReferee2(null);
-                }}
-                temporarySelection={temporaryReferee2}
+                onConfirm={updateAssignmentStatus}
               />
             )}
           </div>
