@@ -13,6 +13,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;
+  const [referee1, setReferee1] = useState(match.referee1);
+  const [referee2, setReferee2] = useState(match.referee2);
 
   const allStatuses = [
     {
@@ -223,30 +225,32 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="flex flex-col space-y-2">
           <div className="w-full">
-            {match.referee1 ? (
+            {referee1 ? (
               <div className="py-1.5 px-3 rounded-md bg-gray-50 text-sm text-gray-900">
-                {match.referee1.firstName} {match.referee1.lastName}
+                {referee1.firstName} {referee1.lastName}
               </div>
             ) : (
               <RefereeSelect 
-                assignments={assignments}
+                assignments={assignments.filter(a => !referee2 || a.referee.userId !== referee2.userId)}
                 position={1}
                 jwt={jwt}
                 onConfirm={updateAssignmentStatus}
+                onAssignmentComplete={setReferee1}
               />
             )}
           </div>
           <div className="w-full">
-            {match.referee2 ? (
+            {referee2 ? (
               <div className="py-1.5 px-3 rounded-md bg-gray-50 text-sm text-gray-900">
-                {match.referee2.firstName} {match.referee2.lastName}
+                {referee2.firstName} {referee2.lastName}
               </div>
             ) : (
               <RefereeSelect 
-                assignments={assignments}
+                assignments={assignments.filter(a => !referee1 || a.referee.userId !== referee1.userId)}
                 position={2}
                 jwt={jwt}
                 onConfirm={updateAssignmentStatus}
+                onAssignmentComplete={setReferee2}
               />
             )}
           </div>
