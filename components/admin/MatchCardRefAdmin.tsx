@@ -103,6 +103,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         position: position
       };
 
+      { console.log("enpoint", endpoint) }
+      { console.log('JWT: ', jwt) }
+      { console.log('Body: ', body) }
+      
       const response = await fetch(endpoint, {
         method,
         headers: {
