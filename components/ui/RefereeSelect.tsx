@@ -57,7 +57,8 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                 <button
                   onClick={async () => {
                     if (selected) {
-                      await onConfirm(jwt, selected, position);
+                      const assignedRef = { ...selected, status: 'ASSIGNED' };
+                      await onConfirm(jwt, assignedRef, position);
                       onAssignmentComplete(selected.referee);
                     }
                   }}
