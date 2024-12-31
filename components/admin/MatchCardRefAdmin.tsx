@@ -92,7 +92,6 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
   const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     try {
-      //const existingAssignment = assignments.find(a => a.referee.userId === refereeId);
       const method = assignment?._id ? 'PATCH' : 'POST';
       const endpoint = `${BASE_URL}/assignments${assignment?._id ? `/${assignment._id}` : ''}`;
 
@@ -104,10 +103,6 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         position: position
       };
 
-      { console.log("enpoint", endpoint) }
-      { console.log('JWT: ', jwt) }
-      { console.log('Body: ', body) }
-
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -117,11 +112,17 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         body: JSON.stringify(body)
       });
 
-      console.log('Response:', response)
-
       if (!response.ok) {
         throw new Error('Failed to update assignment status');
       }
+
+      // Update the local assignments array with the new status
+      const updatedAssignments = assignments.map(a => 
+        a.referee.userId === assignment.referee.userId 
+          ? { ...a, status: 'ASSIGNED' }
+          : a
+      );
+      assignments.splice(0, assignments.length, ...updatedAssignments);
     } catch (error) {
       console.error('Error updating assignment:', error);
     }
