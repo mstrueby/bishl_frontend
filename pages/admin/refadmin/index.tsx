@@ -59,7 +59,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         const assignmentPromises = matches.map((match: Match) =>
           axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
             params: {
-              assignmentStatus: ['AVAILABLE', 'REQUESTED']
+              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED']
             },
             headers: { Authorization: `Bearer ${jwt}` }
           }).then(response => {
@@ -78,7 +78,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
           if (result && Array.isArray(result.data)) {
             // Only include AVAILABLE and REQUESTED assignments
             const filteredAssignments = result.data.filter(assignment =>
-              ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
+              ['AVAILABLE', 'REQUESTED', 'ASSIGNED'].includes(assignment.status)
             );
             if (filteredAssignments.length > 0) {
               acc[matches[index]._id] = filteredAssignments.map(assignment => ({
@@ -132,7 +132,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         {/*console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
         {matches && matches.length > 0 ? (
           matches.map((match: Match) => {
-            {/*console.log('Match Assignments:', matchAssignments[match._id])*/}
+            {console.log('Match Assignments:', matchAssignments[match._id])}
             return (
               <MatchCardRefAdmin
                 key={match._id}
@@ -167,7 +167,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const assignmentPromises = matches.map((match: Match) =>
       axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
         params: {
-          assignmentStatus: ['AVAILABLE', 'REQUESTED']
+          assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED']
         },
         headers: { Authorization: `Bearer ${jwt}` }
       })
@@ -177,7 +177,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       if (result && Array.isArray((result as any).data)) {
         // Only include AVAILABLE and REQUESTED assignments
         const filteredAssignments = result.data.filter((assignment: AssignmentValues) =>
-          ['AVAILABLE', 'REQUESTED'].includes(assignment.status)
+          ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED'].includes(assignment.status)
         );
         if (filteredAssignments.length > 0) {
           acc[matches[index]._id] = filteredAssignments.map(assignment => ({

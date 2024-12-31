@@ -57,7 +57,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         ring: 'ring-green-600/20',
         hover: 'hover:bg-green-100',
         focus: 'focus-visible:outline-green-600/20',
-        dot: 'fill-green-500'
+        dot: 'fill-green-400'
       }
     },
     {
@@ -68,7 +68,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         ring: 'ring-green-100',
         hover: 'hover:bg-green-100',
         focus: 'focus-visible:outline-green-100',
-        dot: 'fill-green-600'
+        dot: 'fill-green-500'
       }
     },
   ]
@@ -194,11 +194,23 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         </div>
       </div>
       {/* 3 Referee Select Panel */}
-      <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
-        <div className="flex flex-col space-y-2">
+      <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6 border-t sm:border-0">
+        <div className="flex flex-col">
           <div className="w-full">
             {referee1 ? (
-              <div className="py-1.5 px-3 rounded-md text-sm text-gray-900">
+              <div className="py-1.5 px-3 text-sm text-gray-700 flex items-center gap-x-4 pt-4">
+                {(() => {
+                  const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
+                  const statusColor = allStatuses.find(status => status.key === referee1Assignment?.status)?.color.dot;
+                  return (
+                    <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
+                      <circle cx="4" cy="4" r="4" />
+                    </svg>
+                  );
+                })()}
+                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  {referee1.firstName.charAt(0)}{referee1.lastName.charAt(0)}
+                </div>
                 {referee1.firstName} {referee1.lastName}
               </div>
             ) : (
@@ -214,20 +226,6 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
           <div className="w-full">
             {referee2 ? (
               <div className="py-1.5 px-3 text-sm text-gray-700 flex items-center gap-x-4">
-                
-                <ul>
-                  {assignments.map(assignment => (
-                    <li key={assignment._id}>
-                      {`Referee: ${assignment.referee.firstName} ${assignment.referee.lastName}, Status: ${assignment.status}`}
-                    </li>
-                  ))}
-                </ul>
-                
-                <div>{assignments.filter(a => a.referee.userId === referee2.userId).length > 0 ? 
-                  JSON.stringify(assignments.filter(a => a.referee.userId === referee2.userId)) :
-                  'No assignment found' 
-                }</div>
-                <div>{assignments.find(a => a.referee.userId === referee2?.userId)?.status}</div>
                 {(() => {
                   const referee2Assignment = assignments.find(a => a.referee.userId === referee2?.userId);
                   const statusColor = allStatuses.find(status => status.key === referee2Assignment?.status)?.color.dot;
