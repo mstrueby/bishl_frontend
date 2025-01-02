@@ -98,7 +98,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
       const body = {
         matchId: assignment.matchId,
         userId: assignment.referee.userId,
-        status: 'ASSIGNED',
+        status: assignment.status,
         refAdmin: true,
         position: position
       };
