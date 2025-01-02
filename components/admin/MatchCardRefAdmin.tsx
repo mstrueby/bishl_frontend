@@ -225,12 +225,11 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 1);
                       setReferee1(null);
                     } else if (assignment) {
-                      const updatedAssignments = assignments.map(a => 
-                        a.referee.userId === referee1.userId 
-                          ? { ...a, status: 'CONFIRM_DELETE' }
-                          : a
-                      );
-                      assignments.splice(0, assignments.length, ...updatedAssignments);
+                      const updatedAssignment = assignments.find(a => a.referee.userId === referee1.userId);
+                      if (updatedAssignment) {
+                        updatedAssignment.status = 'CONFIRM_DELETE';
+                        setReferee1({...referee1}); // Force re-render
+                      }
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
@@ -277,12 +276,11 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 2);
                       setReferee2(null);
                     } else if (assignment) {
-                      const updatedAssignments = assignments.map(a => 
-                        a.referee.userId === referee2.userId 
-                          ? { ...a, status: 'CONFIRM_DELETE' }
-                          : a
-                      );
-                      assignments.splice(0, assignments.length, ...updatedAssignments);
+                      const updatedAssignment = assignments.find(a => a.referee.userId === referee2.userId);
+                      if (updatedAssignment) {
+                        updatedAssignment.status = 'CONFIRM_DELETE';
+                        setReferee2({...referee2}); // Force re-render
+                      }
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
