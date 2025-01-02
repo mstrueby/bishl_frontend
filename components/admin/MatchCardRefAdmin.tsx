@@ -14,6 +14,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const { home, away, startDate, venue } = match;
   const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
+  const [deleteConfirmationMap, setDeleteConfirmationMap] = useState<{[key: string]: boolean}>({});
 
   const allStatuses = [
     {
@@ -221,20 +222,17 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 <button
                   onClick={async () => {
                     const assignment = assignments.find(a => a.referee.userId === referee1.userId);
-                    if (assignment && assignment.status === 'CONFIRM_DELETE') {
+                    if (assignment && deleteConfirmationMap[referee1.userId]) {
                       await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 1);
                       setReferee1(null);
+                      setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: false}));
                     } else if (assignment) {
-                      const updatedAssignment = assignments.find(a => a.referee.userId === referee1.userId);
-                      if (updatedAssignment) {
-                        updatedAssignment.status = 'CONFIRM_DELETE';
-                        setReferee1({...referee1}); // Force re-render
-                      }
+                      setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: true}));
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
                 >
-                  {assignments.find(a => a.referee.userId === referee1.userId)?.status === 'CONFIRM_DELETE' ? (
+                  {deleteConfirmationMap[referee1.userId] ? (
                     <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-500" aria-hidden="true" />
                   ) : (
                     <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
@@ -272,20 +270,17 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 <button
                   onClick={async () => {
                     const assignment = assignments.find(a => a.referee.userId === referee2.userId);
-                    if (assignment && assignment.status === 'CONFIRM_DELETE') {
+                    if (assignment && deleteConfirmationMap[referee2.userId]) {
                       await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 2);
                       setReferee2(null);
+                      setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: false}));
                     } else if (assignment) {
-                      const updatedAssignment = assignments.find(a => a.referee.userId === referee2.userId);
-                      if (updatedAssignment) {
-                        updatedAssignment.status = 'CONFIRM_DELETE';
-                        setReferee2({...referee2}); // Force re-render
-                      }
+                      setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: true}));
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
                 >
-                  {assignments.find(a => a.referee.userId === referee2.userId)?.status === 'CONFIRM_DELETE' ? (
+                  {deleteConfirmationMap[referee2.userId] ? (
                     <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-500" aria-hidden="true" />
                   ) : (
                     <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
