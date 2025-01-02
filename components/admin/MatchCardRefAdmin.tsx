@@ -15,6 +15,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
   const [deleteConfirmationMap, setDeleteConfirmationMap] = useState<{[key: string]: boolean}>({});
+  const timeoutRef = React.useRef<{[key: string]: NodeJS.Timeout}>({});
 
   const allStatuses = [
     {
@@ -228,6 +229,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: false}));
                     } else if (assignment) {
                       setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: true}));
+                      if (timeoutRef.current[referee1.userId]) {
+                        clearTimeout(timeoutRef.current[referee1.userId]);
+                      }
+                      timeoutRef.current[referee1.userId] = setTimeout(() => {
+                        setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: false}));
+                      }, 5000);
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
@@ -276,6 +283,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: false}));
                     } else if (assignment) {
                       setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: true}));
+                      if (timeoutRef.current[referee2.userId]) {
+                        clearTimeout(timeoutRef.current[referee2.userId]);
+                      }
+                      timeoutRef.current[referee2.userId] = setTimeout(() => {
+                        setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: false}));
+                      }, 5000);
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
