@@ -132,7 +132,6 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         {/*console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
         {matches && matches.length > 0 ? (
           matches.map((match: Match) => {
-            {console.log('Match Assignments:', matchAssignments[match._id])}
             return (
               <MatchCardRefAdmin
                 key={match._id}

@@ -26,7 +26,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
 
   return (
     <div className="border-b border-gray-200 mb-6 flex items-center justify-between">
-      <h2 className="my-4 text-2xl font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+      <h2 className="my-4 text-2xl font-bold text-gray-900 truncate sm:text-3xl sm:tracking-tight">
         {title}
       </h2>
       <div className="flex lg:ml-4">
