@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { Referee } from '../../types/MatchValues';
-import { CalendarIcon, MapPinIcon, XCircleIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
@@ -234,13 +235,13 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       }
                       timeoutRef.current[referee1.userId] = setTimeout(() => {
                         setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: false}));
-                      }, 5000);
+                      }, 3000);
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
                 >
                   {deleteConfirmationMap[referee1.userId] ? (
-                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-500" aria-hidden="true" />
+                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
                   ) : (
                     <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
                   )}
@@ -288,13 +289,13 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       }
                       timeoutRef.current[referee2.userId] = setTimeout(() => {
                         setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: false}));
-                      }, 5000);
+                      }, 3000);
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
                 >
                   {deleteConfirmationMap[referee2.userId] ? (
-                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-500" aria-hidden="true" />
+                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
                   ) : (
                     <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
                   )}
