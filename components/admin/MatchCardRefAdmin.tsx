@@ -15,8 +15,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const { home, away, startDate, venue } = match;
   const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
-  const [deleteConfirmationMap, setDeleteConfirmationMap] = useState<{[key: string]: boolean}>({});
-  const timeoutRef = React.useRef<{[key: string]: NodeJS.Timeout}>({});
+  const [deleteConfirmationMap, setDeleteConfirmationMap] = useState<{ [key: string]: boolean }>({});
+  const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const allStatuses = [
     {
@@ -108,7 +108,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
       { console.log("enpoint", endpoint) }
       { console.log('Body: ', body) }
-      
+
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -123,8 +123,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
       }
 
       // Update the local assignments array with the new status
-      const updatedAssignments = assignments.map(a => 
-        a.referee.userId === assignment.referee.userId 
+      const updatedAssignments = assignments.map(a =>
+        a.referee.userId === assignment.referee.userId
           ? { ...a, status: assignment.status }
           : a
       );
@@ -184,136 +184,137 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         </div>
       </div>
       {/* 2  scores */}
-      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/2">
+      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/3">
         {/* home */}
         <div className="flex flex-row items-center w-full">
           <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={32} width={32} />
           <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{home.fullName}</p>
+            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{home.shortName}</p>
           </div>
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
           <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
           <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.fullName}</p>
+            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.shortName}</p>
           </div>
         </div>
       </div>
       {/* 3 Referee Select Panel */}
-      <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6 border-t sm:border-0">
-        <div className="flex flex-col">
-          <div className="w-full">
-            {referee1 ? (
-              <div className="py-1.5 px-3 text-sm text-gray-700 flex items-center justify-between pt-4">
-                <div className="flex items-center gap-x-4">
-                  {(() => {
-                    const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
-                    const statusColor = allStatuses.find(status => status.key === referee1Assignment?.status)?.color.dot;
-                    return (
-                      <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="4" />
-                      </svg>
-                    );
-                  })()}
-                  <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    {referee1.firstName.charAt(0)}{referee1.lastName.charAt(0)}
-                  </div>
+      <div className="flex flex-col justify-between mt-3 sm:mt-0 pt-2 sm:pt-0 gap-y-2 sm:w-1/3 md:w-1/3 border-t sm:border-0">
+        {/* referee 1 (assigned or select box) */}
+        <div className="w-full">
+          {referee1 ? (
+            <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
+              {/** status indicator, avatar, name */}
+              <div className="flex items-center gap-x-4">
+                {(() => {
+                  const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
+                  const statusColor = allStatuses.find(status => status.key === referee1Assignment?.status)?.color.dot;
+                  return (
+                    <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
+                      <circle cx="4" cy="4" r="4" />
+                    </svg>
+                  );
+                })()}
+                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  {referee1.firstName.charAt(0)}{referee1.lastName.charAt(0)}
+                </div>
+                <span>
                   {referee1.firstName} {referee1.lastName}
-                </div>
-                <button
-                  onClick={async () => {
-                    const assignment = assignments.find(a => a.referee.userId === referee1.userId);
-                    if (assignment && deleteConfirmationMap[referee1.userId]) {
-                      await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 1);
-                      setReferee1(null);
-                      setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: false}));
-                    } else if (assignment) {
-                      setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: true}));
-                      if (timeoutRef.current[referee1.userId]) {
-                        clearTimeout(timeoutRef.current[referee1.userId]);
-                      }
-                      timeoutRef.current[referee1.userId] = setTimeout(() => {
-                        setDeleteConfirmationMap(prev => ({...prev, [referee1.userId]: false}));
-                      }, 3000);
-                    }
-                  }}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  {deleteConfirmationMap[referee1.userId] ? (
-                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                  ) : (
-                    <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
-                  )}
-                </button>
+                </span>
               </div>
-            ) : (
-              <RefereeSelect
-                assignments={assignments.filter(a => !referee2 || a.referee.userId !== referee2.userId)}
-                position={1}
-                jwt={jwt}
-                onConfirm={updateAssignmentStatus}
-                onAssignmentComplete={setReferee1}
-              />
-            )}
-          </div>
-          <div className="w-full">
-            {referee2 ? (
-              <div className="py-1.5 px-3 text-sm text-gray-700 flex items-center justify-between">
-                <div className="flex items-center gap-x-4">
-                  {(() => {
-                    const referee2Assignment = assignments.find(a => a.referee.userId === referee2?.userId);
-                    const statusColor = allStatuses.find(status => status.key === referee2Assignment?.status)?.color.dot;
-                    return (
-                      <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="4" />
-                      </svg>
-                    );
-                  })()}
-                  <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    {referee2.firstName.charAt(0)}{referee2.lastName.charAt(0)}
-                  </div>
-                  {referee2.firstName} {referee2.lastName}
-                </div>
-                <button
-                  onClick={async () => {
-                    const assignment = assignments.find(a => a.referee.userId === referee2.userId);
-                    if (assignment && deleteConfirmationMap[referee2.userId]) {
-                      await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 2);
-                      setReferee2(null);
-                      setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: false}));
-                    } else if (assignment) {
-                      setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: true}));
-                      if (timeoutRef.current[referee2.userId]) {
-                        clearTimeout(timeoutRef.current[referee2.userId]);
-                      }
-                      timeoutRef.current[referee2.userId] = setTimeout(() => {
-                        setDeleteConfirmationMap(prev => ({...prev, [referee2.userId]: false}));
-                      }, 3000);
+              {/** unassign button */}
+              <button
+                onClick={async () => {
+                  const assignment = assignments.find(a => a.referee.userId === referee1.userId);
+                  if (assignment && deleteConfirmationMap[referee1.userId]) {
+                    await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
+                    setReferee1(null);
+                    setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
+                  } else if (assignment) {
+                    setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: true }));
+                    if (timeoutRef.current[referee1.userId]) {
+                      clearTimeout(timeoutRef.current[referee1.userId]);
                     }
-                  }}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  {deleteConfirmationMap[referee2.userId] ? (
-                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                  ) : (
-                    <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
-                  )}
-                </button>
-              </div>
-            ) : (
-              <RefereeSelect
-                assignments={assignments.filter(a => !referee1 || a.referee.userId !== referee1.userId)}
-                position={2}
-                jwt={jwt}
-                onConfirm={updateAssignmentStatus}
-                onAssignmentComplete={setReferee2}
-              />
-            )}
-          </div>
+                    timeoutRef.current[referee1.userId] = setTimeout(() => {
+                      setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
+                    }, 3000);
+                  }
+                }}
+                className="text-red-500 hover:text-red-700"
+              >
+                {deleteConfirmationMap[referee1.userId] ? (
+                  <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                ) : (
+                  <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          ) : (
+            <RefereeSelect
+              assignments={assignments.filter(a => !referee2 || a.referee.userId !== referee2.userId)}
+              position={1}
+              jwt={jwt}
+              onConfirm={updateAssignmentStatus}
+              onAssignmentComplete={setReferee1}
+            />
+          )}
         </div>
-        <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-
+        {/* referee 2 (assigned or select box) */}
+        <div className="w-full">
+          {referee2 ? (
+            <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
+              <div className="flex items-center gap-x-4">
+                {(() => {
+                  const referee2Assignment = assignments.find(a => a.referee.userId === referee2?.userId);
+                  const statusColor = allStatuses.find(status => status.key === referee2Assignment?.status)?.color.dot;
+                  return (
+                    <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
+                      <circle cx="4" cy="4" r="4" />
+                    </svg>
+                  );
+                })()}
+                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  {referee2.firstName.charAt(0)}{referee2.lastName.charAt(0)}
+                </div>
+                {referee2.firstName} {referee2.lastName}
+              </div>
+              <button
+                onClick={async () => {
+                  const assignment = assignments.find(a => a.referee.userId === referee2.userId);
+                  if (assignment && deleteConfirmationMap[referee2.userId]) {
+                    await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 2);
+                    setReferee2(null);
+                    setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
+                  } else if (assignment) {
+                    setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: true }));
+                    if (timeoutRef.current[referee2.userId]) {
+                      clearTimeout(timeoutRef.current[referee2.userId]);
+                    }
+                    timeoutRef.current[referee2.userId] = setTimeout(() => {
+                      setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
+                    }, 3000);
+                  }
+                }}
+                className="text-red-500 hover:text-red-700"
+              >
+                {deleteConfirmationMap[referee2.userId] ? (
+                  <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                ) : (
+                  <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          ) : (
+            <RefereeSelect
+              assignments={assignments.filter(a => !referee1 || a.referee.userId !== referee1.userId)}
+              position={2}
+              jwt={jwt}
+              onConfirm={updateAssignmentStatus}
+              onAssignmentComplete={setReferee2}
+            />
+          )}
         </div>
       </div>
     </div>

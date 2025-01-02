@@ -38,10 +38,10 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
       {({ open }) => (
         <>
           {/*<Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Wettbewerb:</Listbox.Label>*/}
-          <div className="relative mt-4 sm:mt-0">
+          <div className="relative">
             <div className="relative w-full flex items-center gap-2">
               <div className="relative flex-1">
-                <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
                   {selected ? (
                     <span className="ml-0 block truncate">{selected.referee.firstName} {selected.referee.lastName}</span>
                   ) : (
@@ -87,7 +87,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 {assignments?.length === 0 ? (
                   <div className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-500">
-                    Keine Daten verfügbar
+                    Niemand verfügbar
                   </div>
                 ) : (
                   assignments?.map((assignment) => (
