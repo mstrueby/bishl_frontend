@@ -221,14 +221,27 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 <button
                   onClick={async () => {
                     const assignment = assignments.find(a => a.referee.userId === referee1.userId);
-                    if (assignment) {
+                    if (assignment && assignment.status === 'CONFIRM_DELETE') {
                       await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 1);
                       setReferee1(null);
+                    } else if (assignment) {
+                      const updatedAssignments = assignments.map(a => 
+                        a.referee.userId === referee1.userId 
+                          ? { ...a, status: 'CONFIRM_DELETE' }
+                          : a
+                      );
+                      assignments.splice(0, assignments.length, ...updatedAssignments);
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
                 >
-                  <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                  {assignments.find(a => a.referee.userId === referee1.userId)?.status === 'CONFIRM_DELETE' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-yellow-500">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                  ) : (
+                    <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                  )}
                 </button>
               </div>
             ) : (
@@ -262,14 +275,27 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 <button
                   onClick={async () => {
                     const assignment = assignments.find(a => a.referee.userId === referee2.userId);
-                    if (assignment) {
+                    if (assignment && assignment.status === 'CONFIRM_DELETE') {
                       await updateAssignmentStatus(jwt, {...assignment, status: 'UNAVAILABLE'}, 2);
                       setReferee2(null);
+                    } else if (assignment) {
+                      const updatedAssignments = assignments.map(a => 
+                        a.referee.userId === referee2.userId 
+                          ? { ...a, status: 'CONFIRM_DELETE' }
+                          : a
+                      );
+                      assignments.splice(0, assignments.length, ...updatedAssignments);
                     }
                   }}
                   className="text-red-500 hover:text-red-700"
                 >
-                  <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                  {assignments.find(a => a.referee.userId === referee2.userId)?.status === 'CONFIRM_DELETE' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-yellow-500">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                  ) : (
+                    <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                  )}
                 </button>
               </div>
             ) : (
