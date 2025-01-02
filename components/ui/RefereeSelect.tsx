@@ -38,8 +38,9 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
       {({ open }) => (
         <>
          {/*<Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Wettbewerb:</Listbox.Label>*/}
-          <div className="relative mt-4 sm:mt-0 flex gap-2">
-            <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+          <div className="relative mt-4 sm:mt-0 flex items-center gap-2">
+            <div className="relative flex-1">
+              <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                 {selected ? (
                   <span className="ml-0 block truncate">{selected.referee.firstName} {selected.referee.lastName}</span>
                 ) : (
@@ -49,6 +50,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                 <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </span>
             </Listbox.Button>
+            </div>
 
             {selected && (
               <div className="flex gap-2">
@@ -80,7 +82,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full left-0 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 {assignments?.map((assignment) => (
                   <Listbox.Option
                     key={assignment.referee.userId}
