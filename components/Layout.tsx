@@ -11,7 +11,7 @@ export default function Layout({
 }) {
 
   return (
-    <div className="flex flex-col min-h-screen overflow-y-scroll">
+    <div className="flex flex-col min-h-screen">
       <Head>
         <meta name="robots" content="noindex, nofollow" />
       </Head>

@@ -6,7 +6,7 @@ import { Referee } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
-import { tournamentConfigs } from '../../tools/consts';
+import { tournamentConfigs, allRefereeAssignmentStatuses } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -18,63 +18,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [deleteConfirmationMap, setDeleteConfirmationMap] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
-  const allStatuses = [
-    {
-      key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
-        divide: 'divide-gray-500/10',
-        background: 'bg-gray-50',
-        text: 'text-gray-600',
-        ring: 'ring-gray-500/10',
-        hover: 'hover:bg-gray-100',
-        focus: 'focus-visible:outline-gray-500/10',
-        dot: 'fill-gray-400'
-      }
-    },
-    {
-      key: 'REQUESTED', title: 'Angefragt', current: false, color: {
-        divide: 'divide-yellow-600/20',
-        background: 'bg-yellow-50',
-        text: 'text-yellow-800',
-        ring: 'ring-yellow-600/20',
-        hover: 'hover:bg-yellow-100',
-        focus: 'focus-visible:outline-yellow-600/20',
-        dot: 'fill-yellow-500'
-      }
-    },
-    {
-      key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
-        divide: 'divide-red-600/10',
-        background: 'bg-red-50',
-        text: 'text-red-700',
-        ring: 'ring-red-600/10',
-        hover: 'hover:bg-red-100',
-        focus: 'focus-visible:outline-red-600/10',
-        dot: 'fill-red-500'
-      }
-    },
-    {
-      key: 'ASSIGNED', title: 'Eingeteilt', current: false, color: {
-        divide: 'divide-green-600/20',
-        background: 'bg-green-50',
-        text: 'text-green-700',
-        ring: 'ring-green-600/20',
-        hover: 'hover:bg-green-100',
-        focus: 'focus-visible:outline-green-600/20',
-        dot: 'fill-green-400'
-      }
-    },
-    {
-      key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
-        divide: 'divide-green-100',
-        background: 'bg-green-100',
-        text: 'text-green-700',
-        ring: 'ring-green-100',
-        hover: 'hover:bg-green-100',
-        focus: 'focus-visible:outline-green-100',
-        dot: 'fill-green-500'
-      }
-    },
-  ]
+
 
   const getValidTransitions = (currentStatus: string) => {
     switch (currentStatus) {
@@ -207,10 +151,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
           {referee1 ? (
             <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
               {/** status indicator, avatar, name */}
-              <div className="flex items-center gap-x-4">
+              <div className="flex items-center gap-x-3">
                 {(() => {
                   const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
-                  const statusColor = allStatuses.find(status => status.key === referee1Assignment?.status)?.color.dot;
+                  const statusColor = allRefereeAssignmentStatuses.find(status => status.key === referee1Assignment?.status)?.color.dot;
                   return (
                     <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
                       <circle cx="4" cy="4" r="4" />
@@ -265,10 +209,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         <div className="w-full">
           {referee2 ? (
             <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
-              <div className="flex items-center gap-x-4">
+              <div className="flex items-center gap-x-3">
                 {(() => {
                   const referee2Assignment = assignments.find(a => a.referee.userId === referee2?.userId);
-                  const statusColor = allStatuses.find(status => status.key === referee2Assignment?.status)?.color.dot;
+                  const statusColor = allRefereeAssignmentStatuses.find(status => status.key === referee2Assignment?.status)?.color.dot;
                   return (
                     <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
                       <circle cx="4" cy="4" r="4" />

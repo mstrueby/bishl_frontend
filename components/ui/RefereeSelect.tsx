@@ -2,9 +2,9 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { UserValues } from '../../types/UserValues';
 import { Referee } from '../../types/MatchValues';
+import { allRefereeAssignmentStatuses } from '../../tools/consts';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { AssignmentValues } from '../../types/AssignmentValues';
-import { AssignmentSelect } from '../../types/AssignmentSelect';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -17,6 +17,33 @@ interface RefereeSelectProps {
   onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => Promise<void>;
   onAssignmentComplete: (referee: Referee) => void;
 }
+
+
+{/** Referee Item */ }
+const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boolean }> = ({ assignment, showLastName = true }) => (
+  <div className="flex items-center gap-x-3">
+    {/** status indicator */}
+    <svg
+      className={classNames(
+        "flex-shrink-0 h-2 w-2",
+        allRefereeAssignmentStatuses.find(status => status.key === assignment.status)?.color.dot ?? 'fill-black'
+      )}
+      viewBox="0 0 8 8"
+    >
+      <circle cx="4" cy="4" r="4" />
+    </svg>
+    {/** Profile Avatar */}
+    <div className="size-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+      {assignment.referee.firstName.charAt(0)}{assignment.referee.lastName.charAt(0)}
+    </div>
+    {/** Name */}
+    <span className="font-normal block truncate">
+      {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
+    </span>
+  </div>
+);
+
+
 const RefereeSelect: React.FC<RefereeSelectProps> = ({
   assignments,
   position,
@@ -43,7 +70,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               <div className="relative flex-1">
                 <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
                   {selected ? (
-                    <span className="ml-0 block truncate">{selected.referee.firstName} {selected.referee.lastName}</span>
+                    <RefereeItem assignment={selected} showLastName={false} />
                   ) : (
                     <Placeholder />
                   )}
@@ -91,49 +118,19 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                   </div>
                 ) : (
                   assignments?.map((assignment) => (
-                  <Listbox.Option
-                    key={assignment.referee.userId}
-                    className={({ active }) =>
-                      classNames(
-                        active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                        'relative cursor-default select-none py-2 pl-3 pr-9'
-                      )
-                    }
-                    value={assignment}
-                  >
-                    {({ selected, active }) => (
-                      <>
-                        <div className="flex items-center">
-                          <span className="flex-shrink-0 h-2 w-2 rounded-full mr-2"
-                            style={{
-                              backgroundColor: assignment.status === 'REQUESTED'
-                                ? '#FCD34D'
-                                : assignment.status === 'UNAVAILABLE'
-                                  ? '#EF4444'
-                                  : '#D1D5DB'
-                            }}
-                          />
-                          <span
-                            className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}
-                          >
-                            {assignment.referee.firstName} {assignment.referee.lastName}
-                          </span>
-                        </div>
-
-                        {selected ? (
-                          <span
-                            className={classNames(
-                              active ? 'text-white' : 'text-indigo-600',
-                              'absolute inset-y-0 right-0 flex items-center pr-4'
-                            )}
-                          >
-                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                          </span>
-                        ) : null}
-                      </>
-                    )}
-                  </Listbox.Option>
-                ))
+                    <Listbox.Option
+                      key={assignment.referee.userId}
+                      className={({ active }) =>
+                        classNames(
+                          active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                          'relative cursor-default select-none py-2 pl-3 pr-9'
+                        )
+                      }
+                      value={assignment}
+                    >
+                      <RefereeItem assignment={assignment} />
+                    </Listbox.Option>
+                  ))
                 )}
               </Listbox.Options>
             </Transition>
