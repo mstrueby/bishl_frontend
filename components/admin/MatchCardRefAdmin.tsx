@@ -236,11 +236,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 onClick={async () => {
                   const assignment = assignments.find(a => a.referee.userId === referee2.userId);
                   if (assignment && deleteConfirmationMap[referee2.userId]) {
-                    setUnassignLoading(prev => ({ ...prev, [referee2.userId]: true }));
                     await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 2);
                     setReferee2(null);
                     setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
-                    setUnassignLoading(prev => ({ ...prev, [referee2.userId]: false }));
                   } else if (assignment) {
                     setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: true }));
                     if (timeoutRef.current[referee2.userId]) {
@@ -253,12 +251,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 }}
                 className="text-red-500 hover:text-red-700"
               >
-                {unassignLoading[referee2.userId] ? (
-                  <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                ) : deleteConfirmationMap[referee2.userId] ? (
+                {deleteConfirmationMap[referee2.userId] ? (
                   <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
                 ) : (
                   <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
