@@ -155,7 +155,11 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               <div className="flex items-center gap-x-3">
                 {(() => {
                   const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
-                  const statusColor = allRefereeAssignmentStatuses.find(status => status.key === referee1Assignment?.status)?.color.dot;
+                  console.log('Referee1 Assignment:', referee1Assignment);
+                  console.log('Assignment Status:', referee1Assignment?.status);
+                  const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === referee1Assignment?.status);
+                  console.log('Status Config:', statusConfig);
+                  const statusColor = statusConfig?.color.dot;
                   return (
                     <svg className={`h-2 w-2 ${statusColor || 'fill-gray-400'}`} viewBox="0 0 8 8">
                       <circle cx="4" cy="4" r="4" />
