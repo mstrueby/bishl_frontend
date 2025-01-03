@@ -16,7 +16,6 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
   const [deleteConfirmationMap, setDeleteConfirmationMap] = useState<{ [key: string]: boolean }>({});
-  const [unassignLoading, setUnassignLoading] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
 
@@ -174,11 +173,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 onClick={async () => {
                   const assignment = assignments.find(a => a.referee.userId === referee1.userId);
                   if (assignment && deleteConfirmationMap[referee1.userId]) {
-                    setUnassignLoading(prev => ({ ...prev, [referee1.userId]: true }));
                     await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
                     setReferee1(null);
                     setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
-                    setUnassignLoading(prev => ({ ...prev, [referee1.userId]: false }));
                   } else if (assignment) {
                     setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: true }));
                     if (timeoutRef.current[referee1.userId]) {
@@ -191,12 +188,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 }}
                 className="text-red-500 hover:text-red-700"
               >
-                {unassignLoading[referee1.userId] ? (
-                  <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                ) : deleteConfirmationMap[referee1.userId] ? (
+                {deleteConfirmationMap[referee1.userId] ? (
                   <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
                 ) : (
                   <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
