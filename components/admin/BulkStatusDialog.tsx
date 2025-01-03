@@ -30,7 +30,7 @@ export default function BulkStatusDialog({
   }, [isOpen]);
 
   const handleCancel = () => {
-    setSelected(initialSelected);
+    setSelected(null);
     onClose();
   };
 
