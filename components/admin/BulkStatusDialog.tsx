@@ -20,7 +20,20 @@ export default function BulkStatusDialog({
   onConfirm: (status: string) => void,
   isLoading?: boolean
 }) {
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState(null);
+  const [initialSelected, setInitialSelected] = useState(null);
+  
+  useEffect(() => {
+    if (isOpen) {
+      setInitialSelected(selected);
+    }
+  }, [isOpen]);
+
+  const handleCancel = () => {
+    setSelected(initialSelected);
+    onClose();
+  };
+
   const Placeholder = () => (
     <span className="block truncate text-gray-400">(auswählen)</span>
   );
@@ -79,7 +92,7 @@ export default function BulkStatusDialog({
                 <button
                   type="button"
                   className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  onClick={onClose}
+                  onClick={handleCancel}
                 >
                   Abbrechen
                 </button>
