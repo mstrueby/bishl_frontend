@@ -21,13 +21,7 @@ export default function BulkStatusDialog({
   isLoading?: boolean
 }) {
   const [selected, setSelected] = useState(null);
-  const [initialSelected, setInitialSelected] = useState(null);
-  
-  useEffect(() => {
-    if (isOpen) {
-      setInitialSelected(selected);
-    }
-  }, [isOpen]);
+
 
   const handleCancel = () => {
     setSelected(null);
