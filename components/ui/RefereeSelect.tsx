@@ -52,6 +52,8 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   onAssignmentComplete
 }) => {
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [unsetLoading, setUnsetLoading] = useState(false);
 
   // Placeholder component for the listbox
   const Placeholder = () => (
@@ -85,20 +87,42 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                   <button
                     onClick={async () => {
                       if (selected) {
+                        setConfirmLoading(true);
                         const assignedRef = { ...selected, status: 'ASSIGNED' };
                         await onConfirm(jwt, assignedRef, position);
                         onAssignmentComplete(selected.referee);
+                        setConfirmLoading(false);
                       }
                     }}
                     className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    disabled={confirmLoading}
                   >
-                    <CheckIcon className="h-5 w-5 text-green-600" aria-hidden="true" />
+                    {confirmLoading ? (
+                      <svg className="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                    ) : (
+                      <CheckIcon className="h-5 w-5 text-green-600" aria-hidden="true" />
+                    )}
                   </button>
                   <button
-                    onClick={() => setSelected(null)}
+                    onClick={() => {
+                      setUnsetLoading(true);
+                      setSelected(null);
+                      setUnsetLoading(false);
+                    }}
                     className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    disabled={unsetLoading}
                   >
-                    <XMarkIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                    {unsetLoading ? (
+                      <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                    ) : (
+                      <XMarkIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                    )}
                   </button>
                 </div>
               )}
