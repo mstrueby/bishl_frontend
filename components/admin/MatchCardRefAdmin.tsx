@@ -155,14 +155,16 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               <div className="flex items-center gap-x-3">
                 {(() => {
                   const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
-                  console.log('Referee1 Assignment:', referee1Assignment);
-                  console.log('Assignment Status:', referee1Assignment?.status);
                   const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === referee1Assignment?.status);
+                  console.log('Referee1 Assignment:', referee1Assignment);
+                  {/**
+                  console.log('Assignment Status:', referee1Assignment?.status);
                   console.log('Status Config:', statusConfig);
-                  const statusColor = statusConfig?.color.dot;
+                  */}
+                  const statusColor = statusConfig?.color.dot || 'fill-gray-400';
                   return (
-                    <svg className="h-2 w-2" viewBox="0 0 8 8">
-                      <circle cx="4" cy="4" r="4" className={statusColor || 'fill-gray-400'} />
+                    <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8">
+                      <circle cx="4" cy="4" r="4" />
                     </svg>
                   );
                 })()}
@@ -224,10 +226,16 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               <div className="flex items-center gap-x-3">
                 {(() => {
                   const referee2Assignment = assignments.find(a => a.referee.userId === referee2?.userId);
-                  const statusColor = allRefereeAssignmentStatuses.find(status => status.key === referee2Assignment?.status)?.color.dot;
+                  const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === referee2Assignment?.status);
+                  console.log('Referee1 Assignment:', referee2Assignment);
+                  console.log('Assignment Status:', referee2Assignment?.status);
+                  console.log('Status Config:', statusConfig);
+                  {/**
+                  */}
+                  const statusColor = statusConfig?.color.dot || 'fill-gray-400';
                   return (
-                    <svg className="h-2 w-2" viewBox="0 0 8 8">
-                      <circle cx="4" cy="4" r="4" className={statusColor || 'fill-gray-400'} />
+                    <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8" aria-hidden="true">
+                      <circle cx="4" cy="4" r="4" />
                     </svg>
                   );
                 })()}

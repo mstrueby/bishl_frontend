@@ -50,7 +50,7 @@ export const allRefereeAssignmentStatuses = [
       ring: 'ring-green-600/20',
       hover: 'hover:bg-green-100',
       focus: 'focus-visible:outline-green-600/20',
-      dot: 'fill-green-400'
+      dot: 'fill-green-500'
     }
   },
   {
@@ -61,7 +61,7 @@ export const allRefereeAssignmentStatuses = [
       ring: 'ring-green-100',
       hover: 'hover:bg-green-100',
       focus: 'focus-visible:outline-green-100',
-      dot: 'fill-green-500'
+      dot: 'fill-green-600'
     }
   },
 ]
