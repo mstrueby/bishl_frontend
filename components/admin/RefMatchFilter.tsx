@@ -104,7 +104,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                         showUnassignedOnly ? 'bg-indigo-600' : 'bg-gray-200'
                       } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
                     >
-                      <span className="sr-only">Nur offene Spiele anzeigen</span>
+                      <span className="sr-only">Nur offene Spiele</span>
                       <span
                         aria-hidden="true"
                         className={`${
@@ -137,13 +137,13 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                   </div>
 
 
-                  <div className="mt-6 flex justify-between items-center">
+                  <div className="mt-6 flex justify-end items-center">
                     <button
                       type="button"
-                      className="text-sm text-gray-500 hover:text-gray-700"
+                      className="text-sm text-indigo-600 hover:underline mr-3"
                       onClick={handleResetFilter}
                     >
-                      Filter zurücksetzen
+                      Reset
                     </button>
                     <div className="flex space-x-3">
                       <button

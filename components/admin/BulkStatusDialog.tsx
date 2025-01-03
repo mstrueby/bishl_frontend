@@ -2,33 +2,36 @@
 import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/24/outline'
+import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
 
 const allStatuses = [
   { key: 'REQUESTED', title: 'Angefragt' },
   { key: 'UNAVAILABLE', title: 'Nicht verfügbar' }
 ]
 
-export default function BulkStatusDialog({ 
-  isOpen, 
-  onClose, 
+export default function BulkStatusDialog({
+  isOpen,
+  onClose,
   onConfirm,
-  isLoading 
-}: { 
-  isOpen: boolean, 
-  onClose: () => void, 
+  isLoading
+}: {
+  isOpen: boolean,
+  onClose: () => void,
   onConfirm: (status: string) => void,
-  isLoading?: boolean 
+  isLoading?: boolean
 }) {
-  const [selected, setSelected] = useState(allStatuses[0])
+  const [selected, setSelected] = useState(null)
+  const Placeholder = () => (
+    <span className="block truncate text-gray-400">(auswählen)</span>
+  );
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-10" onClose={onClose}>
-        <div className="fixed inset-0 bg-black/30" />
+        <div className="fixed inset-0 bg-black/30 transition-opacity" />
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
-            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all">
               <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                 Status aktualisieren
               </Dialog.Title>
@@ -37,10 +40,15 @@ export default function BulkStatusDialog({
                 <Listbox value={selected} onChange={setSelected}>
                   <Label className="sr-only">Change status</Label>
                   <div className="relative">
-                    <ListboxButton className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                      <span className="block truncate">{selected.title}</span>
+                    <ListboxButton className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                      {selected ? (
+
+                        <span className="block truncate">{selected.title}</span>
+                      ) : (
+                        <Placeholder />
+                      )}
                       <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                        <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                       </span>
                     </ListboxButton>
                     <ListboxOptions className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
@@ -49,8 +57,7 @@ export default function BulkStatusDialog({
                           key={status.key}
                           value={status}
                           className={({ active }) =>
-                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                              active ? 'bg-indigo-100 text-indigo-900' : 'text-gray-900'
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? 'bg-indigo-100 text-indigo-900' : 'text-gray-900'
                             }`
                           }
                         >
@@ -71,14 +78,14 @@ export default function BulkStatusDialog({
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
-                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-100 w-1/2 px-4 py-2 text-sm font-medium text-indigo-900 hover:bg-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                  className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   onClick={onClose}
                 >
                   Abbrechen
                 </button>
                 <button
                   type="button"
-                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 w-1/2 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   onClick={() => onConfirm(selected.key)}
                   disabled={isLoading}
                 >
