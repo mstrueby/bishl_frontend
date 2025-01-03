@@ -38,8 +38,21 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setIsOpen(false);
   };
 
+  // Update temp states when opening the filter
+  useEffect(() => {
+    if (isOpen) {
+      setTempSelectedTournament(selectedTournament);
+      setDateFrom(dateFrom);
+      setDateTo(dateTo);
+      setShowUnassignedOnly(showUnassignedOnly);
+    }
+  }, [isOpen]);
+
   const handleCancel = () => {
     setTempSelectedTournament(selectedTournament);
+    setDateFrom(dateFrom);
+    setDateTo(dateTo);
+    setShowUnassignedOnly(showUnassignedOnly);
     setIsOpen(false);
   };
 
