@@ -41,8 +41,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   // Store initial values when opening the modal
   const [initialValues, setInitialValues] = useState({
     tournament: null,
-    dateFrom: '',
-    dateTo: '',
+    dateRange: [new Date(), null] as [Date | null, Date | null],
     showUnassignedOnly: false
   });
 
@@ -50,8 +49,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     if (isOpen) {
       setInitialValues({
         tournament: selectedTournament,
-        dateFrom: dateFrom,
-        dateTo: dateTo,
+        dateRange: dateRange,
         showUnassignedOnly: showUnassignedOnly
       });
       setTempSelectedTournament(selectedTournament);
@@ -60,8 +58,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
 
   const handleCancel = () => {
     setTempSelectedTournament(initialValues.tournament);
-    setDateFrom(initialValues.dateFrom);
-    setDateTo(initialValues.dateTo);
+    setDateRange(initialValues.dateRange);
     setShowUnassignedOnly(initialValues.showUnassignedOnly);
     setIsOpen(false);
   };
