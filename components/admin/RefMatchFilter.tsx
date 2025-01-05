@@ -17,7 +17,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([new Date(), null]);
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [startDate, endDate] = dateRange;
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setTempSelectedTournament(null);
     setSelectedTournament(null);
     setShowUnassignedOnly(false);
-    setDateRange([new Date(), null]);
+    setDateRange([null, null]);
     onFilterChange({ 
       tournament: 'all', 
       showUnassignedOnly: false,
