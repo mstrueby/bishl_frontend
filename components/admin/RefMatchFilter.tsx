@@ -17,8 +17,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
-  const [dateFrom, setDateFrom] = useState(new Date().toISOString().split('T')[0]);
-  const [dateTo, setDateTo] = useState('');
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([new Date(), null]);
+  const [startDate, endDate] = dateRange;
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`)
@@ -32,8 +32,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     onFilterChange({
       tournament: tempSelectedTournament?.alias || 'all',
       showUnassignedOnly,
-      date_from: dateFrom,
-      date_to: dateTo || undefined
+      date_from: startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date_to: endDate ? endDate.toISOString().split('T')[0] : undefined
     });
     setIsOpen(false);
   };
@@ -138,23 +138,18 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                     <span className="ml-3 text-sm text-gray-900">Nur offene Spiele</span>
                   </div>
 
-                  <div className="mt-4 flex space-x-4"> {/* Added flex and space-x-4 for alignment */}
-                    <div className="flex flex-col">
-                      <label htmlFor="date_from" className="text-gray-700 text-sm font-bold mb-2">From:</label>
+                  <div className="mt-4">
+                    <label className="text-gray-700 text-sm font-bold mb-2">Datumsbereich:</label>
+                    <div className="mt-1">
                       <DatePicker
-                        id="date_from"
-                        selected={new Date(dateFrom)}
-                        onChange={(date) => setDateFrom(date ? date.toISOString().split('T')[0] : '')}
-                        dateFormat="yyyy-MM-dd"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <label htmlFor="date_to" className="text-gray-700 text-sm font-bold mb-2">To:</label>
-                      <DatePicker
-                        id="date_to"
-                        selected={dateTo ? new Date(dateTo) : null}
-                        onChange={(date) => setDateTo(date ? date.toISOString().split('T')[0] : '')}
-                        dateFormat="yyyy-MM-dd"
+                        selectsRange={true}
+                        startDate={startDate}
+                        endDate={endDate}
+                        onChange={(update) => setDateRange(update)}
+                        dateFormat="dd.MM.yyyy"
+                        isClearable={true}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2"
+                        placeholderText="Zeitraum auswählen"
                       />
                     </div>
                   </div>
