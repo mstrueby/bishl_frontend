@@ -227,7 +227,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
           </div>
         </div>
       </div>
-      {/* 2  scores */}
+      {/* 2  matchup */}
       <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/3">
         {/* home */}
         <div className="flex flex-row items-center w-full">
