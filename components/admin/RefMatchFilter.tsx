@@ -144,8 +144,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                         onChange={(update) => setDateRange(update)}
                         dateFormat="dd.MM.yyyy"
                         isClearable={true}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2"
-                        placeholderText="Zeitraum auswählen"
+                        className="w-full rounded-md border border-gray-300 py-1.5 pl-3 pr-10"
+                        placeholderText="(Zeitraum auswählen)"
                       />
                     </div>
                   </div>
