@@ -33,7 +33,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       tournament: tempSelectedTournament?.alias || 'all',
       showUnassignedOnly,
       date_from: startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      date_to: endDate ? endDate.toISOString().split('T')[0] : undefined
+      date_to: endDate ? new Date(endDate.setHours(23, 59, 59)).toISOString().split('T')[0] : undefined
     });
     setIsOpen(false);
   };
