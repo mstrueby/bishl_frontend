@@ -176,9 +176,9 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
-      {/* 1 tournament, status (mobile), date, venue */}
+      {/* 1 tournament, workflow drop-down (mobile), date, venue */}
       <div className="flex flex-col sm:w-1/3">
-        {/* 1-1 tournament, status (mobile) */}
+        {/* 1-1 tournament, workflow drop-down (mobile) */}
         <div className="flex flex-row justify-between">
           {/* tournament */}
           <div className="">
@@ -244,20 +244,20 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
           </div>
         </div>
       </div>
-      {/* 3 button Spielberich, status (tablet) */}
-      <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/3">
+      {/* 3 assigned Referees, workflow drop-down (tablet) */}
+      <div className="flex flex-col justify-between mt-1.5 sm:mt-0 pt-2 sm:pt-0 sm:pb-1 sm:w-1/3 border-t sm:border-t-0 sm:border-l sm:pl-3">
         <div className="sm:flex hidden flex-row justify-end">
           <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
         </div>
-        <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          {/* Referee section */}
-          <div className="mt-4 space-y-2">
+        <div className="flex flex-col sm:flex-none justify-center">
+          {/* assigned Referees */}
+          <div className="flex flex-row items-center justify-between">
             {match.referee1 && (
               <div className="flex items-center gap-x-2">
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
                   {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
                 </div>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 truncate">
                   {match.referee1.firstName} {match.referee1.lastName}
                 </span>
               </div>
@@ -267,7 +267,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
                   {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
                 </div>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 truncate">
                   {match.referee2.firstName} {match.referee2.lastName}
                 </span>
               </div>
