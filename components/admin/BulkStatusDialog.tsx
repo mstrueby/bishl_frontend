@@ -3,6 +3,7 @@ import { Fragment, useState, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import { classNames } from '../../tools/utils'
 
 const allStatuses = [
   { key: 'REQUESTED', title: 'Angefragt' },
@@ -58,14 +59,16 @@ export default function BulkStatusDialog({
                         <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                       </span>
                     </ListboxButton>
-                    <ListboxOptions className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    <ListboxOptions className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                       {allStatuses.map((status) => (
                         <ListboxOption
                           key={status.key}
                           value={status}
                           className={({ active }) =>
-                            `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? 'bg-indigo-100 text-indigo-900' : 'text-gray-900'
-                            }`
+                            classNames(
+                              active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                              'relative cursor-default select-none py-2 pl-3 pr-9'
+                            )
                           }
                         >
                           {({ selected }) => (

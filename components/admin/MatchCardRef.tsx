@@ -228,24 +228,24 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
         </div>
       </div>
       {/* 2  scores */}
-      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/2">
+      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/3">
         {/* home */}
         <div className="flex flex-row items-center w-full">
           <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={32} width={32} />
           <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{home.fullName}</p>
+            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{home.shortName}</p>
           </div>
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
           <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
           <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.fullName}</p>
+            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.shortName}</p>
           </div>
         </div>
       </div>
       {/* 3 button Spielberich, status (tablet) */}
-      <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
+      <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/3">
         <div className="sm:flex hidden flex-row justify-end">
           <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
         </div>
