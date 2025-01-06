@@ -138,6 +138,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                     <label className="text-gray-700 text-sm font-bold mb-2">Datumsbereich:</label>
                     <div className="mt-1">
                       <DatePicker
+                        showIcon={true}
+                        toggleCalendarOnIconClick={true}
                         selectsRange={true}
                         startDate={startDate}
                         endDate={endDate}
