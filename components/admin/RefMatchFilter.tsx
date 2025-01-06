@@ -56,9 +56,13 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   };
 
   // Store initial values when opening the modal
-  const [initialValues, setInitialValues] = useState({
+  const [initialValues, setInitialValues] = useState<{
+    tournament: TournamentValues | null;
+    dateRange: [Date | null, Date | null];
+    showUnassignedOnly: boolean;
+  }>({
     tournament: null,
-    dateRange: [new Date(), null] as [Date | null, Date | null],
+    dateRange: [new Date(), null],
     showUnassignedOnly: false
   });
 
