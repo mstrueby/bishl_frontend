@@ -26,7 +26,7 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
     <svg
       className={classNames(
         "flex-shrink-0 h-2 w-2",
-        allRefereeAssignmentStatuses.find(status => status.key === assignment.status)?.color.dot ?? 'fill-black'
+        allRefereeAssignmentStatuses.find(status => status.key === assignment.status)?.color.dotRefAdmin ?? 'fill-black'
       )}
       viewBox="0 0 8 8"
     >

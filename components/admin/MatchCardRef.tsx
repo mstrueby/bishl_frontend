@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
+import { allRefereeAssignmentStatuses, getValidTransitions } from '../../tools/consts';
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs } from '../../tools/consts';
@@ -12,85 +13,12 @@ let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
   const { home, away, startDate, venue } = match;
 
-  const allStatuses = [
-    {
-      key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
-        divide: 'divide-gray-500/10',
-        background: 'bg-gray-50',
-        text: 'text-gray-600',
-        ring: 'ring-gray-500/10',
-        hover: 'hover:bg-gray-100',
-        focus: 'focus-visible:outline-gray-500/10',
-        dot: 'fill-gray-400'
-      }
-    },
-    {
-      key: 'REQUESTED', title: 'Angefragt', current: false, color: {
-        divide: 'divide-yellow-600/20',
-        background: 'bg-yellow-50',
-        text: 'text-yellow-800',
-        ring: 'ring-yellow-600/20',
-        hover: 'hover:bg-yellow-100',
-        focus: 'focus-visible:outline-yellow-600/20',
-        dot: 'fill-yellow-500'
-      }
-    },
-    {
-      key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
-        divide: 'divide-red-600/10',
-        background: 'bg-red-50',
-        text: 'text-red-700',
-        ring: 'ring-red-600/10',
-        hover: 'hover:bg-red-100',
-        focus: 'focus-visible:outline-red-600/10',
-        dot: 'fill-red-500'
-      }
-    },
-    {
-      key: 'ASSIGNED', title: 'Eingeteilt', current: false, color: {
-        divide: 'divide-green-600/20',
-        background: 'bg-green-50',
-        text: 'text-green-700',
-        ring: 'ring-green-600/20',
-        hover: 'hover:bg-green-100',
-        focus: 'focus-visible:outline-green-600/20',
-        dot: 'fill-green-500'
-      }
-    },
-    {
-      key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
-        divide: 'divide-green-100',
-        background: 'bg-green-500',
-        text: 'text-white',
-        ring: 'ring-green-700',
-        hover: 'hover:bg-green-100',
-        focus: 'focus-visible:outline-green-100',
-        dot: 'fill-green-300'
-      }
-    },
-  ]
 
-  const getValidTransitions = (currentStatus: string) => {
-    switch (currentStatus) {
-      case 'AVAILABLE':
-        return ['REQUESTED', 'UNAVAILABLE'];
-      case 'REQUESTED':
-        return ['UNAVAILABLE'];
-      case 'ASSIGNED':
-        return ['ACCEPTED'];
-      case 'ACCEPTED':
-        return [];
-      case 'UNAVAILABLE':
-        return ['REQUESTED'];
-      default:
-        return ['AVAILABLE'];
-    }
-  }
 
   const [selected, setSelected] = useState(
     assignment ?
-      allStatuses.find(s => s.key === assignment.status) || allStatuses[0] :
-      allStatuses[0]
+      allRefereeAssignmentStatuses.find(s => s.key === assignment.status) || allRefereeAssignmentStatuses[0] :
+      allRefereeAssignmentStatuses[0]
   )
 
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
@@ -129,10 +57,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
   const validStatuses = useMemo(() => {
     const validKeys = getValidTransitions(selected.key);
-    return allStatuses.filter(status =>
+    return allRefereeAssignmentStatuses.filter(status =>
       validKeys.includes(status.key)
     );
-  }, [selected.key, allStatuses]);
+  }, [selected.key, allRefereeAssignmentStatuses]);
 
   const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[] }> = ({ selected, handleStatusChange, validStatuses }) => (
     <Listbox value={selected} onChange={handleStatusChange}>
@@ -140,7 +68,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       <div className="relative">
         <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
           <div className={classNames("inline-flex items-center gap-x-1.5 ", validStatuses.length > 0 ? "rounded-l-md" : "rounded-md", "ring-1 ring-inset py-0.5 px-2", selected.color.background, selected.color.text, selected.color.ring)}>
-            <svg viewBox="0 0 6 6" aria-hidden="true" className={classNames("size-1.5", selected.color.dot)}>
+            <svg viewBox="0 0 6 6" aria-hidden="true" className={classNames("size-1.5", selected.color.dotMyRef)}>
               <circle r={3} cx={3} cy={3} />
             </svg>
 

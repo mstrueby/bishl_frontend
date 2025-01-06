@@ -8,60 +8,83 @@ export const tournamentConfigs = [
   { name: 'Mini', tiny_name: 'U8', href: '/tournaments/mini', bdg_col_dark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20', bdg_col_light: 'bg-pink-50 text-pink-700 ring-pink-700/10' },
 ];
 
+export const getValidTransitions = (currentStatus: string) => {
+  switch (currentStatus) {
+    case 'AVAILABLE':
+      return ['REQUESTED', 'UNAVAILABLE'];
+    case 'REQUESTED':
+      return ['UNAVAILABLE'];
+    case 'ASSIGNED':
+      return ['ACCEPTED'];
+    case 'ACCEPTED':
+      return [];
+    case 'UNAVAILABLE':
+      return ['REQUESTED'];
+    default:
+      return ['AVAILABLE'];
+  }
+}
+
 export const allRefereeAssignmentStatuses = [
-  {
-    key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
-      divide: 'divide-gray-500/10',
-      background: 'bg-gray-50',
-      text: 'text-gray-600',
-      ring: 'ring-gray-500/10',
-      hover: 'hover:bg-gray-100',
-      focus: 'focus-visible:outline-gray-500/10',
-      dot: 'fill-gray-400'
-    }
-  },
-  {
-    key: 'REQUESTED', title: 'Angefragt', current: false, color: {
-      divide: 'divide-yellow-600/20',
-      background: 'bg-yellow-50',
-      text: 'text-yellow-800',
-      ring: 'ring-yellow-600/20',
-      hover: 'hover:bg-yellow-100',
-      focus: 'focus-visible:outline-yellow-600/20',
-      dot: 'fill-yellow-500'
-    }
-  },
-  {
-    key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
-      divide: 'divide-red-600/10',
-      background: 'bg-red-50',
-      text: 'text-red-700',
-      ring: 'ring-red-600/10',
-      hover: 'hover:bg-red-100',
-      focus: 'focus-visible:outline-red-600/10',
-      dot: 'fill-red-500'
-    }
-  },
-  {
-    key: 'ASSIGNED', title: 'Eingeteilt', current: false, color: {
-      divide: 'divide-green-600/20',
-      background: 'bg-green-50',
-      text: 'text-green-700',
-      ring: 'ring-green-600/20',
-      hover: 'hover:bg-green-100',
-      focus: 'focus-visible:outline-green-600/20',
-      dot: 'fill-green-500'
-    }
-  },
-  {
-    key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
-      divide: 'divide-green-100',
-      background: 'bg-green-100',
-      text: 'text-green-700',
-      ring: 'ring-green-100',
-      hover: 'hover:bg-green-100',
-      focus: 'focus-visible:outline-green-100',
-      dot: 'fill-green-600'
-    }
-  },
-]
+    {
+      key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
+        divide: 'divide-gray-500/10',
+        background: 'bg-gray-50',
+        text: 'text-gray-600',
+        ring: 'ring-gray-500/10',
+        hover: 'hover:bg-gray-100',
+        focus: 'focus-visible:outline-gray-500/10',
+        dotMyRef: 'fill-gray-400',
+        dotRefAdmin: 'fill-gray-400',
+      }
+    },
+    {
+      key: 'REQUESTED', title: 'Angefragt', current: false, color: {
+        divide: 'divide-yellow-600/20',
+        background: 'bg-yellow-50',
+        text: 'text-yellow-800',
+        ring: 'ring-yellow-600/20',
+        hover: 'hover:bg-yellow-100',
+        focus: 'focus-visible:outline-yellow-600/20',
+        dotMyRef: 'fill-yellow-500',
+        dotRefAdmin: 'fill-yellow-500',
+      }
+    },
+    {
+      key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
+        divide: 'divide-red-600/10',
+        background: 'bg-red-50',
+        text: 'text-red-700',
+        ring: 'ring-red-600/10',
+        hover: 'hover:bg-red-100',
+        focus: 'focus-visible:outline-red-600/10',
+        dotMyRef: 'fill-red-500',
+        dotRefAdmin: 'fill-red-500',
+
+      }
+    },
+    {
+      key: 'ASSIGNED', title: 'Eingeteilt', current: false, color: {
+        divide: 'divide-green-600/20',
+        background: 'bg-green-50',
+        text: 'text-green-700',
+        ring: 'ring-green-600/20',
+        hover: 'hover:bg-green-100',
+        focus: 'focus-visible:outline-green-600/20',
+        dotMyRef: 'fill-green-500',
+        dotRefAdmin: 'fill-green-300',
+      }
+    },
+    {
+      key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
+        divide: 'divide-green-100',
+        background: 'bg-green-500',
+        text: 'text-white',
+        ring: 'ring-green-700',
+        hover: 'hover:bg-green-100',
+        focus: 'focus-visible:outline-green-100',
+        dotMyRef: 'fill-green-300',
+        dotRefAdmin: 'fill-green-500',
+      }
+    },
+  ]

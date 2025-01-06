@@ -95,10 +95,12 @@ const [selected, setSelected] = useState<StatusType | null>(null);
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
-              <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 mb-4">
-                Status aktualisieren
+              <Dialog.Title as="h3" className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
+                Status ändern
               </Dialog.Title>
-
+              <div className="mt-2">
+                <p className="text-sm text-gray-800">Ändere deine Verfügbarkeit für alle momentan gefilterten Spiele. Der neue Status wird nur zugewiesen, wenn er für das jeweilige Spiel verfügbar ist.</p>
+              </div>
               <div className="mt-4">
                 <Listbox value={selected} onChange={setSelected}>
                   <Label className="sr-only">Change status</Label>

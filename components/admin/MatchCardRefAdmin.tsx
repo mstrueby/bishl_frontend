@@ -161,7 +161,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                   console.log('Assignment Status:', referee1Assignment?.status);
                   console.log('Status Config:', statusConfig);
                   */}
-                  const statusColor = statusConfig?.color.dot || 'fill-gray-400';
+                  const statusColor = statusConfig?.color.dotRefAdmin || 'fill-gray-400';
                   return (
                     <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8">
                       <circle cx="4" cy="4" r="4" />
@@ -232,7 +232,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                   console.log('Status Config:', statusConfig);
                   {/**
                   */}
-                  const statusColor = statusConfig?.color.dot || 'fill-gray-400';
+                  const statusColor = statusConfig?.color.dotRefAdmin|| 'fill-gray-400';
                   return (
                     <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8" aria-hidden="true">
                       <circle cx="4" cy="4" r="4" />
