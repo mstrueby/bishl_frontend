@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition, Switch } from '@headlessui/react';
-import { FunnelIcon as FunnelIconOutline, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon as FunnelIconOutline, CalendarDateRangeIcon } from '@heroicons/react/24/outline';
 import { FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid';
 import TournamentSelect from '../ui/TournamentSelect';
 import type { TournamentValues } from '../../types/TournamentValues';
@@ -138,20 +138,13 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                   </div>
 
                   <div className="mt-4">
-                    <label className="text-gray-700 text-sm font-bold mb-2">Datumsbereich:</label>
+                    {/* <label className="text-gray-700 text-sm font-bold mb-2">Datumsbereich:</label> */}
                     <div className="mt-1">
                       <DatePicker
                         showIcon={true}
                         toggleCalendarOnIconClick={true}
-                        customInput={
-                          <div className="relative w-full">
-                            <input
-                              type="text"
-                              className="w-full rounded-md border border-gray-300 py-1.5 pl-3 pr-10"
-                              placeholder="(Zeitraum auswählen)"
-                            />
-                            <CalendarDaysIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                          </div>
+                        icon={
+                          <CalendarDateRangeIcon className="pointer-events-none mr-2 size-6 self-center text-gray-400" />
                         }
                         selectsRange={true}
                         startDate={startDate}
@@ -159,7 +152,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                         onChange={(update) => setDateRange(update)}
                         dateFormat="dd.MM.yyyy"
                         isClearable={true}
-                        className="w-full rounded-md border border-gray-300 py-1.5 pl-3 pr-10 [&>div]:w-full"
+                        className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
                         placeholderText="(Zeitraum auswählen)"
                         locale="de"
                         calendarStartDay={1}

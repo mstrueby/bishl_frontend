@@ -9,7 +9,7 @@ import { AssignmentValues } from '../../../types/AssignmentValues';
 import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL + "/matches/";
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface MyRefProps {
   jwt: string;
@@ -31,17 +31,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const currentDate = new Date().toISOString().split('T')[0];
 
   try {
-    const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userRes = await axios.get(`${BASE_URL}/users/me`, {
       headers: { Authorization: `Bearer ${jwt}` },
     });
     const userId = userRes.data._id;
 
     const [matchesRes, assignmentsRes] = await Promise.all([
-      axios.get(BASE_URL, {
+      axios.get(`${BASE_URL}/matches/`, {
         headers: { Authorization: `Bearer ${jwt}` },
         params: { date_from: currentDate }
       }),
-      axios.get(`${process.env.NEXT_PUBLIC_API_URL}/assignments/users/${userId}`, {
+      axios.get(`${BASE_URL}/assignments/users/${userId}`, {
         headers: { Authorization: `Bearer ${jwt}` }
       })
     ]);
@@ -71,7 +71,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
 
   const fetchData = async (filterParams: FilterState) => {
     try {
-      const userRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      const userRes = await axios.get(`${BASE_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       const userId = userRes.data._id;
@@ -89,12 +89,14 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         params.assigned = false;
       }
 
+      console.log(params);
+
       const [matchesRes, assignmentsRes] = await Promise.all([
-        axios.get(BASE_URL, {
+        axios.get(`${BASE_URL}/matches/`, {
           headers: { Authorization: `Bearer ${jwt}` },
           params
         }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/assignments/users/${userId}`, {
+        axios.get(`${BASE_URL}/assignments/users/${userId}`, {
           headers: { Authorization: `Bearer ${jwt}` }
         })
       ]);
@@ -126,8 +128,8 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
               const assignment = assignments.find(a => a.matchId === match._id);
               const method = !assignment ? 'POST' : 'PATCH';
               const endpoint = !assignment ? 
-                `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
-                `${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`;
+                `${BASE_URL}/assignments` :
+                `${BASE_URL}/assignments/${assignment._id}`;
               const body = !assignment ?
                 { matchId: match._id, status } :
                 { status };
