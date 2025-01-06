@@ -4,8 +4,11 @@ import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline';
 import { FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid';
 import TournamentSelect from '../ui/TournamentSelect';
 import type { TournamentValues } from '../../types/TournamentValues';
-import DatePicker from 'react-datepicker'; // Import DatePicker component
-import 'react-datepicker/dist/react-datepicker.css'; // Import DatePicker CSS
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { registerLocale } from 'react-datepicker';
+import de from 'date-fns/locale/de';
+registerLocale('de', de);
 
 interface RefMatchFilterProps {
   onFilterChange: (filter: { tournament: string; showUnassignedOnly: boolean; date_from?: string; date_to?: string }) => void;
@@ -148,6 +151,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                         isClearable={true}
                         className="w-full rounded-md border border-gray-300 py-1.5 pl-3 pr-10 [&>div]:w-full"
                         placeholderText="(Zeitraum auswählen)"
+                        locale="de"
+                        calendarStartDay={1}
                       />
                     </div>
                   </div>
