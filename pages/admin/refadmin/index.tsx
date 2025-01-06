@@ -151,7 +151,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let matches: Match[] = null;
+  let matches: Match[] = [];
   let assignments = null;
   const currentDate = new Date().toISOString().split('T')[0];
 
@@ -179,15 +179,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED'].includes(assignment.status)
         );
         if (filteredAssignments.length > 0) {
-          acc[matches[index]._id] = filteredAssignments.map(assignment => ({
-                ...assignment,
-                refAdmin: true,
-                position: assignment.position || 1
-              })) as AssignmentValues[];
+          acc[matches[index]._id] = filteredAssignments.map((assignment: AssignmentValues) => ({
+            ...assignment,
+            refAdmin: true,
+            position: assignment.position || 1
+          })) as AssignmentValues[];
         }
       }
       return acc;
-    }, {} as { [key: string]: AssignmentValues[] });    
+    }, {} as { [key: string]: AssignmentValues[] });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching data:', error);

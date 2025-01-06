@@ -171,8 +171,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                           <CalendarDateRangeIcon className="pointer-events-none mr-2 size-5 self-center text-gray-400" />
                         }
                         selectsRange={true}
-                        startDate={startDate}
-                        endDate={endDate}
+                        startDate={startDate || undefined}
+                        endDate={endDate || undefined}
                         onChange={(update) => setDateRange(update)}
                         dateFormat="dd.MM.yyyy"
                         isClearable={true}

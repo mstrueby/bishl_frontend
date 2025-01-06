@@ -2,8 +2,8 @@ import { Listbox } from '@headlessui/react';
 import { useState, useEffect } from 'react';
 
 const TournamentListbox = () => {
-    const [tournaments, setTournaments] = useState([]);
-    const [selectedTournament, setSelectedTournament] = useState(null);
+    const [tournaments, setTournaments] = useState<{ id: string; name: string }[]>([]);
+    const [selectedTournament, setSelectedTournament] = useState<{ name: string } | null>(null);
 
     useEffect(() => {
         const fetchTournaments = async () => {
@@ -24,7 +24,7 @@ const TournamentListbox = () => {
     return (
         <Listbox value={selectedTournament} onChange={setSelectedTournament}>
             <Listbox.Button>
-                {selectedTournament ? selectedTournament.name : 'Select Tournament'}
+                {selectedTournament && 'name' in selectedTournament ? selectedTournament.name : 'Select Tournament'}
             </Listbox.Button>
             <Listbox.Options>
                 {tournaments.map((tournament) => (
