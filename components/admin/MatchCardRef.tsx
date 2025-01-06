@@ -146,10 +146,12 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
             <p className="text-xs font-medium uppercase">{selected.title}</p>
           </div>
+          {validStatuses.length > 0 && (
           <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
             <span className="sr-only">Change workflow status</span>
             <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
           </ListboxButton>
+          )}
         </div>
 
         <ListboxOptions
