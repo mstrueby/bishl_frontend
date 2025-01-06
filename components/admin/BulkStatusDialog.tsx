@@ -52,7 +52,22 @@ export default function BulkStatusDialog({
   onConfirm: (status: string) => void,
   isLoading?: boolean
 }) {
-  const [selected, setSelected] = useState(null);
+  interface StatusType {
+  key: string;
+  title: string;
+  current: boolean;
+  color: {
+    divide: string;
+    background: string;
+    text: string;
+    ring: string;
+    hover: string;
+    focus: string;
+    dot: string;
+  };
+}
+
+const [selected, setSelected] = useState<StatusType | null>(null);
 
 
   const handleCancel = () => {
