@@ -6,8 +6,39 @@ import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
 import { classNames } from '../../tools/utils'
 
 const allStatuses = [
-  { key: 'REQUESTED', title: 'Angefragt' },
-  { key: 'UNAVAILABLE', title: 'Nicht verfügbar' }
+  {
+    key: 'REQUESTED', title: 'Angefragt', current: false, color: {
+      divide: 'divide-yellow-600/20',
+      background: 'bg-yellow-50',
+      text: 'text-yellow-800',
+      ring: 'ring-yellow-600/20',
+      hover: 'hover:bg-yellow-100',
+      focus: 'focus-visible:outline-yellow-600/20',
+      dot: 'fill-yellow-500'
+    }
+  },
+  {
+    key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
+      divide: 'divide-red-600/10',
+      background: 'bg-red-50',
+      text: 'text-red-700',
+      ring: 'ring-red-600/10',
+      hover: 'hover:bg-red-100',
+      focus: 'focus-visible:outline-red-600/10',
+      dot: 'fill-red-500'
+    }
+  },
+  {
+    key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
+      divide: 'divide-green-100',
+      background: 'bg-green-500',
+      text: 'text-white',
+      ring: 'ring-green-700',
+      hover: 'hover:bg-green-100',
+      focus: 'focus-visible:outline-green-100',
+      dot: 'fill-green-300'
+    }
+  }
 ]
 
 export default function BulkStatusDialog({
@@ -38,9 +69,18 @@ export default function BulkStatusDialog({
       <Dialog as="div" className="fixed inset-0 z-10" onClose={onClose}>
         <div className="fixed inset-0 bg-black/30 transition-opacity" />
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-              <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+          <div className="flex items-center justify-center min-h-full p-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
+              <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 mb-4">
                 Status aktualisieren
               </Dialog.Title>
 
@@ -48,10 +88,13 @@ export default function BulkStatusDialog({
                 <Listbox value={selected} onChange={setSelected}>
                   <Label className="sr-only">Change status</Label>
                   <div className="relative">
-                    <ListboxButton className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    <ListboxButton className="relative flex flex-row items-center w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                       {selected ? (
-
-                        <span className="block truncate">{selected.title}</span>
+                        <div className={classNames("inline-flex rounded-md outline-none my-0.5", selected.color.divide)}>
+                          <div className={classNames("inline-flex items-center gap-x-1.5 rounded-md ring-1 ring-inset py-0.5 px-2", selected.color.background, selected.color.text, selected.color.ring)}>
+                            <p className="text-xs font-medium uppercase whitespace-nowrap">{selected.title}</p>
+                          </div>
+                        </div>
                       ) : (
                         <Placeholder />
                       )}
@@ -59,25 +102,22 @@ export default function BulkStatusDialog({
                         <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                       </span>
                     </ListboxButton>
-                    <ListboxOptions className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    <ListboxOptions className="absolute right-0 z-10 mt-2 w-full p-3 grid gap-y-4 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in">
                       {allStatuses.map((status) => (
                         <ListboxOption
                           key={status.key}
                           value={status}
-                          className={({ active }) =>
-                            classNames(
-                              active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                              'relative cursor-default select-none py-2 pl-3 pr-9'
-                            )
-                          }
+                          className="group cursor-default select-none text-sm text-gray-900"
                         >
-                          {({ selected }) => (
-                            <>
-                              <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                                {status.title}
-                              </span>
-                            </>
-                          )}
+                          <div className="flex flex-col">
+                            <div className="flex justify-between">
+                              <div className={classNames("inline-flex rounded-md outline-none", status.color.divide)}>
+                                <div className={classNames("inline-flex items-center gap-x-1.5 rounded-md ring-1 ring-inset py-0.5 px-2", status.color.background, status.color.text, status.color.ring)}>
+                                  <p className="text-xs font-medium uppercase whitespace-nowrap">{status.title}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </ListboxOption>
                       ))}
                     </ListboxOptions>
@@ -110,6 +150,7 @@ export default function BulkStatusDialog({
                 </button>
               </div>
             </Dialog.Panel>
+            </Transition.Child>
           </div>
         </div>
       </Dialog>
