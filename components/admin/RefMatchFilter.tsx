@@ -34,15 +34,21 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     console.log('Date Range:', { startDate, endDate });
     const formatDateToYMD = (date: Date | null) => {
         if (!date) return undefined;
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        try {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return undefined;
+        }
     };
 
-    const dateFrom = formatDateToYMD(startDate) || formatDateToYMD(new Date());
+    const today = new Date();
+    const dateFrom = formatDateToYMD(startDate) || formatDateToYMD(today);
     const adjustedEndDate = endDate ? new Date(endDate.getTime() + (24 * 60 * 60 * 1000)) : null;
-    const dateTo = formatDateToYMD(adjustedEndDate);
+    const dateTo = endDate ? formatDateToYMD(adjustedEndDate) : undefined;
     console.log('dateFrom:', dateFrom);
     console.log('dateTo:', dateTo);
     setSelectedTournament(tempSelectedTournament);
