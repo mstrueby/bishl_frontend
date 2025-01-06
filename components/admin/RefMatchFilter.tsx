@@ -155,10 +155,10 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                     {/* <label className="text-gray-700 text-sm font-bold mb-2">Datumsbereich:</label> */}
                     <div className="mt-1">
                       <DatePicker
-                        showIcon={true}
+                        showIcon={false}
                         toggleCalendarOnIconClick={true}
                         icon={
-                          <CalendarDateRangeIcon className="pointer-events-none mr-2 size-6 self-center text-gray-400" />
+                          <CalendarDateRangeIcon className="pointer-events-none mr-2 size-5 self-center text-gray-400" />
                         }
                         selectsRange={true}
                         startDate={startDate}
