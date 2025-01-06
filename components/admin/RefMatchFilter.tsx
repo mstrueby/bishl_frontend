@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition, Switch } from '@headlessui/react';
-import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline';
+import { FunnelIcon as FunnelIconOutline, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid';
 import TournamentSelect from '../ui/TournamentSelect';
 import type { TournamentValues } from '../../types/TournamentValues';
@@ -143,6 +143,16 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                       <DatePicker
                         showIcon={true}
                         toggleCalendarOnIconClick={true}
+                        customInput={
+                          <div className="relative w-full">
+                            <input
+                              type="text"
+                              className="w-full rounded-md border border-gray-300 py-1.5 pl-3 pr-10"
+                              placeholder="(Zeitraum auswählen)"
+                            />
+                            <CalendarDaysIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          </div>
+                        }
                         selectsRange={true}
                         startDate={startDate}
                         endDate={endDate}
