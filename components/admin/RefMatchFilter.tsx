@@ -31,6 +31,9 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   }, []);
 
   const handleApplyFilter = () => {
+    console.log('Date Range:', { startDate, endDate });
+    console.log('Start Date ISO:', startDate?.toISOString());
+    console.log('End Date ISO:', endDate?.toISOString());
     setSelectedTournament(tempSelectedTournament);
     onFilterChange({
       tournament: tempSelectedTournament?.alias || 'all',
