@@ -32,14 +32,25 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
 
   const handleApplyFilter = () => {
     console.log('Date Range:', { startDate, endDate });
-    console.log('Start Date ISO:', startDate?.toISOString());
-    console.log('End Date ISO:', endDate?.toISOString());
+    const formatDateToYMD = (date: Date | null) => {
+        if (!date) return undefined;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const dateFrom = formatDateToYMD(startDate) || formatDateToYMD(new Date());
+    const adjustedEndDate = endDate ? new Date(endDate.getTime() + (24 * 60 * 60 * 1000)) : null;
+    const dateTo = formatDateToYMD(adjustedEndDate);
+    console.log('dateFrom:', dateFrom);
+    console.log('dateTo:', dateTo);
     setSelectedTournament(tempSelectedTournament);
     onFilterChange({
       tournament: tempSelectedTournament?.alias || 'all',
       showUnassignedOnly,
-      date_from: startDate ? startDate.toLocaleDateString('de-DE').split('T')[0] : new Date().toLocaleDateString('de-DE').split('T')[0],
-      date_to: endDate ? new Date(new Date(endDate).setHours(23, 59, 59)).toLocaleDateString('de-DE').split('T')[0] : undefined
+      date_from: dateFrom,
+      date_to: dateTo
     });
     setIsOpen(false);
   };
