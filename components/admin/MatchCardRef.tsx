@@ -7,6 +7,8 @@ import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/o
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
   const { home, away, startDate, venue } = match;
 
@@ -58,12 +60,12 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     {
       key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
         divide: 'divide-green-100',
-        background: 'bg-green-100',
-        text: 'text-green-700',
-        ring: 'ring-green-100',
+        background: 'bg-green-500',
+        text: 'text-white',
+        ring: 'ring-green-700',
         hover: 'hover:bg-green-100',
         focus: 'focus-visible:outline-green-100',
-        dot: 'fill-green-600'
+        dot: 'fill-green-300'
       }
     },
   ]
@@ -95,8 +97,8 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     try {
       const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
       const endpoint = (!assignment || selected.key === 'AVAILABLE') ?
-        `${process.env.NEXT_PUBLIC_API_URL}/assignments` :
-        `${process.env.NEXT_PUBLIC_API_URL}/assignments/${assignment._id}`;
+        `${BASE_URL}/assignments` :
+        `${BASE_URL}/assignments/${assignment._id}`;
 
       const body = (!assignment || selected.key === 'AVAILABLE') ?
         { matchId: match._id, status: newStatus.key } :
@@ -152,18 +154,21 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
         <ListboxOptions
           transition
-          className="absolute right-0 z-10 mt-2 w-72 origin-top-right divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
+          className="absolute right-0 z-10 mt-2 w-auto p-3 grid gap-y-4 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
         >
           {validStatuses.map((option) => (
             <ListboxOption
               key={option.title}
               value={option}
-              className="group cursor-default select-none p-4 text-sm text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
+              className="group cursor-default select-none text-sm text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
             >
               <div className="flex flex-col">
                 <div className="flex justify-between">
-                  <p className="font-normal group-data-[selected]:font-semibold">{option.title}</p>
-
+                  <div className={classNames("inline-flex rounded-md outline-none", option.color.divide)}>
+                    <div className={classNames("inline-flex items-center gap-x-1.5 rounded-md ring-1 ring-inset py-0.5 px-2", option.color.background, option.color.text, option.color.ring)}>
+                      <p className="text-xs font-medium uppercase whitespace-nowrap">{option.title}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </ListboxOption>
