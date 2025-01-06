@@ -139,7 +139,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       <Label className="sr-only">Change workflow status</Label>
       <div className="relative">
         <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
-          <div className={classNames("inline-flex items-center gap-x-1.5 rounded-l-md ring-1 ring-inset py-0.5 px-2", selected.color.background, selected.color.text, selected.color.ring)}>
+          <div className={classNames("inline-flex items-center gap-x-1.5 ", validStatuses.length > 0 ? "rounded-l-md" : "rounded-md", "ring-1 ring-inset py-0.5 px-2", selected.color.background, selected.color.text, selected.color.ring)}>
             <svg viewBox="0 0 6 6" aria-hidden="true" className={classNames("size-1.5", selected.color.dot)}>
               <circle r={3} cx={3} cy={3} />
             </svg>
