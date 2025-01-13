@@ -9,7 +9,14 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ email, password })
     })
-    const data = await result.json()
+    let data;
+    try {
+      data = await result.json();
+    } catch (e) {
+      console.error('Error parsing response:', await result.text());
+      res.status(500).json({ error: 'Invalid response from authentication server' });
+      return;
+    }
     
     console.log(data)
     
