@@ -86,12 +86,37 @@ export default function Club({
   );
 }
 
-export async function getStaticProps(context: GetStaticPropsContext) {
+export async function getServerSideProps(context) {
   const cAlias = context.params?.cAlias;
-  if (typeof cAlias !== 'string') {
-    return { notFound: true };
+  const jwt = getCookie('jwt', context) as string | undefined;
+
+  if (!jwt) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
   }
+
   try {
+    // First check if user has required role
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    
+    const user = userResponse.data;
+    if (!user.roles?.includes('ADMIN')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${cAlias}`);
     if (!res.ok) {
       console.error('Error fetching club:', res.statusText);
