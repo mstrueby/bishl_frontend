@@ -150,10 +150,37 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = getCookie('jwt', context) as string | undefined;
   let matches: Match[] = [];
   let assignments = null;
   const currentDate = new Date().toISOString().split('T')[0];
+
+  if (!jwt) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
+  try {
+    // First check if user has required role
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    
+    const user = userResponse.data;
+    if (!user.roles?.includes('REF_ADMIN') && !user.roles?.includes('ADMIN')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
 
   try {
     const [matchesRes] = await Promise.all([
