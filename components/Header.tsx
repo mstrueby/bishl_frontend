@@ -188,6 +188,8 @@ const Header = () => {
                       >
                         <MenuItems className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <p className="block px-4 py-2 text-sm font-bold text-gray-900 border-b border-gray-200">Hallo {user.firstName}</p>
+                          
+                          {/* Profile - visible to all */}
                           <MenuItem>
                             {({ active }) => (
                               <a
@@ -201,75 +203,76 @@ const Header = () => {
                               </a>
                             )}
                           </MenuItem>
+
+                          {/* Admin items - only for admins */}
+                          {user.roles?.includes('admin') && (
+                            <>
+                              <MenuItem>
+                                <MyLink href="/admin/posts" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  <PencilSquareIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>Beiträge</span>
+                                </MyLink>
+                              </MenuItem>
+                              <MenuItem>
+                                <MyLink href="/admin/documents" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  <DocumentIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>Dokumente</span>
+                                </MyLink>
+                              </MenuItem>
+                            </>
+                          )}
+
+                          {/* Referee admin items - only for referee admins */}
+                          {user.roles?.includes('refAdmin') && (
+                            <MenuItem>
+                              <MyLink href="/admin/refadmin" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                <CalendarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <span>Schiris einteilen</span>
+                              </MyLink>
+                            </MenuItem>
+                          )}
+
+                          {/* Referee items - only for referees */}
+                          {user.roles?.includes('referee') && (
+                            <MenuItem>
+                              <MyLink href="/admin/myref" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                <HandRaisedIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <span>Meine Einsätze</span>
+                              </MyLink>
+                            </MenuItem>
+                          )}
+
+                          {/* League manager items - only for league managers */}
+                          {user.roles?.includes('leagueManager') && (
+                            <>
+                              <MenuItem>
+                                <MyLink href="/admin/clubs" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
+                                  <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>Vereine</span>
+                                </MyLink>
+                              </MenuItem>
+                              <MenuItem>
+                                <MyLink href="/admin/venues" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  <RectangleStackIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>Spielflächen</span>
+                                </MyLink>
+                              </MenuItem>
+                              <MenuItem>
+                                <MyLink href="/leaguemanager" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  Spielbetrieb
+                                </MyLink>
+                              </MenuItem>
+                            </>
+                          )}
+
+                          {/* Logout - visible to all */}
                           <MenuItem>
-                            <MyLink
-                              href="/admin/posts"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
-                            >
-                              <PencilSquareIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                              <span>Beiträge</span>
-                            </MyLink>
-                          </MenuItem>
-                          <MenuItem>
-                            <MyLink
-                              href="/admin/documents"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
-                            >
-                              <DocumentIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                              <span>Dokumente</span>
-                            </MyLink>
-                          </MenuItem>
-                          <MenuItem>
-                            <MyLink
-                              href="/admin/refadmin"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
-                            >
-                              <CalendarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                              <span>Schiris einteilen</span>
-                            </MyLink>
-                          </MenuItem>
-                          <MenuItem>
-                            <MyLink
-                              href="/admin/myref"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
-                            >
-                              <HandRaisedIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                              <span>Meine Einsätze</span>
-                            </MyLink>
-                          </MenuItem>
-                          <MenuItem>
-                            <MyLink
-                              href="/admin/clubs"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'
-                            >
-                              <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                              <span>Vereine</span>
-                            </MyLink>
-                          </MenuItem>
-                          <MenuItem>
-                            <MyLink
-                              href="/admin/venues"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'
-                            >
-                              <RectangleStackIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                              <span>Spielflächen</span>
-                            </MyLink>
-                          </MenuItem>
-                          <MenuItem>
-                            <MyLink
-                              href="/leaguemanager"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                              Spielbetrieb
-                            </MyLink>
-                          </MenuItem>
-                          <MenuItem>
-                            <MyLink
-                              href="/logout"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
+                            <MyLink href="/logout" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
                               <ArrowLeftStartOnRectangleIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                               <span>Abmelden</span>
                             </MyLink>
                           </MenuItem>
+                        </MenuItems>
                         </MenuItems>
                       </Transition>
                     </Menu>
