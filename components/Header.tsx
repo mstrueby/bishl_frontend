@@ -1,8 +1,8 @@
 import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu as HeadlessMenu, MenuButton as HeadlessMenuButton, MenuItems as HeadlessMenuItems, MenuItem as HeadlessMenuItem, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon } from '@heroicons/react/24/outline'
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 
 
@@ -78,8 +78,8 @@ const Header = () => {
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-                    <HeadlessMenu as="div" className="relative inline-block text-left">
-                      <HeadlessMenuButton className={item}>Herren</HeadlessMenuButton>
+                    <Menu as="div" className="relative inline-block text-left">
+                      <MenuButton className={item}>Herren</MenuButton>
                       <Transition
                         as={Fragment}
                         enter="transition ease-out duration-300"
@@ -89,9 +89,9 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <HeadlessMenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {men.map((item, index) => (
-                            <HeadlessMenuItem key={index}>
+                            <MenuItem key={index}>
                               {({ active }) => (
                                 <MyLink
                                   href={item.href}
@@ -108,13 +108,13 @@ const Header = () => {
                                   {item.name}
                                 </MyLink>
                               )}
-                            </HeadlessMenuItem>
+                            </MenuItem>
                           ))}
-                        </HeadlessMenuItems>
+                        </MenuItems>
                       </Transition>
-                    </HeadlessMenu>
-                    <HeadlessMenu as="div" className="relative inline-block text-left">
-                      <HeadlessMenuButton className={item}>Nachwuchs</HeadlessMenuButton>
+                    </Menu>
+                    <Menu as="div" className="relative inline-block text-left">
+                      <MenuButton className={item}>Nachwuchs</MenuButton>
                       <Transition
                         as={Fragment}
                         enter="transition ease-out duration-100"
@@ -124,9 +124,9 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <HeadlessMenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {youth.map((item, index) => (
-                            <HeadlessMenuItem key={index}>
+                            <MenuItem key={index}>
                               {({ active }) => (
                                 <MyLink
                                   href={item.href}
@@ -143,11 +143,11 @@ const Header = () => {
                                   {item.name}
                                 </MyLink>
                               )}
-                            </HeadlessMenuItem>
+                            </MenuItem>
                           ))}
-                        </HeadlessMenuItems>
+                        </MenuItems>
                       </Transition>
-                    </HeadlessMenu>
+                    </Menu>
                   </div>
                 </div>
               </div>
@@ -169,13 +169,13 @@ const Header = () => {
                   {/* Profile dropdown */}
                   {loading ? <span>Loading...</span> : ""}
                   {user !== null ? (
-                    <HeadlessMenu as="div" className="relative ml-3">
+                    <Menu as="div" className="relative ml-3">
                       <div>
-                        <HeadlessMenuButton className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                        <MenuButton className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                           <span className="absolute -inset-1.5" />
                           <span className="sr-only">Open user menu</span>
                           <UserIcon className="block h-6 w-6" aria-hidden="true" />
-                        </HeadlessMenuButton>
+                        </MenuButton>
                       </div>
                       <Transition
                         as={Fragment}
@@ -186,95 +186,95 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <HeadlessMenuItems className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <MenuItems className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <p className="block px-4 py-2 text-sm font-bold text-gray-900 border-b border-gray-200">Hallo {user.firstName}</p>
 
-                          {/* Profile - visible to all */}
-                          <HeadlessMenuItem>
-                            {({ active }) => (
-                              <a
-                                href="#"
-                                className={classNames(
-                                  active ? 'bg-gray-100 text-gray-900 hover:no-underline' : '',
-                                  'block px-4 py-2 text-sm text-gray-700'
-                                )}
-                              >
-                                Your Profile
-                              </a>
-                            )}
-                          </HeadlessMenuItem>
-
                           {/* Admin items - only for admins */}
-                          {user.roles?.includes('admin') && (
+                          {(user.roles?.includes('AUTHOR') || user.roles?.includes('ADMIN')) && (
                             <>
-                              <HeadlessMenuItem>
+                              <MenuItem>
                                 <MyLink href="/admin/posts" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                   <PencilSquareIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                   <span>Beiträge</span>
                                 </MyLink>
-                              </HeadlessMenuItem>
-                              <HeadlessMenuItem>
+                              </MenuItem>
+                            </>
+                          )}
+                          {(user.roles?.includes('DOC_ADMIN') || user.roles?.includes('ADMIN')) && (
+                            <>
+                              <MenuItem>
                                 <MyLink href="/admin/documents" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                   <DocumentIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                   <span>Dokumente</span>
                                 </MyLink>
-                              </HeadlessMenuItem>
+                              </MenuItem>
                             </>
                           )}
 
                           {/* Referee admin items - only for referee admins */}
-                          {user.roles?.includes('refAdmin') && (
-                            <HeadlessMenuItem>
+                          {(user.roles?.includes('REF_ADMIN') || user.roles?.includes('ADMIN')) && (
+                            <MenuItem>
                               <MyLink href="/admin/refadmin" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                 <CalendarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                 <span>Schiris einteilen</span>
                               </MyLink>
-                            </HeadlessMenuItem>
+                            </MenuItem>
                           )}
 
                           {/* Referee items - only for referees */}
-                          {user.roles?.includes('referee') && (
-                            <HeadlessMenuItem>
+                          {user.roles?.includes('REFEREE') && (
+                            <MenuItem>
                               <MyLink href="/admin/myref" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                 <HandRaisedIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                 <span>Meine Einsätze</span>
                               </MyLink>
-                            </HeadlessMenuItem>
+                            </MenuItem>
                           )}
 
                           {/* League manager items - only for league managers */}
-                          {user.roles?.includes('leagueManager') && (
+                          {user.roles?.includes('ADMIN') && (
                             <>
-                              <HeadlessMenuItem>
+                              <MenuItem>
                                 <MyLink href="/admin/clubs" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
                                   <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                   <span>Vereine</span>
                                 </MyLink>
-                              </HeadlessMenuItem>
-                              <HeadlessMenuItem>
+                              </MenuItem>
+                              <MenuItem>
                                 <MyLink href="/admin/venues" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                   <RectangleStackIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                   <span>Spielflächen</span>
                                 </MyLink>
-                              </HeadlessMenuItem>
-                              <HeadlessMenuItem>
+                              </MenuItem>
+                              <MenuItem>
                                 <MyLink href="/leaguemanager" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                   Spielbetrieb
                                 </MyLink>
-                              </HeadlessMenuItem>
+                              </MenuItem>
                             </>
                           )}
 
+                          {/* Profile - visible to all */}
+                          <MenuItem>
+                              <MyLink 
+                                href="#"
+                                className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'
+                              >
+                                <Cog8ToothIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <span>Mein Profil</span>
+                              </MyLink>
+                          </MenuItem>
+
                           {/* Logout - visible to all */}
-                          <HeadlessMenuItem>
-                            <MyLink href="/logout" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
+                          <MenuItem>
+                            <MyLink href="/logout" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                               <ArrowLeftStartOnRectangleIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                               <span>Abmelden</span>
                             </MyLink>
-                          </HeadlessMenuItem>
-                        </HeadlessMenuItems>
+                          </MenuItem>
+                        </MenuItems>
                       </Transition>
-                    </HeadlessMenu>
+                    </Menu>
                   ) : (
 
                     /* Login Menu Link */
