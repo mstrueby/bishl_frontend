@@ -21,12 +21,28 @@ export const getServerSideProps: GetServerSideProps<EditProps> = async (context)
   const { alias } = context.params as { alias: string };
 
   if (!jwt) {
-    // If JWT is undefined, return notFound or redirect, as appropriate
     return { notFound: true };
   }
 
-  let doc = null;
   try {
+    // First check if user has required role
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    
+    const user = userResponse.data;
+    if (!user.roles?.includes('DOC_ADMIN') && !user.roles?.includes('ADMIN')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
+
+    let doc = null;
     const response = await axios.get(BASE_URL + alias, {
       headers: {
         Authorization: `Bearer ${jwt}`,
