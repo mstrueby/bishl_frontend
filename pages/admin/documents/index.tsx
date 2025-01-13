@@ -19,11 +19,28 @@ interface DocsProps {
 }
 
 export const getServerSideProps: GetServerSideProps<DocsProps> = async (context) => {
-  // Ensure jwt is a string or an empty string if undefined
   const jwt = (getCookie('jwt', context) ?? '') as string;
   let docs: DocumentValues[] = [];
 
   try {
+    // First check if user has required role
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    
+    const user = userResponse.data;
+    if (!user.roles?.includes('DOC_ADMIN') && !user.roles?.includes('ADMIN')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
+
+    // If authorized, fetch documents
     const res = await axios.get(BASE_URL, {
       headers: {
         'Content-Type': 'application/json',
@@ -32,11 +49,16 @@ export const getServerSideProps: GetServerSideProps<DocsProps> = async (context)
     docs = res.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error('Error fetching docs:', error);
+      console.error('Error:', error);
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
     }
   }
 
-  // Ensure we provide an empty array for docs if it's undefined
   return { props: { jwt, docs } };
 }
 
