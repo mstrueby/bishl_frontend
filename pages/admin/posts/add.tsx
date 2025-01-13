@@ -23,8 +23,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
   let user = {
     firstName: "",
-    lastName: ""
+    lastName: "",
+    roles: []
   };
+  
+  try {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+    user = userResponse.data;
+    
+    if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
   try {
     const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
