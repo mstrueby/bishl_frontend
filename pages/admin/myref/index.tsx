@@ -25,12 +25,38 @@ interface FilterState {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = getCookie('jwt', context) as string | undefined;
   let matches = null;
   let assignments = null;
   const currentDate = new Date().toISOString().split('T')[0];
 
+  if (!jwt) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
   try {
+    // First check if user has REFEREE role
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    
+    const user = userResponse.data;
+    if (!user.roles?.includes('REFEREE')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
+
     const userRes = await axios.get(`${BASE_URL}/users/me`, {
       headers: { Authorization: `Bearer ${jwt}` },
     });
