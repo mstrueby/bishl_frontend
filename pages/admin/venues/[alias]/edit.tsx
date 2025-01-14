@@ -30,9 +30,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  let venue = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -49,7 +50,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Fetch the existing venue data
-    let venue = null;
     const response = await axios.get(BASE_URL + alias, {
       headers: {
         Authorization: `Bearer ${jwt}`,

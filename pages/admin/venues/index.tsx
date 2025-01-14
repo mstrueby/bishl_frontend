@@ -18,7 +18,6 @@ interface VenuesProps {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let venues = null;
 
   if (!jwt) {
     return {
@@ -29,9 +28,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  let venues = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
