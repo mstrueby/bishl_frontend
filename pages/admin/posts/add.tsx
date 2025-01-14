@@ -9,7 +9,7 @@ import PostForm from '../../../components/admin/PostForm'
 import { PostValuesForm } from '../../../types/PostValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/posts/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AddProps {
   jwt: string;
@@ -17,7 +17,7 @@ interface AddProps {
     firstName: string;
     lastName: string;
   }
-}
+};
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
@@ -28,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
   
   try {
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -59,7 +59,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       user
     }
   }
-}
+};
 
 export default function Add({ jwt, user }: AddProps) {
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +94,7 @@ export default function Add({ jwt, user }: AddProps) {
         }
       });
 
-      const response = await axios.post(BASE_URL, formData, {
+      const response = await axios.post(BASE_URL! + "/posts/", formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

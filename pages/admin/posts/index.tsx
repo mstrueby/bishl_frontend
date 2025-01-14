@@ -11,7 +11,7 @@ import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import DataList from '../../../components/admin/ui/DataList';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface PostsProps {
   jwt: string,
@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -40,7 +40,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await axios.get(BASE_URL, {
+    const res = await axios.get(BASE_URL + '/posts/', {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -61,7 +61,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get(BASE_URL, {
+      const res = await axios.get(BASE_URL + '/posts/', {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -87,7 +87,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
         formData.append('imageUrl', imageUrl);
       }
 
-      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
+      const response = await axios.patch(`${BASE_URL + '/posts/'}${postId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
         },
@@ -115,7 +115,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       if (imageUrl) {
         formData.append('imageUrl', imageUrl);
       }
-      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
+      const response = await axios.patch(`${BASE_URL + '/posts/'}${postId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
         },
@@ -142,7 +142,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       const formData = new FormData();
       formData.append('deleted', 'true'); // Mark the post as deleted
 
-      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
+      const response = await axios.patch(`${BASE_URL + '/posts/'}${postId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

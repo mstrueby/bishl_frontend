@@ -10,7 +10,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface ClubsProps {
   jwt: string,
@@ -32,13 +32,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
     });
     
     const user = userResponse.data;
+    console.log("user:", user)
     if (!user.roles?.includes('ADMIN')) {
       return {
         redirect: {
@@ -48,12 +49,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await axios.get(BASE_URL, {
+    const res = await axios.get(BASE_URL! + '/clubs/', {
       headers: {
         'Content-Type': 'application/json',
       }
     });
     clubs = res.data;
+    console.log("clubs:", clubs)
   } catch (error) {
     if (axios.isAxiosError(error)) {
       clubs = [];
@@ -91,7 +93,7 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
 
   const fetchClubs = async () => {
     try {
-      const res = await axios.get(BASE_URL, {
+      const res = await axios.get(BASE_URL! + '/clubs/', {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -116,7 +118,7 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
         formData.append('logo', logo);
       }
 
-      const response = await axios.patch(`${BASE_URL}${clubId}`, formData, {
+      const response = await axios.patch(`${BASE_URL! + '/clubs/'}${clubId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
         },
