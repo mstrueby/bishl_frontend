@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     try {
-      const result = await fetch(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
+      const result = await fetch(`${process.env['NEXT_PUBLIC_API_URL']}/user`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -21,7 +21,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       userData['jwt'] = jwt;
       res.status(200).json(userData);
     } catch (error) {
-      res.status(401).end();
+      console.error('Error fetching user:', error);
+      res.status(401).json({ detail: 'Authentication failed' });
       return;
     }
   } else {
