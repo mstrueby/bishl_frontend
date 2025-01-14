@@ -32,7 +32,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       initialValues={initialValues}
       enableReinitialize={enableReinitialize}
       validationSchema={Yup.object({
-        email: Yup.string().required('Das Feld "Titel" ist erforderlich.'),
+        email: Yup.string()
+          .required('Das Feld "Titel" ist erforderlich.')
+          .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
       })}
       onSubmit={onSubmit}
     >
