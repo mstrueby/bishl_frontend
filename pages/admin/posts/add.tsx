@@ -9,7 +9,7 @@ import PostForm from '../../../components/admin/PostForm'
 import { PostValuesForm } from '../../../types/PostValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/posts/";
 
 interface AddProps {
   jwt: string;
@@ -20,7 +20,11 @@ interface AddProps {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = getCookie('jwt', context) as string | undefined;
+  if (!jwt) {
+    return { notFound: true };
+  }
+  
   let user = {
     firstName: "",
     lastName: "",
@@ -28,13 +32,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
   
   try {
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
     });
-    user = userResponse.data;
-    
+    const user = userResponse.data;
     if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
       return {
         redirect: {
@@ -43,13 +46,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       };
     }
-  try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    user = response.data;
   } catch (error) {
     console.error('Error fetching user data:', error);
   }
@@ -94,7 +90,7 @@ export default function Add({ jwt, user }: AddProps) {
         }
       });
 
-      const response = await axios.post(BASE_URL! + "/posts/", formData, {
+      const response = await axios.post(BASE_URL, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

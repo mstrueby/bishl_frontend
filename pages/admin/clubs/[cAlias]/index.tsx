@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { GetStaticPropsContext } from 'next';
+import { GetServerSideProps, GetStaticPropsContext } from 'next';
+import { getCookie } from 'cookies-next';
+import axios from 'axios';
 import { ClubValues } from "../../../../types/ClubValues";
 import LayoutAdm from "../../../../components/LayoutAdm";
 import navData from "../../../../components/leaguemanager/navData";
@@ -8,6 +10,62 @@ import SuccessMessage from "../../../../components/ui/SuccessMessage";
 import SectionHeader from "../../../../components/leaguemanager/SectionHeader";
 import DescriptionList from "../../../../components/leaguemanager/DescriptionList";
 import DataList from "../../../../components/leaguemanager/DataList";
+
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
+
+export const getServerSideProps: GetServerSideProps = async(context) => {
+  const cAlias = context.params?.cAlias;
+  const jwt = getCookie('jwt', context) as string | undefined;
+
+  if (!jwt) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
+  try {
+    // First check if user has required role
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+
+    const user = userResponse.data;
+    if (!user.roles?.includes('ADMIN')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${cAlias}`);
+    if (!res.ok) {
+      console.error('Error fetching club:', res.statusText);
+      return {
+        notFound: true,
+      };
+    }
+    const clubData = await res.json();
+    return {
+      props: {
+        club: clubData,
+      },
+      revalidate: 60,
+    };
+  } catch (error) {
+    console.error('Failed to fetch club data:', error);
+    return {
+      notFound: true,
+    };
+  }
+}
+
 
 export default function Club({
   club
@@ -86,70 +144,4 @@ export default function Club({
   );
 }
 
-export async function getServerSideProps(context) {
-  const cAlias = context.params?.cAlias;
-  const jwt = getCookie('jwt', context) as string | undefined;
 
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${cAlias}`);
-    if (!res.ok) {
-      console.error('Error fetching club:', res.statusText);
-      return {
-        notFound: true,
-      };
-    }
-    const clubData = await res.json();
-    return {
-      props: {
-        club: clubData,
-      },
-      revalidate: 60,
-    };
-  } catch (error) {
-    console.error('Failed to fetch club data:', error);
-    return {
-      notFound: true,
-    };
-  }
-}
-
-export async function getStaticPaths() {
-  const clubsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/`);
-  const clubs = await clubsRes.json();
-  let paths: { params: { cAlias: string; } }[] = [];
-  for (const club of clubs) {
-    paths.push({
-      params: { cAlias: club.alias },
-    });
-  }
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-}
