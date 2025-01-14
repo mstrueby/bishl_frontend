@@ -48,35 +48,16 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
   const onSubmit = async (values: UserValues) => {
     setError(null);
     setLoading(true);
-    
+
     // Remove 'roles' from the values object
     console.log('submitted values', values)
     const { roles, _id, firstName, lastName, club, ...filteredValues } = values;
     console.log('filtered values', filteredValues)
     try {
-      const formData = new FormData();
-      Object.entries(filteredValues).forEach(([key, value]) => {
-        if (value instanceof FileList) {
-          Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (key === 'club') {
-          formData.append(key, JSON.stringify(value));
-        } else { 
-          // Handle imageUrl specifically to ensure it's only appended if not null
-          if (key === 'imageUrl' && value !== null) {
-            formData.append(key, value);
-          } else if (key !== 'imageUrl') {
-            formData.append(key, value);
-          }
-        }
-      });
-
-      // Debug FormData by logging key-value pairs to the console
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-
-      const response = await axios.patch(BASE_URL, formData, {
+      
+      const response = await axios.patch(BASE_URL, filteredValues, {
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`,
         },
       });
@@ -154,4 +135,3 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
 };
 
 export default Profile;
-
