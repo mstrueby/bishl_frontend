@@ -37,20 +37,31 @@ const MyLink = forwardRef<HTMLAnchorElement, { href: string; children: ReactNode
 
 const Header = () => {
   const { user, setUser, authError, setAuthError, loading, setLoading } = useAuth();
-  useEffect(() => {
+  const fetchUserData = async () => {
     setLoading(true);
-    (async () => {
+    try {
       const userData = await fetch('/api/user');
-      try {
-        const user = await userData.json();
-        setUser(user);
-      } catch (error) {
-        setUser(null);
-        setAuthError(error);
-      }
-    })();
-    setLoading(false);
-  }, [setLoading, setUser, setAuthError]);
+      const user = await userData.json();
+      setUser(user);
+    } catch (error) {
+      setUser(null);
+      setAuthError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  // Add event listener for auth changes
+  useEffect(() => {
+    window.addEventListener('auth_change', fetchUserData);
+    return () => {
+      window.removeEventListener('auth_change', fetchUserData);
+    };
+  }, []);
 
   return (
     <Disclosure as="nav" className="bg-gray-800 sticky top-0 z-50 shadow-md">
