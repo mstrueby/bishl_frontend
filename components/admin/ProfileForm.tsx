@@ -57,6 +57,18 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             label="E-Mail"
             type="email"
           />
+          
+          <InputText
+            name="password"
+            label="Neues Passwort"
+            type="password"
+          />
+          
+          <InputText
+            name="confirmPassword"
+            label="Passwort bestätigen"
+            type="password"
+          />
 
           {/**
            {values.imageUrl ? (
