@@ -48,15 +48,19 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
   const onSubmit = async (values: UserValues) => {
     setError(null);
     setLoading(true);
+    
+    // Remove 'roles' from the values object
     console.log('submitted values', values)
+    const { roles, _id, firstName, lastName, club, ...filteredValues } = values;
+    console.log('filtered values', filteredValues)
     try {
       const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
+      Object.entries(filteredValues).forEach(([key, value]) => {
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else if (key === 'club') {
           formData.append(key, JSON.stringify(value));
-        } else {
+        } else { 
           // Handle imageUrl specifically to ensure it's only appended if not null
           if (key === 'imageUrl' && value !== null) {
             formData.append(key, value);
@@ -125,7 +129,8 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
     club: {
       clubId: profile.club.clubId,
       clubName: profile.club.clubName,
-    }
+    },
+    roles: profile.roles,
   };
 
   const sectionTitle = 'Mein Profil';
