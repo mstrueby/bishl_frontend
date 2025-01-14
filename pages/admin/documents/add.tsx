@@ -13,22 +13,29 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/documents/"
 
 interface AddProps {
   jwt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+  }
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context) as string | undefined;
-
   if (!jwt) {
     return { notFound: true };
   }
 
+  let user = {
+    firstName: "",
+    lastName: "",
+    roles: []
+  };
   try {
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
     });
-    
     const user = userResponse.data;
     if (!user.roles?.includes('DOC_ADMIN') && !user.roles?.includes('ADMIN')) {
       return {
@@ -38,21 +45,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       };
     }
-
-    return {
-      props: {
-        jwt
-      }
-    };
   } catch (error) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
+    console.error('Error fetching user data:', error);
   }
-}
+  return {
+    props: {
+      jwt,
+      user
+    },
+  }
+};
 
 export default function Add({ jwt }: AddProps) {
   const [error, setError] = useState<string | null>(null);

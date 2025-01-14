@@ -19,14 +19,14 @@ interface EditProps {
 export const getServerSideProps: GetServerSideProps<EditProps> = async (context) => {
   const jwt = getCookie('jwt', context) as string | undefined;
   const { alias } = context.params as { alias: string };
-
   if (!jwt) {
     return { notFound: true };
   }
 
+  let doc = null
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -41,8 +41,7 @@ export const getServerSideProps: GetServerSideProps<EditProps> = async (context)
         },
       };
     }
-
-    let doc = null;
+    
     const response = await axios.get(BASE_URL + alias, {
       headers: {
         Authorization: `Bearer ${jwt}`,

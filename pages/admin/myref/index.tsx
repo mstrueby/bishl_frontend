@@ -41,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has REFEREE role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -56,11 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       };
     }
-
-    const userRes = await axios.get(`${BASE_URL}/users/me`, {
-      headers: { Authorization: `Bearer ${jwt}` },
-    });
-    const userId = userRes.data._id;
+    const userId = userResponse.data._id;
 
     const [matchesRes, assignmentsRes] = await Promise.all([
       axios.get(`${BASE_URL}/matches/`, {

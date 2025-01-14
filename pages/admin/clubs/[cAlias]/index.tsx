@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { GetStaticPropsContext } from 'next';
+import { GetServerSideProps, GetStaticPropsContext } from 'next';
+import { getCookie } from 'cookies-next';
+import axios from 'axios';
 import { ClubValues } from "../../../../types/ClubValues";
 import LayoutAdm from "../../../../components/LayoutAdm";
 import navData from "../../../../components/leaguemanager/navData";
@@ -86,7 +88,7 @@ export default function Club({
   );
 }
 
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async(context) => {
   const cAlias = context.params?.cAlias;
   const jwt = getCookie('jwt', context) as string | undefined;
 
@@ -101,7 +103,7 @@ export async function getServerSideProps(context) {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }

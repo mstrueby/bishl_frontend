@@ -24,6 +24,87 @@ interface FilterState {
   date_to?: string;
 }
 
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const jwt = getCookie('jwt', context) as string | undefined;
+  let matches: Match[] = [];
+  let assignments = null;
+  const currentDate = new Date().toISOString().split('T')[0];
+
+  if (!jwt) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
+  try {
+    // First check if user has required role
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+
+    const user = userResponse.data;
+    if (!user.roles?.includes('REF_ADMIN') && !user.roles?.includes('ADMIN')) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
+    }
+
+    const [matchesRes] = await Promise.all([
+      axios.get(`${BASE_URL}/matches`, {
+        params: { date_from: currentDate }
+      })
+    ]);
+    matches = matchesRes.data;
+
+    const assignmentPromises = matches.map((match: Match) =>
+      axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
+        params: {
+          assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED']
+        },
+        headers: { Authorization: `Bearer ${jwt}` }
+      })
+    )
+    const assignmentResults = await Promise.all(assignmentPromises);
+    assignments = assignmentResults.reduce((acc, result, index) => {
+      if (result && Array.isArray((result as any).data)) {
+        // Only include AVAILABLE and REQUESTED assignments
+        const filteredAssignments = result.data.filter((assignment: AssignmentValues) =>
+          ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED'].includes(assignment.status)
+        );
+        if (filteredAssignments.length > 0) {
+          acc[matches[index]._id] = filteredAssignments.map((assignment: AssignmentValues) => ({
+            ...assignment,
+            refAdmin: true,
+            position: assignment.position || 1
+          })) as AssignmentValues[];
+        }
+      }
+      return acc;
+    }, {} as { [key: string]: AssignmentValues[] });
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching data:', error);
+    }
+    return { props: { initialMatches: [], initialAssignments: {} } };
+  }
+
+  return {
+    props: {
+      jwt,
+      initialMatches: matches || [],
+      initialAssignments: assignments || {}
+    }
+  };
+};
+
 const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignments }) => {
   const [matches, setMatches] = React.useState<Match[]>(initialMatches);
   const [matchAssignments, setMatchAssignments] = React.useState<{ [key: string]: AssignmentValues[] }>(initialAssignments);
@@ -147,88 +228,6 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
       </ul>
     </Layout>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  let matches: Match[] = [];
-  let assignments = null;
-  const currentDate = new Date().toISOString().split('T')[0];
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('REF_ADMIN') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-  try {
-    const [matchesRes] = await Promise.all([
-      axios.get(`${BASE_URL}/matches`, {
-        params: { date_from: currentDate }
-      })
-    ]);
-    matches = matchesRes.data;
-
-    const assignmentPromises = matches.map((match: Match) =>
-      axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
-        params: {
-          assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED']
-        },
-        headers: { Authorization: `Bearer ${jwt}` }
-      })
-    )
-    const assignmentResults = await Promise.all(assignmentPromises);
-    assignments = assignmentResults.reduce((acc, result, index) => {
-      if (result && Array.isArray((result as any).data)) {
-        // Only include AVAILABLE and REQUESTED assignments
-        const filteredAssignments = result.data.filter((assignment: AssignmentValues) =>
-          ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED'].includes(assignment.status)
-        );
-        if (filteredAssignments.length > 0) {
-          acc[matches[index]._id] = filteredAssignments.map((assignment: AssignmentValues) => ({
-            ...assignment,
-            refAdmin: true,
-            position: assignment.position || 1
-          })) as AssignmentValues[];
-        }
-      }
-      return acc;
-    }, {} as { [key: string]: AssignmentValues[] });
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching data:', error);
-    }
-    return { props: { initialMatches: [], initialAssignments: {} } };
-  }
-
-  return {
-    props: {
-      jwt,
-      initialMatches: matches || [],
-      initialAssignments: assignments || {}
-    }
-  };
 };
 
 export default RefAdmin;
