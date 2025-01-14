@@ -257,7 +257,7 @@ const Header = () => {
                           {/* Profile - visible to all */}
                           <MenuItem>
                               <MyLink 
-                                href="#"
+                                href="/admin/profile"
                                 className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'
                               >
                                 <Cog8ToothIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
