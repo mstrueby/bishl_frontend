@@ -12,7 +12,14 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         body: JSON.stringify({ email, password })
       })
 
-      const data = await result.json();
+      let data;
+      const responseText = await result.text();
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Response text:', responseText);
+        throw new Error('Invalid JSON response from server');
+      }
 
       if (result.ok) {
         const jwt = data.token
