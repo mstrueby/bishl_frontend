@@ -53,19 +53,8 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
     console.log('submitted values', values)
     const { roles, _id, firstName, lastName, club, password, confirmPassword, ...filteredValues } = values;
     
-    // Check if password fields are filled
-    if (password || confirmPassword) {
-      if (password !== confirmPassword) {
-        setError('Die Passwörter stimmen nicht überein.');
-        setLoading(false);
-        return;
-      }
-      if (password.length < 6) {
-        setError('Das Passwort muss mindestens 6 Zeichen lang sein.');
-        setLoading(false);
-        return;
-      }
-      // Only include password if it's being changed
+    // Only include password if it's being changed
+    if (password) {
       filteredValues.password = password;
     }
     

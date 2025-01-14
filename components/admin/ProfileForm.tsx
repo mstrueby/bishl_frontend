@@ -35,10 +35,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         email: Yup.string()
           .required('Das Feld "Titel" ist erforderlich.')
           .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+        password: Yup.string()
+          .min(6, 'Das Passwort muss mindestens 6 Zeichen lang sein.'),
+        confirmPassword: Yup.string()
+          .test('passwords-match', 'Die Passwörter stimmen nicht überein.', function(value) {
+            return !this.parent.password || !value || value === this.parent.password;
+          })
       })}
       onSubmit={onSubmit}
     >
-      {({ values, handleChange, setFieldValue }) => (
+      {({ values, handleChange, setFieldValue, errors, touched }) => (
         <Form>
           <InputText
             name="firstName"
@@ -62,12 +68,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="password"
             label="Neues Passwort"
             type="password"
+            error={touched.password && errors.password}
           />
           
           <InputText
             name="confirmPassword"
             label="Passwort bestätigen"
             type="password"
+            error={touched.confirmPassword && errors.confirmPassword}
           />
 
           {/**
