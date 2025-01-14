@@ -33,8 +33,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       enableReinitialize={enableReinitialize}
       validationSchema={Yup.object({
         email: Yup.string()
-          .required('Das Feld "Titel" ist erforderlich.')
-          .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+          .required('Die E-Mail-Adresse ist erforderlich.')
+          .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
+          .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
         password: Yup.string()
           .min(6, 'Das Passwort muss mindestens 6 Zeichen lang sein.'),
         confirmPassword: Yup.string()
@@ -62,6 +63,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="email"
             label="E-Mail"
             type="email"
+            error={touched.email && errors.email}
           />
           
           <InputText
