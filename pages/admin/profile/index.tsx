@@ -9,7 +9,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import { UserValues } from '../../../types/UserValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/users/me';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface EditProps {
   jwt: string,
@@ -24,8 +24,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   let profile = null;
   try {
-    // First check if user has required role
-    const response = await axios.get(`${BASE_URL}`, {
+    // Get user data
+    const response = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -51,25 +51,35 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
 
     // Remove 'roles' from the values object
     console.log('submitted values', values)
-    const { roles, _id, firstName, lastName, club, password, confirmPassword, ...filteredValues } = values;
-    
-    // Only include password if it's being changed
-    if (password) {
-      filteredValues.password = password;
-    }
+    const { roles, _id, club, ...filteredValues } = values;
     
     console.log('filtered values', filteredValues)
     try {
-      const response = await axios.patch(BASE_URL, filteredValues, {
+      const formData = new FormData();
+      Object.entries(filteredValues).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+
+      // Debug FormData by logging key-value pairs to the console
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
+      const response = await axios.patch(`${BASE_URL}/users/${profile._id}`, formData, {
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`,
         },
       });
-      if (response.status === 200) {
+      console.log("response", response.data)
+      if (response.status === 200 || response.status === 304) {
         router.push({
           pathname: '/',
-          query: { message: `Dein Profile wurde erfolgreich aktualisiert.` }
+          query: {
+            message:
+              response.status === 304 
+                ? 'Es wurden keine Änderungen vorgenommen'
+                : 'Dein Profile wurde erfolgreich aktualisiert.'
+          }
         }, `/`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -118,7 +128,6 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
     },
     roles: profile.roles,
     password: '',
-    confirmPassword: '',
   };
 
   const sectionTitle = 'Mein Profil';

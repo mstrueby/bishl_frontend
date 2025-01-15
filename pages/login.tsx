@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import useAuth from '../hooks/useAuth';
 import Layout from '../components/Layout';
 import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
 import InputText from '../components/ui/form/InputText';
 import ButtonPrimary from '../components/ui/form/ButtonPrimary';
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
@@ -98,6 +99,16 @@ const LoginPage = () => {
                 email: '',
                 password: ''
               }}
+              /* 
+              validationSchema={Yup.object({
+                email: Yup.string()
+                  .required('Bitte gib eine E-Mail-Adresse ein.')
+                  .email('Bitte gib eine gültige E-Mail-Adresse ein.')
+                  .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+                password: Yup.string().required('Bitte gib ein Passwort ein.')
+              })
+              */  
+              
               onSubmit={handleSubmit}
             >
               <Form className="space-y-6">
