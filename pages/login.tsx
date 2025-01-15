@@ -139,11 +139,13 @@ const LoginPage = () => {
               </Form>
             </Formik>
 
+            {/**
             <div className="mt-6 text-center text-sm text-gray-500">
               <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
                 Passwort vergessen?
               </a>
             </div>
+            */}
           </div>
         </div>
       </Layout>
