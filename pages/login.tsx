@@ -39,9 +39,8 @@ const LoginPage = () => {
     } else {
       // Handle error here
       const errData = await res.json();
-      console.log(errData);
-      setError(errData.detail);
-      console.log(error);
+      console.log('Login error:', errData);
+      setError(errData.error || errData.detail || 'Login failed');
     }
     setLoading(false);
   };
