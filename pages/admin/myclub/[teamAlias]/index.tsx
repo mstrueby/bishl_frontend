@@ -4,22 +4,28 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { ClubValues, TeamValues } from '../../../types/ClubValues';
-import Layout from '../../../components/Layout';
-import SectionHeader from "../../../components/admin/SectionHeader";
-import SuccessMessage from '../../../components/ui/SuccessMessage';
-import DataList from '../../../components/admin/ui/DataList';
+import { TeamValues } from '../../../../types/ClubValues';
+import { PlayerValues } from '../../../../types/PlayerValues';
+import Layout from '../../../../components/Layout';
+import SectionHeader from "../../../../components/admin/SectionHeader";
+import SuccessMessage from '../../../../components/ui/SuccessMessage';
+import DataList from '../../../../components/admin/ui/DataList';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
-interface ClubsProps {
+interface TeamProps {
   jwt: string,
-  club: ClubValues
+  team: TeamValues,
+  players: PlayerValues[],
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
+  const { teamAlias } = context.params as { teamAlias: string };
+
   let club = null;
+  let team = null;
+  let players = null;
 
   if (!jwt) {
     return {
@@ -50,21 +56,43 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Get club by user's clubId
-    const res = await axios.get(`${BASE_URL}/clubs/id/${user.club.clubId}`, {
+    const clubResponse = await axios.get(`${BASE_URL}/clubs/id/${user.club.clubId}`, {
       headers: {
         'Content-Type': 'application/json',
       }
     });
-    club = res.data;
+    club = clubResponse.data;
     console.log("club:", club)
+
+    // Get team by alias
+    const teamResponse = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/${teamAlias}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    team = teamResponse.data;
+    console.log("team:", team)
+                                         
+    // Get players of team by calling /players/clubs/alias/teams/alias
+    const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${teamAlias}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    players = playersResponse.data;
+    console.log("players:", players)
+    
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
     }
   }
-  return club ? {
+
+  
+  return team ? {
     props: {
-      jwt, club
+      jwt, team, players,
     },
   } : {
     props: { jwt }
@@ -86,13 +114,13 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
-  const [club, setClub] = useState<ClubValues>(initialClub);
+const MyClub: NextPage<TeamProps> = ({ jwt, team, players }) => {
+  //const [club, setClub] = useState<ClubValues>(initialClub);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
-  const editTeam = (alias: string) => {
-    router.push(`/admin/myclub/${alias}`);
+  const editPlayer = (teamAlias: string, PlayerId: string) => {
+    router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
   }
 
   useEffect(() => {
@@ -114,14 +142,14 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     setSuccessMessage(null);
   };
 
-  const sectionTitle = club?.name || 'Mein Verein';
+  const sectionTitle = team?.name || 'Meine Mannschaft';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const teamValues = club?.teams
+  const playerValues = players?
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((team: TeamValues) => ({
