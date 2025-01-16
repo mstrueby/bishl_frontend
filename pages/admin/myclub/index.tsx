@@ -87,7 +87,7 @@ const transformedUrl = (id: string) => buildUrl(id, {
 });
 
 const Clubs: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
-  const [clubs, setClubs] = useState<ClubValues[]>(initialClub);
+  const [club, setClub] = useState<ClubValues>(initialClub);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
@@ -158,41 +158,29 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     setSuccessMessage(null);
   };
 
-  const clubValues = clubs
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.alias))
-    .map((club: ClubValues) => ({
-      ...club
-    }));
-
-  const sectionTitle = 'Vereine';
-  const newLink = '/admin/clubs/add';
+  const sectionTitle = club?.name || 'Mein Verein';
+  const newLink = `/admin/clubs/${club?.alias}/addTeam`;
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const dataLisItems = clubValues.map((club: ClubValues) => {
-    return {
-      _id: club._id,
-      title: club.name,
-      alias: club.alias,
-      image: {
-        src: club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
-        width: 32,
-        height: 32,
-        gravity: 'center',
-        className: 'object-contain',
-        radius: 0,
-      },
-      published: club.active,
-      menu: [
-        { edit: { onClick: () => editClub(club.alias) } },
-        { active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
-      ],
-    };
-  });
+  const dataLisItems = club?.teams
+    ? club.teams
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((team) => ({
+          _id: team._id || '',
+          title: team.name,
+          description: `${team.fullName} / ${team.ageGroup}`,
+          alias: team.alias,
+          active: team.active,
+          menu: [
+            { edit: { onClick: () => router.push(`/admin/clubs/${club.alias}/teams/${team.alias}/edit`) } },
+          ],
+        }))
+    : [];
 
   return (
     <Layout>
