@@ -63,21 +63,21 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="email"
             label="E-Mail"
             type="email"
-            error={touched.email && errors.email}
+            //error={touched.email && errors.email}
           />
           
           <InputText
             name="password"
             label="Neues Passwort"
             type="password"
-            error={touched.password && errors.password}
+            //error={touched.password && errors.password}
           />
           
           <InputText
             name="confirmPassword"
             label="Passwort bestätigen"
             type="password"
-            error={touched.confirmPassword && errors.confirmPassword}
+            //error={touched.confirmPassword && errors.confirmPassword}
           />
 
           {/**
