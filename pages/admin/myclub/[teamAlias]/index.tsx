@@ -156,27 +156,24 @@ const MyClub: NextPage<TeamProps> = ({ jwt, team, players }) => {
       ...player
     }));
 
-  const dataLisItems = teamValues.map((team: TeamValues) => {
+  const dataLisItems = playerValues?.map((player: PlayerValues) => {
     return {
-      _id: team._id,
-      title: team.name,
-      alias: team.alias,
-      /*
+      _id: player._id,
+      title: `${player.firstName} ${player.lastName}`,
+      alias: player._id,
       image: {
-        src: transformedUrl(team.logoUrl),
+        src: player.image || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
         width: 32,
         height: 32,
         gravity: 'center',
         className: 'object-contain',
         radius: 0,
       },
-      */
-      published: team.active,
       menu: [
-        { edit: { onClick: () => editPlayer(team.alias) } },
+        { edit: { onClick: () => editPlayer(team.alias, player._id) } },
       ],
     }
-  });
+  }) || [];
 
   return (
     <Layout>
