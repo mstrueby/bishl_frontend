@@ -173,7 +173,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, team, players }) => {
       */
       published: team.active,
       menu: [
-        { edit: { onClick: () => editTeam(team.alias) } },
+        { edit: { onClick: () => editPlayer(team.alias) } },
       ],
     }
   });
