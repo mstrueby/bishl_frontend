@@ -151,9 +151,9 @@ const MyClub: NextPage<TeamProps> = ({ jwt, team, players }) => {
 
   const playerValues = players?
     .slice()
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((team: TeamValues) => ({
-      ...team
+    .sort((a, b) => a.firstName.localeCompare(b.firstName))
+    .map((player: PlayerValues) => ({
+      ...player
     }));
 
   const dataLisItems = teamValues.map((team: TeamValues) => {
