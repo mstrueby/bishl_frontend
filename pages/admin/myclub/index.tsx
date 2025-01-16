@@ -49,12 +49,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await axios.get(BASE_URL! + '/clubs/', {
+    // Get club by user's clubId
+    const res = await axios.get(`${BASE_URL}/clubs/${user.club.clubId}`, {
       headers: {
         'Content-Type': 'application/json',
       }
     });
-    clubs = res.data;
+    clubs = [res.data]; // Wrap in array since component expects array
     console.log("clubs:", clubs)
   } catch (error) {
     if (axios.isAxiosError(error)) {
