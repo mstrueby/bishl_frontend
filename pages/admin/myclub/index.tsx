@@ -14,12 +14,12 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface ClubsProps {
   jwt: string,
-  clubs: ClubValues[]
+  club: ClubValues
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let clubs = null;
+  let club = null;
 
   if (!jwt) {
     return {
@@ -55,17 +55,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Content-Type': 'application/json',
       }
     });
-    clubs = [res.data]; // Wrap in array since component expects array
-    console.log("clubs:", clubs)
+    club = res.data;
+    console.log("club:", club)
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      clubs = [];
       console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
     }
   }
-  return clubs ? {
+  return club ? {
     props: {
-      jwt, clubs
+      jwt, club
     },
   } : {
     props: { jwt }
@@ -87,8 +86,8 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
-  const [clubs, setClubs] = useState<ClubValues[]>(initialClubs);
+const Clubs: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
+  const [clubs, setClubs] = useState<ClubValues[]>(initialClub);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
