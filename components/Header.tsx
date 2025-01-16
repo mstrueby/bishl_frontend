@@ -231,6 +231,16 @@ const Header = () => {
                             </MenuItem>
                           )}
 
+                          {/* RMy Club administration */}
+                          {(user.roles?.includes('CLUB_ADMIN')  || user.roles?.includes('ADMIN')) && (
+                            <MenuItem>
+                              <MyLink href="/admin/myclub" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <span>Mein Verein</span>
+                              </MyLink>
+                            </MenuItem>
+                          )}
+
                           {/* League manager items - only for league managers */}
                           {user.roles?.includes('ADMIN') && (
                             <>
