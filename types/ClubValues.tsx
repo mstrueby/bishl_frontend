@@ -1,6 +1,6 @@
 // Define a Team interface
 export interface TeamValues {
-  _id?: string;
+  _id: string;
   name: string;
   alias: string;
   fullName: string;
