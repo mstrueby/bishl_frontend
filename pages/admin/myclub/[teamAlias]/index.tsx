@@ -133,11 +133,13 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
           const updatedTeam: any = {
             teamId: teamInner.teamId,
             passNo: teamInner.passNo,
+            source: teamInner.source,
+            modifyDate: teamInner.modifyDate,
           };
           
-          if (teamInner.jerseyNo !== undefined) {
-            updatedTeam.jerseyNo = teamInner.jerseyNo;
-          }
+          //if (teamInner.jerseyNo !== undefined) {
+          //  updatedTeam.jerseyNo = teamInner.jerseyNo;
+          //}
           
           if (teamInner.teamId === teamId) {
             updatedTeam.active = !teamInner.active;
@@ -268,6 +270,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
         className: 'object-contain',
         radius: 0,
       },
+      published: player.published,
       menu: [
         { edit: { onClick: () => editPlayer(team.alias, player._id) } },
         { active: { onClick: () => { toggleActive(player._id, team._id, player.assignedTeams, player.image || null) } } },
