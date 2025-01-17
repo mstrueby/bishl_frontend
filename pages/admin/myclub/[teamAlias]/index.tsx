@@ -46,7 +46,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
 
     const user = userResponse.data;
-    //console.log("user:", user)
+    console.log("user:", user)
     if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
       return {
         redirect: {
@@ -63,7 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     club = clubResponse.data;
-    //console.log("club:", club)
+    console.log("club:", club)
 
     // Get team by alias
     const teamResponse = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/${teamAlias}`, {
@@ -72,8 +72,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     team = teamResponse.data;
-    //console.log("team:", team)
-                                         
+    console.log("team:", team)
+
     // Get players of team by calling /players/clubs/alias/teams/alias
     const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${teamAlias}`, {
       headers: {
@@ -82,15 +82,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     players = playersResponse.data;
-    //console.log("players:", players)
-    
+    console.log("players:", players)
+
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
     }
   }
 
-  
+
   return team ? {
     props: {
       jwt, club, team, players,
@@ -115,10 +115,27 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
+const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers }) => {
   //const [club, setClub] = useState<ClubValues>(initialClub);
+  const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
+
+  const fetchPlayers = async () => {
+    try {
+      const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${team.alias}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      setPlayers(playersResponse.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Error fetching players:', error);
+      }
+    }
+  };
 
   const editPlayer = (teamAlias: string, PlayerId: string) => {
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
@@ -136,17 +153,17 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
             source: teamInner.source,
             modifyDate: teamInner.modifyDate,
           };
-          
+
           //if (teamInner.jerseyNo !== undefined) {
           //  updatedTeam.jerseyNo = teamInner.jerseyNo;
           //}
-          
+
           if (teamInner.teamId === teamId) {
             updatedTeam.active = !teamInner.active;
           } else if (teamInner.active !== undefined) {
             updatedTeam.active = teamInner.active;
           }
-          
+
           return updatedTeam;
         })
       }));
@@ -169,6 +186,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
       });
       if (response.status === 200) {
         console.log(`Player ${playerId} status successfully toggled for team ${teamId}`);
+        await fetchPlayers();
       } else if (response.status === 304) {
         console.log('No changes were made to the player status.');
       } else {
@@ -198,12 +216,6 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
     setSuccessMessage(null);
   };
 
-  const sectionTitle = club.name ? `${club.name} - ${team.name}` : 'Meine Mannschaft';
-  const statuses = {
-    Published: 'text-green-500 bg-green-500/20',
-    Unpublished: 'text-gray-500 bg-gray-800/10',
-    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
-  }
 
   const playerValues = Array.isArray(players)
     ? players.slice().sort((a, b) => a.firstName.localeCompare(b.firstName))
@@ -231,8 +243,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
           .filter(Boolean)
           .join(', ')
         } ${player.assignedTeams.some((item) =>
-            item.teams.some((teamInner) => teamInner.teamId != team._id)
-          ) ? ` (${player.assignedTeams
+          item.teams.some((teamInner) => teamInner.teamId != team._id)
+        ) ? ` (${player.assignedTeams
           .map((item) => {
             const nonMatchingTeams = item.teams.filter((teamInner) => teamInner.teamId != team._id);
             const passNos = nonMatchingTeams.map((teamInner) => teamInner.passNo);
@@ -259,29 +271,42 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
           })
           .filter(Boolean)
           .join(', ')
-        }`        
+        }`
       ],
       alias: player._id,
       image: {
-        src: player.image || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
+        src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
         width: 32,
         height: 32,
         gravity: 'center',
         className: 'object-contain',
         radius: 0,
       },
-      published: player.published,
+      published: player.assignedTeams
+        .flatMap(item => item.teams)
+        .find(teamInner => teamInner.teamId === team._id)?.active || false,
       menu: [
         { edit: { onClick: () => editPlayer(team.alias, player._id) } },
-        { active: { onClick: () => { toggleActive(player._id, team._id, player.assignedTeams, player.image || null) } } },
+        { active: { onClick: () => { toggleActive(player._id, team._id, player.assignedTeams, player.imageUrl || null) } } },
       ],
     }
   }) || [];
+
+  const sectionTitle = team.name ? team.name : 'Meine Mannschaft';
+  const description = club.name ? club.name.toUpperCase() : 'Mein Verein';
+  const statuses = {
+    Published: 'text-green-500 bg-green-500/20',
+    Unpublished: 'text-gray-500 bg-gray-800/10',
+    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
+  }
+  const backLink = '/admin/myclub';
 
   return (
     <Layout>
       <SectionHeader
         title={sectionTitle}
+        description={description}
+        backLink={backLink}
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}

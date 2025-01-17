@@ -5,6 +5,7 @@ const Badge = ({ info }: { info: string }) => {
     case 'aktiv':
     case 'veröffentlicht':
     case 'Ja':
+    case 'erforderlich':
       return (
         <span className={`inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20`}>
           {info}
@@ -19,6 +20,7 @@ const Badge = ({ info }: { info: string }) => {
         </span>
       )
     case 'extern':
+    case 'nicht erforderlich':
       return (
         <span className={`inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20`}>
           {info}

@@ -45,11 +45,12 @@ interface DataListProps {
   deleteModalTitle?: string;
   deleteModalDescription?: string;
   deleteModalDescriptionSubText?: string;
+  showThumbnails?: boolean;
 }
 
 
 const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDeleteConfirm,
-  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText }) => {
+  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText, showThumbnails }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
@@ -70,18 +71,19 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
     <ul role="list" className="divide-y divide-gray-100">
       {items.map((item) => (
         <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
-          {item.image ? (
-            <span className="hidden sm:block"><CldImage
-              src={item.image.src}
-              alt="Thumbnail"
-              className={classNames(item.image.className, '')}
-              width={item.image.width} height={item.image.height}
-              //crop="fill"
-              gravity={item.image.gravity}
-              radius={item.image.radius}
-            /></span>
-          ) : (
-            <div className="hidden sm:block relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
+          {showThumbnails && (
+            item.image ? (
+              <span className="hidden sm:block"><CldImage
+                src={item.image.src}
+                alt="Thumbnail"
+                className={classNames(item.image.className, '')}
+                width={item.image.width} height={item.image.height}
+                gravity={item.image.gravity}
+                radius={item.image.radius}
+              /></span>
+            ) : (
+              <div className="hidden sm:block relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
+            )
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-x-3">

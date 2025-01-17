@@ -248,6 +248,7 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
         deleteModalTitle="Dokument löschen"
         deleteModalDescription="Möchtest du das Dokument <strong>{{title}}</strong> wirklich löschen?"
         deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
+        showThumbnails
       />
 
     </Layout>

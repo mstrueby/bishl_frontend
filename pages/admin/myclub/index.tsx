@@ -39,7 +39,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
 
     const user = userResponse.data;
-    console.log("user:", user)
+    //console.log("user:", user)
     if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
       return {
         redirect: {
@@ -56,7 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     club = res.data;
-    console.log("club:", club)
+    //console.log("club:", club)
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');

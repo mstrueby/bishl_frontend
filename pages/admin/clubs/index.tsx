@@ -206,6 +206,7 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
       <DataList
         items={dataLisItems}
         statuses={statuses}
+        showThumbnails
       />
 
     </Layout>
