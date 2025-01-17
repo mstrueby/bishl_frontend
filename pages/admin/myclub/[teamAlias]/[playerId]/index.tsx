@@ -189,6 +189,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
+        clubId={userResponse.data.club.clubId}
       />
     </Layout>
   );

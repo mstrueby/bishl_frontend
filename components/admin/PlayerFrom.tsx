@@ -18,6 +18,7 @@ interface PlayerFormProps {
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
+  clubId: string;
 }
 
 const PlayerForm: React.FC<PlayerFormProps> = ({
@@ -97,6 +98,35 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             <InputText name="displayLastName" autoComplete="off" type="text" label="Angezeigter Nachname" />
 
             <Toggle name="active" type="checkbox" label="Aktiv" />
+            
+            {/* Team assignments section */}
+            {values.assignedTeams?.map((assignment, index) => {
+              if (assignment.clubId === clubId) {
+                return (
+                  <div key={index} className="mt-6 border-t border-gray-200 pt-6">
+                    <h4 className="text-sm font-medium text-gray-900">Team Zuordnungen</h4>
+                    {assignment.teams.map((team, teamIndex) => (
+                      <div key={teamIndex} className="mt-4 grid grid-cols-2 gap-4">
+                        <InputText
+                          name={`assignedTeams.${index}.teams.${teamIndex}.passNo`}
+                          type="text"
+                          label="Pass-Nummer"
+                          autoComplete="off"
+                        />
+                        <InputText
+                          name={`assignedTeams.${index}.teams.${teamIndex}.jerseyNo`}
+                          type="number"
+                          label="Trikotnummer"
+                          autoComplete="off"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              return null;
+            })}
+
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
               <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />
