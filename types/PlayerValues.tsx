@@ -22,6 +22,8 @@ export interface PlayerValues {
       passNo: string;
       source: string; // e.g. "BISHL"
       modifyDate: string;  // e.g. "2025-01-16T11:36:45.395Z"
+      jerseyNo: number;
+      active: boolean;
     }[];
   }[];
   stats: {
