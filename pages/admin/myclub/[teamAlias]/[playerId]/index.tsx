@@ -79,14 +79,14 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality', 'assignedTeams'];
+        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality'];
         if (excludedFields.includes(key)) return;
-        
+
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else if (typeof value === 'object') {
           if (key === 'assignedTeams') {
-            const cleanedTeams = value.map(club => ({
+            const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
               ...club,
               teams: club.teams.map(team => {
                 if (team.jerseyNo === null) {
