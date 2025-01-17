@@ -140,6 +140,11 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
         formData.append('image', image);
       }
 
+      // Debug FormData by logging key-value pairs to the console
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
       const response = await axios.patch(`${BASE_URL! + '/players/'}${playerId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
