@@ -79,11 +79,13 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        const excludedFields = ['stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality'];
+        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality', 'assignedTeams'];
         if (excludedFields.includes(key)) return;
         
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
+        } else if (typeof value === 'object') {
+          formData.append(key, JSON.stringify(value));
         } else {
           // Handle imageUrl specifically to ensure it's only appended if not null
           if (key === 'imageUrl' && value !== null) {
@@ -107,7 +109,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
       if (response.status === 200) {
         router.push({
           pathname: `/admin/myclub/${teamAlias}`,
-          query: { message: `Spieler*in <strong>${values.displayFirstName} ${values.displayLastName}</strong> wurde erfolgreich aktualisiert.` }
+          query: { message: `<strong>${values.displayFirstName} ${values.displayLastName}</strong> erfolgreich aktualisiert.` }
         }, `/admin/myclub/${teamAlias}`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');

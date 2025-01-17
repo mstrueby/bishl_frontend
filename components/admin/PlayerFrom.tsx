@@ -93,8 +93,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             ) : (
               <ImageUpload name="image" label="Bild" imageUrl={initialValues.imageUrl || ''} />
             )}
-            <InputText name="displayFirstName" type="text" label="Angezeigter Vorname" />
-            <InputText name="displayLastName" type="text" label="Angezeigter Nachname" />
+            <InputText name="displayFirstName" autoComplete="off" type="text" label="Angezeigter Vorname" />
+            <InputText name="displayLastName" autoComplete="off" type="text" label="Angezeigter Nachname" />
 
             <Toggle name="active" type="checkbox" label="Aktiv" />
             <div className="mt-4 flex justify-end py-4">
