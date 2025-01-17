@@ -115,11 +115,28 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
+const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers }) => {
   //const [club, setClub] = useState<ClubValues>(initialClub);
+  const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
+  const fetchPlayers = async () => {
+    try {
+      const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${team.alias}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      setPlayers(playersResponse.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Error fetching players:', error);
+      }
+    }
+  };
+  
   const editPlayer = (teamAlias: string, PlayerId: string) => {
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
   }
@@ -169,6 +186,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
       });
       if (response.status === 200) {
         console.log(`Player ${playerId} status successfully toggled for team ${teamId}`);
+        await fetchPlayers();
       } else if (response.status === 304) {
         console.log('No changes were made to the player status.');
       } else {
