@@ -270,7 +270,9 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
         className: 'object-contain',
         radius: 0,
       },
-      published: player.published,
+      published: player.assignedTeams
+        .flatMap(item => item.teams)
+        .find(teamInner => teamInner.teamId === team._id)?.active || false,
       menu: [
         { edit: { onClick: () => editPlayer(team.alias, player._id) } },
         { active: { onClick: () => { toggleActive(player._id, team._id, player.assignedTeams, player.image || null) } } },
