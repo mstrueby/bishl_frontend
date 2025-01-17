@@ -63,12 +63,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
         validationSchema={Yup.object({
-          name: Yup.string().required('Der Name des Vereins ist erforderlich'),
-          country: Yup.string().required('Das Land ist erforderlich'),
-          email: Yup.string().email('Ungültige E-Mail-Adresse'),
-          description: Yup.string(),
-          website: Yup.string().url('Ungültige URL'),
-          //active: Yup.boolean(),
+          displayFirstName: Yup.string().required('Der Vorname ist erforderlich'),
+          displayLastName: Yup.string().required('Der Nachname ist erforderlich'),
         })}
         onSubmit={onSubmit}
       >
