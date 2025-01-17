@@ -124,13 +124,25 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
   }
 
-  const toggleActive = async (playerId: string, teamId: string, assignedTeams: {}, image: string | null) => {
+  const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, image: string | null) => {
     try {
+      const updatedAssignedTeams = assignedTeams.map((item: any) => ({
+        ...item,
+        teams: item.teams.map((teamInner: any) => ({
+          ...teamInner,
+          active: teamInner.teamId === teamId ? !teamInner.active : teamInner.active
+        }))
+      }));
+
       const formData = new FormData();
-      // TODO: submit complete assignedTeams document with changed active status
-      formData.append('active', (!currentStatus).toString()); // Toggle the status
+      formData.append('assignedTeams', JSON.stringify(updatedAssignedTeams));
       if (image) {
-        formData.append('assignedTeams', assignedTeams);
+        formData.append('image', image);
+      }
+
+      // Debug FormData by logging key-value pairs to the console
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
       }
 
       const response = await axios.patch(`${BASE_URL! + '/players/'}${playerId}`, formData, {
@@ -139,18 +151,14 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
         },
       });
       if (response.status === 200) {
-        // Handle successful response
-        console.log(`Player ${playerId} successfully activated`);
-        //await fetchClubs();
+        console.log(`Player ${playerId} status successfully toggled for team ${teamId}`);
       } else if (response.status === 304) {
-        // Handle not modified response
-        console.log('No changes were made to the club.');
+        console.log('No changes were made to the player status.');
       } else {
-        // Handle error response
-        console.error('Failed to publish club.');
+        console.error('Failed to update player status.');
       }
     } catch (error) {
-      console.error('Error publishing club:', error);
+      console.error('Error updating player status:', error);
     }
   }
 
