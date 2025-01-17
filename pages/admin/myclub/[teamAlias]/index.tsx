@@ -46,7 +46,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
 
     const user = userResponse.data;
-    console.log("user:", user)
+    // console.log("user:", user)
     if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
       return {
         redirect: {
@@ -63,7 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     club = clubResponse.data;
-    console.log("club:", club)
+    // console.log("club:", club)
 
     // Get team by alias
     const teamResponse = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/${teamAlias}`, {
@@ -72,7 +72,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     team = teamResponse.data;
-    console.log("team:", team)
+    // console.log("team:", team)
 
     // Get players of team by calling /players/clubs/alias/teams/alias
     const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${teamAlias}`, {
@@ -82,7 +82,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     players = playersResponse.data;
-    console.log("players:", players)
+    // console.log("players:", players)
 
   } catch (error) {
     if (axios.isAxiosError(error)) {
