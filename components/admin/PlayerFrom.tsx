@@ -58,7 +58,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
         </dl>
       </div>
       
-      <h3 className="text-base/7 font-semibold text-gray-900 mt-8">Nicht änderbare Felder</h3>
+      <h3 className="text-base/7 font-semibold text-gray-900 mt-8">Änderbare Felder</h3>
       <Formik
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
