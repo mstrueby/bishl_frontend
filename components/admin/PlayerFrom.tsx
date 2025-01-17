@@ -27,6 +27,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   enableReinitialize,
   handleCancel,
   loading,
+  clubId,
 }) => {
   return (
     <>

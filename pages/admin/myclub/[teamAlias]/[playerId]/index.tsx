@@ -15,6 +15,8 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 interface EditProps {
   jwt: string,
   player: PlayerValues,
+  clubId: string,
+  clubName: string,
   teamAlias: string,
 }
 
@@ -33,6 +35,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   let player = null;
+  let clubId = null;
+  let clubName = null;
   try {
     // First check if user has required role
     const userResponse = await axios.get(`${BASE_URL}/users/me`, {
@@ -50,6 +54,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       };
     }
+    clubId = user.club.clubId;
+    clubName = user.club.clubName;
 
     // Fetch the existing player data
     const response = await axios.get(`${BASE_URL}/players/${playerId}`, {
@@ -63,10 +69,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error('Error fetching player:', error.message);
     }
   }
-  return player ? { props: { jwt, player, teamAlias } } : { notFound: true };
+  return player ? { props: { jwt, player, clubId, clubName, teamAlias } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
+const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -175,11 +181,12 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
     position: player?.position || '', // Added missing property
   };
 
+  console.log("clubId", clubId)
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;
   // Render the form with initialValues and the edit-specific handlers
   return (
     <Layout>
-      <SectionHeader title={sectionTitle} />
+      <SectionHeader title={sectionTitle.toUpperCase()} description={clubName.toUpperCase()} />
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
@@ -189,7 +196,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
-        clubId={userResponse.data.club.clubId}
+        clubId={clubId}
       />
     </Layout>
   );
