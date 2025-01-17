@@ -85,7 +85,21 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else if (typeof value === 'object') {
-          formData.append(key, JSON.stringify(value));
+          if (key === 'assignedTeams') {
+            const cleanedTeams = value.map(club => ({
+              ...club,
+              teams: club.teams.map(team => {
+                if (team.jerseyNo === null) {
+                  const { jerseyNo, ...restTeam } = team;
+                  return restTeam;
+                }
+                return team;
+              })
+            }));
+            formData.append(key, JSON.stringify(cleanedTeams));
+          } else {
+            formData.append(key, JSON.stringify(value));
+          }
         } else {
           // Handle imageUrl specifically to ensure it's only appended if not null
           if (key === 'imageUrl' && value !== null) {
