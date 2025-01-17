@@ -126,6 +126,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
 
   const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, image: string | null) => {
     try {
+      console.log("input assigendTeams:", assignedTeams)
       const updatedAssignedTeams = assignedTeams.map((item: any) => ({
         teams: item.teams.map((teamInner: any) => ({
           teamId: teamInner.teamId,
