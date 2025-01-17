@@ -126,12 +126,27 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
 
   const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, image: string | null) => {
     try {
-      console.log("input assigendTeams:", assignedTeams)
+      console.log("input assignedTeams:", assignedTeams)
       const updatedAssignedTeams = assignedTeams.map((item: any) => ({
-        teams: item.teams.map((teamInner: any) => ({
-          teamId: teamInner.teamId,
-          active: teamInner.teamId === teamId ? !teamInner.active : teamInner.active
-        }))
+        clubId: item.clubId,
+        teams: item.teams.map((teamInner: any) => {
+          const updatedTeam: any = {
+            teamId: teamInner.teamId,
+            passNo: teamInner.passNo,
+          };
+          
+          if (teamInner.jerseyNo !== undefined) {
+            updatedTeam.jerseyNo = teamInner.jerseyNo;
+          }
+          
+          if (teamInner.teamId === teamId) {
+            updatedTeam.active = !teamInner.active;
+          } else if (teamInner.active !== undefined) {
+            updatedTeam.active = teamInner.active;
+          }
+          
+          return updatedTeam;
+        })
       }));
 
       const formData = new FormData();
