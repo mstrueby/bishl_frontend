@@ -4,7 +4,7 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { TeamValues } from '../../../../types/ClubValues';
+import { ClubValues, TeamValues } from '../../../../types/ClubValues';
 import { PlayerValues } from '../../../../types/PlayerValues';
 import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
@@ -15,6 +15,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface TeamProps {
   jwt: string,
+  club: ClubValues,
   team: TeamValues,
   players: PlayerValues[],
 }
@@ -45,7 +46,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
 
     const user = userResponse.data;
-    console.log("user:", user)
+    //console.log("user:", user)
     if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
       return {
         redirect: {
@@ -62,7 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     club = clubResponse.data;
-    console.log("club:", club)
+    //console.log("club:", club)
 
     // Get team by alias
     const teamResponse = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/${teamAlias}`, {
@@ -71,7 +72,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     team = teamResponse.data;
-    console.log("team:", team)
+    //console.log("team:", team)
                                          
     // Get players of team by calling /players/clubs/alias/teams/alias
     const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${teamAlias}`, {
@@ -81,7 +82,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     players = playersResponse.data;
-    console.log("players:", players)
+    //console.log("players:", players)
     
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -92,7 +93,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   
   return team ? {
     props: {
-      jwt, team, players,
+      jwt, club, team, players,
     },
   } : {
     props: { jwt }
@@ -114,13 +115,43 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<TeamProps> = ({ jwt, team, players }) => {
+const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
   //const [club, setClub] = useState<ClubValues>(initialClub);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
   const editPlayer = (teamAlias: string, PlayerId: string) => {
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
+  }
+
+  const toggleActive = async (playerId: string, teamId: string, assignedTeams: {}, image: string | null) => {
+    try {
+      const formData = new FormData();
+      // TODO: submit complete assignedTeams document with changed active status
+      formData.append('active', (!currentStatus).toString()); // Toggle the status
+      if (image) {
+        formData.append('assignedTeams', assignedTeams);
+      }
+
+      const response = await axios.patch(`${BASE_URL! + '/players/'}${playerId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        },
+      });
+      if (response.status === 200) {
+        // Handle successful response
+        console.log(`Player ${playerId} successfully activated`);
+        //await fetchClubs();
+      } else if (response.status === 304) {
+        // Handle not modified response
+        console.log('No changes were made to the club.');
+      } else {
+        // Handle error response
+        console.error('Failed to publish club.');
+      }
+    } catch (error) {
+      console.error('Error publishing club:', error);
+    }
   }
 
   useEffect(() => {
@@ -142,41 +173,84 @@ const MyClub: NextPage<TeamProps> = ({ jwt, team, players }) => {
     setSuccessMessage(null);
   };
 
-  const sectionTitle = team?.name || 'Meine Mannschaft';
+  const sectionTitle = club.name ? `${club.name} - ${team.name}` : 'Meine Mannschaft';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const playerValues = players?
-    .slice()
-    .sort((a, b) => a.firstName.localeCompare(b.firstName))
-    .map((player: PlayerValues) => ({
-      ...player
-    }));
+  const playerValues = Array.isArray(players)
+    ? players.slice().sort((a, b) => a.firstName.localeCompare(b.firstName))
+    : [];
 
-  const dataLisItems = teamValues.map((team: TeamValues) => {
+  const dataLisItems = playerValues?.map((player: PlayerValues) => {
     return {
-      _id: team._id,
-      title: team.name,
-      alias: team.alias,
-      /*
+      _id: player._id,
+      title: `${player.displayFirstName} ${player.displayLastName.toUpperCase()}`,
+      description: [
+        /*
+        `${player.firstName} ${player.lastName}`,
+        new Date(player.birthdate).toLocaleDateString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }),
+        */
+        `${player.assignedTeams
+          .map((item) => {
+            const filteredTeams = item.teams.filter((teamInner) => teamInner.teamId === team._id);
+            const passNos = filteredTeams.map((teamInner) => teamInner.passNo);
+            return passNos.length > 0 ? passNos.join(', ') : '';
+          })
+          .filter(Boolean)
+          .join(', ')
+        } ${player.assignedTeams.some((item) =>
+            item.teams.some((teamInner) => teamInner.teamId != team._id)
+          ) ? ` (${player.assignedTeams
+          .map((item) => {
+            const nonMatchingTeams = item.teams.filter((teamInner) => teamInner.teamId != team._id);
+            const passNos = nonMatchingTeams.map((teamInner) => teamInner.passNo);
+            return passNos.length > 0 ? passNos.join(', ') : '';
+          })
+          .filter(Boolean)
+          .join(', ')})` : ''
+        }`,
+        `${player.assignedTeams
+          .map((item) => {
+            const filteredTeams = item.teams.filter((teamInner) => teamInner.teamId === team._id);
+            const modifyDates = filteredTeams.map((teamInner) => {
+              const date = new Date(teamInner.modifyDate);
+              return date.toLocaleString('de-DE', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              });
+            });
+            return modifyDates.length > 0 ? modifyDates.join(', ') : '';
+          })
+          .filter(Boolean)
+          .join(', ')
+        }`        
+      ],
+      alias: player._id,
       image: {
-        src: transformedUrl(team.logoUrl),
+        src: player.image || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
         width: 32,
         height: 32,
         gravity: 'center',
         className: 'object-contain',
         radius: 0,
       },
-      */
-      published: team.active,
       menu: [
-        { edit: { onClick: () => editPlayer(team.alias) } },
+        { edit: { onClick: () => editPlayer(team.alias, player._id) } },
+        { active: { onClick: () => { toggleActive(player._id, team._id, player.assignedTeams, player.image || null) } } },
       ],
     }
-  });
+  }) || [];
 
   return (
     <Layout>
