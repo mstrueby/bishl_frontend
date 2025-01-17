@@ -127,9 +127,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players }) => {
   const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, image: string | null) => {
     try {
       const updatedAssignedTeams = assignedTeams.map((item: any) => ({
-        ...item,
         teams: item.teams.map((teamInner: any) => ({
-          ...teamInner,
+          teamId: teamInner.teamId,
           active: teamInner.teamId === teamId ? !teamInner.active : teamInner.active
         }))
       }));
