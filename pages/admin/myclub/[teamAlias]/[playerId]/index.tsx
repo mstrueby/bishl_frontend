@@ -79,6 +79,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
+        if (key === 'stats') return; // Skip stats field
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else {
