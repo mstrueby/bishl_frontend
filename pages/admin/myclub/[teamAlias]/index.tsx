@@ -275,7 +275,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
       ],
       alias: player._id,
       image: {
-        src: player.image || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
+        src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
         width: 32,
         height: 32,
         gravity: 'center',
@@ -287,7 +287,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         .find(teamInner => teamInner.teamId === team._id)?.active || false,
       menu: [
         { edit: { onClick: () => editPlayer(team.alias, player._id) } },
-        { active: { onClick: () => { toggleActive(player._id, team._id, player.assignedTeams, player.image || null) } } },
+        { active: { onClick: () => { toggleActive(player._id, team._id, player.assignedTeams, player.imageUrl || null) } } },
       ],
     }
   }) || [];
