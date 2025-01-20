@@ -224,7 +224,13 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
   const dataLisItems = playerValues?.map((player: PlayerValues) => {
     return {
       _id: player._id,
-      title: `${player.displayFirstName} ${player.displayLastName}`,
+      title: `${player.assignedTeams
+        .flatMap(item => item.teams)
+        .find(teamInner => teamInner.teamId === team._id)?.jerseyNo 
+          ? `${player.assignedTeams
+              .flatMap(item => item.teams)
+              .find(teamInner => teamInner.teamId === team._id)?.jerseyNo} ` 
+          : ''}${player.displayFirstName} ${player.displayLastName}`,
       description: [
         /*
         `${player.firstName} ${player.lastName}`,
