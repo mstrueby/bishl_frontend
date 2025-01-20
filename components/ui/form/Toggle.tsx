@@ -4,7 +4,7 @@ import { Field, Label, Description, Switch } from '@headlessui/react'
 
 interface ToggleProps extends ComponentPropsWithoutRef<'input'> {
   name: string;
-  label: string;
+  label?: string;
   description?: string;
 }
 
@@ -50,7 +50,7 @@ const Toggle = ({ name, label, description, ...props }: ToggleProps) => {
           'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2'
         )}
       >
-        <span className="sr-only">{label}</span>
+        {label && <span className="sr-only">{label}</span>}
         <span
           aria-hidden="true"
           className={classNames(

@@ -15,6 +15,8 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 interface EditProps {
   jwt: string,
   player: PlayerValues,
+  clubId: string,
+  clubName: string,
   teamAlias: string,
 }
 
@@ -33,6 +35,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   let player = null;
+  let clubId = null;
+  let clubName = null;
   try {
     // First check if user has required role
     const userResponse = await axios.get(`${BASE_URL}/users/me`, {
@@ -50,6 +54,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       };
     }
+    clubId = user.club.clubId;
+    clubName = user.club.clubName;
 
     // Fetch the existing player data
     const response = await axios.get(`${BASE_URL}/players/${playerId}`, {
@@ -63,10 +69,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error('Error fetching player:', error.message);
     }
   }
-  return player ? { props: { jwt, player, teamAlias } } : { notFound: true };
+  return player ? { props: { jwt, player, clubId, clubName, teamAlias } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
+const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -79,13 +85,27 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality', 'assignedTeams'];
+        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality'];
         if (excludedFields.includes(key)) return;
-        
+
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else if (typeof value === 'object') {
-          formData.append(key, JSON.stringify(value));
+          if (key === 'assignedTeams') {
+            const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
+              ...club,
+              teams: club.teams.map(team => {
+                if (team.jerseyNo === null) {
+                  const { jerseyNo, ...restTeam } = team;
+                  return restTeam;
+                }
+                return team;
+              })
+            }));
+            formData.append(key, JSON.stringify(cleanedTeams));
+          } else {
+            formData.append(key, JSON.stringify(value));
+          }
         } else {
           // Handle imageUrl specifically to ensure it's only appended if not null
           if (key === 'imageUrl' && value !== null) {
@@ -161,11 +181,12 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
     position: player?.position || '', // Added missing property
   };
 
+  console.log("clubId", clubId)
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;
   // Render the form with initialValues and the edit-specific handlers
   return (
     <Layout>
-      <SectionHeader title={sectionTitle} />
+      <SectionHeader title={sectionTitle.toUpperCase()} description={clubName.toUpperCase()} />
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
@@ -175,6 +196,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, teamAlias }) => {
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
+        clubId={clubId}
       />
     </Layout>
   );

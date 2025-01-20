@@ -18,6 +18,7 @@ interface PlayerFormProps {
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
+  clubId: string;
 }
 
 const PlayerForm: React.FC<PlayerFormProps> = ({
@@ -26,11 +27,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   enableReinitialize,
   handleCancel,
   loading,
+  clubId,
 }) => {
   return (
     <>
       <div className="">
-        <h3 className="text-base/7 font-semibold text-gray-900">Nicht änderbare Felder</h3>
+        <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Nicht änderbare Felder</h3>
         <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Die Felder <em>Name</em> und <em>Geburtsdatum</em> dienen zur Verknüpfung mit den ISHD-Daten. Weiter unten können Vor- und Nachname für die Anzeige geändert werden.</p>
       </div>
       <div className="mt-6 border-t border-b border-gray-100">
@@ -57,8 +59,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           </div>
         </dl>
       </div>
-      
-      <h3 className="text-base/7 font-semibold text-gray-900 mt-8">Änderbare Felder</h3>
+
+      <h3 className="text-base/7 font-semibold text-gray-900 mt-8 uppercase">Änderbare Felder</h3>
       <Formik
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
@@ -96,7 +98,77 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             <InputText name="displayFirstName" autoComplete="off" type="text" label="Angezeigter Vorname" />
             <InputText name="displayLastName" autoComplete="off" type="text" label="Angezeigter Nachname" />
 
-            <Toggle name="active" type="checkbox" label="Aktiv" />
+            {/* Team assignments section */}
+            {values.assignedTeams?.map((assignment, index) => {
+              if (assignment.clubId === clubId) {
+                return (
+                  <div key={index} className="">
+                    <h3 className="text-base/7 font-semibold text-gray-900 mt-8 uppercase">Mannschaften</h3>
+                    <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
+                    <div className="mt-6 border-t border-b border-gray-100">
+                      <ul className="divide-y divide-gray-100">
+                        {assignment.teams.map((team, teamIndex) => (
+                          <li key={teamIndex} className="relative flex justify-between gap-x-6 py-5">
+                            <div className="flex-1 min-w-8 gap-x-4">
+                              <div className="flex items-center gap-x-3">
+                                <p className="text-sm/6 font-semibold text-gray-900 truncate">
+                                  {team.teamName}
+                                </p>
+                              </div>
+                              <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500">
+
+                                <span className="whitespace-nowrap truncate">
+                                  {team.passNo}
+                                </span>
+                                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                                  <circle r={1} cx={1} cy={1} />
+                                </svg>
+                                <span className="whitespace-nowrap truncate">
+                                  {new Date(team.modifyDate).toLocaleDateString('de-DE', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="relative flex-none gap-x-4">
+                              <Toggle name={`teams.${teamIndex}.active`} type="checkbox" />
+                              
+
+                            </div>
+
+                            
+                          </li>
+                          /*
+                        <div key={teamIndex} className="mt-4 grid grid-cols-2 gap-4">
+                          <p>{team.teamName}</p>
+                          <p>{team.passNo} ({team.source})</p>
+                          <p>{new Date(team.modifyDate).toLocaleDateString('de-DE', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          })}</p>
+                          <Toggle name={`teams.${teamIndex}.active`} type="checkbox" label="Aktiv" />
+                          <InputText
+                            name={`assignedTeams.${index}.teams.${teamIndex}.jerseyNo`}
+                            type="number"
+                            label="Trikotnummer"
+                            autoComplete="off"
+                          />
+                        </div>
+                        */
+
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })}
+
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
               <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />
