@@ -224,7 +224,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
   const dataLisItems = playerValues?.map((player: PlayerValues) => {
     return {
       _id: player._id,
-      title: `${player.displayFirstName} ${player.displayLastName.toUpperCase()}`,
+      title: `${player.displayFirstName} ${player.displayLastName}`,
       description: [
         /*
         `${player.firstName} ${player.lastName}`,

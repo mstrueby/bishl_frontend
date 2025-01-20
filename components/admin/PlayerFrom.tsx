@@ -29,15 +29,15 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 }) => {
   return (
     <>
-      <div className="">
+      <div className="mt-8">
         <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Nicht änderbare Felder</h3>
         <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Die Felder <em>Name</em> und <em>Geburtsdatum</em> dienen zur Verknüpfung mit den ISHD-Daten. Weiter unten können Vor- und Nachname für die Anzeige geändert werden.</p>
       </div>
       <div className="mt-6 border-t border-b border-gray-100">
         <dl className="divide-y divide-gray-100">
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm/6 font-medium text-gray-900">Name</dt>
-            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{initialValues.firstName} {initialValues.lastName}</dd>
+            <dt className="text-sm/6 font-medium text-gray-900">Name, Vorname</dt>
+            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{initialValues.lastName}, {initialValues.firstName}</dd>
           </div>
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt className="text-sm/6 font-medium text-gray-900">Geburtsdatum</dt>
@@ -58,7 +58,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
         </dl>
       </div>
 
-      <h3 className="text-base/7 font-semibold text-gray-900 mt-8 uppercase">Änderbare Felder</h3>
+      <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Änderbare Felder</h3>
       <Formik
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
@@ -101,7 +101,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               if (assignment.clubId === clubId) {
                 return (
                   <div key={index} className="">
-                    <h3 className="text-base/7 font-semibold text-gray-900 mt-8 uppercase">Mannschaften</h3>
+                    <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Mannschaften</h3>
                     <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
                     <div className="mt-6 border-t border-b border-gray-100">
                       <ul className="divide-y divide-gray-100">
@@ -135,6 +135,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                               <input
                                 type="number"
                                 name={`assignedTeams.${index}.teams.${teamIndex}.jerseyNo`}
+                                value={values.assignedTeams[index].teams[teamIndex].jerseyNo || ''}
+                                onChange={handleChange}
                                 min="1"
                                 max="98"
                                 className="block w-16 rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
@@ -164,6 +166,46 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               }
               return null;
             })}
+
+            {/* Other club assignments section */}
+            {values.assignedTeams?.some(assignment => assignment.clubId !== clubId) && (
+              <div className="mt-8">
+                <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Andere Vereine</h3>
+                <div className="mt-6 border-t border-b border-gray-100">
+                  <ul className="divide-y divide-gray-100">
+                    {values.assignedTeams
+                      .filter(assignment => assignment.clubId !== clubId)
+                      .map((assignment, index) => (
+                        <li key={index}>
+                          <div className="py-5">
+                            <h4 className="text-sm font-semibold text-gray-900">{assignment.clubName}</h4>
+                            <ul className="mt-2 space-y-3">
+                              {assignment.teams.map((team, teamIndex) => (
+                                <li key={teamIndex} className="flex items-center text-sm text-gray-500">
+                                  <span className="mr-2">{team.teamName}</span>
+                                  <span className="mr-2">•</span>
+                                  <span className="mr-2">{team.passNo}</span>
+                                  <span className="mr-2">•</span>
+                                  <span>{new Date(team.modifyDate).toLocaleDateString('de-DE')}</span>
+                                  {team.jerseyNo && (
+                                    <>
+                                      <span className="mr-2 ml-2">•</span>
+                                      <span>#{team.jerseyNo}</span>
+                                    </>
+                                  )}
+                                  <span className="ml-2">
+                                    <Badge info={team.active ? "aktiv" : "inaktiv"} />
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
 
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
