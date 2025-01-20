@@ -29,7 +29,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 }) => {
   return (
     <>
-      <div className="">
+      <div className="mt-8">
         <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Nicht änderbare Felder</h3>
         <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Die Felder <em>Name</em> und <em>Geburtsdatum</em> dienen zur Verknüpfung mit den ISHD-Daten. Weiter unten können Vor- und Nachname für die Anzeige geändert werden.</p>
       </div>
@@ -58,7 +58,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
         </dl>
       </div>
 
-      <h3 className="text-base/7 font-semibold text-gray-900 mt-8 uppercase">Änderbare Felder</h3>
+      <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Änderbare Felder</h3>
       <Formik
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
@@ -101,7 +101,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               if (assignment.clubId === clubId) {
                 return (
                   <div key={index} className="">
-                    <h3 className="text-base/7 font-semibold text-gray-900 mt-8 uppercase">Mannschaften</h3>
+                    <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Mannschaften</h3>
                     <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
                     <div className="mt-6 border-t border-b border-gray-100">
                       <ul className="divide-y divide-gray-100">
@@ -170,7 +170,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             {/* Other club assignments section */}
             {values.assignedTeams?.some(assignment => assignment.clubId !== clubId) && (
               <div className="mt-8">
-                <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Andere Vereinszugehörigkeiten</h3>
+                <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Andere Vereine</h3>
                 <div className="mt-6 border-t border-b border-gray-100">
                   <ul className="divide-y divide-gray-100">
                     {values.assignedTeams
