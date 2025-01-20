@@ -262,9 +262,6 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
               });
             });
             return modifyDates.length > 0 ? modifyDates.join(', ') : '';
