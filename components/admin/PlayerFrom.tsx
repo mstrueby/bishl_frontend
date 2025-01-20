@@ -133,7 +133,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                               </div>
                             </div>
 
-                            <div className="relative flex-none gap-x-4 flex items-center">
+                            <div className="relative gap-x-4 flex items-center">
                               <input
                                 type="number"
                                 name={`assignedTeams.${index}.teams.${teamIndex}.jerseyNo`}
