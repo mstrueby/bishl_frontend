@@ -222,15 +222,15 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
     : [];
 
   const dataLisItems = playerValues?.map((player: PlayerValues) => {
+    const name = `${player.firstName} ${player.lastName}`;
+    const number = player.assignedTeams
+      .flatMap(item => item.teams)
+      .filter(teamInner => teamInner.teamId === team._id && teamInner.jerseyNo !== undefined)
+      .map(teamInner => teamInner.jerseyNo)
+      .join('');
     return {
       _id: player._id,
-      title: `${player.assignedTeams
-        .flatMap(item => item.teams)
-        .find(teamInner => teamInner.teamId === team._id)?.jerseyNo 
-          ? `${player.assignedTeams
-              .flatMap(item => item.teams)
-              .find(teamInner => teamInner.teamId === team._id)?.jerseyNo}. ` 
-          : ''}${player.displayFirstName} ${player.displayLastName}`,
+      title: `${number ? number + ' - ' : ''}${name}`,
       description: [
         /*
         `${player.firstName} ${player.lastName}`,
