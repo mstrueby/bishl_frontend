@@ -167,6 +167,46 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               return null;
             })}
 
+            {/* Other club assignments section */}
+            {values.assignedTeams?.some(assignment => assignment.clubId !== clubId) && (
+              <div className="mt-8">
+                <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Andere Vereinszugehörigkeiten</h3>
+                <div className="mt-6 border-t border-b border-gray-100">
+                  <ul className="divide-y divide-gray-100">
+                    {values.assignedTeams
+                      .filter(assignment => assignment.clubId !== clubId)
+                      .map((assignment, index) => (
+                        <li key={index}>
+                          <div className="py-5">
+                            <h4 className="text-sm font-semibold text-gray-900">{assignment.clubName}</h4>
+                            <ul className="mt-2 space-y-3">
+                              {assignment.teams.map((team, teamIndex) => (
+                                <li key={teamIndex} className="flex items-center text-sm text-gray-500">
+                                  <span className="mr-2">{team.teamName}</span>
+                                  <span className="mr-2">•</span>
+                                  <span className="mr-2">{team.passNo}</span>
+                                  <span className="mr-2">•</span>
+                                  <span>{new Date(team.modifyDate).toLocaleDateString('de-DE')}</span>
+                                  {team.jerseyNo && (
+                                    <>
+                                      <span className="mr-2 ml-2">•</span>
+                                      <span>#{team.jerseyNo}</span>
+                                    </>
+                                  )}
+                                  <span className="ml-2">
+                                    <Badge info={team.active ? "aktiv" : "inaktiv"} />
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
               <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />
