@@ -229,7 +229,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         .find(teamInner => teamInner.teamId === team._id)?.jerseyNo 
           ? `${player.assignedTeams
               .flatMap(item => item.teams)
-              .find(teamInner => teamInner.teamId === team._id)?.jerseyNo} ` 
+              .find(teamInner => teamInner.teamId === team._id)?.jerseyNo}. ` 
           : ''}${player.displayFirstName} ${player.displayLastName}`,
       description: [
         /*
