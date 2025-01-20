@@ -135,6 +135,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                               <input
                                 type="number"
                                 name={`assignedTeams.${index}.teams.${teamIndex}.jerseyNo`}
+                                value={values.assignedTeams[index].teams[teamIndex].jerseyNo || ''}
+                                onChange={handleChange}
                                 min="1"
                                 max="98"
                                 className="block w-16 rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
