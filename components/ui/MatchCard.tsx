@@ -128,6 +128,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             finishTypeValue={match.finishType.value}
           />
         </div>
+        {/*
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           <button
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -136,6 +137,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             <span className="hidden sm:block md:hidden">Bericht</span>
           </button>
         </div>
+        */}
       </div>
     </div>
   );
