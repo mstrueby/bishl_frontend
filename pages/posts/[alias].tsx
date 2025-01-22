@@ -25,8 +25,12 @@ function classNames(...classes: string[]) {
 export default function Post({
   post
 }: {
-  post: PostValues
+  post?: PostValues
 }) {
+  if (!post) {
+    return <Layout><div>Loading...</div></Layout>;
+  }
+
   const createDate = new Date(new Date(post.createDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString();
 
   return (
@@ -98,7 +102,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const paths = allPostsData.map((post: PostValues) => ({
     params: { alias: post.alias },
   }));
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {

@@ -10,14 +10,14 @@ const navigation = {
   bishl: [
     { name: 'Vereine', href: '/clubs' },
     { name: 'Spielstätten', href: '/venues' },
-    { name: 'Schiedsrichterwesen', href: '#' },
+    //{ name: 'Schiedsrichterwesen', href: '#' },
     { name: 'Dokumente', href: '/documents' },
   ],
-  company: [
+  articles: [
     { name: 'News', href: '/posts' },
-    { name: 'Blog', href: '#' },
-    { name: 'Jobs', href: '#' },
-    { name: 'Press', href: '#' },
+    //{ name: 'Blog', href: '#' },
+    //{ name: 'Jobs', href: '#' },
+    //{ name: 'Press', href: '#' },
   ],
   associations: [
     { name: 'DRIV', href: 'https://www.driv.de/' },
@@ -86,9 +86,9 @@ const Footer = () => {
                 </ul>
               </div>
               <div className="mt-10 md:mt-0">
-                <h3 className="text-sm/6 font-semibold text-white">Company</h3>
+                <h3 className="text-sm/6 font-semibold text-white">Artikel</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  {navigation.company.map((item) => (
+                  {navigation.articles.map((item) => (
                     <li key={item.name}>
                       <Link href={item.href}>
                         <a className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">

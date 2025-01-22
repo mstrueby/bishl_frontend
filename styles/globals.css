@@ -64,7 +64,7 @@ a {
   color: #4c51bf;
   text-decoration: none;
 }
-.legal :hover {
+.legal a:hover {
   text-decoration: underline;
 }
 

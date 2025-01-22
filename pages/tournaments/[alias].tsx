@@ -133,8 +133,15 @@ export default function Tournament({
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
         .then((response) => response.json())
         .then((data) => {
-          setRounds(data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder));
-          setSelectedRound(data[data.length - 1] || {} as Round);
+          if (Array.isArray(data)) {
+            const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+            setRounds(sortedData);
+            setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
+          } else {
+            console.error('Received invalid data format for rounds');
+            setRounds([]);
+            setSelectedRound({} as Round);
+          }
         })
         .finally(() => {
           setIsLoadingRounds(false);
@@ -150,21 +157,29 @@ export default function Tournament({
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
         .then((response) => response.json())
         .then((data) => {
-          setMatchdays(data.sort((a: Matchday, b: Matchday) => {
-            if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
-              return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-            } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
-              return a.name.localeCompare(b.name);
+          if (Array.isArray(data)) {
+            const sortedData = data.sort((a: Matchday, b: Matchday) => {
+              if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
+                return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+              } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
+                return a.name.localeCompare(b.name);
+              }
+              return 0;
+            });
+            setMatchdays(sortedData);
+            
+            if (selectedRound.matchdaysType.key === 'GROUP') {
+              setSelectedMatchday(sortedData[0] || {} as Matchday);
+            } else {
+              const now = new Date().getTime();
+              const mostRecentPastMatchday = sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+              setSelectedMatchday(mostRecentPastMatchday || {} as Matchday);
             }
-            return 0;
-          }));
-          if (selectedRound.matchdaysType.key === 'GROUP') {
-            setSelectedMatchday(data[0] || {} as Matchday);
           } else {
-            const now = new Date().getTime();
-            const mostRecentPastMatchday = data.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
-              .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
-            setSelectedMatchday(mostRecentPastMatchday || {} as Matchday);
+            console.error('Received invalid data format for matchdays');
+            setMatchdays([]);
+            setSelectedMatchday({} as Matchday);
           }
         })
         .finally(() => {
