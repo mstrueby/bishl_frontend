@@ -222,7 +222,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
     : [];
 
   const dataLisItems = playerValues?.map((player: PlayerValues) => {
-    const name = `${player.firstName} ${player.lastName}`;
+    const name = `${player.displayFirstName} ${player.displayLastName}`;
     const number = player.assignedTeams
       .flatMap(item => item.teams)
       .filter(teamInner => teamInner.teamId === team._id && teamInner.jerseyNo !== undefined)
