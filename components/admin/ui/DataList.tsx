@@ -46,6 +46,7 @@ interface DataListProps {
   deleteModalDescription?: string;
   deleteModalDescriptionSubText?: string;
   showThumbnails?: boolean;
+  showThumbnailsOnMobiles?: boolean;
 }
 
 
@@ -73,7 +74,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
         <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
           {showThumbnails && (
             item.image ? (
-              <span className="hidden sm:block"><CldImage
+              <span className={`${!showThumbnailsOnMobiles ? 'hidden sm:block' : 'block'}`}><CldImage
                 src={item.image.src}
                 alt="Thumbnail"
                 className={classNames(item.image.className, '')}
@@ -82,7 +83,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                 radius={item.image.radius}
               /></span>
             ) : (
-              <div className="hidden sm:block relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
+              <div className={`${!showThumbnailsOnMobiles ? 'hidden sm:block' : 'block'} relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]`}></div>
             )
           )}
           <div className="flex-1 min-w-0">
