@@ -87,7 +87,9 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
       Object.entries(values).forEach(([key, value]) => {
         const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality'];
         if (excludedFields.includes(key)) return;
-        if (value instanceof FileList) {
+        if (key === 'image' && value instanceof File) {
+          formData.append('image', value);
+        } else if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else if (typeof value === 'object') {
           if (key === 'assignedTeams') {

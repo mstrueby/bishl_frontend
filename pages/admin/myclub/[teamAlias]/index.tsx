@@ -279,8 +279,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
       alias: player._id,
       image: {
         src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
-        width: 32,
-        height: 32,
+        width: 46,
+        height: 46,
         gravity: 'center',
         className: 'object-contain',
         radius: 0,
@@ -317,6 +317,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
       <DataList
         items={dataLisItems}
         statuses={statuses}
+        showThumbnails
       />
 
     </Layout>
