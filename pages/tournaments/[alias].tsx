@@ -133,8 +133,15 @@ export default function Tournament({
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
         .then((response) => response.json())
         .then((data) => {
-          setRounds(data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder));
-          setSelectedRound(data[data.length - 1] || {} as Round);
+          if (Array.isArray(data)) {
+            const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+            setRounds(sortedData);
+            setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
+          } else {
+            console.error('Received invalid data format for rounds');
+            setRounds([]);
+            setSelectedRound({} as Round);
+          }
         })
         .finally(() => {
           setIsLoadingRounds(false);
