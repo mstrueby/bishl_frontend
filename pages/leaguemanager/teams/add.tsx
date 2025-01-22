@@ -26,6 +26,7 @@ export default function Add({ jwt }: AddProps) {
   const router = useRouter();
 
   const initialValues: TeamValues = {
+    _id: '',
     name: '',
     alias: '',
     fullName: '',
