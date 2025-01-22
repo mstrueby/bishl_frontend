@@ -278,7 +278,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
       ],
       alias: player._id,
       image: {
-        src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
+        src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png',
         width: 46,
         height: 46,
         gravity: 'center',
