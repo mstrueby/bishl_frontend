@@ -51,7 +51,7 @@ interface DataListProps {
 
 
 const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDeleteConfirm,
-  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText, showThumbnails }) => {
+  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText, showThumbnails, showThumbnailsOnMobiles }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
