@@ -22,14 +22,12 @@ interface DataListProps {
     description?: string[];
     category?: string;
     image?: {
-      type: 'url' | 'svg';
-      src?: string;
-      width?: number;
-      height?: number;
-      gravity?: string;
-      className?: string;
-      radius?: number;
-      svg?: string;
+      src: string;
+      width: number;
+      height: number;
+      gravity: string;
+      className: string;
+      radius: number;
     };
     published?: boolean;
     featured?: boolean;
@@ -75,21 +73,14 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
         <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
           {showThumbnails && (
             item.image ? (
-              item.image.type === 'url' ? (
-                <span className="hidden sm:block">
-                  <CldImage
-                    src={item.image.src || ''}
-                    alt="Thumbnail"
-                    className={classNames(item.image.className || '', '')}
-                    width={item.image.width || 46} 
-                    height={item.image.height || 46}
-                    gravity={item.image.gravity || 'center'}
-                    radius={item.image.radius || 0}
-                  />
-                </span>
-              ) : (
-                <span className="hidden sm:block" dangerouslySetInnerHTML={{ __html: item.image.svg || '' }} />
-              )
+              <span className="hidden sm:block"><CldImage
+                src={item.image.src}
+                alt="Thumbnail"
+                className={classNames(item.image.className, '')}
+                width={item.image.width} height={item.image.height}
+                gravity={item.image.gravity}
+                radius={item.image.radius}
+              /></span>
             ) : (
               <div className="hidden sm:block relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
             )
