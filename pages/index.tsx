@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 }
 
 
-const Home: NextPage<PostsProps> = ({ jwt, posts }) => {
+const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
 
 
   const postItems = posts
