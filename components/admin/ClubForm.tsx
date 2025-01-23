@@ -75,7 +75,7 @@ const ClubForm: React.FC<ClubFormProps> = ({
                 </button>
               </div>
             ) : (
-              <ImageUpload name="logo" label="Logo" imageUrl={initialValues.logoUrl || ''} />
+              <ImageUpload name="logo" label="Logo" description="Das neue Logo wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.logoUrl || ''} />
             )}
             <InputText name="addressName" type="text" label="Adresse" />
             <InputText name="street" autoComplete="off" type="text" label="Straße" />

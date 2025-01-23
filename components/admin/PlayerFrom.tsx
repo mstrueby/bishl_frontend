@@ -91,7 +91,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 </button>
               </div>
             ) : (
-              <ImageUpload name="image" label="Bild" imageUrl={initialValues.imageUrl || ''} />
+              <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
             <InputText name="displayFirstName" autoComplete="off" type="text" label="Angezeigter Vorname" />
             <InputText name="displayLastName" autoComplete="off" type="text" label="Angezeigter Nachname" />

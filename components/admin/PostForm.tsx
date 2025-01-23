@@ -72,7 +72,7 @@ const PostForm: React.FC<PostFormProps> = ({
               </button>
             </div>
           ) : (
-            <ImageUpload name="image" label="Beitragsbild" imageUrl={initialValues.imageUrl || ''} />
+            <ImageUpload name="image" label="Beitragsbild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
           )}
 
           <label
