@@ -37,6 +37,14 @@ const SearchBox: React.FC<SearchBoxProps> = ({ placeholder, options, onSearch, o
             className="w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             placeholder={placeholder || "Search..."}
             onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                if (query.length >= 3) {
+                  onSearch(query);
+                }
+              }
+            }}
             displayValue={(option: SearchOption) => option?.label || query}
           />
         </div>
