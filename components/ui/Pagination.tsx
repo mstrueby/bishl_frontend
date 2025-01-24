@@ -11,7 +11,7 @@ type Props = {
 
 
 export default function Pagination({ totalItems, currentPage, onPageChange, basePath }: Props) {
-  const itemsPerPage = process.env['RESULTS_PER_PAGE'] ? parseInt(process.env['RESULTS_PER_PAGE'], 25) : 25;
+  const itemsPerPage = 25; // Fixed value to ensure consistency between server and client
   const pageCount = Math.ceil(totalItems / itemsPerPage);
 
   if (pageCount <= 1) return null;
