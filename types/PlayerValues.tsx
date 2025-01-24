@@ -6,9 +6,9 @@ export interface PlayerValues {
   displayFirstName: string;
   displayLastName: string;
   nationality: string;
-  position: "Skater";
+  position?: "Skater";
   fullFaceReq: boolean;
-  source: string; // e.g. "BISHL"
+  source?: string; // e.g. "BISHL"
   assignedTeams: {
     clubId: string;
     clubName: string;

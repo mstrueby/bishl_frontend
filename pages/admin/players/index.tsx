@@ -290,6 +290,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
         items={dataLisItems}
         statuses={statuses}
         showThumbnails
+        showThumbnailsOnMobiles
       />
 
       <div className="mt-8">
