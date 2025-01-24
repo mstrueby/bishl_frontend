@@ -15,7 +15,8 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface PlayersProps {
   jwt: string,
-  players: PlayerValues[]
+  players: PlayerValues[],
+  totalPlayers: number
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -62,7 +63,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         pageSize
       }
     });
-    players = res.data;
+    players = res.data.players;
+    const totalPlayers = res.data.total;
     //console.log("clubs:", clubs)
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -237,9 +239,11 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers }) => {
 
       <div className="mt-8">
         <Pagination
-          items={players.length}
+          totalItems={totalPlayers}
           currentPage={currentPage}
           onPageChange={handlePageChange}
+          itemsPerPage={10}
+          basePath="/admin/players"
         />
       </div>
     </Layout>
