@@ -26,7 +26,7 @@ export interface PlayerValues {
       active: boolean;
     }[];
   }[];
-  stats: {
+  stats?: {
     tournament: {
       name: string;
       alias: string;
@@ -56,6 +56,6 @@ export interface PlayerValues {
     penaltyMinutes: number;
   }[];
   imageUrl: string;
-  legacyId: number;
-  createDate: string;  // e.g. "2025-01-16T11:36:45.395Z"
+  legacyId?: number;
+  createDate?: string;  // e.g. "2025-01-16T11:36:45.395Z"
 }

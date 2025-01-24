@@ -4,7 +4,7 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { PlayerValues } from '../../../types/PlaerValues';
+import { PlayerValues } from '../../../types/PlayerValues';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
@@ -189,9 +189,17 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
     //.sort((a, b) => a.firstName.localeCompare(b.firstName))
     .map((player: PlayerValues) => ({
       _id: player._id,
+      firstName: player.firstName,
+      lastName: player.lastName,
+      birthdate: player.birthdate,
       displayFirstName: player.displayFirstName,
       displayLastName: player.displayLastName,
+      nationality: player.nationality,
+      position: player.position,
+      fullFaceReq: player.fullFaceReq,
+      source: player.source,
       assignedTeams: player.assignedTeams,
+      imageUrl: player.imageUrl,
     }));
 
   const sectionTitle = 'SpielerInnen';
