@@ -110,12 +110,15 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
     router.push(`/admin/clubs/${alias}/edit`);
   }
 
-  const toggleActive = async (clubId: string, currentStatus: boolean, logo: string | null) => {
+  const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
     try {
       const formData = new FormData();
       formData.append('active', (!currentStatus).toString()); // Toggle the status
-      if (logo) {
-        formData.append('logo', logo);
+      if (logoUrl) {
+        formData.append('logoUrl', logoUrl);
+      }
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
       }
 
       const response = await axios.patch(`${BASE_URL! + '/clubs/'}${clubId}`, formData, {
