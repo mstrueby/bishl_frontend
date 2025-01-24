@@ -107,13 +107,13 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       const res = await axios.get(`${BASE_URL}/players/`, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
         },
         params: {
-          page,
-          pageSize
+          page
         }
       });
-      setPlayers(res.data);
+      setPlayers(res.data.results);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching players:', error);
