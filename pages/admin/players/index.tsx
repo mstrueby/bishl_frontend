@@ -191,6 +191,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       _id: player._id,
       displayFirstName: player.displayFirstName,
       displayLastName: player.displayLastName,
+      assignedTeams: player.assignedTeams,
     }));
 
   const sectionTitle = 'SpielerInnen';
