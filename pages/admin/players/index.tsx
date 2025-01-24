@@ -98,8 +98,44 @@ const transformedUrl = (id: string) => buildUrl(id, {
 const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPlayers }) => {
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [searchOptions, setSearchOptions] = useState<Array<{id: string, label: string}>>([]);
   const router = useRouter();
   const currentPage = parseInt(router.query.page as string) || 1;
+  
+  const handleSearch = async (query: string) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/players/search`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        },
+        params: {
+          q: query
+        }
+      });
+      const searchResults = res.data.results.map((player: PlayerValues) => ({
+        id: player._id,
+        label: `${player.displayFirstName} ${player.displayLastName}`
+      }));
+      setSearchOptions(searchResults);
+    } catch (error) {
+      console.error('Error searching players:', error);
+    }
+  };
+
+  const handleSelect = async (option: {id: string, label: string}) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/players/${option.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      setPlayers([res.data]);
+    } catch (error) {
+      console.error('Error fetching player:', error);
+    }
+  };
 
   const fetchPlayers = async (page: number) => {
     try {
@@ -237,6 +273,14 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       <SectionHeader
         title={sectionTitle}
         newLink={newLink}
+        searchBox={
+          <SearchBox
+            placeholder="Search players..."
+            options={searchOptions}
+            onSearch={handleSearch}
+            onSelect={handleSelect}
+          />
+        }
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
