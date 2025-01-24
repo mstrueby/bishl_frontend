@@ -10,6 +10,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 import Pagination from '../../../components/ui/Pagination';
+import SearchBox from '../../../components/ui/SearchBox';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -104,7 +105,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
   
   const handleSearch = async (query: string) => {
     try {
-      const res = await axios.get(`${BASE_URL}/players/search`, {
+      const res = await axios.get(`${BASE_URL}/players/`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
