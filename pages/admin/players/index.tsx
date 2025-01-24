@@ -121,11 +121,12 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
     }
   };
 
-  const handlePageChange = (page: number) => {
-    router.push({
+  const handlePageChange = async (page: number) => {
+    await router.push({
       pathname: router.pathname,
       query: { ...router.query, page }
     });
+    await fetchPlayers(page);
   };
 
   const editPlayer = (id: string) => {
