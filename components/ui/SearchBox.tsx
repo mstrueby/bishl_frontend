@@ -50,6 +50,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ placeholder, options, onSearch, o
                   active ? 'bg-indigo-600 text-white' : 'text-gray-900'
                 }`
               }
+              selected={false}
             >
               {option.label}
             </Combobox.Option>
