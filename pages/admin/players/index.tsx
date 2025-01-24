@@ -202,10 +202,13 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
   }
 
   const dataLisItems = playerValues.map((player: PlayerValues) => {
+    const clubNames = player.assignedTeams?.map(team => team.clubName) || [];
+    
     return {
       _id: player._id,
       title: `${player.displayFirstName} ${player.displayLastName}`,
       alias: player._id,
+      description: clubNames,
       image: {
         src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/w_36,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png',
         width: 46,
@@ -214,10 +217,8 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
         className: 'object-contain rounded-full',
         radius: 0,
       },
-      //published: club.active,
       menu: [
         { edit: { onClick: () => editPlayer(player._id) } },
-        //{ active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
       ],
     };
   });
