@@ -4,12 +4,13 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { PlayerValues } from '../../../types/PlaerValues';
+import { PlayerValues } from '../../../types/PlayerValues';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 import Pagination from '../../../components/ui/Pagination';
+import SearchBox from '../../../components/ui/SearchBox';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -98,22 +99,57 @@ const transformedUrl = (id: string) => buildUrl(id, {
 const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPlayers }) => {
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [searchOptions, setSearchOptions] = useState<Array<{id: string, label: string}>>([]);
   const router = useRouter();
   const currentPage = parseInt(router.query.page as string) || 1;
-  const pageSize = 10;
+  
+  const handleSearch = async (query: string) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/players/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        },
+        params: {
+          q: query
+        }
+      });
+      const searchResults = res.data.results.map((player: PlayerValues) => ({
+        id: player._id,
+        label: `${player.displayFirstName} ${player.displayLastName}`
+      }));
+      setSearchOptions(searchResults);
+    } catch (error) {
+      console.error('Error searching players:', error);
+    }
+  };
+
+  const handleSelect = async (option: {id: string, label: string}) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/players/${option.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      setPlayers([res.data]);
+    } catch (error) {
+      console.error('Error fetching player:', error);
+    }
+  };
 
   const fetchPlayers = async (page: number) => {
     try {
       const res = await axios.get(`${BASE_URL}/players/`, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
         },
         params: {
-          page,
-          pageSize
+          page
         }
       });
-      setPlayers(res.data);
+      setPlayers(res.data.results);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching players:', error);
@@ -121,11 +157,12 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
     }
   };
 
-  const handlePageChange = (page: number) => {
-    router.push({
+  const handlePageChange = async (page: number) => {
+    await router.push({
       pathname: router.pathname,
       query: { ...router.query, page }
     });
+    await fetchPlayers(page);
   };
 
   const editPlayer = (id: string) => {
@@ -189,8 +226,17 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
     //.sort((a, b) => a.firstName.localeCompare(b.firstName))
     .map((player: PlayerValues) => ({
       _id: player._id,
+      firstName: player.firstName,
+      lastName: player.lastName,
+      birthdate: player.birthdate,
       displayFirstName: player.displayFirstName,
       displayLastName: player.displayLastName,
+      nationality: player.nationality,
+      position: player.position,
+      fullFaceReq: player.fullFaceReq,
+      source: player.source,
+      assignedTeams: player.assignedTeams,
+      imageUrl: player.imageUrl,
     }));
 
   const sectionTitle = 'SpielerInnen';
@@ -202,10 +248,13 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
   }
 
   const dataLisItems = playerValues.map((player: PlayerValues) => {
+    const clubNames = player.assignedTeams?.map(team => team.clubName) || [];
+    
     return {
       _id: player._id,
       title: `${player.displayFirstName} ${player.displayLastName}`,
       alias: player._id,
+      description: clubNames,
       image: {
         src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/w_36,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png',
         width: 46,
@@ -214,10 +263,8 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
         className: 'object-contain rounded-full',
         radius: 0,
       },
-      //published: club.active,
       menu: [
         { edit: { onClick: () => editPlayer(player._id) } },
-        //{ active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
       ],
     };
   });
@@ -227,6 +274,14 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       <SectionHeader
         title={sectionTitle}
         newLink={newLink}
+        searchBox={
+          <SearchBox
+            placeholder="Search players..."
+            options={searchOptions}
+            onSearch={handleSearch}
+            onSelect={handleSelect}
+          />
+        }
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}

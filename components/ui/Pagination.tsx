@@ -11,11 +11,41 @@ type Props = {
 
 
 export default function Pagination({ totalItems, currentPage, onPageChange, basePath }: Props) {
-  const itemsPerPage = process.env['RESULTS_PER_PAGE'] ? parseInt(process.env['RESULTS_PER_PAGE'], 25) : 25;
+  const itemsPerPage = 25; // Fixed value to ensure consistency between server and client
   const pageCount = Math.ceil(totalItems / itemsPerPage);
 
   if (pageCount <= 1) return null;
-  const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
+  
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    range.push(1);
+    for (let i = currentPage - delta; i <= currentPage + delta; i++) {
+      if (i > 1 && i < pageCount) {
+        range.push(i);
+      }
+    }
+    range.push(pageCount);
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  };
+
+  const pages = getVisiblePages();
 
   const pageInactive = "inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
   const pageActive = "inline-flex items-center border-t-2 border-indigo-500 px-4 pt-4 text-sm font-medium text-indigo-600";
@@ -33,18 +63,24 @@ export default function Pagination({ totalItems, currentPage, onPageChange, base
         )}
       </div>
       <div className="hidden md:-mt-px md:flex">
-        {pages.map((page) => (
-          <Link href={`${basePath}${page === 1 ? '' : `?page=${page}`}`} key={page}>
-            <a
-              onClick={(e) => {
-                e.preventDefault();
-                onPageChange(page);
-              }}
-              className={currentPage === page ? pageActive : pageInactive}
-            >
+        {pages.map((page, index) => (
+          typeof page === 'number' ? (
+            <Link href={`${basePath}${page === 1 ? '' : `?page=${page}`}`} key={index}>
+              <a
+                onClick={(e) => {
+                  e.preventDefault();
+                  onPageChange(page);
+                }}
+                className={currentPage === page ? pageActive : pageInactive}
+              >
+                {page}
+              </a>
+            </Link>
+          ) : (
+            <span key={index} className="inline-flex items-center px-4 pt-4 text-sm font-medium text-gray-500">
               {page}
-            </a>
-          </Link>
+            </span>
+          )
         ))}
       </div>
       <div className="-mt-px flex w-0 flex-1 justify-end">
