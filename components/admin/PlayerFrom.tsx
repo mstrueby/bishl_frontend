@@ -76,10 +76,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                   <span className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
                     Bild
                   </span>
-                  <CldImage src={values.imageUrl} alt="Uploaded image" width={96} height={96}
+                  <CldImage src={values.imageUrl} alt="Uploaded image" width={128} height={128}
                     crop="thumb"
                     gravity="face"
-                    className=" w-full object-contain"
+                    className=" w-full object-contain rounded-full"
                   />
                 </div>
                 <button
@@ -91,7 +91,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 </button>
               </div>
             ) : (
-              <ImageUpload name="image" label="Bild" imageUrl={initialValues.imageUrl || ''} />
+              <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
             <InputText name="displayFirstName" autoComplete="off" type="text" label="Angezeigter Vorname" />
             <InputText name="displayLastName" autoComplete="off" type="text" label="Angezeigter Nachname" />

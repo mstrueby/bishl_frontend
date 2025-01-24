@@ -46,11 +46,13 @@ interface DataListProps {
   deleteModalDescription?: string;
   deleteModalDescriptionSubText?: string;
   showThumbnails?: boolean;
+  showThumbnailsOnMobiles?: boolean;
+  showStatusIndicator?: boolean;
 }
 
 
 const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDeleteConfirm,
-  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText, showThumbnails }) => {
+  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText, showThumbnails, showThumbnailsOnMobiles, showStatusIndicator }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
@@ -73,7 +75,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
         <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
           {showThumbnails && (
             item.image ? (
-              <span className="hidden sm:block"><CldImage
+              <span className={`${!showThumbnailsOnMobiles ? 'hidden sm:block' : 'block'}`}><CldImage
                 src={item.image.src}
                 alt="Thumbnail"
                 className={classNames(item.image.className, '')}
@@ -82,14 +84,16 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                 radius={item.image.radius}
               /></span>
             ) : (
-              <div className="hidden sm:block relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]"></div>
+              <div className={`${!showThumbnailsOnMobiles ? 'hidden sm:block' : 'block'} relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]`}></div>
             )
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-x-3">
-              <div className={`${statuses[item.published ? 'Published' : 'Unpublished']} flex-none rounded-full p-1`}>
-                <div className="h-2 w-2 rounded-full bg-current" />
-              </div>
+              {showStatusIndicator && (
+                <div className={`${statuses[item.published ? 'Published' : 'Unpublished']} flex-none rounded-full p-1`}>
+                  <div className="h-2 w-2 rounded-full bg-current" />
+                </div>
+              )}
               <p className="text-sm/6 font-semibold text-gray-900 truncate">{item.title}</p>
               {item.featured && (
                 <p

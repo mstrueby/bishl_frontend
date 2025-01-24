@@ -2,7 +2,7 @@ import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 
 
@@ -252,6 +252,12 @@ const Header = () => {
                                 </MyLink>
                               </MenuItem>
                               <MenuItem>
+                                <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>SpielerInnen</span>
+                                </MyLink>
+                              </MenuItem>
+                              <MenuItem>
                                 <MyLink href="/admin/venues" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                   <RectangleStackIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                   <span>Spielflächen</span>
@@ -339,7 +345,7 @@ const Header = () => {
                       href={item.href}
                       className='block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 text-gray-300 hover:text-white hover:no-underline'
                     >
-                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
+                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
                       {item.name}
                     </Disclosure.Button>
                   ))}
@@ -356,7 +362,7 @@ const Header = () => {
                       href={item.href}
                       className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 text-gray-300 hover:text-white hover:no-underline"
                     >
-                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-12", item.bdg_col_dark)}>{item.tiny_name}</span>
+                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
                       {item.name}
                     </Disclosure.Button>
                   ))}

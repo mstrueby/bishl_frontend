@@ -141,7 +141,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
   }
 
-  const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, image: string | null) => {
+  const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, imageUrl: string | null) => {
     try {
       console.log("input assignedTeams:", assignedTeams)
       const updatedAssignedTeams = assignedTeams.map((item: any) => ({
@@ -154,9 +154,9 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
             modifyDate: teamInner.modifyDate,
           };
 
-          //if (teamInner.jerseyNo !== undefined) {
-          //  updatedTeam.jerseyNo = teamInner.jerseyNo;
-          //}
+          if (teamInner.jerseyNo !== undefined) {
+            updatedTeam.jerseyNo = teamInner.jerseyNo;
+          }
 
           if (teamInner.teamId === teamId) {
             updatedTeam.active = !teamInner.active;
@@ -170,8 +170,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
 
       const formData = new FormData();
       formData.append('assignedTeams', JSON.stringify(updatedAssignedTeams));
-      if (image) {
-        formData.append('image', image);
+      if (imageUrl) {
+        formData.append('imageUrl', imageUrl);
       }
 
       // Debug FormData by logging key-value pairs to the console
@@ -278,11 +278,11 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
       ],
       alias: player._id,
       image: {
-        src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png',
+        src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/w_36,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png',
         width: 46,
         height: 46,
         gravity: 'center',
-        className: 'object-contain',
+        className: 'object-contain rounded-full',
         radius: 0,
       },
       published: player.assignedTeams
@@ -318,6 +318,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         items={dataLisItems}
         statuses={statuses}
         showThumbnails
+        showThumbnailsOnMobiles
+        showStatusIndicator
       />
 
     </Layout>

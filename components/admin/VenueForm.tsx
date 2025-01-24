@@ -85,7 +85,7 @@ const VenueForm: React.FC<VenueFormProps> = ({
                 </button>
               </div>
             ) : (
-              <ImageUpload name="image" label="Bild" imageUrl={initialValues.imageUrl || ''} />
+              <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
             <InputText
               name="shortName"

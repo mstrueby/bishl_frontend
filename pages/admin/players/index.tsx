@@ -4,22 +4,25 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { ClubValues } from '../../../types/ClubValues';
+import { PlayerValues } from '../../../types/PlaerValues';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
+import Pagination from '../../../components/ui/Pagination';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
-interface ClubsProps {
+interface PlayersProps {
   jwt: string,
-  clubs: ClubValues[]
+  players: PlayerValues[],
+  totalPlayers: number
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let clubs = null;
+  let players = null;
+  let totalPlayers = 0;
 
   if (!jwt) {
     return {
@@ -34,12 +37,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // First check if user has required role
     const userResponse = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
-        'Authorization': `Bearer ${jwt}`
+        'Authorization': `Bearer ${jwt}`,
       }
     });
-    
+
     const user = userResponse.data;
-    //console.log("user:", user)
     if (!user.roles?.includes('ADMIN')) {
       return {
         redirect: {
@@ -49,23 +51,31 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await axios.get(BASE_URL! + '/clubs/', {
+    const page = parseInt(context.query.page as string) || 1;
+
+    const res = await axios.get(BASE_URL! + '/players/', {
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwt}`
+      },
+      params: {
+        page
       }
     });
-    clubs = res.data;
+    players = res.data.results;
+    totalPlayers = res.data.total;
     //console.log("clubs:", clubs)
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      clubs = [];
+      players = [];
       console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
     }
   }
   return {
     props: {
-      jwt,
-      clubs: clubs || []
+      jwt, 
+      players: players || [],
+      totalPlayers: totalPlayers || 0
     }
   };
 };
@@ -85,30 +95,43 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
-  const [clubs, setClubs] = useState<ClubValues[]>(initialClubs);
+const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPlayers }) => {
+  const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
+  const currentPage = parseInt(router.query.page as string) || 1;
+  const pageSize = 10;
 
-  const fetchClubs = async () => {
+  const fetchPlayers = async (page: number) => {
     try {
-      const res = await axios.get(BASE_URL! + '/clubs/', {
+      const res = await axios.get(`${BASE_URL}/players/`, {
         headers: {
           'Content-Type': 'application/json',
         },
+        params: {
+          page,
+          pageSize
+        }
       });
-      setClubs(res.data);
+      setPlayers(res.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Error fetching clubs:', error);
+        console.error('Error fetching players:', error);
       }
     }
   };
 
-  const editClub = (alias: string) => {
-    router.push(`/admin/clubs/${alias}/edit`);
-  }
+  const handlePageChange = (page: number) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, page }
+    });
+  };
 
+  const editPlayer = (id: string) => {
+    router.push(`/admin/players/${id}/edit`);
+  }
+/*
   const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
     try {
       const formData = new FormData();
@@ -140,7 +163,8 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
       console.error('Error publishing club:', error);
     }
   }
-
+*/
+  
   useEffect(() => {
     if (router.query.message) {
       setSuccessMessage(router.query.message as string);
@@ -160,38 +184,40 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
     setSuccessMessage(null);
   };
 
-  const clubValues = clubs
+  const playerValues = players
     .slice()
-    .sort((a, b) => a.name.localeCompare(b.alias))
-    .map((club: ClubValues) => ({
-      ...club
+    //.sort((a, b) => a.firstName.localeCompare(b.firstName))
+    .map((player: PlayerValues) => ({
+      _id: player._id,
+      displayFirstName: player.displayFirstName,
+      displayLastName: player.displayLastName,
     }));
 
-  const sectionTitle = 'Vereine';
-  const newLink = '/admin/clubs/add';
+  const sectionTitle = 'SpielerInnen';
+  const newLink = '/admin/players/add';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const dataLisItems = clubValues.map((club: ClubValues) => {
+  const dataLisItems = playerValues.map((player: PlayerValues) => {
     return {
-      _id: club._id,
-      title: club.name,
-      alias: club.alias,
+      _id: player._id,
+      title: `${player.displayFirstName} ${player.displayLastName}`,
+      alias: player._id,
       image: {
-        src: club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
-        width: 32,
-        height: 32,
+        src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/w_36,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png',
+        width: 46,
+        height: 46,
         gravity: 'center',
-        className: 'object-contain',
+        className: 'object-contain rounded-full',
         radius: 0,
       },
-      published: club.active,
+      //published: club.active,
       menu: [
-        { edit: { onClick: () => editClub(club.alias) } },
-        { active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
+        { edit: { onClick: () => editPlayer(player._id) } },
+        //{ active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
       ],
     };
   });
@@ -209,14 +235,21 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
         items={dataLisItems}
         statuses={statuses}
         showThumbnails
-        showStatusIndicator
       />
 
+      <div className="mt-8">
+        <Pagination
+          totalItems={totalPlayers}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          basePath="/admin/players"
+        />
+      </div>
     </Layout>
   );
 };
 
-export default Clubs;
+export default Players;
 
 
 
