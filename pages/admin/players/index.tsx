@@ -9,6 +9,7 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
+import Pagination from '../../../components/ui/Pagination';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -39,7 +40,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
 
     const user = userResponse.data;
-    //console.log("user:", user)
     if (!user.roles?.includes('ADMIN')) {
       return {
         redirect: {
@@ -49,10 +49,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
+    const page = parseInt(context.query.page as string) || 1;
+    const pageSize = 10;
+
     const res = await axios.get(BASE_URL! + '/players/', {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwt}`
+      },
+      params: {
+        page,
+        pageSize
       }
     });
     players = res.data;
@@ -90,13 +97,19 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers }) => {
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
+  const currentPage = parseInt(router.query.page as string) || 1;
+  const pageSize = 10;
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = async (page: number) => {
     try {
-      const res = await axios.get(BASE_URL! + '/players/', {
+      const res = await axios.get(`${BASE_URL}/players/`, {
         headers: {
           'Content-Type': 'application/json',
         },
+        params: {
+          page,
+          pageSize
+        }
       });
       setPlayers(res.data);
     } catch (error) {
@@ -104,6 +117,13 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers }) => {
         console.error('Error fetching players:', error);
       }
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, page }
+    });
   };
 
   const editPlayer = (id: string) => {
@@ -215,6 +235,13 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers }) => {
         showThumbnails
       />
 
+      <div className="mt-8">
+        <Pagination
+          items={players.length}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </Layout>
   );
 };
