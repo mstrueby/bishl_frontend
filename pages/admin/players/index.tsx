@@ -22,6 +22,7 @@ interface PlayersProps {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
   let players = null;
+  let totalPlayers = 0;
 
   if (!jwt) {
     return {
@@ -51,7 +52,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const page = parseInt(context.query.page as string) || 1;
-    const pageSize = 10;
 
     const res = await axios.get(BASE_URL! + '/players/', {
       headers: {
@@ -59,12 +59,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Authorization': `Bearer ${jwt}`
       },
       params: {
-        page,
-        pageSize
+        page
       }
     });
-    players = res.data.players;
-    const totalPlayers = res.data.total;
+    players = res.data.results;
+    totalPlayers = res.data.total;
     //console.log("clubs:", clubs)
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -75,7 +74,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       jwt, 
-      players: players || []
+      players: players || [],
+      totalPlayers: totalPlayers || 0
     }
   };
 };
@@ -95,7 +95,7 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers }) => {
+const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPlayers }) => {
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -242,7 +242,6 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers }) => {
           totalItems={totalPlayers}
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          itemsPerPage={10}
           basePath="/admin/players"
         />
       </div>

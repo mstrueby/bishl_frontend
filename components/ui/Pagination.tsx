@@ -6,12 +6,13 @@ type Props = {
   totalItems: number;
   currentPage: number;
   onPageChange: (page: number) => void;
-  itemsPerPage: number;
   basePath: string;
 };
 
-export default function Pagination({ totalItems, currentPage, onPageChange, itemsPerPage, basePath }: Props) {
-  const pageCount = Math.ceil(totalItems / itemsPerPage)
+
+export default function Pagination({ totalItems, currentPage, onPageChange, basePath }: Props) {
+  const itemsPerPage = process.env['RESULTS_PER_PAGE'] ? parseInt(process.env['RESULTS_PER_PAGE'], 25) : 25;
+  const pageCount = Math.ceil(totalItems / itemsPerPage);
 
   if (pageCount <= 1) return null;
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
