@@ -100,7 +100,6 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
   const currentPage = parseInt(router.query.page as string) || 1;
-  const pageSize = 10;
 
   const fetchPlayers = async (page: number) => {
     try {
