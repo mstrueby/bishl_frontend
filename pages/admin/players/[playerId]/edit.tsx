@@ -73,12 +73,33 @@ const Edit: NextPage<EditProps> = ({ jwt, player }) => {
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
+    values.birthdate = new Date(values.birthdate).toISOString();
     console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        if (value instanceof FileList) {
+        const excludedFields = ['_id', 'stats', 'source', 'legacyId', 'createDate', 'displayFirstName', 'displayLastName', 'assignedTeams'];
+        if (excludedFields.includes(key)) return;
+        if (key === 'image' && value instanceof File) {
+          formData.append('image', value);
+        } else if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
+        } else if (typeof value === 'object') {
+          if (key === 'assignedTeams') {
+            const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
+              ...club,
+              teams: club.teams.map(team => {
+                if (team.jerseyNo === null) {
+                  const { jerseyNo, ...restTeam } = team;
+                  return restTeam;
+                }
+                return team;
+              })
+            }));
+            formData.append(key, JSON.stringify(cleanedTeams));
+          } else {
+            formData.append(key, JSON.stringify(value));
+          }
         } else {
           // Handle imageUrl specifically to ensure it's only appended if not null
           if (key === 'imageUrl' && value !== null) {
@@ -108,10 +129,14 @@ const Edit: NextPage<EditProps> = ({ jwt, player }) => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        router.push({
-          pathname: `/admin/players`,
-          query: { message: `Keine Änderungen für SpielerIn <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
-        }, `/admin/players`);
+        if (error.response?.status === 304) {
+          router.push({
+            pathname: `/admin/players`,
+            query: { message: `Keine Änderungen für SpielerIn <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
+          }, `/admin/players`);
+        } else {
+          setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
+        }
       } else {
         setError('Ein Fehler ist aufgetreten.');
       }
