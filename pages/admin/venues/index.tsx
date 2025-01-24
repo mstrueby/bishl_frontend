@@ -209,6 +209,7 @@ const Venues: NextPage<VenuesProps> = ({ jwt, venues: initialVenues }) => {
         deleteModalDescription="Möchtest du die Spielfläche <strong>{{title}}</strong> wirklich löschen?"
         deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
         showThumbnails
+        showStatusIndicator
       />
 
     </Layout>

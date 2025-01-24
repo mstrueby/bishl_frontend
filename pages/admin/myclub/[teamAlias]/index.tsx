@@ -319,6 +319,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         statuses={statuses}
         showThumbnails
         showThumbnailsOnMobiles
+        showStatusIndicator
       />
 
     </Layout>
