@@ -98,7 +98,7 @@ export default function Add({ jwt }: AddProps) {
       if (response.status === 201) {
         router.push({
           pathname: '/admin/clubs',
-          query: { message: `Der neue Verein ${values.name} wurde erfolgreich angelegt.` },
+          query: { message: `Der neue Verein <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
         }, '/admin/clubs');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');

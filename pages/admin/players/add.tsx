@@ -69,9 +69,7 @@ export default function Add({ jwt }: AddProps) {
     displayFirstName: '',
     displayLastName: '',
     nationality: '',
-    position: 'Skater',
     fullFaceReq: false,
-    source: 'BISHL',
     assignedTeams: [],
     imageUrl: '',
   };;
@@ -79,12 +77,18 @@ export default function Add({ jwt }: AddProps) {
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
+    values.displayFirstName = values.firstName;
+    values.displayLastName = values.lastName;
+    values.birthdate = new Date(values.birthdate).toISOString();
     console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
+
+      console.log('FormData entries:', Array.from(formData.entries()));
+      
       const response = await axios.post(`${BASE_URL}/players/`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -93,7 +97,7 @@ export default function Add({ jwt }: AddProps) {
       if (response.status === 201) {
         router.push({
           pathname: '/admin/players',
-          query: { message: `SpielerIn ${values.firstName} ${values.lastName}  wurde erfolgreich angelegt.` },
+          query: { message: `SpielerIn <strong>${values.firstName} ${values.lastName}</strong>  wurde erfolgreich angelegt.` },
         }, '/admin/players');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -121,7 +125,7 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
-  const sectionTitle = 'Neu';
+  const sectionTitle = 'SpielerIn anlegen';
 
   return (
     <Layout>
