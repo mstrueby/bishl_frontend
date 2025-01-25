@@ -69,9 +69,9 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             )}
 
             {/* Display assigned clubs and teams */}
-            {values.assignedTeams && values.assignedTeams.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-base font-semibold leading-7 text-gray-900">Zugewiesene Mannschaften</h3>
+            <div className="mt-6">
+              <h3 className="text-base font-semibold leading-7 text-gray-900">Zugewiesene Mannschaften</h3>
+              {values.assignedTeams && values.assignedTeams.length > 0 && (
                 <div className="mt-2 divide-y divide-gray-100">
                   {values.assignedTeams.map((assignment, index) => (
                     <div key={index} className="py-4">
@@ -86,8 +86,8 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
