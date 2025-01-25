@@ -78,7 +78,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player }) => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        const excludedFields = ['_id', 'stats', 'source', 'legacyId', 'createDate', 'displayFirstName', 'displayLastName', 'assignedTeams'];
+        const excludedFields = ['_id', 'stats', 'source', 'legacyId', 'createDate', 'displayFirstName', 'displayLastName'];
         if (excludedFields.includes(key)) return;
         if (key === 'image' && value instanceof File) {
           formData.append('image', value);

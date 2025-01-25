@@ -3,7 +3,7 @@ import React, { Fragment, useEffect } from 'react';
 import Image from 'next/image';
 import { Listbox, Transition } from '@headlessui/react';
 import { ClubValues } from '../../types/ClubValues';
-import { AssignClub } from '../../types/PlayerValues';
+//import { AssignedTeams } from '../../types/PlayerValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 
 function classNames(...classes: string[]) {
@@ -11,12 +11,12 @@ function classNames(...classes: string[]) {
 }
 
 interface ClubSelectProps {
-  onClubChange: (club: ClubValues) => void;
-  selectedClub?: AssignClub | null;
+  onClubChange: (clubId: string) => void;
+  selectedClub?: string | null;
 }
 
 const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, selectedClub: initialSelectedClub }) => {
-  const [selectedClub, setSelectedClub] = React.useState<AssignClub | null>(initialSelectedClub || null);
+  const [selectedClub, setSelectedClub] = React.useState<ClubValues | null>(initialSelectedClub || null);
   const [allClubsData, setAllClubsData] = React.useState<ClubValues[]>([]);
 
   useEffect(() => {
@@ -33,10 +33,10 @@ const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, selectedClub: ini
   }, []);
 
   return (
-    <Listbox value={selectedClub} onChange={(club) => {
-      setSelectedClub(club);
-      if (club) {
-        onClubChange(club);
+    <Listbox value={selectedClub} onChange={(clubId) => {
+      setSelectedClub(clubId);
+      if (clubId) {
+        onClubChange(selectedClub?._id);
       }
     }}>
       {({ open }) => (
