@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
-import { PlayerValues } from '../../types/PlayerValues';
+import { PlayerValues, AssignedTeams } from '../../types/PlayerValues';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
@@ -74,6 +74,14 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             <div className="mt-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-base font-semibold leading-7 text-gray-900">Zugewiesene Mannschaften</h3>
+
+                <div className="mt-4">
+                  <ClubSelect
+                      onClubChange={(club) => setFieldValue('assignedTeams', club)}
+                      selectedClub={values.assignedTeams ? values.assignedTeams[0] : null}
+                  />
+                </div>
+                
                 <button
                   type="button"
                   onClick={() => {
@@ -94,12 +102,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                   Verein hinzufügen
                 </button>
               </div>
-              <div className="mt-4">
-                <ClubSelect
-                    onClubChange={(club) => setFieldValue('selectedClub', club)}
-                    selectedClub={values.selectedClub ? values.selectedClub : null} // Correctly assign the selected club
-                />
-              </div>
+              
               {values.assignedTeams && values.assignedTeams.length > 0 && (
                 <div className="mt-2 divide-y divide-gray-100">
                   {values.assignedTeams.map((assignment, index) => (
