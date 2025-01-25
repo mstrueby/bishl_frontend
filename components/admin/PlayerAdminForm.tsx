@@ -25,7 +25,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
   loading,
 }) => {
   return (
-    <>        
+    <>
       <Formik
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
@@ -43,27 +43,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum" />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
             <Toggle name="fullFaceReq" label="Vollvisier notwendig" />
-            
-            {/* Display assigned clubs and teams */}
-            {values.assignedTeams && values.assignedTeams.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-base font-semibold leading-7 text-gray-900">Zugewiesene Mannschaften</h3>
-                <div className="mt-2 divide-y divide-gray-100">
-                  {values.assignedTeams.map((assignment, index) => (
-                    <div key={index} className="py-4">
-                      <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
-                      <ul className="mt-2 space-y-2">
-                        {assignment.teams.map((team, teamIndex) => (
-                          <li key={teamIndex} className="text-sm text-gray-600">
-                            {team.teamName} {team.passNo && `• Pass-Nr: ${team.passNo}`}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+
             {values.imageUrl ? (
               <div>
                 <div>
@@ -87,6 +67,28 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             ) : (
               <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
+
+            {/* Display assigned clubs and teams */}
+            {values.assignedTeams && values.assignedTeams.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-base font-semibold leading-7 text-gray-900">Zugewiesene Mannschaften</h3>
+                <div className="mt-2 divide-y divide-gray-100">
+                  {values.assignedTeams.map((assignment, index) => (
+                    <div key={index} className="py-4">
+                      <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
+                      <ul className="mt-2 space-y-2">
+                        {assignment.teams.map((team, teamIndex) => (
+                          <li key={teamIndex} className="text-sm text-gray-600">
+                            {team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
               <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />
