@@ -164,7 +164,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player }) => {
     _id: player?._id || '',
     firstName: player?.firstName || '',
     lastName: player?.lastName || '',
-    birthdate: player?.birthdate ? new Date(player.birthdate).toISOString().split('T')[0] : '',
+    birthdate: player?.birthdate ? new Date(new Date(player.birthdate).toLocaleString('en-US', { timeZone: 'Europe/Berlin' })).toISOString().split('T')[0] : '',
     displayFirstName: player?.displayFirstName || '',
     displayLastName: player?.displayLastName || '',
     nationality: player?.nationality || '',
