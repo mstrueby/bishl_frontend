@@ -8,6 +8,7 @@ import { PlayerValues } from '../../types/PlayerValues';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
+import ClubSelect from '../ui/ClubSelect';
 
 interface PlayerAdminFormProps {
   initialValues: PlayerValues;
@@ -15,6 +16,7 @@ interface PlayerAdminFormProps {
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
+  allClubsData: any[]; // Add proper type from your ClubValues interface
 }
 
 const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
@@ -25,7 +27,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
   loading,
 }) => {
   return (
-    <>        
+    <>
       <Formik
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
@@ -43,6 +45,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum" />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
             <Toggle name="fullFaceReq" label="Vollvisier notwendig" />
+
             {values.imageUrl ? (
               <div>
                 <div>
@@ -66,6 +69,56 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             ) : (
               <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
+
+            {/* Display assigned clubs and teams */}
+            <div className="mt-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-base font-semibold leading-7 text-gray-900">Zugewiesene Mannschaften</h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selectedClub = values.selectedClub;
+                    if (selectedClub && !values.assignedTeams.some(team => team.clubId === selectedClub.clubId)) {
+                      const newAssignment = {
+                        clubId: selectedClub.clubId,
+                        clubName: selectedClub.name,
+                        clubAlias: selectedClub.alias,
+                        clubIshdId: selectedClub.ishdId,
+                        teams: []
+                      };
+                      setFieldValue('assignedTeams', [...values.assignedTeams, newAssignment]);
+                    }
+                  }}
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Verein hinzufügen
+                </button>
+              </div>
+              <div className="mt-4">
+                <ClubSelect
+                  onClubChange={(club) => setFieldValue('selectedClub', club)}
+                  allClubsData={[]}
+                  selectedClub={values.selectedClub}
+                />
+              </div>
+              {values.assignedTeams && values.assignedTeams.length > 0 && (
+                <div className="mt-2 divide-y divide-gray-100">
+                  {values.assignedTeams.map((assignment, index) => (
+                    <div key={index} className="py-4">
+                      <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
+                      <ul className="mt-2 space-y-2">
+                        {assignment.teams.map((team, teamIndex) => (
+                          <li key={teamIndex} className="text-sm text-gray-600">
+                            {team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
               <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />

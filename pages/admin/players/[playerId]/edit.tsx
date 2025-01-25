@@ -164,7 +164,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player }) => {
     _id: player?._id || '',
     firstName: player?.firstName || '',
     lastName: player?.lastName || '',
-    birthdate: player?.birthdate ? new Date(player.birthdate).toLocaleDateString('en-US') : '',
+    birthdate: player?.birthdate ? new Date(player.birthdate).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' }) : '',
     displayFirstName: player?.displayFirstName || '',
     displayLastName: player?.displayLastName || '',
     nationality: player?.nationality || '',
@@ -172,7 +172,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player }) => {
     assignedTeams: player?.assignedTeams || [],
     imageUrl: player?.imageUrl || '',
   };
-  console.log("initial birthday", player.birthdate, new Date(player.birthdate).toLocaleDateString('en-US'), initialValues.birthdate)
+  console.log("initial birthday", player.birthdate, new Date(player.birthdate).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' }), initialValues.birthdate)
   const sectionTitle = 'SpielerIn bearbeiten';
 
   // Render the form with initialValues and the edit-specific handlers
