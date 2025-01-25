@@ -19,9 +19,13 @@ const SearchBox: React.FC<SearchBoxProps> = ({ placeholder, options, onSearch, o
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (query.length >= 3) {
-      onSearch(query);
-    }
+    const timeoutId = setTimeout(() => {
+      if (query.length >= 3) {
+        onSearch(query);
+      }
+    }, 300); // Wait 300ms after last keystroke before searching
+
+    return () => clearTimeout(timeoutId);
   }, [query, onSearch]);
 
   const filteredOptions = query.length >= 3 ? options.slice(0, 20) : [];
