@@ -74,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
   return {
     props: {
-      jwt, 
+      jwt,
       players: players || [],
       totalPlayers: totalPlayers || 0
     }
@@ -99,10 +99,10 @@ const transformedUrl = (id: string) => buildUrl(id, {
 const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPlayers }) => {
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [searchOptions, setSearchOptions] = useState<Array<{id: string, label: string}>>([]);
+  const [searchOptions, setSearchOptions] = useState<Array<{ id: string, label: string }>>([]);
   const router = useRouter();
   const currentPage = parseInt(router.query.page as string) || 1;
-  
+
   const handleSearch = async (query: string) => {
     try {
       const res = await axios.get(`${BASE_URL}/players/`, {
@@ -114,17 +114,23 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
           q: query
         }
       });
-      const searchResults = res.data.results.map((player: PlayerValues) => ({
-        id: player._id,
-        label: `${player.displayFirstName} ${player.displayLastName}`
-      }));
+      const searchResults = res.data.results.map((player: PlayerValues) => {
+        const labelComponents = [`${player.firstName} ${player.lastName}`];
+        if (player.displayFirstName !== player.firstName || player.displayLastName !== player.lastName) {
+          labelComponents.push(`(${player.displayFirstName} ${player.displayLastName})`);
+        }
+        return {
+          id: player._id,
+          label: labelComponents.join(' ')
+        };
+      });
       setSearchOptions(searchResults);
     } catch (error) {
       console.error('Error searching players:', error);
     }
   };
 
-  const handleSelect = async (option: {id: string, label: string}) => {
+  const handleSelect = async (option: { id: string, label: string }) => {
     try {
       const res = await axios.get(`${BASE_URL}/players/${option.id}`, {
         headers: {
@@ -168,40 +174,40 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
   const editPlayer = (id: string) => {
     router.push(`/admin/players/${id}/edit`);
   }
-/*
-  const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
-    try {
-      const formData = new FormData();
-      formData.append('active', (!currentStatus).toString()); // Toggle the status
-      if (logoUrl) {
-        formData.append('logoUrl', logoUrl);
-      }
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-
-      const response = await axios.patch(`${BASE_URL! + '/clubs/'}${clubId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        },
-      });
-      if (response.status === 200) {
-        // Handle successful response
-        console.log(`Club ${clubId} successfully activated`);
-        await fetchClubs();
-      } else if (response.status === 304) {
-        // Handle not modified response
-        console.log('No changes were made to the club.');
-      } else {
-        // Handle error response
-        console.error('Failed to publish club.');
-      }
-    } catch (error) {
-      console.error('Error publishing club:', error);
-    }
-  }
-*/
+  /*
+    const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
+      try {
+        const formData = new FormData();
+        formData.append('active', (!currentStatus).toString()); // Toggle the status
+        if (logoUrl) {
+          formData.append('logoUrl', logoUrl);
+        }
+        for (let pair of formData.entries()) {
+          console.log(pair[0] + ': ' + pair[1]);
+        }
   
+        const response = await axios.patch(`${BASE_URL! + '/clubs/'}${clubId}`, formData, {
+          headers: {
+            Authorization: `Bearer ${jwt}`
+          },
+        });
+        if (response.status === 200) {
+          // Handle successful response
+          console.log(`Club ${clubId} successfully activated`);
+          await fetchClubs();
+        } else if (response.status === 304) {
+          // Handle not modified response
+          console.log('No changes were made to the club.');
+        } else {
+          // Handle error response
+          console.error('Failed to publish club.');
+        }
+      } catch (error) {
+        console.error('Error publishing club:', error);
+      }
+    }
+  */
+
   useEffect(() => {
     if (router.query.message) {
       setSuccessMessage(router.query.message as string);
@@ -249,10 +255,10 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
 
   const dataLisItems = playerValues.map((player: PlayerValues) => {
     const clubNames = player.assignedTeams?.map(team => team.clubName) || [];
-    
+
     return {
       _id: player._id,
-      title: `${player.displayFirstName} ${player.displayLastName}`,
+      title: `${player.firstName} ${player.lastName}`,
       alias: player._id,
       description: clubNames,
       image: {
@@ -276,7 +282,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
         newLink={newLink}
         searchBox={
           <SearchBox
-            placeholder="Search players..."
+            placeholder="Name, Pass-Nr."
             options={searchOptions}
             onSearch={handleSearch}
             onSelect={handleSelect}
