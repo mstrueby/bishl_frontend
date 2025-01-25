@@ -138,12 +138,134 @@ const AddTeamSection = ({ values, setFieldValue, jwt }: { values: PlayerValues, 
   );
 };
 
+interface AddTeamSectionProps {
+  values: PlayerValues;
+  setFieldValue: any;
+  jwt: string;
+}
+
+const AddTeamSection: React.FC<AddTeamSectionProps> = ({ values, setFieldValue, jwt }) => {  
+  const [clubs, setClubs] = useState<ClubValues[]>([]);
+  const [selectedClub, setSelectedClub] = useState<string>('');
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [availableTeams, setAvailableTeams] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/`, {
+          headers: { Authorization: `Bearer ${jwt}` }
+        });
+        setClubs(response.data.filter(club => club.active));
+      } catch (error) {
+        console.error('Error fetching clubs:', error);
+      }
+    };
+    fetchClubs();
+  }, [jwt]);
+
+  useEffect(() => {
+    if (selectedClub) {
+      const club = clubs.find(c => c._id === selectedClub);
+      setAvailableTeams(club?.teams || []);
+    }
+  }, [selectedClub, clubs]);
+
+  const handleAddTeam = () => {
+    if (!selectedClub || !selectedTeam) return;
+
+    const club = clubs.find(c => c._id === selectedClub);
+    const team = club?.teams.find(t => t._id === selectedTeam);
+
+    if (!club || !team) return;
+
+    const existingClubIndex = values.assignedTeams.findIndex(
+      assignment => assignment.clubId === selectedClub
+    );
+
+    if (existingClubIndex >= 0) {
+      const teamExists = values.assignedTeams[existingClubIndex].teams.some(
+        t => t.teamId === selectedTeam
+      );
+
+      if (!teamExists) {
+        const newTeams = [
+          ...values.assignedTeams[existingClubIndex].teams,
+          {
+            teamId: team._id,
+            teamName: team.name,
+            teamAlias: team.alias,
+            teamIshdId: team.ishdId,
+            passNo: '',
+            source: 'MANUAL',
+            modifyDate: new Date().toISOString(),
+            jerseyNo: 0,
+            active: true
+          }
+        ];
+        setFieldValue(`assignedTeams.${existingClubIndex}.teams`, newTeams);
+      }
+    } else {
+      const newAssignment = {
+        clubId: club._id,
+        clubName: club.name,
+        clubAlias: club.alias,
+        clubIshdId: club.ishdId,
+        teams: [{
+          teamId: team._id,
+          teamName: team.name,
+          teamAlias: team.alias,
+          teamIshdId: team.ishdId,
+          passNo: '',
+          source: 'MANUAL',
+          modifyDate: new Date().toISOString(),
+          jerseyNo: 0,
+          active: true
+        }]
+      };
+      setFieldValue('assignedTeams', [...values.assignedTeams, newAssignment]);
+    }
+
+    setSelectedTeam('');
+  };
+
+  return (
+    <div className="space-y-4">
+      <MyListbox
+        name="club"
+        label="Verein"
+        options={clubs.map(club => ({ key: club._id, value: club.name }))}
+        onChange={(value) => setSelectedClub(value)}
+      />
+
+      {selectedClub && (
+        <MyListbox
+          name="team"
+          label="Mannschaft"
+          options={availableTeams.map(team => ({ key: team._id, value: team.name }))}
+          onChange={(value) => setSelectedTeam(value)}
+        />
+      )}
+
+      <button
+        type="button"
+        onClick={handleAddTeam}
+        disabled={!selectedClub || !selectedTeam}
+        className="mt-2 inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:bg-gray-300"
+      >
+        Team hinzufügen
+      </button>
+    </div>
+  );
+};
+
 const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
   initialValues,
   onSubmit,
   enableReinitialize,
   handleCancel,
   loading,
+  jwt,
 }) => {
   return (
     <>        
