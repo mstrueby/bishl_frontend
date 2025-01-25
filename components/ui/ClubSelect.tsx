@@ -1,5 +1,5 @@
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import Image from 'next/image';
 import { Listbox, Transition } from '@headlessui/react';
 import { ClubValues } from '../../types/ClubValues';
@@ -11,12 +11,25 @@ function classNames(...classes: string[]) {
 
 interface ClubSelectProps {
   onClubChange: (club: ClubValues) => void;
-  allClubsData: ClubValues[];
   selectedClub?: ClubValues | null;
 }
 
-const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, allClubsData, selectedClub: initialSelectedClub }) => {
+const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, selectedClub: initialSelectedClub }) => {
   const [selectedClub, setSelectedClub] = React.useState<ClubValues | null>(initialSelectedClub || null);
+  const [allClubsData, setAllClubsData] = React.useState<ClubValues[]>([]);
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/?active=true`);
+        const data = await response.json();
+        setAllClubsData(data);
+      } catch (error) {
+        console.error('Error fetching clubs:', error);
+      }
+    };
+    fetchClubs();
+  }, []);
 
   return (
     <Listbox value={selectedClub} onChange={(club) => {
