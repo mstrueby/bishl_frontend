@@ -1,31 +1,30 @@
 
 import { Fragment } from 'react';
-import Image from 'next/image';
 import { Listbox, Transition } from '@headlessui/react';
-import { ClubValues } from '../../types/ClubValues';
+import { TeamValues } from '../../types/ClubValues';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-interface ClubSelectProps {
-  selectedClubId?: string | null;
-  clubs: ClubValues[];
-  onClubChange: (clubId: string) => void;
+interface TeamSelectProps {
+  selectedTeamId?: string | null;
+  teams: TeamValues[];
+  onTeamChange: (teamId: string) => void;
   label?: string;
 }
 
-const ClubSelect: React.FC<ClubSelectProps> = ({ 
-  selectedClubId,
-  clubs,
-  onClubChange,
-  label = "Verein"
+const TeamSelect: React.FC<TeamSelectProps> = ({ 
+  selectedTeamId,
+  teams,
+  onTeamChange,
+  label = "Mannschaft"
 }) => {
-  const selectedClub = clubs.find(club => club._id === selectedClubId);
+  const selectedTeam = teams.find(team => team._id === selectedTeamId);
 
   return (
-    <Listbox value={selectedClubId} onChange={onClubChange}>
+    <Listbox value={selectedTeamId} onChange={onTeamChange}>
       <div className="relative mt-2">
         {label && (
           <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">
@@ -35,20 +34,9 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
-              {selectedClub ? (
-                <>
-                  <Image 
-                    src={selectedClub.logoUrl} 
-                    alt="" 
-                    width={20} 
-                    height={20} 
-                    className="h-5 w-5 flex-shrink-0 rounded-full" 
-                  />
-                  <span className="ml-3 block truncate">{selectedClub.name}</span>
-                </>
-              ) : (
-                <span className="ml-3 block truncate text-gray-500">Verein auswählen</span>
-              )}
+              <span className="block truncate">
+                {selectedTeam ? selectedTeam.name : 'Mannschaft auswählen'}
+              </span>
             </span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -62,31 +50,22 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
             leaveTo="opacity-0"
           >
             <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {clubs.map((club) => (
+              {teams.map((team) => (
                 <Listbox.Option
-                  key={club._id}
+                  key={team._id}
                   className={({ active }) =>
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
                       'relative cursor-default select-none py-2 pl-3 pr-9'
                     )
                   }
-                  value={club._id}
+                  value={team._id}
                 >
                   {({ selected, active }) => (
                     <>
-                      <div className="flex items-center">
-                        <Image 
-                          src={club.logoUrl} 
-                          alt="" 
-                          width={20} 
-                          height={20} 
-                          className="h-5 w-5 flex-shrink-0 rounded-full" 
-                        />
-                        <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
-                          {club.name}
-                        </span>
-                      </div>
+                      <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                        {team.name}
+                      </span>
                       {selected && (
                         <span
                           className={classNames(
@@ -109,4 +88,4 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
   );
 };
 
-export default ClubSelect;
+export default TeamSelect;
