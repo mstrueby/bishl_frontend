@@ -130,18 +130,8 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
     }
   };
 
-  const handleSelect = async (option: { id: string, label: string }) => {
-    try {
-      const res = await axios.get(`${BASE_URL}/players/${option.id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`
-        }
-      });
-      setPlayers([res.data]);
-    } catch (error) {
-      console.error('Error fetching player:', error);
-    }
+  const handleSelect = (option: { id: string, label: string }) => {
+    router.push(`/admin/players/${option.id}/edit`);
   };
 
   const fetchPlayers = async (page: number) => {
