@@ -1,8 +1,9 @@
-// components/ClubSelect.tsx
-import React, { Fragment } from 'react';
+
+import React, { Fragment, useEffect } from 'react';
 import Image from 'next/image';
 import { Listbox, Transition } from '@headlessui/react';
 import { ClubValues } from '../../types/ClubValues';
+import { AssignClub } from '../../types/PlayerValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 
 function classNames(...classes: string[]) {
@@ -10,17 +11,32 @@ function classNames(...classes: string[]) {
 }
 
 interface ClubSelectProps {
-  onClubChange: (clubAlias: string) => void;
-  allClubsData: ClubValues[];
+  onClubChange: (club: ClubValues) => void;
+  selectedClub?: AssignClub | null;
 }
-const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, allClubsData }) => {
-  const [selectedClub, setSelectedClub] = React.useState<ClubValues | null>(null);
+
+const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, selectedClub: initialSelectedClub }) => {
+  const [selectedClub, setSelectedClub] = React.useState<AssignClub | null>(initialSelectedClub || null);
+  const [allClubsData, setAllClubsData] = React.useState<ClubValues[]>([]);
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/?active=true`);
+        const data = await response.json();
+        setAllClubsData(data);
+      } catch (error) {
+        console.error('Error fetching clubs:', error);
+      }
+    };
+    fetchClubs();
+  }, []);
 
   return (
     <Listbox value={selectedClub} onChange={(club) => {
       setSelectedClub(club);
       if (club) {
-        onClubChange(club.alias);
+        onClubChange(club);
       }
     }}>
       {({ open }) => (
@@ -29,7 +45,11 @@ const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, allClubsData }) =
           <div className="relative mt-2 mb-4 md:px-6 lg:px-8">
             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
               <span className="flex items-center">
-                <Image src={selectedClub?.logoUrl ? selectedClub.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt="" className="h-5 w-5 flex-shrink-0 rounded-full" />
+                {selectedClub ? (
+                  <Image src={selectedClub.logoUrl} alt="" width={20} height={20} className="h-5 w-5 flex-shrink-0 rounded-full" />
+                ) : (
+                  <span className="ml-3 text-gray-500">Verein</span>
+                )}
                 <span className="ml-3 block truncate">{selectedClub?.name}</span>
               </span>
               <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
@@ -59,7 +79,7 @@ const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, allClubsData }) =
                     {({ selected, active }) => (
                       <>
                         <div className="flex items-center">
-                          <Image src={club?.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt="" className="h-5 w-5 flex-shrink-0 rounded-full" />
+                          <Image src={club?.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt="" width={20} height={20} className="h-5 w-5 flex-shrink-0 rounded-full" />
                           <span
                             className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}
                           >
@@ -89,4 +109,5 @@ const ClubSelect: React.FC<ClubSelectProps> = ({ onClubChange, allClubsData }) =
     </Listbox>
   );
 };
+
 export default ClubSelect;

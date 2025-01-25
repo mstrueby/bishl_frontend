@@ -1,3 +1,15 @@
+export interface AssignClub {
+  clubId: string;
+  teams?: [
+    {
+      teamId: string;
+      passNo: string;
+      source?: string; // e.g. "BISHL"
+      modifyDate?: string;
+    }
+  ]
+}
+
 export interface PlayerValues {
   _id: string;
   firstName: string;
@@ -58,4 +70,5 @@ export interface PlayerValues {
   imageUrl: string;
   legacyId?: number;
   createDate?: string;  // e.g. "2025-01-16T11:36:45.395Z"
+  selectedClub?: [AssignClub]
 }
