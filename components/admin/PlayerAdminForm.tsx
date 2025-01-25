@@ -96,9 +96,8 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               </div>
               <div className="mt-4">
                 <ClubSelect
-                  onClubChange={(club) => setFieldValue('selectedClub', club)}
-                  allClubsData={[]}
-                  selectedClub={values.selectedClub}
+                    onClubChange={(club) => setFieldValue('selectedClub', club)}
+                    selectedClub={values.selectedClub ? values.selectedClub : null} // Correctly assign the selected club
                 />
               </div>
               {values.assignedTeams && values.assignedTeams.length > 0 && (
