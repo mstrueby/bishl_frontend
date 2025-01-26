@@ -22,8 +22,8 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
   onClubChange,
   label = "Verein"
 }) => {
-  const activeClubs = clubs?.filter(club => club.active) || [];
-  const selectedClub = activeClubs.find(club => club._id === selectedClubId);
+  const clubs = clubs?.filter(club => club.active) || [];
+  const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   return (
     <Listbox value={selectedClubId} onChange={onClubChange}>
@@ -63,7 +63,7 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
             leaveTo="opacity-0"
           >
             <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {activeClubs.map((club) => (
+              {clubs.map((club) => (
                 <Listbox.Option
                   key={club._id}
                   className={({ active }) =>

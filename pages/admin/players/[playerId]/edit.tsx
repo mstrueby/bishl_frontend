@@ -9,11 +9,13 @@ import Layout from '../../../../components/Layout';
 import SectionHeader from '../../../../components/admin/SectionHeader';
 import { PlayerValues } from '../../../../types/PlayerValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import { ClubValues } from '../../../../types/ClubValues';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/players/';
 
 interface EditProps {
   jwt: string,
+  clubs: ClubValues[],
   player: PlayerValues,
 }
 
@@ -31,6 +33,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   let player = null;
+  let clubs = null;
   try {
     // First check if user has required role
     const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
@@ -50,6 +53,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Fetch the existing club data
+    const clubResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs?active=true`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    clubs = clubResponse.data;
+
+    // Fetch player data
     const response = await axios.get(BASE_URL + playerId, {
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -61,10 +72,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error('Error fetching player:', error.message);
     }
   }
-  return player ? { props: { jwt, player, playerId } } : { notFound: true };
+  return player ? { props: { jwt, clubs: clubs || [], player } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, player }) => {
+const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -184,6 +195,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player }) => {
 
       <PlayerAdminForm
         initialValues={initialValues}
+        clubs={clubs}
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
