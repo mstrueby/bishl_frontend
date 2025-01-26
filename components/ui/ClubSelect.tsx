@@ -1,4 +1,3 @@
-
 import { Fragment } from 'react';
 import Image from 'next/image';
 import { Listbox, Transition } from '@headlessui/react';
@@ -22,7 +21,6 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
   onClubChange,
   label = "Verein"
 }) => {
-  const clubs = clubs?.filter(club => club.active) || [];
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   return (
