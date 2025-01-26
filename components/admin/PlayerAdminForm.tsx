@@ -1,14 +1,16 @@
 import React from 'react';
+import { useState } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
-import { PlayerValues, AssignedTeams } from '../../types/PlayerValues';
+import { PlayerValues } from '../../types/PlayerValues';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
-import ClubSelect from '../ui/ClubSelect';
+import AssignmentModal from '../ui/AssignmentModal';
+
 
 interface PlayerAdminFormProps {
   initialValues: PlayerValues;
