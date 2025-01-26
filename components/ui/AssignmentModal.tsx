@@ -18,7 +18,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  clubs,
+  clubs = [], // Add default empty array
 }) => {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
