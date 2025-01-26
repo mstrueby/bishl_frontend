@@ -39,8 +39,8 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
               {selectedClub ? (
                 <>
                   <Image 
-                    src={selectedClub.logoUrl} 
-                    alt="" 
+                    src={selectedClub.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+                    alt={selectedClub.name || ''} 
                     width={20} 
                     height={20} 
                     className="h-5 w-5 flex-shrink-0 rounded-full" 
@@ -78,8 +78,8 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
                     <>
                       <div className="flex items-center">
                         <Image 
-                          src={club.logoUrl} 
-                          alt="" 
+                          src={club.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+                          alt={club.name || ''} 
                           width={20} 
                           height={20} 
                           className="h-5 w-5 flex-shrink-0 rounded-full" 
