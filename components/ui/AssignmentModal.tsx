@@ -18,12 +18,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  clubs,
+  clubs = [], // Add default empty array
 }) => {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [passNo, setPassNo] = useState<string>('');
-  
+  console.log("clubs assign modal", clubs.length)
+
   const selectedClub = clubs.find(club => club._id === selectedClubId);
   
   const handleSave = () => {

@@ -10,7 +10,7 @@ import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
-
+import { ClubValues } from '../../types/ClubValues';
 
 interface PlayerAdminFormProps {
   initialValues: PlayerValues;
@@ -18,7 +18,7 @@ interface PlayerAdminFormProps {
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
-  allClubsData: any[]; // Add proper type from your ClubValues interface
+  clubs: ClubValues[]; // Add proper type from your ClubValues interface
 }
 
 const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
@@ -27,9 +27,10 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
   enableReinitialize,
   handleCancel,
   loading,
-  allClubsData,
+  clubs,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <>
       <Formik
@@ -90,7 +91,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                 <AssignmentModal
                   isOpen={isModalOpen}
                   onClose={() => setIsModalOpen(false)}
-                  clubs={allClubsData}
+                  clubs={clubs}
                   onSave={(newAssignment) => {
                     const currentAssignments = values.assignedTeams || [];
                     const existingClubIndex = currentAssignments.findIndex(
