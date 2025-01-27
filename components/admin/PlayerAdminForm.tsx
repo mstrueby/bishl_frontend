@@ -121,7 +121,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                       <ul className="mt-2 space-y-2">
                         {assignment.teams.map((team, teamIndex) => (
                           <li key={teamIndex} className="text-sm text-gray-600">
-                            {team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}
+                            {team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}
                           </li>
                         ))}
                       </ul>

@@ -4,13 +4,13 @@ import { Dialog, Transition } from '@headlessui/react';
 import ClubSelect from './ClubSelect';
 import TeamSelect from './TeamSelect';
 import { ClubValues, TeamValues } from '../../types/ClubValues';
-import { NewClubAssignment } from '../../types/PlayerValues';
+import { NewClubAssignment, Assignment } from '../../types/PlayerValues';
 import InputText from './form/InputText';
 
 interface AssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (assignment: NewClubAssignment) => void;
+  onSave: (assignment: Assignment) => void;
   clubs: ClubValues[];
 }
 
@@ -34,13 +34,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           clubId: selectedClub._id,
           clubName: selectedClub.name,
           clubAlias: selectedClub.alias,
-          clubIshdId: selectedClub.ishdId,
           teams: [{
             teamId: selectedTeam._id,
             teamName: selectedTeam.name,
+            teamAlias: selectedTeam.alias,
             passNo: passNo,
-            active: true,
-            modifyDate: new Date().toISOString()
+            source: selectedTeam.source,
+            modifyDate: selectedTeam.modyfyDate,
           }]
         });
         onClose();
