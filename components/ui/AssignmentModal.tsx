@@ -39,12 +39,15 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             teamName: selectedTeam.name,
             teamAlias: selectedTeam.alias,
             passNo: passNo,
-            source: 'UI',
+            source: 'BISHL',
             modifyDate: new Date().toISOString(),
-            active: true
+            active: false
           }]
         };
         onSave(assignment);
+        setSelectedClubId(null);
+        setSelectedTeamId(null);
+        setPassNo('');
         onClose();
       }
     }
