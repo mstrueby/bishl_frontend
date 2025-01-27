@@ -12,6 +12,7 @@ interface AssignmentModalProps {
   onClose: () => void;
   onSave: (assignment: Assignment) => void;
   clubs: ClubValues[];
+  currentAssignments?: Assignment[];
 }
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -93,7 +94,12 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   {selectedClub && (
                     <TeamSelect
                       selectedTeamId={selectedTeamId}
-                      teams={selectedClub.teams || []}
+                      teams={(selectedClub.teams || []).filter(team => 
+                        !currentAssignments?.find(assignment => 
+                          assignment.clubId === selectedClub._id && 
+                          assignment.teams.some(t => t.teamId === team._id)
+                        )
+                      )}
                       onTeamChange={setSelectedTeamId}
                     />
                   )}

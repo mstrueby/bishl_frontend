@@ -98,6 +98,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 clubs={clubs}
+                currentAssignments={values.assignedTeams}
                 onSave={(newAssignment) => {
                   const currentAssignments = values.assignedTeams || [];
                   const existingClubIndex = currentAssignments.findIndex(
