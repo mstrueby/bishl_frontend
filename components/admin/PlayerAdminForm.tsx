@@ -6,6 +6,7 @@ import InputText from '../ui/form/InputText';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import { PlayerValues } from '../../types/PlayerValues';
+import { TrashIcon } from '@heroicons/react/24/outline';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
@@ -147,7 +148,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                                   : 'text-gray-400 bg-gray-100 cursor-not-allowed'
                               }`}
                             >
-                              Löschen
+                              <TrashIcon className="h-4 w-4" />
                             </button>
                           </li>
                         ))}
