@@ -1,8 +1,9 @@
 import { Fragment } from 'react';
-import Image from 'next/image';
 import { Listbox, Transition } from '@headlessui/react';
 import { ClubValues } from '../../types/ClubValues';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
+import { CldImage } from 'next-cloudinary';
+import Image from 'next/image';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -32,16 +33,17 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
           </Listbox.Label>
         )}
         <div className="relative mt-2">
-          <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+          <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
               {selectedClub ? (
                 <>
-                  <Image 
+                  <CldImage 
                     src={selectedClub.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
                     alt={selectedClub.name || ''} 
                     width={20} 
-                    height={20} 
-                    className="h-5 w-5 flex-shrink-0 rounded-full" 
+                    height={20}
+                    crop="fill_pad"
+                    className="" 
                   />
                   <span className="ml-3 block truncate">{selectedClub.name}</span>
                 </>
@@ -75,12 +77,13 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
                   {({ selected, active }) => (
                     <>
                       <div className="flex items-center">
-                        <Image 
+                        <CldImage 
                           src={club.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
                           alt={club.name || ''} 
                           width={20} 
                           height={20} 
-                          className="h-5 w-5 flex-shrink-0 rounded-full" 
+                          crop="fill_pad"
+                          className="" 
                         />
                         <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
                           {club.name}
