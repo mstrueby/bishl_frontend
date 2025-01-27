@@ -4,7 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import ClubSelect from './ClubSelect';
 import TeamSelect from './TeamSelect';
 import { ClubValues, TeamValues } from '../../types/ClubValues';
-import { NewClubAssignment, Assignment } from '../../types/PlayerValues';
+import { Assignment } from '../../types/PlayerValues';
 import InputText from './form/InputText';
 
 interface AssignmentModalProps {
@@ -18,7 +18,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  clubs = [], // Add default empty array
+  clubs = [],
 }) => {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     if (selectedClub && selectedTeamId && passNo) {
       const selectedTeam = selectedClub.teams.find(team => team._id === selectedTeamId);
       if (selectedTeam) {
-        onSave({
+        const assignment: Assignment = {
           clubId: selectedClub._id,
           clubName: selectedClub.name,
           clubAlias: selectedClub.alias,
@@ -39,10 +39,12 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             teamName: selectedTeam.name,
             teamAlias: selectedTeam.alias,
             passNo: passNo,
-            source: selectedTeam.source,
-            modifyDate: selectedTeam.modyfyDate,
+            source: 'UI',
+            modifyDate: new Date().toISOString(),
+            active: true
           }]
-        });
+        };
+        onSave(assignment);
         onClose();
       }
     }
