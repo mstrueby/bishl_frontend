@@ -120,8 +120,35 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                       <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
                       <ul className="mt-2 space-y-2">
                         {assignment.teams.map((team, teamIndex) => (
-                          <li key={teamIndex} className="text-sm text-gray-600">
-                            {team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}
+                          <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600">
+                            <span>{team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}</span>
+                            <button
+                              type="button"
+                              disabled={team.source !== 'BISHL'}
+                              onClick={() => {
+                                const updatedTeams = assignment.teams.filter((_, idx) => idx !== teamIndex);
+                                const updatedAssignments = [...values.assignedTeams];
+                                if (updatedTeams.length === 0) {
+                                  // Remove entire club assignment if no teams left
+                                  const filteredAssignments = updatedAssignments.filter((_, idx) => idx !== index);
+                                  setFieldValue('assignedTeams', filteredAssignments);
+                                } else {
+                                  // Update teams for this club
+                                  updatedAssignments[index] = {
+                                    ...assignment,
+                                    teams: updatedTeams
+                                  };
+                                  setFieldValue('assignedTeams', updatedAssignments);
+                                }
+                              }}
+                              className={`ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${
+                                team.source === 'BISHL'
+                                  ? 'text-white bg-red-600 hover:bg-red-500'
+                                  : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                              }`}
+                            >
+                              Löschen
+                            </button>
                           </li>
                         ))}
                       </ul>
