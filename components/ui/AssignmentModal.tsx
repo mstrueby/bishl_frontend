@@ -4,13 +4,13 @@ import { Dialog, Transition } from '@headlessui/react';
 import ClubSelect from './ClubSelect';
 import TeamSelect from './TeamSelect';
 import { ClubValues, TeamValues } from '../../types/ClubValues';
-import { NewClubAssignment } from '../../types/PlayerValues';
+import { NewClubAssignment, Assignment } from '../../types/PlayerValues';
 import InputText from './form/InputText';
 
 interface AssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (assignment: NewClubAssignment) => void;
+  onSave: (assignment: Assignment) => void;
   clubs: ClubValues[];
 }
 
@@ -34,13 +34,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           clubId: selectedClub._id,
           clubName: selectedClub.name,
           clubAlias: selectedClub.alias,
-          clubIshdId: selectedClub.ishdId,
           teams: [{
             teamId: selectedTeam._id,
             teamName: selectedTeam.name,
+            teamAlias: selectedTeam.alias,
             passNo: passNo,
-            active: true,
-            modifyDate: new Date().toISOString()
+            source: selectedTeam.source,
+            modifyDate: selectedTeam.modyfyDate,
           }]
         });
         onClose();
@@ -92,19 +92,21 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                       onTeamChange={setSelectedTeamId}
                     />
                   )}
-                  <div className="">
-                    <label htmlFor="passNo" className="block text-sm font-medium mb-2 leading-6 text-gray-900">
-                      Pass-Nummer
-                    </label>
-                    <input
-                      type="text"
-                      name="passNo"
-                      id="passNo"
-                      value={passNo}
-                      onChange={(e) => setPassNo(e.target.value)}
-                      className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none"
-                    />
-                  </div>
+                  {selectedTeamId && (
+                    <div className="">
+                      <label htmlFor="passNo" className="block text-sm font-medium mb-2 leading-6 text-gray-900">
+                        Pass-Nummer
+                      </label>
+                      <input
+                        type="text"
+                        name="passNo"
+                        id="passNo"
+                        value={passNo}
+                        onChange={(e) => setPassNo(e.target.value)}
+                        className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-6 flex justify-end space-x-3">
