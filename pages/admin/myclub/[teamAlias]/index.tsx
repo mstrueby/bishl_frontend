@@ -10,6 +10,7 @@ import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
 import DataList from '../../../../components/admin/ui/DataList';
+import Pagination from '../../../../components/ui/Pagination';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -327,6 +328,20 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         showStatusIndicator
       />
 
+      <div className="mt-8">
+        <Pagination
+          totalItems={players.length}
+          currentPage={currentPage}
+          onPageChange={async (page) => {
+            await router.push({
+              pathname: router.pathname,
+              query: { ...router.query, page }
+            });
+            await fetchPlayers(page);
+          }}
+          basePath={`/admin/myclub/${team.alias}`}
+        />
+      </div>
     </Layout>
   );
 };
