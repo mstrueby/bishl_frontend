@@ -19,6 +19,7 @@ interface TeamProps {
   club: ClubValues,
   team: TeamValues,
   players: PlayerValues[],
+  totalPlayers: number,
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -28,6 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let club = null;
   let team = null;
   let players = null;
+  let totalPlayers = 0;
 
   if (!jwt) {
     return {
@@ -83,6 +85,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     players = playersResponse.data.results;
+    totalPlayers = playersResponse.data.total;
     // console.log("players:", players)
 
   } catch (error) {
@@ -92,12 +95,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
 
-  return team ? {
+  return {
     props: {
-      jwt, club, team, players,
-    },
-  } : {
-    props: { jwt }
+      jwt, club, team, players: players || [], totalPlayers: totalPlayers || 0,
+    }
   };
 };
 
@@ -116,12 +117,12 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers }) => {
+const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers, totalPlayers }) => {
   //const [club, setClub] = useState<ClubValues>(initialClub);
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1); // Add state for current page
   const router = useRouter();
+  const currentPage = parseInt(router.query.page as string) || 1;
 
   const fetchPlayers = async (page: number) => {
     try {
@@ -140,6 +141,14 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         console.error('Error fetching players:', error);
       }
     }
+  };
+
+  const handlePageChange = async (page: number) => {
+    await router.push({
+      pathname: router.pathname,
+      query: { ...router.query, page }
+    });
+    await fetchPlayers(page);
   };
 
   const editPlayer = (teamAlias: string, PlayerId: string) => {
@@ -330,15 +339,9 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
 
       <div className="mt-8">
         <Pagination
-          totalItems={players.length}
+          totalItems={totalPlayers}
           currentPage={currentPage}
-          onPageChange={async (page) => {
-            await router.push({
-              pathname: router.pathname,
-              query: { ...router.query, page }
-            });
-            await fetchPlayers(page);
-          }}
+          onPageChange={handlePageChange}
           basePath={`/admin/myclub/${team.alias}`}
         />
       </div>
