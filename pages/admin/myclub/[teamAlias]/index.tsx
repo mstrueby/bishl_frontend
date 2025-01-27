@@ -119,14 +119,18 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
   //const [club, setClub] = useState<ClubValues>(initialClub);
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1); // Add state for current page
   const router = useRouter();
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = async (page: number) => {
     try {
       const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${team.alias}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
+        },
+        params: {
+          page
         }
       });
       setPlayers(playersResponse.data.results);
@@ -186,7 +190,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
       });
       if (response.status === 200) {
         console.log(`Player ${playerId} status successfully toggled for team ${teamId}`);
-        await fetchPlayers();
+        await fetchPlayers(currentPage); // Fetch players for current page after update
       } else if (response.status === 304) {
         console.log('No changes were made to the player status.');
       } else {
@@ -209,7 +213,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         query: currentQuery,
       }, undefined, { shallow: true });
     }
-  }, [router]);
+    fetchPlayers(currentPage); // Initial fetch on component mount
+  }, [router, currentPage]);
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
@@ -327,6 +332,3 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
 };
 
 export default MyClub;
-
-
-
