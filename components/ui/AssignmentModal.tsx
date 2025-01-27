@@ -48,6 +48,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    setSelectedClubId(null);
+    setSelectedTeamId(null);
+    setPassNo('');
+    onClose();
+  }
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-10" onClose={onClose}>
@@ -104,7 +111,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   <button
                     type="button"
                     className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    onClick={onClose}
+                    onClick={handleCancel}
                   >
                     Abbrechen
                   </button>
