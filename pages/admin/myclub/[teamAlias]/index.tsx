@@ -81,7 +81,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Authorization': `Bearer ${jwt}`
       }
     });
-    players = playersResponse.data;
+    players = playersResponse.data.results;
     // console.log("players:", players)
 
   } catch (error) {
@@ -129,7 +129,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
           'Authorization': `Bearer ${jwt}`
         }
       });
-      setPlayers(playersResponse.data);
+      setPlayers(playersResponse.data.results);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching players:', error);
