@@ -19,7 +19,7 @@ const youth = [
   { name: 'Jugendliga', tiny_name: 'U16', href: '/tournaments/jugendliga', bdg_col_dark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdg_col_light: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
   { name: 'Schülerliga', tiny_name: 'U13', href: '/tournaments/schuelerliga', bdg_col_dark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30', bdg_col_light: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10' },
   { name: 'Schülerliga P', tiny_name: 'U13-P', href: '/tournaments/schuelerliga-p', bdg_col_dark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30', bdg_col_light: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10' },
-{ name: 'Bambini', tiny_name: 'U10', href: '/tournaments/bambini', bdg_col_dark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdg_col_light: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
+  { name: 'Bambini', tiny_name: 'U10', href: '/tournaments/bambini', bdg_col_dark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdg_col_light: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
   { name: 'Mini', tiny_name: 'U8', href: '/tournaments/mini', bdg_col_dark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20', bdg_col_light: 'bg-pink-50 text-pink-700 ring-pink-700/10' },
 ]
 
@@ -233,7 +233,7 @@ const Header = () => {
                           )}
 
                           {/* RMy Club administration */}
-                          {(user.roles?.includes('CLUB_ADMIN')  || user.roles?.includes('ADMIN')) && (
+                          {(user.roles?.includes('CLUB_ADMIN') || user.roles?.includes('ADMIN')) && (
                             <MenuItem>
                               <MyLink href="/admin/myclub" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                 <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
@@ -242,19 +242,13 @@ const Header = () => {
                             </MenuItem>
                           )}
 
-                          {/* League manager items - only for league managers */}
+                          {/* ADMIN items - only for admins */}
                           {user.roles?.includes('ADMIN') && (
                             <>
                               <MenuItem>
                                 <MyLink href="/admin/clubs" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
                                   <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                   <span>Vereine</span>
-                                </MyLink>
-                              </MenuItem>
-                              <MenuItem>
-                                <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                  <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                                  <span>SpielerInnen</span>
                                 </MyLink>
                               </MenuItem>
                               <MenuItem>
@@ -270,16 +264,27 @@ const Header = () => {
                               </MenuItem>
                             </>
                           )}
+                          {/* LEAGUE_ADMIN items */}
+                          {user.roles?.includes('LEAGUE_ADMIN') && (
+                            <>
+                              <MenuItem>
+                                <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
+                                  <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>SpielerInnen</span>
+                                </MyLink>
+                              </MenuItem>
+                            </>
+                          )}
 
                           {/* Profile - visible to all */}
                           <MenuItem>
-                              <MyLink 
-                                href="/admin/profile"
-                                className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'
-                              >
-                                <Cog8ToothIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                                <span>Mein Profil</span>
-                              </MyLink>
+                            <MyLink
+                              href="/admin/profile"
+                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'
+                            >
+                              <Cog8ToothIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <span>Mein Profil</span>
+                            </MyLink>
                           </MenuItem>
 
                           {/* Logout - visible to all */}

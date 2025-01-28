@@ -6,6 +6,7 @@ import InputText from '../ui/form/InputText';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import { PlayerValues } from '../../types/PlayerValues';
+import { TrashIcon } from '@heroicons/react/24/outline';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
@@ -76,68 +77,98 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             )}
 
             {/* Display assigned clubs and teams */}
-            <div className="mt-6">
-              <div className="flex justify-between items-center">
-                <h3 className="text-base font-semibold leading-7 text-gray-900">Zugewiesene Mannschaften</h3>
-
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(true)}
-                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
-                  Neue Zuordnung
-                </button>
-
-                <AssignmentModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                  clubs={clubs}
-                  onSave={(newAssignment) => {
-                    const currentAssignments = values.assignedTeams || [];
-                    const existingClubIndex = currentAssignments.findIndex(
-                      (assignment) => assignment.clubId === newAssignment.clubId
-                    );
-
-                    if (existingClubIndex === -1) {
-                      setFieldValue('assignedTeams', [...currentAssignments, newAssignment]);
-                    } else {
-                      const updatedAssignments = [...currentAssignments];
-                      updatedAssignments[existingClubIndex].teams = [
-                        ...updatedAssignments[existingClubIndex].teams,
-                        ...newAssignment.teams,
-                      ];
-                      setFieldValue('assignedTeams', updatedAssignments);
-                    }
-                    setIsModalOpen(false);
-                  }}
-                />
-              </div>
-              
-              {values.assignedTeams && values.assignedTeams.length > 0 && (
-                <div className="mt-2 divide-y divide-gray-100">
-                  {values.assignedTeams.map((assignment, index) => (
-                    <div key={index} className="py-4">
-                      <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
-                      <ul className="mt-2 space-y-2">
-                        {assignment.teams.map((team, teamIndex) => (
-                          <li key={teamIndex} className="text-sm text-gray-600">
-                            {team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-8">
+              <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
+                Zugewiesene Mannschaften
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="rounded-md bg-indigo-600 mt-2 sm:mt-0 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                Neue Zuordnung
+              </button>
             </div>
+            <p className="mt-2 text-sm text-gray-500">
+              Geänderte Zuordnungen werden erst nach Klick auf <em>Speichern</em> endgültig gespeichert.
+            </p>
+
+            <div className="mt-2">
+              <AssignmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                clubs={clubs}
+                currentAssignments={values.assignedTeams}
+                onSave={(newAssignment) => {
+                  const currentAssignments = values.assignedTeams || [];
+                  const existingClubIndex = currentAssignments.findIndex(
+                    (assignment) => assignment.clubId === newAssignment.clubId
+                  );
+
+                  if (existingClubIndex === -1) {
+                    setFieldValue('assignedTeams', [...currentAssignments, newAssignment]);
+                  } else {
+                    const updatedAssignments = [...currentAssignments];
+                    updatedAssignments[existingClubIndex].teams = [
+                      ...updatedAssignments[existingClubIndex].teams,
+                      ...newAssignment.teams,
+                    ];
+                    setFieldValue('assignedTeams', updatedAssignments);
+                  }
+                  setIsModalOpen(false);
+                }}
+              />
+            </div>
+
+            {values.assignedTeams && values.assignedTeams.length > 0 && (
+              <div className="mt-2 divide-y divide-gray-100">
+                {values.assignedTeams.map((assignment, index) => (
+                  <div key={index} className="py-4">
+                    <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
+                    <ul className="mt-2 space-y-2">
+                      {assignment.teams.map((team, teamIndex) => (
+                        <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600">
+                          <span>{team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}</span>
+                          <TrashIcon
+                            className={`ml-2 h-4 w-4 ${team.source === 'BISHL'
+                              ? 'text-red-600 hover:text-red-500 cursor-pointer'
+                              : 'text-gray-400 cursor-not-allowed'
+                              }`}
+                            onClick={() => {
+                              if (team.source === 'BISHL') {
+                                const updatedTeams = assignment.teams.filter((_, idx) => idx !== teamIndex);
+                                const updatedAssignments = [...values.assignedTeams];
+                                if (updatedTeams.length === 0) {
+                                  // Remove entire club assignment if no teams left
+                                  const filteredAssignments = updatedAssignments.filter((_, idx) => idx !== index);
+                                  setFieldValue('assignedTeams', filteredAssignments);
+                                } else {
+                                  // Update teams for this club
+                                  updatedAssignments[index] = {
+                                    ...assignment,
+                                    teams: updatedTeams
+                                  };
+                                  setFieldValue('assignedTeams', updatedAssignments);
+                                }
+                              }
+                            }}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
               <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />
             </div>
           </Form>
-        )}
-      </Formik>
+        )
+        }
+      </Formik >
     </>
   );
 };

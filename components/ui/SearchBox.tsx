@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Combobox } from '@headlessui/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 
@@ -16,24 +15,18 @@ interface SearchBoxProps {
 }
 
 const SearchBox: React.FC<SearchBoxProps> = ({ placeholder, options, onSearch, onSelect }) => {
+  const [selected, setSelected] = useState<SearchOption | null>(null);
   const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    if (query.length < 3) {
-      return;
-    }
+  const handleSelect = (option: SearchOption) => {
+    setSelected(option);
+    onSelect(option);
+  };
 
-    const timeoutId = setTimeout(() => {
-      onSearch(query);
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
-  }, [query, onSearch]);
-
-  const filteredOptions = query.length >= 3 ? options.slice(0, 20) : [];
+  const filteredOptions = query === '' ? [] : options;
 
   return (
-    <Combobox onChange={onSelect}>
+    <Combobox value={selected} onChange={handleSelect}>
       <div className="relative">
         <div className="relative w-full">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -42,16 +35,11 @@ const SearchBox: React.FC<SearchBoxProps> = ({ placeholder, options, onSearch, o
           <Combobox.Input
             className="w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             placeholder={placeholder || "Suche..."}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                if (query.length >= 3) {
-                  onSearch(query);
-                }
-              }
+            onChange={(event) => {
+              setQuery(event.target.value);
+              onSearch(event.target.value);
             }}
-            displayValue={(option: SearchOption) => option?.label || query}
+            displayValue={(option: SearchOption) => option?.label || ''}
           />
         </div>
         <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
@@ -64,14 +52,10 @@ const SearchBox: React.FC<SearchBoxProps> = ({ placeholder, options, onSearch, o
                   active ? 'bg-indigo-600 text-white' : 'text-gray-900'
                 }`
               }
-              selected={false}
             >
               {option.label}
             </Combobox.Option>
           ))}
-          {query.length >= 3 && filteredOptions.length === 0 && (
-            <div className="px-4 py-2 text-sm text-gray-500">No results found</div>
-          )}
         </Combobox.Options>
       </div>
     </Combobox>

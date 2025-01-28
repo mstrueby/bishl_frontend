@@ -16,16 +16,16 @@ export interface Assignment {
   clubId: string;
   clubName: string;
   clubAlias: string;
-  clubIshdId: number;
+  clubIshdId?: number;
   teams: {
     teamId: string;
     teamName: string;
     teamAlias: string;
-    teamIshdId: string;
+    teamIshdId?: string;
     passNo: string;
     source: string; // e.g. "BISHL"
     modifyDate: string;  // e.g. "2025-01-16T11:36:45.395Z"
-    jerseyNo: number;
+    jerseyNo?: number;
     active: boolean;
   }[];
 };
