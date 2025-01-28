@@ -134,9 +134,10 @@ export default function Add({ jwt }: AddProps) {
       <PlayerAdminForm
         initialValues={initialValues}
         onSubmit={onSubmit}
-        enableReinitialize= {false}
-        handleCancel= {handleCancel}
+        enableReinitialize={false}
+        handleCancel={handleCancel}
         loading={loading}
+        clubs={[]}
       />
     </Layout>
   );
