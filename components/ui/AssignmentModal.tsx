@@ -28,6 +28,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
+  const isFormComplete = selectedClubId && selectedTeamId && passNo.trim() !== '';
+
   const handleSave = () => {
     if (selectedClub && selectedTeamId && passNo) {
       const selectedTeam = selectedClub.teams.find(team => team._id === selectedTeamId);
@@ -81,11 +83,6 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 <Dialog.Title as="h3" className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
                   Neue Mannschaftszuweisung
                 </Dialog.Title>
-                {/*
-                <div className="mt-2">
-                  <p className="text-sm text-gray-800">Die neue Zuordnung... </p>
-                </div>
-                */}
                 <div className="mt-4 space-y-4">
                   <ClubSelect
                     selectedClubId={selectedClubId}
@@ -131,15 +128,19 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   </button>
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                      isFormComplete 
+                        ? 'bg-indigo-600 hover:bg-indigo-700' 
+                        : 'bg-indigo-300 cursor-not-allowed'
+                    }`}
                     onClick={handleSave}
+                    disabled={!isFormComplete}
                   >
                     Übernehmen
                   </button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
-
           </div>
         </div>
       </Dialog>
