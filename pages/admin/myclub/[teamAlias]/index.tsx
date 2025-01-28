@@ -224,7 +224,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
       }, undefined, { shallow: true });
     }
     fetchPlayers(currentPage); // Initial fetch on component mount
-  }, [router, currentPage]);
+  }, [router, currentPage, fetchPlayers]);
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
