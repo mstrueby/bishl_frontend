@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
@@ -124,7 +124,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
   const router = useRouter();
   const currentPage = parseInt(router.query.page as string) || 1;
 
-  const fetchPlayers = async (page: number) => {
+  const fetchPlayers = useCallback(async (page: number) => {
     try {
       const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${team.alias}`, {
         headers: {
@@ -141,7 +141,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
         console.error('Error fetching players:', error);
       }
     }
-  };
+  }, [club.alias, team.alias, jwt]);
 
   const handlePageChange = async (page: number) => {
     await router.push({
