@@ -81,7 +81,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       });
       setTempSelectedTournament(selectedTournament);
     }
-  }, [isOpen]);
+  }, [isOpen, selectedTournament, dateRange, showUnassignedOnly]);
 
   const handleCancel = () => {
     setTempSelectedTournament(initialValues.tournament);
