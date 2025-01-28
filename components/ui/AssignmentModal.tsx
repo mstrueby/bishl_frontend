@@ -20,6 +20,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   onClose,
   onSave,
   clubs = [],
+  currentAssignments = [],
 }) => {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
