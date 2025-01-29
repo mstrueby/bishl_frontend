@@ -182,6 +182,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
     fullFaceReq: player?.fullFaceReq || false,
     assignedTeams: player?.assignedTeams || [],
     imageUrl: player?.imageUrl || '',
+    source: player?.source || 'n/a',
   };
   console.log("initial birthday", player.birthdate, new Date(player.birthdate).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' }), initialValues.birthdate)
   const sectionTitle = 'SpielerIn bearbeiten';

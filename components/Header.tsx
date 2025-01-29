@@ -265,7 +265,7 @@ const Header = () => {
                             </>
                           )}
                           {/* LEAGUE_ADMIN items */}
-                          {user.roles?.includes('LEAGUE_ADMIN') && (
+                          {(user.roles?.includes('LEAGUE_ADMIN') || user.roles?.includes('ADMIN')) && (
                             <>
                               <MenuItem>
                                 <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>

@@ -12,6 +12,7 @@ import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
 import { ClubValues } from '../../types/ClubValues';
+import Badge from '../ui/Badge';
 
 interface PlayerAdminFormProps {
   initialValues: PlayerValues;
@@ -46,11 +47,18 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
       >
         {({ values, handleChange, setFieldValue }) => (
           <Form>
-            <InputText name="firstName" autoComplete="off" type="text" label="Vorname" />
-            <InputText name="lastName" autoComplete="off" type="text" label="Nachname" />
-            <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum" />
+            <InputText name="firstName" autoComplete="off" type="text" label="Vorname" 
+                disabled={values.source === "ISHD"} />
+            <InputText name="lastName" autoComplete="off" type="text" label="Nachname" 
+                disabled={values.source === "ISHD"} />
+            <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum" 
+                disabled={values.source === "ISHD"} />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
-            <Toggle name="fullFaceReq" label="Vollvisier notwendig" />
+            <Toggle name="fullFaceReq" label="Vollvisier notwendig" disabled />
+            <div className="flex items-center justify-between mt-6 mb-2">
+              <span className="block text-sm font-medium leading-6 text-gray-900">Quelle</span>
+              <Badge info={values.source} />
+            </div>
 
             {values.imageUrl ? (
               <div>
