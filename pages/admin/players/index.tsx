@@ -282,6 +282,10 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
+      <div className="text-sm text-gray-600 my-4">
+        {`${(currentPage - 1) * 25 + 1}-${Math.min(currentPage * 25, totalPlayers)} von ${totalPlayers} insgesamt`}
+      </div>
+      
       <DataList
         items={dataLisItems}
         statuses={statuses}
