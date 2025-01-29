@@ -41,7 +41,7 @@ export interface PlayerValues {
   nationality: string;
   position?: "Skater";
   fullFaceReq: boolean;
-  source?: string; // e.g. "BISHL"
+  source: string; // e.g. "BISHL"
   assignedTeams: Assignment[];
   stats?: {
   tournament: {
