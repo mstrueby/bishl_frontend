@@ -72,6 +72,7 @@ export default function Add({ jwt }: AddProps) {
     fullFaceReq: false,
     assignedTeams: [],
     imageUrl: '',
+    source: 'BISHL',
   };;
 
   const onSubmit = async (values: PlayerValues) => {
