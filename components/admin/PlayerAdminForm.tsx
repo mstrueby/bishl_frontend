@@ -47,25 +47,37 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
       >
         {({ values, handleChange, setFieldValue }) => (
           <Form>
+
+            <div className="flex items-center justify-between mt-6 mb-2">
+              <span className="block text-sm font-medium leading-6 text-gray-900">Quelle</span>
+              <Badge info={values.source} />
+            </div>
+            
+
+            
             <InputText name="firstName" autoComplete="off" type="text" label="Vorname" 
                 disabled={values.source === "ISHD"} />
             <InputText name="lastName" autoComplete="off" type="text" label="Nachname" 
                 disabled={values.source === "ISHD"} />
             <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum" 
                 disabled={values.source === "ISHD"} />
-            <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
-            <Toggle name="fullFaceReq" label="Vollvisier notwendig" disabled />
+            {values.source === 'ISHD' ? (
             <div className="flex items-center justify-between mt-6 mb-2">
-              <span className="block text-sm font-medium leading-6 text-gray-900">Quelle</span>
-              <Badge info={values.source} />
+              <span className="block text-sm font-medium leading-6 text-gray-900">Vollvisier erforderlich</span>
+              <Badge info={values.fullFaceReq ? 'Ja' : 'Nein'} />
             </div>
+            ) : (
+                <Toggle name="fullFaceReq" label="Vollvisier erforderlich" />
+            )}
 
             {values.imageUrl ? (
-              <div>
+              <div className="mt-8">
                 <div>
+                  {/*
                   <span className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
                     Bild
                   </span>
+                  */}
                   <CldImage src={values.imageUrl} alt="Uploaded image" width={128} height={128}
                     crop="thumb"
                     gravity="face"
@@ -83,7 +95,10 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             ) : (
               <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
+            
+            <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
 
+            
             {/* Display assigned clubs and teams */}
             <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-8">
               <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
@@ -99,6 +114,9 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             </div>
             <p className="mt-2 text-sm text-gray-500">
               Geänderte Zuordnungen werden erst nach Klick auf <em>Speichern</em> endgültig gespeichert.
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Zuordnungen von der ISHD können hier <em>nicht</em> entfernt werden.
             </p>
 
             <div className="mt-2">
