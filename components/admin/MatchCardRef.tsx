@@ -60,7 +60,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     return allRefereeAssignmentStatuses.filter(status =>
       validKeys.includes(status.key)
     );
-  }, [selected.key, allRefereeAssignmentStatuses]);
+  }, [selected.key]);
 
   const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[] }> = ({ selected, handleStatusChange, validStatuses }) => (
     <Listbox value={selected} onChange={handleStatusChange}>

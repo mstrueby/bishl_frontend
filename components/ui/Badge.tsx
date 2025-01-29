@@ -19,8 +19,15 @@ const Badge = ({ info }: { info: string }) => {
           {info}
         </span>
       )
+    case 'BISHL':
+      return (
+        <span className={`inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20`}>
+          {info}
+        </span>
+      )
     case 'extern':
     case 'nicht erforderlich':
+    case 'ISHD':
       return (
         <span className={`inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20`}>
           {info}
@@ -28,7 +35,9 @@ const Badge = ({ info }: { info: string }) => {
       )
     default:
       return (
-        <span>&nbsp;</span>
+        <span className={`inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20`}>
+          {info}
+        </span>
       )
   }
 
