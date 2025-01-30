@@ -203,7 +203,7 @@ export default function Tournament({
       setIsLoadingMatchdays(false);
       setIsLoadingMatches(false);
     }
-  }, [selectedRound, tournament.alias, selectedSeason.alias]);
+  }, [selectedRound, tournament.alias, selectedSeason?.alias]);
 
   useEffect(() => {
     if (selectedMatchday.name) {
