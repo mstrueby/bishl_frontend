@@ -11,7 +11,22 @@ const status = [
   { key: 'FINISHED', value: 'beendet', bdg_col_light: 'bg-gray-600 text-white ring-gray-700' },
   { key: 'CANCELLED', value: 'abgesagt', bdg_col_light: 'bg-amber-100 text-amber-700 ring-amber-700/10' },
   { key: 'FORFEITED', value: 'gewertet', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-400' },
-]
+];
+
+const finishTypes = [
+  { key: 'REGULAR', value: 'Regulär' },
+  { key: 'SHOOTOUT', value: 'Shootout' },
+  { key: 'OVERTIME', value: 'Verlängerung' },
+];
+
+const matchStatuses = [
+  { key: 'LIVE', value: 'Live' },
+  { key: 'FINISHED', value: 'Beendet' },
+  { key: 'CANCELLED', value: 'Abgesagt' },
+  { key: 'FORFEITED', value: 'Gewettet' },
+  { key: 'SCHEDULED', value: 'Geplant' }
+];
+
 
 const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusValue: string, finishTypeValue?: string }> = ({ statusKey, finishTypeKey, statusValue, finishTypeValue }) => {
   return (
@@ -156,4 +171,60 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   );
 };
 
-export default MatchCard
+//Hypothetical Dialog Component
+const MyDialog = ({editData, setEditData}: {editData: any, setEditData: any}) => {
+  return (
+    <form>
+      <div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Status</label>
+            <select
+              value={editData.matchStatus.key}
+              onChange={(e) => {
+                const selectedStatus = matchStatuses.find(s => s.key === e.target.value);
+                if (selectedStatus) {
+                  setEditData({...editData, matchStatus: selectedStatus});
+                }
+              }}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              {matchStatuses.map(status => (
+                <option key={status.key} value={status.key}>
+                  {status.value}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {editData.matchStatus.key === 'FINISHED' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Spielende</label>
+              <select
+                value={editData.finishType.key}
+                onChange={(e) => {
+                  const selectedType = finishTypes.find(t => t.key === e.target.value);
+                  if (selectedType) {
+                    setEditData({...editData, finishType: selectedType});
+                  }
+                }}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              >
+                {finishTypes.map(type => (
+                  <option key={type.key} value={type.key}>
+                    {type.value}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <label className="block text-sm font-medium text-gray-700">Datum und Zeit</label>
+      </div>
+    </form>
+  )
+}
+
+export default MatchCard;
+export {MyDialog};
