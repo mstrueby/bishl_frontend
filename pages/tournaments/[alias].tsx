@@ -213,7 +213,7 @@ export default function Tournament({
         .then((data) => setMatches(data))
         .finally(() => setIsLoadingMatches(false));
     }
-  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
+  }, [selectedMatchday, tournament?.alias, selectedSeason?.alias, selectedRound?.alias]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
