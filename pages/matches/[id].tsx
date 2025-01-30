@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
@@ -155,11 +154,11 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
         {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} className="relative z-50">
           <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          
+
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <Dialog.Panel className="mx-auto max-w-sm rounded bg-white p-6">
               <Dialog.Title className="text-lg font-medium mb-4">Spiel bearbeiten</Dialog.Title>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Datum und Zeit</label>
@@ -219,11 +218,11 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
-  const jwt = getCookie('jwt', context) as string | undefined;
-  
+  const jwt = (getCookie('jwt', context) || '') as string;
+
   try {
     const match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
-    
+
     let userRoles: string[] = [];
     if (jwt) {
       const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
