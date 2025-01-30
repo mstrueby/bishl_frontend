@@ -73,7 +73,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
             <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={startDate}>
+              <time dateTime={new Date(startDate).toISOString()}>
                 {new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'short',
@@ -86,7 +86,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
               </time>
             </p>
             <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={startDate}>
+              <time dateTime={new Date(startDate).toISOString()}>
                 {new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'long',
