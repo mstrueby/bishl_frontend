@@ -126,7 +126,7 @@ export default function Tournament({
   }, [router.isFallback, tournament]);
 
   useEffect(() => {
-    if (selectedSeason.name) {
+    if (selectedSeason?.name) {
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
