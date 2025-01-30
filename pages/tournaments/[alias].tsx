@@ -327,7 +327,7 @@ export default function Tournament({
               </Listbox>
 
               {/* Drop-Down ROUND */}
-              {rounds.length > 1 &&
+              {rounds && rounds.length > 0 &&
                 <Listbox value={selectedRound} onChange={setSelectedRound}>
                   {({ open }) => (
                     <>
@@ -440,7 +440,7 @@ export default function Tournament({
                 <span>{`${selectedRound.matchdaysType.key} / ${selectedRound.matchdaysSortedBy.key}`}</span>   
               </div>  
               */}
-              {matchdays.length > 1 &&
+              {matchdays && matchdays.length > 0 &&
                 <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
                   {({ open }) => (
                     <>
@@ -544,10 +544,19 @@ export default function Tournament({
               )}
 
               {/* MATCHES */}
-              {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
-                <MatchCard key={index} match={match} />
-
-              ))}
+              {isLoadingMatches ? (
+                <div className="flex items-center justify-center py-12">
+                  <ClipLoader color={"#4f46e5"} loading={true} size={50} />
+                </div>
+              ) : matches && matches.length > 0 ? (
+                matches.map((match, index) => (
+                  <MatchCard key={index} match={match} />
+                ))
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  Keine Spiele verfügbar
+                </div>
+              )}
             </section>
           )}
 
