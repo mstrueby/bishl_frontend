@@ -139,7 +139,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
           </div>
 
           {/* Admin Button */}
-          {(userRoles?.includes('LEAGUE_ADMIN') || userRoles?.includes('ADMIN')) && (
+          {userRoles?.includes('LEAGUE_ADMIN') && (
             <div className="mt-6 text-center">
               <button
                 onClick={() => setIsEditDialogOpen(true)}
