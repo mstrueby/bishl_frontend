@@ -71,21 +71,23 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* date */}
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { 
-              weekday: 'short', 
-              day: 'numeric', 
-              month: 'short', 
-              year: undefined, 
-              hour: '2-digit', 
-              minute: '2-digit' 
+            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
+              timeZone: 'Europe/Berlin',
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+              year: undefined,
+              hour: '2-digit',
+              minute: '2-digit'
             })}</time></p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', { 
-              weekday: 'long', 
-              day: 'numeric', 
-              month: 'short', 
-              year: '2-digit', 
-              hour: '2-digit', 
-              minute: '2-digit' 
+            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
+              timeZone: 'Europe/Berlin',
+              weekday: 'long',
+              day: 'numeric',
+              month: 'short',
+              year: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
             })}</time></p>
           </div>
           {/* venue */}
@@ -103,20 +105,24 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           <div className="flex-auto ml-6">
             <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
           </div>
-          <div className="flex-auto">
-            <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
-          </div>
+          {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+            <div className="flex-auto">
+              <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
+            </div>
+          )}
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
-            <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
-            <div className="flex-auto ml-6">
-              <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
-            </div>
+          <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
+          <div className="flex-auto ml-6">
+            <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
+          </div>
+          {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
             <div className="flex-auto">
               <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
             </div>
-          </div>
+          )}
+        </div>
       </div>
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
@@ -128,7 +134,6 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             finishTypeValue={match.finishType.value}
           />
         </div>
-        {/*
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           <button
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -137,7 +142,6 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             <span className="hidden sm:block md:hidden">Bericht</span>
           </button>
         </div>
-        */}
       </div>
     </div>
   );
