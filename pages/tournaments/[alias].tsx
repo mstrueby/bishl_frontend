@@ -544,10 +544,17 @@ export default function Tournament({
               )}
 
               {/* MATCHES */}
-              {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
-                <MatchCard key={index} match={match} />
-
-              ))}
+              {activeMatchdayTab == 'matches' && (
+                matches && matches.length > 0 ? (
+                  matches.map((match, index) => (
+                    <MatchCard key={index} match={match} />
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    Keine Spiele verfügbar
+                  </div>
+                )
+              )}
             </section>
           )}
 
