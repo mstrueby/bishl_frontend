@@ -161,6 +161,48 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
               <div className="space-y-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <select
+                    value={editData.matchStatus.key}
+                    onChange={(e) => {
+                      const newStatus = {
+                        key: e.target.value,
+                        value: e.target.options[e.target.selectedIndex].text
+                      };
+                      setEditData({...editData, matchStatus: newStatus});
+                    }}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  >
+                    <option value="SCHEDULED">Geplant</option>
+                    <option value="LIVE">Live</option>
+                    <option value="FINISHED">Beendet</option>
+                    <option value="CANCELLED">Abgesagt</option>
+                    <option value="FORFEITED">Gewertet</option>
+                  </select>
+                </div>
+
+                {editData.matchStatus.key === 'FINISHED' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Spielende</label>
+                    <select
+                      value={editData.finishType.key}
+                      onChange={(e) => {
+                        const newFinishType = {
+                          key: e.target.value,
+                          value: e.target.options[e.target.selectedIndex].text
+                        };
+                        setEditData({...editData, finishType: newFinishType});
+                      }}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    >
+                      <option value="REGULAR">Regulär</option>
+                      <option value="OVERTIME">Verlängerung</option>
+                      <option value="SHOOTOUT">Penaltyschießen</option>
+                    </select>
+                  </div>
+                )}
+
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Datum und Zeit</label>
                   <input
                     type="datetime-local"
@@ -170,7 +212,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                   />
                 </div>
 
-                {match.matchStatus.key === 'FINISHED' && (
+                {editData.matchStatus.key === 'FINISHED' && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Tore Heim</label>
