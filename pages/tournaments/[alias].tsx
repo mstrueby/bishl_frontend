@@ -126,7 +126,7 @@ export default function Tournament({
   }, [router.isFallback, tournament]);
 
   useEffect(() => {
-    if (selectedSeason?.name) {
+    if (selectedSeason.name) {
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
@@ -203,7 +203,7 @@ export default function Tournament({
       setIsLoadingMatchdays(false);
       setIsLoadingMatches(false);
     }
-  }, [selectedRound, tournament.alias, selectedSeason?.alias]);
+  }, [selectedRound, tournament.alias, selectedSeason.alias]);
 
   useEffect(() => {
     if (selectedMatchday.name) {
@@ -213,7 +213,7 @@ export default function Tournament({
         .then((data) => setMatches(data))
         .finally(() => setIsLoadingMatches(false));
     }
-  }, [selectedMatchday, tournament?.alias, selectedSeason?.alias, selectedRound?.alias]);
+  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
@@ -327,7 +327,7 @@ export default function Tournament({
               </Listbox>
 
               {/* Drop-Down ROUND */}
-              {rounds && rounds.length > 0 &&
+              {rounds.length > 1 &&
                 <Listbox value={selectedRound} onChange={setSelectedRound}>
                   {({ open }) => (
                     <>
@@ -440,7 +440,7 @@ export default function Tournament({
                 <span>{`${selectedRound.matchdaysType.key} / ${selectedRound.matchdaysSortedBy.key}`}</span>   
               </div>  
               */}
-              {matchdays && matchdays.length > 0 &&
+              {matchdays.length > 1 &&
                 <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
                   {({ open }) => (
                     <>
@@ -544,19 +544,10 @@ export default function Tournament({
               )}
 
               {/* MATCHES */}
-              {isLoadingMatches ? (
-                <div className="flex items-center justify-center py-12">
-                  <ClipLoader color={"#4f46e5"} loading={true} size={50} />
-                </div>
-              ) : matches && matches.length > 0 ? (
-                matches.map((match, index) => (
-                  <MatchCard key={index} match={match} />
-                ))
-              ) : (
-                <div className="text-center py-12 text-gray-500">
-                  Keine Spiele verfügbar
-                </div>
-              )}
+              {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
+                <MatchCard key={index} match={match} />
+
+              ))}
             </section>
           )}
 
