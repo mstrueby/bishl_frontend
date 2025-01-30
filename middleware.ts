@@ -16,9 +16,9 @@ export function middleware(request: NextRequest) {
     );
   }
   
-  if ((url.includes('/leaguemanager') || url.includes('/admin')) && !cookie) { // simplified condition
-    let loginUrl = `${process.env['NEXT_FRONTEND_URL']}/login`; // used template literals for consistency
-    return NextResponse.redirect(loginUrl);
+  if ((url.includes('/leaguemanager') || url.includes('/admin')) && !cookie) {
+    const loginUrl = new URL('/login', process.env.NEXT_PUBLIC_URL || 'https://' + request.headers.get('host'));
+    return NextResponse.redirect(loginUrl.toString());
   }
 
   return NextResponse.next();

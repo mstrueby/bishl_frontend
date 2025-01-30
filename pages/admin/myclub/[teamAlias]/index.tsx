@@ -82,6 +82,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwt}`
+      },
+      params: {
+        sortby: 'lastName',
       }
     });
     players = playersResponse.data.results;
@@ -132,7 +135,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
           'Authorization': `Bearer ${jwt}`
         },
         params: {
-          page
+          page,
+          sortby: 'lastName'
         }
       });
       setPlayers(playersResponse.data.results);
@@ -231,13 +235,10 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
     setSuccessMessage(null);
   };
 
-
-  const playerValues = Array.isArray(players)
-    ? players.slice().sort((a, b) => a.firstName.localeCompare(b.firstName))
-    : [];
+  const playerValues = Array.isArray(players) ? players : [];
 
   const dataLisItems = playerValues?.map((player: PlayerValues) => {
-    const name = `${player.displayFirstName} ${player.displayLastName}`;
+    const name = `${player.lastName}, ${player.firstName}`;
     const number = player.assignedTeams
       .flatMap(item => item.teams)
       .filter(teamInner => teamInner.teamId === team._id && teamInner.jerseyNo !== undefined)
@@ -329,6 +330,11 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
+      
+      <div className="text-sm text-gray-600 my-4">
+        {`${(currentPage - 1) * 25 + 1}-${Math.min(currentPage * 25, totalPlayers)} von ${totalPlayers} insgesamt`}
+      </div>
+      
       <DataList
         items={dataLisItems}
         statuses={statuses}
