@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Match } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs } from '../../tools/consts';
@@ -71,24 +72,32 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* date */}
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              timeZone: 'Europe/Berlin',
-              weekday: 'short',
-              day: 'numeric',
-              month: 'short',
-              year: undefined,
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              timeZone: 'Europe/Berlin',
-              weekday: 'long',
-              day: 'numeric',
-              month: 'short',
-              year: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
+            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate}>
+                {new Date(startDate).toLocaleString('de-DE', {
+                  timeZone: 'Europe/Berlin',
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                  year: undefined,
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </time>
+            </p>
+            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate}>
+                {new Date(startDate).toLocaleString('de-DE', {
+                  timeZone: 'Europe/Berlin',
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'short',
+                  year: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </time>
+            </p>
           </div>
           {/* venue */}
           <div className="flex items-center truncate">
@@ -135,12 +144,12 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           />
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          <button
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            <span className="block sm:hidden md:block">Spielbericht</span>
-            <span className="hidden sm:block md:hidden">Bericht</span>
-          </button>
+          <Link href={`/matches/${match._id}`}>
+            <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+              <span className="block sm:hidden md:block">Spielbericht</span>
+              <span className="hidden sm:block md:hidden">Bericht</span>
+            </a>
+          </Link>
         </div>
       </div>
     </div>
