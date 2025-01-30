@@ -126,7 +126,7 @@ export default function Tournament({
   }, [router.isFallback, tournament]);
 
   useEffect(() => {
-    if (selectedSeason.name) {
+    if (selectedSeason?.name) {
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
@@ -203,7 +203,7 @@ export default function Tournament({
       setIsLoadingMatchdays(false);
       setIsLoadingMatches(false);
     }
-  }, [selectedRound, tournament.alias, selectedSeason.alias]);
+  }, [selectedRound, tournament.alias, selectedSeason?.alias]);
 
   useEffect(() => {
     if (selectedMatchday.name) {
@@ -213,7 +213,7 @@ export default function Tournament({
         .then((data) => setMatches(data))
         .finally(() => setIsLoadingMatches(false));
     }
-  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
+  }, [selectedMatchday, tournament?.alias, selectedSeason?.alias, selectedRound?.alias]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
