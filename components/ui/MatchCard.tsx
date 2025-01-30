@@ -71,32 +71,24 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* date */}
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={startDate}>
-                {new Date(startDate).toLocaleString('de-DE', {
-                  timeZone: 'Europe/Berlin',
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'short',
-                  year: undefined,
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </time>
-            </p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={startDate}>
-                {new Date(startDate).toLocaleString('de-DE', {
-                  timeZone: 'Europe/Berlin',
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'short',
-                  year: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </time>
-            </p>
+            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
+              timeZone: 'Europe/Berlin',
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+              year: undefined,
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</time></p>
+            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
+              timeZone: 'Europe/Berlin',
+              weekday: 'long',
+              day: 'numeric',
+              month: 'short',
+              year: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</time></p>
           </div>
           {/* venue */}
           <div className="flex items-center truncate">
