@@ -61,14 +61,6 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
       featured: post.featured,
     }));
 
-  const sectionTitle = 'Beiträge';
-  const newLink = '/admin/posts/add';
-  const statuses = {
-    Published: 'text-green-500 bg-green-500/20',
-    Draft: 'text-gray-500 bg-gray-800/10',
-    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
-  }
-
   return (
     <>
       <Head>
@@ -84,14 +76,13 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
                 <p className="mt-20 text-lg/8 text-gray-500">Keine Beiträge vorhanden.</p>
               ) : (
                 <div className="mt-16 space-y-20 lg:mt-20 lg:space-y-20">
-                {postItems.map((post) => (
-                  <article key={post._id} className="relative isolate flex flex-col gap-8 sm:flex-row">
-                    <div className="relative w-full sm:w-1/2 lg:w-1/3">
-                      {post.imageUrl ? (
+                  {postItems.map((post) => (
+                    <article key={post._id} className="relative isolate flex flex-col gap-8 sm:flex-row">
+                      <div className="relative w-full sm:w-1/2 lg:w-1/3">
                         <CldImage
                           alt="Post Thumbnail"
-                          src={post.imageUrl}
-                          className="w-full rounded-2xl bg-gray-100 object-cover aspect-[16/9]"
+                          src={post.imageUrl ? post.imageUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                          className="w-full rounded-2xl object-cover aspect-[16/9]"
                           layout="responsive"
                           width={1024}
                           height={576}
@@ -99,34 +90,31 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
                           gravity="auto"
                           radius={18}
                         />
-                      ) : (
-                        <div className="inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10 aspect-[16/9] w-full bg-gray-100 object-cover"></div>
-                      )}
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-y-1 overflow-hidden text-sm/6 text-gray-500">
-                        <time dateTime={post.createDate} className="mr-8">
-                          {getFuzzyDate(post.createDate)}
-                        </time>
-                        <div className="-ml-4 flex items-center gap-x-4">
-                          <svg viewBox="0 0 2 2" className="-ml-0.5 h-0.5 w-0.5 flex-none fill-black/50">
-                            <circle r={1} cx={1} cy={1} />
-                          </svg>
-                          <div className="flex items-center gap-x-2.5">
-                            <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                              {`${post.author_firstname[0]}${post.author_lastname[0]}`}
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-y-1 overflow-hidden text-sm/6 text-gray-500">
+                          <time dateTime={post.createDate} className="mr-8">
+                            {getFuzzyDate(post.createDate)}
+                          </time>
+                          <div className="-ml-4 flex items-center gap-x-4">
+                            <svg viewBox="0 0 2 2" className="-ml-0.5 h-0.5 w-0.5 flex-none fill-black/50">
+                              <circle r={1} cx={1} cy={1} />
+                            </svg>
+                            <div className="flex items-center gap-x-2.5">
+                              <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                                {`${post.author_firstname[0]}${post.author_lastname[0]}`}
+                              </div>
+                              <div className="text-sm/6">
+                                <p className="font-extralight text-gray-900">
+                                  <a href="#">
+                                    <span className="absolute inset-0" />
+                                    {post.author_firstname}
+                                  </a>
+                                </p>
+                                {/*<p className="text-gray-600">{post.author.role}</p>*/}
+                              </div>
                             </div>
-                            <div className="text-sm/6">
-                              <p className="font-extralight text-gray-900">
-                                <a href="#">
-                                  <span className="absolute inset-0" />
-                                  {post.author_firstname}
-                                </a>
-                              </p>
-                              {/*<p className="text-gray-600">{post.author.role}</p>*/}
-                            </div>
-                          </div>
-                          {/*
+                            {/*
                           <a
                             href={post.category.href}
                             className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
@@ -134,23 +122,23 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
                             {post.category.title}
                           </a>
                           */}
+                          </div>
+                        </div>
+                        <div className="group relative max-w-xl">
+                          <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
+                            <Link href={`/posts/${post.alias}`} passHref>
+                              <a href="#">
+                                <span className="absolute inset-0" />
+                                {post.title}
+                              </a>
+                            </Link>
+                          </h3>
+                          <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                         </div>
                       </div>
-                      <div className="group relative max-w-xl">
-                        <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                          <Link href={`/posts/${post.alias}`} passHref>
-                            <a href="#">
-                              <span className="absolute inset-0" />
-                              {post.title}
-                            </a>
-                          </Link>
-                        </h3>
-                        <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
+                    </article>
+                  ))}
+                </div>
               )}
             </div>
           </div>
