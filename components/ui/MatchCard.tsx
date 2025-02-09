@@ -1,10 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Fragment } from 'react';
 import { Match } from '../../types/MatchValues';
-import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+
+const StatusMenu = ({ matchId }: { matchId: string }) => {
+  return (
+    <Menu as="div" className="relative inline-block text-left ml-1">
+      <Menu.Button className="flex items-center text-gray-400 hover:text-gray-600">
+        <EllipsisVerticalIcon className="h-4 w-4" aria-hidden="true" />
+      </Menu.Button>
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-100"
+        enterFrom="transform opacity-0 scale-95"
+        enterTo="transform opacity-100 scale-100"
+        leave="transition ease-in duration-75"
+        leaveFrom="transform opacity-100 scale-100"
+        leaveTo="transform opacity-0 scale-95"
+      >
+        <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="py-1">
+            <Menu.Item>
+              {({ active }) => (
+                <Link href={`/admin/refadmin?matchId=${matchId}`}>
+                  <a className={classNames(
+                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                    'block px-4 py-2 text-sm'
+                  )}>
+                    Ansetzung
+                  </a>
+                </Link>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <Link href={`/matches/${matchId}`}>
+                  <a className={classNames(
+                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                    'block px-4 py-2 text-sm'
+                  )}>
+                    Ergebnis
+                  </a>
+                </Link>
+              )}
+            </Menu.Item>
+          </div>
+        </Menu.Items>
+      </Transition>
+    </Menu>
+  );
+};
 
 const status = [
   { key: 'LIVE', value: 'Live', bdg_col_light: 'bg-red-600 text-white ring-red-700' },
@@ -59,12 +109,15 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           </div>
           {/* status */}
           <div className="sm:hidden">
-            <StatusBadge
-              statusKey={match.matchStatus.key}
-              finishTypeKey={match.finishType.key}
-              statusValue={match.matchStatus.value}
-              finishTypeValue={match.finishType.value}
-            />
+            <div className="flex items-center">
+              <StatusBadge
+                statusKey={match.matchStatus.key}
+                finishTypeKey={match.finishType.key}
+                statusValue={match.matchStatus.value}
+                finishTypeValue={match.finishType.value}
+              />
+              <StatusMenu matchId={match._id} />
+            </div>
           </div>
         </div>
         {/* 1-2 date, venue */}
