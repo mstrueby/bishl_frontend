@@ -83,22 +83,18 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
               {postItems.map((post) => (
                 <article key={post._id} className="flex flex-col items-start justify-between">
                   <div className="relative w-full">
-                    {post.imageUrl ? (
-                      <CldImage
-                        alt="Post Thumbnail"
-                        src={post.imageUrl}
-                        className="w-full rounded-2xl bg-gray-100 object-cover aspect-[16/9]"
-                        layout="responsive"
-                        width={1024}
-                        height={576}
-                        crop="fill"
-                        gravity="auto"
-                        radius={18}
-                        priority
-                      />
-                    ) : (
-                      <div className="inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10 aspect-[16/9] w-full bg-gray-100 object-cover"></div>
-                    )}
+                    <CldImage
+                      alt="Post Thumbnail"
+                      src={post.imageUrl ? post.imageUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                      className="w-full rounded-2xl object-cover aspect-[16/9]"
+                      layout="responsive"
+                      width={1024}
+                      height={576}
+                      crop="fill"
+                      gravity="auto"
+                      radius={18}
+                      priority
+                    />
                   </div>
                   <div className="max-w-xl">
                     <div className="mt-8 flex items-center gap-x-4 text-xs">
