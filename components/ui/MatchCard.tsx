@@ -8,10 +8,16 @@ import useAuth from '../../hooks/useAuth';
 import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+import MatchEdit from '../admin/ui/MatchEdit';
+import { useState } from 'react';
 
-const StatusMenu = ({ matchId }: { matchId: string }) => {
+const StatusMenu = ({ matchId, match }: { matchId: string, match: Match }) => {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const { user } = useAuth();
+  
   return (
-    <Menu as="div" className="relative inline-block text-left ml-1">
+    <>
+      <Menu as="div" className="relative inline-block text-left ml-1">
       <Menu.Button className="flex items-center text-gray-500">
         <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
       </Menu.Button>
@@ -28,14 +34,15 @@ const StatusMenu = ({ matchId }: { matchId: string }) => {
           <div className="py-1">
             <Menu.Item>
               {({ active }) => (
-                <Link href={`/admin/refadmin?matchId=${matchId}`}>
-                  <a className={classNames(
+                <button
+                  onClick={() => setIsEditOpen(true)}
+                  className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block px-4 py-2 text-sm'
-                  )}>
-                    Ansetzung
-                  </a>
-                </Link>
+                    'block w-full text-left px-4 py-2 text-sm'
+                  )}
+                >
+                  Ansetzung
+                </button>
               )}
             </Menu.Item>
             <Menu.Item>
@@ -54,6 +61,14 @@ const StatusMenu = ({ matchId }: { matchId: string }) => {
         </Menu.Items>
       </Transition>
     </Menu>
+    <MatchEdit
+      isOpen={isEditOpen}
+      onClose={() => setIsEditOpen(false)}
+      match={match}
+      jwt={user?.jwt || ''}
+      onSuccess={() => window.location.reload()}
+    />
+    </>
   );
 };
 
@@ -112,7 +127,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           <div className="sm:hidden">
             <div className="flex items-center">
               {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-                <StatusMenu matchId={match._id} />
+                <StatusMenu matchId={match._id} match={match} />
               )}
               <StatusBadge
                 statusKey={match.matchStatus.key}
