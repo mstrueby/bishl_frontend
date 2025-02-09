@@ -158,6 +158,13 @@ export default function Tournament({
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data)) {
+            if (data.length === 0) {
+              setMatchdays([]);
+              setSelectedMatchday({} as Matchday);
+              setIsLoadingMatches(false);
+              return;
+            }
+            
             const sortedData = data.sort((a: Matchday, b: Matchday) => {
               if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
                 return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
@@ -168,25 +175,33 @@ export default function Tournament({
             });
             setMatchdays(sortedData);
             
-            if (selectedRound.matchdaysType.key === 'GROUP') {
-              setSelectedMatchday(sortedData[0] || {} as Matchday);
-            } else {
-              const now = new Date().getTime();
-              const mostRecentPastMatchday = sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
-                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
-              setSelectedMatchday(mostRecentPastMatchday || {} as Matchday);
-            }
+            const selectedMd = selectedRound.matchdaysType.key === 'GROUP' 
+              ? sortedData[0] 
+              : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
+                  .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
+            
+            setSelectedMatchday(selectedMd || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
             setMatchdays([]);
             setSelectedMatchday({} as Matchday);
+            setIsLoadingMatches(false);
           }
+        })
+        .catch((error) => {
+          console.error('Error fetching matchdays:', error);
+          setMatchdays([]);
+          setSelectedMatchday({} as Matchday);
+          setIsLoadingMatches(false);
         })
         .finally(() => {
           setIsLoadingMatchdays(false);
           setActiveTab('matches');
           setActiveMatchdayTab('matches');
         });
+    } else {
+      setIsLoadingMatchdays(false);
+      setIsLoadingMatches(false);
     }
   }, [selectedRound, tournament.alias, selectedSeason.alias]);
 
@@ -529,10 +544,17 @@ export default function Tournament({
               )}
 
               {/* MATCHES */}
-              {activeMatchdayTab == 'matches' && matches?.map((match, index) => (
-                <MatchCard key={index} match={match} />
-
-              ))}
+              {activeMatchdayTab == 'matches' && (
+                matches && matches.length > 0 ? (
+                  matches.map((match, index) => (
+                    <MatchCard key={index} match={match} />
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    Keine Spiele verfügbar
+                  </div>
+                )
+              )}
             </section>
           )}
 

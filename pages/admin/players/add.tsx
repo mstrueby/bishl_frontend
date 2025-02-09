@@ -3,13 +3,13 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { ClubValues } from '../../../types/ClubValues';
-import ClubForm from '../../../components/admin/ClubForm';
+import { PlayerValues } from '../../../types/PlayerValues';
+import PlayerAdminForm from '../../../components/admin/PlayerAdminForm';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AddProps {
   jwt: string;
@@ -29,14 +29,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
     });
-    
+
     const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN')) {
+    if (!user.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role))) {
       return {
         redirect: {
           destination: '/',
@@ -61,45 +61,45 @@ export default function Add({ jwt }: AddProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: ClubValues = {
+  const initialValues: PlayerValues = {
     _id: '',
-    name: '',
-    alias: '',
-    addressName: '',
-    street: '',
-    zipCode: '',
-    city: '',
-    country: 'Deutschland',
-    email: '',
-    yearOfFoundation: '',
-    description: '',
-    website: '',
-    ishdId: '',
-    active: false,
-    logoUrl: '',
-    legacyId: '',
-    teams: [],
+    firstName: '',
+    lastName: '',
+    birthdate: '',
+    displayFirstName: '',
+    displayLastName: '',
+    nationality: '',
+    fullFaceReq: false,
+    assignedTeams: [],
+    imageUrl: '',
+    source: 'BISHL',
   };;
 
-  const onSubmit = async (values: ClubValues) => {
+  const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
+    values.displayFirstName = values.firstName;
+    values.displayLastName = values.lastName;
+    values.birthdate = new Date(values.birthdate).toISOString();
     console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await axios.post(BASE_URL, formData, {
+
+      console.log('FormData entries:', Array.from(formData.entries()));
+      
+      const response = await axios.post(`${BASE_URL}/players/`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       });
       if (response.status === 201) {
         router.push({
-          pathname: '/admin/clubs',
-          query: { message: `Der neue Verein <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
-        }, '/admin/clubs');
+          pathname: '/admin/players',
+          query: { message: `SpielerIn <strong>${values.firstName} ${values.lastName}</strong>  wurde erfolgreich angelegt.` },
+        }, '/admin/players');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
@@ -113,7 +113,7 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const handleCancel = () => {
-    router.push('/admin/clubs');
+    router.push('/admin/players');
   };
 
   useEffect(() => {
@@ -126,18 +126,19 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
-  const sectionTitle = 'Neuer Verein';
+  const sectionTitle = 'SpielerIn anlegen';
 
   return (
     <Layout>
       <SectionHeader title={sectionTitle} />
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
-      <ClubForm 
+      <PlayerAdminForm
         initialValues={initialValues}
         onSubmit={onSubmit}
-        enableReinitialize= {false}
-        handleCancel= {handleCancel}
+        enableReinitialize={false}
+        handleCancel={handleCancel}
         loading={loading}
+        clubs={[]}
       />
     </Layout>
   );

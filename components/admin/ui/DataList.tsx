@@ -47,11 +47,12 @@ interface DataListProps {
   deleteModalDescriptionSubText?: string;
   showThumbnails?: boolean;
   showThumbnailsOnMobiles?: boolean;
+  showStatusIndicator?: boolean;
 }
 
 
 const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDeleteConfirm,
-  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText, showThumbnails, showThumbnailsOnMobiles }) => {
+  deleteModalTitle, deleteModalDescription, deleteModalDescriptionSubText, showThumbnails, showThumbnailsOnMobiles, showStatusIndicator }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [postIdToDelete, setPostIdToDelete] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
@@ -88,9 +89,11 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-x-3">
-              <div className={`${statuses[item.published ? 'Published' : 'Unpublished']} flex-none rounded-full p-1`}>
-                <div className="h-2 w-2 rounded-full bg-current" />
-              </div>
+              {showStatusIndicator && (
+                <div className={`${statuses[item.published ? 'Published' : 'Unpublished']} flex-none rounded-full p-1`}>
+                  <div className="h-2 w-2 rounded-full bg-current" />
+                </div>
+              )}
               <p className="text-sm/6 font-semibold text-gray-900 truncate">{item.title}</p>
               {item.featured && (
                 <p
