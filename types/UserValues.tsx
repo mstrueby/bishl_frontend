@@ -4,7 +4,7 @@ export interface UserValues {
   password: string;
   firstName: string;
   lastName: string;
-  club?: {
+  club: {
     clubId: string;
     clubName: string;
   };

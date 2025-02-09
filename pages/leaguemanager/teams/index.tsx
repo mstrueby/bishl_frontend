@@ -61,7 +61,7 @@ export default function Teams({
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
       {/* Dropdown to select a club */}
-      <ClubSelect onClubChange={onClubChange} clubs={allClubsData} />
+      <ClubSelect onClubChange={onClubChange} allClubsData={allClubsData} />
 
       <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
         <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">

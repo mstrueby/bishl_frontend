@@ -247,7 +247,6 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
         deleteModalDescription="Möchtest du den Beitrag <strong>{{title}}</strong> wirklich löschen?"
         deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
         showThumbnails
-        showStatusIndicator
       />
 
     </Layout>

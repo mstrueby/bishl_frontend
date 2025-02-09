@@ -58,7 +58,6 @@ export default function Post({
                 <div className="text-sm/6">
                   <p className="font-extralight text-gray-900">
                     <a href="#">
-                      <span className="absolute inset-0" />
                       {post.author.firstName}
                     </a>
                   </p>

@@ -174,12 +174,12 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
     fullFaceReq: player?.fullFaceReq || false,
     source: player?.source || '', // Added missing property
     assignedTeams: player?.assignedTeams || [],
-    stats: player?.stats || [], // Added missing property
+    stats: player?.stats || {}, // Added missing property
     imageUrl: player?.imageUrl || '',
     legacyId: player?.legacyId || 0,
     createDate: player?.createDate || '',
     nationality: player?.nationality || '', // Added missing property
-    position: player?.position || undefined, // Added missing property
+    position: player?.position || '', // Added missing property
   };
 
   console.log("clubId", clubId)

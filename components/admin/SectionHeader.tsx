@@ -13,7 +13,7 @@ interface FilterChangeParams {
   date_to?: string;
 }
 
-export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, backLink, searchBox }: {
+export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, backLink }: {
   title: string,
   filter?: string,
   newLink?: string,
@@ -21,7 +21,6 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
   onBulkUpdate?: (status: string) => void,
   description?: string
   backLink?: string
-  searchBox?: React.ReactNode
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -41,8 +40,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
           </div>
         )}
       </div>
-      <div className="mt-5 flex sm:ml-4 sm:mt-0 gap-x-2 items-center">
-        {searchBox && <div className="w-64">{searchBox}</div>}
+      <div className="mt-5 flex sm:ml-4 sm:mt-0 gap-x-2">
         {filter && (
           <>
             <RefMatchFilter onFilterChange={onFilterChange!} />
