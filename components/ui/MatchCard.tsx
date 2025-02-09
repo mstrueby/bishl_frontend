@@ -11,8 +11,8 @@ import { classNames } from '../../tools/utils';
 const StatusMenu = ({ matchId }: { matchId: string }) => {
   return (
     <Menu as="div" className="relative inline-block text-left ml-1">
-      <Menu.Button className="flex items-center text-gray-400 hover:text-gray-600">
-        <EllipsisVerticalIcon className="h-4 w-4" aria-hidden="true" />
+      <Menu.Button className="flex items-center text-gray-500">
+        <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
       </Menu.Button>
       <Transition
         as={Fragment}
@@ -110,13 +110,13 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
+              <StatusMenu matchId={match._id} />
               <StatusBadge
                 statusKey={match.matchStatus.key}
                 finishTypeKey={match.finishType.key}
                 statusValue={match.matchStatus.value}
                 finishTypeValue={match.finishType.value}
               />
-              <StatusMenu matchId={match._id} />
             </div>
           </div>
         </div>
@@ -189,6 +189,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
+          <StatusMenu matchId={match._id} />
           <StatusBadge
             statusKey={match.matchStatus.key}
             finishTypeKey={match.finishType.key}
@@ -196,6 +197,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             finishTypeValue={match.finishType.value}
           />
         </div>
+        {/*
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           <Link href={`/matches/${match._id}`}>
             <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -204,6 +206,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             </a>
           </Link>
         </div>
+        */}
       </div>
     </div>
   );
