@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { Match } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import useAuth from '../../hooks/useAuth';
 import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
@@ -110,7 +111,9 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              <StatusMenu matchId={match._id} />
+              {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
+                <StatusMenu matchId={match._id} />
+              )}
               <StatusBadge
                 statusKey={match.matchStatus.key}
                 finishTypeKey={match.finishType.key}
@@ -189,7 +192,9 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
-          <StatusMenu matchId={match._id} />
+          {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
+            <StatusMenu matchId={match._id} />
+          )}
           <StatusBadge
             statusKey={match.matchStatus.key}
             finishTypeKey={match.finishType.key}
