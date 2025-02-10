@@ -13,7 +13,7 @@ import MatchEdit from '../admin/ui/MatchEdit';
 const StatusMenu = ({ match }: { match: Match }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { user } = useAuth();
-  
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
