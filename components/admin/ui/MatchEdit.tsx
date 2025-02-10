@@ -57,8 +57,11 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
     console.log('Submitted values:', { venue, startDate });
 
     try {
+      // Format startDate to YYYY-MM-DD HH:MM:SS
+      const formattedDate = startDate.toISOString().slice(0, 19).replace('T', ' ');
+      
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
-        startDate,
+        startDate: formattedDate,
         venue
       }, {
         headers: {
