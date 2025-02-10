@@ -20,15 +20,17 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues?active=true`);
         const data = await response.json();
         setVenues(data);
       } catch (error) {
         console.error('Error fetching venues:', error);
       }
     };
-    fetchVenues();
-  }, []);
+    if (isOpen) {
+      fetchVenues();
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
