@@ -1,10 +1,8 @@
-
+import React, { useState, useEffect } from 'react';
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Match } from '../../../types/MatchValues';
 import axios from 'axios';
-import VenueSelect from '../../ui/VenueSelect';
-
 import VenueSelect from '../../ui/VenueSelect';
 import { VenueValues } from '../../../types/VenueValues';
 
