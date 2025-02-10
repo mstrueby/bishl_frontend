@@ -16,7 +16,8 @@ interface MatchEditProps {
   onClose: () => void;
   match: Match;
   jwt: string;
-  onSuccess: () => void;
+  onSuccess: (updatedMatch: Partial<Match>) => void;
+  //setMatch: (newMatch: Match) => void;
 }
 
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
@@ -66,7 +67,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
           Authorization: `Bearer ${jwt}`
         }
       });
-      onSuccess(response.data);
+      onSuccess();
       onClose();
     } catch (error) {
       console.error('Error updating match:', error);

@@ -10,7 +10,7 @@ import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 
-const StatusMenu = ({ match }: { match: Match }) => {
+const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { user } = useAuth();
 
@@ -133,7 +133,10 @@ const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
           <div className="sm:hidden">
             <div className="flex items-center">
               {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-                <StatusMenu match={match} />
+                <StatusMenu 
+                  match={match}
+                  setMatch={setMatch}
+                />
               )}
               <StatusBadge
                 statusKey={match.matchStatus.key}
@@ -214,7 +217,10 @@ const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
           {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-            <StatusMenu match={match} />
+            <StatusMenu 
+              match={match}
+              setMatch={setMatch}
+            />
           )}
           <StatusBadge
             statusKey={match.matchStatus.key}
