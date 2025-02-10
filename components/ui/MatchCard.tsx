@@ -9,9 +9,8 @@ import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
-import { useState } from 'react';
 
-const StatusMenu = ({ matchId, match }: { matchId: string, match: Match }) => {
+const StatusMenu = ({ match }: { match: Match }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { user } = useAuth();
   
@@ -47,7 +46,7 @@ const StatusMenu = ({ matchId, match }: { matchId: string, match: Match }) => {
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href={`/matches/${matchId}`}>
+                <Link href={`/matches/${match._id}`}>
                   <a className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
@@ -127,7 +126,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           <div className="sm:hidden">
             <div className="flex items-center">
               {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-                <StatusMenu matchId={match._id} match={match} />
+                <StatusMenu match={match} />
               )}
               <StatusBadge
                 statusKey={match.matchStatus.key}
@@ -208,7 +207,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
           {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-            <StatusMenu matchId={match._id} />
+            <StatusMenu match={match} />
           )}
           <StatusBadge
             statusKey={match.matchStatus.key}

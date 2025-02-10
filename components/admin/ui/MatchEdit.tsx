@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Match } from '../../../types/MatchValues';
 import axios from 'axios';
+import VenueSelect from '../../ui/VenueSelect';
 
 interface MatchEditProps {
   isOpen: boolean;
