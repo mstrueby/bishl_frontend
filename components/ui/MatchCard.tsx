@@ -66,7 +66,7 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
         match={match}
         jwt={user?.jwt || ''}
         onSuccess={(updatedMatch) => {
-          setMatch(updatedMatch);
+          setMatch({ ...match, ...updatedMatch });
         }}
       />
     </>
