@@ -7,7 +7,7 @@ import VenueSelect from '../../ui/VenueSelect';
 import { VenueValues } from '../../../types/VenueValues';
 
 interface EditMatchData {
-  venue: { _id: string; name: string; alias: string };
+  venue: { venueId: string; name: string; alias: string };
   startDate: string;
 }
 
@@ -22,7 +22,7 @@ interface MatchEditProps {
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
   const [venues, setVenues] = useState<VenueValues[]>([]);
   const [editData, setEditData] = useState<EditMatchData>({
-    venue: { _id: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
+    venue: { venueId: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
   });
 
@@ -50,7 +50,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
       await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
         startDate: new Date(formData.get('startDate') as string),
         venue: {
-          _id: editData.venue._id,
+          venueId: editData.venue.venueId,
           name: editData.venue.name,
           alias: match.venue.alias
         }
@@ -120,7 +120,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
                         if (selectedVenue) {
                           setEditData({
                             ...editData,
-                            venue: { _id: venueId, name: selectedVenue.name, alias: selectedVenue.alias }
+                            venue: { venueId: venueId, name: selectedVenue.name, alias: selectedVenue.alias }
                           });
                         }
                       }}
