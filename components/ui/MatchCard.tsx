@@ -17,58 +17,58 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
-      <Menu.Button className="flex items-center text-gray-500">
-        <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
-      </Menu.Button>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            <Menu.Item>
-              {({ active }) => (
-                <button
-                  onClick={() => setIsEditOpen(true)}
-                  className={classNames(
-                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block w-full text-left px-4 py-2 text-sm'
-                  )}
-                >
-                  Ansetzung
-                </button>
-              )}
-            </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <Link href={`/matches/${match._id}`}>
-                  <a className={classNames(
-                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block px-4 py-2 text-sm'
-                  )}>
-                    Ergebnis
-                  </a>
-                </Link>
-              )}
-            </Menu.Item>
-          </div>
-        </Menu.Items>
-      </Transition>
-    </Menu>
-    <MatchEdit
-      isOpen={isEditOpen}
-      onClose={() => setIsEditOpen(false)}
-      match={match}
-      jwt={user?.jwt || ''}
-      onSuccess={(updatedMatch) => {
-        setMatch(updatedMatch);
-      }}
-    />
+        <Menu.Button className="flex items-center text-gray-500">
+          <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+        </Menu.Button>
+        <Transition
+          as={Fragment}
+          enter="transition ease-out duration-100"
+          enterFrom="transform opacity-0 scale-95"
+          enterTo="transform opacity-100 scale-100"
+          leave="transition ease-in duration-75"
+          leaveFrom="transform opacity-100 scale-100"
+          leaveTo="transform opacity-0 scale-95"
+        >
+          <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <div className="py-1">
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={() => setIsEditOpen(true)}
+                    className={classNames(
+                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      'block w-full text-left px-4 py-2 text-sm'
+                    )}
+                  >
+                    Ansetzung
+                  </button>
+                )}
+              </Menu.Item>
+              <Menu.Item>
+                {({ active }) => (
+                  <Link href={`/matches/${match._id}`}>
+                    <a className={classNames(
+                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      'block px-4 py-2 text-sm'
+                    )}>
+                      Ergebnis
+                    </a>
+                  </Link>
+                )}
+              </Menu.Item>
+            </div>
+          </Menu.Items>
+        </Transition>
+      </Menu>
+      <MatchEdit
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        match={match}
+        jwt={user?.jwt || ''}
+        onSuccess={(updatedMatch) => {
+          setMatch(updatedMatch);
+        }}
+      />
     </>
   );
 };
@@ -129,7 +129,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
           <div className="sm:hidden">
             <div className="flex items-center">
               {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-                <StatusMenu 
+                <StatusMenu
                   match={match}
                   setMatch={setMatch}
                 />
@@ -149,7 +149,9 @@ const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
             <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={new Date(startDate).toISOString()}>
+              <time dateTime={
+                `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+              }>
                 {new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'short',
@@ -162,7 +164,9 @@ const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
               </time>
             </p>
             <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={new Date(startDate).toISOString()}>
+              <time dateTime={
+                `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+              }>
                 {new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'long',
@@ -213,7 +217,7 @@ const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
           {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-            <StatusMenu 
+            <StatusMenu
               match={match}
               setMatch={setMatch}
             />

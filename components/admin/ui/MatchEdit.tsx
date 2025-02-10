@@ -57,8 +57,13 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
     console.log('Submitted values:', { venue, startDate });
 
     try {
-      // Format startDate to YYYY-MM-DD HH:MM:SS
-      const formattedDate = startDate.toISOString().slice(0, 19).replace('T', ' ');
+      const year = startDate.getFullYear();
+      const month = String(startDate.getMonth() + 1).padStart(2, '0');
+      const day = String(startDate.getDate()).padStart(2, '0');
+      const hours = String(startDate.getHours()).padStart(2, '0');
+      const minutes = String(startDate.getMinutes()).padStart(2, '0');
+      const seconds = String(startDate.getSeconds()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
       
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
         startDate: formattedDate,
