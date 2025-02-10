@@ -1,27 +1,27 @@
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { ClubValues } from '../../types/ClubValues';
+import { VenueValues } from '../../types/VenueValues';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
 import { CldImage } from 'next-cloudinary';
 import { classNames } from '../../tools/utils';
 
-interface ClubSelectProps {
-  selectedClubId?: string | null;
-  clubs: ClubValues[];
-  onClubChange: (clubId: string) => void;
+interface VenueSelectProps {
+  selectedVenueId?: string | null;
+  venues: VenueValues[];
+  onVenueChange: (venueId: string) => void;
   label?: string;
 }
 
-const ClubSelect: React.FC<ClubSelectProps> = ({ 
-  selectedClubId,
-  clubs = [], // Provide default empty array
-  onClubChange,
-  label = "Verein"
+const VenueSelect: React.FC<VenueSelectProps> = ({ 
+  selectedVenueId,
+  venues = [], // Provide default empty array
+  onVenueChange,
+  label = "Spielstätte"
 }) => {
-  const selectedClub = clubs.find(club => club._id === selectedClubId);
+  const selectedVenue = venues.find(venue => venue._id === seletedVenueId);
 
   return (
-    <Listbox value={selectedClubId} onChange={onClubChange}>
+    <Listbox value={selectedVenueId} onChange={onVenueChange}>
       <div className="relative mt-2">
         {label && (
           <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">
@@ -31,20 +31,20 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
-              {selectedClub ? (
+              {selectedVenue ? (
                 <>
                   <CldImage 
-                    src={selectedClub.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
-                    alt={selectedClub.name || ''} 
+                    src={selectedVenue.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+                    alt={selectedVenue.name || ''} 
                     width={20} 
                     height={20}
                     crop="fill_pad"
                     className="" 
                   />
-                  <span className="ml-3 block truncate">{selectedClub.name}</span>
+                  <span className="ml-3 block truncate">{selectedVenue.name}</span>
                 </>
               ) : (
-                <span className="ml-3 block truncate text-gray-500">Verein auswählen</span>
+                <span className="ml-3 block truncate text-gray-500">Spielstätte auswählen</span>
               )}
             </span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -59,30 +59,30 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
             leaveTo="opacity-0"
           >
             <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {clubs.map((club) => (
+              {venues.map((venue) => (
                 <Listbox.Option
-                  key={club._id}
+                  key={venue._id}
                   className={({ active }) =>
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
                       'relative cursor-default select-none py-2 pl-3 pr-9'
                     )
                   }
-                  value={club._id}
+                  value={venue._id}
                 >
                   {({ selected, active }) => (
                     <>
                       <div className="flex items-center">
                         <CldImage 
-                          src={club.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
-                          alt={club.name || ''} 
+                          src={venue.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+                          alt={venue.name || ''} 
                           width={20} 
                           height={20} 
                           crop="fill_pad"
                           className="" 
                         />
                         <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
-                          {club.name}
+                          {venue.name}
                         </span>
                       </div>
                       {selected && (
@@ -107,4 +107,4 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
   );
 };
 
-export default ClubSelect;
+export default VenueSelect;

@@ -4,13 +4,19 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { Match } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import useAuth from '../../hooks/useAuth';
 import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+import MatchEdit from '../admin/ui/MatchEdit';
 
-const StatusMenu = ({ matchId }: { matchId: string }) => {
+const StatusMenu = ({ match }: { match: Match }) => {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const { user } = useAuth();
+  
   return (
-    <Menu as="div" className="relative inline-block text-left ml-1">
+    <>
+      <Menu as="div" className="relative inline-block text-left ml-1">
       <Menu.Button className="flex items-center text-gray-500">
         <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
       </Menu.Button>
@@ -27,19 +33,20 @@ const StatusMenu = ({ matchId }: { matchId: string }) => {
           <div className="py-1">
             <Menu.Item>
               {({ active }) => (
-                <Link href={`/admin/refadmin?matchId=${matchId}`}>
-                  <a className={classNames(
+                <button
+                  onClick={() => setIsEditOpen(true)}
+                  className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block px-4 py-2 text-sm'
-                  )}>
-                    Ansetzung
-                  </a>
-                </Link>
+                    'block w-full text-left px-4 py-2 text-sm'
+                  )}
+                >
+                  Ansetzung
+                </button>
               )}
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href={`/matches/${matchId}`}>
+                <Link href={`/matches/${match._id}`}>
                   <a className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
@@ -53,6 +60,14 @@ const StatusMenu = ({ matchId }: { matchId: string }) => {
         </Menu.Items>
       </Transition>
     </Menu>
+    <MatchEdit
+      isOpen={isEditOpen}
+      onClose={() => setIsEditOpen(false)}
+      match={match}
+      jwt={user?.jwt || ''}
+      onSuccess={() => window.location.reload()}
+    />
+    </>
   );
 };
 
@@ -110,7 +125,9 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              <StatusMenu matchId={match._id} />
+              {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
+                <StatusMenu match={match} />
+              )}
               <StatusBadge
                 statusKey={match.matchStatus.key}
                 finishTypeKey={match.finishType.key}
@@ -189,7 +206,9 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
-          <StatusMenu matchId={match._id} />
+          {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
+            <StatusMenu match={match} />
+          )}
           <StatusBadge
             statusKey={match.matchStatus.key}
             finishTypeKey={match.finishType.key}
