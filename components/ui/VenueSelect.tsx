@@ -33,6 +33,7 @@ const VenueSelect: React.FC<VenueSelectProps> = ({
             <span className="flex items-center">
               {selectedVenue ? (
                 <>
+                  {/**
                   <CldImage 
                     src={selectedVenue.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
                     alt={selectedVenue.name || ''} 
@@ -41,6 +42,7 @@ const VenueSelect: React.FC<VenueSelectProps> = ({
                     crop="fill_pad"
                     className="" 
                   />
+                  */}
                   <span className="ml-3 block truncate">{selectedVenue.name}</span>
                 </>
               ) : (
@@ -73,6 +75,7 @@ const VenueSelect: React.FC<VenueSelectProps> = ({
                   {({ selected, active }) => (
                     <>
                       <div className="flex items-center">
+                        {/**
                         <CldImage 
                           src={venue.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
                           alt={venue.name || ''} 
@@ -81,6 +84,7 @@ const VenueSelect: React.FC<VenueSelectProps> = ({
                           crop="fill_pad"
                           className="" 
                         />
+                        */}
                         <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
                           {venue.name}
                         </span>

@@ -21,7 +21,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
     console.log("fetch venues")
     const fetchVenues = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues?active=true`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues/?active=true`);
         const data = await response.json();
         setVenues(data);
       } catch (error) {
