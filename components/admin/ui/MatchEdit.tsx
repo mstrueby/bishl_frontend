@@ -57,7 +57,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
     console.log('Submitted values:', { venue, startDate });
 
     try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+      const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
         //startDate,
         venue
       }, {
@@ -66,8 +66,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
           Authorization: `Bearer ${jwt}`
         }
       });
-      const updatedMatch = response.data;
-      onSuccess(updatedMatch);
+      onSuccess(response.data);
       onClose();
     } catch (error) {
       console.error('Error updating match:', error);
