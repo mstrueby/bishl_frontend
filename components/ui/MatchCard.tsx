@@ -10,10 +10,10 @@ import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 
-const StatusMenu = ({ match }: { match: Match }) => {
+const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { user } = useAuth();
-  
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
@@ -65,7 +65,13 @@ const StatusMenu = ({ match }: { match: Match }) => {
       onClose={() => setIsEditOpen(false)}
       match={match}
       jwt={user?.jwt || ''}
-      onSuccess={() => window.location.reload()}
+      onSuccess={(updatedMatch) => {
+        const newMatch = {
+          ...match,
+          ...updatedMatch
+        };
+        setMatch(newMatch);
+      }}
     />
     </>
   );
@@ -100,7 +106,8 @@ const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusV
   );
 };
 
-const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
+const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
+  const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
 
   return (
@@ -126,7 +133,10 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           <div className="sm:hidden">
             <div className="flex items-center">
               {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-                <StatusMenu match={match} />
+                <StatusMenu 
+                  match={match}
+                  setMatch={setMatch}
+                />
               )}
               <StatusBadge
                 statusKey={match.matchStatus.key}
@@ -207,7 +217,10 @@ const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
       <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
         <div className="sm:flex hidden flex-row justify-end">
           {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
-            <StatusMenu match={match} />
+            <StatusMenu 
+              match={match}
+              setMatch={setMatch}
+            />
           )}
           <StatusBadge
             statusKey={match.matchStatus.key}

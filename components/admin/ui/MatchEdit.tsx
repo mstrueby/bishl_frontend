@@ -16,7 +16,8 @@ interface MatchEditProps {
   onClose: () => void;
   match: Match;
   jwt: string;
-  onSuccess: () => void;
+  onSuccess: (updatedMatch: Partial<Match>) => void;
+  //setMatch: (newMatch: Match) => void;
 }
 
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
@@ -57,7 +58,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
     console.log('Submitted values:', { venue, startDate });
 
     try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+      const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
         //startDate,
         venue
       }, {
