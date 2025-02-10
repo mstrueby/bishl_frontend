@@ -6,6 +6,11 @@ import axios from 'axios';
 import VenueSelect from '../../ui/VenueSelect';
 import { VenueValues } from '../../../types/VenueValues';
 
+interface EditMatchData {
+  venue: { _id: string; name: string; alias: string };
+  startDate: string;
+}
+
 interface MatchEditProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,6 +21,10 @@ interface MatchEditProps {
 
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
   const [venues, setVenues] = useState<VenueValues[]>([]);
+  const [editData, setEditData] = useState<EditMatchData>({
+    venue: { _id: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
+    startDate: new Date(match.startDate).toISOString().slice(0, 16),
+  });
 
   useEffect(() => {
     console.log("fetch venues")
@@ -36,12 +45,13 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    
+
     try {
       await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
         startDate: new Date(formData.get('startDate') as string),
         venue: {
-          name: formData.get('venue') as string,
+          _id: editData.venue._id,
+          name: editData.venue.name,
           alias: match.venue.alias
         }
       }, {
@@ -103,14 +113,14 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
                   </div>
                   <div>
                     <VenueSelect
-                      selectedVenueId={match.venue._id}
+                      selectedVenueId={match.venue.venueId}
                       venues={venues}
                       onVenueChange={(venueId) => {
                         const selectedVenue = venues.find(v => v._id === venueId);
                         if (selectedVenue) {
                           setEditData({
                             ...editData,
-                            venue: { name: selectedVenue.name, alias: selectedVenue.alias }
+                            venue: { _id: venueId, name: selectedVenue.name, alias: selectedVenue.alias }
                           });
                         }
                       }}

@@ -48,6 +48,7 @@ export interface Match {
   matchStatus: { key: string; value: string };
   finishType: { key: string; value: string };
   venue: {
+    venueId: string;
     name: string;
     alias: string;
   };
