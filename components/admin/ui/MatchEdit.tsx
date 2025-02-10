@@ -22,7 +22,7 @@ interface MatchEditProps {
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
   const [venues, setVenues] = useState<VenueValues[]>([]);
   const [editData, setEditData] = useState<EditMatchData>({
-    venue: { _id: match.venue._id, name: match.venue.name, alias: match.venue.alias },
+    venue: { _id: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
   });
 
@@ -113,7 +113,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
                   </div>
                   <div>
                     <VenueSelect
-                      selectedVenueId={match.venue._id}
+                      selectedVenueId={match.venue.venueId}
                       venues={venues}
                       onVenueChange={(venueId) => {
                         const selectedVenue = venues.find(v => v._id === venueId);
