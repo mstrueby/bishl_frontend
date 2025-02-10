@@ -21,13 +21,13 @@ interface MatchEditProps {
 
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
   const [venues, setVenues] = useState<VenueValues[]>([]);
-  const [editData, setEditData] = useState<EditMatchData>({
+  const initialEditData = {
     venue: { venueId: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
-  });
+  };
+  const [editData, setEditData] = useState<EditMatchData>(initialEditData);
 
   useEffect(() => {
-    console.log("fetch venues")
     const fetchVenues = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues/?active=true`);
@@ -46,16 +46,23 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
+    const startDate = new Date(formData.get('startDate') as string);
+    const venue = {
+      venueId: editData.venue.venueId,
+      name: editData.venue.name,
+      alias: match.venue.alias
+    };
+
+    // log values to submit
+    console.log('Submitted values:', { venue, startDate });
+
     try {
       await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
-        startDate: new Date(formData.get('startDate') as string),
-        venue: {
-          venueId: editData.venue.venueId,
-          name: editData.venue.name,
-          alias: match.venue.alias
-        }
+        //startDate,
+        venue
       }, {
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`
         }
       });
@@ -68,7 +75,10 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50" onClose={() => {
+        setEditData(initialEditData);
+        onClose();
+      }}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
