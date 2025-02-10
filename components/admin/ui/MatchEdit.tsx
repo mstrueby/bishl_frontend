@@ -113,14 +113,18 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
                   </div>
                   <div>
                     <VenueSelect
-                      selectedVenueId={match.venue.venueId}
+                      selectedVenueId={editData.venue.venueId}
                       venues={venues}
                       onVenueChange={(venueId) => {
                         const selectedVenue = venues.find(v => v._id === venueId);
                         if (selectedVenue) {
                           setEditData({
                             ...editData,
-                            venue: { venueId: venueId, name: selectedVenue.name, alias: selectedVenue.alias }
+                            venue: { 
+                              venueId: venueId, 
+                              name: selectedVenue.name, 
+                              alias: selectedVenue.alias 
+                            }
                           });
                         }
                       }}
