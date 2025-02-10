@@ -65,7 +65,13 @@ const StatusMenu = ({ match }: { match: Match }) => {
       onClose={() => setIsEditOpen(false)}
       match={match}
       jwt={user?.jwt || ''}
-      onSuccess={() => window.location.reload()}
+      onSuccess={(updatedMatch) => {
+        const newMatch = {
+          ...match,
+          ...updatedMatch
+        };
+        setMatch(newMatch);
+      }}
     />
     </>
   );
@@ -100,7 +106,8 @@ const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusV
   );
 };
 
-const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
+const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
+  const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
 
   return (

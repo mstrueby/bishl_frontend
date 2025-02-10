@@ -66,7 +66,8 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
           Authorization: `Bearer ${jwt}`
         }
       });
-      onSuccess();
+      const updatedMatch = response.data;
+      onSuccess(updatedMatch);
       onClose();
     } catch (error) {
       console.error('Error updating match:', error);
