@@ -1,4 +1,3 @@
-
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import ClubSelect from './ClubSelect';
