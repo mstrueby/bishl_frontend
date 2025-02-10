@@ -5,6 +5,9 @@ import { Match } from '../../../types/MatchValues';
 import axios from 'axios';
 import VenueSelect from '../../ui/VenueSelect';
 
+import VenueSelect from '../../ui/VenueSelect';
+import { VenueValues } from '../../../types/VenueValues';
+
 interface MatchEditProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,6 +17,21 @@ interface MatchEditProps {
 }
 
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
+  const [venues, setVenues] = useState<VenueValues[]>([]);
+
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues`);
+        const data = await response.json();
+        setVenues(data);
+      } catch (error) {
+        console.error('Error fetching venues:', error);
+      }
+    };
+    fetchVenues();
+  }, []);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -83,14 +101,19 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Spielort
-                    </label>
-                    <input
-                      type="text"
-                      name="venue"
-                      defaultValue={match.venue.name}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    <VenueSelect
+                      selectedVenueId={match.venue._id}
+                      venues={venues}
+                      onVenueChange={(venueId) => {
+                        const selectedVenue = venues.find(v => v._id === venueId);
+                        if (selectedVenue) {
+                          setEditData({
+                            ...editData,
+                            venue: { name: selectedVenue.name, alias: selectedVenue.alias }
+                          });
+                        }
+                      }}
+                      label="Spielort"
                     />
                   </div>
                   <div className="mt-6 flex justify-end space-x-3">
