@@ -107,20 +107,24 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
                     <input
                       type="datetime-local"
                       name="startDate"
-                      defaultValue={new Date(match.startDate).toISOString().slice(0, 16)}
+                      defaultValue={match.startDate}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>
                   <div>
                     <VenueSelect
-                      selectedVenueId={match.venue.venueId}
+                      selectedVenueId={editData.venue.venueId}
                       venues={venues}
                       onVenueChange={(venueId) => {
                         const selectedVenue = venues.find(v => v._id === venueId);
                         if (selectedVenue) {
                           setEditData({
                             ...editData,
-                            venue: { venueId: venueId, name: selectedVenue.name, alias: selectedVenue.alias }
+                            venue: { 
+                              venueId: venueId, 
+                              name: selectedVenue.name, 
+                              alias: selectedVenue.alias 
+                            }
                           });
                         }
                       }}

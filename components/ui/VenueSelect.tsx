@@ -31,19 +31,9 @@ const VenueSelect: React.FC<VenueSelectProps> = ({
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
-              {selectedVenue ? (
+              {selectedVenueId && venues.find(v => v._id === selectedVenueId) ? (
                 <>
-                  {/**
-                  <CldImage 
-                    src={selectedVenue.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
-                    alt={selectedVenue.name || ''} 
-                    width={20} 
-                    height={20}
-                    crop="fill_pad"
-                    className="" 
-                  />
-                  */}
-                  <span className="ml-3 block truncate">{selectedVenue.name}</span>
+                  <span className="ml-3 block truncate">{venues.find(v => v._id === selectedVenueId)?.name}</span>
                 </>
               ) : (
                 <span className="ml-3 block truncate text-gray-500">Spielstätte auswählen</span>
@@ -75,16 +65,6 @@ const VenueSelect: React.FC<VenueSelectProps> = ({
                   {({ selected, active }) => (
                     <>
                       <div className="flex items-center">
-                        {/**
-                        <CldImage 
-                          src={venue.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
-                          alt={venue.name || ''} 
-                          width={20} 
-                          height={20} 
-                          crop="fill_pad"
-                          className="" 
-                        />
-                        */}
                         <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
                           {venue.name}
                         </span>
