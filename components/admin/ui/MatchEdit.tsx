@@ -17,7 +17,6 @@ interface MatchEditProps {
   match: Match;
   jwt: string;
   onSuccess: (updatedMatch: Partial<Match>) => void;
-  //setMatch: (newMatch: Match) => void;
 }
 
 const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
@@ -59,7 +58,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
 
     try {
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
-        //startDate,
+        startDate,
         venue
       }, {
         headers: {
@@ -67,7 +66,8 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
           Authorization: `Bearer ${jwt}`
         }
       });
-      onSuccess();
+      const updatedMatch = response.data;
+      onSuccess(updatedMatch);
       onClose();
     } catch (error) {
       console.error('Error updating match:', error);
