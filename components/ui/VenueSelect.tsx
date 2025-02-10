@@ -18,7 +18,7 @@ const VenueSelect: React.FC<VenueSelectProps> = ({
   onVenueChange,
   label = "Spielstätte"
 }) => {
-  const selectedVenue = venues.find(venue => venue._id === seletedVenueId);
+  const selectedVenue = venues.find(venue => venue._id === selectedVenueId);
 
   return (
     <Listbox value={selectedVenueId} onChange={onVenueChange}>
