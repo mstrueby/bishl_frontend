@@ -18,6 +18,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
   const [venues, setVenues] = useState<VenueValues[]>([]);
 
   useEffect(() => {
+    console.log("fetch venues")
     const fetchVenues = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues?active=true`);
