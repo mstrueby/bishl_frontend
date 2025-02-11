@@ -9,9 +9,11 @@ import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
+import MatchStatus from '../admin/ui/MatchStatus';
 
 const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
 
   return (
@@ -46,14 +48,15 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
               </Menu.Item>
               <Menu.Item>
                 {({ active }) => (
-                  <Link href={`/matches/${match._id}`}>
-                    <a className={classNames(
+                  <button
+                    onClick={() => setIsStatusOpen(true)}
+                    className={classNames(
                       active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}>
-                      Ergebnis
-                    </a>
-                  </Link>
+                      'block w-full text-left px-4 py-2 text-sm'
+                    )}
+                  >
+                    Ergebnis
+                  </button>
                 )}
               </Menu.Item>
             </div>
@@ -63,6 +66,15 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
       <MatchEdit
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
+        match={match}
+        jwt={user?.jwt || ''}
+        onSuccess={(updatedMatch) => {
+          setMatch({ ...match, ...updatedMatch });
+        }}
+      />
+      <MatchStatus
+        isOpen={isStatusOpen}
+        onClose={() => setIsStatusOpen(false)}
         match={match}
         jwt={user?.jwt || ''}
         onSuccess={(updatedMatch) => {

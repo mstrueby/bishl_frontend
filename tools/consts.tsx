@@ -30,65 +30,93 @@ export const getValidTransitions = (currentStatus: string) => {
 }
 
 export const allRefereeAssignmentStatuses = [
-    {
-      key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
-        divide: 'divide-gray-500/10',
-        background: 'bg-gray-50',
-        text: 'text-gray-600',
-        ring: 'ring-gray-500/10',
-        hover: 'hover:bg-gray-100',
-        focus: 'focus-visible:outline-gray-500/10',
-        dotMyRef: 'fill-gray-400',
-        dotRefAdmin: 'fill-gray-400',
-      }
-    },
-    {
-      key: 'REQUESTED', title: 'Angefragt', current: false, color: {
-        divide: 'divide-yellow-600/20',
-        background: 'bg-yellow-50',
-        text: 'text-yellow-800',
-        ring: 'ring-yellow-600/20',
-        hover: 'hover:bg-yellow-100',
-        focus: 'focus-visible:outline-yellow-600/20',
-        dotMyRef: 'fill-yellow-500',
-        dotRefAdmin: 'fill-yellow-500',
-      }
-    },
-    {
-      key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
-        divide: 'divide-red-600/10',
-        background: 'bg-red-50',
-        text: 'text-red-700',
-        ring: 'ring-red-600/10',
-        hover: 'hover:bg-red-100',
-        focus: 'focus-visible:outline-red-600/10',
-        dotMyRef: 'fill-red-500',
-        dotRefAdmin: 'fill-red-500',
+  {
+    key: 'AVAILABLE', title: 'Verfügbar', current: true, color: {
+      divide: 'divide-gray-500/10',
+      background: 'bg-gray-50',
+      text: 'text-gray-600',
+      ring: 'ring-gray-500/10',
+      hover: 'hover:bg-gray-100',
+      focus: 'focus-visible:outline-gray-500/10',
+      dotMyRef: 'fill-gray-400',
+      dotRefAdmin: 'fill-gray-400',
+    }
+  },
+  {
+    key: 'REQUESTED', title: 'Angefragt', current: false, color: {
+      divide: 'divide-yellow-600/20',
+      background: 'bg-yellow-50',
+      text: 'text-yellow-800',
+      ring: 'ring-yellow-600/20',
+      hover: 'hover:bg-yellow-100',
+      focus: 'focus-visible:outline-yellow-600/20',
+      dotMyRef: 'fill-yellow-500',
+      dotRefAdmin: 'fill-yellow-500',
+    }
+  },
+  {
+    key: 'UNAVAILABLE', title: 'Nicht verfügbar', current: false, color: {
+      divide: 'divide-red-600/10',
+      background: 'bg-red-50',
+      text: 'text-red-700',
+      ring: 'ring-red-600/10',
+      hover: 'hover:bg-red-100',
+      focus: 'focus-visible:outline-red-600/10',
+      dotMyRef: 'fill-red-500',
+      dotRefAdmin: 'fill-red-500',
 
-      }
-    },
-    {
-      key: 'ASSIGNED', title: 'Eingeteilt', current: false, color: {
-        divide: 'divide-green-600/20',
-        background: 'bg-green-50',
-        text: 'text-green-700',
-        ring: 'ring-green-600/20',
-        hover: 'hover:bg-green-100',
-        focus: 'focus-visible:outline-green-600/20',
-        dotMyRef: 'fill-green-500',
-        dotRefAdmin: 'fill-green-300',
-      }
-    },
-    {
-      key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
-        divide: 'divide-green-100',
-        background: 'bg-green-500',
-        text: 'text-white',
-        ring: 'ring-green-700',
-        hover: 'hover:bg-green-100',
-        focus: 'focus-visible:outline-green-100',
-        dotMyRef: 'fill-green-300',
-        dotRefAdmin: 'fill-green-500',
-      }
-    },
-  ]
+    }
+  },
+  {
+    key: 'ASSIGNED', title: 'Eingeteilt', current: false, color: {
+      divide: 'divide-green-600/20',
+      background: 'bg-green-50',
+      text: 'text-green-700',
+      ring: 'ring-green-600/20',
+      hover: 'hover:bg-green-100',
+      focus: 'focus-visible:outline-green-600/20',
+      dotMyRef: 'fill-green-500',
+      dotRefAdmin: 'fill-green-300',
+    }
+  },
+  {
+    key: 'ACCEPTED', title: 'Bestätigt', current: false, color: {
+      divide: 'divide-green-100',
+      background: 'bg-green-500',
+      text: 'text-white',
+      ring: 'ring-green-700',
+      hover: 'hover:bg-green-100',
+      focus: 'focus-visible:outline-green-100',
+      dotMyRef: 'fill-green-300',
+      dotRefAdmin: 'fill-green-500',
+    }
+  },
+];
+
+export const allMatchStatuses = [
+  {
+    key: "SCHEDULED",
+    value: "Angesetzt",
+    sortOrder: 1
+  },
+  {
+    key: "INPROGRESS",
+    value: "Live",
+    sortOrder: 2
+  },
+  {
+    key: "FINISHED",
+    value: "Beendet",
+    sortOrder: 3
+  },
+  {
+    key: "CANCELLED",
+    value: "Abgesagt",
+    sortOrder: 4
+  },
+  {
+    key: "FORFEITED",
+    value: "Gewertet",
+    sortOrder: 5
+  }
+]
