@@ -69,7 +69,9 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
     try {
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
         matchStatus,
-        finishType
+        finishType,
+        home: editData.home,
+        away: editData.away
       }, {
         headers: {
           'Content-Type': 'application/json',
