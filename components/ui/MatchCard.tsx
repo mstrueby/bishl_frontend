@@ -77,7 +77,7 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
         onClose={() => setIsStatusOpen(false)}
         match={match}
         jwt={user?.jwt || ''}
-        onSuccess={(updatedMatch) => {
+        onSuccess={async (updatedMatch) => {
           setMatch({ ...match, ...updatedMatch });
         }}
       />
@@ -114,7 +114,7 @@ const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusV
   );
 };
 
-const MatchCard: React.FC<{ match: Match }> = ({ match: initialMatch }) => {
+const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, onMatchUpdate }) => {
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
 

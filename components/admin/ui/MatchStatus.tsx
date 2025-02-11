@@ -88,6 +88,7 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
         const updatedMatch = response.data;
         onSuccess(updatedMatch);
         onClose();
+        return updatedMatch;
       } else {
         console.error('Error updating match:', response.data);
       }
