@@ -103,6 +103,26 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                       }}
                     />
                   </div>
+                  {editData.matchStatus.key === 'FINISHED' && (
+                    <div>
+                      <FinishTypeSelect
+                        selectedType={editData.finishType}
+                        types={allFinishTypes.sort((a, b) => a.sortOrder - b.sortOrder)}
+                        onTypeChange={(typeKey) => {
+                          const selectedType = allFinishTypes.find(v => v.key === typeKey);
+                          if (selectedType) {
+                            setEditData({
+                              ...editData,
+                              finishType: {
+                                key: typeKey,
+                                value: selectedType.value
+                              }
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -147,26 +167,7 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                       />
                     </div>
                   </div>
-                  {editData.matchStatus.key === 'FINISHED' && (
-                    <div>
-                      <FinishTypeSelect
-                        selectedType={editData.finishType}
-                        types={allFinishTypes.sort((a, b) => a.sortOrder - b.sortOrder)}
-                        onTypeChange={(typeKey) => {
-                          const selectedType = allFinishTypes.find(v => v.key === typeKey);
-                          if (selectedType) {
-                            setEditData({
-                              ...editData,
-                              finishType: {
-                                key: typeKey,
-                                value: selectedType.value
-                              }
-                            });
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
+
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
