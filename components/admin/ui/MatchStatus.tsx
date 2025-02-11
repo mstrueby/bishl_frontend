@@ -56,7 +56,7 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="fixed inset-0 z-[9000]" onClose={() => {
+      <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
         setEditData(initialEditData);
         onClose();
       }}>
@@ -79,22 +79,24 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                   Ergebnis bearbeiten
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                  <MatchStatusSelect
-                    selectedStatus={editData.matchStatus}
-                    statuses={allMatchStatuses.sort((a, b) => a.sortOrder - b.sortOrder)}
-                    onStatusChange={(statusKey) => {
-                      const selectedStatus = allMatchStatuses.find(v => v.key === statusKey);
-                      if (selectedStatus) {
-                        setEditData({
-                          ...editData,
-                          matchStatus: {
-                            key: statusKey,
-                            value: selectedStatus.value
-                          }
-                        });
-                      }
-                    }}
-                  />
+                  <div>
+                    <MatchStatusSelect
+                      selectedStatus={editData.matchStatus}
+                      statuses={allMatchStatuses.sort((a, b) => a.sortOrder - b.sortOrder)}
+                      onStatusChange={(statusKey) => {
+                        const selectedStatus = allMatchStatuses.find(v => v.key === statusKey);
+                        if (selectedStatus) {
+                          setEditData({
+                            ...editData,
+                            matchStatus: {
+                              key: statusKey,
+                              value: selectedStatus.value
+                            }
+                          });
+                        }
+                      }}
+                    />
+                  </div>
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
