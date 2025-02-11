@@ -79,24 +79,22 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                   Ergebnis bearbeiten
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                  <div>
-                    <MatchStatusSelect
-                      selectedStatus={editData.matchStatus}
-                      statuses={allMatchStatuses.sort((a, b) => a.sortOrder - b.sortOrder)}
-                      onStatusChange={(statusKey) => {
-                        const selectedStatus = allMatchStatuses.find(v => v.key === statusKey);
-                        if (selectedStatus) {
-                          setEditData({
-                            ...editData,
-                            matchStatus: {
-                              key: statusKey,
-                              value: selectedStatus.value
-                            }
-                          });
-                        }
-                      }}
-                    />
-                  </div>
+                  <MatchStatusSelect
+                    selectedStatus={editData.matchStatus}
+                    statuses={allMatchStatuses.sort((a, b) => a.sortOrder - b.sortOrder)}
+                    onStatusChange={(statusKey) => {
+                      const selectedStatus = allMatchStatuses.find(v => v.key === statusKey);
+                      if (selectedStatus) {
+                        setEditData({
+                          ...editData,
+                          matchStatus: {
+                            key: statusKey,
+                            value: selectedStatus.value
+                          }
+                        });
+                      }
+                    }}
+                  />
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"

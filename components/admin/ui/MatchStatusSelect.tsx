@@ -53,7 +53,7 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-[100] mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" style={{ maxHeight: 'min(300px, calc(100vh - 200px))', position: 'fixed', minWidth: '200px' }}>
+            <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {statuses.map((status) => (
                 <Listbox.Option
                   key={status.key}
@@ -62,7 +62,7 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
                       selected ? 'bg-indigo-50' : '',
-                      'relative cursor-default select-none py-2 pl-8 pr-4'
+                      'relative cursor-default select-none py-2 px-3'
                     )
                   }
                 >
