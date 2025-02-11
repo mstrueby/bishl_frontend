@@ -56,7 +56,7 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
+      <Dialog as="div" className="fixed inset-0 z-[9000]" onClose={() => {
         setEditData(initialEditData);
         onClose();
       }}>
