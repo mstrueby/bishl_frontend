@@ -19,7 +19,7 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
 }) => {
   return (
     <Listbox
-      value={selectedStatus}
+      value={statuses.find(status => status.key === selectedStatus?.key)}
       onChange={(selected) => {
         if (selected) {
           onStatusChange(selected.key);
@@ -61,7 +61,7 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
                   className={({ active, selected }) =>
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                      selected ? 'bg-indigo-50' : '',
+                      selected ? 'bg-indigo-50 font-semibold' : '',
                       'relative cursor-default select-none py-2 px-3'
                     )
                   }
