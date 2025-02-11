@@ -119,4 +119,22 @@ export const allMatchStatuses = [
     value: "Gewertet",
     sortOrder: 5
   }
+];
+
+export const allFinishTypes = [
+  {
+    "key": "REGULAR",
+    "value": "Regulär",
+    "sortOrder": 1
+  },
+  {
+    "key": "OVERTIME",
+    "value": "Verlängerung",
+    "sortOrder": 2
+  },
+  {
+    "key": "SHOOTOUT",
+    "value": "Penaltyschießen",
+    "sortOrder": 3
+  }
 ]

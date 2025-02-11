@@ -3,12 +3,13 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Match } from '../../../types/MatchValues';
 import axios from 'axios';
-import { VenueValues } from '../../../types/VenueValues';
 import MatchStatusSelect from './MatchStatusSelect';
-import { allMatchStatuses } from '../../../tools/consts';
+import FinishTypeSelect from './FinishTypeSelect';
+import { allMatchStatuses, allFinishTypes } from '../../../tools/consts';
 
 interface EditData {
   matchStatus: { key: string; value: string };
+  finishType: { key: string; value: string };
 }
 
 interface MatchEditProps {
@@ -22,24 +23,29 @@ interface MatchEditProps {
 const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
   const initialEditData = {
     matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
+    finishType: { key: match.finishType.key, value: match.finishType.value },
   };
   const [editData, setEditData] = useState<EditData>(initialEditData);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
 
     const matchStatus = {
       key: editData.matchStatus.key,
       value: editData.matchStatus.value
     };
+    const finishType = {
+      key: editData.finishType.key,
+      value: editData.finishType.value
+    }
 
     // log values to submit
-    console.log('Submitted values:', { matchStatus });
+    console.log('Submitted values:', { matchStatus, finishType });
 
     try {
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
-        matchStatus
+        matchStatus,
+        finishType
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -91,6 +97,24 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                             matchStatus: {
                               key: statusKey,
                               value: selectedStatus.value
+                            }
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <FinishTypeSelect
+                      selectedType={editData.finishType}
+                      types={allFinishTypes.sort((a, b) => a.sortOrder - b.sortOrder)}
+                      onTypeChange={(typeKey) => {
+                        const selectedType = allFinishTypes.find(v => v.key === typeKey);
+                        if (selectedType) {
+                          setEditData({
+                            ...editData,
+                            finishType: {
+                              key: typeKey,
+                              value: selectedType.value
                             }
                           });
                         }
