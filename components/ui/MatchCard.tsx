@@ -79,6 +79,9 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
         jwt={user?.jwt || ''}
         onSuccess={async (updatedMatch) => {
           setMatch({ ...match, ...updatedMatch });
+          if (onMatchUpdate) {
+            await onMatchUpdate();
+          }
         }}
       />
     </>
