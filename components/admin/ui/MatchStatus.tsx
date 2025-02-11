@@ -3,12 +3,13 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Match } from '../../../types/MatchValues';
 import axios from 'axios';
-import { VenueValues } from '../../../types/VenueValues';
 import MatchStatusSelect from './MatchStatusSelect';
-import { allMatchStatuses } from '../../../tools/consts';
+import FinishTypeSelect from './FinishTypeSelect';
+import { allMatchStatuses, allFinishTypes } from '../../../tools/consts';
 
 interface EditData {
   matchStatus: { key: string; value: string };
+  finishType: { key: string; value: string };
 }
 
 interface MatchEditProps {
@@ -22,24 +23,29 @@ interface MatchEditProps {
 const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
   const initialEditData = {
     matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
+    finishType: { key: match.finishType.key, value: match.finishType.value },
   };
   const [editData, setEditData] = useState<EditData>(initialEditData);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
 
     const matchStatus = {
       key: editData.matchStatus.key,
       value: editData.matchStatus.value
     };
+    const finishType = {
+      key: editData.finishType.key,
+      value: editData.finishType.value
+    }
 
     // log values to submit
-    console.log('Submitted values:', { matchStatus });
+    console.log('Submitted values:', { matchStatus, finishType });
 
     try {
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
-        matchStatus
+        matchStatus,
+        finishType
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -97,6 +103,71 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                       }}
                     />
                   </div>
+                  {editData.matchStatus.key === 'FINISHED' && (
+                    <div>
+                      <FinishTypeSelect
+                        selectedType={editData.finishType}
+                        types={allFinishTypes.sort((a, b) => a.sortOrder - b.sortOrder)}
+                        onTypeChange={(typeKey) => {
+                          const selectedType = allFinishTypes.find(v => v.key === typeKey);
+                          if (selectedType) {
+                            setEditData({
+                              ...editData,
+                              finishType: {
+                                key: typeKey,
+                                value: selectedType.value
+                              }
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {match.home.tinyName} Tore
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={match.home.stats.goalsFor}
+                        onChange={(e) => {
+                          const goalsFor = parseInt(e.target.value) || 0;
+                          setEditData({
+                            ...editData,
+                            home: {
+                              ...match.home,
+                              stats: { ...match.home.stats, goalsFor }
+                            }
+                          });
+                        }}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {match.away.tinyName} Tore
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={match.away.stats.goalsFor}
+                        onChange={(e) => {
+                          const goalsFor = parseInt(e.target.value) || 0;
+                          setEditData({
+                            ...editData,
+                            away: {
+                              ...match.away,
+                              stats: { ...match.away.stats, goalsFor }
+                            }
+                          });
+                        }}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
