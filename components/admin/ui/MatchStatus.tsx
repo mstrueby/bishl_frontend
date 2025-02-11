@@ -76,11 +76,21 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
           Authorization: `Bearer ${jwt}`
         }
       });
-      const updatedMatch = response.data;
-      onSuccess(updatedMatch);
-      onClose();
+      if (response.status === 200) {
+        const updatedMatch = response.data;
+        onSuccess(updatedMatch);
+        onClose();
+      } else {
+        console.error('Error updating match:', response.data);
+      }
     } catch (error) {
-      console.error('Error updating match:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 304) {
+          onClose();
+        } else {
+          console.error('Error updating match:', error);
+        }
+      }
     }
   };
 
@@ -154,15 +164,18 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                       </label>
                       <input
                         type="number"
-                        min="0"
                         value={editData.home.stats.goalsFor}
                         onChange={(e) => {
-                          const goalsFor = parseInt(e.target.value) || 0;
+                          const goalsFor = parseInt(e.target.value);
                           setEditData({
                             ...editData,
                             home: {
                               ...editData.home,
                               stats: { ...editData.home.stats, goalsFor }
+                            },
+                            away: {
+                              ...editData.away,
+                              stats: { ...editData.away.stats, goalsAgainst: goalsFor }
                             }
                           });
                         }}
@@ -175,57 +188,18 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                       </label>
                       <input
                         type="number"
-                        min="0"
                         value={editData.away.stats.goalsFor}
                         onChange={(e) => {
-                          const goalsFor = parseInt(e.target.value) || 0;
+                          const goalsFor = parseInt(e.target.value);
                           setEditData({
                             ...editData,
                             away: {
                               ...editData.away,
                               stats: { ...editData.away.stats, goalsFor }
-                            }
-                          });
-                        }}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {match.home.tinyName} Gegentore
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={editData.home.stats.goalsAgainst}
-                        onChange={(e) => {
-                          const goalsAgainst = parseInt(e.target.value) || 0;
-                          setEditData({
-                            ...editData,
+                            },
                             home: {
                               ...editData.home,
-                              stats: { ...editData.home.stats, goalsAgainst }
-                            }
-                          });
-                        }}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {match.away.tinyName} Gegentore
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={editData.away.stats.goalsAgainst}
-                        onChange={(e) => {
-                          const goalsAgainst = parseInt(e.target.value) || 0;
-                          setEditData({
-                            ...editData,
-                            away: {
-                              ...editData.away,
-                              stats: { ...editData.away.stats, goalsAgainst }
+                              stats: { ...editData.home.stats, goalsAgainst: goalsFor }
                             }
                           });
                         }}
