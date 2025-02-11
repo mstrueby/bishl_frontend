@@ -1,4 +1,3 @@
-
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
@@ -59,10 +58,11 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
                 <Listbox.Option
                   key={status.key}
                   value={status}
-                  className={({ active }) =>
+                  className={({ active, selected }) =>
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                      'relative cursor-default select-none py-2 pl-3 pr-9'
+                      selected ? 'bg-indigo-50' : '',
+                      'relative cursor-default select-none py-2 pl-8 pr-4'
                     )
                   }
                 >
