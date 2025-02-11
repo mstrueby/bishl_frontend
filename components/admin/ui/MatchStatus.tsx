@@ -3,12 +3,12 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Match } from '../../../types/MatchValues';
 import axios from 'axios';
-import VenueSelect from '../../ui/VenueSelect';
 import { VenueValues } from '../../../types/VenueValues';
+import MatchStatusSelect from './MatchStatusSelect';
+import { allMatchStatuses } from '../../../tools/consts';
 
-interface EditMatchData {
-  venue: { venueId: string; name: string; alias: string };
-  startDate: string;
+interface EditData {
+  matchStatus: { key: string; value: string };
 }
 
 interface MatchEditProps {
@@ -19,58 +19,27 @@ interface MatchEditProps {
   onSuccess: (updatedMatch: Partial<Match>) => void;
 }
 
-const formatDate = (date: Date | string) => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  const hours = String(dateObj.getHours()).padStart(2, '0');
-  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-  const seconds = String(dateObj.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
-
-const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
-  const [venues, setVenues] = useState<VenueValues[]>([]);
+const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
   const initialEditData = {
-    venue: { venueId: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
-    startDate: new Date(match.startDate).toISOString().slice(0, 16),
+    matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
   };
-  const [editData, setEditData] = useState<EditMatchData>(initialEditData);
-
-  useEffect(() => {
-    const fetchVenues = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues/?active=true`);
-        const data = await response.json();
-        setVenues(data);
-      } catch (error) {
-        console.error('Error fetching venues:', error);
-      }
-    };
-    if (isOpen) {
-      fetchVenues();
-    }
-  }, [isOpen]);
+  const [editData, setEditData] = useState<EditData>(initialEditData);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    const startDate = new Date(formData.get('startDate') as string);
-    const venue = {
-      venueId: editData.venue.venueId,
-      name: editData.venue.name,
-      alias: match.venue.alias
+    const matchStatus = {
+      key: editData.matchStatus.key,
+      value: editData.matchStatus.value
     };
 
     // log values to submit
-    console.log('Submitted values:', { venue, startDate });
+    console.log('Submitted values:', { matchStatus });
 
     try {
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
-        startDate: formatDate(startDate),
-        venue
+        matchStatus
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -107,38 +76,25 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
                 <Dialog.Title
                   as="h3"
                   className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
-                  Spielansetzung bearbeiten
+                  Ergebnis bearbeiten
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
-                      Datum und Zeit
-                    </label>
-                    <input
-                      type="datetime-local"
-                      name="startDate"
-                      defaultValue={formatDate(match.startDate)}
-                      className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none"
-                    />
-                  </div>
-                  <div>
-                    <VenueSelect
-                      selectedVenueId={editData.venue.venueId}
-                      venues={venues}
-                      onVenueChange={(venueId) => {
-                        const selectedVenue = venues.find(v => v._id === venueId);
-                        if (selectedVenue) {
+                    <MatchStatusSelect
+                      selectedStatus={editData.matchStatus}
+                      statuses={allMatchStatuses.sort((a, b) => a.sortOrder - b.sortOrder)}
+                      onStatusChange={(statusKey) => {
+                        const selectedStatus = allMatchStatuses.find(v => v.key === statusKey);
+                        if (selectedStatus) {
                           setEditData({
                             ...editData,
-                            venue: {
-                              venueId: venueId,
-                              name: selectedVenue.name,
-                              alias: selectedVenue.alias
+                            matchStatus: {
+                              key: statusKey,
+                              value: selectedStatus.value
                             }
                           });
                         }
                       }}
-                      label="Spielort"
                     />
                   </div>
                   <div className="mt-6 flex justify-end space-x-3">
@@ -166,4 +122,4 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
   );
 };
 
-export default MatchEdit;
+export default MatchStatus;
