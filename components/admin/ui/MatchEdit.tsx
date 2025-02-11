@@ -17,6 +17,7 @@ interface MatchEditProps {
   match: Match;
   jwt: string;
   onSuccess: (updatedMatch: Partial<Match>) => void;
+  onMatchUpdate?: (updatedMatch: Partial<Match>) => Promise<void>;
 }
 
 const formatDate = (date: Date | string) => {
@@ -30,7 +31,7 @@ const formatDate = (date: Date | string) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
+const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: MatchEditProps) => {
   const [venues, setVenues] = useState<VenueValues[]>([]);
   const initialEditData = {
     venue: { venueId: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
@@ -77,11 +78,23 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) =
           Authorization: `Bearer ${jwt}`
         }
       });
-      const updatedMatch = response.data;
-      onSuccess(updatedMatch);
-      onClose();
+      if (response.status === 200) {
+        const updatedMatch = response.data;
+        onSuccess(updatedMatch);
+        onClose();
+        if (onMatchUpdate) {
+          await onMatchUpdate(updatedMatch);
+        }
+        return updatedMatch;
+      } else {
+        console.error('Error updating match:', response.data);
+      }
     } catch (error) {
-      console.error('Error updating match:', error);
+      if (axios.isAxiosError(error)) {
+        onClose();
+      } else {
+        console.error('Error updating match:', error);
+      }
     }
   };
 

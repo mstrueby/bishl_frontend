@@ -68,9 +68,13 @@ const StatusMenu = ({ match, setMatch, onMatchUpdate }: { match: Match, setMatch
         onClose={() => setIsEditOpen(false)}
         match={match}
         jwt={user?.jwt || ''}
-        onSuccess={(updatedMatch) => {
+        onSuccess={async (updatedMatch) => {
           setMatch({ ...match, ...updatedMatch });
+          if (onMatchUpdate) {
+            await onMatchUpdate();
+          }
         }}
+        onMatchUpdate={onMatchUpdate}
       />
       <MatchStatus
         isOpen={isStatusOpen}
@@ -125,7 +129,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
-      <div className="flex flex-col sm:w-1/3">
+      <div className="flex flex-col sm:flex-none sm:w-1/3">
         {/* 1-1 tournament, status (mobile) */}
         <div className="flex flex-row justify-between">
           {/* tournament */}
@@ -203,34 +207,40 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
         </div>
       </div>
       {/* 2  scores */}
-      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/2">
+      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 sm:w-5/12 md:w-full">
         {/* home */}
         <div className="flex flex-row items-center w-full">
-          <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
-          <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
+          <div className="flex-none h-10 w-10">
+            <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
+          </div>
+          <div className="flex-auto ml-6 truncate text-ellipsis">
+            <p className={`block md:hidden sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.shortName}</p>
+            <p className={`hidden md:block sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
           </div>
           {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
-            <div className="flex-auto">
+            <div className="flex-none w-10">
               <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
             </div>
           )}
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
-          <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
-          <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
+          <div className="flex-none h-10 w-10">
+            <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
+          </div>
+          <div className="flex-auto ml-6 w-full truncate">
+            <p className={`block md:hidden sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.shortName}</p>
+            <p className={`hidden md:block sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
           </div>
           {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
-            <div className="flex-auto">
+            <div className="flex-none w-10">
               <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
             </div>
           )}
         </div>
       </div>
       {/* 3 button Spielberich, status (tablet) */}
-      <div className="flex flex-col justify-between mt-3 sm:mt-0 sm:w-1/4 md:w-1/6">
+      <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
           {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
             <StatusMenu
