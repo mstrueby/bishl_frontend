@@ -11,7 +11,7 @@ import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
 
-const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>> }) => {
+const StatusMenu = ({ match, setMatch, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, onMatchUpdate?: () => Promise<void> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
@@ -236,6 +236,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
             <StatusMenu
               match={match}
               setMatch={setMatch}
+              onMatchUpdate={onMatchUpdate}
             />
           )}
           <StatusBadge
