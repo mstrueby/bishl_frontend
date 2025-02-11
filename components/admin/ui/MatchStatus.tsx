@@ -6,6 +6,7 @@ import axios from 'axios';
 import MatchStatusSelect from './MatchStatusSelect';
 import FinishTypeSelect from './FinishTypeSelect';
 import { allMatchStatuses, allFinishTypes } from '../../../tools/consts';
+import Image from 'next/image';
 
 interface EditData {
   matchStatus: { key: string; value: string };
@@ -64,11 +65,11 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
     }
 
     // log values to submit
-    console.log('Submitted values:', { 
-      matchStatus, 
-      finishType, 
-      homeGoals: editData.home.stats.goalsFor, 
-      awayGoals: editData.away.stats.goalsFor 
+    console.log('Submitted values:', {
+      matchStatus,
+      finishType,
+      homeGoals: editData.home.stats.goalsFor,
+      awayGoals: editData.away.stats.goalsFor
     });
 
     try {
@@ -125,8 +126,8 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                   className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
                   Ergebnis bearbeiten
                 </Dialog.Title>
-                <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                  <div>
+                <form onSubmit={handleSubmit} className="mt-4 ">
+                  <div className="space-y-6">
                     <MatchStatusSelect
                       selectedStatus={editData.matchStatus}
                       statuses={allMatchStatuses.sort((a, b) => a.sortOrder - b.sortOrder)}
@@ -143,92 +144,101 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                         }
                       }}
                     />
-                  </div>
-                  {editData.matchStatus.key === 'FINISHED' && (
-                    <div>
-                      <FinishTypeSelect
-                        selectedType={editData.finishType}
-                        types={allFinishTypes.sort((a, b) => a.sortOrder - b.sortOrder)}
-                        onTypeChange={(typeKey) => {
-                          const selectedType = allFinishTypes.find(v => v.key === typeKey);
-                          if (selectedType) {
-                            setEditData({
-                              ...editData,
-                              finishType: {
-                                key: typeKey,
-                                value: selectedType.value
-                              }
-                            });
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {match.home.tinyName} Tore
-                      </label>
-                      <input
-                        type="number"
-                        value={editData.home.stats.goalsFor}
-                        onChange={(e) => {
-                          const goalsFor = parseInt(e.target.value);
-                          setEditData({
-                            ...editData,
-                            home: {
-                              ...editData.home,
-                              stats: { ...editData.home.stats, goalsFor }
-                            },
-                            away: {
-                              ...editData.away,
-                              stats: { ...editData.away.stats, goalsAgainst: goalsFor }
+                    {editData.matchStatus.key === 'FINISHED' && (
+                      <div>
+                        <FinishTypeSelect
+                          selectedType={editData.finishType}
+                          types={allFinishTypes.sort((a, b) => a.sortOrder - b.sortOrder)}
+                          onTypeChange={(typeKey) => {
+                            const selectedType = allFinishTypes.find(v => v.key === typeKey);
+                            if (selectedType) {
+                              setEditData({
+                                ...editData,
+                                finishType: {
+                                  key: typeKey,
+                                  value: selectedType.value
+                                }
+                              });
                             }
-                          });
-                        }}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {match.away.tinyName} Tore
-                      </label>
-                      <input
-                        type="number"
-                        value={editData.away.stats.goalsFor}
-                        onChange={(e) => {
-                          const goalsFor = parseInt(e.target.value);
-                          setEditData({
-                            ...editData,
-                            away: {
-                              ...editData.away,
-                              stats: { ...editData.away.stats, goalsFor }
-                            },
-                            home: {
-                              ...editData.home,
-                              stats: { ...editData.home.stats, goalsAgainst: goalsFor }
-                            }
-                          });
-                        }}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
+                          }}
+                        />
+                      </div>
+                    )}
+                    {(editData.matchStatus.key === 'INPROGRESS' ||
+                      editData.matchStatus.key === 'FINISHED' ||
+                      editData.matchStatus.key === 'FORFEITED') && (
+                        <div className="flex flex-col gap-2 mt-4">
+                          <label className="flex-initial block text-sm font-medium text-gray-700">
+                            Tore
+                          </label>
+                          <div className="flex flex-row gap-2 justify-between items-center">
+                            <Image className="h-10 w-10 flex-none" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={40} width={40} />
+                            <span className="flex-auto">
+                              {match.home.fullName}
+                            </span>
+                            <input
+                              type="number"
+                              value={editData.home.stats.goalsFor}
+                              onChange={(e) => {
+                                const goalsFor = parseInt(e.target.value);
+                                setEditData({
+                                  ...editData,
+                                  home: {
+                                    ...editData.home,
+                                    stats: { ...editData.home.stats, goalsFor }
+                                  },
+                                  away: {
+                                    ...editData.away,
+                                    stats: { ...editData.away.stats, goalsAgainst: goalsFor }
+                                  }
+                                });
+                              }}
+                              className="block w-12 text-center rounded-md border-0 p-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none"
+                            />
+                          </div>
+                          <div className="flex flex-row gap-2 justify-between items-center">
+                            <Image className="h-10 w-10 flex-none" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={40} width={40} />
+                            <span className="flex-auto">
+                              {match.away.fullName}
+                            </span>
+                            <input
+                              type="number"
+                              value={editData.away.stats.goalsFor}
+                              onChange={(e) => {
+                                const goalsFor = parseInt(e.target.value);
+                                setEditData({
+                                  ...editData,
+                                  away: {
+                                    ...editData.away,
+                                    stats: { ...editData.away.stats, goalsFor }
+                                  },
+                                  home: {
+                                    ...editData.home,
+                                    stats: { ...editData.home.stats, goalsAgainst: goalsFor }
+                                  }
+                                });
+                              }}
+                              className="block w-12 text-center rounded-md border-0 p-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none"
+                            />
+                          </div>
+                        </div>
+                      )}
 
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      Abbrechen
-                    </button>
-                    <button
-                      type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      Speichern
-                    </button>
+                    <div className="mt-6 flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      >
+                        Abbrechen
+                      </button>
+                      <button
+                        type="submit"
+                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      >
+                        Speichern
+                      </button>
+                    </div>
                   </div>
                 </form>
               </Dialog.Panel>
