@@ -10,6 +10,18 @@ import { allMatchStatuses, allFinishTypes } from '../../../tools/consts';
 interface EditData {
   matchStatus: { key: string; value: string };
   finishType: { key: string; value: string };
+  home: {
+    stats: {
+      goalsFor: number;
+      goalsAgainst: number;
+    }
+  };
+  away: {
+    stats: {
+      goalsFor: number;
+      goalsAgainst: number;
+    }
+  };
 }
 
 interface MatchEditProps {
@@ -24,6 +36,18 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
   const initialEditData = {
     matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
     finishType: { key: match.finishType.key, value: match.finishType.value },
+    home: {
+      stats: {
+        goalsFor: match.home.stats.goalsFor,
+        goalsAgainst: match.home.stats.goalsAgainst
+      }
+    },
+    away: {
+      stats: {
+        goalsFor: match.away.stats.goalsFor,
+        goalsAgainst: match.away.stats.goalsAgainst
+      }
+    }
   };
   const [editData, setEditData] = useState<EditData>(initialEditData);
 
@@ -131,14 +155,14 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                       <input
                         type="number"
                         min="0"
-                        value={match.home.stats.goalsFor}
+                        value={editData.home.stats.goalsFor}
                         onChange={(e) => {
                           const goalsFor = parseInt(e.target.value) || 0;
                           setEditData({
                             ...editData,
                             home: {
-                              ...match.home,
-                              stats: { ...match.home.stats, goalsFor }
+                              ...editData.home,
+                              stats: { ...editData.home.stats, goalsFor }
                             }
                           });
                         }}
@@ -152,14 +176,56 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
                       <input
                         type="number"
                         min="0"
-                        value={match.away.stats.goalsFor}
+                        value={editData.away.stats.goalsFor}
                         onChange={(e) => {
                           const goalsFor = parseInt(e.target.value) || 0;
                           setEditData({
                             ...editData,
                             away: {
-                              ...match.away,
-                              stats: { ...match.away.stats, goalsFor }
+                              ...editData.away,
+                              stats: { ...editData.away.stats, goalsFor }
+                            }
+                          });
+                        }}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {match.home.tinyName} Gegentore
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={editData.home.stats.goalsAgainst}
+                        onChange={(e) => {
+                          const goalsAgainst = parseInt(e.target.value) || 0;
+                          setEditData({
+                            ...editData,
+                            home: {
+                              ...editData.home,
+                              stats: { ...editData.home.stats, goalsAgainst }
+                            }
+                          });
+                        }}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {match.away.tinyName} Gegentore
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={editData.away.stats.goalsAgainst}
+                        onChange={(e) => {
+                          const goalsAgainst = parseInt(e.target.value) || 0;
+                          setEditData({
+                            ...editData,
+                            away: {
+                              ...editData.away,
+                              stats: { ...editData.away.stats, goalsAgainst }
                             }
                           });
                         }}
