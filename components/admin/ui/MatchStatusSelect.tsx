@@ -1,3 +1,4 @@
+
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
@@ -17,8 +18,6 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
   onStatusChange,
   label = "Status"
 }) => {
-  //const selectedVenue = venues.find(venue => venue._id === selectedVenueId);
-
   return (
     <Listbox
       value={selectedStatus}
@@ -36,12 +35,10 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
-              {selectedStatus && statuses.find(v => v.key === selectedStatus.key) ? (
-                <>
-                  <span className="ml-3 block truncate">
-                    {statuses.find(v => v.key === selectedStatus?.key)?.value}
-                  </span>
-                </>
+              {selectedStatus ? (
+                <span className="ml-3 block truncate">
+                  {selectedStatus.value}
+                </span>
               ) : (
                 <span className="ml-3 block truncate text-gray-500">Status auswählen</span>
               )}
@@ -61,13 +58,13 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
               {statuses.map((status) => (
                 <Listbox.Option
                   key={status.key}
+                  value={status}
                   className={({ active }) =>
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
                       'relative cursor-default select-none py-2 pl-3 pr-9'
                     )
                   }
-                  value={status.value}
                 >
                   {({ selected, active }) => (
                     <>
