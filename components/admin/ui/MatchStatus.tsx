@@ -31,6 +31,7 @@ interface MatchEditProps {
   match: Match;
   jwt: string;
   onSuccess: (updatedMatch: Partial<Match>) => void;
+  onMatchUpdate?: (updatedMatch: Partial<Match>) => Promise<void>;
 }
 
 const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
