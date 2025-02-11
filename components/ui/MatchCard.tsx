@@ -86,7 +86,7 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
 };
 
 const status = [
-  { key: 'LIVE', value: 'Live', bdg_col_light: 'bg-red-600 text-white ring-red-700' },
+  { key: 'INPROGRESS', value: 'Live', bdg_col_light: 'bg-red-600 text-white ring-red-700' },
   { key: 'FINISHED', value: 'beendet', bdg_col_light: 'bg-gray-600 text-white ring-gray-700' },
   { key: 'CANCELLED', value: 'abgesagt', bdg_col_light: 'bg-amber-100 text-amber-700 ring-amber-700/10' },
   { key: 'FORFEITED', value: 'gewertet', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-400' },
