@@ -83,6 +83,7 @@ const StatusMenu = ({ match, setMatch }: { match: Match, setMatch: React.Dispatc
             await onMatchUpdate();
           }
         }}
+        onMatchUpdate={onMatchUpdate}
       />
     </>
   );
