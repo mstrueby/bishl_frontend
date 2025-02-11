@@ -64,7 +64,12 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
     }
 
     // log values to submit
-    console.log('Submitted values:', { matchStatus, finishType });
+    console.log('Submitted values:', { 
+      matchStatus, 
+      finishType, 
+      homeGoals: editData.home.stats.goalsFor, 
+      awayGoals: editData.away.stats.goalsFor 
+    });
 
     try {
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
