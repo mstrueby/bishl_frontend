@@ -10,11 +10,13 @@ import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
+import { useRouter } from 'next/router';
 
-const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, showLinkEdit: boolean, showLinkStatus: boolean, onMatchUpdate?: () => Promise<void> }) => {
+const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHome, showLinkAway, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, showLinkEdit: boolean, showLinkStatus: boolean, showLinkHome: boolean, showLinkAway: boolean, onMatchUpdate?: () => Promise<void> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <>
@@ -59,6 +61,36 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, onMatchUpda
                       )}
                     >
                       Ergebnis
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
+              {showLinkHome && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Aufstellung {match.home.tinyName}
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
+              {showLinkAway && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Aufstellung {match.away.tinyName}
                     </button>
                   )}
                 </Menu.Item>
@@ -130,27 +162,33 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
-  const currentSeason = process.env['CURRENT_SEASON'];
-  const mySecret = process.env['CURRENT_SEASON']
-  console.log(mySecret)
 
   let showLinkEdit = false;
   let showLinkStatus = false;
+  let showLinkHome = false;
+  let showLinkAway = false;
 
   if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
     showLinkEdit = true;
     showLinkStatus = true;
+    showLinkHome = true;
+    showLinkAway = true;
   }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
   }
-  console.log("match", match.season.alias, "secret", process.env['CURRENT_SEASON'])
-  if (match.season.alias == currentSeason) {
+  console.log("match", match.season.alias, "secret", process.env['NEXT_PUBLIC_CURRENT_SEASON'])
+  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
     showLinkEdit = false;
     showLinkStatus = false;
   }
-  
-  
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
+    showLinkHome = true;
+  }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
+    showLinkAway = true;
+  }
+
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
@@ -173,12 +211,14 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              {(showLinkEdit || showLinkStatus) && (
+              {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
                 <StatusMenu
                   match={match}
                   setMatch={setMatch}
                   showLinkEdit={showLinkEdit}
                   showLinkStatus={showLinkStatus}
+                  showLinkHome={showLinkHome}
+                  showLinkAway={showLinkAway}
                   onMatchUpdate={onMatchUpdate}
                 />
               )}
@@ -276,6 +316,8 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
               setMatch={setMatch}
               showLinkEdit={showLinkEdit}
               showLinkStatus={showLinkStatus}
+              showLinkHome={showLinkHome}
+              showLinkAway={showLinkAway}
               onMatchUpdate={onMatchUpdate}
             />
           )}
