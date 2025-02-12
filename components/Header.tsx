@@ -23,9 +23,9 @@ const item = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gr
 const itemActive = "inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
 
 const MyLink = forwardRef<HTMLAnchorElement, { href: string; children: ReactNode; className?: string }>(
-  ({ href, children, ...rest }, ref) => (
-    <Link href={href}>
-      <a ref={ref as any} {...rest}>
+  ({ href, children, className, ...rest }, ref) => (
+    <Link href={href} passHref>
+      <a ref={ref} className={className} {...rest}>
         {children}
       </a>
     </Link>
