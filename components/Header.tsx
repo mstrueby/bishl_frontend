@@ -24,7 +24,7 @@ const itemActive = "inline-flex items-center border-b-2 border-indigo-500 px-1 p
 
 const MyLink = forwardRef<HTMLAnchorElement, { href: string; children: ReactNode; className?: string }>(
   ({ href, children, className, ...rest }, ref) => (
-    <Link href={href} passHref>
+    <Link href={href} passHref legacyBehavior>
       <a ref={ref} className={className} {...rest}>
         {children}
       </a>
