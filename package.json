@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.0",
+    "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.1.5",
     "@types/react-datepicker": "^7.0.0",
     "axios": "^1.6.1",
