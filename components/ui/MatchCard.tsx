@@ -126,10 +126,28 @@ const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusV
   );
 };
 
-const MatchCard: React.FC<{ match: Match, showLinkEdit: boolean, showLinkStatus: boolean, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, showLinkEdit, showLinkStatus, onMatchUpdate }) => {
+const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, onMatchUpdate }) => {
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
+  const { user } = useAuth();
+  const currentSeason = process.env['CURRENT_SEASON']
 
+  let showLinkEdit = false;
+  let showLinkStatus = false;
+
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
+    showLinkEdit = true;
+    showLinkStatus = true;
+  }
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
+    showLinkStatus = true;
+  }
+  if (match.season.alias != currentSeason) {
+    showLinkEdit = false;
+    showLinkStatus = false;
+  }
+  
+  
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}

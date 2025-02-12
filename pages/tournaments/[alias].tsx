@@ -550,8 +550,6 @@ export default function Tournament({
                     <MatchCard
                       key={index}
                       match={match}
-                      showLinkEdit={false}
-                      showLinkStatus={true}
                       onMatchUpdate={async () => {
                         // Refetch rounds to update standings
                         const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
