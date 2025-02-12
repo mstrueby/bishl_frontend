@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.17",
+    "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.5",
     "@types/react-datepicker": "^7.0.0",
     "axios": "^1.6.1",
@@ -20,7 +20,7 @@
     "cookies-next": "^4.0.0",
     "date-fns": "^2.30.0",
     "formik": "^2.4.2",
-    "next": "12.3.4",
+    "next": "12.2.0",
     "next-cloudinary": "^6.16.0",
     "prismjs": "^1.29.0",
     "react": "18.2.0",
