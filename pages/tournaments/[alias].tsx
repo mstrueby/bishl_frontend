@@ -90,10 +90,13 @@ interface Tournament {
 }
 
 export default function Tournament({
-  tournament
+  tournament,
+  user: initialUser
 }: {
-  tournament: Tournament
+  tournament: Tournament,
+  user: any
 }) {
+  const { user } = useAuth();
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
@@ -623,11 +626,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       return { notFound: true };
     }
 
+    // We'll set a default null user that will be updated client-side
     return {
       props: {
-        tournament: tournamentData
+        tournament: tournamentData,
+        user: null
       },
-      revalidate: 10 // or your preferred revalidation time
+      revalidate: 10
     };
   } catch (error) {
     console.error(error);
