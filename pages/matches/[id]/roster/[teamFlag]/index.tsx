@@ -35,7 +35,7 @@ const RosterPage = () => {
                         `${process.env.NEXT_PUBLIC_API_URL}/players/clubs/${team.clubAlias}/teams/${team.teamAlias}`
                     );
                     const rosterData = await rosterResponse.json();
-                    setRoster(rosterData);
+                    setRoster(Array.isArray(rosterData) ? rosterData : []);
                     
                 } catch (error) {
                     console.error('Error fetching data:', error);
