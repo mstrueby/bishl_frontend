@@ -130,6 +130,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
+  const currentSeason = process.env['CURRENT_SEASON']
 
   let showLinkEdit = false;
   let showLinkStatus = false;
@@ -140,6 +141,10 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
+  }
+  if (match.season.alias != currentSeason) {
+    showLinkEdit = false;
+    showLinkStatus = false;
   }
   
   
