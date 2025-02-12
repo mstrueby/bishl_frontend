@@ -131,15 +131,14 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
 
-  // TODO: cehck user roles to set showLinkEdit and showLinkStatus
-  const showLinkEdit = false;
-  const showLinkStatus = false;
+  let showLinkEdit = false;
+  let showLinkStatus = false;
 
   if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
     showLinkEdit = true;
     showLinkStatus = true;
   }
-  if (user && (user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
   }
   

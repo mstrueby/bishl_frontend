@@ -4,7 +4,10 @@ interface TeamStats {
 }
 
 interface Team {
+  clubId: string;
+  clubName: string;
   clubAlias: string;
+  teamId: string;
   teamAlias: string;
   name: string;
   fullName: string;
