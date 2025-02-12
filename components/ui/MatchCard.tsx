@@ -11,7 +11,7 @@ import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
 
-const StatusMenu = ({ match, setMatch, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, onMatchUpdate?: () => Promise<void> }) => {
+const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, showLinkEdit: boolean, showLinkStatus: boolean, onMatchUpdate?: () => Promise<void> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
@@ -33,32 +33,36 @@ const StatusMenu = ({ match, setMatch, onMatchUpdate }: { match: Match, setMatch
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    onClick={() => setIsEditOpen(true)}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                      'block w-full text-left px-4 py-2 text-sm'
-                    )}
-                  >
-                    Ansetzung
-                  </button>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    onClick={() => setIsStatusOpen(true)}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                      'block w-full text-left px-4 py-2 text-sm'
-                    )}
-                  >
-                    Ergebnis
-                  </button>
-                )}
-              </Menu.Item>
+              {showLinkEdit && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => setIsEditOpen(true)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Ansetzung
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
+              {showLinkStatus && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => setIsStatusOpen(true)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Ergebnis
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
             </div>
           </Menu.Items>
         </Transition>
@@ -122,7 +126,7 @@ const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusV
   );
 };
 
-const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, onMatchUpdate }) => {
+const MatchCard: React.FC<{ match: Match, showLinkEdit: boolean, showLinkStatus: boolean, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, showLinkEdit, showLinkStatus, onMatchUpdate }) => {
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
 
@@ -148,10 +152,13 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
+              {(showLinkEdit || showLinkStatus) && (
                 <StatusMenu
                   match={match}
                   setMatch={setMatch}
+                  showLinkEdit={showLinkEdit}
+                  showLinkStatus={showLinkStatus}
+                  onMatchUpdate={onMatchUpdate}
                 />
               )}
               <StatusBadge
@@ -242,10 +249,12 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
-          {useAuth().user?.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role)) && (
+          {(showLinkEdit || showLinkStatus) && (
             <StatusMenu
               match={match}
               setMatch={setMatch}
+              showLinkEdit={showLinkEdit}
+              showLinkStatus={showLinkStatus}
               onMatchUpdate={onMatchUpdate}
             />
           )}
