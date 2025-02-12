@@ -164,7 +164,7 @@ export default function Tournament({
               setIsLoadingMatches(false);
               return;
             }
-            
+
             const sortedData = data.sort((a: Matchday, b: Matchday) => {
               if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
                 return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
@@ -174,12 +174,12 @@ export default function Tournament({
               return 0;
             });
             setMatchdays(sortedData);
-            
-            const selectedMd = selectedRound.matchdaysType.key === 'GROUP' 
-              ? sortedData[0] 
+
+            const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
+              ? sortedData[0]
               : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
-                  .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
-            
+                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
+
             setSelectedMatchday(selectedMd || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
@@ -547,7 +547,30 @@ export default function Tournament({
               {activeMatchdayTab == 'matches' && (
                 matches && matches.length > 0 ? (
                   matches.map((match, index) => (
-                    <MatchCard key={index} match={match} />
+                    <MatchCard
+                      key={index}
+                      match={match}
+                      showLinkEdit={false}
+                      showLinkStatus={true}
+                      onMatchUpdate={async () => {
+                        // Refetch rounds to update standings
+                        const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                        const roundsData = await roundsResponse.json();
+                        if (Array.isArray(roundsData)) {
+                          const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+                          setRounds(sortedData);
+                          setSelectedRound(prevRound => {
+                            const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
+                            return updatedRound;
+                          });
+                        }
+
+                        // Refetch matches
+                        const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                        const matchesData = await matchesResponse.json();
+                        setMatches(matchesData);
+                      }}
+                    />
                   ))
                 ) : (
                   <div className="text-center py-12 text-gray-500">

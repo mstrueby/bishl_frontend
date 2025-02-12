@@ -31,9 +31,10 @@ interface MatchEditProps {
   match: Match;
   jwt: string;
   onSuccess: (updatedMatch: Partial<Match>) => void;
+  onMatchUpdate?: (updatedMatch: Partial<Match>) => Promise<void>;
 }
 
-const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps) => {
+const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: MatchEditProps) => {
   const initialEditData = {
     matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
     finishType: { key: match.finishType.key, value: match.finishType.value },
@@ -88,6 +89,11 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess }: MatchEditProps)
         const updatedMatch = response.data;
         onSuccess(updatedMatch);
         onClose();
+        // Call onMatchUpdate callback if provided by parent
+        if (onMatchUpdate) {
+          onMatchUpdate(updatedMatch);
+        }
+        return updatedMatch;
       } else {
         console.error('Error updating match:', response.data);
       }
