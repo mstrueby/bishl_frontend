@@ -28,7 +28,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       .then(response => response.json())
       .then(data => setTournaments(data))
       .catch(error => console.error('Error fetching tournaments:', error));
-  }, [dateRange, selectedTournament, showUnassignedOnly]);
+  }, []);
 
   const handleApplyFilter = () => {
     console.log('Date Range:', { startDate, endDate });
@@ -81,7 +81,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       });
       setTempSelectedTournament(selectedTournament);
     }
-  }, [isOpen]);
+  }, [isOpen, selectedTournament, dateRange, showUnassignedOnly]);
 
   const handleCancel = () => {
     setTempSelectedTournament(initialValues.tournament);

@@ -161,6 +161,7 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
       <DataList
         items={dataLisItems}
         statuses={statuses}
+        showStatusIndicator
       />
 
     </Layout>

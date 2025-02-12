@@ -123,8 +123,8 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
     firstName: profile.firstName,
     lastName: profile.lastName,
     club: {
-      clubId: profile.club.clubId,
-      clubName: profile.club.clubName,
+      clubId: profile.club ? profile.club.clubId : '',
+      clubName: profile.club ? profile.club.clubName : '',
     },
     roles: profile.roles,
     password: '',

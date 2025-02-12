@@ -100,6 +100,12 @@ div.post h3 {
 div.post p {
   @apply mt-6;
 }
+div.post a {
+  @apply text-indigo-600 no-underline;
+}
+div.post a:hover {
+  @apply underline;
+}
 div.post ul, div.post ol {
   @apply mt-6 max-w-xl space-y-2 text-gray-900;
 }

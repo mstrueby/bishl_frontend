@@ -62,12 +62,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
     }
   }
-  return clubs ? {
+  return {
     props: {
-      jwt, clubs
-    },
-  } : {
-    props: { jwt }
+      jwt,
+      clubs: clubs || []
+    }
   };
 };
 
@@ -210,6 +209,7 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
         items={dataLisItems}
         statuses={statuses}
         showThumbnails
+        showStatusIndicator
       />
 
     </Layout>

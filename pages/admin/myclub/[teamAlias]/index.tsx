@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
@@ -10,6 +10,7 @@ import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
 import DataList from '../../../../components/admin/ui/DataList';
+import Pagination from '../../../../components/ui/Pagination';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -18,6 +19,7 @@ interface TeamProps {
   club: ClubValues,
   team: TeamValues,
   players: PlayerValues[],
+  totalPlayers: number,
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -27,6 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let club = null;
   let team = null;
   let players = null;
+  let totalPlayers = 0;
 
   if (!jwt) {
     return {
@@ -79,9 +82,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwt}`
+      },
+      params: {
+        sortby: 'lastName',
       }
     });
-    players = playersResponse.data;
+    players = playersResponse.data.results;
+    totalPlayers = playersResponse.data.total;
     // console.log("players:", players)
 
   } catch (error) {
@@ -91,12 +98,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
 
-  return team ? {
+  return {
     props: {
-      jwt, club, team, players,
-    },
-  } : {
-    props: { jwt }
+      jwt, club, team, players: players || [], totalPlayers: totalPlayers || 0,
+    }
   };
 };
 
@@ -115,26 +120,39 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers }) => {
+const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers, totalPlayers }) => {
   //const [club, setClub] = useState<ClubValues>(initialClub);
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
+  const currentPage = parseInt(router.query.page as string) || 1;
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async (page: number) => {
     try {
       const playersResponse = await axios.get(`${BASE_URL}/players/clubs/${club.alias}/teams/${team.alias}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
+        },
+        params: {
+          page,
+          sortby: 'lastName'
         }
       });
-      setPlayers(playersResponse.data);
+      setPlayers(playersResponse.data.results);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching players:', error);
       }
     }
+  }, [club.alias, team.alias, jwt]);
+
+  const handlePageChange = async (page: number) => {
+    await router.push({
+      pathname: router.pathname,
+      query: { ...router.query, page }
+    });
+    await fetchPlayers(page);
   };
 
   const editPlayer = (teamAlias: string, PlayerId: string) => {
@@ -186,7 +204,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
       });
       if (response.status === 200) {
         console.log(`Player ${playerId} status successfully toggled for team ${teamId}`);
-        await fetchPlayers();
+        await fetchPlayers(currentPage); // Fetch players for current page after update
       } else if (response.status === 304) {
         console.log('No changes were made to the player status.');
       } else {
@@ -209,20 +227,18 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
         query: currentQuery,
       }, undefined, { shallow: true });
     }
-  }, [router]);
+    fetchPlayers(currentPage); // Initial fetch on component mount
+  }, [router, currentPage, fetchPlayers]);
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
 
-
-  const playerValues = Array.isArray(players)
-    ? players.slice().sort((a, b) => a.firstName.localeCompare(b.firstName))
-    : [];
+  const playerValues = Array.isArray(players) ? players : [];
 
   const dataLisItems = playerValues?.map((player: PlayerValues) => {
-    const name = `${player.displayFirstName} ${player.displayLastName}`;
+    const name = `${player.lastName}, ${player.firstName}`;
     const number = player.assignedTeams
       .flatMap(item => item.teams)
       .filter(teamInner => teamInner.teamId === team._id && teamInner.jerseyNo !== undefined)
@@ -314,18 +330,29 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers 
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
+      
+      <div className="text-sm text-gray-600 my-4">
+        {`${(currentPage - 1) * 25 + 1}-${Math.min(currentPage * 25, totalPlayers)} von ${totalPlayers} insgesamt`}
+      </div>
+      
       <DataList
         items={dataLisItems}
         statuses={statuses}
         showThumbnails
         showThumbnailsOnMobiles
+        showStatusIndicator
       />
 
+      <div className="mt-8">
+        <Pagination
+          totalItems={totalPlayers}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          basePath={`/admin/myclub/${team.alias}`}
+        />
+      </div>
     </Layout>
   );
 };
 
 export default MyClub;
-
-
-

@@ -29,7 +29,7 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
             path: '/', 
             httpOnly: true,
             sameSite: 'strict',
-            maxAge: 60 * parseInt(process.env['COOKIE_MAXAGE_MIN'] || '60', 10)
+            maxAge: 60 * parseInt(process.env['NEXT_PUBLIC_COOKIE_MAXAGE_MIN'] || '60', 10)
           }
         )).json({ 
           'email': data['user']['email'],

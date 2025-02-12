@@ -25,11 +25,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { notFound: true };
   }
   
-  let user = {
-    firstName: "",
-    lastName: "",
-    roles: []
-  };
+  let user = null
   
   try {
     const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
@@ -37,7 +33,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         Authorization: `Bearer ${jwt}`,
       },
     });
-    const user = userResponse.data;
+    user = userResponse.data;
     if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
       return {
         redirect: {

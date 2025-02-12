@@ -1,27 +1,30 @@
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { ClubValues } from '../../types/ClubValues';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
 import { CldImage } from 'next-cloudinary';
-import { classNames } from '../../tools/utils';
+import { classNames } from '../../../tools/utils';
 
-interface ClubSelectProps {
-  selectedClubId?: string | null;
-  clubs: ClubValues[];
-  onClubChange: (clubId: string) => void;
+interface MatchStatusSelectProps {
+  selectedStatus?: { key: string, value: string } | null;
+  statuses: { key: string, value: string }[];
+  onStatusChange: (key: string) => void;
   label?: string;
 }
 
-const ClubSelect: React.FC<ClubSelectProps> = ({ 
-  selectedClubId,
-  clubs = [], // Provide default empty array
-  onClubChange,
-  label = "Verein"
+const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
+  selectedStatus,
+  statuses = [],
+  onStatusChange,
+  label = "Status"
 }) => {
-  const selectedClub = clubs.find(club => club._id === selectedClubId);
-
   return (
-    <Listbox value={selectedClubId} onChange={onClubChange}>
+    <Listbox
+      value={statuses.find(status => status.key === selectedStatus?.key)}
+      onChange={(selected) => {
+        if (selected) {
+          onStatusChange(selected.key);
+        }
+      }}>
       <div className="relative mt-2">
         {label && (
           <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">
@@ -31,20 +34,12 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
-              {selectedClub ? (
-                <>
-                  <CldImage 
-                    src={selectedClub.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
-                    alt={selectedClub.name || ''} 
-                    width={20} 
-                    height={20}
-                    crop="fill_pad"
-                    className="" 
-                  />
-                  <span className="ml-3 block truncate">{selectedClub.name}</span>
-                </>
+              {selectedStatus ? (
+                <span className="ml-3 block truncate">
+                  {selectedStatus.value}
+                </span>
               ) : (
-                <span className="ml-3 block truncate text-gray-500">Verein auswählen</span>
+                <span className="ml-3 block truncate text-gray-500">Status auswählen</span>
               )}
             </span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -58,31 +53,24 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {clubs.map((club) => (
+            <Listbox.Options className="relative w-full z-[100] mt-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              {statuses.map((status) => (
                 <Listbox.Option
-                  key={club._id}
-                  className={({ active }) =>
+                  key={status.key}
+                  value={status}
+                  className={({ active, selected }) =>
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                      'relative cursor-default select-none py-2 pl-3 pr-9'
+                      selected ? 'bg-indigo-50 font-semibold' : '',
+                      'relative cursor-default select-none py-2 px-3'
                     )
                   }
-                  value={club._id}
                 >
                   {({ selected, active }) => (
                     <>
                       <div className="flex items-center">
-                        <CldImage 
-                          src={club.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
-                          alt={club.name || ''} 
-                          width={20} 
-                          height={20} 
-                          crop="fill_pad"
-                          className="" 
-                        />
                         <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
-                          {club.name}
+                          {status.value}
                         </span>
                       </div>
                       {selected && (
@@ -107,4 +95,4 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
   );
 };
 
-export default ClubSelect;
+export default MatchStatusSelect;

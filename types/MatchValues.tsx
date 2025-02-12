@@ -4,7 +4,10 @@ interface TeamStats {
 }
 
 interface Team {
+  clubId: string;
+  clubName: string;
   clubAlias: string;
+  teamId: string;
   teamAlias: string;
   name: string;
   fullName: string;
@@ -48,6 +51,7 @@ export interface Match {
   matchStatus: { key: string; value: string };
   finishType: { key: string; value: string };
   venue: {
+    venueId: string;
     name: string;
     alias: string;
   };
