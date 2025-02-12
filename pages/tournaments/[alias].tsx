@@ -90,13 +90,10 @@ interface Tournament {
 }
 
 export default function Tournament({
-  tournament,
-  user: initialUser
+  tournament
 }: {
-  tournament: Tournament,
-  user: any
+  tournament: Tournament
 }) {
-  const { user } = useAuth();
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
@@ -553,8 +550,6 @@ export default function Tournament({
                     <MatchCard
                       key={index}
                       match={match}
-                      showLinkEdit={false}
-                      showLinkStatus={true}
                       onMatchUpdate={async () => {
                         // Refetch rounds to update standings
                         const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
@@ -626,13 +621,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       return { notFound: true };
     }
 
-    // We'll set a default null user that will be updated client-side
     return {
       props: {
-        tournament: tournamentData,
-        user: null
+        tournament: tournamentData
       },
-      revalidate: 10
+      revalidate: 10 // or your preferred revalidation time
     };
   } catch (error) {
     console.error(error);
