@@ -197,7 +197,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      const response = await axios.patch(`${BASE_URL! + '/players/'}${playerId}`, formData, {
+      const response = await axios.patch(`${BASE_URL}/players/${playerId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
         },
