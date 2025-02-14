@@ -78,7 +78,7 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
             message:
               response.status === 304 
                 ? 'Es wurden keine Änderungen vorgenommen'
-                : 'Dein Profile wurde erfolgreich aktualisiert.'
+                : 'Dein Profil wurde erfolgreich aktualisiert.'
           }
         }, `/`);
       } else {

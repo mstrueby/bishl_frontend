@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { PostValues } from '../types/PostValues';
@@ -8,10 +10,8 @@ import Layout from "../components/Layout";
 import { getFuzzyDate } from '../tools/dateUtils';
 import { ArrowLongRightIcon } from '@heroicons/react/20/solid';
 import { CldImage } from 'next-cloudinary';
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
-}
+import SuccessMessage from '../components/ui/SuccessMessage';
+import { classNames } from '../tools/utils';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
@@ -44,8 +44,28 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 
 const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const router = useRouter();
 
+  useEffect(() => {
+    if (router.query.message) {
+      setSuccessMessage(router.query.message as string);
+      // Update the URL to remove the message from the query parameters
+      const currentPath = router.pathname;
+      const currentQuery = { ...router.query };
+      delete currentQuery.message;
+      router.replace({
+        pathname: currentPath,
+        query: currentQuery,
+      }, undefined, { shallow: true });
+    }
+  }, [router]);
 
+  // Handler to close the success message
+  const handleCloseSuccessMessage = () => {
+    setSuccessMessage(null);
+  };
+  
   const postItems = posts
     .slice()
     .sort((a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime())
@@ -71,6 +91,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
         <title>BISHL</title>
       </Head>
       <Layout>
+        {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
         <div className="bg-white py-24 sm:py-32">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             {/*<div className="mx-auto max-w-2xl text-center">
