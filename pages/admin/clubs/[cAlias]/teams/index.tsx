@@ -4,31 +4,27 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { ClubValues, TeamValues } from '../../../types/ClubValues';
-import Layout from '../../../components/Layout';
-import SectionHeader from "../../../components/admin/SectionHeader";
-import SuccessMessage from '../../../components/ui/SuccessMessage';
-import DataList from '../../../components/admin/ui/DataList';
+import { TeamValues } from '../../../../../types/ClubValues';
+import Layout from '../../../../../components/Layout';
+import SectionHeader from "../../../../../components/admin/SectionHeader";
+import SuccessMessage from '../../../../../components/ui/SuccessMessage';
+import DataList from '../../../../../components/admin/ui/DataList';
+import { ta } from "date-fns/locale";
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
-interface ClubsProps {
+interface TeamsProps {
   jwt: string,
-  club: ClubValues
+  cAlias: string,
+  clubName: string,
+  teams:TeamValues[]
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let club = null;
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
+  const { cAlias } = context.params as { cAlias: string };
+  let clubName = null;
+  let teams: TeamValues[] = [];
 
   try {
     // First check if user has required role
@@ -40,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const user = userResponse.data;
     //console.log("user:", user)
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
+    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
       return {
         redirect: {
           destination: '/',
@@ -49,25 +45,34 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    // Get club by user's clubId
-    const res = await axios.get(`${BASE_URL}/clubs/id/${user.club.clubId}`, {
+    // Get club infos
+    const clubResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}`, {
       headers: {
         'Content-Type': 'application/json',
       }
     });
-    club = res.data;
-    //console.log("club:", club)
+    clubName = clubResponse.data.name;
+    
+
+    // Get teams
+    const res = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams`, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    teams = res.data;
+    
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
+      console.error(error?.response?.data.detail || 'Error fetching teams.');
     }
   }
-  return club ? {
+  return teams ? {
     props: {
-      jwt, club
+      jwt, cAlias, clubName, teams
     },
   } : {
-    props: { jwt }
+    props: { jwt, cAlias, clubName, teams: [] }
   };
 };
 
@@ -86,8 +91,8 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
-  const [club, setClub] = useState<ClubValues>(initialClub);
+const Teams: NextPage<TeamsProps> = ({ jwt, cAlias, clubName, teams: initialTeams }) => {
+  const [teams, setTeams] = useState<TeamValues[]>(initialTeams);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
@@ -110,14 +115,15 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     setSuccessMessage(null);
   };
 
-  const sectionTitle = club?.name || 'Mein Verein';
+  const sectionTitle = clubName;
+  const backLink = `/admin/clubs`;
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const teamValues = club?.teams
+  const teamValues = teams
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((team: TeamValues) => ({
@@ -141,7 +147,8 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
       */
       published: team.active,
       menu: [
-        { players: { onClick: () => router.push(`/admin/myclub/${team.alias}`) } },
+        //{ edit: { onClick: () => router.push(`/admin/clubs/${cAlias}/teams/${team.alias}/edit`) }},
+        { players: { onClick: () => router.push(`/admin/clubs/${cAlias}/teams/${team.alias}/players`) } },
       ],
     }
   });
@@ -150,6 +157,7 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     <Layout>
       <SectionHeader
         title={sectionTitle}
+        backLink={backLink}
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
@@ -164,7 +172,4 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
   );
 };
 
-export default MyClub;
-
-
-
+export default Teams;

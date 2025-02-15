@@ -2,7 +2,7 @@ import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon, StarIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 // import { tournamentConfigs } from '../tools/consts'
 
@@ -246,7 +246,7 @@ const Header = () => {
                           {(user.roles?.includes('CLUB_ADMIN') || user.roles?.includes('ADMIN')) && (
                             <MenuItem>
                               <MyLink href="/admin/myclub" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <StarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                 <span>Mein Verein</span>
                               </MyLink>
                             </MenuItem>
@@ -280,7 +280,7 @@ const Header = () => {
                               <MenuItem>
                                 <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
                                   <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                                  <span>SpielerInnen</span>
+                                  <span>Spieler</span>
                                 </MyLink>
                               </MenuItem>
                             </>
