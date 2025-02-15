@@ -7,6 +7,14 @@
         "version": 1,
         "index": 338
       }
+    ],
+    "pages/admin/myclub/[teamAlias]/index.tsx": [
+      {
+        "id": "004d4fe9-acee-4526-9650-115ee15e3a57",
+        "line": 239,
+        "version": 2119,
+        "index": 7329
+      }
     ]
   }
 }
