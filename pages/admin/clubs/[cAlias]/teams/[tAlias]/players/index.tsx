@@ -9,6 +9,7 @@ import Layout from '../../../../../../../components/Layout';
 import SectionHeader from "../../../../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../../../../components/ui/SuccessMessage';
 import DataList from '../../../../../../../components/admin/ui/DataList';
+import { getDataListItems } from '../../../../../../../tools/playerItems';
 import { ta } from "date-fns/locale";
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
@@ -17,8 +18,11 @@ interface PlayersProps {
   jwt: string,
   cAlias: string,
   clubName: string,
-  tAlias: string,
-  teamName: string,  
+  team: {
+    _id: string,
+    name: string,
+    alias: string,
+  }  
   players: PlayerValues[],
   totalPlayers: number,
 }
@@ -28,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { cAlias } = context.params as { cAlias: string };
   const { tAlias } = context.params as { tAlias: string };
   let clubName = null;
-  let teamName = null;
+  let team = {};
   let players: PlayerValues[] = [];
   let totalPlayers = 0;
 
@@ -65,9 +69,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Content-Type': 'application/json',
       }
     });
-    teamName = teamResponse.data.name;
-
-
+    team = {
+        _id: teamResponse.data._id,
+        name: teamResponse.data.name,
+        alias: teamResponse.data.alias,
+    };
+    
     // Get players
     const res = await axios.get(`${BASE_URL}/players/clubs/${cAlias}/teams/${tAlias}`, {
       headers: {
@@ -76,6 +83,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
       params: {
         sortby: 'lastName',
+        all: 'true'
       }
     });
     players = res.data.results;
@@ -88,7 +96,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
   return {
     props: {
-      jwt, cAlias, clubName, tAlias, teamName, players: players || [], totalPlayers: totalPlayers || 0
+      jwt, cAlias, clubName, team, players: players || [], totalPlayers: totalPlayers || 0
     }
   };
 };
@@ -108,7 +116,7 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, tAlias, teamName, players: initialPlayers, totalPlayers }) => {
+const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, team, players: initialPlayers, totalPlayers }) => {
   const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -127,12 +135,19 @@ const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, tAlias, teamNa
     }
   }, [router]);
 
+  const editPlayer = (teamAlias: string, PlayerId: string) => {
+    router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
+  }
+
+  const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, imageUrl: string | null) => {
+    return null;
+  }
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
 
-  const sectionTitle = teamName;
+  const sectionTitle = team.name;
   const description = clubName.toUpperCase();
   const backLink = `/admin/clubs/${cAlias}/teams`;
   const statuses = {
@@ -141,34 +156,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, tAlias, teamNa
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const playerValues = players
-    .slice()
-    .sort((a, b) => a.lastName.localeCompare(b.lastName))
-    .map((player: PlayerValues) => ({
-      ...player
-    }));
-
-  const dataLisItems = playerValues.map((player: PlayerValues) => {
-    return {
-      _id: player._id,
-      title: `${player.lastName}, ${player.firstName}`,
-      alias: player._id,
-      /*
-      image: {
-        src: transformedUrl(team.logoUrl),
-        width: 32,
-        height: 32,
-        gravity: 'center',
-        className: 'object-contain',
-        radius: 0,
-      },
-      */
-      //published: player.active,
-      menu: [
-        { edit: { onClick: () => router.push(`/admin/clubs/${cAlias}/teams/${tAlias}/edit`) }},
-      ],
-    }
-  });
+  const dataLisItems = getDataListItems(players, team, editPlayer, toggleActive, false)
 
   return (
     <Layout>

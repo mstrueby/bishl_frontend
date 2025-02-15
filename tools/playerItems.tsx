@@ -1,4 +1,13 @@
-export function getDataListItems = (players: PlayerValues[], showMenuActions = true) => {
+
+import { PlayerValues } from '../types/PlayerValues';
+
+export const getDataListItems = (
+  players: PlayerValues[],
+  team: { _id: string; alias: string },
+  editPlayer: (teamAlias: string, playerId: string) => void,
+  toggleActive: (playerId: string, teamId: string, assignedTeams: any, imageUrl: string | null) => void,
+  showMenuActions = true
+) => {
   return players.map((player: PlayerValues) => {
     const name = `${player.lastName}, ${player.firstName}`;
     const number = player.assignedTeams

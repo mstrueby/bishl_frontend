@@ -10,6 +10,7 @@ import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
 import DataList from '../../../../components/admin/ui/DataList';
+import { getDataListItems } from '../../../../tools/playerItems';
 import Pagination from '../../../../components/ui/Pagination';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
@@ -235,11 +236,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
     setSuccessMessage(null);
   };
 
-  const playerValues = Array.isArray(players) ? players : [];
-
-  
-
-  const dataListItems = getDataListItems(players);
+  const dataListItems = getDataListItems(players, team, editPlayer, toggleActive, true);
 
   const sectionTitle = team.name ? team.name : 'Meine Mannschaft';
   const description = club.name ? club.name.toUpperCase() : 'Mein Verein';
