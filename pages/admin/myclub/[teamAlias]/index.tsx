@@ -329,7 +329,6 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-
       
       <div className="text-sm text-gray-600 my-4">
         {`${(currentPage - 1) * 25 + 1}-${Math.min(currentPage * 25, totalPlayers)} von ${totalPlayers} insgesamt`}

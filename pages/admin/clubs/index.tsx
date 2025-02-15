@@ -105,10 +105,6 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
     }
   };
 
-  const editClub = (alias: string) => {
-    router.push(`/admin/clubs/${alias}/edit`);
-  }
-
   const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
     try {
       const formData = new FormData();
@@ -190,7 +186,8 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
       },
       published: club.active,
       menu: [
-        { edit: { onClick: () => editClub(club.alias) } },
+        { edit: { onClick: () => router.push(`/admin/clubs/${club.alias}/edit`) } },
+        { teams: { onClick: () => router.push(`/admin/clubs/${club.alias}/teams`) } },
         { active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
       ],
     };

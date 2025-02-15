@@ -4,31 +4,33 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { ClubValues, TeamValues } from '../../../types/ClubValues';
-import Layout from '../../../components/Layout';
-import SectionHeader from "../../../components/admin/SectionHeader";
-import SuccessMessage from '../../../components/ui/SuccessMessage';
-import DataList from '../../../components/admin/ui/DataList';
+import { PlayerValues } from '../../../../../../../types/PlayerValues';
+import Layout from '../../../../../../../components/Layout';
+import SectionHeader from "../../../../../../../components/admin/SectionHeader";
+import SuccessMessage from '../../../../../../../components/ui/SuccessMessage';
+import DataList from '../../../../../../../components/admin/ui/DataList';
+import { ta } from "date-fns/locale";
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
-interface ClubsProps {
+interface PlayersProps {
   jwt: string,
-  club: ClubValues
+  cAlias: string,
+  clubName: string,
+  tAlias: string,
+  teamName: string,  
+  players: PlayerValues[],
+  totalPlayers: number,
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
-  let club = null;
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
+  const { cAlias } = context.params as { cAlias: string };
+  const { tAlias } = context.params as { tAlias: string };
+  let clubName = null;
+  let teamName = null;
+  let players: PlayerValues[] = [];
+  let totalPlayers = 0;
 
   try {
     // First check if user has required role
@@ -40,7 +42,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const user = userResponse.data;
     //console.log("user:", user)
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
+    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
       return {
         redirect: {
           destination: '/',
@@ -49,25 +51,45 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    // Get club by user's clubId
-    const res = await axios.get(`${BASE_URL}/clubs/id/${user.club.clubId}`, {
+    // Get club infos
+    const clubResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}`, {
       headers: {
         'Content-Type': 'application/json',
       }
     });
-    club = res.data;
-    //console.log("club:", club)
+    clubName = clubResponse.data.name;
+
+    // Get team infos
+    const teamResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams/${tAlias}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    teamName = teamResponse.data.name;
+
+
+    // Get players
+    const res = await axios.get(`${BASE_URL}/players/clubs/${cAlias}/teams/${tAlias}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwt}`
+      },
+      params: {
+        sortby: 'lastName',
+      }
+    });
+    players = res.data.results;
+    totalPlayers = res.data.total;
+    
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
+      console.error(error?.response?.data.detail || 'Error fetching players.');
     }
   }
-  return club ? {
+  return {
     props: {
-      jwt, club
-    },
-  } : {
-    props: { jwt }
+      jwt, cAlias, clubName, tAlias, teamName, players: players || [], totalPlayers: totalPlayers || 0
+    }
   };
 };
 
@@ -86,8 +108,8 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
-  const [club, setClub] = useState<ClubValues>(initialClub);
+const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, tAlias, teamName, players: initialPlayers, totalPlayers }) => {
+  const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
@@ -110,25 +132,27 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     setSuccessMessage(null);
   };
 
-  const sectionTitle = club?.name || 'Mein Verein';
+  const sectionTitle = teamName;
+  const description = clubName.toUpperCase();
+  const backLink = `/admin/clubs/${cAlias}/teams`;
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
 
-  const teamValues = club?.teams
+  const playerValues = players
     .slice()
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((team: TeamValues) => ({
-      ...team
+    .sort((a, b) => a.lastName.localeCompare(b.lastName))
+    .map((player: PlayerValues) => ({
+      ...player
     }));
 
-  const dataLisItems = teamValues.map((team: TeamValues) => {
+  const dataLisItems = playerValues.map((player: PlayerValues) => {
     return {
-      _id: team._id,
-      title: team.name,
-      alias: team.alias,
+      _id: player._id,
+      title: `${player.lastName}, ${player.firstName}`,
+      alias: player._id,
       /*
       image: {
         src: transformedUrl(team.logoUrl),
@@ -139,9 +163,9 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
         radius: 0,
       },
       */
-      published: team.active,
+      //published: player.active,
       menu: [
-        { players: { onClick: () => router.push(`/admin/myclub/${team.alias}`) } },
+        { edit: { onClick: () => router.push(`/admin/clubs/${cAlias}/teams/${tAlias}/edit`) }},
       ],
     }
   });
@@ -150,6 +174,8 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     <Layout>
       <SectionHeader
         title={sectionTitle}
+        description={description}
+        backLink={backLink}
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
@@ -164,7 +190,4 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
   );
 };
 
-export default MyClub;
-
-
-
+export default Players;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, DocumentArrowDownIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, DocumentArrowDownIcon, TrashIcon, CheckCircleIcon, XCircleIcon, UserGroupIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import DeleteConfirmationModal from '../../ui/DeleteConfirmationModal';
 import { classNames } from '../../../tools/utils';
@@ -12,6 +12,8 @@ type MenuItemType = {
   publish?: { onClick: () => void };
   active?: { onClick: () => void };
   delete?: { onClick?: () => void };
+  teams?: { onClick: () => void };
+  players?: { onClick: () => void };
 };
 
 interface DataListProps {
@@ -37,6 +39,8 @@ interface DataListProps {
       publish?: { onClick: () => void };
       active?: { onClick: () => void };
       delete?: { onClick: () => void };
+      teams?: { onClick: () => void };
+      players?: { onClick: () => void };
     }>;
   }[];
   statuses: { [key: string]: string };
@@ -166,16 +170,20 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                       caption = item.featured ? "Loslösen" : "Anheften";
                       iconColor = item.featured ? "text-gray-500" : "text-indigo-500";
                       break;
+                    case "teams":
+                      IconComponent = ListBulletIcon;
+                      caption = "Mannschaften";
+                      iconColor = "text-gray-500";
+                      break;
+                    case "players":
+                      IconComponent = UserGroupIcon;
+                      caption = "Spieler";
+                      iconColor = "text-gray-500";
+                      break;
                     case "delete":
                       IconComponent = TrashIcon;
                       caption = "Löschen";
                       iconColor = "text-red-500";
-
-                    case "delete":
-                      IconComponent = TrashIcon;
-                      caption = "Löschen";
-                      iconColor = "text-red-500";
-                      //if (menuItem[key]) { menuItem[key].onClick = () => handleDeleteClick(item._id, item.title); }
                       break;
                     default:
                       break;
