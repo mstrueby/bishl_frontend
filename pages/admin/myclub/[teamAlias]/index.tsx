@@ -86,6 +86,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
       params: {
         sortby: 'lastName',
+        all: 'true'
       }
     });
     players = playersResponse.data.results;
@@ -137,7 +138,8 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
         },
         params: {
           page,
-          sortby: 'lastName'
+          sortby: 'lastName',
+          all: 'true'
         }
       });
       setPlayers(playersResponse.data.results);
@@ -257,9 +259,11 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
+      {/* 
       <div className="text-sm text-gray-600 my-4">
         {`${(currentPage - 1) * 25 + 1}-${Math.min(currentPage * 25, totalPlayers)} von ${totalPlayers} insgesamt`}
       </div>
+      */}
 
       <DataList
         items={dataListItems}
@@ -269,6 +273,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
         showStatusIndicator
       />
 
+      {/**
       <div className="mt-8">
         <Pagination
           totalItems={totalPlayers}
@@ -277,6 +282,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
           basePath={`/admin/myclub/${team.alias}`}
         />
       </div>
+      */}
     </Layout>
   );
 };
