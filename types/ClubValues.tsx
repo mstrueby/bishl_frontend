@@ -11,7 +11,7 @@ export interface TeamValues {
   active: boolean;
   external: boolean;
   ishdId: string;
-  legacyId: number;
+  legacyId?: number;
 }
 
 export interface ClubValues {

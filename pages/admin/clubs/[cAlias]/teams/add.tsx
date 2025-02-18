@@ -3,20 +3,22 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { ClubValues } from '../../../types/ClubValues';
-import ClubForm from '../../../components/admin/ClubForm';
-import Layout from '../../../components/Layout';
-import SectionHeader from "../../../components/admin/SectionHeader";
-import ErrorMessage from '../../../components/ui/ErrorMessage';
+import { TeamValues } from '../../../../../types/ClubValues';
+import TeamForm from '../../../../../components/admin/TeamForm';
+import Layout from '../../../../../components/Layout';
+import SectionHeader from "../../../../../components/admin/SectionHeader";
+import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AddProps {
   jwt: string;
+  cAlias: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context) as string | undefined;
+  const cAlias = context.params?.cAlias as string | undefined;
 
   if (!jwt) {
     return {
@@ -34,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Authorization': `Bearer ${jwt}`
       }
     });
-    
+
     const user = userResponse.data;
     if (!user.roles?.includes('ADMIN')) {
       return {
@@ -45,7 +47,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    return { props: { jwt } };
+    return { props: { jwt, cAlias } };
   } catch (error) {
     return {
       redirect: {
@@ -56,32 +58,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 }
 
-export default function Add({ jwt }: AddProps) {
+export default function Add({ jwt, cAlias }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: ClubValues = {
+  const initialValues: TeamValues = {
     _id: '',
     name: '',
     alias: '',
-    addressName: '',
-    street: '',
-    zipCode: '',
-    city: '',
-    country: 'Deutschland',
-    email: '',
-    yearOfFoundation: '',
-    description: '',
-    website: '',
-    ishdId: '',
+    fullName: '',
+    shortName: '',
+    tinyName: '',
+    ageGroup: '',
+    teamNumber: 1,
     active: false,
-    logoUrl: '',
-    legacyId: '',
-    teams: [],
+    external: false,
+    ishdId: '',
+    legacyId: 0,
   };;
 
-  const onSubmit = async (values: ClubValues) => {
+  const onSubmit = async (values: TeamValues) => {
     setError(null);
     setLoading(true);
     console.log('submitted values', values);
@@ -90,16 +87,16 @@ export default function Add({ jwt }: AddProps) {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await axios.post(BASE_URL, formData, {
+      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       });
       if (response.status === 201) {
         router.push({
-          pathname: '/admin/clubs',
-          query: { message: `Verein <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
-        }, '/admin/clubs');
+          pathname: `/admin/clubs/${cAlias}/teams`,
+          query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
+        }, `/admin/clubs/${cAlias}/teams`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
@@ -113,7 +110,7 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const handleCancel = () => {
-    router.push('/admin/clubs');
+    router.push(`/admin/clubs/${cAlias}/teams`);
   };
 
   useEffect(() => {
@@ -126,17 +123,21 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
-  const sectionTitle = 'Neuer Verein';
+  const sectionTitle = 'Neue Mannschaft';
+  const sectionDescription = 'CLUB NAME';
 
   return (
     <Layout>
-      <SectionHeader title={sectionTitle} />
+      <SectionHeader
+        title={sectionTitle}
+        description={sectionDescription}
+      />
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
-      <ClubForm 
+      <TeamForm
         initialValues={initialValues}
         onSubmit={onSubmit}
-        enableReinitialize= {false}
-        handleCancel= {handleCancel}
+        enableReinitialize={false}
+        handleCancel={handleCancel}
         loading={loading}
       />
     </Layout>

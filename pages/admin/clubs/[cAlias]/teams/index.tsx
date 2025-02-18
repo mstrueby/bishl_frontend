@@ -114,15 +114,7 @@ const Teams: NextPage<TeamsProps> = ({ jwt, cAlias, clubName, teams: initialTeam
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
-
-  const sectionTitle = clubName;
-  const backLink = `/admin/clubs`;
-  const statuses = {
-    Published: 'text-green-500 bg-green-500/20',
-    Unpublished: 'text-gray-500 bg-gray-800/10',
-    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
-  }
-
+  
   const teamValues = teams
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -134,6 +126,7 @@ const Teams: NextPage<TeamsProps> = ({ jwt, cAlias, clubName, teams: initialTeam
     return {
       _id: team._id,
       title: team.name,
+      description: [team.ageGroup],
       alias: team.alias,
       /*
       image: {
@@ -153,11 +146,24 @@ const Teams: NextPage<TeamsProps> = ({ jwt, cAlias, clubName, teams: initialTeam
     }
   });
 
+  const sectionTitle = 'Mannschaften';
+  const sectionDescription = clubName.toUpperCase();
+  const backLink = `/admin/clubs`;
+  const newLink = `/admin/clubs/${cAlias}/teams/add`;
+  const statuses = {
+    Published: 'text-green-500 bg-green-500/20',
+    Unpublished: 'text-gray-500 bg-gray-800/10',
+    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
+  }
+
+
   return (
     <Layout>
       <SectionHeader
         title={sectionTitle}
+        description={sectionDescription}
         backLink={backLink}
+        newLink={newLink}
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
