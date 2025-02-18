@@ -75,10 +75,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
             <p className="text-xs font-medium uppercase">{selected.title}</p>
           </div>
           {validStatuses.length > 0 && (
-          <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
-            <span className="sr-only">Change workflow status</span>
-            <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
-          </ListboxButton>
+            <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
+              <span className="sr-only">Change workflow status</span>
+              <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
+            </ListboxButton>
           )}
         </div>
 
@@ -138,22 +138,30 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
           {/* date */}
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              weekday: 'short',
-              day: 'numeric',
-              month: 'short',
-              year: undefined,
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'short',
-              year: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
+            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
+                {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                  year: undefined,
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : 'offen'}
+              </time>
+            </p>
+            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
+                {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'short',
+                  year: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : 'offen'}
+              </time>
+            </p>
           </div>
           {/* venue */}
           <div className="flex items-center truncate">
