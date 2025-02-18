@@ -18,6 +18,9 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
   const { user } = useAuth();
   const router = useRouter();
 
+  showLinkHome=false;
+  showLinkAway=false;
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
@@ -177,7 +180,6 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
   }
-  console.log("match", match.season.alias, "secret", process.env['NEXT_PUBLIC_CURRENT_SEASON'])
   if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
     showLinkEdit = false;
     showLinkStatus = false;
