@@ -73,6 +73,14 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
     setIsModalOpen(false);
   };
 
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-6 text-sm text-gray-500">
+        keine Daten vorhanden
+      </div>
+    );
+  }
+
   return (
     <ul role="list" className="divide-y divide-gray-100">
       {items.map((item) => (
