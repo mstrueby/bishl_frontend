@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { TeamValues } from '../../../../../types/ClubValues';
+import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import TeamForm from '../../../../../components/admin/TeamForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from "../../../../../components/admin/SectionHeader";
@@ -13,12 +13,13 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AddProps {
   jwt: string;
-  cAlias: string;
+  club: ClubValues
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context) as string | undefined;
   const cAlias = context.params?.cAlias as string | undefined;
+  let club = null;
 
   if (!jwt) {
     return {
@@ -36,7 +37,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Authorization': `Bearer ${jwt}`
       }
     });
-
     const user = userResponse.data;
     if (!user.roles?.includes('ADMIN')) {
       return {
@@ -47,7 +47,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    return { props: { jwt, cAlias } };
+    // Get club name
+    const clubResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${cAlias}`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      }
+    });
+    club = clubResponse.data;
+
+    return { props: { jwt, club } };
   } catch (error) {
     return {
       redirect: {
@@ -58,7 +66,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 }
 
-export default function Add({ jwt, cAlias }: AddProps) {
+export default function Add({ jwt, club }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -87,16 +95,16 @@ export default function Add({ jwt, cAlias }: AddProps) {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
+      const response = await axios.post(`${BASE_URL}/clubs/${club.alias}/teams`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       });
       if (response.status === 201) {
         router.push({
-          pathname: `/admin/clubs/${cAlias}/teams`,
+          pathname: `/admin/clubs/${club.alias}/teams`,
           query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
-        }, `/admin/clubs/${cAlias}/teams`);
+        }, `/admin/clubs/${club.alias}/teams`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
@@ -110,7 +118,7 @@ export default function Add({ jwt, cAlias }: AddProps) {
   };
 
   const handleCancel = () => {
-    router.push(`/admin/clubs/${cAlias}/teams`);
+    router.push(`/admin/clubs/${club.alias}/teams`);
   };
 
   useEffect(() => {
@@ -124,7 +132,7 @@ export default function Add({ jwt, cAlias }: AddProps) {
   };
 
   const sectionTitle = 'Neue Mannschaft';
-  const sectionDescription = 'CLUB NAME';
+  const sectionDescription = club.name.toUpperCase();
 
   return (
     <Layout>

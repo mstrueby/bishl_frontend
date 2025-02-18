@@ -7,16 +7,15 @@ import axios from 'axios';
 import TeamForm from '../../../../../../components/admin/TeamForm';
 import Layout from '../../../../../../components/Layout';
 import SectionHeader from '../../../../../../components/admin/SectionHeader';
-import { TeamValues } from '../../../../../../types/ClubValues';
+import { ClubValues, TeamValues } from '../../../../../../types/ClubValues';
 import ErrorMessage from '../../../../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface EditProps {
   jwt: string,
+  club: ClubValues,
   team: TeamValues,
-  cAlias: string,
-  tAlias: string,
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -33,6 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  let club = null;
   let team = null;
   try {
     // First check if user has required role
@@ -52,6 +52,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
+    // Fetch club data
+    const clubResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      }
+    });
+    club = clubResponse.data;
+
     // Fetch the existing team data
     const response = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams/${tAlias}`, {
       headers: {
@@ -64,10 +72,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error('Error fetching club:', error.message);
     }
   }
-  return team ? { props: { jwt, team, cAlias, tAlias } } : { notFound: true };
+  return team ? { props: { jwt, team, club } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, team, cAlias, tAlias }) => {
+const Edit: NextPage<EditProps> = ({ jwt, team, club }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -96,25 +104,25 @@ const Edit: NextPage<EditProps> = ({ jwt, team, cAlias, tAlias }) => {
         console.log(pair[0] + ', ' + pair[1]);
       }
 
-      const response = await axios.patch(`${BASE_URL}/clubs/${cAlias}/teams/${tAlias}`, formData, {
+      const response = await axios.patch(`${BASE_URL}/clubs/${club.alias}/teams/${team._id}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         }
       });
       if (response.status === 200) {
         router.push({
-          pathname: `/admin/clubs/${cAlias}/teams/`,
+          pathname: `/admin/clubs/${club.alias}/teams/`,
           query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich aktualisiert.` }
-        }, `/admin/clubs/${cAlias}/teams/`);
+        }, `/admin/clubs/${club.alias}/teams/`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         router.push({
-          pathname: `/admin/clubs/${cAlias}/teams/`,
+          pathname: `/admin/clubs/${club.alias}/teams/`,
           query: { message: `Keine Änderungen für Mannschaft <strong>${values.name}</strong> vorgenommen.` }
-        }, `/admin/clubs/${cAlias}/teams/`);
+        }, `/admin/clubs/${club.alias}/teams/`);
       } else {
         setError('Ein Fehler ist aufgetreten.');
       }
@@ -124,7 +132,7 @@ const Edit: NextPage<EditProps> = ({ jwt, team, cAlias, tAlias }) => {
   };
 
   const handleCancel = () => {
-    router.push(`/admin/clubs/${cAlias}/teams/`);
+    router.push(`/admin/clubs/${club.alias}/teams/`);
   };
 
   useEffect(() => {
@@ -153,13 +161,13 @@ const Edit: NextPage<EditProps> = ({ jwt, team, cAlias, tAlias }) => {
   };
 
   const sectionTitle = 'Mannschaft bearbeiten';
-  const sectionDescription = 'CLUB NAME';
+  const sectionDescription = club.name.toUpperCase();
 
   // Render the form with initialValues and the edit-specific handlers
   return (
     <Layout>
       <SectionHeader
-        title={sectionTitle} 
+        title={sectionTitle}
         description={sectionDescription}
       />
 

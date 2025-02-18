@@ -130,12 +130,12 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
         console.log('No changes were made to the club.');
       } else {
         // Handle error response
-        console.error('Failed to publish club.');
+        console.error('Failed to activate club.');
       }
     } catch (error) {
-      console.error('Error publishing club:', error);
+      console.error('Error activating club:', error);
     }
-  }
+  };
 
   useEffect(() => {
     if (router.query.message) {
@@ -163,14 +163,6 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
       ...club
     }));
 
-  const sectionTitle = 'Vereine';
-  const newLink = '/admin/clubs/add';
-  const statuses = {
-    Published: 'text-green-500 bg-green-500/20',
-    Unpublished: 'text-gray-500 bg-gray-800/10',
-    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
-  }
-
   const dataLisItems = clubValues.map((club: ClubValues) => {
     return {
       _id: club._id,
@@ -192,6 +184,14 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
       ],
     };
   });
+
+  const sectionTitle = 'Vereine';
+  const newLink = '/admin/clubs/add';
+  const statuses = {
+    Published: 'text-green-500 bg-green-500/20',
+    Unpublished: 'text-gray-500 bg-gray-800/10',
+    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
+  }
 
   return (
     <Layout>

@@ -2,7 +2,6 @@ import React from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
-import { AutoAlias } from '../../tools/autoAlias';
 import ButtonPrimary from '../ui/form/ButtonPrimary';
 import ButtonLight from '../ui/form/ButtonLight';
 import Toggle from '../ui/form/Toggle';
@@ -58,13 +57,6 @@ const TeamForm: React.FC<TeamFormProps> = ({
               type="text"
               label="Mannschaftsname"
               onChange={handleChange}
-            />
-            <AutoAlias field="name" targetField="alias"/>
-            <InputText
-              name="alias"
-              type="text"
-              label="Alias"
-              disabled
             />
             <InputText
               name="fullName"
