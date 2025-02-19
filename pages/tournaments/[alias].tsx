@@ -95,7 +95,7 @@ export default function Tournament({
   tournament: Tournament | null
 }) {
   const router = useRouter();
-  
+
   // Initialize all hooks at the top level before any conditionals
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
@@ -131,25 +131,27 @@ export default function Tournament({
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-            setRounds(sortedData);
-            setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
-          } else {
-            console.error('Received invalid data format for rounds');
-            setRounds([]);
-            setSelectedRound({} as Round);
-          }
-        })
-        .finally(() => {
-          setIsLoadingRounds(false);
-          setActiveTab('matches');
-        });
+      if (tournament?.alias && selectedSeason?.alias) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (Array.isArray(data)) {
+              const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+              setRounds(sortedData);
+              setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
+            } else {
+              console.error('Received invalid data format for rounds');
+              setRounds([]);
+              setSelectedRound({} as Round);
+            }
+          })
+          .finally(() => {
+            setIsLoadingRounds(false);
+            setActiveTab('matches');
+          });
+      }
     }
-  }, [selectedSeason, tournament.alias]);
+  }, [selectedSeason, tournament?.alias]);
 
   useEffect(() => {
     if (selectedRound.name) {
