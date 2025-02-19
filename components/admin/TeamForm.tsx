@@ -47,7 +47,10 @@ const TeamForm: React.FC<TeamFormProps> = ({
           ageGroup: Yup.string().required('Die Altersklasse ist erforderlich'),
           teamNumber: Yup.number().required('Die Mannschaftsnummer ist erforderlich'),
         })}
-        onSubmit={onSubmit}
+        onSubmit={(values, actions) => {
+          onSubmit(values);
+          actions.setSubmitting(false);
+        }}
       >
         {({ values, handleChange, setFieldValue }) => (
           <Form>
