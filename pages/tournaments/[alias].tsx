@@ -159,9 +159,8 @@ export default function Tournament({
       setIsLoadingMatches(true);
       if (process.env.NEXT_PUBLIC_API_URL && tournament?.alias && selectedSeason?.alias && selectedRound?.alias) {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
-      }
-        .then((response) => response.json())
-        .then((data) => {
+          .then((response) => response.json())
+          .then((data) => {
           if (Array.isArray(data)) {
             if (data.length === 0) {
               setMatchdays([]);
