@@ -157,66 +157,74 @@ export default function Tournament({
     if (selectedRound.name) {
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            if (data.length === 0) {
+      if (process.env.NEXT_PUBLIC_API_URL && tournament?.alias && selectedSeason?.alias && selectedRound?.alias) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (Array.isArray(data)) {
+              if (data.length === 0) {
+                setMatchdays([]);
+                setSelectedMatchday({} as Matchday);
+                setIsLoadingMatches(false);
+                return;
+              }
+
+              const sortedData = data.sort((a: Matchday, b: Matchday) => {
+                if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
+                  return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+                } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
+                  return a.name.localeCompare(b.name);
+                }
+                return 0;
+              });
+              setMatchdays(sortedData);
+
+              const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
+                ? sortedData[0]
+                : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
+                  .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
+
+              setSelectedMatchday(selectedMd || {} as Matchday);
+            } else {
+              console.error('Received invalid data format for matchdays');
               setMatchdays([]);
               setSelectedMatchday({} as Matchday);
               setIsLoadingMatches(false);
-              return;
             }
-
-            const sortedData = data.sort((a: Matchday, b: Matchday) => {
-              if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
-                return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-              } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
-                return a.name.localeCompare(b.name);
-              }
-              return 0;
-            });
-            setMatchdays(sortedData);
-
-            const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
-              ? sortedData[0]
-              : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
-                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
-
-            setSelectedMatchday(selectedMd || {} as Matchday);
-          } else {
-            console.error('Received invalid data format for matchdays');
+          })
+          .catch((error) => {
+            console.error('Error fetching matchdays:', error);
             setMatchdays([]);
             setSelectedMatchday({} as Matchday);
             setIsLoadingMatches(false);
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching matchdays:', error);
-          setMatchdays([]);
-          setSelectedMatchday({} as Matchday);
-          setIsLoadingMatches(false);
-        })
-        .finally(() => {
-          setIsLoadingMatchdays(false);
-          setActiveTab('matches');
-          setActiveMatchdayTab('matches');
-        });
-    } else {
-      setIsLoadingMatchdays(false);
-      setIsLoadingMatches(false);
+          })
+          .finally(() => {
+            setIsLoadingMatchdays(false);
+            setActiveTab('matches');
+            setActiveMatchdayTab('matches');
+          });
+      } else {
+        setIsLoadingMatchdays(false);
+        setIsLoadingMatches(false);
+      }
     }
-  }, [selectedRound, tournament.alias, selectedSeason.alias]);
+  }, [selectedRound, tournament?.alias, selectedSeason?.alias, setActiveTab, setActiveMatchdayTab]);
 
   useEffect(() => {
-    if (selectedMatchday.name) {
+    if (selectedMatchday?.name) {
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
-        .then((response) => response.json())
-        .then((data) => setMatches(data))
-        .finally(() => setIsLoadingMatches(false));
+      if (selectedMatchday?.alias && tournament?.alias && selectedSeason?.alias && selectedRound?.alias) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
+          .then((response) => response.json())
+          .then((data) => setMatches(data))
+          .catch((error) => console.error('Error fetching matches:', error));
+      } else {
+        setMatches([]);
+      }
+      
+      setIsLoadingMatches(false);
     }
-  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
+  }, [selectedMatchday, tournament?.alias, selectedSeason?.alias, selectedRound?.alias]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
@@ -606,7 +614,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const allTournamentsData = await res.json();
     const paths = allTournamentsData.map((tournament: Tournament) => ({
       params: { alias: tournament.alias || '' },
-    })).filter(path => path.params.alias);
+    })).filter((path: { params: { alias: string } }) => path.params.alias);
     return { 
       paths, 
       fallback: true // Change to true to handle loading state
