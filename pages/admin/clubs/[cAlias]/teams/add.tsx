@@ -89,15 +89,17 @@ export default function Add({ jwt, club }: AddProps) {
   const onSubmit = async (values: TeamValues) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value as string);
+        if (value !== null && value !== undefined) {
+          formData.append(key, String(value));
+        }
       });
       const response = await axios.post(`${BASE_URL}/clubs/${club.alias}/teams`, formData, {
         headers: {
-          Authorization: `Bearer ${jwt}`,
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'multipart/form-data',
         },
       });
       if (response.status === 201) {
