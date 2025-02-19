@@ -133,7 +133,7 @@ export default function Tournament({
   const [activeTab, setActiveTab] = useState('matches');
   const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
 
-  const router = useRouter();
+  // Router is already defined in the component scope
 
   useEffect(() => {
     setIsLoadingInitial(true);
