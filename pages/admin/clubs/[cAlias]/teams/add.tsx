@@ -146,10 +146,7 @@ export default function Add({ jwt, club }: AddProps) {
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
       <TeamForm
         initialValues={initialValues}
-        onSubmit={(values) => {
-          console.log('Add page form submission:', values);
-          onSubmit(values);
-        }}
+        onSubmit={onSubmit}
         enableReinitialize={false}
         handleCancel={handleCancel}
         loading={loading}
