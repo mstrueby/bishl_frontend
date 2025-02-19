@@ -23,17 +23,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const jwt = getCookie('jwt', context);
     const { cAlias } = context.params as { cAlias: string };
-    
+
     if (!jwt || !cAlias) {
       return {
         notFound: true
       };
     }
-    
+
     let club: ClubValues | null = null;
     let teams: TeamValues[] = [];
 
-  try {
     // First check if user has required role
     const userResponse = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
@@ -68,19 +67,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     teams = res.data;
-
+    return {
+      props: {
+        jwt, club, teams
+      },
+    };
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(error?.response?.data.detail || 'Error fetching teams.');
-    }
+    console.error('Error fetching data in getServerSideProps:', error);
+    // Return a valid default props structure in case of error
+    return {
+      props: {
+        jwt: '',
+        club: null,
+        teams: []
+      }
+    };
   }
-  return teams ? {
-    props: {
-      jwt, club, teams
-    },
-  } : {
-    props: { jwt, club, teams: [] }
-  };
 };
 
 const transformedUrl = (id: string) => buildUrl(id, {
@@ -149,7 +151,7 @@ const Teams: NextPage<TeamsProps> = ({ jwt, club, teams: initialTeams }) => {
       console.error('Error activating club:', error);
     }
   };
-  
+
   useEffect(() => {
     if (router.query.message) {
       setSuccessMessage(router.query.message as string);
