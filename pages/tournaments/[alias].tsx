@@ -614,7 +614,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const allTournamentsData = await res.json();
     const paths = allTournamentsData.map((tournament: Tournament) => ({
       params: { alias: tournament.alias || '' },
-    })).filter(path => path.params.alias);
+    })).filter((path: { params: { alias: string } }) => path.params.alias);
     return { 
       paths, 
       fallback: true // Change to true to handle loading state
