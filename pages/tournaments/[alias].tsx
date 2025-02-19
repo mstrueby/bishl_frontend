@@ -211,14 +211,20 @@ export default function Tournament({
   }, [selectedRound, tournament?.alias, selectedSeason?.alias, setActiveTab, setActiveMatchdayTab]);
 
   useEffect(() => {
-    if (selectedMatchday.name) {
+    if (selectedMatchday?.name) {
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
-        .then((response) => response.json())
-        .then((data) => setMatches(data))
-        .finally(() => setIsLoadingMatches(false));
+      if (selectedMatchday?.alias && tournament?.alias && selectedSeason?.alias && selectedRound?.alias) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
+          .then((response) => response.json())
+          .then((data) => setMatches(data))
+          .catch((error) => console.error('Error fetching matches:', error));
+      } else {
+        setMatches([]);
+      }
+      
+      setIsLoadingMatches(false);
     }
-  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
+  }, [selectedMatchday, tournament?.alias, selectedSeason?.alias, selectedRound?.alias]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
