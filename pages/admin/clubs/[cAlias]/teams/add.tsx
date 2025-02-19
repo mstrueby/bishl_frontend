@@ -84,11 +84,12 @@ export default function Add({ jwt, club }: AddProps) {
     external: false,
     ishdId: '',
     legacyId: 0,
-  };;
+  };
 
   const onSubmit = async (values: TeamValues) => {
     setError(null);
     setLoading(true);
+    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -104,7 +105,7 @@ export default function Add({ jwt, club }: AddProps) {
       });
       if (response.status === 201) {
         router.push({
-          pathname: `/admin/clubs/${club.alias}/teams`,
+          pathname: `/admin/clubs/${club.alias}/teams/`,
           query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
         }, `/admin/clubs/${club.alias}/teams`);
       } else {
