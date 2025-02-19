@@ -54,7 +54,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     club = clubResponse.data;
-    console.log("club:", club)
 
     return { props: { jwt, cAlias } };
   } catch (error) {
@@ -87,37 +86,20 @@ export default function Add({ jwt, cAlias}: AddProps) {
     legacyId: 0,
   };
 
-  const handleCancel = () => {
-    router.push(`/admin/clubs/${cAlias}/teams`);
-  };
-
-  useEffect(() => {
-    if (error) {
-      window.scrollTo(0, 0);
-    }
-  }, [error]);
-
-  const handleCloseMessage = () => {
-    setError(null);
-  };
-
-  const sectionTitle = 'Neue Mannschaft';
-  const sectionDescription = cAlias.toUpperCase();
-
-  const handleSubmit = async (values: TeamValues) => {
+  const onSubmit = async (values: TeamValues) => {
     setLoading(true);
     try {
       const formData = new FormData();
       Object.keys(values).forEach(key => {
         formData.append(key, values[key as keyof TeamValues]?.toString() || '');
       });
-      
+
       const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
         headers: {
           'Authorization': `Bearer ${jwt}`,
         }
       });
-      
+
       if (response.status === 201) {
         router.push({
           pathname: `/admin/clubs/${cAlias}/teams`,
@@ -137,6 +119,23 @@ export default function Add({ jwt, cAlias}: AddProps) {
       setLoading(false);
     }
   };
+  
+  const handleCancel = () => {
+    router.push(`/admin/clubs/${cAlias}/teams`);
+  };
+
+  useEffect(() => {
+    if (error) {
+      window.scrollTo(0, 0);
+    }
+  }, [error]);
+
+  const handleCloseMessage = () => {
+    setError(null);
+  };
+
+  const sectionTitle = 'Neue Mannschaft';
+  const sectionDescription = cAlias.toUpperCase();
 
   return (
     <Layout>
@@ -147,7 +146,7 @@ export default function Add({ jwt, cAlias}: AddProps) {
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
       <TeamForm
         initialValues={initialValues}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         enableReinitialize={false}
         handleCancel={handleCancel}
         loading={loading}
