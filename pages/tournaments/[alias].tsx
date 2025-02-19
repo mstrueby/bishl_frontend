@@ -110,32 +110,8 @@ export default function Tournament({
   const [activeTab, setActiveTab] = useState('matches');
   const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
 
-  // Handle the loading state
-  if (router.isFallback) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="spinner-container">
-          <ClipLoader color={"#4f46e5"} loading={true} size={150} />
-        </div>
-      </div>
-    );
-  }
-
   const seasons = tournament?.seasons.sort((a, b) => b.name.localeCompare(a.name)) || [];
   const initialSeasons = seasons;
-
-  // Handle the case where tournament is null
-  if (!tournament) {
-    return (
-      <Layout>
-        <div className="text-center py-12 text-gray-500">
-          Tournament not found
-        </div>
-      </Layout>
-    );
-  }
-
-  // Router is already defined in the component scope
 
   useEffect(() => {
     setIsLoadingInitial(true);
