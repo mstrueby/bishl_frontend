@@ -13,7 +13,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AddProps {
   jwt: string;
-  club: ClubValues
+  cAlias: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -56,7 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     club = clubResponse.data;
     console.log("club:", club)
 
-    return { props: { jwt, club } };
+    return { props: { jwt, cAlias } };
   } catch (error) {
     return {
       redirect: {
@@ -67,7 +67,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 }
 
-export default function Add({ jwt, club }: AddProps) {
+export default function Add({ jwt, cAlias}: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -87,39 +87,8 @@ export default function Add({ jwt, club }: AddProps) {
     legacyId: 0,
   };
 
-  const onSubmit = async (values: TeamValues) => {
-    setError(null);
-    setLoading(true);
-    console.log('submitted values', values);
-    try {
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
-      const response = await axios.post(`${BASE_URL}/clubs/${club.alias}/teams`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
-      if (response.status === 201) {
-        router.push({
-          pathname: `/admin/clubs/${club.alias}/teams`,
-          query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
-        }, `/admin/clubs/${club.alias}/teams`);
-      } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCancel = () => {
-    router.push(`/admin/clubs/${club.alias}/teams`);
+    router.push(`/admin/clubs/${cAlias}/teams`);
   };
 
   useEffect(() => {
@@ -133,7 +102,11 @@ export default function Add({ jwt, club }: AddProps) {
   };
 
   const sectionTitle = 'Neue Mannschaft';
-  const sectionDescription = club.name.toUpperCase();
+  const sectionDescription = cAlias.toUpperCase();
+
+  const handleSubmit = async (values: TeamValues) => {
+    console.log("submitting:", values)
+  };
 
   return (
     <Layout>
@@ -144,7 +117,7 @@ export default function Add({ jwt, club }: AddProps) {
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
       <TeamForm
         initialValues={initialValues}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
         enableReinitialize={false}
         handleCancel={handleCancel}
         loading={loading}
