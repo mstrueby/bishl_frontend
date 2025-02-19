@@ -107,6 +107,23 @@ export default function Tournament({
     );
   }
 
+  // Initialize all hooks at the top level
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  const [isLoadingRounds, setIsLoadingRounds] = useState(true);
+  const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(true);
+
+  const initialSeasons = tournament?.seasons.sort((a, b) => b.name.localeCompare(a.name)) || [];
+  const [selectedSeason, setSelectedSeason] = useState<Season>({} as Season);
+  const [rounds, setRounds] = useState<Round[]>([]);
+  const [selectedRound, setSelectedRound] = useState<Round>({} as Round);
+  const [matchdays, setMatchdays] = useState<Matchday[]>([]);
+  const [selectedMatchday, setSelectedMatchday] = useState<Matchday>({} as Matchday);
+  const [matches, setMatches] = useState<Match[]>([]);
+
+  const [activeTab, setActiveTab] = useState('matches');
+  const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
+
   // Handle the case where tournament is null
   if (!tournament) {
     return (
@@ -117,21 +134,6 @@ export default function Tournament({
       </Layout>
     );
   }
-  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
-  const [isLoadingRounds, setIsLoadingRounds] = useState(true);
-  const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
-  const [isLoadingMatches, setIsLoadingMatches] = useState(true);
-
-  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
-  const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
-  const [rounds, setRounds] = useState<Round[]>([]);
-  const [selectedRound, setSelectedRound] = useState({} as Round);
-  const [matchdays, setMatchdays] = useState<Matchday[]>([]);
-  const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
-  const [matches, setMatches] = useState<Match[]>([]);
-
-  const [activeTab, setActiveTab] = useState('matches');
-  const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
 
   // Router is already defined in the component scope
 
