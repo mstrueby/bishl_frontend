@@ -113,7 +113,8 @@ export default function Tournament({
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
 
-  const initialSeasons = tournament?.seasons.sort((a, b) => b.name.localeCompare(a.name)) || [];
+  const seasons = tournament?.seasons.sort((a, b) => b.name.localeCompare(a.name)) || [];
+  const initialSeasons = seasons;
   const [selectedSeason, setSelectedSeason] = useState<Season>({} as Season);
   const [rounds, setRounds] = useState<Round[]>([]);
   const [selectedRound, setSelectedRound] = useState<Round>({} as Round);
