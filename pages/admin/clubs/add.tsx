@@ -135,8 +135,8 @@ export default function Add({ jwt }: AddProps) {
       <ClubForm 
         initialValues={initialValues}
         onSubmit={onSubmit}
-        enableReinitialize= {false}
-        handleCancel= {handleCancel}
+        enableReinitialize={false}
+        handleCancel={handleCancel}
         loading={loading}
       />
     </Layout>
