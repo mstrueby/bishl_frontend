@@ -20,10 +20,18 @@ interface TeamsProps {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
-  const { cAlias } = context.params as { cAlias: string };
-  let club: ClubValues | null = null;
-  let teams: TeamValues[] = [];
+  try {
+    const jwt = getCookie('jwt', context);
+    const { cAlias } = context.params as { cAlias: string };
+    
+    if (!jwt || !cAlias) {
+      return {
+        notFound: true
+      };
+    }
+    
+    let club: ClubValues | null = null;
+    let teams: TeamValues[] = [];
 
   try {
     // First check if user has required role
