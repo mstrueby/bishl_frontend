@@ -157,7 +157,9 @@ export default function Tournament({
     if (selectedRound.name) {
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
+      if (process.env.NEXT_PUBLIC_API_URL && tournament?.alias && selectedSeason?.alias && selectedRound?.alias) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
+      }
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data)) {
