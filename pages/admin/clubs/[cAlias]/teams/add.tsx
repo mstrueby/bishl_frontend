@@ -105,7 +105,37 @@ export default function Add({ jwt, cAlias}: AddProps) {
   const sectionDescription = cAlias.toUpperCase();
 
   const handleSubmit = async (values: TeamValues) => {
-    console.log("submitting:", values)
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      Object.keys(values).forEach(key => {
+        formData.append(key, values[key as keyof TeamValues]?.toString() || '');
+      });
+      
+      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+        }
+      });
+      
+      if (response.status === 201) {
+        router.push({
+          pathname: `/admin/clubs/${cAlias}/teams`,
+          query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` }
+        });
+      } else {
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.detail || 'Ein Fehler ist aufgetreten.';
+        setError(errorMessage);
+      } else {
+        setError('Ein Fehler ist aufgetreten.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
