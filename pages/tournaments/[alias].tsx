@@ -92,8 +92,31 @@ interface Tournament {
 export default function Tournament({
   tournament
 }: {
-  tournament: Tournament
+  tournament: Tournament | null
 }) {
+  const router = useRouter();
+
+  // Handle the loading state
+  if (router.isFallback) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="spinner-container">
+          <ClipLoader color={"#4f46e5"} loading={true} size={150} />
+        </div>
+      </div>
+    );
+  }
+
+  // Handle the case where tournament is null
+  if (!tournament) {
+    return (
+      <Layout>
+        <div className="text-center py-12 text-gray-500">
+          Tournament not found
+        </div>
+      </Layout>
+    );
+  }
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
@@ -598,12 +621,20 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
-  const allTournamentsData = await res.json();
-  const paths = allTournamentsData.map((tournament: Tournament) => ({
-    params: { alias: tournament.alias },
-  }));
-  return { paths, fallback: 'blocking' };
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+    const allTournamentsData = await res.json();
+    const paths = allTournamentsData.map((tournament: Tournament) => ({
+      params: { alias: tournament.alias || '' },
+    })).filter(path => path.params.alias);
+    return { 
+      paths, 
+      fallback: true // Change to true to handle loading state
+    };
+  } catch (error) {
+    console.error('Error in getStaticPaths:', error);
+    return { paths: [], fallback: true };
+  }
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
