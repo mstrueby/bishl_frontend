@@ -33,7 +33,7 @@ const TeamForm: React.FC<TeamFormProps> = ({
   onSubmit,
   enableReinitialize,
   handleCancel,
-  loading,
+  loading = false,
 }) => {
   return (
     <>
@@ -47,9 +47,13 @@ const TeamForm: React.FC<TeamFormProps> = ({
           ageGroup: Yup.string().required('Die Altersklasse ist erforderlich'),
           teamNumber: Yup.number().required('Die Mannschaftsnummer ist erforderlich'),
         })}
-        onSubmit={onSubmit}
+        onSubmit={(values, { setSubmitting }) => {
+          console.log('Form submitted with values:', values);
+          onSubmit(values);
+          setSubmitting(false);
+        }}
       >
-        {({ values, handleChange, setFieldValue }) => (
+        {({ values, handleChange, setFieldValue, isSubmitting }) => (
           <Form>
             <InputText
               name="name"
