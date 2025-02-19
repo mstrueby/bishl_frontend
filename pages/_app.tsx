@@ -11,7 +11,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     const handleStart = () => setLoading(true)
-    const handleComplete = () => setLoading(false)
+    const handleComplete = () => {
+      setLoading(false)
+      // Force a client-side update after route change
+      router.replace(router.asPath, router.asPath, { locale: router.locale })
+    }
     const handleError = () => setLoading(false)
 
     router.events.on('routeChangeStart', handleStart)
