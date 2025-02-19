@@ -54,7 +54,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     club = clubResponse.data;
-    console.log("club:", club)
 
     return { props: { jwt, cAlias } };
   } catch (error) {
@@ -87,6 +86,40 @@ export default function Add({ jwt, cAlias}: AddProps) {
     legacyId: 0,
   };
 
+  const onSubmit = async (values: TeamValues) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      Object.keys(values).forEach(key => {
+        formData.append(key, values[key as keyof TeamValues]?.toString() || '');
+      });
+
+      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+        }
+      });
+
+      if (response.status === 201) {
+        router.push({
+          pathname: `/admin/clubs/${cAlias}/teams`,
+          query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` }
+        });
+      } else {
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.detail || 'Ein Fehler ist aufgetreten.';
+        setError(errorMessage);
+      } else {
+        setError('Ein Fehler ist aufgetreten.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const handleCancel = () => {
     router.push(`/admin/clubs/${cAlias}/teams`);
   };
@@ -104,10 +137,6 @@ export default function Add({ jwt, cAlias}: AddProps) {
   const sectionTitle = 'Neue Mannschaft';
   const sectionDescription = cAlias.toUpperCase();
 
-  const handleSubmit = async (values: TeamValues) => {
-    console.log("submitting:", values)
-  };
-
   return (
     <Layout>
       <SectionHeader
@@ -117,7 +146,7 @@ export default function Add({ jwt, cAlias}: AddProps) {
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
       <TeamForm
         initialValues={initialValues}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         enableReinitialize={false}
         handleCancel={handleCancel}
         loading={loading}
