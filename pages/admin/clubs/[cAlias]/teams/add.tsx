@@ -54,6 +54,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     club = clubResponse.data;
+    console.log("club:", club)
 
     return { props: { jwt, club } };
   } catch (error) {
@@ -93,19 +94,16 @@ export default function Add({ jwt, club }: AddProps) {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formData.append(key, String(value));
-        }
+        formData.append(key, value as string);
       });
       const response = await axios.post(`${BASE_URL}/clubs/${club.alias}/teams`, formData, {
         headers: {
-          'Authorization': `Bearer ${jwt}`,
-          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${jwt}`,
         },
       });
       if (response.status === 201) {
         router.push({
-          pathname: `/admin/clubs/${club.alias}/teams/`,
+          pathname: `/admin/clubs/${club.alias}/teams`,
           query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
         }, `/admin/clubs/${club.alias}/teams`);
       } else {
