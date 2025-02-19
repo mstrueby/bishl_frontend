@@ -87,11 +87,12 @@ export default function Add({ jwt, cAlias}: AddProps) {
   };
 
   const onSubmit = async (values: TeamValues) => {
+    setError(null);
     setLoading(true);
     try {
       const formData = new FormData();
-      Object.keys(values).forEach(key => {
-        formData.append(key, values[key as keyof TeamValues]?.toString() || '');
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value?.toString() || '');
       });
 
       const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
