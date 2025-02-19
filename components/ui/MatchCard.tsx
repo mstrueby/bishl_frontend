@@ -180,15 +180,17 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
   }
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
-    showLinkEdit = false;
-    showLinkStatus = false;
-  }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showLinkHome = true;
   }
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showLinkAway = true;
+  }
+  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
+    showLinkEdit = false;
+    showLinkStatus = false;
+    showLinkHome = false;
+    showLinkAway = false;
   }
 
   return (
