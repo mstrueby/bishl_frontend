@@ -73,6 +73,14 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
     setIsModalOpen(false);
   };
 
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-6 text-sm text-gray-500">
+        keine Daten vorhanden
+      </div>
+    );
+  }
+
   return (
     <ul role="list" className="divide-y divide-gray-100">
       {items.map((item) => (
@@ -134,12 +142,13 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
           </div>
 
           {/* Context Menu */}
-          <div className="flex-none gap-x-4">
-            <Menu as="div" className="relative flex-none">
-              <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
-                <span className="sr-only">Open options</span>
-                <EllipsisVerticalIcon aria-hidden="true" className="h-5 w-5" />
-              </MenuButton>
+          {item.menu && item.menu.length > 0 && (
+            <div className="flex-none gap-x-4">
+              <Menu as="div" className="relative flex-none">
+                <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
+                  <span className="sr-only">Open options</span>
+                  <EllipsisVerticalIcon aria-hidden="true" className="h-5 w-5" />
+                </MenuButton>
               <MenuItems
                 transition
                 className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
@@ -207,7 +216,8 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                 })}
               </MenuItems>
             </Menu>
-          </div>
+            </div>
+          )}
         </li>
       ))}
 

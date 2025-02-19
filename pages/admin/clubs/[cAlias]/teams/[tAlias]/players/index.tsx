@@ -171,6 +171,8 @@ const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, team, players:
       <DataList
         items={dataLisItems}
         statuses={statuses}
+        showThumbnails
+        showThumbnailsOnMobiles
         showStatusIndicator
       />
 

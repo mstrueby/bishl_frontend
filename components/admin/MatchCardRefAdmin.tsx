@@ -104,22 +104,27 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
           {/* date */}
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              weekday: 'short',
-              day: 'numeric',
-              month: 'short',
-              year: undefined,
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'short',
-              year: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
+            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>{startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: undefined,
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : 'offen'}</time>
+            </p>
+            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>{startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'short',
+                year: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : 'offen'}
+              </time>
+            </p>
           </div>
           {/* venue */}
           <div className="flex items-center truncate">
@@ -232,7 +237,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                   console.log('Status Config:', statusConfig);
                   {/**
                   */}
-                  const statusColor = statusConfig?.color.dotRefAdmin|| 'fill-gray-400';
+                  const statusColor = statusConfig?.color.dotRefAdmin || 'fill-gray-400';
                   return (
                     <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8" aria-hidden="true">
                       <circle cx="4" cy="4" r="4" />

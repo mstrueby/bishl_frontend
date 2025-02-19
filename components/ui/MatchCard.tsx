@@ -18,6 +18,9 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
   const { user } = useAuth();
   const router = useRouter();
 
+  showLinkHome=false;
+  showLinkAway=false;
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
@@ -177,16 +180,17 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
   }
-  console.log("match", match.season.alias, "secret", process.env['NEXT_PUBLIC_CURRENT_SEASON'])
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
-    showLinkEdit = false;
-    showLinkStatus = false;
-  }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showLinkHome = true;
   }
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showLinkAway = true;
+  }
+  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
+    showLinkEdit = false;
+    showLinkStatus = false;
+    showLinkHome = false;
+    showLinkAway = false;
   }
 
   return (
@@ -238,9 +242,9 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
             <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
               <time dateTime={
-                `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
               }>
-                {new Date(startDate).toLocaleString('de-DE', {
+                {startDate ? new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'short',
                   day: 'numeric',
@@ -248,14 +252,14 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
                   year: undefined,
                   hour: '2-digit',
                   minute: '2-digit'
-                })}
+                }) : 'offen'}
               </time>
             </p>
             <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
               <time dateTime={
-                `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
               }>
-                {new Date(startDate).toLocaleString('de-DE', {
+                {startDate ? new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'long',
                   day: 'numeric',
@@ -263,7 +267,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
                   year: '2-digit',
                   hour: '2-digit',
                   minute: '2-digit'
-                })}
+                }) : 'offen'}
               </time>
             </p>
           </div>
