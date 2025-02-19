@@ -13,9 +13,9 @@ const nextConfig = {
   i18n: {
     locales: ["de-DE"],
     defaultLocale: "de-DE",
-    localeDetection: false
   },
   webpack: (config, { isServer }) => {
+    // Custom webpack config to handle module resolution
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
