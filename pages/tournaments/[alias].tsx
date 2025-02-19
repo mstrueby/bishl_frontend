@@ -92,25 +92,26 @@ interface Tournament {
 export default function Tournament({
   tournament
 }: {
-  tournament: Tournament
+  tournament: Tournament | null
 }) {
+  const router = useRouter();
+
+  // Initialize all hooks at the top level before any conditionals
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
-
-  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
-  const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
+  const [selectedSeason, setSelectedSeason] = useState<Season>({} as Season);
   const [rounds, setRounds] = useState<Round[]>([]);
-  const [selectedRound, setSelectedRound] = useState({} as Round);
+  const [selectedRound, setSelectedRound] = useState<Round>({} as Round);
   const [matchdays, setMatchdays] = useState<Matchday[]>([]);
-  const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
+  const [selectedMatchday, setSelectedMatchday] = useState<Matchday>({} as Matchday);
   const [matches, setMatches] = useState<Match[]>([]);
-
   const [activeTab, setActiveTab] = useState('matches');
   const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
 
-  const router = useRouter();
+  const seasons = tournament?.seasons.sort((a, b) => b.name.localeCompare(a.name)) || [];
+  const initialSeasons = seasons;
 
   useEffect(() => {
     setIsLoadingInitial(true);
@@ -130,25 +131,27 @@ export default function Tournament({
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-            setRounds(sortedData);
-            setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
-          } else {
-            console.error('Received invalid data format for rounds');
-            setRounds([]);
-            setSelectedRound({} as Round);
-          }
-        })
-        .finally(() => {
-          setIsLoadingRounds(false);
-          setActiveTab('matches');
-        });
+      if (tournament?.alias && selectedSeason?.alias) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (Array.isArray(data)) {
+              const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+              setRounds(sortedData);
+              setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
+            } else {
+              console.error('Received invalid data format for rounds');
+              setRounds([]);
+              setSelectedRound({} as Round);
+            }
+          })
+          .finally(() => {
+            setIsLoadingRounds(false);
+            setActiveTab('matches');
+          });
+      }
     }
-  }, [selectedSeason, tournament.alias]);
+  }, [selectedSeason, tournament?.alias]);
 
   useEffect(() => {
     if (selectedRound.name) {
@@ -598,12 +601,20 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
-  const allTournamentsData = await res.json();
-  const paths = allTournamentsData.map((tournament: Tournament) => ({
-    params: { alias: tournament.alias },
-  }));
-  return { paths, fallback: 'blocking' };
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+    const allTournamentsData = await res.json();
+    const paths = allTournamentsData.map((tournament: Tournament) => ({
+      params: { alias: tournament.alias || '' },
+    })).filter(path => path.params.alias);
+    return { 
+      paths, 
+      fallback: true // Change to true to handle loading state
+    };
+  } catch (error) {
+    console.error('Error in getStaticPaths:', error);
+    return { paths: [], fallback: true };
+  }
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
