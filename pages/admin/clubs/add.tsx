@@ -79,7 +79,7 @@ export default function Add({ jwt }: AddProps) {
     logoUrl: '',
     legacyId: '',
     teams: [],
-  };;
+  };
 
   const onSubmit = async (values: ClubValues) => {
     setError(null);
