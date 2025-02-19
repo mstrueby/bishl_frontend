@@ -88,6 +88,7 @@ export default function Add({ jwt, club }: AddProps) {
   };
 
   const onSubmit = async (values: TeamValues) => {
+    console.log('Add page onSubmit called with values:', values);
     setError(null);
     setLoading(true);
     console.log('submitted values', values);
