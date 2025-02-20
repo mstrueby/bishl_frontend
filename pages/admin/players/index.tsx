@@ -233,6 +233,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       source: player.source,
       assignedTeams: player.assignedTeams,
       imageUrl: player.imageUrl,
+      imageVisible: player.imageVisible,
     }));
 
   const sectionTitle = 'Spieler*innen';

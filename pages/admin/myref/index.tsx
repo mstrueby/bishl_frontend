@@ -9,7 +9,7 @@ import { AssignmentValues } from '../../../types/AssignmentValues';
 import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+let BASE_URL = process.env.API_URL;
 
 interface MyRefProps {
   jwt: string;
@@ -41,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has REFEREE role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }

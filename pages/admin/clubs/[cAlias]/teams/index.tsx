@@ -11,7 +11,7 @@ import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import DataList from '../../../../../components/admin/ui/DataList';
 import { ta } from "date-fns/locale";
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface TeamsProps {
   jwt: string,

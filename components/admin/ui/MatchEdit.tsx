@@ -42,7 +42,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues/?active=true`);
+        const response = await fetch(`${process.env.API_URL}/venues/?active=true`);
         const data = await response.json();
         setVenues(data);
       } catch (error) {
@@ -69,7 +69,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
     console.log('Submitted values:', { venue, startDate });
 
     try {
-      const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+      const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
         startDate: formatDate(startDate),
         venue
       }, {

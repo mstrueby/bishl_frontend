@@ -72,6 +72,7 @@ export default function Add({ jwt }: AddProps) {
     fullFaceReq: false,
     assignedTeams: [],
     imageUrl: '',
+    imageVisible: false,
     source: 'BISHL',
   };;
 

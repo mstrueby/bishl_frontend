@@ -16,8 +16,8 @@ const nextConfig = {
   },
   env: {
     API_URL: process.env.NODE_ENV === 'production' 
-      ? 'https://api.production-url.com'  // Replace with your production API URL
-      : process.env.NEXT_PUBLIC_API_URL,
+      ? 'https://api.bishl.de'  // Replace with your production API URL
+      : process.env.API_URL,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {

@@ -40,7 +40,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
   const handleSave = async () => {
     try {
-      const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+      const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
         venue: editData.venue,
         startDate: new Date(editData.startDate),
         matchStatus: editData.matchStatus,
@@ -263,11 +263,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = (getCookie('jwt', context) || '') as string;
 
   try {
-    const match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
+    const match = await fetch(`${process.env.API_URL}/matches/${id}`).then(res => res.json());
 
     let userRoles: string[] = [];
     if (jwt) {
-      const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      const userResponse = await fetch(`${process.env.API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` }
       });
       const userData = await userResponse.json();

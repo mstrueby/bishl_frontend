@@ -9,7 +9,7 @@ import DocumentForm from '../../../components/admin/DocumentForm'
 import { DocumentValuesForm } from '../../../types/DocumentValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/documents/"
+let BASE_URL = process.env['API_URL'] + "/documents/"
 
 interface AddProps {
   jwt: string;
@@ -31,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     roles: []
   };
   try {
-    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
+    const userResponse = await axios.get(`${process.env['API_URL']}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
