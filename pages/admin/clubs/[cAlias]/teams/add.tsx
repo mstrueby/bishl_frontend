@@ -95,7 +95,7 @@ export default function Add({ jwt, cAlias}: AddProps) {
         formData.append(key, value?.toString() || '');
       });
 
-      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
+      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams/`, formData, {
         headers: {
           'Authorization': `Bearer ${jwt}`,
         }

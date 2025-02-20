@@ -73,6 +73,7 @@ export interface PlayerValues {
   penaltyMinutes: number;
 } [];
 imageUrl: string;
+imageVisible: boolean;
 legacyId ?: number;
 createDate ?: string;  // e.g. "2025-01-16T11:36:45.395Z"
 }

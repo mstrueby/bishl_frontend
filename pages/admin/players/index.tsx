@@ -235,7 +235,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       imageUrl: player.imageUrl,
     }));
 
-  const sectionTitle = 'SpielerInnen';
+  const sectionTitle = 'Spieler*innen';
   const newLink = '/admin/players/add';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',

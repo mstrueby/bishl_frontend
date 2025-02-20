@@ -98,7 +98,7 @@ export default function Add({ jwt }: AddProps) {
       if (response.status === 201) {
         router.push({
           pathname: '/admin/players',
-          query: { message: `SpielerIn <strong>${values.firstName} ${values.lastName}</strong>  wurde erfolgreich angelegt.` },
+          query: { message: `Spieler*in <strong>${values.firstName} ${values.lastName}</strong>  wurde erfolgreich angelegt.` },
         }, '/admin/players');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -126,7 +126,7 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
-  const sectionTitle = 'SpielerIn anlegen';
+  const sectionTitle = 'Spieler*in anlegen';
 
   return (
     <Layout>

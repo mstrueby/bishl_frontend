@@ -95,7 +95,8 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             ) : (
               <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
-            
+
+            <Toggle name="imageVisible" label="Foto öffentlich anzeigen" />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
 
             
