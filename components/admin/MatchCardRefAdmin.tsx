@@ -9,7 +9,7 @@ import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs, allRefereeAssignmentStatuses } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = process.env.API_URL;
 
 const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
   const { home, away, startDate, venue } = match;

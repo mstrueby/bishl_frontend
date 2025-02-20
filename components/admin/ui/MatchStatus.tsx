@@ -74,7 +74,7 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
     });
 
     try {
-      const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+      const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
         matchStatus,
         finishType,
         home: editData.home,

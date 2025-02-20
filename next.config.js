@@ -14,8 +14,12 @@ const nextConfig = {
     locales: ["de-DE"],
     defaultLocale: "de-DE",
   },
+  env: {
+    API_URL: process.env.NODE_ENV === 'production' 
+      ? 'https://api.bishl.de'  // Replace with your production API URL
+      : process.env.API_URL,
+  },
   webpack: (config, { isServer }) => {
-    // Custom webpack config to handle module resolution
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,

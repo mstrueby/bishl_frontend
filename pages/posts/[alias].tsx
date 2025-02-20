@@ -96,7 +96,7 @@ export default function Post({
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/`);
+  const res = await fetch(`${process.env.API_URL}/posts/`);
   const allPostsData = await res.json();
   const paths = allPostsData.map((post: PostValues) => ({
     params: { alias: post.alias },
@@ -112,7 +112,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${alias}`);
+    const res = await fetch(`${process.env.API_URL}/posts/${alias}`);
     const postData = await res.json();
 
     if (!postData) {

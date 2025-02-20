@@ -23,7 +23,7 @@ const RosterPage = () => {
             const fetchMatchAndRoster = async () => {
                 try {
                     // Fetch match data
-                    const matchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`);
+                    const matchResponse = await fetch(`${process.env.API_URL}/matches/${id}`);
                     const matchData: Match = await matchResponse.json();
                     setMatch(matchData);
 
@@ -32,7 +32,7 @@ const RosterPage = () => {
                     
                     // Fetch roster data
                     const rosterResponse = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/players/clubs/${team.clubAlias}/teams/${team.teamAlias}`
+                        `${process.env.API_URL}/players/clubs/${team.clubAlias}/teams/${team.teamAlias}`
                     );
                     const rosterData = await rosterResponse.json();
                     setRoster(Array.isArray(rosterData) ? rosterData : []);

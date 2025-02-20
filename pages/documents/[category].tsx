@@ -137,7 +137,7 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, docs }) => {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const category = context.params ? context.params.category : undefined;
-  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/documents/categories/${category}`, {
+  const res = await axios.get(`${process.env.API_URL}/documents/categories/${category}`, {
     params: { published: true },
   });
 

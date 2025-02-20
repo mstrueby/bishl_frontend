@@ -9,7 +9,7 @@ import Layout from '../../../../../components/Layout';
 import SectionHeader from "../../../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface AddProps {
   jwt: string;
@@ -32,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -48,7 +48,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Get club name
-    const clubResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${cAlias}`, {
+    const clubResponse = await axios.get(`${process.env.API_URL}/clubs/${cAlias}`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -87,14 +87,15 @@ export default function Add({ jwt, cAlias}: AddProps) {
   };
 
   const onSubmit = async (values: TeamValues) => {
+    setError(null);
     setLoading(true);
     try {
       const formData = new FormData();
-      Object.keys(values).forEach(key => {
-        formData.append(key, values[key as keyof TeamValues]?.toString() || '');
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value?.toString() || '');
       });
 
-      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams`, formData, {
+      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams/`, formData, {
         headers: {
           'Authorization': `Bearer ${jwt}`,
         }

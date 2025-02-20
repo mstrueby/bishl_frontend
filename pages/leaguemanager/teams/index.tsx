@@ -39,7 +39,7 @@ export default function Teams({
   const onClubChange = async (clubAlias: string) => {
     // Fetch the teams for the selected club
     if (clubAlias) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${clubAlias}`);
+      const response = await fetch(`${process.env.API_URL}/clubs/${clubAlias}`);
       const { teams: teamsData } = await response.json();
       setTeams(teamsData);
     } else {
@@ -121,7 +121,7 @@ export default function Teams({
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clubs/`);
+  const res = await fetch(`${process.env.API_URL}/clubs/`);
   const allClubsData = await res.json();
 
   return {
