@@ -157,6 +157,7 @@ const Edit: NextPage<EditProps> = ({ jwt, team, club }) => {
     teamNumber: team?.teamNumber || 0,
     active: team?.active || false,
     external: team?.external || false,
+    logoUrl: team?.logoUrl || '',
     ishdId: team?.ishdId || ''
   };
 

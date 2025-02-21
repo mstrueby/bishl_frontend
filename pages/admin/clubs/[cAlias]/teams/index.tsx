@@ -182,18 +182,16 @@ const Teams: NextPage<TeamsProps> = ({ jwt, club, teams: initialTeams }) => {
     return {
       _id: team._id,
       title: team.name,
-      description: [team.ageGroup],
+      description: [team.ageGroup, team.fullName],
       alias: team.alias,
-      /*
       image: {
-        src: transformedUrl(team.logoUrl),
-        width: 32,
-        height: 32,
+        src: team.logoUrl ? team.logoUrl : (club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.svg'),
+        width: 48,
+        height: 48,
         gravity: 'center',
         className: 'object-contain',
         radius: 0,
       },
-      */
       published: team.active,
       menu: [
         { edit: { onClick: () => router.push(`/admin/clubs/${club.alias}/teams/${team.alias}/edit`) } },
@@ -229,6 +227,8 @@ const Teams: NextPage<TeamsProps> = ({ jwt, club, teams: initialTeams }) => {
         items={dataLisItems}
         statuses={statuses}
         showStatusIndicator
+        showThumbnails
+        showThumbnailsOnMobiles
       />
 
     </Layout>
