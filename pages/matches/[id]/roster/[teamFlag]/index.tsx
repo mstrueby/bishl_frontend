@@ -108,7 +108,28 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
-    const [rosterList, setRosterList] = useState<RosterPlayer[]>(roster || []);
+    
+    // Sort roster by position order: C, A, G, F, then by jersey number
+    const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+        return [...rosterToSort].sort((a, b) => {
+            // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+            const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+            
+            // Get priorities
+            const posA = positionPriority[a.playerPosition.key] || 99;
+            const posB = positionPriority[b.playerPosition.key] || 99;
+            
+            // First sort by position priority
+            if (posA !== posB) {
+                return posA - posB;
+            }
+            
+            // If positions are the same, sort by jersey number
+            return a.player.jerseyNumber - b.player.jerseyNumber;
+        });
+    };
+    
+    const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
     const [errorMessage, setErrorMessage] = useState('');
 
     if (loading) {
@@ -156,7 +177,26 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             
             // Add player to roster
             const updatedRoster = [...rosterList, newPlayer];
-            setRosterList(updatedRoster);
+            
+            // Sort roster by position order: C, A, G, F, then by jersey number
+            const sortedRoster = updatedRoster.sort((a, b) => {
+                // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+                const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+                
+                // Get priorities
+                const posA = positionPriority[a.playerPosition.key] || 99;
+                const posB = positionPriority[b.playerPosition.key] || 99;
+                
+                // First sort by position priority
+                if (posA !== posB) {
+                    return posA - posB;
+                }
+                
+                // If positions are the same, sort by jersey number
+                return a.player.jerseyNumber - b.player.jerseyNumber;
+            });
+            
+            setRosterList(sortedRoster);
             
             // Reset form
             setSelectedPlayer(null);
@@ -187,7 +227,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     return (
         <Layout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 className="text-2xl font-bold mb-6">Team Roster: {team.fullName}</h1>
+                <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
                 
                 {/* Add Player Form */}
                 <div className="bg-white shadow rounded-lg p-6 mb-6">
@@ -379,8 +419,8 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                             rosterList.map((player) => (
                                 <li key={player.player.playerId} className="px-6 py-4">
                                     <div className="flex items-center">
-                                        <div className="min-w-12 text-sm font-medium text-gray-900">
-                                            #{player.player.jerseyNumber}
+                                        <div className="min-w-12 text-sm font-semibold text-gray-900">
+                                            {player.player.jerseyNumber}
                                         </div>
                                         <div className="min-w-12 text-sm font-medium text-gray-500">
                                             {player.playerPosition.key}
