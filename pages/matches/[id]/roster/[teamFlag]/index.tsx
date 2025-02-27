@@ -105,10 +105,12 @@ const playerPositions = [
 const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers = [] }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [savingRoster, setSavingRoster] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
     const [availablePlayersList, setAvailablePlayersList] = useState<PlayerValues[]>(availablePlayers || []);
+    const [rosterPublished, setRosterPublished] = useState(false);
     
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -229,6 +231,41 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             setErrorMessage('Failed to add player to roster');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSaveRoster = async () => {
+        if (rosterList.length === 0) {
+            setErrorMessage('Cannot save an empty roster');
+            return;
+        }
+
+        setSavingRoster(true);
+        setErrorMessage('');
+
+        try {
+            // Prepare the data to be sent
+            const rosterData = {
+                roster: rosterList,
+                published: rosterPublished
+            };
+
+            // Make the API call to save the roster
+            await axios.post(`${process.env.API_URL}/matches/${match._id}/roster/${teamFlag}`, rosterData, {
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Show success message or redirect
+            setErrorMessage('');
+            // You could add a success message here if needed
+        } catch (error) {
+            console.error('Error saving roster:', error);
+            setErrorMessage('Failed to save roster');
+        } finally {
+            setSavingRoster(false);
         }
     };
 
@@ -448,6 +485,35 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                             </li>
                         )}
                     </ul>
+                </div>
+                
+                {/* Publish toggle and save button */}
+                <div className="flex items-center justify-between mt-8 bg-white shadow rounded-lg p-6">
+                    <div className="flex items-center">
+                        <div className="relative inline-flex items-center">
+                            <div className="flex items-center h-6">
+                                <input
+                                    id="rosterPublished"
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                    checked={rosterPublished}
+                                    onChange={(e) => setRosterPublished(e.target.checked)}
+                                />
+                            </div>
+                            <div className="ml-3 text-sm leading-6">
+                                <label htmlFor="rosterPublished" className="font-medium text-gray-900">Veröffentlichen</label>
+                                <p className="text-gray-500">Aufstellung öffentlich sichtbar machen</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleSaveRoster}
+                        disabled={loading || savingRoster}
+                        className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                        {savingRoster ? 'Speichern...' : 'Speichern'}
+                    </button>
                 </div>
             </div>
         </Layout>
