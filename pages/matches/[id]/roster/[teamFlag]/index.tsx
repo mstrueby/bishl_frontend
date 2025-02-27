@@ -37,6 +37,7 @@ interface RosterPageProps {
     rosterPublished: boolean;
     teamFlag: string;
     availablePlayers: AvailablePlayer[];
+    allAvailablePlayers: AvailablePlayer[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -130,14 +131,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
         
-        // Filter out players that are already in the roster
+        // Keep both the full list and a filtered list of available players
         const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
         const filteredAvailablePlayers = availablePlayers.filter(player => 
             !rosterPlayerIds.includes(player._id)
         );
         
-        console.log("Available players for roster:", filteredAvailablePlayers.length);
-        console.log("filteredAvailablePlayers", filteredAvailablePlayers);
+        console.log("All available players:", availablePlayers.length);
+        console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
 
         return {
             props: {
@@ -149,6 +150,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 rosterPublished: matchTeam.rosterPublished || false,
                 teamFlag,
                 availablePlayers: filteredAvailablePlayers || [],
+                allAvailablePlayers: availablePlayers || [],
             }
         };
 
@@ -170,7 +172,7 @@ const playerPositions = [
     { key: 'A', value: 'Assistant' },
 ];
 
-const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [] }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [] }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
@@ -577,9 +579,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    // Find the player details from the original availablePlayers array 
-                                                    // This contains all players, including those already in the roster
-                                                    const playerToAddBack = availablePlayers.find(p => p._id === player.player.playerId);
+                                                    // Find the player in the complete list of all players
+                                                    const playerToAddBack = allAvailablePlayers.find(p => p._id === player.player.playerId);
                                                     
                                                     // Remove from roster
                                                     const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
