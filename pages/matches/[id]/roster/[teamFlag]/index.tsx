@@ -108,6 +108,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
+    const [availablePlayersList, setAvailablePlayersList] = useState<PlayerValues[]>(availablePlayers || []);
     
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -198,6 +199,13 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             
             setRosterList(sortedRoster);
             
+            // Remove the selected player from the available players list
+            if (selectedPlayer) {
+                setAvailablePlayersList(prevList => 
+                    prevList.filter(player => player._id !== selectedPlayer._id)
+                );
+            }
+            
             // Reset form
             setSelectedPlayer(null);
             setPlayerNumber(0);
@@ -266,8 +274,8 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                                 leaveTo="opacity-0"
                                             >
                                                 <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                    {Array.isArray(availablePlayers) && availablePlayers.length > 0 ? (
-                                                        availablePlayers.map((player) => (
+                                                    {Array.isArray(availablePlayersList) && availablePlayersList.length > 0 ? (
+                                                        availablePlayersList.map((player) => (
                                                             <Listbox.Option
                                                                 key={player._id}
                                                                 className={({ active }) =>
