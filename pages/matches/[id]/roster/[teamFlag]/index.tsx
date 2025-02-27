@@ -108,7 +108,28 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
-    const [rosterList, setRosterList] = useState<RosterPlayer[]>(roster || []);
+    
+    // Sort roster by position order: C, A, G, F, then by jersey number
+    const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+        return [...rosterToSort].sort((a, b) => {
+            // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+            const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+            
+            // Get priorities
+            const posA = positionPriority[a.playerPosition.key] || 99;
+            const posB = positionPriority[b.playerPosition.key] || 99;
+            
+            // First sort by position priority
+            if (posA !== posB) {
+                return posA - posB;
+            }
+            
+            // If positions are the same, sort by jersey number
+            return a.player.jerseyNumber - b.player.jerseyNumber;
+        });
+    };
+    
+    const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
     const [errorMessage, setErrorMessage] = useState('');
 
     if (loading) {
@@ -156,7 +177,26 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             
             // Add player to roster
             const updatedRoster = [...rosterList, newPlayer];
-            setRosterList(updatedRoster);
+            
+            // Sort roster by position order: C, A, G, F, then by jersey number
+            const sortedRoster = updatedRoster.sort((a, b) => {
+                // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+                const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+                
+                // Get priorities
+                const posA = positionPriority[a.playerPosition.key] || 99;
+                const posB = positionPriority[b.playerPosition.key] || 99;
+                
+                // First sort by position priority
+                if (posA !== posB) {
+                    return posA - posB;
+                }
+                
+                // If positions are the same, sort by jersey number
+                return a.player.jerseyNumber - b.player.jerseyNumber;
+            });
+            
+            setRosterList(sortedRoster);
             
             // Reset form
             setSelectedPlayer(null);
