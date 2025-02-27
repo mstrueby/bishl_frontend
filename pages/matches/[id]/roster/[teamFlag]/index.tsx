@@ -1,8 +1,12 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
 import { Match } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
+import { getCookie } from 'cookies-next';
+import axios from 'axios';
+import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 
 interface Player {
     id: string;
@@ -11,42 +15,75 @@ interface Player {
     number: string;
 }
 
-const RosterPage = () => {
-    const router = useRouter();
-    const { id, teamFlag } = router.query;
-    const [match, setMatch] = useState<Match | null>(null);
-    const [roster, setRoster] = useState<Player[]>([]);
-    const [loading, setLoading] = useState(true);
+interface RosterPageProps {
+    jwt: string;
+    match: Match;
+    club: ClubValues;
+    team: TeamValues;
+    roster: Player[];
+    teamFlag: string;
+}
 
-    useEffect(() => {
-        if (id) {
-            const fetchMatchAndRoster = async () => {
-                try {
-                    // Fetch match data
-                    const matchResponse = await fetch(`${process.env.API_URL}/matches/${id}`);
-                    const matchData: Match = await matchResponse.json();
-                    setMatch(matchData);
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { id, teamFlag } = context.params as { id: string; teamFlag: string };
+    const jwt = getCookie('jwt', context);
+    if (!jwt || !id || !teamFlag)
+        return { notFound: true };
+    try {
+        // Fetch match data
+        const matchResponse = await axios.get(`${process.env.API_URL}/matches/${id}`, {
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+            }
+        });
+        const match: Match = await matchResponse.data;
 
-                    // Determine which team's roster to fetch
-                    const team = teamFlag === 'home' ? matchData.home : matchData.away;
-                    
-                    // Fetch roster data
-                    const rosterResponse = await fetch(
-                        `${process.env.API_URL}/players/clubs/${team.clubAlias}/teams/${team.teamAlias}`
-                    );
-                    const rosterData = await rosterResponse.json();
-                    setRoster(Array.isArray(rosterData) ? rosterData : []);
-                    
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
+        // Determine which team's roster to fetch
+        const matchTeam = teamFlag === 'home' ? match.home : match.away;
 
-            fetchMatchAndRoster();
+        // get club object
+        const clubResponse = await axios.get(`${process.env.API_URL}/clubs/${matchTeam.clubAlias}`);
+        const club: ClubValues = await clubResponse.data;
+        
+        // get team object
+        const teamResponse = await axios.get(`${process.env.API_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
+        const team: TeamValues = await teamResponse.data;
+
+        // Fetch roster data
+        const rosterResponse = await axios.get(
+            `${process.env.API_URL}/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+            }
         }
-    }, [id, teamFlag]);
+        );
+        const rosterData = await rosterResponse.data.results;
+        const roster = Array.isArray(rosterData) ? rosterData : [];
+
+        return {
+            props: {
+                jwt,
+                match,
+                club,
+                team,
+                roster,
+                teamFlag
+            }
+        };
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return {
+            notFound: true
+        };
+    }
+};
+
+
+
+const RosterPage = ({ jwt, match, club, team, roster, teamFlag }: RosterPageProps) => {
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     if (loading) {
         return <Layout><div>Loading...</div></Layout>;
@@ -55,8 +92,6 @@ const RosterPage = () => {
     if (!match) {
         return <Layout><div>Match not found</div></Layout>;
     }
-
-    const team = teamFlag === 'home' ? match.home : match.away;
 
     return (
         <Layout>
