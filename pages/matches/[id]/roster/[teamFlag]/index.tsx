@@ -2,7 +2,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
-import { Match } from '../../../../../types/MatchValues';
+import { Match, RosterPlayer } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
@@ -12,19 +12,7 @@ import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
 
-interface RosterPlayer {
-    player: {
-        playerId: string;
-        firstName: string;
-        lastName: string;
-        jerseyNumber: number;
-    },
-    playerPosition: {
-        key: string;
-        value: string;
-    },
-    passNumber: string;
-}
+let BASE_URL = process.env['API_URL'];
 
 interface RosterPageProps {
     jwt: string;
@@ -32,6 +20,7 @@ interface RosterPageProps {
     club: ClubValues;
     team: TeamValues;
     roster: RosterPlayer[];
+    rosterPublished: boolean;
     teamFlag: string;
     availablePlayers: PlayerValues[];
 }
@@ -42,35 +31,70 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (!jwt || !id || !teamFlag)
         return { notFound: true };
     try {
+        // First check if user has required role
+        const userResponse = await axios.get(`${BASE_URL}/users/me`, {
+            headers: {
+                'Authorization': `Bearer ${jwt}`
+            }
+        });
+
+        const user = userResponse.data;
+        // console.log("user:", user)
+        if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
+            return {
+                redirect: {
+                    destination: '/',
+                    permanent: false,
+                },
+            };
+        }
+
         // Fetch match data
-        const matchResponse = await axios.get(`${process.env.API_URL}/matches/${id}`, {
+        const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
             headers: {
                 Authorization: `Bearer ${jwt}`,
             }
         });
+        console.log("match", matchResponse.data)
         const match: Match = await matchResponse.data;
 
         // Determine which team's roster to fetch
         const matchTeam = teamFlag === 'home' ? match.home : match.away;
 
         // get club object
-        const clubResponse = await axios.get(`${process.env.API_URL}/clubs/${matchTeam.clubAlias}`);
+        const clubResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}`);
         const club: ClubValues = await clubResponse.data;
-        
+
         // get team object
-        const teamResponse = await axios.get(`${process.env.API_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
+        const teamResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
         const team: TeamValues = await teamResponse.data;
 
         // Fetch available players
         const availablePlayersResponse = await axios.get(
-            `${process.env.API_URL}/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
+            `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
             headers: {
                 Authorization: `Bearer ${jwt}`,
+            },
+            params: {
+                sortby: 'lastName',
+                all: 'false'
             }
         }
         );
         const availablePlayersResult = await availablePlayersResponse.data.results;
         const availablePlayers = Array.isArray(availablePlayersResult) ? availablePlayersResult : [];
+
+        // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
+        const playerDetails = availablePlayers.map(player => {
+            const assignedTeam = player.assignedTeams.clubs.flatMap((club: { teams: Array<{ teamId: string; passNo?: string; jerseyNo?: string }> }) => club.teams)
+                .find((team: { teamId: string; passNo?: string; jerseyNo?: string }) => team.teamId === matchTeam.teamId);
+            return assignedTeam ? {
+                ...player,
+                passNo: assignedTeam.passNo,
+                jerseyNo: assignedTeam.jerseyNo
+            } : null;
+        }).filter(player => player !== null);
+        console.log("playerDetails", playerDetails)
 
         return {
             props: {
@@ -78,9 +102,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 match,
                 club,
                 team,
-                roster: [],
+                roster: matchTeam.roster || [],
+                rosterPublished: matchTeam.rosterPublished || false,
                 teamFlag,
-                availablePlayers: availablePlayers || [],
+                availablePlayers: availablePlayers || [],
             }
         };
 
@@ -102,7 +127,7 @@ const playerPositions = [
     { key: 'A', value: 'Assistant' },
 ];
 
-const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers = [] }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [] }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
@@ -110,28 +135,28 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
     const [availablePlayersList, setAvailablePlayersList] = useState<PlayerValues[]>(availablePlayers || []);
-    const [rosterPublished, setRosterPublished] = useState(false);
-    
+    const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
+
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
         return [...rosterToSort].sort((a, b) => {
             // Define position priorities (C = 1, A = 2, G = 3, F = 4)
             const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-            
+
             // Get priorities
             const posA = positionPriority[a.playerPosition.key] || 99;
             const posB = positionPriority[b.playerPosition.key] || 99;
-            
+
             // First sort by position priority
             if (posA !== posB) {
                 return posA - posB;
             }
-            
+
             // If positions are the same, sort by jersey number
             return a.player.jerseyNumber - b.player.jerseyNumber;
         });
     };
-    
+
     const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -153,14 +178,14 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             setErrorMessage('Please select a player');
             return;
         }
-        
+
         if (!playerNumber) {
             setErrorMessage('Please enter a player number');
             return;
         }
 
         setLoading(true);
-        
+
         try {
             // Here you would normally make an API call to save the player to the roster
             // For now, we'll just update the local state
@@ -177,37 +202,37 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                 },
                 passNumber: 'DUMMY',
             };
-            
+
             // Add player to roster
             const updatedRoster = [...rosterList, newPlayer];
-            
+
             // Sort roster by position order: C, A, G, F, then by jersey number
             const sortedRoster = updatedRoster.sort((a, b) => {
                 // Define position priorities (C = 1, A = 2, G = 3, F = 4)
                 const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-                
+
                 // Get priorities
                 const posA = positionPriority[a.playerPosition.key] || 99;
                 const posB = positionPriority[b.playerPosition.key] || 99;
-                
+
                 // First sort by position priority
                 if (posA !== posB) {
                     return posA - posB;
                 }
-                
+
                 // If positions are the same, sort by jersey number
                 return a.player.jerseyNumber - b.player.jerseyNumber;
             });
-            
+
             setRosterList(sortedRoster);
-            
+
             // Remove the selected player from the available players list
             if (selectedPlayer) {
-                setAvailablePlayersList(prevList => 
+                setAvailablePlayersList(prevList =>
                     prevList.filter(player => player._id !== selectedPlayer._id)
                 );
             }
-            
+
             // Reset form
             setSelectedPlayer(null);
             setPlayerNumber(0);
@@ -225,7 +250,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                 }
             });
             */
-            
+
         } catch (error) {
             console.error('Error adding player to roster:', error);
             setErrorMessage('Failed to add player to roster');
@@ -251,10 +276,21 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             };
 
             // Make the API call to save the roster
-            await axios.post(`${process.env.API_URL}/matches/${match._id}/roster/${teamFlag}`, rosterData, {
+            await axios.put(`${process.env.API_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
+                }
+            });
+
+            // Make API call to save further roster attributes
+            await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                [teamFlag]: {
+                    rosterPublished: rosterPublished
+                }
+            }, {
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
                 }
             });
 
@@ -273,17 +309,17 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
         <Layout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
-                
+
                 {/* Add Player Form */}
                 <div className="bg-white shadow rounded-lg p-6 mb-6">
                     <h2 className="text-lg font-medium mb-4">Add Player to Roster</h2>
-                    
+
                     {errorMessage && (
                         <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4">
                             {errorMessage}
                         </div>
                     )}
-                    
+
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {/* Player Selection */}
                         <div className="col-span-2">
@@ -296,7 +332,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedPlayer ? `${selectedPlayer.firstName} ${selectedPlayer.lastName}` : 'Select a player'}
+                                                    {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Select a player'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -329,7 +365,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                                                             selected ? 'font-semibold' : 'font-normal',
                                                                             'block truncate'
                                                                         )}>
-                                                                            {player.firstName} {player.lastName}
+                                                                            {player.lastName}, {player.firstName}
                                                                         </span>
 
                                                                         {selected ? (
@@ -358,7 +394,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                 )}
                             </Listbox>
                         </div>
-                        
+
                         {/* Jersey Number */}
                         <div>
                             <label htmlFor="player-number" className="block text-sm font-medium text-gray-700 mb-1">
@@ -374,7 +410,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                             />
                         </div>
                     </div>
-                    
+
                     {/* Player Position */}
                     <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -386,7 +422,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                     <div className="relative">
                                         <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                             <span className="block truncate">
-                                                {playerPosition.value} ({playerPosition.key})
+                                                {playerPosition.key} - {playerPosition.value}
                                             </span>
                                             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                 <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -418,7 +454,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                                                     selected ? 'font-semibold' : 'font-normal',
                                                                     'block truncate'
                                                                 )}>
-                                                                    {position.value} ({position.key})
+                                                                    {position.key} - {position.value}
                                                                 </span>
 
                                                                 {selected ? (
@@ -442,7 +478,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                             )}
                         </Listbox>
                     </div>
-                    
+
                     <div className="mt-4 flex justify-end">
                         <button
                             type="button"
@@ -455,7 +491,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                         </button>
                     </div>
                 </div>
-                
+
                 {/* Roster List */}
                 <h3 className="mt-8 text-lg font-medium text-gray-900">Aufstellung</h3>
                 <div className="bg-white shadow rounded-lg mt-4">
@@ -471,7 +507,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                             {player.playerPosition.key}
                                         </div>
                                         <div className="flex-1 text-sm text-gray-900">
-                                            {player.player.firstName} {player.player.lastName}
+                                            {player.player.lastName}, {player.player.firstName}
                                         </div>
                                         <div className="flex-1 text-sm text-gray-500">
                                             {player.passNumber}
@@ -486,7 +522,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                         )}
                     </ul>
                 </div>
-                
+
                 {/* Publish toggle and save button */}
                 <div className="flex items-center justify-between mt-8 bg-white shadow rounded-lg p-6">
                     <div className="flex items-center">

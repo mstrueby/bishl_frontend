@@ -1,9 +1,23 @@
+export interface RosterPlayer {
+  player: {
+    playerId: string;
+    firstName: string;
+    lastName: string;
+    jerseyNumber: number;
+  },
+  playerPosition: {
+    key: string;
+    value: string;
+  },
+  passNumber: string;
+}
+
 interface TeamStats {
   goalsFor: number;
   goalsAgainst: number;
 }
 
-interface Team {
+export interface Team {
   clubId: string;
   clubName: string;
   clubAlias: string;
@@ -15,7 +29,8 @@ interface Team {
   tinyName: string;
   logo: string;
   stats: TeamStats;
-
+  roster?: RosterPlayer[];
+  rosterPublished?: boolean;
 }
 
 export interface Referee {
