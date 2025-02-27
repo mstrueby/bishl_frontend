@@ -26,7 +26,7 @@ interface RosterPageProps {
     team: TeamValues;
     roster: Player[];
     teamFlag: string;
-    allPlayers: PlayerValues[];
+    availablePlayers: PlayerValues[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -54,29 +54,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const teamResponse = await axios.get(`${process.env.API_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
         const team: TeamValues = await teamResponse.data;
 
-        // Fetch roster data
-        const rosterResponse = await axios.get(
+        // Fetch available players
+        const availablePlayersResponse = await axios.get(
             `${process.env.API_URL}/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
             headers: {
                 Authorization: `Bearer ${jwt}`,
             }
         }
         );
-        const rosterData = await rosterResponse.data.results;
-        const roster = Array.isArray(rosterData) ? rosterData : [];
-        
-        // Fetch all available players from the club
-        const allPlayersResponse = await axios.get(
-            `${process.env.API_URL}/players/`, {
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-            },
-            params: {
-                limit: 100,
-            }
-        });
-        
-        const allPlayers = allPlayersResponse.data?.results || [];
+        const availablePlayersResult = await availablePlayersResponse.data.results;
+        const availablePlayers = Array.isArray(availablePlayersResult) ? availablePlayersResult : [];
 
         return {
             props: {
@@ -84,9 +71,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 match,
                 club,
                 team,
-                roster,
+                roster: [],
                 teamFlag,
-                allPlayers
+                availablePlayers: availablePlayers || [],
             }
         };
 
@@ -100,7 +87,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 
 
-const RosterPage = ({ jwt, match, club, team, roster, teamFlag, allPlayers }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
@@ -117,9 +104,9 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, allPlayers }: Ro
     }
 
     // Filter out players that are already in the roster
-    const availablePlayers = allPlayers.filter(player => 
-        !rosterList.some(rp => rp.id === player._id)
-    );
+    //const availablePlayers = allPlayers.filter(player => 
+    //    !rosterList.some(rp => rp.id === player._id)
+    //);
 
     const handleAddPlayer = async () => {
         if (!selectedPlayer) {
