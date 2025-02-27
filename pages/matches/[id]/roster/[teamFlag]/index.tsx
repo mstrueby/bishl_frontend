@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import { Match } from '../../../../../types/MatchValues';
@@ -12,15 +12,18 @@ import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
 
-interface Player {
-    id: string;
-    firstName: string;
-    lastName: string;
-    number: string;
-    position: {
+interface RosterPlayer {
+    player: {
+        playerId: string;
+        firstName: string;
+        lastName: string;
+        jerseyNumber: number;
+    },
+    playerPosition: {
         key: string;
         value: string;
-    };
+    },
+    passNumber: string;
 }
 
 interface RosterPageProps {
@@ -28,7 +31,7 @@ interface RosterPageProps {
     match: Match;
     club: ClubValues;
     team: TeamValues;
-    roster: Player[];
+    roster: RosterPlayer[];
     teamFlag: string;
     availablePlayers: PlayerValues[];
 }
@@ -103,9 +106,9 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
-    const [playerNumber, setPlayerNumber] = useState('');
+    const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
-    const [rosterList, setRosterList] = useState<Player[]>(roster || []);
+    const [rosterList, setRosterList] = useState<RosterPlayer[]>(roster || []);
     const [errorMessage, setErrorMessage] = useState('');
 
     if (loading) {
@@ -137,12 +140,18 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
         try {
             // Here you would normally make an API call to save the player to the roster
             // For now, we'll just update the local state
-            const newPlayer: Player = {
-                id: selectedPlayer._id,
-                firstName: selectedPlayer.firstName,
-                lastName: selectedPlayer.lastName,
-                number: playerNumber,
-                position: playerPosition
+            const newPlayer: RosterPlayer = {
+                player: {
+                    playerId: selectedPlayer._id,
+                    firstName: selectedPlayer.firstName,
+                    lastName: selectedPlayer.lastName,
+                    jerseyNumber: playerNumber,
+                },
+                playerPosition: {
+                    key: playerPosition.key,
+                    value: playerPosition.value,
+                },
+                passNumber: 'DUMMY',
             };
             
             // Add player to roster
@@ -151,7 +160,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             
             // Reset form
             setSelectedPlayer(null);
-            setPlayerNumber('');
+            setPlayerNumber(0);
             setPlayerPosition(playerPositions[0]);
             setErrorMessage('');
 
@@ -274,7 +283,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                 type="text"
                                 id="player-number"
                                 value={playerNumber}
-                                onChange={(e) => setPlayerNumber(e.target.value)}
+                                onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
                                 className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 placeholder="##"
                             />
@@ -363,20 +372,24 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                 </div>
                 
                 {/* Roster List */}
-                <div className="bg-white shadow rounded-lg">
+                <h3 className="mt-8 text-lg font-medium text-gray-900">Aufstellung</h3>
+                <div className="bg-white shadow rounded-lg mt-4">
                     <ul className="divide-y divide-gray-200">
                         {rosterList.length > 0 ? (
                             rosterList.map((player) => (
-                                <li key={player.id} className="px-6 py-4">
+                                <li key={player.player.playerId} className="px-6 py-4">
                                     <div className="flex items-center">
                                         <div className="min-w-12 text-sm font-medium text-gray-900">
-                                            #{player.number}
+                                            #{player.player.jerseyNumber}
+                                        </div>
+                                        <div className="min-w-12 text-sm font-medium text-gray-500">
+                                            {player.playerPosition.key}
                                         </div>
                                         <div className="flex-1 text-sm text-gray-900">
-                                            {player.firstName} {player.lastName}
+                                            {player.player.firstName} {player.player.lastName}
                                         </div>
-                                        <div className="text-sm font-medium text-gray-500">
-                                            {player.position.key}
+                                        <div className="flex-1 text-sm text-gray-500">
+                                            {player.passNumber}
                                         </div>
                                     </div>
                                 </li>
