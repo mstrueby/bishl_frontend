@@ -320,7 +320,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             };
 
             // Make the API call to save the roster
-            await axios.put(`${process.env.API_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
+            const rosterResponse = await axios.put(`${process.env.API_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
@@ -328,7 +328,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             });
 
             // Make API call to save further roster attributes
-            await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+            const publishResponse = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
                 [teamFlag]: {
                     rosterPublished: rosterPublished
                 }
@@ -343,7 +343,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // You could add a success message here if needed
         } catch (error) {
             console.error('Error saving roster:', error);
-            setErrorMessage('Failed to save roster');
+            // Ignore 304 Not Modified errors as they're not actual errors
+            if (axios.isAxiosError(error) && error.response?.status === 304) {
+                console.log('Roster unchanged (304 Not Modified), continuing normally');
+            } else {
+                setErrorMessage('Failed to save roster');
+            }
         } finally {
             setSavingRoster(false);
         }
