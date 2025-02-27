@@ -227,7 +227,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     return (
         <Layout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 className="text-2xl font-bold mb-6">Team Roster: {team.fullName}</h1>
+                <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
                 
                 {/* Add Player Form */}
                 <div className="bg-white shadow rounded-lg p-6 mb-6">
@@ -419,8 +419,8 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                             rosterList.map((player) => (
                                 <li key={player.player.playerId} className="px-6 py-4">
                                     <div className="flex items-center">
-                                        <div className="min-w-12 text-sm font-medium text-gray-900">
-                                            #{player.player.jerseyNumber}
+                                        <div className="min-w-12 text-sm font-semibold text-gray-900">
+                                            {player.player.jerseyNumber}
                                         </div>
                                         <div className="min-w-12 text-sm font-medium text-gray-500">
                                             {player.playerPosition.key}
