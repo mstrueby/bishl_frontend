@@ -588,7 +588,17 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     
                                                     // Add back to available players list if found and not already there
                                                     if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
-                                                        setAvailablePlayersList(prevList => [...prevList, playerToAddBack]);
+                                                        setAvailablePlayersList(prevList => {
+                                                            // Add the player back and sort the list by lastName, then firstName
+                                                            const newList = [...prevList, playerToAddBack];
+                                                            return newList.sort((a, b) => {
+                                                                // First sort by lastName
+                                                                const lastNameComparison = a.lastName.localeCompare(b.lastName);
+                                                                // If lastName is the same, sort by firstName
+                                                                return lastNameComparison !== 0 ? lastNameComparison : 
+                                                                    a.firstName.localeCompare(b.firstName);
+                                                            });
+                                                        });
                                                     }
                                                 }}
                                                 className="text-red-600 hover:text-red-900"
