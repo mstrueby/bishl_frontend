@@ -6,12 +6,27 @@ import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import { Match, RosterPlayer } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
-import { PlayerValues, AssignmentTeam } from '../../../../../types/PlayerValues';
+import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
 
 let BASE_URL = process.env['API_URL'];
+
+interface AvailablePlayer {
+    id: string,
+    firstName: string,
+    lastName: string,
+    displayFirstName: string,
+    displayLastName: string,
+    position: string,
+    fullFaceReq: boolean,
+    source: string,
+    imageUrl: string,
+    imageVisible: boolean,
+    passNo: string,
+    jerseyNo: number,
+}
 
 interface RosterPageProps {
     jwt: string;
@@ -21,11 +36,7 @@ interface RosterPageProps {
     roster: RosterPlayer[];
     rosterPublished: boolean;
     teamFlag: string;
-    availablePlayers: PlayerValues[];
-}
-
-interface Club {
-    teams: Array<{ teamId: string; passNo?: string; jerseyNo?: string }>;
+    availablePlayers: AvailablePlayer[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -73,7 +84,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const team: TeamValues = await teamResponse.data;
 
         // Fetch available players
-        const availablePlayersResponse = await axios.get(
+        const teamPlayerResponse = await axios.get(
             `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
             headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -84,21 +95,30 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
         }
         );
-        const availablePlayersResult = await availablePlayersResponse.data.results;
-        const availablePlayers = Array.isArray(availablePlayersResult) ? availablePlayersResult : [];
+        const teamPlayerResult = await teamPlayerResponse.data.results;
+        const teamPlayers = Array.isArray(teamPlayerResponse) ? teamPlayerResult : [];
 
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
-        const playerDetails = availablePlayers.map(player => {
-            const assignedTeam = player.assignedTeams
-                .flatMap((teams: AssignmentTeam[]) => club.teams)
+        const availablePlayers = teamPlayers.map((teamPlayer: PlayerValues) => {
+            const assignedTeam = teamPlayer.assignedTeams
+                .flatMap((assignment: Assignment) => assignment.teams)
                 .find((team: AssignmentTeam) => team.teamId === matchTeam.teamId);
             return assignedTeam ? {
-                ...player,
+                id: teamPlayer._id,
+                firstName: teamPlayer.firstName,
+                lastName: teamPlayer.lastName,
+                displayFirstName: teamPlayer.displayFirstName,
+                displayLastName: teamPlayer.displayLastName,
+                position: teamPlayer.position,
+                fullFaceReq: teamPlayer.fullFaceReq,
+                source: teamPlayer.source,
+                imageUrl: teamPlayer.imageUrl,
+                imageVisible: teamPlayer.imageVisible,
                 passNo: assignedTeam.passNo,
                 jerseyNo: assignedTeam.jerseyNo
             } : null;
-        }).filter(player => player !== null);
-        console.log("playerDetails", playerDetails)
+        }).filter((player: AvailablePlayer) => player !== null);
+        console.log("availablePlayers", availablePlayers)
 
         return {
             props: {
@@ -138,7 +158,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
-    const [availablePlayersList, setAvailablePlayersList] = useState<PlayerValues[]>(availablePlayers || []);
+    const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
     const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
 
     // Sort roster by position order: C, A, G, F, then by jersey number
@@ -183,9 +203,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             return;
         }
 
+        // Set playerNumber to the jerseyNo from playerDetails if it exists and playerNumber is not set
         if (!playerNumber) {
-            setErrorMessage('Please enter a player number');
-            return;
+            // Find the player in playerDetails
+            const playerDetail = availablePlayers.find(player => player._id === selectedPlayer._id);
+            if (playerDetail && playerDetail.jerseyNo) {
+                setPlayerNumber(parseInt(playerDetail.jerseyNo));
+            } else {
+                setErrorMessage('Please enter a player number');
+                return;
+            }
         }
 
         setLoading(true);
@@ -362,6 +389,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                     )
                                                                 }
                                                                 value={player}
+                                                                onClick={() => {
+                                                                    if (player.jerseyNo) {
+                                                                        setPlayerNumber(parseInt(player.jerseyNo));
+                                                                    }
+                                                                }}
                                                             >
                                                                 {({ selected, active }) => (
                                                                     <>
