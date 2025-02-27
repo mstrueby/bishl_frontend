@@ -342,14 +342,15 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             setErrorMessage('');
             // You could add a success message here if needed
         } catch (error) {
-            console.error('Error saving roster:', error);
             // Ignore 304 Not Modified errors as they're not actual errors
             if (axios.isAxiosError(error) && error.response?.status === 304) {
-                console.log('Roster unchanged (304 Not Modified), continuing normally');
+                console.log('Match not changed (304 Not Modified), continuing normally');
             } else {
-                setErrorMessage('Failed to save roster');
+                console.error('Error saving roster/match:', error);
+                setErrorMessage('Aufstellung konnte nicht gespeichert werden.');
             }
         } finally {
+            console.log("Roster successfully changed")
             setSavingRoster(false);
         }
     };
