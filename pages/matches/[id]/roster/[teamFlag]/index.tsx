@@ -17,6 +17,10 @@ interface Player {
     firstName: string;
     lastName: string;
     number: string;
+    position: {
+        key: string;
+        value: string;
+    };
 }
 
 interface RosterPageProps {
@@ -87,11 +91,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 
 
+// Player position options
+const playerPositions = [
+    { key: 'F', value: 'Feldspieler' },
+    { key: 'G', value: 'Goalie' },
+    { key: 'C', value: 'Captain' },
+    { key: 'A', value: 'Assistant' },
+];
+
 const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers = [] }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState('');
+    const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
     const [rosterList, setRosterList] = useState<Player[]>(roster || []);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -128,7 +141,8 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                 id: selectedPlayer._id,
                 firstName: selectedPlayer.firstName,
                 lastName: selectedPlayer.lastName,
-                number: playerNumber
+                number: playerNumber,
+                position: playerPosition
             };
             
             // Add player to roster
@@ -138,6 +152,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             // Reset form
             setSelectedPlayer(null);
             setPlayerNumber('');
+            setPlayerPosition(playerPositions[0]);
             setErrorMessage('');
 
             // Here you would make the actual API call to update the roster
@@ -266,6 +281,74 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                         </div>
                     </div>
                     
+                    {/* Player Position */}
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Position
+                        </label>
+                        <Listbox value={playerPosition} onChange={setPlayerPosition}>
+                            {({ open }) => (
+                                <>
+                                    <div className="relative">
+                                        <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                            <span className="block truncate">
+                                                {playerPosition.value} ({playerPosition.key})
+                                            </span>
+                                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                            </span>
+                                        </Listbox.Button>
+
+                                        <Transition
+                                            show={open}
+                                            as={Fragment}
+                                            leave="transition ease-in duration-100"
+                                            leaveFrom="opacity-100"
+                                            leaveTo="opacity-0"
+                                        >
+                                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                {playerPositions.map((position) => (
+                                                    <Listbox.Option
+                                                        key={position.key}
+                                                        className={({ active }) =>
+                                                            classNames(
+                                                                active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                                                'relative cursor-default select-none py-2 pl-3 pr-9'
+                                                            )
+                                                        }
+                                                        value={position}
+                                                    >
+                                                        {({ selected, active }) => (
+                                                            <>
+                                                                <span className={classNames(
+                                                                    selected ? 'font-semibold' : 'font-normal',
+                                                                    'block truncate'
+                                                                )}>
+                                                                    {position.value} ({position.key})
+                                                                </span>
+
+                                                                {selected ? (
+                                                                    <span
+                                                                        className={classNames(
+                                                                            active ? 'text-white' : 'text-indigo-600',
+                                                                            'absolute inset-y-0 right-0 flex items-center pr-4'
+                                                                        )}
+                                                                    >
+                                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                                    </span>
+                                                                ) : null}
+                                                            </>
+                                                        )}
+                                                    </Listbox.Option>
+                                                ))}
+                                            </Listbox.Options>
+                                        </Transition>
+                                    </div>
+                                </>
+                            )}
+                        </Listbox>
+                    </div>
+                    
                     <div className="mt-4 flex justify-end">
                         <button
                             type="button"
@@ -291,6 +374,9 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                         </div>
                                         <div className="flex-1 text-sm text-gray-900">
                                             {player.firstName} {player.lastName}
+                                        </div>
+                                        <div className="text-sm font-medium text-gray-500">
+                                            {player.position.key}
                                         </div>
                                     </div>
                                 </li>
