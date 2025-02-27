@@ -1,4 +1,3 @@
-
 import React, { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
@@ -86,7 +85,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
         const playerDetails = availablePlayers.map(player => {
-            const assignedTeam = player.assignedTeams.clubs.flatMap((club: { teams: Array<{ teamId: string; passNo?: string; jerseyNo?: string }> }) => club.teams)
+            const assignedTeam = player.assignedTeams
+                .flatMap(club => club.teams)
                 .find((team: { teamId: string; passNo?: string; jerseyNo?: string }) => team.teamId === matchTeam.teamId);
             return assignedTeam ? {
                 ...player,
