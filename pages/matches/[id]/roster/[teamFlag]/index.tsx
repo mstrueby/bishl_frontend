@@ -14,7 +14,7 @@ import { classNames } from '../../../../../tools/utils';
 let BASE_URL = process.env['API_URL'];
 
 interface AvailablePlayer {
-    id: string,
+    _id: string,
     firstName: string,
     lastName: string,
     displayFirstName: string,
@@ -95,21 +95,32 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
         }
         );
-        const teamPlayerResult = await teamPlayerResponse.data.results;
-        const teamPlayers = Array.isArray(teamPlayerResponse) ? teamPlayerResult : [];
+        const teamPlayerResult = teamPlayerResponse.data.results;
+        const teamPlayers = Array.isArray(teamPlayerResult) ? teamPlayerResult : [];
+
+        // Debug log to check what's coming back
+        console.log("Team players count:", teamPlayers.length);
 
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
         const availablePlayers = teamPlayers.map((teamPlayer: PlayerValues) => {
+            // Check if assignedTeams exists and is an array
+            if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
+                console.log("Player missing assignedTeams:", teamPlayer._id);
+                return null;
+            }
+
+            // Find the team assignment that matches the target team ID
             const assignedTeam = teamPlayer.assignedTeams
-                .flatMap((assignment: Assignment) => assignment.teams)
-                .find((team: AssignmentTeam) => team.teamId === matchTeam.teamId);
+                .flatMap((assignment: Assignment) => assignment.teams || [])
+                .find((team: AssignmentTeam) => team && team.teamId === matchTeam.teamId);
+
             return assignedTeam ? {
-                id: teamPlayer._id,
+                _id: teamPlayer._id,
                 firstName: teamPlayer.firstName,
                 lastName: teamPlayer.lastName,
                 displayFirstName: teamPlayer.displayFirstName,
                 displayLastName: teamPlayer.displayLastName,
-                position: teamPlayer.position,
+                position: teamPlayer.position || 'Skater',
                 fullFaceReq: teamPlayer.fullFaceReq,
                 source: teamPlayer.source,
                 imageUrl: teamPlayer.imageUrl,
@@ -117,7 +128,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 passNo: assignedTeam.passNo,
                 jerseyNo: assignedTeam.jerseyNo
             } : null;
-        }).filter((player: AvailablePlayer) => player !== null);
+        }).filter((player: AvailablePlayer | null) => player !== null);
+        
+        console.log("Available players for roster:", availablePlayers.length);
         console.log("availablePlayers", availablePlayers)
 
         return {
@@ -155,7 +168,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
-    const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
+    const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
     const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
@@ -231,7 +244,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     key: playerPosition.key,
                     value: playerPosition.value,
                 },
-                passNumber: 'DUMMY',
+                passNumber: selectedPlayer.passNo,
             };
 
             // Add player to roster
@@ -307,7 +320,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             };
 
             // Make the API call to save the roster
-            await axios.put(`${process.env.API_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
+            const rosterResponse = await axios.put(`${process.env.API_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
@@ -315,7 +328,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             });
 
             // Make API call to save further roster attributes
-            await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+            const publishResponse = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
                 [teamFlag]: {
                     rosterPublished: rosterPublished
                 }
@@ -329,9 +342,15 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             setErrorMessage('');
             // You could add a success message here if needed
         } catch (error) {
-            console.error('Error saving roster:', error);
-            setErrorMessage('Failed to save roster');
+            // Ignore 304 Not Modified errors as they're not actual errors
+            if (axios.isAxiosError(error) && error.response?.status === 304) {
+                console.log('Match not changed (304 Not Modified), continuing normally');
+            } else {
+                console.error('Error saving roster/match:', error);
+                setErrorMessage('Aufstellung konnte nicht gespeichert werden.');
+            }
         } finally {
+            console.log("Roster successfully changed")
             setSavingRoster(false);
         }
     };
@@ -547,6 +566,29 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         </div>
                                         <div className="flex-1 text-sm text-gray-500">
                                             {player.passNumber}
+                                        </div>
+                                        <div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    // Find the player in availablePlayers to add back to the list
+                                                    const playerToAddBack = availablePlayers.find(p => p._id === player.player.playerId);
+                                                    
+                                                    // Remove from roster
+                                                    const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
+                                                    setRosterList(updatedRoster);
+                                                    
+                                                    // Add back to available players if found
+                                                    if (playerToAddBack) {
+                                                        setAvailablePlayersList(prevList => [...prevList, playerToAddBack]);
+                                                    }
+                                                }}
+                                                className="text-red-600 hover:text-red-900"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </li>
