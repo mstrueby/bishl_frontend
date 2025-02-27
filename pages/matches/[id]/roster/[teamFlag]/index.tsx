@@ -14,7 +14,7 @@ import { classNames } from '../../../../../tools/utils';
 let BASE_URL = process.env['API_URL'];
 
 interface AvailablePlayer {
-    id: string,
+    _id: string,
     firstName: string,
     lastName: string,
     displayFirstName: string,
@@ -113,15 +113,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             const assignedTeam = teamPlayer.assignedTeams
                 .flatMap((assignment: Assignment) => assignment.teams || [])
                 .find((team: AssignmentTeam) => team && team.teamId === matchTeam.teamId);
-            
+
             return assignedTeam ? {
                 _id: teamPlayer._id,
-                id: teamPlayer._id,
                 firstName: teamPlayer.firstName,
                 lastName: teamPlayer.lastName,
                 displayFirstName: teamPlayer.displayFirstName,
                 displayLastName: teamPlayer.displayLastName,
-                position: teamPlayer.position,
+                position: teamPlayer.position || 'Skater',
                 fullFaceReq: teamPlayer.fullFaceReq,
                 source: teamPlayer.source,
                 imageUrl: teamPlayer.imageUrl,
@@ -169,7 +168,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
-    const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
+    const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
     const [playerNumber, setPlayerNumber] = useState(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
     const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
@@ -245,7 +244,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     key: playerPosition.key,
                     value: playerPosition.value,
                 },
-                passNumber: 'DUMMY',
+                passNumber: selectedPlayer.passNo,
             };
 
             // Add player to roster
