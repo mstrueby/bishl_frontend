@@ -95,15 +95,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
         }
         );
-        const teamPlayerResult = await teamPlayerResponse.data.results;
-        const teamPlayers = Array.isArray(teamPlayerResponse) ? teamPlayerResult : [];
+        const teamPlayerResult = teamPlayerResponse.data.results;
+        const teamPlayers = Array.isArray(teamPlayerResult) ? teamPlayerResult : [];
+
+        // Debug log to check what's coming back
+        console.log("Team players count:", teamPlayers.length);
 
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
         const availablePlayers = teamPlayers.map((teamPlayer: PlayerValues) => {
+            // Check if assignedTeams exists and is an array
+            if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
+                console.log("Player missing assignedTeams:", teamPlayer._id);
+                return null;
+            }
+
+            // Find the team assignment that matches the target team ID
             const assignedTeam = teamPlayer.assignedTeams
-                .flatMap((assignment: Assignment) => assignment.teams)
-                .find((team: AssignmentTeam) => team.teamId === matchTeam.teamId);
+                .flatMap((assignment: Assignment) => assignment.teams || [])
+                .find((team: AssignmentTeam) => team && team.teamId === matchTeam.teamId);
+            
             return assignedTeam ? {
+                _id: teamPlayer._id,
                 id: teamPlayer._id,
                 firstName: teamPlayer.firstName,
                 lastName: teamPlayer.lastName,
@@ -117,7 +129,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 passNo: assignedTeam.passNo,
                 jerseyNo: assignedTeam.jerseyNo
             } : null;
-        }).filter((player: AvailablePlayer) => player !== null);
+        }).filter((player: AvailablePlayer | null) => player !== null);
+        
+        console.log("Available players for roster:", availablePlayers.length);
         console.log("availablePlayers", availablePlayers)
 
         return {
