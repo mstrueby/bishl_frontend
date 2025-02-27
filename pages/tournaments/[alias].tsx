@@ -92,26 +92,25 @@ interface Tournament {
 export default function Tournament({
   tournament
 }: {
-  tournament: Tournament | null
+  tournament: Tournament
 }) {
-  const router = useRouter();
-
-  // Initialize all hooks at the top level before any conditionals
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
-  const [selectedSeason, setSelectedSeason] = useState<Season>({} as Season);
+
+  let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
+  const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
   const [rounds, setRounds] = useState<Round[]>([]);
-  const [selectedRound, setSelectedRound] = useState<Round>({} as Round);
+  const [selectedRound, setSelectedRound] = useState({} as Round);
   const [matchdays, setMatchdays] = useState<Matchday[]>([]);
-  const [selectedMatchday, setSelectedMatchday] = useState<Matchday>({} as Matchday);
+  const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
   const [matches, setMatches] = useState<Match[]>([]);
+
   const [activeTab, setActiveTab] = useState('matches');
   const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
 
-  const seasons = tournament?.seasons.sort((a, b) => b.name.localeCompare(a.name)) || [];
-  const initialSeasons = seasons;
+  const router = useRouter();
 
   useEffect(() => {
     setIsLoadingInitial(true);
@@ -131,100 +130,90 @@ export default function Tournament({
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      if (tournament?.alias && selectedSeason?.alias) {
-        fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
-          .then((response) => response.json())
-          .then((data) => {
-            if (Array.isArray(data)) {
-              const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-              setRounds(sortedData);
-              setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
-            } else {
-              console.error('Received invalid data format for rounds');
-              setRounds([]);
-              setSelectedRound({} as Round);
-            }
-          })
-          .finally(() => {
-            setIsLoadingRounds(false);
-            setActiveTab('matches');
-          });
-      }
+      fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+            setRounds(sortedData);
+            setSelectedRound(sortedData[sortedData.length - 1] || {} as Round);
+          } else {
+            console.error('Received invalid data format for rounds');
+            setRounds([]);
+            setSelectedRound({} as Round);
+          }
+        })
+        .finally(() => {
+          setIsLoadingRounds(false);
+          setActiveTab('matches');
+        });
     }
-  }, [selectedSeason, tournament?.alias]);
+  }, [selectedSeason, tournament.alias]);
 
   useEffect(() => {
     if (selectedRound.name) {
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      if (process.env.API_URL && tournament?.alias && selectedSeason?.alias && selectedRound?.alias) {
-        fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
-          .then((response) => response.json())
-          .then((data) => {
-            if (Array.isArray(data)) {
-              if (data.length === 0) {
-                setMatchdays([]);
-                setSelectedMatchday({} as Matchday);
-                setIsLoadingMatches(false);
-                return;
-              }
-
-              const sortedData = data.sort((a: Matchday, b: Matchday) => {
-                if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
-                  return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-                } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
-                  return a.name.localeCompare(b.name);
-                }
-                return 0;
-              });
-              setMatchdays(sortedData);
-
-              const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
-                ? sortedData[0]
-                : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
-                  .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
-
-              setSelectedMatchday(selectedMd || {} as Matchday);
-            } else {
-              console.error('Received invalid data format for matchdays');
+      fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            if (data.length === 0) {
               setMatchdays([]);
               setSelectedMatchday({} as Matchday);
               setIsLoadingMatches(false);
+              return;
             }
-          })
-          .catch((error) => {
-            console.error('Error fetching matchdays:', error);
+
+            const sortedData = data.sort((a: Matchday, b: Matchday) => {
+              if (selectedRound.matchdaysSortedBy.key === 'STARTDATE') {
+                return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+              } else if (selectedRound.matchdaysSortedBy.key === 'NAME') {
+                return a.name.localeCompare(b.name);
+              }
+              return 0;
+            });
+            setMatchdays(sortedData);
+
+            const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
+              ? sortedData[0]
+              : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
+                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
+
+            setSelectedMatchday(selectedMd || {} as Matchday);
+          } else {
+            console.error('Received invalid data format for matchdays');
             setMatchdays([]);
             setSelectedMatchday({} as Matchday);
             setIsLoadingMatches(false);
-          })
-          .finally(() => {
-            setIsLoadingMatchdays(false);
-            setActiveTab('matches');
-            setActiveMatchdayTab('matches');
-          });
-      } else {
-        setIsLoadingMatchdays(false);
-        setIsLoadingMatches(false);
-      }
-    }
-  }, [selectedRound, tournament?.alias, selectedSeason?.alias, setActiveTab, setActiveMatchdayTab]);
-
-  useEffect(() => {
-    if (selectedMatchday?.name) {
-      setIsLoadingMatches(true);
-      if (selectedMatchday?.alias && tournament?.alias && selectedSeason?.alias && selectedRound?.alias) {
-        fetch(`${process.env.API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
-          .then((response) => response.json())
-          .then((data) => setMatches(data))
-          .catch((error) => console.error('Error fetching matches:', error));
-      } else {
-        setMatches([]);
-      }
-      
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching matchdays:', error);
+          setMatchdays([]);
+          setSelectedMatchday({} as Matchday);
+          setIsLoadingMatches(false);
+        })
+        .finally(() => {
+          setIsLoadingMatchdays(false);
+          setActiveTab('matches');
+          setActiveMatchdayTab('matches');
+        });
+    } else {
+      setIsLoadingMatchdays(false);
       setIsLoadingMatches(false);
     }
-  }, [selectedMatchday, tournament?.alias, selectedSeason?.alias, selectedRound?.alias]);
+  }, [selectedRound, tournament.alias, selectedSeason.alias]);
+
+  useEffect(() => {
+    if (selectedMatchday.name) {
+      setIsLoadingMatches(true);
+      fetch(`${process.env.API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
+        .then((response) => response.json())
+        .then((data) => setMatches(data))
+        .finally(() => setIsLoadingMatches(false));
+    }
+  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
@@ -609,20 +598,12 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const res = await fetch(`${process.env.API_URL}/tournaments/`);
-    const allTournamentsData = await res.json();
-    const paths = allTournamentsData.map((tournament: Tournament) => ({
-      params: { alias: tournament.alias || '' },
-    })).filter((path: { params: { alias: string } }) => path.params.alias);
-    return { 
-      paths, 
-      fallback: true // Change to true to handle loading state
-    };
-  } catch (error) {
-    console.error('Error in getStaticPaths:', error);
-    return { paths: [], fallback: true };
-  }
+  const res = await fetch(`${process.env.API_URL}/tournaments/`);
+  const allTournamentsData = await res.json();
+  const paths = allTournamentsData.map((tournament: Tournament) => ({
+    params: { alias: tournament.alias },
+  }));
+  return { paths, fallback: 'blocking' };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {

@@ -169,9 +169,9 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
       title: club.name,
       alias: club.alias,
       image: {
-        src: club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
-        width: 32,
-        height: 32,
+        src: club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.svg',
+        width: 48,
+        height: 48,
         gravity: 'center',
         className: 'object-contain',
         radius: 0,

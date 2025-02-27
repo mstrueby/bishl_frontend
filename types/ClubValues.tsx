@@ -10,6 +10,7 @@ export interface TeamValues {
   teamNumber: number;
   active: boolean;
   external: boolean;
+  logoUrl: string;
   ishdId: string;
   legacyId?: number;
 }

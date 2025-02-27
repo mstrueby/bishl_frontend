@@ -12,7 +12,7 @@ import DataList from '../../../components/admin/ui/DataList';
 import Pagination from '../../../components/ui/Pagination';
 import SearchBox from '../../../components/ui/SearchBox';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface PlayersProps {
   jwt: string,

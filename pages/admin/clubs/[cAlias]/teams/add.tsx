@@ -82,6 +82,7 @@ export default function Add({ jwt, cAlias}: AddProps) {
     teamNumber: 1,
     active: false,
     external: false,
+    logoUrl: '',
     ishdId: '',
     legacyId: 0,
   };

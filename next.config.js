@@ -16,18 +16,8 @@ const nextConfig = {
   },
   env: {
     API_URL: process.env.NODE_ENV === 'production' 
-      ? 'https://api.bishl.de'  // Replace with your production API URL
-      : process.env.API_URL,
-  },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-      };
-    }
-    return config;
-  },
+      ? 'https://api.bishl.de' : process.env.API_URL,
+  }
 }
 
 module.exports = nextConfig
