@@ -1,13 +1,12 @@
-
 import React, { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
-import { Match, RosterPlayer } from '../../../../../types/MatchValues';
+import axios from 'axios';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
-import axios from 'axios';
+import { Match, RosterPlayer } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
-import { PlayerValues } from '../../../../../types/PlayerValues';
+import { PlayerValues, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
@@ -23,6 +22,10 @@ interface RosterPageProps {
     rosterPublished: boolean;
     teamFlag: string;
     availablePlayers: PlayerValues[];
+}
+
+interface Club {
+    teams: Array<{ teamId: string; passNo?: string; jerseyNo?: string }>;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -86,8 +89,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
         const playerDetails = availablePlayers.map(player => {
-            const assignedTeam = player.assignedTeams.clubs.flatMap((club: { teams: Array<{ teamId: string; passNo?: string; jerseyNo?: string }> }) => club.teams)
-                .find((team: { teamId: string; passNo?: string; jerseyNo?: string }) => team.teamId === matchTeam.teamId);
+            const assignedTeam = player.assignedTeams
+                .flatMap((teams: AssignmentTeam[]) => club.teams)
+                .find((team: AssignmentTeam) => team.teamId === matchTeam.teamId);
             return assignedTeam ? {
                 ...player,
                 passNo: assignedTeam.passNo,
