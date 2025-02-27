@@ -92,7 +92,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             },
             params: {
                 sortby: 'lastName',
-                all: 'false'
+                active: 'true'
             }
         }
         );
@@ -130,13 +130,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 jerseyNo: assignedTeam.jerseyNo
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
-        
+
         // Keep both the full list and a filtered list of available players
         const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
-        const filteredAvailablePlayers = availablePlayers.filter(player => 
+        const filteredAvailablePlayers = availablePlayers.filter(player =>
             !rosterPlayerIds.includes(player._id)
         );
-        
+
         console.log("All available players:", availablePlayers.length);
         console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
 
@@ -177,7 +177,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
-    const [playerNumber, setPlayerNumber] = useState(0);
+    const [playerNumber, setPlayerNumber] = useState<number>(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
     const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
     const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
@@ -229,10 +229,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Find the player in playerDetails
             const playerDetail = availablePlayers.find(player => player._id === selectedPlayer._id);
             if (playerDetail && playerDetail.jerseyNo) {
-                setPlayerNumber(parseInt(playerDetail.jerseyNo));
-            } else {
-                setErrorMessage('Please enter a player number');
-                return;
+                setPlayerNumber(playerDetail.jerseyNo);
             }
         }
 
@@ -312,10 +309,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     };
 
     const handleSaveRoster = async () => {
-        if (rosterList.length === 0) {
-            setErrorMessage('Cannot save an empty roster');
-            return;
-        }
+        //if (rosterList.length === 0) {
+        //    setErrorMessage('Cannot save an empty roster');
+        //    return;
+        //}
 
         setSavingRoster(true);
         setErrorMessage('');
@@ -581,11 +578,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                 onClick={() => {
                                                     // Find the player in the complete list of all players
                                                     const playerToAddBack = allAvailablePlayers.find(p => p._id === player.player.playerId);
-                                                    
+
                                                     // Remove from roster
                                                     const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
                                                     setRosterList(updatedRoster);
-                                                    
+
                                                     // Add back to available players list if found and not already there
                                                     if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
                                                         setAvailablePlayersList(prevList => {
@@ -595,7 +592,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                 // First sort by lastName
                                                                 const lastNameComparison = a.lastName.localeCompare(b.lastName);
                                                                 // If lastName is the same, sort by firstName
-                                                                return lastNameComparison !== 0 ? lastNameComparison : 
+                                                                return lastNameComparison !== 0 ? lastNameComparison :
                                                                     a.firstName.localeCompare(b.firstName);
                                                             });
                                                         });
