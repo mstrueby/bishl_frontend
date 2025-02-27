@@ -90,7 +90,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
         const playerDetails = availablePlayers.map(player => {
             const assignedTeam = player.assignedTeams
-                .flatMap((teams: AssignmentTeam[]) => club.teams)
+                .flatMap((club: Club) => club.teams)
                 .find((team: AssignmentTeam) => team.teamId === matchTeam.teamId);
             return assignedTeam ? {
                 ...player,
@@ -183,9 +183,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             return;
         }
 
+        // Set playerNumber to the jerseyNo from playerDetails if it exists and playerNumber is not set
         if (!playerNumber) {
-            setErrorMessage('Please enter a player number');
-            return;
+            // Find the player in playerDetails
+            const playerDetail = availablePlayers.find(player => player._id === selectedPlayer._id);
+            if (playerDetail && playerDetail.jerseyNo) {
+                setPlayerNumber(parseInt(playerDetail.jerseyNo));
+            } else {
+                setErrorMessage('Please enter a player number');
+                return;
+            }
         }
 
         setLoading(true);
@@ -362,6 +369,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                     )
                                                                 }
                                                                 value={player}
+                                                                onClick={() => {
+                                                                    if (player.jerseyNo) {
+                                                                        setPlayerNumber(parseInt(player.jerseyNo));
+                                                                    }
+                                                                }}
                                                             >
                                                                 {({ selected, active }) => (
                                                                     <>
