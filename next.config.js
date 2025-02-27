@@ -16,11 +16,7 @@ const nextConfig = {
   },
   env: {
     API_URL: process.env.NODE_ENV === 'production' 
-      ? 'https://api.bishl.de'
-      : process.env.API_URL,
-  },
-  experimental: {
-    esmExternals: 'loose'
+      ? 'https://api.bishl.de' : process.env.API_URL,
   }
 }
 
