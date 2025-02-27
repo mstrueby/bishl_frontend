@@ -1,6 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
 import { Match } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 
@@ -11,42 +12,15 @@ interface Player {
     number: string;
 }
 
-const RosterPage = () => {
+interface RosterPageProps {
+    match: Match;
+    roster: Player[];
+    teamFlag: string;
+}
+
+const RosterPage = ({ match, roster, teamFlag }: RosterPageProps) => {
     const router = useRouter();
-    const { id, teamFlag } = router.query;
-    const [match, setMatch] = useState<Match | null>(null);
-    const [roster, setRoster] = useState<Player[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (id) {
-            const fetchMatchAndRoster = async () => {
-                try {
-                    // Fetch match data
-                    const matchResponse = await fetch(`${process.env.API_URL}/matches/${id}`);
-                    const matchData: Match = await matchResponse.json();
-                    setMatch(matchData);
-
-                    // Determine which team's roster to fetch
-                    const team = teamFlag === 'home' ? matchData.home : matchData.away;
-                    
-                    // Fetch roster data
-                    const rosterResponse = await fetch(
-                        `${process.env.API_URL}/players/clubs/${team.clubAlias}/teams/${team.teamAlias}`
-                    );
-                    const rosterData = await rosterResponse.json();
-                    setRoster(Array.isArray(rosterData) ? rosterData : []);
-                    
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            fetchMatchAndRoster();
-        }
-    }, [id, teamFlag]);
+    const [loading, setLoading] = useState(false);
 
     if (loading) {
         return <Layout><div>Loading...</div></Layout>;
@@ -81,6 +55,59 @@ const RosterPage = () => {
             </div>
         </Layout>
     );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { id, teamFlag } = context.params as { id: string; teamFlag: string };
+    
+    try {
+        // Fetch match data
+        const matchResponse = await fetch(`${process.env.API_URL}/matches/${id}`);
+        
+        if (!matchResponse.ok) {
+            return { 
+                notFound: true 
+            };
+        }
+        
+        const match: Match = await matchResponse.json();
+        
+        // Determine which team's roster to fetch
+        const team = teamFlag === 'home' ? match.home : match.away;
+        
+        // Fetch roster data
+        const rosterResponse = await fetch(
+            `${process.env.API_URL}/players/clubs/${team.clubAlias}/teams/${team.teamAlias}`
+        );
+        
+        if (!rosterResponse.ok) {
+            // Return match but with empty roster if roster fetch fails
+            return {
+                props: {
+                    match,
+                    roster: [],
+                    teamFlag
+                }
+            };
+        }
+        
+        const rosterData = await rosterResponse.json();
+        const roster = Array.isArray(rosterData) ? rosterData : [];
+        
+        return {
+            props: {
+                match,
+                roster,
+                teamFlag
+            }
+        };
+        
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return { 
+            notFound: true 
+        };
+    }
 };
 
 export default RosterPage;
