@@ -18,9 +18,6 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
   const { user } = useAuth();
   const router = useRouter();
 
-  showLinkHome=false;
-  showLinkAway=false;
-
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
