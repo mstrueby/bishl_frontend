@@ -17,6 +17,9 @@ interface Player {
     firstName: string;
     lastName: string;
     number: string;
+    isCaptain: boolean;
+    isAssistant: boolean;
+    isGoalie: boolean;
 }
 
 interface RosterPageProps {
@@ -92,6 +95,9 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
     const [loading, setLoading] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState('');
+    const [isCaptain, setIsCaptain] = useState(false);
+    const [isAssistant, setIsAssistant] = useState(false);
+    const [isGoalie, setIsGoalie] = useState(false);
     const [rosterList, setRosterList] = useState<Player[]>(roster || []);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -128,7 +134,10 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                 id: selectedPlayer._id,
                 firstName: selectedPlayer.firstName,
                 lastName: selectedPlayer.lastName,
-                number: playerNumber
+                number: playerNumber,
+                isCaptain: isCaptain,
+                isAssistant: isAssistant,
+                isGoalie: isGoalie
             };
             
             // Add player to roster
@@ -138,6 +147,9 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
             // Reset form
             setSelectedPlayer(null);
             setPlayerNumber('');
+            setIsCaptain(false);
+            setIsAssistant(false);
+            setIsGoalie(false);
             setErrorMessage('');
 
             // Here you would make the actual API call to update the roster
@@ -265,6 +277,66 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                             />
                         </div>
                     </div>
+
+                    {/* Position Toggles */}
+                    <div className="mt-4 grid grid-cols-3 gap-4">
+                        {/* Captain Toggle */}
+                        <div className="flex items-center">
+                            <button
+                                type="button"
+                                className={`${
+                                    isCaptain ? 'bg-indigo-600' : 'bg-gray-200'
+                                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                onClick={() => setIsCaptain(!isCaptain)}
+                            >
+                                <span className="sr-only">Captain</span>
+                                <span
+                                    className={`${
+                                        isCaptain ? 'translate-x-5' : 'translate-x-0'
+                                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                />
+                            </button>
+                            <span className="ml-3 text-sm">Captain (C)</span>
+                        </div>
+
+                        {/* Assistant Toggle */}
+                        <div className="flex items-center">
+                            <button
+                                type="button"
+                                className={`${
+                                    isAssistant ? 'bg-indigo-600' : 'bg-gray-200'
+                                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                onClick={() => setIsAssistant(!isAssistant)}
+                            >
+                                <span className="sr-only">Assistant</span>
+                                <span
+                                    className={`${
+                                        isAssistant ? 'translate-x-5' : 'translate-x-0'
+                                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                />
+                            </button>
+                            <span className="ml-3 text-sm">Assistant (A)</span>
+                        </div>
+
+                        {/* Goalie Toggle */}
+                        <div className="flex items-center">
+                            <button
+                                type="button"
+                                className={`${
+                                    isGoalie ? 'bg-indigo-600' : 'bg-gray-200'
+                                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                onClick={() => setIsGoalie(!isGoalie)}
+                            >
+                                <span className="sr-only">Goalie</span>
+                                <span
+                                    className={`${
+                                        isGoalie ? 'translate-x-5' : 'translate-x-0'
+                                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                />
+                            </button>
+                            <span className="ml-3 text-sm">Goalie (G)</span>
+                        </div>
+                    </div>
                     
                     <div className="mt-4 flex justify-end">
                         <button
@@ -291,6 +363,11 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                         </div>
                                         <div className="flex-1 text-sm text-gray-900">
                                             {player.firstName} {player.lastName}
+                                            <span className="ml-2">
+                                                {player.isCaptain && <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 mr-1">C</span>}
+                                                {player.isAssistant && <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mr-1">A</span>}
+                                                {player.isGoalie && <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-700/10">G</span>}
+                                            </span>
                                         </div>
                                     </div>
                                 </li>
