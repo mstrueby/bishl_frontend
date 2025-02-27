@@ -130,8 +130,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
         
-        console.log("Available players for roster:", availablePlayers.length);
-        console.log("availablePlayers", availablePlayers)
+        // Filter out players that are already in the roster
+        const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
+        const filteredAvailablePlayers = availablePlayers.filter(player => 
+            !rosterPlayerIds.includes(player._id)
+        );
+        
+        console.log("Available players for roster:", filteredAvailablePlayers.length);
+        console.log("filteredAvailablePlayers", filteredAvailablePlayers);
 
         return {
             props: {
@@ -142,7 +148,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 roster: matchTeam.roster || [],
                 rosterPublished: matchTeam.rosterPublished || false,
                 teamFlag,
-                availablePlayers: availablePlayers || [],
+                availablePlayers: filteredAvailablePlayers || [],
             }
         };
 
