@@ -577,15 +577,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    // Find the player in availablePlayers to add back to the list
+                                                    // Find the player details from the original availablePlayers array 
+                                                    // This contains all players, including those already in the roster
                                                     const playerToAddBack = availablePlayers.find(p => p._id === player.player.playerId);
                                                     
                                                     // Remove from roster
                                                     const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
                                                     setRosterList(updatedRoster);
                                                     
-                                                    // Add back to available players if found
-                                                    if (playerToAddBack) {
+                                                    // Add back to available players list if found and not already there
+                                                    if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
                                                         setAvailablePlayersList(prevList => [...prevList, playerToAddBack]);
                                                     }
                                                 }}
