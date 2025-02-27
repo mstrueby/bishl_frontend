@@ -87,12 +87,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 
 
-const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers = [] }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<PlayerValues | null>(null);
     const [playerNumber, setPlayerNumber] = useState('');
-    const [rosterList, setRosterList] = useState<Player[]>(roster);
+    const [rosterList, setRosterList] = useState<Player[]>(roster || []);
     const [errorMessage, setErrorMessage] = useState('');
 
     if (loading) {
@@ -202,7 +202,7 @@ const RosterPage = ({ jwt, match, club, team, roster, teamFlag, availablePlayers
                                                 leaveTo="opacity-0"
                                             >
                                                 <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                    {availablePlayers.length > 0 ? (
+                                                    {Array.isArray(availablePlayers) && availablePlayers.length > 0 ? (
                                                         availablePlayers.map((player) => (
                                                             <Listbox.Option
                                                                 key={player._id}
