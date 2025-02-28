@@ -230,6 +230,30 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             return;
         }
 
+        // Check if trying to add an Assistant when one already exists
+        if (playerPosition.key === 'A' && rosterList.some(player => player.playerPosition.key === 'A')) {
+            setErrorMessage('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
+            return;
+        }
+
+        // Check if trying to add more than 2 Goalies
+        if (playerPosition.key === 'G') {
+            const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
+            if (goalieCount >= 2) {
+                setErrorMessage('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
+                return;
+            }
+        }
+
+        // Check if trying to add more than 14 Feldspieler
+        if (playerPosition.key === 'F') {
+            const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
+            if (feldspielerCount >= 14) {
+                setErrorMessage('Es können maximal 14 Feldspieler (F) eingetragen werden');
+                return;
+            }
+        }
+
         // Set playerNumber to the jerseyNo from playerDetails if it exists and playerNumber is not set
         if (!playerNumber) {
             // Find the player in playerDetails
