@@ -166,10 +166,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 // Player position options
 const playerPositions = [
-    { key: 'F', value: 'Feldspieler' },
-    { key: 'G', value: 'Goalie' },
     { key: 'C', value: 'Captain' },
     { key: 'A', value: 'Assistant' },
+    { key: 'G', value: 'Goalie' },
+    { key: 'F', value: 'Feldspieler' },
 ];
 
 const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [] }: RosterPageProps) => {
@@ -221,6 +221,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const handleAddPlayer = async () => {
         if (!selectedPlayer) {
             setErrorMessage('Please select a player');
+            return;
+        }
+
+        // Check if trying to add a Captain when one already exists
+        if (playerPosition.key === 'C' && rosterList.some(player => player.playerPosition.key === 'C')) {
+            setErrorMessage('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
             return;
         }
 
