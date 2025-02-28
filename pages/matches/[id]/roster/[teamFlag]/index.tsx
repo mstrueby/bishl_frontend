@@ -166,10 +166,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 // Player position options
 const playerPositions = [
-    { key: 'F', value: 'Feldspieler' },
-    { key: 'G', value: 'Goalie' },
     { key: 'C', value: 'Captain' },
     { key: 'A', value: 'Assistant' },
+    { key: 'G', value: 'Goalie' },
+    { key: 'F', value: 'Feldspieler' },
 ];
 
 const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [] }: RosterPageProps) => {
@@ -579,45 +579,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                             {player.passNumber}
                                         </div>
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="ml-3 text-gray-500 hover:text-indigo-600 cursor-pointer"
-                                                onClick={() => {
-                                                    // Get next position in rotation (F->G->C->A->F)
-                                                    const positionOrder = ['F', 'G', 'C', 'A'];
-                                                    const currentIndex = positionOrder.indexOf(player.playerPosition.key);
-                                                    const nextIndex = (currentIndex + 1) % positionOrder.length;
-                                                    const nextKey = positionOrder[nextIndex];
-                                                    
-                                                    // If trying to change to Captain, check if a Captain already exists
-                                                    if (nextKey === 'C' && rosterList.some(p => p.playerPosition.key === 'C' && p.player.playerId !== player.player.playerId)) {
-                                                        setErrorMessage('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
-                                                        return;
-                                                    }
-                                                    
-                                                    // Get corresponding position object
-                                                    const nextPosition = playerPositions.find(pos => pos.key === nextKey);
-                                                    if (!nextPosition) return;
-                                                    
-                                                    // Create updated player with new position
-                                                    const updatedPlayer = {
-                                                        ...player,
-                                                        playerPosition: nextPosition
-                                                    };
-                                                    
-                                                    // Update roster with new player position
-                                                    const updatedRoster = rosterList.map(p => 
-                                                        p.player.playerId === player.player.playerId ? updatedPlayer : p
-                                                    );
-                                                    
-                                                    setRosterList(sortRoster(updatedRoster));
-                                                    setErrorMessage('');
-                                                }}
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                                                </svg>
-                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() => {
