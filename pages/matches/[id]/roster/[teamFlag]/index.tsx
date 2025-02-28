@@ -588,9 +588,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     <ul className="divide-y divide-gray-200">
                         {rosterList.length > 0 ? (
                             rosterList.map((player) => (
-                                <li key={player.player.playerId} className="px-6 py-4">
+                                <li key={player.player.playerId} className={`px-6 py-4 ${player.player.jerseyNumber === 0 ? 'bg-yellow-50' : ''}`}>
                                     <div className="flex items-center">
-                                        <div className="min-w-12 text-sm font-semibold text-gray-900">
+                                        <div className={`min-w-12 text-sm font-semibold ${player.player.jerseyNumber === 0 ? 'text-red-600' : 'text-gray-900'}`}>
                                             {player.player.jerseyNumber}
                                         </div>
                                         <div className="min-w-12 text-sm font-medium text-gray-500">
