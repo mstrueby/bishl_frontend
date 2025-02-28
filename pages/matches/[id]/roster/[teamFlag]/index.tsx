@@ -181,6 +181,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [playerPosition, setPlayerPosition] = useState(playerPositions[3]); // Default to 'F' (Feldspieler)
     const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
     const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
+    const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
+    const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[3]);
 
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -204,6 +208,42 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
     const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
     const [errorMessage, setErrorMessage] = useState('');
+
+    const handleEditPlayer = (player: RosterPlayer) => {
+        setEditingPlayer(player);
+        setEditPlayerNumber(player.player.jerseyNumber);
+        // Find the position in playerPositions that matches the player's position
+        const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
+        setEditPlayerPosition(position || playerPositions[3]); // Default to 'F' if not found
+        setIsEditModalOpen(true);
+    };
+
+    const handleSaveEdit = () => {
+        if (!editingPlayer) return;
+
+        const updatedRoster = rosterList.map(player => {
+            if (player.player.playerId === editingPlayer.player.playerId) {
+                return {
+                    ...player,
+                    player: {
+                        ...player.player,
+                        jerseyNumber: editPlayerNumber
+                    },
+                    playerPosition: editPlayerPosition
+                };
+            }
+            return player;
+        });
+
+        setRosterList(sortRoster(updatedRoster));
+        setIsEditModalOpen(false);
+        setEditingPlayer(null);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditModalOpen(false);
+        setEditingPlayer(null);
+    };
 
     if (loading) {
         return <Layout><div>Loading...</div></Layout>;
@@ -602,7 +642,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="flex-1 text-sm text-gray-500">
                                             {player.passNumber}
                                         </div>
-                                        <div>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleEditPlayer(player)}
+                                                className="text-indigo-600 hover:text-indigo-900"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -675,6 +724,118 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </button>
                 </div>
             </div>
+
+            {/* Edit Player Modal */}
+            {isEditModalOpen && editingPlayer && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">
+                            Spieler bearbeiten: {editingPlayer.player.lastName}, {editingPlayer.player.firstName}
+                        </h3>
+
+                        {/* Jersey Number */}
+                        <div className="mb-4">
+                            <label htmlFor="edit-player-number" className="block text-sm font-medium text-gray-700 mb-1">
+                                Jersey Number
+                            </label>
+                            <input
+                                type="text"
+                                id="edit-player-number"
+                                value={editPlayerNumber}
+                                onChange={(e) => setEditPlayerNumber(parseInt(e.target.value) || 0)}
+                                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                placeholder="##"
+                            />
+                        </div>
+
+                        {/* Player Position */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Position
+                            </label>
+                            <Listbox value={editPlayerPosition} onChange={setEditPlayerPosition}>
+                                {({ open }) => (
+                                    <>
+                                        <div className="relative">
+                                            <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                                <span className="block truncate">
+                                                    {editPlayerPosition.key} - {editPlayerPosition.value}
+                                                </span>
+                                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                                    <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                </span>
+                                            </Listbox.Button>
+
+                                            <Transition
+                                                show={open}
+                                                as={Fragment}
+                                                leave="transition ease-in duration-100"
+                                                leaveFrom="opacity-100"
+                                                leaveTo="opacity-0"
+                                            >
+                                                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                    {playerPositions.map((position) => (
+                                                        <Listbox.Option
+                                                            key={position.key}
+                                                            className={({ active }) =>
+                                                                classNames(
+                                                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                                                    'relative cursor-default select-none py-2 pl-3 pr-9'
+                                                                )
+                                                            }
+                                                            value={position}
+                                                        >
+                                                            {({ selected, active }) => (
+                                                                <>
+                                                                    <span className={classNames(
+                                                                        selected ? 'font-semibold' : 'font-normal',
+                                                                        'block truncate'
+                                                                    )}>
+                                                                        {position.key} - {position.value}
+                                                                    </span>
+
+                                                                    {selected ? (
+                                                                        <span
+                                                                            className={classNames(
+                                                                                active ? 'text-white' : 'text-indigo-600',
+                                                                                'absolute inset-y-0 right-0 flex items-center pr-4'
+                                                                            )}
+                                                                        >
+                                                                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                                        </span>
+                                                                    ) : null}
+                                                                </>
+                                                            )}
+                                                        </Listbox.Option>
+                                                    ))}
+                                                </Listbox.Options>
+                                            </Transition>
+                                        </div>
+                                    </>
+                                )}
+                            </Listbox>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            >
+                                Abbrechen
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSaveEdit}
+                                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            >
+                                Speichern
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Layout>
     );
 };
