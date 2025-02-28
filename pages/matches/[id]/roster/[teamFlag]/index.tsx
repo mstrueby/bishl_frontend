@@ -11,6 +11,7 @@ import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
+import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['API_URL'];
 
@@ -187,7 +188,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
     const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[3]);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [modalError, setModalError] = useState<string | null>(null);
 
+    // Handler to close the success message
+    const handleCloseSuccessMessage = () => {
+        setSuccessMessage(null);
+    };
+    const handleCloseErrorMesssage = () => {
+        setError(null);
+    }
 
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -210,7 +220,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     };
 
     const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
-    const [errorMessage, setErrorMessage] = useState('');
 
     const handleEditPlayer = (player: RosterPlayer) => {
         setEditingPlayer(player);
@@ -225,22 +234,22 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         if (!editingPlayer) return;
 
         // Check if trying to change to Captain when another player is already Captain
-        if (editPlayerPosition.key === 'C' && 
-            rosterList.some(player => 
-                player.playerPosition.key === 'C' && 
+        if (editPlayerPosition.key === 'C' &&
+            rosterList.some(player =>
+                player.playerPosition.key === 'C' &&
                 player.player.playerId !== editingPlayer.player.playerId
             )) {
-            setErrorMessage('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
+            setError('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
             return;
         }
 
         // Check if trying to change to Assistant when another player is already Assistant
-        if (editPlayerPosition.key === 'A' && 
-            rosterList.some(player => 
-                player.playerPosition.key === 'A' && 
+        if (editPlayerPosition.key === 'A' &&
+            rosterList.some(player =>
+                player.playerPosition.key === 'A' &&
                 player.player.playerId !== editingPlayer.player.playerId
             )) {
-            setErrorMessage('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
+            setError('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
             return;
         }
 
@@ -248,7 +257,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         if (editPlayerPosition.key === 'G' && editingPlayer.playerPosition.key !== 'G') {
             const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
             if (goalieCount >= 2) {
-                setErrorMessage('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
+                setError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
                 return;
             }
         }
@@ -257,7 +266,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         if (editPlayerPosition.key === 'F' && editingPlayer.playerPosition.key !== 'F') {
             const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
             if (feldspielerCount >= 14) {
-                setErrorMessage('Es können maximal 14 Feldspieler (F) eingetragen werden');
+                setError('Es können maximal 14 Feldspieler (F) eingetragen werden');
                 return;
             }
         }
@@ -279,7 +288,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setRosterList(sortRoster(updatedRoster));
         setIsEditModalOpen(false);
         setEditingPlayer(null);
-        setErrorMessage('');
+        setError('');
     };
 
     const handleCancelEdit = () => {
@@ -302,19 +311,19 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
     const handleAddPlayer = async () => {
         if (!selectedPlayer) {
-            setErrorMessage('Please select a player');
+            setError('Please select a player');
             return;
         }
 
         // Check if trying to add a Captain when one already exists
         if (playerPosition.key === 'C' && rosterList.some(player => player.playerPosition.key === 'C')) {
-            setErrorMessage('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
+            setError('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
             return;
         }
 
         // Check if trying to add an Assistant when one already exists
         if (playerPosition.key === 'A' && rosterList.some(player => player.playerPosition.key === 'A')) {
-            setErrorMessage('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
+            setError('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
             return;
         }
 
@@ -322,7 +331,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         if (playerPosition.key === 'G') {
             const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
             if (goalieCount >= 2) {
-                setErrorMessage('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
+                setError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
                 return;
             }
         }
@@ -331,7 +340,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         if (playerPosition.key === 'F') {
             const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
             if (feldspielerCount >= 14) {
-                setErrorMessage('Es können maximal 14 Feldspieler (F) eingetragen werden');
+                setError('Es können maximal 14 Feldspieler (F) eingetragen werden');
                 return;
             }
         }
@@ -398,7 +407,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             setSelectedPlayer(null);
             setPlayerNumber(0);
             setPlayerPosition(playerPositions[3]); // Reset to 'F' (Feldspieler)
-            setErrorMessage('');
+            setError('');
 
             // Here you would make the actual API call to update the roster
             /*
@@ -414,7 +423,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
         } catch (error) {
             console.error('Error adding player to roster:', error);
-            setErrorMessage('Failed to add player to roster');
+            setError('Failed to add player to roster');
         } finally {
             setLoading(false);
         }
@@ -422,12 +431,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
     const handleSaveRoster = async () => {
         //if (rosterList.length === 0) {
-        //    setErrorMessage('Cannot save an empty roster');
+        //    setError('Cannot save an empty roster');
         //    return;
         //}
 
         setSavingRoster(true);
-        setErrorMessage('');
+        setError('');
 
         try {
             // Prepare the data to be sent
@@ -456,19 +465,24 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             });
 
             // Show success message or redirect
-            setErrorMessage('');
+            setError('');
             // You could add a success message here if needed
         } catch (error) {
             // Ignore 304 Not Modified errors as they're not actual errors
             if (axios.isAxiosError(error) && error.response?.status === 304) {
                 console.log('Match not changed (304 Not Modified), continuing normally');
+                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
             } else {
                 console.error('Error saving roster/match:', error);
-                setErrorMessage('Aufstellung konnte nicht gespeichert werden.');
+                setError('Aufstellung konnte nicht gespeichert werden.');
             }
         } finally {
-            console.log("Roster successfully changed")
+            console.log("Roster successfully changed");
             setSavingRoster(false);
+            // Set success message if no error occurred
+            if (!error) {
+                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
+            }
         }
     };
 
@@ -477,19 +491,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
 
+                {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+
                 {/* Add Player Form */}
                 <div className="bg-white shadow rounded-lg p-6 mb-6">
                     <h2 className="text-lg font-medium mb-4">Add Player to Roster</h2>
 
-                    {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-                    
-                    {errorMessage && (
-                        <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4">
-                            {errorMessage}
-                        </div>
-                    )}
-
-
+                    {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {/* Player Selection */}
@@ -862,12 +870,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </Listbox>
                         </div>
 
-                        {errorMessage && (
+                        {modalError && (
                             <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-md">
-                                {errorMessage}
+                                {error}
                             </div>
                         )}
-                        
+
                         {/* Modal Actions */}
                         <div className="flex justify-end space-x-3">
                             <button
