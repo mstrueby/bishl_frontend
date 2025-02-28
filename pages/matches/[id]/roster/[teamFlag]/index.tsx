@@ -10,6 +10,7 @@ import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/P
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
+import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 
 let BASE_URL = process.env['API_URL'];
 
@@ -185,6 +186,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
     const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
     const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[3]);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
 
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -478,11 +481,15 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 <div className="bg-white shadow rounded-lg p-6 mb-6">
                     <h2 className="text-lg font-medium mb-4">Add Player to Roster</h2>
 
+                    {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+                    
                     {errorMessage && (
                         <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4">
                             {errorMessage}
                         </div>
                     )}
+
+
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {/* Player Selection */}
