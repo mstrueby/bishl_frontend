@@ -188,6 +188,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[3]);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+    // Handler to close the success message
+    const handleCloseSuccessMessage = () => {
+        setSuccessMessage(null);
+    };
 
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -462,13 +466,18 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Ignore 304 Not Modified errors as they're not actual errors
             if (axios.isAxiosError(error) && error.response?.status === 304) {
                 console.log('Match not changed (304 Not Modified), continuing normally');
+                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
             } else {
                 console.error('Error saving roster/match:', error);
                 setErrorMessage('Aufstellung konnte nicht gespeichert werden.');
             }
         } finally {
-            console.log("Roster successfully changed")
+            console.log("Roster successfully changed");
             setSavingRoster(false);
+            // Set success message if no error occurred
+            if (!errorMessage) {
+                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
+            }
         }
     };
 
@@ -476,6 +485,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         <Layout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
+
+                {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
                 {/* Add Player Form */}
                 <div className="bg-white shadow rounded-lg p-6 mb-6">
