@@ -25,7 +25,7 @@ interface AvailablePlayer {
     imageUrl: string,
     imageVisible: boolean,
     passNo: string,
-    jerseyNo: number,
+    jerseyNo: number | undefined,
 }
 
 interface RosterPageProps {
@@ -134,7 +134,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         // Keep both the full list and a filtered list of available players
         const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
         const filteredAvailablePlayers = availablePlayers.filter(player =>
-            !rosterPlayerIds.includes(player._id)
+            !rosterPlayerIds.includes(player?._id ?? '')
         );
 
         console.log("All available players:", availablePlayers.length);
@@ -415,7 +415,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                 value={player}
                                                                 onClick={() => {
                                                                     if (player.jerseyNo) {
-                                                                        setPlayerNumber(parseInt(player.jerseyNo));
+                                                                        setPlayerNumber(player.jerseyNo);
                                                                     }
                                                                 }}
                                                             >
