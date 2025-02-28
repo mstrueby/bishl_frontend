@@ -25,7 +25,7 @@ interface AvailablePlayer {
     imageUrl: string,
     imageVisible: boolean,
     passNo: string,
-    jerseyNo: number,
+    jerseyNo: number | undefined,
 }
 
 interface RosterPageProps {
@@ -37,6 +37,7 @@ interface RosterPageProps {
     rosterPublished: boolean;
     teamFlag: string;
     availablePlayers: AvailablePlayer[];
+    allAvailablePlayers: AvailablePlayer[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -91,7 +92,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             },
             params: {
                 sortby: 'lastName',
-                all: 'false'
+                active: 'true'
             }
         }
         );
@@ -129,9 +130,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 jerseyNo: assignedTeam.jerseyNo
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
-        
-        console.log("Available players for roster:", availablePlayers.length);
-        console.log("availablePlayers", availablePlayers)
+
+        // Keep both the full list and a filtered list of available players
+        const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
+        const filteredAvailablePlayers = availablePlayers.filter(player =>
+            !rosterPlayerIds.includes(player?._id ?? '')
+        );
+
+        console.log("All available players:", availablePlayers.length);
+        console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
 
         return {
             props: {
@@ -142,7 +149,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 roster: matchTeam.roster || [],
                 rosterPublished: matchTeam.rosterPublished || false,
                 teamFlag,
-                availablePlayers: availablePlayers || [],
+                availablePlayers: filteredAvailablePlayers || [],
+                allAvailablePlayers: availablePlayers || [],
             }
         };
 
@@ -164,12 +172,12 @@ const playerPositions = [
     { key: 'A', value: 'Assistant' },
 ];
 
-const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [] }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [] }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
-    const [playerNumber, setPlayerNumber] = useState(0);
+    const [playerNumber, setPlayerNumber] = useState<number>(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
     const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
     const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
@@ -221,10 +229,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Find the player in playerDetails
             const playerDetail = availablePlayers.find(player => player._id === selectedPlayer._id);
             if (playerDetail && playerDetail.jerseyNo) {
-                setPlayerNumber(parseInt(playerDetail.jerseyNo));
-            } else {
-                setErrorMessage('Please enter a player number');
-                return;
+                setPlayerNumber(playerDetail.jerseyNo);
             }
         }
 
@@ -304,10 +309,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     };
 
     const handleSaveRoster = async () => {
-        if (rosterList.length === 0) {
-            setErrorMessage('Cannot save an empty roster');
-            return;
-        }
+        //if (rosterList.length === 0) {
+        //    setErrorMessage('Cannot save an empty roster');
+        //    return;
+        //}
 
         setSavingRoster(true);
         setErrorMessage('');
@@ -410,7 +415,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                 value={player}
                                                                 onClick={() => {
                                                                     if (player.jerseyNo) {
-                                                                        setPlayerNumber(parseInt(player.jerseyNo));
+                                                                        setPlayerNumber(player.jerseyNo);
                                                                     }
                                                                 }}
                                                             >
@@ -571,16 +576,26 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    // Find the player in availablePlayers to add back to the list
-                                                    const playerToAddBack = availablePlayers.find(p => p._id === player.player.playerId);
-                                                    
+                                                    // Find the player in the complete list of all players
+                                                    const playerToAddBack = allAvailablePlayers.find(p => p._id === player.player.playerId);
+
                                                     // Remove from roster
                                                     const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
                                                     setRosterList(updatedRoster);
-                                                    
-                                                    // Add back to available players if found
-                                                    if (playerToAddBack) {
-                                                        setAvailablePlayersList(prevList => [...prevList, playerToAddBack]);
+
+                                                    // Add back to available players list if found and not already there
+                                                    if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
+                                                        setAvailablePlayersList(prevList => {
+                                                            // Add the player back and sort the list by lastName, then firstName
+                                                            const newList = [...prevList, playerToAddBack];
+                                                            return newList.sort((a, b) => {
+                                                                // First sort by lastName
+                                                                const lastNameComparison = a.lastName.localeCompare(b.lastName);
+                                                                // If lastName is the same, sort by firstName
+                                                                return lastNameComparison !== 0 ? lastNameComparison :
+                                                                    a.firstName.localeCompare(b.firstName);
+                                                            });
+                                                        });
                                                     }
                                                 }}
                                                 className="text-red-600 hover:text-red-900"
