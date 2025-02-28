@@ -221,6 +221,44 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const handleSaveEdit = () => {
         if (!editingPlayer) return;
 
+        // Check if trying to change to Captain when another player is already Captain
+        if (editPlayerPosition.key === 'C' && 
+            rosterList.some(player => 
+                player.playerPosition.key === 'C' && 
+                player.player.playerId !== editingPlayer.player.playerId
+            )) {
+            setErrorMessage('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
+            return;
+        }
+
+        // Check if trying to change to Assistant when another player is already Assistant
+        if (editPlayerPosition.key === 'A' && 
+            rosterList.some(player => 
+                player.playerPosition.key === 'A' && 
+                player.player.playerId !== editingPlayer.player.playerId
+            )) {
+            setErrorMessage('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
+            return;
+        }
+
+        // Check if trying to add more than 2 Goalies
+        if (editPlayerPosition.key === 'G' && editingPlayer.playerPosition.key !== 'G') {
+            const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
+            if (goalieCount >= 2) {
+                setErrorMessage('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
+                return;
+            }
+        }
+
+        // Check if trying to add more than 14 Feldspieler
+        if (editPlayerPosition.key === 'F' && editingPlayer.playerPosition.key !== 'F') {
+            const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
+            if (feldspielerCount >= 14) {
+                setErrorMessage('Es können maximal 14 Feldspieler (F) eingetragen werden');
+                return;
+            }
+        }
+
         const updatedRoster = rosterList.map(player => {
             if (player.player.playerId === editingPlayer.player.playerId) {
                 return {
@@ -238,6 +276,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setRosterList(sortRoster(updatedRoster));
         setIsEditModalOpen(false);
         setEditingPlayer(null);
+        setErrorMessage('');
     };
 
     const handleCancelEdit = () => {
@@ -816,6 +855,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </Listbox>
                         </div>
 
+                        {errorMessage && (
+                            <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-md">
+                                {errorMessage}
+                            </div>
+                        )}
+                        
                         {/* Modal Actions */}
                         <div className="flex justify-end space-x-3">
                             <button
