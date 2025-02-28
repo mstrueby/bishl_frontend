@@ -178,7 +178,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [savingRoster, setSavingRoster] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
     const [playerNumber, setPlayerNumber] = useState<number>(0);
-    const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
+    const [playerPosition, setPlayerPosition] = useState(playerPositions[3]); // Default to 'F' (Feldspieler)
     const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
     const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
 
@@ -291,7 +291,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Reset form
             setSelectedPlayer(null);
             setPlayerNumber(0);
-            setPlayerPosition(playerPositions[0]);
+            setPlayerPosition(playerPositions[3]); // Reset to 'F' (Feldspieler)
             setErrorMessage('');
 
             // Here you would make the actual API call to update the roster
