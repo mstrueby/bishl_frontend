@@ -190,7 +190,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [modalError, setModalError] = useState<string | null>(null);
-    const [modalError, setModalError] = useState<string | null>(null);
 
     // Handler to close the success message
     const handleCloseSuccessMessage = () => {
