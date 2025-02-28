@@ -190,6 +190,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [modalError, setModalError] = useState<string | null>(null);
+    const [modalError, setModalError] = useState<string | null>(null);
 
     // Handler to close the success message
     const handleCloseSuccessMessage = () => {
@@ -198,6 +199,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const handleCloseErrorMesssage = () => {
         setError(null);
     }
+    
+    const handleCloseModalError = () => {
+        setModalError(null);
+    };
 
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -288,12 +293,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setRosterList(sortRoster(updatedRoster));
         setIsEditModalOpen(false);
         setEditingPlayer(null);
-        setError('');
+        setModalError(null);
     };
 
     const handleCancelEdit = () => {
         setIsEditModalOpen(false);
         setEditingPlayer(null);
+        setModalError(null);
     };
 
     if (loading) {
@@ -870,11 +876,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </Listbox>
                         </div>
 
-                        {modalError && (
-                            <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-md">
-                                {error}
-                            </div>
-                        )}
+                        {modalError && <ErrorMessage error={modalError} onClose={handleCloseModalError} />}
 
                         {/* Modal Actions */}
                         <div className="flex justify-end space-x-3">
