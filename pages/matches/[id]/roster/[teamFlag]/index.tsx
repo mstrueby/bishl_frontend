@@ -778,7 +778,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 <label htmlFor="rosterPublished" className={`font-medium ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'text-gray-400' : 'text-gray-900'}`}>Veröffentlichen</label>
                                 <p className="text-gray-500">
                                     {rosterList.some(player => player.player.jerseyNumber === 0) 
-                                        ? 'Beheben Sie zuerst alle Fehler in der Aufstellung (markierte Zeilen)'
+                                        ? 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)'
                                         : 'Aufstellung öffentlich sichtbar machen'}
                                 </p>
                             </div>
