@@ -20,8 +20,8 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
 
   // deactivate new features for PROD
   // Feature-Switch
-  // showLinkHome=false;
-  // showLinkAway=false;
+  showLinkHome=false;
+  showLinkAway=false;
   
   return (
     <>
