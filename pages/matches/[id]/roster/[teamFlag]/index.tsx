@@ -232,6 +232,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
         setEditPlayerPosition(position || playerPositions[3]); // Default to 'F' if not found
         setModalError(null); // Clear any modal errors when opening the dialog
+        setError(null)
         setIsEditModalOpen(true);
     };
 
