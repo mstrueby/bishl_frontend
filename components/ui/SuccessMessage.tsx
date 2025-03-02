@@ -19,7 +19,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({ message, onClose }) => 
   };
   
   return (
-      <div className="border-l-4 border-green-400 rounded-md bg-green-50 p-4 mb-4 md:mx-6 lg:mx-8">
+      <div className="border-l-4 border-green-400 rounded-md bg-green-50 p-4 mb-4 md:mx-0 lg:mx-0">
         <div className="flex">
           <div className="flex-shrink-0">
             <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />

@@ -9,7 +9,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ error, onClose }) => {
   if (!error) return null;
 
   return (
-    <div className="border-l-4 border-red-400 rounded-md bg-red-50 p-4 my-4 md:mx-6 lg:mx-8">
+    <div className="border-l-4 border-red-400 rounded-md bg-red-50 p-4 mb-4 md:mx-0 lg:mx-0">
       <div className="flex">
         <div className="flex-shrink-0">
           <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />

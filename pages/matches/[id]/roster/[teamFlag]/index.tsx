@@ -232,6 +232,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
         setEditPlayerPosition(position || playerPositions[3]); // Default to 'F' if not found
         setModalError(null); // Clear any modal errors when opening the dialog
+        setError(null)
         setIsEditModalOpen(true);
     };
 
@@ -763,14 +764,23 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 <input
                                     id="rosterPublished"
                                     type="checkbox"
-                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                    className={`h-4 w-4 rounded border-gray-300 ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'text-gray-400 bg-gray-100' : 'text-indigo-600'} focus:ring-indigo-600`}
                                     checked={rosterPublished}
-                                    onChange={(e) => setRosterPublished(e.target.checked)}
+                                    onChange={(e) => {
+                                        if (!rosterList.some(player => player.player.jerseyNumber === 0)) {
+                                            setRosterPublished(e.target.checked);
+                                        }
+                                    }}
+                                    disabled={rosterList.some(player => player.player.jerseyNumber === 0)}
                                 />
                             </div>
                             <div className="ml-3 text-sm leading-6">
-                                <label htmlFor="rosterPublished" className="font-medium text-gray-900">Veröffentlichen</label>
-                                <p className="text-gray-500">Aufstellung öffentlich sichtbar machen</p>
+                                <label htmlFor="rosterPublished" className={`font-medium ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'text-gray-400' : 'text-gray-900'}`}>Veröffentlichen</label>
+                                <p className="text-gray-500">
+                                    {rosterList.some(player => player.player.jerseyNumber === 0) 
+                                        ? 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)'
+                                        : 'Aufstellung öffentlich sichtbar machen'}
+                                </p>
                             </div>
                         </div>
                     </div>
