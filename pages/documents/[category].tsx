@@ -3,6 +3,7 @@
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import axios from 'axios';
 import Layout from '../../components/Layout';
 import { DocumentValues as DocumentValues } from '../../types/DocumentValues';
@@ -18,6 +19,7 @@ interface DocumentPageProps {
 }
 
 const DocumentPage: NextPage<DocumentPageProps> = ({ category, docs }) => {
+  const router = useRouter();
   const categories = [
     { name: 'Allgemein', href: 'allgemein', current: category === 'allgemein' },
     { name: 'Spielbetrieb', href: 'spielbetrieb', current: category === 'spielbetrieb' },
@@ -94,7 +96,14 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, docs }) => {
               id="current-tab"
               name="current-tab"
               defaultValue={categories.find((cat) => cat.current)?.name || categories[0].name}
-              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+              onChange={(e) => {
+                const selectedName = e.target.value;
+                const selectedCategory = categories.find((cat) => cat.name === selectedName);
+                if (selectedCategory) {
+                  router.push(`/documents/${selectedCategory.href}`);
+                }
+              }}
             >
               {categories.map((cat) => (
                 <option key={cat.name}>{cat.name}</option>

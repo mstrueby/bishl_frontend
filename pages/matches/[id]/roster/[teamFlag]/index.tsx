@@ -198,6 +198,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const handleCloseErrorMesssage = () => {
         setError(null);
     }
+    
+    const handleCloseModalError = () => {
+        setModalError(null);
+    };
 
     // Sort roster by position order: C, A, G, F, then by jersey number
     const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -227,6 +231,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         // Find the position in playerPositions that matches the player's position
         const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
         setEditPlayerPosition(position || playerPositions[3]); // Default to 'F' if not found
+        setModalError(null); // Clear any modal errors when opening the dialog
         setIsEditModalOpen(true);
     };
 
@@ -239,7 +244,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 player.playerPosition.key === 'C' &&
                 player.player.playerId !== editingPlayer.player.playerId
             )) {
-            setError('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
+            setModalError('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
             return;
         }
 
@@ -249,7 +254,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 player.playerPosition.key === 'A' &&
                 player.player.playerId !== editingPlayer.player.playerId
             )) {
-            setError('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
+            setModalError('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
             return;
         }
 
@@ -257,7 +262,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         if (editPlayerPosition.key === 'G' && editingPlayer.playerPosition.key !== 'G') {
             const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
             if (goalieCount >= 2) {
-                setError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
+                setModalError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
                 return;
             }
         }
@@ -266,7 +271,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         if (editPlayerPosition.key === 'F' && editingPlayer.playerPosition.key !== 'F') {
             const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
             if (feldspielerCount >= 14) {
-                setError('Es können maximal 14 Feldspieler (F) eingetragen werden');
+                setModalError('Es können maximal 14 Feldspieler (F) eingetragen werden');
                 return;
             }
         }
@@ -288,12 +293,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setRosterList(sortRoster(updatedRoster));
         setIsEditModalOpen(false);
         setEditingPlayer(null);
-        setError('');
+        setModalError(null);
     };
 
     const handleCancelEdit = () => {
         setIsEditModalOpen(false);
         setEditingPlayer(null);
+        setModalError(null);
     };
 
     if (loading) {
@@ -870,11 +876,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </Listbox>
                         </div>
 
-                        {modalError && (
-                            <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-md">
-                                {error}
-                            </div>
-                        )}
+                        {modalError && <ErrorMessage error={modalError} onClose={handleCloseModalError} />}
 
                         {/* Modal Actions */}
                         <div className="flex justify-end space-x-3">
