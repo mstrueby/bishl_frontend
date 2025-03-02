@@ -824,25 +824,56 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     <div className="flex items-center">
                         <div className="relative inline-flex items-center">
                             <div className="flex items-center h-6">
-                                <input
-                                    id="rosterPublished"
-                                    type="checkbox"
-                                    className={`h-4 w-4 rounded border-gray-300 ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'text-gray-400 bg-gray-100' : 'text-indigo-600'} focus:ring-indigo-600`}
-                                    checked={rosterPublished}
-                                    onChange={(e) => {
-                                        if (!rosterList.some(player => player.player.jerseyNumber === 0)) {
-                                            setRosterPublished(e.target.checked);
-                                        }
-                                    }}
-                                    disabled={rosterList.some(player => player.player.jerseyNumber === 0)}
-                                />
+                                {/* Check if all required conditions are met */}
+                                {(() => {
+                                    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+                                    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+                                    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+                                    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                    
+                                    // All checks must pass to enable the checkbox
+                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie;
+                                    
+                                    return (
+                                        <input
+                                            id="rosterPublished"
+                                            type="checkbox"
+                                            className={`h-4 w-4 rounded border-gray-300 ${allChecksPass ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
+                                            checked={rosterPublished}
+                                            onChange={(e) => {
+                                                if (allChecksPass) {
+                                                    setRosterPublished(e.target.checked);
+                                                }
+                                            }}
+                                            disabled={!allChecksPass}
+                                        />
+                                    );
+                                })()}
                             </div>
                             <div className="ml-3 text-sm leading-6">
-                                <label htmlFor="rosterPublished" className={`font-medium ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'text-gray-400' : 'text-gray-900'}`}>Veröffentlichen</label>
+                                <label htmlFor="rosterPublished" className={`font-medium ${(() => {
+                                    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+                                    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+                                    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+                                    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                    
+                                    return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie ? 'text-gray-900' : 'text-gray-400';
+                                })()} `}>Veröffentlichen</label>
                                 <p className="text-gray-500">
-                                    {rosterList.some(player => player.player.jerseyNumber === 0) 
-                                        ? 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)'
-                                        : 'Aufstellung öffentlich sichtbar machen'}
+                                    {(() => {
+                                        const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+                                        const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+                                        const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+                                        const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                        
+                                        if (hasZeroJerseyNumber) {
+                                            return 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)';
+                                        } else if (!hasCaptain || !hasAssistant || !hasGoalie) {
+                                            return 'Stelle sicher, dass ein Captain (C), ein Assistant (A) und mindestens ein Goalie (G) festgelegt ist';
+                                        } else {
+                                            return 'Aufstellung öffentlich sichtbar machen';
+                                        }
+                                    })()}
                                 </p>
                             </div>
                         </div>
