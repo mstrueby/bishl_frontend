@@ -12,7 +12,6 @@ import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/soli
 import { classNames } from '../../../../../tools/utils';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
-import Toggle from '../../../../../components/ui/Toggle';
 
 let BASE_URL = process.env['API_URL'];
 
@@ -237,6 +236,29 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         }
     }, [isCallUpModalOpen, club, team, jwt]);
 
+    // Sort roster by position order: C, A, G, F, then by jersey number
+    const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+        return [...rosterToSort].sort((a, b) => {
+            // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+            const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+
+            // Get priorities
+            const posA = positionPriority[a.playerPosition.key] || 99;
+            const posB = positionPriority[b.playerPosition.key] || 99;
+
+            // First sort by position priority
+            if (posA !== posB) {
+                return posA - posB;
+            }
+
+            // If positions are the same, sort by jersey number
+            return a.player.jerseyNumber - b.player.jerseyNumber;
+        });
+    };
+
+    // Fetch players when a team is selected
+    const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
+
     // Fetch players when a team is selected
     useEffect(() => {
         if (selectedCallUpTeam) {
@@ -277,11 +299,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             jerseyNo: assignedTeam?.jerseyNo,
                             called: true
                         };
-                    }).filter(player => player !== null);
+                    }).filter((player: AvailablePlayer | null) => player !== null);
 
                     // Filter out players that are already in the roster
                     const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
-                    const filteredPlayers = formattedPlayers.filter(player =>
+                    const filteredPlayers = formattedPlayers.filter((player: AvailablePlayer) =>
                         !rosterPlayerIds.includes(player._id)
                     );
 
@@ -331,28 +353,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         // Optional: Show a success message
         setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
     };
-
-    // Sort roster by position order: C, A, G, F, then by jersey number
-    const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
-        return [...rosterToSort].sort((a, b) => {
-            // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-            const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-            // Get priorities
-            const posA = positionPriority[a.playerPosition.key] || 99;
-            const posB = positionPriority[b.playerPosition.key] || 99;
-
-            // First sort by position priority
-            if (posA !== posB) {
-                return posA - posB;
-            }
-
-            // If positions are the same, sort by jersey number
-            return a.player.jerseyNumber - b.player.jerseyNumber;
-        });
-    };
-
-    const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
 
     const handleEditPlayer = (player: RosterPlayer) => {
         setEditingPlayer(player);
