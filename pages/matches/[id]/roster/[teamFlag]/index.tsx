@@ -841,6 +841,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="flex-1 text-sm text-gray-500">
                                             {player.called ? (
                                                 <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                                    </svg>
                                                     Hochgemeldet
                                                 </span>
                                             ) : null}
