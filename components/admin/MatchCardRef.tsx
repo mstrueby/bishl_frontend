@@ -23,18 +23,19 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
     try {
-      const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
-      const endpoint = (!assignment || selected.key === 'AVAILABLE') ?
+      const isNewAssignment = !assignment || selected.key === 'AVAILABLE';
+      const method = isNewAssignment ? 'POST' : 'PATCH';
+      const endpoint = isNewAssignment ?
         `${BASE_URL}/assignments/` :
         `${BASE_URL}/assignments/${assignment._id}`;
 
-      const body = (!assignment || selected.key === 'AVAILABLE') ?
+      const body = isNewAssignment ?
         { matchId: match._id, status: newStatus.key } :
         { status: newStatus.key };
 
-      console.log(assignment)
-      console.log(selected.key)
-      console.log(body);
+      console.log('Current assignment:', assignment);
+      console.log('Selected status:', selected.key);
+      console.log('Request body:', body);
 
       const response = await fetch(endpoint, {
         method,
@@ -47,6 +48,19 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
       if (!response.ok) {
         throw new Error('Failed to update assignment status');
+      }
+
+      // For new assignments, save the created assignment data so we can use it
+      if (isNewAssignment) {
+        const createdAssignment = await response.json();
+        console.log('Created new assignment:', createdAssignment);
+        
+        // Update local assignment state with the newly created assignment
+        // This allows further updates without refresh
+        if (createdAssignment) {
+          // This is a reference to the component prop we're updating with our local state
+          assignment = createdAssignment;
+        }
       }
     } catch (error) {
       console.error('Error updating assignment:', error);
