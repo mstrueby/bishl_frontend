@@ -125,20 +125,23 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
 
       // Sort matches by date, venue, and time
       const sortedMatches = [...matchesRes.data].sort((a, b) => {
-        // First sort by date
+        // First sort by date only (ignore time component)
         const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
         const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+        
         if (dateA !== dateB) {
           return dateA - dateB;
         }
         
-        // Then sort by venue name
-        const venueComparison = a.venue.name.localeCompare(b.venue.name);
-        if (venueComparison !== 0) {
-          return venueComparison;
+        // When dates are the same, sort by venue name to group matches by venue
+        const venueA = a.venue.name.toLowerCase();
+        const venueB = b.venue.name.toLowerCase();
+        
+        if (venueA !== venueB) {
+          return venueA.localeCompare(venueB);
         }
         
-        // Finally sort by time
+        // Finally, for matches at the same venue on the same day, sort by time
         const timeA = new Date(a.startDate).getTime();
         const timeB = new Date(b.startDate).getTime();
         return timeA - timeB;
