@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
@@ -21,20 +21,28 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       allRefereeAssignmentStatuses[0]
   )
 
+  const [localAssignment, setLocalAssignment] = useState(assignment);
+
+  // Update local state when the prop changes
+  useEffect(() => {
+    setLocalAssignment(assignment);
+  }, [assignment]);
+
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
     try {
-      const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
-      const endpoint = (!assignment || selected.key === 'AVAILABLE') ?
+      const isNewAssignment = !localAssignment || selected.key === 'AVAILABLE';
+      const method = isNewAssignment ? 'POST' : 'PATCH';
+      const endpoint = isNewAssignment ?
         `${BASE_URL}/assignments/` :
-        `${BASE_URL}/assignments/${assignment._id}`;
+        `${BASE_URL}/assignments/${localAssignment?._id}`;
 
-      const body = (!assignment || selected.key === 'AVAILABLE') ?
+      const body = isNewAssignment ?
         { matchId: match._id, status: newStatus.key } :
         { status: newStatus.key };
 
-      console.log(assignment)
-      console.log(selected.key)
-      console.log(body);
+      console.log('Current assignment:', localAssignment);
+      console.log('Selected status:', selected.key);
+      console.log('Request body:', body);
 
       const response = await fetch(endpoint, {
         method,
@@ -47,6 +55,18 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
       if (!response.ok) {
         throw new Error('Failed to update assignment status');
+      }
+
+      // For new assignments, save the created assignment data so we can use it
+      if (isNewAssignment) {
+        const createdAssignment = await response.json();
+        console.log('Created new assignment:', createdAssignment);
+        
+        // Update local assignment state with the newly created assignment
+        // This allows further updates without refresh
+        if (createdAssignment) {
+          setLocalAssignment(createdAssignment);
+        }
       }
     } catch (error) {
       console.error('Error updating assignment:', error);
@@ -147,7 +167,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
                 {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
                   weekday: 'short',
                   day: 'numeric',
-                  month: 'short',
+                  month: 'numeric',
                   year: undefined,
                   hour: '2-digit',
                   minute: '2-digit'
@@ -160,7 +180,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
                   weekday: 'long',
                   day: 'numeric',
                   month: 'short',
-                  year: '2-digit',
+                  year: undefined,
                   hour: '2-digit',
                   minute: '2-digit'
                 }) : 'offen'}

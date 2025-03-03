@@ -20,7 +20,7 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
 
   // deactivate new features for PROD
   // Feature-Switch
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
     showLinkHome = false;
     showLinkAway = false;
   }
@@ -174,6 +174,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   let showLinkStatus = false;
   let showLinkHome = false;
   let showLinkAway = false;
+  let showMatchSheet = true;
 
   if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
     showLinkEdit = true;
@@ -197,6 +198,11 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
     showLinkAway = false;
   }
 
+  // Feature-Switch
+  if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
+    showMatchSheet = false;
+  }
+  
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
@@ -252,7 +258,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
                   timeZone: 'Europe/Berlin',
                   weekday: 'short',
                   day: 'numeric',
-                  month: 'short',
+                  month: 'numeric',
                   year: undefined,
                   hour: '2-digit',
                   minute: '2-digit'
@@ -336,7 +342,8 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
             finishTypeValue={match.finishType.value}
           />
         </div>
-        {/*
+
+        {showMatchSheet && (
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           <Link href={`/matches/${match._id}`}>
             <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -345,7 +352,8 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
             </a>
           </Link>
         </div>
-        */}
+      )}
+        
       </div>
     </div>
   );

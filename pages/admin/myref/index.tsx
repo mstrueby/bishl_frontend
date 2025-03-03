@@ -68,7 +68,31 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       })
     ]);
 
-    matches = matchesRes.data;
+    // Sort matches by date, venue, and time
+    const sortedMatches = [...matchesRes.data].sort((a, b) => {
+      // First sort by date only (ignore time component)
+      const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
+      const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+      
+      if (dateA !== dateB) {
+        return dateA - dateB;
+      }
+      
+      // When dates are the same, sort by venue name to group matches by venue
+      const venueA = a.venue.name.toLowerCase();
+      const venueB = b.venue.name.toLowerCase();
+      
+      if (venueA !== venueB) {
+        return venueA.localeCompare(venueB);
+      }
+      
+      // Finally, for matches at the same venue on the same day, sort by time
+      const timeA = new Date(a.startDate).getTime();
+      const timeB = new Date(b.startDate).getTime();
+      return timeA - timeB;
+    });
+    
+    matches = sortedMatches;
     assignments = assignmentsRes.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -90,6 +114,11 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
   const [assignments, setAssignments] = useState<AssignmentValues[]>(initialAssignments);
   const [filter, setFilter] = useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Meine Schiedsrichtereinsätze";
+  
+  // Call fetchData when component mounts to get the initial sorted data
+  useEffect(() => {
+    fetchData(filter);
+  }, []);
 
   const fetchData = async (filterParams: FilterState) => {
     try {
@@ -123,7 +152,31 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         })
       ]);
 
-      setMatches(matchesRes.data);
+      // Sort matches by date, venue, and time
+      const sortedMatches = [...matchesRes.data].sort((a, b) => {
+        // First sort by date only (ignore time component)
+        const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
+        const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+        
+        if (dateA !== dateB) {
+          return dateA - dateB;
+        }
+        
+        // When dates are the same, sort by venue name to group matches by venue
+        const venueA = a.venue.name.toLowerCase();
+        const venueB = b.venue.name.toLowerCase();
+        
+        if (venueA !== venueB) {
+          return venueA.localeCompare(venueB);
+        }
+        
+        // Finally, for matches at the same venue on the same day, sort by time
+        const timeA = new Date(a.startDate).getTime();
+        const timeB = new Date(b.startDate).getTime();
+        return timeA - timeB;
+      });
+
+      setMatches(sortedMatches);
       setAssignments(assignmentsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -186,10 +239,11 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
             const assignment = assignments.find((a: AssignmentValues) => a.matchId === match._id);
             return (
               <MatchCardRef
-                key={match._id}
+                key={`${match._id}-${assignment?._id || 'new'}`}
                 match={match}
                 assignment={assignment}
                 jwt={jwt}
+                // Force re-render with a new key when assignment changes
               />
             );
           })

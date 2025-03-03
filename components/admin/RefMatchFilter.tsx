@@ -24,7 +24,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   const [startDate, endDate] = dateRange;
 
   useEffect(() => {
-    fetch(`${process.env.API_URL}/tournaments`)
+    fetch(`${process.env.API_URL}/tournaments/`)
       .then(response => response.json())
       .then(data => setTournaments(data))
       .catch(error => console.error('Error fetching tournaments:', error));
