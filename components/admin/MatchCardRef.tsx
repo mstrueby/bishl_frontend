@@ -32,6 +32,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
         { matchId: match._id, status: newStatus.key } :
         { status: newStatus.key };
 
+      console.log(assignment)
+      console.log(selected.key)
+      console.log(body);
+
       const response = await fetch(endpoint, {
         method,
         headers: {
