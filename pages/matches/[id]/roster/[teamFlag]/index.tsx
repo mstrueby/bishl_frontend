@@ -884,7 +884,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             onClick={() => router.back()}
                             className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                         >
-                            Abbrechen
+                            Schließen
                         </button>
                         <button
                             type="button"
