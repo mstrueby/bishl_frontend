@@ -636,9 +636,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
                     {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div className="flex flex-col gap-4">
                         {/* Player Selection */}
-                        <div className="col-span-2">
+                        <div className="">
                             <div className="flex justify-between items-center mb-1">
                                 <label className="block text-sm font-medium text-gray-700">
                                     Spieler
@@ -651,7 +651,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                     </svg>
-                                    Spieler hochmelden
+                                    Hochmelden
                                 </button>
                             </div>
                             <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
@@ -729,87 +729,89 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         </div>
 
                         {/* Jersey Number */}
-                        <div>
-                            <label htmlFor="player-number" className="block text-sm font-medium text-gray-700 mb-1">
-                                Nr.
-                            </label>
-                            <input
-                                type="text"
-                                id="player-number"
-                                value={playerNumber}
-                                onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
-                                className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                placeholder="##"
-                            />
+                        <div className="flex flex-row justify-between items-center mb-1">
+                            <div>
+                                <label htmlFor="player-number" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nr.
+                                </label>
+                                <input
+                                    type="text"
+                                    id="player-number"
+                                    value={playerNumber}
+                                    onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
+                                    className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                    placeholder="##"
+                                />
+                            </div>
+
+                            {/* Player Position */}
+                            <div className="w-full ml-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Position
+                                </label>
+                                <Listbox value={playerPosition} onChange={setPlayerPosition}>
+                                    {({ open }) => (
+                                        <>
+                                            <div className="relative">
+                                                <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                                    <span className="block truncate">
+                                                        {playerPosition.key} - {playerPosition.value}
+                                                    </span>
+                                                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                                        <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                    </span>
+                                                </Listbox.Button>
+
+                                                <Transition
+                                                    show={open}
+                                                    as={Fragment}
+                                                    leave="transition ease-in duration-100"
+                                                    leaveFrom="opacity-100"
+                                                    leaveTo="opacity-0"
+                                                >
+                                                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                        {playerPositions.map((position) => (
+                                                            <Listbox.Option
+                                                                key={position.key}
+                                                                className={({ active }) =>
+                                                                    classNames(
+                                                                        active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                                                        'relative cursor-default select-none py-2 pl-3 pr-9'
+                                                                    )
+                                                                }
+                                                                value={position}
+                                                            >
+                                                                {({ selected, active }) => (
+                                                                    <>
+                                                                        <span className={classNames(
+                                                                            selected ? 'font-semibold' : 'font-normal',
+                                                                            'block truncate'
+                                                                        )}>
+                                                                            {position.key} - {position.value}
+                                                                        </span>
+
+                                                                        {selected ? (
+                                                                            <span
+                                                                                className={classNames(
+                                                                                    active ? 'text-white' : 'text-indigo-600',
+                                                                                    'absolute inset-y-0 right-0 flex items-center pr-4'
+                                                                                )}
+                                                                            >
+                                                                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                                            </span>
+                                                                        ) : null}
+                                                                    </>
+                                                                )}
+                                                            </Listbox.Option>
+                                                        ))}
+                                                    </Listbox.Options>
+                                                </Transition>
+                                            </div>
+                                        </>
+                                    )}
+                                </Listbox>
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Player Position */}
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Position
-                        </label>
-                        <Listbox value={playerPosition} onChange={setPlayerPosition}>
-                            {({ open }) => (
-                                <>
-                                    <div className="relative">
-                                        <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                            <span className="block truncate">
-                                                {playerPosition.key} - {playerPosition.value}
-                                            </span>
-                                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                                            </span>
-                                        </Listbox.Button>
-
-                                        <Transition
-                                            show={open}
-                                            as={Fragment}
-                                            leave="transition ease-in duration-100"
-                                            leaveFrom="opacity-100"
-                                            leaveTo="opacity-0"
-                                        >
-                                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                {playerPositions.map((position) => (
-                                                    <Listbox.Option
-                                                        key={position.key}
-                                                        className={({ active }) =>
-                                                            classNames(
-                                                                active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                                                'relative cursor-default select-none py-2 pl-3 pr-9'
-                                                            )
-                                                        }
-                                                        value={position}
-                                                    >
-                                                        {({ selected, active }) => (
-                                                            <>
-                                                                <span className={classNames(
-                                                                    selected ? 'font-semibold' : 'font-normal',
-                                                                    'block truncate'
-                                                                )}>
-                                                                    {position.key} - {position.value}
-                                                                </span>
-
-                                                                {selected ? (
-                                                                    <span
-                                                                        className={classNames(
-                                                                            active ? 'text-white' : 'text-indigo-600',
-                                                                            'absolute inset-y-0 right-0 flex items-center pr-4'
-                                                                        )}
-                                                                    >
-                                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                                                    </span>
-                                                                ) : null}
-                                                            </>
-                                                        )}
-                                                    </Listbox.Option>
-                                                ))}
-                                            </Listbox.Options>
-                                        </Transition>
-                                    </div>
-                                </>
-                            )}
-                        </Listbox>
                     </div>
 
                     <div className="mt-4 flex justify-end">
@@ -1031,7 +1033,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         </div>
                     </div>
                 </div>
-                <div className="flex space-x-3 mt-4 justify-end">
+                <div className="flex space-x-3 mt-6 justify-end">
                     <button
                         type="button"
                         onClick={() => router.back()}
@@ -1375,8 +1377,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 onClick={handleConfirmCallUp}
                                 disabled={!selectedCallUpPlayer}
                                 className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
-                                        ? 'bg-indigo-600 hover:bg-indigo-500'
-                                        : 'bg-indigo-300 cursor-not-allowed'
+                                    ? 'bg-indigo-600 hover:bg-indigo-500'
+                                    : 'bg-indigo-300 cursor-not-allowed'
                                     }`}
                             >
                                 Hinzufügen
