@@ -21,19 +21,26 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       allRefereeAssignmentStatuses[0]
   )
 
+  const [localAssignment, setLocalAssignment] = useState(assignment);
+
+  // Update local state when the prop changes
+  useEffect(() => {
+    setLocalAssignment(assignment);
+  }, [assignment]);
+
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
     try {
-      const isNewAssignment = !assignment || selected.key === 'AVAILABLE';
+      const isNewAssignment = !localAssignment || selected.key === 'AVAILABLE';
       const method = isNewAssignment ? 'POST' : 'PATCH';
       const endpoint = isNewAssignment ?
         `${BASE_URL}/assignments/` :
-        `${BASE_URL}/assignments/${assignment._id}`;
+        `${BASE_URL}/assignments/${localAssignment?._id}`;
 
       const body = isNewAssignment ?
         { matchId: match._id, status: newStatus.key } :
         { status: newStatus.key };
 
-      console.log('Current assignment:', assignment);
+      console.log('Current assignment:', localAssignment);
       console.log('Selected status:', selected.key);
       console.log('Request body:', body);
 
@@ -58,8 +65,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
         // Update local assignment state with the newly created assignment
         // This allows further updates without refresh
         if (createdAssignment) {
-          // This is a reference to the component prop we're updating with our local state
-          assignment = createdAssignment;
+          setLocalAssignment(createdAssignment);
         }
       }
     } catch (error) {

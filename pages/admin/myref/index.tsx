@@ -186,10 +186,11 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
             const assignment = assignments.find((a: AssignmentValues) => a.matchId === match._id);
             return (
               <MatchCardRef
-                key={match._id}
+                key={`${match._id}-${assignment?._id || 'new'}`}
                 match={match}
                 assignment={assignment}
                 jwt={jwt}
+                // Force re-render with a new key when assignment changes
               />
             );
           })
