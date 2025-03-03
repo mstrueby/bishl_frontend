@@ -25,7 +25,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     try {
       const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
       const endpoint = (!assignment || selected.key === 'AVAILABLE') ?
-        `${BASE_URL}/assignments` :
+        `${BASE_URL}/assignments/` :
         `${BASE_URL}/assignments/${assignment._id}`;
 
       const body = (!assignment || selected.key === 'AVAILABLE') ?
