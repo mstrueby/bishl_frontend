@@ -12,6 +12,7 @@ import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/soli
 import { classNames } from '../../../../../tools/utils';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
+import Toggle from '../../../../../components/ui/Toggle';
 
 let BASE_URL = process.env['API_URL'];
 
@@ -206,7 +207,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const handleCloseErrorMesssage = () => {
         setError(null);
     }
-    
+
     const handleCloseModalError = () => {
         setModalError(null);
     };
@@ -222,7 +223,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             Authorization: `Bearer ${jwt}`,
                         }
                     });
-                    const filteredTeams = teamsResponse.data.filter((t: TeamValues) => 
+                    const filteredTeams = teamsResponse.data.filter((t: TeamValues) =>
                         t.ageGroup === team.ageGroup && t._id !== team._id && t.active && t.teamNumber > team.teamNumber
                     );
                     setCallUpTeams(filteredTeams);
@@ -231,7 +232,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     setCallUpModalError('Fehler beim Laden der Teams');
                 }
             };
-            
+
             fetchTeams();
         }
     }, [isCallUpModalOpen, club, team, jwt]);
@@ -251,16 +252,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             active: 'true'
                         }
                     });
-                    
+
                     const players = playersResponse.data.results || [];
-                    
+
                     // Format the players to match the AvailablePlayer interface
                     const formattedPlayers = players.map((player: PlayerValues) => {
                         // Find the team assignment for the selected team
                         const assignedTeam = player.assignedTeams
                             ?.flatMap((assignment: Assignment) => assignment.teams || [])
                             .find((team: AssignmentTeam) => team && team.teamId === selectedCallUpTeam._id);
-                        
+
                         return {
                             _id: player._id,
                             firstName: player.firstName,
@@ -277,13 +278,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             called: true
                         };
                     }).filter(player => player !== null);
-                    
+
                     // Filter out players that are already in the roster
                     const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
-                    const filteredPlayers = formattedPlayers.filter(player => 
+                    const filteredPlayers = formattedPlayers.filter(player =>
                         !rosterPlayerIds.includes(player._id)
                     );
-                    
+
                     setCallUpPlayers(filteredPlayers);
                 } catch (error) {
                     console.error('Error fetching players:', error);
@@ -291,7 +292,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     setCallUpPlayers([]);
                 }
             };
-            
+
             fetchPlayers();
         } else {
             setCallUpPlayers([]);
@@ -312,15 +313,21 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             return;
         }
 
+        // Make sure the called attribute is set to true
+        const playerWithCalled = {
+            ...selectedCallUpPlayer,
+            called: true
+        };
+
         // Add the player to the available players list
-        setAvailablePlayersList(prev => [...prev, selectedCallUpPlayer]);
-        
+        setAvailablePlayersList(prev => [...prev, playerWithCalled]);
+
         // Close the modal and reset selections
         setIsCallUpModalOpen(false);
         setSelectedCallUpTeam(null);
         setSelectedCallUpPlayer(null);
         setCallUpModalError(null);
-        
+
         // Optional: Show a success message
         setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
     };
@@ -440,7 +447,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
     const handleAddPlayer = async () => {
         if (!selectedPlayer) {
-            setError('Please select a player');
+            setError('Wähle einen Spieler aus');
             return;
         }
 
@@ -500,7 +507,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     value: playerPosition.value,
                 },
                 passNumber: selectedPlayer.passNo,
-                called: false
+                called: selectedPlayer.called || false
             };
 
             // Add player to roster
@@ -624,8 +631,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
                 {/* Add Player Form */}
-                <div className="bg-white shadow rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-medium mb-4">Add Player to Roster</h2>
+                <div className="bg-white shadow rounded-md border p-4 mb-6">
+                    <h2 className="text-lg font-medium mb-4">Spieler aufstellen</h2>
 
                     {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
@@ -634,7 +641,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         <div className="col-span-2">
                             <div className="flex justify-between items-center mb-1">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Player
+                                    Spieler
                                 </label>
                                 <button
                                     type="button"
@@ -653,7 +660,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Select a player'}
+                                                    {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -710,7 +717,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                         ))
                                                     ) : (
                                                         <div className="py-2 px-3 text-gray-500 italic">
-                                                            No available players
+                                                            Keine Spieler verfügbar
                                                         </div>
                                                     )}
                                                 </Listbox.Options>
@@ -724,14 +731,14 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         {/* Jersey Number */}
                         <div>
                             <label htmlFor="player-number" className="block text-sm font-medium text-gray-700 mb-1">
-                                Jersey Number
+                                Nr.
                             </label>
                             <input
                                 type="text"
                                 id="player-number"
                                 value={playerNumber}
                                 onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
-                                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 placeholder="##"
                             />
                         </div>
@@ -813,33 +820,40 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                            Add to Roster
+                            Hinzufügen
                         </button>
                     </div>
                 </div>
 
                 {/* Roster List */}
                 <h3 className="mt-8 text-lg font-medium text-gray-900">Aufstellung</h3>
-                <div className="bg-white shadow rounded-lg mt-4">
+                <div className="bg-white shadow-md rounded-md border-2 mt-4">
                     <ul className="divide-y divide-gray-200">
                         {rosterList.length > 0 ? (
                             rosterList.map((player) => (
                                 <li key={player.player.playerId} className={`px-6 py-4 ${player.player.jerseyNumber === 0 ? 'bg-yellow-50' : ''}`}>
                                     <div className="flex items-center">
-                                        <div className={`min-w-12 text-sm font-semibold ${player.player.jerseyNumber === 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                                        <div className={`min-w-8 md:min-w-12 text-sm font-semibold ${player.player.jerseyNumber === 0 ? 'text-red-600' : 'text-gray-900'}`}>
                                             {player.player.jerseyNumber}
                                         </div>
-                                        <div className="min-w-12 text-sm font-medium text-gray-500">
+                                        <div className="min-w-8 md:min-w-12 text-sm font-medium text-gray-500">
                                             {player.playerPosition.key}
                                         </div>
                                         <div className="flex-1 text-sm text-gray-900">
                                             {player.player.lastName}, {player.player.firstName}
                                         </div>
-                                        <div className="flex-1 text-sm text-gray-500">
+                                        <div className="flex-1 hidden sm:block flex-1 text-xs text-gray-500">
                                             {player.passNumber}
                                         </div>
-                                        <div className="flex-1 text-sm text-gray-500">
-                                            {player.called}
+                                        <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
+                                            {player.called ? (
+                                                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                    <span className="hidden sm:block">Hochgemeldet</span>
+                                                </span>
+                                            ) : null}
                                         </div>
                                         <div className="flex space-x-2">
                                             <button
@@ -888,7 +902,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             ))
                         ) : (
                             <li className="px-6 py-4 text-center text-gray-500">
-                                No players in roster
+                                Keine Spieler in der Aufstellung
                             </li>
                         )}
                     </ul>
@@ -896,8 +910,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
                 {/* Publish toggle and save button */}
                 {/* Roster Completeness Check */}
-                <div className="mt-8 bg-white shadow rounded-lg p-6">
-                    <h3 className="text-base font-semibold mb-4">Vollständigkeitsprüfung:</h3>
+                <div className="mt-8 bg-white shadow rounded-md border p-6">
+                    <h3 className="text-base font-semibold mb-4">Check:</h3>
                     <div className="space-y-3">
                         <div className="flex items-center">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'C') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
@@ -912,12 +926,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 )}
                             </div>
                             <span className="ml-2 text-sm">
-                                {rosterList.some(player => player.playerPosition.key === 'C') 
-                                    ? 'Captain (C) wurde festgelegt' 
+                                {rosterList.some(player => player.playerPosition.key === 'C')
+                                    ? 'Captain (C) wurde festgelegt'
                                     : 'Es wurde noch kein Captain (C) festgelegt'}
                             </span>
                         </div>
-                        
+
                         <div className="flex items-center">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'A') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                                 {rosterList.some(player => player.playerPosition.key === 'A') ? (
@@ -931,12 +945,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 )}
                             </div>
                             <span className="ml-2 text-sm">
-                                {rosterList.some(player => player.playerPosition.key === 'A') 
-                                    ? 'Assistant (A) wurde festgelegt' 
+                                {rosterList.some(player => player.playerPosition.key === 'A')
+                                    ? 'Assistant (A) wurde festgelegt'
                                     : 'Es wurde noch kein Assistant (A) festgelegt'}
                             </span>
                         </div>
-                        
+
                         <div className="flex items-center">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'G') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                                 {rosterList.some(player => player.playerPosition.key === 'G') ? (
@@ -950,8 +964,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 )}
                             </div>
                             <span className="ml-2 text-sm">
-                                {rosterList.some(player => player.playerPosition.key === 'G') 
-                                    ? 'Mindestens ein Goalie (G) wurde festgelegt' 
+                                {rosterList.some(player => player.playerPosition.key === 'G')
+                                    ? 'Mindestens ein Goalie (G) wurde festgelegt'
                                     : 'Es wurde noch kein Goalie (G) festgelegt'}
                             </span>
                         </div>
@@ -968,10 +982,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
                                     const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
                                     const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-                                    
+
                                     // All checks must pass to enable the checkbox
                                     const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie;
-                                    
+
                                     return (
                                         <input
                                             id="rosterPublished"
@@ -994,7 +1008,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
                                     const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
                                     const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-                                    
+
                                     return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie ? 'text-gray-900' : 'text-gray-400';
                                 })()} `}>Veröffentlichen</label>
                                 <p className="text-gray-500">
@@ -1003,7 +1017,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
                                         const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
                                         const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-                                        
+
                                         if (hasZeroJerseyNumber) {
                                             return 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)';
                                         } else if (!hasCaptain || !hasAssistant || !hasGoalie) {
@@ -1016,23 +1030,30 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </div>
                         </div>
                     </div>
-                    <div className="flex space-x-3">
-                        <button
-                            type="button"
-                            onClick={() => router.back()}
-                            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                        >
-                            Schließen
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleSaveRoster}
-                            disabled={loading || savingRoster}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                        >
-                            {savingRoster ? 'Speichern...' : 'Speichern'}
-                        </button>
-                    </div>
+                </div>
+                <div className="flex space-x-3 mt-4 justify-end">
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                        Schließen
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSaveRoster}
+                        disabled={loading || savingRoster}
+                        className="w-24 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        {savingRoster ? (
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                            </svg>
+                        ) : (
+                            'Speichern'
+                        )}
+                    </button>
                 </div>
             </div>
 
@@ -1353,11 +1374,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 type="button"
                                 onClick={handleConfirmCallUp}
                                 disabled={!selectedCallUpPlayer}
-                                className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                                    selectedCallUpPlayer
+                                className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
                                         ? 'bg-indigo-600 hover:bg-indigo-500'
                                         : 'bg-indigo-300 cursor-not-allowed'
-                                }`}
+                                    }`}
                             >
                                 Hinzufügen
                             </button>
