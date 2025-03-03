@@ -28,6 +28,7 @@ interface AvailablePlayer {
     imageVisible: boolean,
     passNo: string,
     jerseyNo: number | undefined,
+    called: boolean,
 }
 
 interface RosterPageProps {
@@ -72,7 +73,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 Authorization: `Bearer ${jwt}`,
             }
         });
-        console.log("match", matchResponse.data)
+        //console.log("match", matchResponse.data)
         const match: Match = await matchResponse.data;
 
         // Determine which team's roster to fetch
@@ -129,7 +130,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 imageUrl: teamPlayer.imageUrl,
                 imageVisible: teamPlayer.imageVisible,
                 passNo: assignedTeam.passNo,
-                jerseyNo: assignedTeam.jerseyNo
+                jerseyNo: assignedTeam.jerseyNo,
+                called: false
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
 
@@ -190,6 +192,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [modalError, setModalError] = useState<string | null>(null);
+    const [isCallUpModalOpen, setIsCallUpModalOpen] = useState(false);
+    const [callUpTeams, setCallUpTeams] = useState<TeamValues[]>([]);
+    const [selectedCallUpTeam, setSelectedCallUpTeam] = useState<TeamValues | null>(null);
+    const [callUpPlayers, setCallUpPlayers] = useState<AvailablePlayer[]>([]);
+    const [selectedCallUpPlayer, setSelectedCallUpPlayer] = useState<AvailablePlayer | null>(null);
+    const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
 
     // Handler to close the success message
     const handleCloseSuccessMessage = () => {
@@ -201,6 +209,120 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     
     const handleCloseModalError = () => {
         setModalError(null);
+    };
+
+    // Fetch teams from the same club with the same age group
+    useEffect(() => {
+        if (isCallUpModalOpen && club && team) {
+            // Filter teams from the same club with the same age group and a lower team number, but not the current team
+            const fetchTeams = async () => {
+                try {
+                    const teamsResponse = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/`, {
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                        }
+                    });
+                    const filteredTeams = teamsResponse.data.filter((t: TeamValues) => 
+                        t.ageGroup === team.ageGroup && t._id !== team._id && t.active && t.teamNumber > team.teamNumber
+                    );
+                    setCallUpTeams(filteredTeams);
+                } catch (error) {
+                    console.error('Error fetching teams:', error);
+                    setCallUpModalError('Fehler beim Laden der Teams');
+                }
+            };
+            
+            fetchTeams();
+        }
+    }, [isCallUpModalOpen, club, team, jwt]);
+
+    // Fetch players when a team is selected
+    useEffect(() => {
+        if (selectedCallUpTeam) {
+            const fetchPlayers = async () => {
+                try {
+                    const playersResponse = await axios.get(
+                        `${BASE_URL}/players/clubs/${club.alias}/teams/${selectedCallUpTeam.alias}`, {
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                        },
+                        params: {
+                            sortby: 'lastName',
+                            active: 'true'
+                        }
+                    });
+                    
+                    const players = playersResponse.data.results || [];
+                    
+                    // Format the players to match the AvailablePlayer interface
+                    const formattedPlayers = players.map((player: PlayerValues) => {
+                        // Find the team assignment for the selected team
+                        const assignedTeam = player.assignedTeams
+                            ?.flatMap((assignment: Assignment) => assignment.teams || [])
+                            .find((team: AssignmentTeam) => team && team.teamId === selectedCallUpTeam._id);
+                        
+                        return {
+                            _id: player._id,
+                            firstName: player.firstName,
+                            lastName: player.lastName,
+                            displayFirstName: player.displayFirstName,
+                            displayLastName: player.displayLastName,
+                            position: player.position || 'Skater',
+                            fullFaceReq: player.fullFaceReq,
+                            source: player.source,
+                            imageUrl: player.imageUrl,
+                            imageVisible: player.imageVisible,
+                            passNo: assignedTeam?.passNo || '',
+                            jerseyNo: assignedTeam?.jerseyNo,
+                            called: true
+                        };
+                    }).filter(player => player !== null);
+                    
+                    // Filter out players that are already in the roster
+                    const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
+                    const filteredPlayers = formattedPlayers.filter(player => 
+                        !rosterPlayerIds.includes(player._id)
+                    );
+                    
+                    setCallUpPlayers(filteredPlayers);
+                } catch (error) {
+                    console.error('Error fetching players:', error);
+                    setCallUpModalError('Fehler beim Laden der Spieler');
+                    setCallUpPlayers([]);
+                }
+            };
+            
+            fetchPlayers();
+        } else {
+            setCallUpPlayers([]);
+            setSelectedCallUpPlayer(null);
+        }
+    }, [selectedCallUpTeam, club, jwt, rosterList]);
+
+    // Handle adding the selected call-up player to the available players list
+    const handleConfirmCallUp = () => {
+        if (!selectedCallUpPlayer) {
+            setCallUpModalError('Bitte wähle einen Spieler aus');
+            return;
+        }
+
+        // Check if the player is already in the available players list
+        if (availablePlayersList.some(p => p._id === selectedCallUpPlayer._id)) {
+            setCallUpModalError('Dieser Spieler ist bereits in der Liste verfügbar');
+            return;
+        }
+
+        // Add the player to the available players list
+        setAvailablePlayersList(prev => [...prev, selectedCallUpPlayer]);
+        
+        // Close the modal and reset selections
+        setIsCallUpModalOpen(false);
+        setSelectedCallUpTeam(null);
+        setSelectedCallUpPlayer(null);
+        setCallUpModalError(null);
+        
+        // Optional: Show a success message
+        setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
     };
 
     // Sort roster by position order: C, A, G, F, then by jersey number
@@ -378,6 +500,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     value: playerPosition.value,
                 },
                 passNumber: selectedPlayer.passNo,
+                called: false
             };
 
             // Add player to roster
@@ -418,7 +541,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
             // Here you would make the actual API call to update the roster
             /*
-            await axios.post(`${process.env.API_URL}/matches/${match._id}/roster/${teamFlag}`, {
+            await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
                 playerId: selectedPlayer._id,
                 playerNumber: playerNumber
             }, {
@@ -453,7 +576,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             };
 
             // Make the API call to save the roster
-            const rosterResponse = await axios.put(`${process.env.API_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
+            const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
@@ -461,7 +584,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             });
 
             // Make API call to save further roster attributes
-            const publishResponse = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+            const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
                 [teamFlag]: {
                     rosterPublished: rosterPublished
                 }
@@ -509,9 +632,21 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {/* Player Selection */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Player
-                            </label>
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Player
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCallUpModalOpen(true)}
+                                    className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                    Spieler hochmelden
+                                </button>
+                            </div>
                             <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
                                 {({ open }) => (
                                     <>
@@ -702,6 +837,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         </div>
                                         <div className="flex-1 text-sm text-gray-500">
                                             {player.passNumber}
+                                        </div>
+                                        <div className="flex-1 text-sm text-gray-500">
+                                            {player.called}
                                         </div>
                                         <div className="flex space-x-2">
                                             <button
@@ -1006,6 +1144,222 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                             >
                                 Speichern
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Call-Up Player Modal */}
+            {isCallUpModalOpen && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">
+                            Spieler aus anderer Mannschaft hinzufügen
+                        </h3>
+
+                        {callUpModalError && (
+                            <div className="rounded-md bg-red-50 p-4 mb-4">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-red-800">{callUpModalError}</h3>
+                                    </div>
+                                    <div className="ml-auto pl-3">
+                                        <div className="-mx-1.5 -my-1.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCallUpModalError(null)}
+                                                className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                                            >
+                                                <span className="sr-only">Dismiss</span>
+                                                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                    <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Team Selection */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Team
+                            </label>
+                            <Listbox value={selectedCallUpTeam} onChange={setSelectedCallUpTeam}>
+                                {({ open }) => (
+                                    <>
+                                        <div className="relative">
+                                            <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                                <span className="block truncate">
+                                                    {selectedCallUpTeam ? selectedCallUpTeam.name : 'Mannschaft auswählen'}
+                                                </span>
+                                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                                    <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                </span>
+                                            </Listbox.Button>
+
+                                            <Transition
+                                                show={open}
+                                                as={React.Fragment}
+                                                leave="transition ease-in duration-100"
+                                                leaveFrom="opacity-100"
+                                                leaveTo="opacity-0"
+                                            >
+                                                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                    {callUpTeams.length > 0 ? (
+                                                        callUpTeams.map((teamItem) => (
+                                                            <Listbox.Option
+                                                                key={teamItem._id}
+                                                                className={({ active }) =>
+                                                                    classNames(
+                                                                        active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                                                        'relative cursor-default select-none py-2 pl-3 pr-9'
+                                                                    )
+                                                                }
+                                                                value={teamItem}
+                                                            >
+                                                                {({ selected, active }) => (
+                                                                    <>
+                                                                        <span className={classNames(
+                                                                            selected ? 'font-semibold' : 'font-normal',
+                                                                            'block truncate'
+                                                                        )}>
+                                                                            {teamItem.name}
+                                                                        </span>
+
+                                                                        {selected ? (
+                                                                            <span
+                                                                                className={classNames(
+                                                                                    active ? 'text-white' : 'text-indigo-600',
+                                                                                    'absolute inset-y-0 right-0 flex items-center pr-4'
+                                                                                )}
+                                                                            >
+                                                                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                                            </span>
+                                                                        ) : null}
+                                                                    </>
+                                                                )}
+                                                            </Listbox.Option>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-2 px-3 text-gray-500 italic">
+                                                            Keine Mannschaften verfügbar
+                                                        </div>
+                                                    )}
+                                                </Listbox.Options>
+                                            </Transition>
+                                        </div>
+                                    </>
+                                )}
+                            </Listbox>
+                        </div>
+
+                        {/* Player Selection */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Spieler
+                            </label>
+                            <Listbox value={selectedCallUpPlayer} onChange={setSelectedCallUpPlayer}>
+                                {({ open }) => (
+                                    <>
+                                        <div className="relative">
+                                            <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                                <span className="block truncate">
+                                                    {selectedCallUpPlayer ? `${selectedCallUpPlayer.lastName}, ${selectedCallUpPlayer.firstName}` : 'Spieler auswählen'}
+                                                </span>
+                                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                                    <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                </span>
+                                            </Listbox.Button>
+
+                                            <Transition
+                                                show={open}
+                                                as={React.Fragment}
+                                                leave="transition ease-in duration-100"
+                                                leaveFrom="opacity-100"
+                                                leaveTo="opacity-0"
+                                            >
+                                                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                    {callUpPlayers.length > 0 ? (
+                                                        callUpPlayers.map((player) => (
+                                                            <Listbox.Option
+                                                                key={player._id}
+                                                                className={({ active }) =>
+                                                                    classNames(
+                                                                        active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                                                        'relative cursor-default select-none py-2 pl-3 pr-9'
+                                                                    )
+                                                                }
+                                                                value={player}
+                                                            >
+                                                                {({ selected, active }) => (
+                                                                    <>
+                                                                        <span className={classNames(
+                                                                            selected ? 'font-semibold' : 'font-normal',
+                                                                            'block truncate'
+                                                                        )}>
+                                                                            {player.lastName}, {player.firstName}
+                                                                        </span>
+
+                                                                        {selected ? (
+                                                                            <span
+                                                                                className={classNames(
+                                                                                    active ? 'text-white' : 'text-indigo-600',
+                                                                                    'absolute inset-y-0 right-0 flex items-center pr-4'
+                                                                                )}
+                                                                            >
+                                                                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                                            </span>
+                                                                        ) : null}
+                                                                    </>
+                                                                )}
+                                                            </Listbox.Option>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-2 px-3 text-gray-500 italic">
+                                                            {selectedCallUpTeam ? 'Keine Spieler verfügbar' : 'Bitte zuerst eine Mannschaft auswählen'}
+                                                        </div>
+                                                    )}
+                                                </Listbox.Options>
+                                            </Transition>
+                                        </div>
+                                    </>
+                                )}
+                            </Listbox>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsCallUpModalOpen(false);
+                                    setSelectedCallUpTeam(null);
+                                    setSelectedCallUpPlayer(null);
+                                    setCallUpModalError(null);
+                                }}
+                                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            >
+                                Abbrechen
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmCallUp}
+                                disabled={!selectedCallUpPlayer}
+                                className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                                    selectedCallUpPlayer
+                                        ? 'bg-indigo-600 hover:bg-indigo-500'
+                                        : 'bg-indigo-300 cursor-not-allowed'
+                                }`}
+                            >
+                                Hinzufügen
                             </button>
                         </div>
                     </div>
