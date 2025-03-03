@@ -10,6 +10,7 @@ export interface RosterPlayer {
     value: string;
   },
   passNumber: string;
+  called: boolean;
 }
 
 interface TeamStats {

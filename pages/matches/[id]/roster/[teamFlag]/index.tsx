@@ -28,6 +28,7 @@ interface AvailablePlayer {
     imageVisible: boolean,
     passNo: string,
     jerseyNo: number | undefined,
+    called: boolean,
 }
 
 interface RosterPageProps {
@@ -72,7 +73,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 Authorization: `Bearer ${jwt}`,
             }
         });
-        console.log("match", matchResponse.data)
+        //console.log("match", matchResponse.data)
         const match: Match = await matchResponse.data;
 
         // Determine which team's roster to fetch
@@ -129,7 +130,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 imageUrl: teamPlayer.imageUrl,
                 imageVisible: teamPlayer.imageVisible,
                 passNo: assignedTeam.passNo,
-                jerseyNo: assignedTeam.jerseyNo
+                jerseyNo: assignedTeam.jerseyNo,
+                called: false
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
 
@@ -212,16 +214,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     // Fetch teams from the same club with the same age group
     useEffect(() => {
         if (isCallUpModalOpen && club && team) {
-            // Filter teams from the same club with the same age group but not the current team
+            // Filter teams from the same club with the same age group and a lower team number, but not the current team
             const fetchTeams = async () => {
                 try {
-                    const teamsResponse = await axios.get(`${process.env.API_URL}/clubs/${club.alias}/teams`, {
+                    const teamsResponse = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/`, {
                         headers: {
                             Authorization: `Bearer ${jwt}`,
                         }
                     });
                     const filteredTeams = teamsResponse.data.filter((t: TeamValues) => 
-                        t.ageGroup === team.ageGroup && t._id !== team._id && t.active
+                        t.ageGroup === team.ageGroup && t._id !== team._id && t.active && t.teamNumber > team.teamNumber
                     );
                     setCallUpTeams(filteredTeams);
                 } catch (error) {
@@ -240,7 +242,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             const fetchPlayers = async () => {
                 try {
                     const playersResponse = await axios.get(
-                        `${process.env.API_URL}/players/clubs/${club.alias}/teams/${selectedCallUpTeam.alias}`, {
+                        `${BASE_URL}/players/clubs/${club.alias}/teams/${selectedCallUpTeam.alias}`, {
                         headers: {
                             Authorization: `Bearer ${jwt}`,
                         },
@@ -271,7 +273,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             imageUrl: player.imageUrl,
                             imageVisible: player.imageVisible,
                             passNo: assignedTeam?.passNo || '',
-                            jerseyNo: assignedTeam?.jerseyNo
+                            jerseyNo: assignedTeam?.jerseyNo,
+                            called: true
                         };
                     }).filter(player => player !== null);
                     
@@ -319,7 +322,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setCallUpModalError(null);
         
         // Optional: Show a success message
-        setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde zur Verfügung gestellt`);
+        setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
     };
 
     // Sort roster by position order: C, A, G, F, then by jersey number
@@ -497,6 +500,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     value: playerPosition.value,
                 },
                 passNumber: selectedPlayer.passNo,
+                called: false
             };
 
             // Add player to roster
@@ -537,7 +541,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
             // Here you would make the actual API call to update the roster
             /*
-            await axios.post(`${process.env.API_URL}/matches/${match._id}/roster/${teamFlag}`, {
+            await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
                 playerId: selectedPlayer._id,
                 playerNumber: playerNumber
             }, {
@@ -572,7 +576,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             };
 
             // Make the API call to save the roster
-            const rosterResponse = await axios.put(`${process.env.API_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
+            const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
@@ -580,7 +584,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             });
 
             // Make API call to save further roster attributes
-            const publishResponse = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+            const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
                 [teamFlag]: {
                     rosterPublished: rosterPublished
                 }
@@ -640,7 +644,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                     </svg>
-                                    Spieler hochziehen
+                                    Spieler hochmelden
                                 </button>
                             </div>
                             <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
@@ -833,6 +837,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         </div>
                                         <div className="flex-1 text-sm text-gray-500">
                                             {player.passNumber}
+                                        </div>
+                                        <div className="flex-1 text-sm text-gray-500">
+                                            {player.called}
                                         </div>
                                         <div className="flex space-x-2">
                                             <button
