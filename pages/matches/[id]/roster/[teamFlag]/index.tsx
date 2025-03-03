@@ -312,8 +312,14 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             return;
         }
 
+        // Make sure the called attribute is set to true
+        const playerWithCalled = {
+            ...selectedCallUpPlayer,
+            called: true
+        };
+
         // Add the player to the available players list
-        setAvailablePlayersList(prev => [...prev, selectedCallUpPlayer]);
+        setAvailablePlayersList(prev => [...prev, playerWithCalled]);
         
         // Close the modal and reset selections
         setIsCallUpModalOpen(false);
@@ -500,7 +506,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     value: playerPosition.value,
                 },
                 passNumber: selectedPlayer.passNo,
-                called: false
+                called: selectedPlayer.called || false
             };
 
             // Add player to roster
