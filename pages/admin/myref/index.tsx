@@ -123,7 +123,28 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         })
       ]);
 
-      setMatches(matchesRes.data);
+      // Sort matches by date, venue, and time
+      const sortedMatches = [...matchesRes.data].sort((a, b) => {
+        // First sort by date
+        const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
+        const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+        if (dateA !== dateB) {
+          return dateA - dateB;
+        }
+        
+        // Then sort by venue name
+        const venueComparison = a.venue.name.localeCompare(b.venue.name);
+        if (venueComparison !== 0) {
+          return venueComparison;
+        }
+        
+        // Finally sort by time
+        const timeA = new Date(a.startDate).getTime();
+        const timeB = new Date(b.startDate).getTime();
+        return timeA - timeB;
+      });
+
+      setMatches(sortedMatches);
       setAssignments(assignmentsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
