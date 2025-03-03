@@ -757,41 +757,144 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 {/* Publish toggle and save button */}
-                <div className="flex items-center justify-between mt-8 bg-white shadow rounded-lg p-6">
+                {/* Roster Completeness Check */}
+                <div className="mt-8 bg-white shadow rounded-lg p-6">
+                    <h3 className="text-base font-semibold mb-4">Vollständigkeitsprüfung:</h3>
+                    <div className="space-y-3">
+                        <div className="flex items-center">
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'C') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                                {rosterList.some(player => player.playerPosition.key === 'C') ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="ml-2 text-sm">
+                                {rosterList.some(player => player.playerPosition.key === 'C') 
+                                    ? 'Captain (C) wurde festgelegt' 
+                                    : 'Es wurde noch kein Captain (C) festgelegt'}
+                            </span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'A') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                                {rosterList.some(player => player.playerPosition.key === 'A') ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="ml-2 text-sm">
+                                {rosterList.some(player => player.playerPosition.key === 'A') 
+                                    ? 'Assistant (A) wurde festgelegt' 
+                                    : 'Es wurde noch kein Assistant (A) festgelegt'}
+                            </span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'G') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                                {rosterList.some(player => player.playerPosition.key === 'G') ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="ml-2 text-sm">
+                                {rosterList.some(player => player.playerPosition.key === 'G') 
+                                    ? 'Mindestens ein Goalie (G) wurde festgelegt' 
+                                    : 'Es wurde noch kein Goalie (G) festgelegt'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-6 bg-white shadow rounded-lg p-6">
                     <div className="flex items-center">
                         <div className="relative inline-flex items-center">
                             <div className="flex items-center h-6">
-                                <input
-                                    id="rosterPublished"
-                                    type="checkbox"
-                                    className={`h-4 w-4 rounded border-gray-300 ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'text-gray-400 bg-gray-100' : 'text-indigo-600'} focus:ring-indigo-600`}
-                                    checked={rosterPublished}
-                                    onChange={(e) => {
-                                        if (!rosterList.some(player => player.player.jerseyNumber === 0)) {
-                                            setRosterPublished(e.target.checked);
-                                        }
-                                    }}
-                                    disabled={rosterList.some(player => player.player.jerseyNumber === 0)}
-                                />
+                                {/* Check if all required conditions are met */}
+                                {(() => {
+                                    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+                                    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+                                    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+                                    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                    
+                                    // All checks must pass to enable the checkbox
+                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie;
+                                    
+                                    return (
+                                        <input
+                                            id="rosterPublished"
+                                            type="checkbox"
+                                            className={`h-4 w-4 rounded border-gray-300 ${allChecksPass ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
+                                            checked={rosterPublished}
+                                            onChange={(e) => {
+                                                if (allChecksPass) {
+                                                    setRosterPublished(e.target.checked);
+                                                }
+                                            }}
+                                            disabled={!allChecksPass}
+                                        />
+                                    );
+                                })()}
                             </div>
                             <div className="ml-3 text-sm leading-6">
-                                <label htmlFor="rosterPublished" className={`font-medium ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'text-gray-400' : 'text-gray-900'}`}>Veröffentlichen</label>
+                                <label htmlFor="rosterPublished" className={`font-medium ${(() => {
+                                    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+                                    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+                                    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+                                    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                    
+                                    return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie ? 'text-gray-900' : 'text-gray-400';
+                                })()} `}>Veröffentlichen</label>
                                 <p className="text-gray-500">
-                                    {rosterList.some(player => player.player.jerseyNumber === 0) 
-                                        ? 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)'
-                                        : 'Aufstellung öffentlich sichtbar machen'}
+                                    {(() => {
+                                        const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+                                        const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+                                        const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+                                        const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                        
+                                        if (hasZeroJerseyNumber) {
+                                            return 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)';
+                                        } else if (!hasCaptain || !hasAssistant || !hasGoalie) {
+                                            return 'Stelle sicher, dass ein Captain (C), ein Assistant (A) und mindestens ein Goalie (G) festgelegt ist';
+                                        } else {
+                                            return 'Aufstellung öffentlich sichtbar machen';
+                                        }
+                                    })()}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        onClick={handleSaveRoster}
-                        disabled={loading || savingRoster}
-                        className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    >
-                        {savingRoster ? 'Speichern...' : 'Speichern'}
-                    </button>
+                    <div className="flex space-x-3">
+                        <button
+                            type="button"
+                            onClick={() => router.back()}
+                            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        >
+                            Schließen
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleSaveRoster}
+                            disabled={loading || savingRoster}
+                            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        >
+                            {savingRoster ? 'Speichern...' : 'Speichern'}
+                        </button>
+                    </div>
                 </div>
             </div>
 
