@@ -20,7 +20,7 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
 
   // deactivate new features for PROD
   // Feature-Switch
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
     showLinkHome = false;
     showLinkAway = false;
   }
