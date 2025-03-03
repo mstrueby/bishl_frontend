@@ -167,7 +167,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
                 {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
                   weekday: 'short',
                   day: 'numeric',
-                  month: 'short',
+                  month: 'numeric',
                   year: undefined,
                   hour: '2-digit',
                   minute: '2-digit'
@@ -180,7 +180,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
                   weekday: 'long',
                   day: 'numeric',
                   month: 'short',
-                  year: '2-digit',
+                  year: undefined,
                   hour: '2-digit',
                   minute: '2-digit'
                 }) : 'offen'}
