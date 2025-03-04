@@ -397,9 +397,83 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
           )}
 
           {activeTab === 'penalties' && (
-            <div className="text-center py-4">
-              <h3 className="text-lg font-medium text-gray-900">Strafen</h3>
-              <p className="mt-2 text-gray-500">Strafstatistiken werden hier angezeigt</p>
+            <div className="py-4">
+              {/* Container for side-by-side or stacked penalties */}
+              <div className="flex flex-col md:flex-row md:space-x-4">
+                {/* Home team penalties */}
+                <div className="w-full md:w-1/2 mb-6 md:mb-0">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.home.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.home.penalties && match.home.penalties.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.home.penalties.map((penalty, index) => (
+                            <tr key={`home-penalty-${index}`}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                {penalty.matchTimeStart}
+                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                <p>
+                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                  {penalty.isGM && ' (GM)'}
+                                  {penalty.isMP && ' (MP)'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                                </p>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Strafen vorhanden
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Away team penalties */}
+                <div className="w-full md:w-1/2">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.away.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.away.penalties && match.away.penalties.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.away.penalties.map((penalty, index) => (
+                            <tr key={`away-penalty-${index}`}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                {penalty.matchTimeStart}
+                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                <p>
+                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                  {penalty.isGM && ' (GM)'}
+                                  {penalty.isMP && ' (MP)'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                                </p>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Strafen vorhanden
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
