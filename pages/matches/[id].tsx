@@ -201,8 +201,6 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
         <div className="py-6">
           {activeTab === 'roster' && (
             <div className="py-4">
-              <h3 className="text-lg font-medium text-gray-900 text-center mb-6">Aufstellung</h3>
-              
               {/* Container for side-by-side or stacked rosters */}
               <div className="flex flex-col md:flex-row md:space-x-4">
                 {/* Home team roster */}
