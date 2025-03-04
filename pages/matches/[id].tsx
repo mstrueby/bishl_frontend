@@ -295,17 +295,8 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                         <h4 className="text-md font-semibold">{match.home.fullName}</h4>
                       </div>
                       <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                        {sortedHomeRoster && sortedHomeRoster.length > 0 ? (
+                        {match.home.rosterPublished && sortedHomeRoster && sortedHomeRoster.length > 0 ? (
                           <table className="min-w-full divide-y divide-gray-200">
-                            {/*
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                              </tr>
-                            </thead>
-                            */}
                             <tbody className="bg-white divide-y divide-gray-200">
                               {sortedHomeRoster.map((player) => (
                                 <tr key={player.player.playerId}>
@@ -318,7 +309,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                           </table>
                         ) : (
                           <div className="text-center py-4 text-sm text-gray-500">
-                            Keine Aufstellung verfügbar
+                            {match.home.rosterPublished === false ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
                           </div>
                         )}
                       </div>
@@ -330,17 +321,8 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                         <h4 className="text-md font-semibold">{match.away.fullName}</h4>
                       </div>
                       <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                        {sortedAwayRoster && sortedAwayRoster.length > 0 ? (
+                        {match.away.rosterPublished && sortedAwayRoster && sortedAwayRoster.length > 0 ? (
                           <table className="min-w-full divide-y divide-gray-200">
-                            {/*
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                              </tr>
-                            </thead>
-                            */}
                             <tbody className="bg-white divide-y divide-gray-200">
                               {sortedAwayRoster.map((player) => (
                                 <tr key={player.player.playerId}>
@@ -353,7 +335,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                           </table>
                         ) : (
                           <div className="text-center py-4 text-sm text-gray-500">
-                            Keine Aufstellung verfügbar
+                            {match.away.rosterPublished === false ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
                           </div>
                         )}
                       </div>
