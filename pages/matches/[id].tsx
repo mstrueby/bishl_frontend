@@ -110,7 +110,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
         {/* Teams and Score */}
         <div className="flex justify-between items-center">
           {/* Home Team */}
-          <div className="text-center">
+          <div className="text-center w-1/3">
             <CldImage
               src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
               alt={match.home.tinyName}
@@ -119,11 +119,13 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
               gravity="center"
               className="mx-auto mb-4"
             />
-            <h2 className="text-xl font-bold">{match.home.fullName}</h2>
+            <h2 className="block sm:hidden text-xl font-bold truncate">{match.home.tinyName}</h2>
+            <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.home.shortName}</h2>
+            <h2 className="hidden md:block text-xl font-bold truncate">{match.home.fullName}</h2>
           </div>
 
           {/* Score */}
-          <div className="text-center">
+          <div className="text-center w-1/3">
             <div className="mb-2 sm:mb-4">
               <MatchStatusBadge
                 statusKey={match.matchStatus.key}
@@ -150,7 +152,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
           </div>
 
           {/* Away Team */}
-          <div className="text-center">
+          <div className="text-center w-1/3">
             <CldImage
               src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
               alt={match.away.tinyName}
@@ -159,7 +161,9 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
               gravity="center"
               className="mx-auto mb-4"
             />
-            <h2 className="text-xl font-bold">{match.away.fullName}</h2>
+            <h2 className="block sm:hidden text-xl font-bold truncate">{match.away.tinyName}</h2>
+            <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.away.shortName}</h2>
+            <h2 className="hidden md:block text-xl font-bold truncate">{match.away.fullName}</h2>
           </div>
         </div>
 
