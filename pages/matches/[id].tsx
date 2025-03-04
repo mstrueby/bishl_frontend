@@ -200,9 +200,77 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
         {/* Tab content */}
         <div className="py-6">
           {activeTab === 'roster' && (
-            <div className="text-center py-4">
-              <h3 className="text-lg font-medium text-gray-900">Aufstellung</h3>
-              <p className="mt-2 text-gray-500">Spieleraufstellung wird hier angezeigt</p>
+            <div className="py-4">
+              <h3 className="text-lg font-medium text-gray-900 text-center mb-6">Aufstellung</h3>
+              
+              {/* Container for side-by-side or stacked rosters */}
+              <div className="flex flex-col md:flex-row md:space-x-4">
+                {/* Home team roster */}
+                <div className="w-full md:w-1/2 mb-6 md:mb-0">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.home.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.home.roster && match.home.roster.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.home.roster.map((player) => (
+                            <tr key={player.player.playerId}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.lastName}, {player.player.firstName}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Aufstellung verfügbar
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Away team roster */}
+                <div className="w-full md:w-1/2">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.away.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.away.roster && match.away.roster.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.away.roster.map((player) => (
+                            <tr key={player.player.playerId}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.lastName}, {player.player.firstName}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Aufstellung verfügbar
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
           
