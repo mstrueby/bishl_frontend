@@ -29,13 +29,14 @@ interface EditMatchData {
 }
 
 const tabs = [
-  { name: 'Aufstellung', href: '#', current: false },
-  { name: 'Tore', href: '#', current: false },
-  { name: 'Strafen', href: '#', current: true },
+  { id: 'roster', name: 'Aufstellung' },
+  { id: 'goals', name: 'Tore' },
+  { id: 'penalties', name: 'Strafen' },
 ]
 
 export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('roster');
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -179,21 +180,111 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
         <div className="mt-10 border-b border-gray-200">
           <nav aria-label="Tabs" className="-mb-px flex justify-center px-0 sm:px-4 md:px-12">
             {tabs.map((tab) => (
-              <a
+              <button
                 key={tab.name}
-                href={tab.href}
-                aria-current={tab.current ? 'page' : undefined}
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={activeTab === tab.id ? 'page' : undefined}
                 className={classNames(
-                  tab.current
+                  activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                   'w-1/3 border-b-2 px-1 py-4 text-center text-sm font-medium',
                 )}
               >
                 {tab.name}
-              </a>
+              </button>
             ))}
           </nav>
+        </div>
+
+        {/* Tab content */}
+        <div className="py-6">
+          {activeTab === 'roster' && (
+            <div className="py-4">
+              {/* Container for side-by-side or stacked rosters */}
+              <div className="flex flex-col md:flex-row md:space-x-4">
+                {/* Home team roster */}
+                <div className="w-full md:w-1/2 mb-6 md:mb-0">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.home.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.home.roster && match.home.roster.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.home.roster.map((player) => (
+                            <tr key={player.player.playerId}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.lastName}, {player.player.firstName}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Aufstellung verfügbar
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Away team roster */}
+                <div className="w-full md:w-1/2">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.away.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.away.roster && match.away.roster.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.away.roster.map((player) => (
+                            <tr key={player.player.playerId}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.lastName}, {player.player.firstName}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Aufstellung verfügbar
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'goals' && (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-medium text-gray-900">Tore</h3>
+              <p className="mt-2 text-gray-500">Torstatistiken werden hier angezeigt</p>
+            </div>
+          )}
+          
+          {activeTab === 'penalties' && (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-medium text-gray-900">Strafen</h3>
+              <p className="mt-2 text-gray-500">Strafstatistiken werden hier angezeigt</p>
+            </div>
+          )}
         </div>
 
       </div>
