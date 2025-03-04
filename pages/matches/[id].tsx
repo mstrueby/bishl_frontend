@@ -29,13 +29,14 @@ interface EditMatchData {
 }
 
 const tabs = [
-  { name: 'Aufstellung', href: '#', current: false },
-  { name: 'Tore', href: '#', current: false },
-  { name: 'Strafen', href: '#', current: true },
+  { id: 'roster', name: 'Aufstellung' },
+  { id: 'goals', name: 'Tore' },
+  { id: 'penalties', name: 'Strafen' },
 ]
 
 export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('roster');
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -179,21 +180,45 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
         <div className="mt-10 border-b border-gray-200">
           <nav aria-label="Tabs" className="-mb-px flex justify-center px-0 sm:px-4 md:px-12">
             {tabs.map((tab) => (
-              <a
+              <button
                 key={tab.name}
-                href={tab.href}
-                aria-current={tab.current ? 'page' : undefined}
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={activeTab === tab.id ? 'page' : undefined}
                 className={classNames(
-                  tab.current
+                  activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                   'w-1/3 border-b-2 px-1 py-4 text-center text-sm font-medium',
                 )}
               >
                 {tab.name}
-              </a>
+              </button>
             ))}
           </nav>
+        </div>
+
+        {/* Tab content */}
+        <div className="py-6">
+          {activeTab === 'roster' && (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-medium text-gray-900">Aufstellung</h3>
+              <p className="mt-2 text-gray-500">Spieleraufstellung wird hier angezeigt</p>
+            </div>
+          )}
+          
+          {activeTab === 'goals' && (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-medium text-gray-900">Tore</h3>
+              <p className="mt-2 text-gray-500">Torstatistiken werden hier angezeigt</p>
+            </div>
+          )}
+          
+          {activeTab === 'penalties' && (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-medium text-gray-900">Strafen</h3>
+              <p className="mt-2 text-gray-500">Strafstatistiken werden hier angezeigt</p>
+            </div>
+          )}
         </div>
 
       </div>
