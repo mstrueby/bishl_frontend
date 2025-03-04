@@ -11,6 +11,7 @@ import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
 import { useRouter } from 'next/router';
+import MatchStatusBadge from './MatchStatusBadge';
 
 const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHome, showLinkAway, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, showLinkEdit: boolean, showLinkStatus: boolean, showLinkHome: boolean, showLinkAway: boolean, onMatchUpdate?: () => Promise<void> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -136,35 +137,6 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
   );
 };
 
-const status = [
-  { key: 'INPROGRESS', value: 'Live', bdg_col_light: 'bg-red-600 text-white ring-red-700' },
-  { key: 'FINISHED', value: 'beendet', bdg_col_light: 'bg-gray-600 text-white ring-gray-700' },
-  { key: 'CANCELLED', value: 'abgesagt', bdg_col_light: 'bg-amber-100 text-amber-700 ring-amber-700/10' },
-  { key: 'FORFEITED', value: 'gewertet', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-400' },
-]
-
-const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusValue: string, finishTypeValue?: string }> = ({ statusKey, finishTypeKey, statusValue, finishTypeValue }) => {
-  return (
-    <>
-      {status.map(item => (
-        item.key === statusKey && (
-          <span
-            key={item.key}
-            className={classNames("inline-flex items-center gap-x-1.5 rounded-md text-xs font-medium ring-1 ring-inset py-0.5 px-2 uppercase", item.bdg_col_light)}
-          >
-            {statusValue}
-            {item.key === 'FINISHED' && finishTypeKey !== 'REGULAR' && (
-              <span>
-                {finishTypeKey === 'SHOOTOUT' ? '(PS)' : finishTypeKey === 'OVERTIME' ? '(V)' : finishTypeValue}
-              </span>
-            )}
-          </span>
-        )
-      ))}
-    </>
-  );
-};
-
 const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, onMatchUpdate }) => {
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
@@ -236,7 +208,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
                   onMatchUpdate={onMatchUpdate}
                 />
               )}
-              <StatusBadge
+              <MatchStatusBadge
                 statusKey={match.matchStatus.key}
                 finishTypeKey={match.finishType.key}
                 statusValue={match.matchStatus.value}
@@ -335,7 +307,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
               onMatchUpdate={onMatchUpdate}
             />
           )}
-          <StatusBadge
+          <MatchStatusBadge
             statusKey={match.matchStatus.key}
             finishTypeKey={match.finishType.key}
             statusValue={match.matchStatus.value}

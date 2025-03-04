@@ -62,7 +62,32 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         params: { date_from: currentDate }
       })
     ]);
-    matches = matchesRes.data;
+    
+    // Sort matches by date, venue, and time
+    const sortedMatches = [...matchesRes.data].sort((a, b) => {
+      // First sort by date only (ignore time component)
+      const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
+      const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+      
+      if (dateA !== dateB) {
+        return dateA - dateB;
+      }
+      
+      // When dates are the same, sort by venue name to group matches by venue
+      const venueA = a.venue.name.toLowerCase();
+      const venueB = b.venue.name.toLowerCase();
+      
+      if (venueA !== venueB) {
+        return venueA.localeCompare(venueB);
+      }
+      
+      // Finally, for matches at the same venue on the same day, sort by time
+      const timeA = new Date(a.startDate).getTime();
+      const timeB = new Date(b.startDate).getTime();
+      return timeA - timeB;
+    });
+    
+    matches = sortedMatches;
 
     const assignmentPromises = matches.map((match: Match) =>
       axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
@@ -131,7 +156,31 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         throw new Error('Invalid matches data received');
       }
 
-      const matches = matchesRes.data;
+      // Sort matches by date, venue, and time
+      const sortedMatches = [...matchesRes.data].sort((a, b) => {
+        // First sort by date only (ignore time component)
+        const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
+        const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+        
+        if (dateA !== dateB) {
+          return dateA - dateB;
+        }
+        
+        // When dates are the same, sort by venue name to group matches by venue
+        const venueA = a.venue.name.toLowerCase();
+        const venueB = b.venue.name.toLowerCase();
+        
+        if (venueA !== venueB) {
+          return venueA.localeCompare(venueB);
+        }
+        
+        // Finally, for matches at the same venue on the same day, sort by time
+        const timeA = new Date(a.startDate).getTime();
+        const timeB = new Date(b.startDate).getTime();
+        return timeA - timeB;
+      });
+
+      const matches = sortedMatches;
 
       // Only proceed with assignments if we have matches
       console.log("Matches length", matches.length)

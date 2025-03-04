@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import { CldImage } from 'next-cloudinary';
 import { Dialog } from '@headlessui/react';
 import { Match } from '../../types/MatchValues';
 import Layout from '../../components/Layout';
@@ -10,6 +11,7 @@ import axios from 'axios';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+import MatchStatusBadge from '../../components/ui/MatchStatusBadge';
 
 interface MatchDetailsProps {
   match: Match;
@@ -105,45 +107,63 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
 
         {/* Match Title */}
-        <div>
-          {/* Teams and Score */}
-          <div className="flex justify-between items-center">
-            {/* Home Team */}
-            <div className="text-center">
-              <Image
-                src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                alt={match.home.tinyName}
-                width={100}
-                height={100}
-                className="mx-auto mb-4"
-              />
-              <h2 className="text-xl font-bold">{match.home.fullName}</h2>
-            </div>
-
-            {/* Score */}
-            {match.matchStatus.key === 'FINISHED' && (
-              <div className="text-4xl font-bold space-x-4">
-                <span>{match.home.stats.goalsFor}</span>
-                <span>:</span>
-                <span>{match.away.stats.goalsFor}</span>
-              </div>
-            )}
-
-            {/* Away Team */}
-            <div className="text-center">
-              <Image
-                src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                alt={match.away.tinyName}
-                width={100}
-                height={100}
-                className="mx-auto mb-4"
-              />
-              <h2 className="text-xl font-bold">{match.away.fullName}</h2>
-            </div>
+        {/* Teams and Score */}
+        <div className="flex justify-between items-center">
+          {/* Home Team */}
+          <div className="text-center">
+            <CldImage
+              src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+              alt={match.home.tinyName}
+              width={100}
+              height={100}
+              gravity="center"
+              className="mx-auto mb-4"
+            />
+            <h2 className="text-xl font-bold">{match.home.fullName}</h2>
           </div>
 
+          {/* Score */}
+          <div className="text-center">
+            <div className="mb-2 sm:mb-4">
+              <MatchStatusBadge
+                statusKey={match.matchStatus.key}
+                finishTypeKey={match.finishType.key}
+                statusValue={match.matchStatus.value}
+                finishTypeValue={match.finishType.value}
+              />
+            </div>
+            {(() => {
+              switch (match.matchStatus.key) {
+                case 'SCHEDULED':
+                case 'CANCELLED':
+                  return null;
+                default:
+                  return (
+                    <div className="text-2xl sm:text-4xl font-bold space-x-1 sm:space-x-4">
+                      <span>{match.home.stats.goalsFor}</span>
+                      <span>:</span>
+                      <span>{match.away.stats.goalsFor}</span>
+                    </div>
+                  );
+              }
+            })()}
+          </div>
 
+          {/* Away Team */}
+          <div className="text-center">
+            <CldImage
+              src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+              alt={match.away.tinyName}
+              width={100}
+              height={100}
+              gravity="center"
+              className="mx-auto mb-4"
+            />
+            <h2 className="text-xl font-bold">{match.away.fullName}</h2>
+          </div>
         </div>
+
+
 
       </div>
     </Layout >
