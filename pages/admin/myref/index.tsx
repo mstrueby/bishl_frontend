@@ -115,11 +115,6 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
   const [filter, setFilter] = useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Meine Schiedsrichtereinsätze";
   
-  // Call fetchData when component mounts to get the initial sorted data
-  useEffect(() => {
-    fetchData(filter);
-  }, []);
-
   const fetchData = async (filterParams: FilterState) => {
     try {
       const userRes = await axios.get(`${BASE_URL}/users/me`, {
