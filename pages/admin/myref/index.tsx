@@ -8,7 +8,6 @@ import { Match } from '../../../types/MatchValues';
 import { AssignmentValues } from '../../../types/AssignmentValues';
 import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
-import { ClipLoader } from "react-spinners";
 
 let BASE_URL = process.env.API_URL;
 
@@ -114,12 +113,10 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [assignments, setAssignments] = useState<AssignmentValues[]>(initialAssignments);
   const [filter, setFilter] = useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const sectionTitle = "Meine Schiedsrichtereinsätze";
   
   const fetchData = async (filterParams: FilterState) => {
     try {
-      setIsLoading(true);
       const userRes = await axios.get(`${BASE_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
@@ -178,8 +175,6 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
       setAssignments(assignmentsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -199,7 +194,6 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         onFilterChange={handleFilterChange}
         onBulkUpdate={async (status) => {
           try {
-            setIsLoading(true);
             const promises = matches.map(match => {
               const assignment = assignments.find(a => a.matchId === match._id);
               const method = !assignment ? 'POST' : 'PATCH';
@@ -225,41 +219,33 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
             await new Promise(resolve => setTimeout(resolve, 500));
             await fetchData(filter);
             setMatches([]); // Clear matches temporarily
-            await fetchData(filter); // Fetch fresh data
+            const refreshedData = await fetchData(filter); // Fetch fresh data
             return true; // Signal successful completion
           } catch (error) {
             console.error('Error in bulk update:', error);
             return false;
-          } finally {
-            setIsLoading(false);
           }
         }}
       />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <ClipLoader color={"#4f46e5"} loading={true} size={80} />
-        </div>
-      ) : (
-        <ul>
-          {matches && matches.length > 0 ? (
-            matches.map((match: Match) => {
-              const assignment = assignments.find((a: AssignmentValues) => a.matchId === match._id);
-              return (
-                <MatchCardRef
-                  key={`${match._id}-${assignment?._id || 'new'}`}
-                  match={match}
-                  assignment={assignment}
-                  jwt={jwt}
-                  // Force re-render with a new key when assignment changes
-                />
-              );
-            })
-          ) : (
-            <p>Keine Spiele vorhanden</p>
-          )}
-        </ul>
-      )}
+      <ul>
+        {matches && matches.length > 0 ? (
+          matches.map((match: Match) => {
+            const assignment = assignments.find((a: AssignmentValues) => a.matchId === match._id);
+            return (
+              <MatchCardRef
+                key={`${match._id}-${assignment?._id || 'new'}`}
+                match={match}
+                assignment={assignment}
+                jwt={jwt}
+                // Force re-render with a new key when assignment changes
+              />
+            );
+          })
+        ) : (
+          <p>Keine Spiele vorhanden</p>
+        )}
+      </ul>
     </Layout>
   );
 };
