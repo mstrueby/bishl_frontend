@@ -251,7 +251,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                                 <tr key={player.player.playerId}>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.lastName}, {player.player.firstName}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.firstName} {player.player.lastName}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -284,7 +284,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                                 <tr key={player.player.playerId}>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.lastName}, {player.player.firstName}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.firstName} {player.player.lastName}</td>
                                 </tr>
                               ))}
                             </tbody>
