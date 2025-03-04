@@ -114,10 +114,11 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
             <CldImage
               src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
               alt={match.home.tinyName}
-              width={100}
-              height={100}
+              width={70}
+              height={70}
+              sizes="(max-width: 640px) 70px, 100px"
               gravity="center"
-              className="mx-auto mb-4"
+              className="mx-auto mb-4 sm:w-[100px] sm:h-[100px]"
             />
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.home.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.home.shortName}</h2>
@@ -156,10 +157,11 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
             <CldImage
               src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
               alt={match.away.tinyName}
-              width={100}
-              height={100}
+              width={70}
+              height={70}
+              sizes="(max-width: 640px) 70px, 100px"
               gravity="center"
-              className="mx-auto mb-4"
+              className="mx-auto mb-4 sm:w-[100px] sm:h-[100px]"
             />
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.away.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.away.shortName}</h2>
