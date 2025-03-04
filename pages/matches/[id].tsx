@@ -303,9 +303,95 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
           )}
           
           {activeTab === 'goals' && (
-            <div className="text-center py-4">
-              <h3 className="text-lg font-medium text-gray-900">Tore</h3>
-              <p className="mt-2 text-gray-500">Torstatistiken werden hier angezeigt</p>
+            <div className="py-4">
+              <h3 className="text-lg font-medium text-gray-900 text-center mb-6">Tore</h3>
+              
+              {/* Container for side-by-side or stacked goals */}
+              <div className="flex flex-col md:flex-row md:space-x-4">
+                {/* Home team goals */}
+                <div className="w-full md:w-1/2 mb-6 md:mb-0">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.home.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.home.scores && match.home.scores.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spieler</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assist</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {/* Sort goals by matchSeconds and map them */}
+                          {match.home.scores
+                            .sort((a, b) => a.matchSeconds - b.matchSeconds)
+                            .map((goal, index) => (
+                              <tr key={`home-goal-${index}`}>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                  {Math.floor(goal.matchSeconds / 60)}:{(goal.matchSeconds % 60).toString().padStart(2, '0')}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                  {goal.scorer ? `${goal.scorer.firstName} ${goal.scorer.lastName} (${goal.scorer.jerseyNumber})` : 'Unbekannt'}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                  {goal.assist ? `${goal.assist.firstName} ${goal.assist.lastName} (${goal.assist.jerseyNumber})` : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Tore vorhanden
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Away team goals */}
+                <div className="w-full md:w-1/2">
+                  <div className="text-center mb-3">
+                    <h4 className="text-md font-semibold">{match.away.fullName}</h4>
+                  </div>
+                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                    {match.away.scores && match.away.scores.length > 0 ? (
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spieler</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assist</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {/* Sort goals by matchSeconds and map them */}
+                          {match.away.scores
+                            .sort((a, b) => a.matchSeconds - b.matchSeconds)
+                            .map((goal, index) => (
+                              <tr key={`away-goal-${index}`}>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                  {Math.floor(goal.matchSeconds / 60)}:{(goal.matchSeconds % 60).toString().padStart(2, '0')}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                  {goal.scorer ? `${goal.scorer.firstName} ${goal.scorer.lastName} (${goal.scorer.jerseyNumber})` : 'Unbekannt'}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                  {goal.assist ? `${goal.assist.firstName} ${goal.assist.lastName} (${goal.assist.jerseyNumber})` : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        Keine Tore vorhanden
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
           
