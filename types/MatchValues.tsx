@@ -1,16 +1,40 @@
+import { boolean } from "yup";
+
+interface EventPlayer {
+  playerId: string;
+  firstName: string;
+  lastName: string
+  jerseyNumber: number;
+}
+
+
 export interface RosterPlayer {
-  player: {
-    playerId: string;
-    firstName: string;
-    lastName: string;
-    jerseyNumber: number;
-  },
+  player: EventPlayer,
   playerPosition: {
     key: string;
     value: string;
   },
   passNumber: string;
   called: boolean;
+}
+
+interface ScoresBase {
+  matchTime: string;
+  goalPlayer: EventPlayer;
+  assistPlayer?: EventPlayer;
+  isPPG?: boolean;
+  isSHG?: boolean;
+  isGWG?: boolean;
+}
+
+interface PenaltiesBase {
+  matchTimeStart: string
+  matchTimeEnd?: string;
+  penaltyPlayer: EventPlayer;
+  penaltyCode: { [key: string]: string };
+  penaltyMinutes: number;
+  isGM?: boolean
+  isMP?: boolean
 }
 
 interface TeamStats {
@@ -32,6 +56,8 @@ export interface Team {
   stats: TeamStats;
   roster?: RosterPlayer[];
   rosterPublished?: boolean;
+  scores?: ScoresBase[];
+  penalties?: PenaltiesBase[];
 }
 
 export interface Referee {

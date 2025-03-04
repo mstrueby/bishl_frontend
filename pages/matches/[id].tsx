@@ -206,29 +206,29 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                 // Sort roster by position order: C, A, G, F, then by jersey number
                 const sortRoster = (rosterToSort) => {
                   if (!rosterToSort || rosterToSort.length === 0) return [];
-                  
+
                   return [...rosterToSort].sort((a, b) => {
                     // Define position priorities (C = 1, A = 2, G = 3, F = 4)
                     const positionPriority = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-                    
+
                     // Get priorities
                     const posA = positionPriority[a.playerPosition.key] || 99;
                     const posB = positionPriority[b.playerPosition.key] || 99;
-                    
+
                     // First sort by position priority
                     if (posA !== posB) {
                       return posA - posB;
                     }
-                    
+
                     // If positions are the same, sort by jersey number
                     return a.player.jerseyNumber - b.player.jerseyNumber;
                   });
                 };
-                
+
                 // Sort rosters
                 const sortedHomeRoster = sortRoster(match.home.roster);
                 const sortedAwayRoster = sortRoster(match.away.roster);
-                
+
                 return (
                   <div className="flex flex-col md:flex-row md:space-x-4">
                     {/* Home team roster */}
@@ -239,6 +239,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                       <div className="overflow-hidden bg-white shadow-md rounded-md border">
                         {sortedHomeRoster && sortedHomeRoster.length > 0 ? (
                           <table className="min-w-full divide-y divide-gray-200">
+                            {/*
                             <thead className="bg-gray-50">
                               <tr>
                                 <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
@@ -246,11 +247,12 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                                 <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                               </tr>
                             </thead>
+                            */}
                             <tbody className="bg-white divide-y divide-gray-200">
                               {sortedHomeRoster.map((player) => (
                                 <tr key={player.player.playerId}>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">{player.player.jerseyNumber}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">{player.playerPosition.key}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.firstName} {player.player.lastName}</td>
                                 </tr>
                               ))}
@@ -263,7 +265,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Away team roster */}
                     <div className="w-full md:w-1/2">
                       <div className="text-center mb-3">
@@ -272,6 +274,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                       <div className="overflow-hidden bg-white shadow-md rounded-md border">
                         {sortedAwayRoster && sortedAwayRoster.length > 0 ? (
                           <table className="min-w-full divide-y divide-gray-200">
+                            {/*
                             <thead className="bg-gray-50">
                               <tr>
                                 <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
@@ -279,11 +282,12 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                                 <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                               </tr>
                             </thead>
+                            */}
                             <tbody className="bg-white divide-y divide-gray-200">
                               {sortedAwayRoster.map((player) => (
                                 <tr key={player.player.playerId}>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.jerseyNumber}</td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{player.playerPosition.key}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">{player.player.jerseyNumber}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">{player.playerPosition.key}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{player.player.firstName} {player.player.lastName}</td>
                                 </tr>
                               ))}
@@ -301,11 +305,9 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
               })()}
             </div>
           )}
-          
+
           {activeTab === 'goals' && (
             <div className="py-4">
-              <h3 className="text-lg font-medium text-gray-900 text-center mb-6">Tore</h3>
-              
               {/* Container for side-by-side or stacked goals */}
               <div className="flex flex-col md:flex-row md:space-x-4">
                 {/* Home team goals */}
@@ -316,27 +318,26 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.scores && match.home.scores.length > 0 ? (
                       <table className="min-w-full divide-y divide-gray-200">
+                        {/*
                         <thead className="bg-gray-50">
                           <tr>
                             <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
                             <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spieler</th>
-                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assist</th>
                           </tr>
                         </thead>
+                        */}
                         <tbody className="bg-white divide-y divide-gray-200">
                           {/* Sort goals by matchSeconds and map them */}
                           {match.home.scores
-                            .sort((a, b) => a.matchSeconds - b.matchSeconds)
+                            //.sort((a, b) => a.matchSeconds - b.matchSeconds)
                             .map((goal, index) => (
                               <tr key={`home-goal-${index}`}>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  {Math.floor(goal.matchSeconds / 60)}:{(goal.matchSeconds % 60).toString().padStart(2, '0')}
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                  {goal.matchTime}
                                 </td>
                                 <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  {goal.scorer ? `${goal.scorer.firstName} ${goal.scorer.lastName} (${goal.scorer.jerseyNumber})` : 'Unbekannt'}
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                                  {goal.assist ? `${goal.assist.firstName} ${goal.assist.lastName} (${goal.assist.jerseyNumber})` : '-'}
+                                  <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
+                                    {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
                                 </td>
                               </tr>
                             ))}
@@ -349,7 +350,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                     )}
                   </div>
                 </div>
-                
+
                 {/* Away team goals */}
                 <div className="w-full md:w-1/2">
                   <div className="text-center mb-3">
@@ -358,6 +359,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.away.scores && match.away.scores.length > 0 ? (
                       <table className="min-w-full divide-y divide-gray-200">
+                        {/*
                         <thead className="bg-gray-50">
                           <tr>
                             <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
@@ -365,20 +367,19 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
                             <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assist</th>
                           </tr>
                         </thead>
+                        */}
                         <tbody className="bg-white divide-y divide-gray-200">
                           {/* Sort goals by matchSeconds and map them */}
                           {match.away.scores
-                            .sort((a, b) => a.matchSeconds - b.matchSeconds)
+                            //.sort((a, b) => a.matchSeconds - b.matchSeconds)
                             .map((goal, index) => (
                               <tr key={`away-goal-${index}`}>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  {Math.floor(goal.matchSeconds / 60)}:{(goal.matchSeconds % 60).toString().padStart(2, '0')}
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                  {goal.matchTime}
                                 </td>
                                 <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  {goal.scorer ? `${goal.scorer.firstName} ${goal.scorer.lastName} (${goal.scorer.jerseyNumber})` : 'Unbekannt'}
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                                  {goal.assist ? `${goal.assist.firstName} ${goal.assist.lastName} (${goal.assist.jerseyNumber})` : '-'}
+                                  <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
+                                    {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
                                 </td>
                               </tr>
                             ))}
@@ -394,7 +395,7 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
               </div>
             </div>
           )}
-          
+
           {activeTab === 'penalties' && (
             <div className="text-center py-4">
               <h3 className="text-lg font-medium text-gray-900">Strafen</h3>
