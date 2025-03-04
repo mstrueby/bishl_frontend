@@ -111,15 +111,16 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
         <div className="flex justify-between items-center">
           {/* Home Team */}
           <div className="text-center w-1/3">
-            <CldImage
-              src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-              alt={match.home.tinyName}
-              width={70}
-              height={70}
-              sizes="(max-width: 640px) 70px, 100px"
-              gravity="center"
-              className="mx-auto mb-4 sm:w-[100px] sm:h-[100px]"
-            />
+            <div className="w-[70px] h-[70px] sm:w-[100px] sm:h-[100px] mx-auto mb-4">
+              <CldImage
+                src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                alt={match.home.tinyName}
+                width={100}
+                height={100}
+                gravity="center"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.home.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.home.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.home.fullName}</h2>
@@ -154,15 +155,16 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
           {/* Away Team */}
           <div className="text-center w-1/3">
-            <CldImage
-              src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-              alt={match.away.tinyName}
-              width={70}
-              height={70}
-              sizes="(max-width: 640px) 70px, 100px"
-              gravity="center"
-              className="mx-auto mb-4 sm:w-[100px] sm:h-[100px]"
-            />
+            <div className="w-[70px] h-[70px] sm:w-[100px] sm:h-[100px] mx-auto mb-4">
+              <CldImage
+                src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                alt={match.away.tinyName}
+                width={100}
+                height={100}
+                gravity="center"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.away.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.away.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.away.fullName}</h2>
