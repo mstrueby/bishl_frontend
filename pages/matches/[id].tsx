@@ -119,7 +119,9 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
               gravity="center"
               className="mx-auto mb-4"
             />
-            <h2 className="text-xl font-bold truncate">{match.home.fullName}</h2>
+            <h2 className="block sm:hidden text-xl font-bold truncate">{match.home.tinyName}</h2>
+            <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.home.shortName}</h2>
+            <h2 className="hidden md:block text-xl font-bold truncate">{match.home.fullName}</h2>
           </div>
 
           {/* Score */}
@@ -159,7 +161,9 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
               gravity="center"
               className="mx-auto mb-4"
             />
-            <h2 className="text-xl font-bold truncate">{match.away.fullName}</h2>
+            <h2 className="block sm:hidden text-xl font-bold truncate">{match.away.tinyName}</h2>
+            <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.away.shortName}</h2>
+            <h2 className="hidden md:block text-xl font-bold truncate">{match.away.fullName}</h2>
           </div>
         </div>
 
