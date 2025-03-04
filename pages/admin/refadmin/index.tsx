@@ -8,6 +8,7 @@ import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import MatchCardRefAdmin from "../../../components/admin/MatchCardRefAdmin";
 import { AssignmentValues } from '../../../types/AssignmentValues';
+import { ClipLoader } from "react-spinners";
 
 let BASE_URL = process.env.API_URL
 
@@ -134,11 +135,13 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
   const [matches, setMatches] = React.useState<Match[]>(initialMatches);
   const [matchAssignments, setMatchAssignments] = React.useState<{ [key: string]: AssignmentValues[] }>(initialAssignments);
   const [filter, setFilter] = React.useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const sectionTitle = "Schiedsrichter einteilen";
 
   const fetchData = async (filterParams: FilterState) => {
     console.log("lets fetch data")
     try {
+      setIsLoading(true);
       // Build query parameters
       const params: any = {
         date_from: filterParams.date_from || new Date().toISOString().split('T')[0]
@@ -238,6 +241,8 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
           window.location.href = '/login';
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -258,23 +263,29 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         onFilterChange={handleFilterChange}
       />
 
-      <ul>
-        {/*console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
-        {matches && matches.length > 0 ? (
-          matches.map((match: Match) => {
-            return (
-              <MatchCardRefAdmin
-                key={match._id}
-                match={match}
-                jwt={jwt}
-                assignments={matchAssignments[match._id] || []}
-              />
-            );
-          })
-        ) : (
-          <p>Keine Spiele vorhanden</p>
-        )}
-      </ul>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <ClipLoader color={"#4f46e5"} loading={true} size={80} />
+        </div>
+      ) : (
+        <ul>
+          {/*console.log('Match Assignments:', matchAssignments)} {/* Debugging line */}
+          {matches && matches.length > 0 ? (
+            matches.map((match: Match) => {
+              return (
+                <MatchCardRefAdmin
+                  key={match._id}
+                  match={match}
+                  jwt={jwt}
+                  assignments={matchAssignments[match._id] || []}
+                />
+              );
+            })
+          ) : (
+            <p>Keine Spiele vorhanden</p>
+          )}
+        </ul>
+      )}
     </Layout>
   );
 };
