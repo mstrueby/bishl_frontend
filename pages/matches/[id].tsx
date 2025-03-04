@@ -28,6 +28,12 @@ interface EditMatchData {
   awayScore: number;
 }
 
+const tabs = [
+  { name: 'Aufstellung', href: '#', current: false },
+  { name: 'Tore', href: '#', current: false },
+  { name: 'Strafen', href: '#', current: true },
+]
+
 export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editData, setEditData] = useState<EditMatchData>({
@@ -44,10 +50,10 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-0 lg:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-0 lg:px-8 py-0 lg:py-4">
 
         {/* Match Header */}
-        <div className="flex items-start justify-between sm:flex-row gap-y-2 p-4 border-b mb-8">
+        <div className="flex items-start justify-between sm:flex-row gap-y-2 p-4 border-b mb-6 sm:mb-8 md:mb-12">
 
           {/* Tournament Badge */}
           <div className="">
@@ -104,21 +110,21 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
           </div>
         </div>
 
-
-
         {/* Match Title */}
         {/* Teams and Score */}
         <div className="flex justify-between items-center">
           {/* Home Team */}
           <div className="text-center w-1/3">
-            <CldImage
-              src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-              alt={match.home.tinyName}
-              width={100}
-              height={100}
-              gravity="center"
-              className="mx-auto mb-4"
-            />
+            <div className="w-[70px] h-[70px] sm:w-[100px] sm:h-[100px] mx-auto mb-4">
+              <CldImage
+                src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                alt={match.home.tinyName}
+                width={100}
+                height={100}
+                gravity="center"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.home.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.home.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.home.fullName}</h2>
@@ -153,21 +159,42 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
           {/* Away Team */}
           <div className="text-center w-1/3">
-            <CldImage
-              src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-              alt={match.away.tinyName}
-              width={100}
-              height={100}
-              gravity="center"
-              className="mx-auto mb-4"
-            />
+            <div className="w-[70px] h-[70px] sm:w-[100px] sm:h-[100px] mx-auto mb-4">
+              <CldImage
+                src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                alt={match.away.tinyName}
+                width={100}
+                height={100}
+                gravity="center"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.away.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.away.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.away.fullName}</h2>
           </div>
         </div>
 
-
+        {/* Sub navigation */}
+        <div className="mt-10 border-b border-gray-200">
+          <nav aria-label="Tabs" className="-mb-px flex justify-center px-0 sm:px-4 md:px-12">
+            {tabs.map((tab) => (
+              <a
+                key={tab.name}
+                href={tab.href}
+                aria-current={tab.current ? 'page' : undefined}
+                className={classNames(
+                  tab.current
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                  'w-1/3 border-b-2 px-1 py-4 text-center text-sm font-medium',
+                )}
+              >
+                {tab.name}
+              </a>
+            ))}
+          </nav>
+        </div>
 
       </div>
     </Layout >
