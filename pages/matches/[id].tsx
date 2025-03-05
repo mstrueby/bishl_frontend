@@ -287,12 +287,16 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                         });
 
                         if (response.status === 200) {
-                          // Update local state instead of reloading
+                          // Update local state with the response data
                           const updatedMatch = response.data;
                           setMatch(updatedMatch);
+                          
+                          // Set up auto-refresh for live match
+                          refreshMatchData();
                         }
                       } catch (error) {
                         console.error('Error updating match status:', error);
+                        alert('Fehler beim Starten des Spiels. Bitte versuchen Sie es erneut.');
                       } finally {
                         setIsRefreshing(false);
                       }
