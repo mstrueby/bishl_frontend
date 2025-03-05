@@ -15,6 +15,7 @@ import { classNames } from '../../tools/utils';
 import MatchStatusBadge from '../../components/ui/MatchStatusBadge';
 import FinishTypeSelect from '../../components/admin/ui/FinishTypeSelect';
 import AddGoalDialog from '../../components/ui/AddGoalDialog';
+import AddPenaltyDialog from '../../components/ui/AddPenaltyDialog';
 
 interface MatchDetailsProps {
   match: Match;
@@ -47,6 +48,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [selectedFinishType, setSelectedFinishType] = useState({ key: "REGULAR", value: "Regulär" });
   const [isHomeGoalDialogOpen, setIsHomeGoalDialogOpen] = useState(false);
   const [isAwayGoalDialogOpen, setIsAwayGoalDialogOpen] = useState(false);
+  const [isHomePenaltyDialogOpen, setIsHomePenaltyDialogOpen] = useState(false);
+  const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -329,10 +332,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     Tor
                   </button>
                   <button
-                    onClick={() => {
-                      // Open dialog to add a new penalty
-                      // Will call POST API endpoint /matches/id/home/penalties
-                    }}
+                    onClick={() => setIsHomePenaltyDialogOpen(true)}
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Strafe
@@ -429,10 +429,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     Tor
                   </button>
                   <button
-                    onClick={() => {
-                      // Open dialog to add a new penalty
-                      // Will call POST API endpoint /matches/id/away/penalties
-                    }}
+                    onClick={() => setIsAwayPenaltyDialogOpen(true)}
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Strafe
@@ -892,6 +889,28 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
       <AddGoalDialog
         isOpen={isAwayGoalDialogOpen}
         onClose={() => setIsAwayGoalDialogOpen(false)}
+        matchId={match._id}
+        teamFlag="away"
+        roster={match.away.roster || []}
+        jwt={jwt || ''}
+        onSuccess={refreshMatchData}
+      />
+      
+      {/* Home Team Penalty Dialog */}
+      <AddPenaltyDialog
+        isOpen={isHomePenaltyDialogOpen}
+        onClose={() => setIsHomePenaltyDialogOpen(false)}
+        matchId={match._id}
+        teamFlag="home"
+        roster={match.home.roster || []}
+        jwt={jwt || ''}
+        onSuccess={refreshMatchData}
+      />
+      
+      {/* Away Team Penalty Dialog */}
+      <AddPenaltyDialog
+        isOpen={isAwayPenaltyDialogOpen}
+        onClose={() => setIsAwayPenaltyDialogOpen(false)}
         matchId={match._id}
         teamFlag="away"
         roster={match.away.roster || []}
