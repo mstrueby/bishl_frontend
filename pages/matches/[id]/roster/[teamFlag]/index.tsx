@@ -602,7 +602,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             });
 
             // Show success message or redirect
-            setError('');
+            setError(null);
             // You could add a success message here if needed
         } catch (error) {
             // Ignore 304 Not Modified errors as they're not actual errors
@@ -629,12 +629,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
 
                 {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+                {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
                 {/* Add Player Form */}
                 <div className="bg-white shadow rounded-md border p-4 mb-6">
                     <h2 className="text-lg font-medium mb-4">Spieler aufstellen</h2>
 
-                    {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
                     <div className="flex flex-col gap-4">
                         {/* Player Selection */}
