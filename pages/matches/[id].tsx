@@ -1,4 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
+import useAuth from '../../hooks/useAuth';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -52,6 +53,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     awayScore: match.away.stats.goalsFor
   });
   const router = useRouter();
+  const { user } = useAuth();
   const { id } = router.query;
 
   // Refresh match data function
@@ -85,7 +87,44 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     };
   }, [match.matchStatus.key, id]);
 
+  let showLinkEdit = false;
+  let showLinkStatus = false;
+  let showButtonRosterHome = false;
+  let showButtonRosterAway = false;
+  let showMatchSheet = true;
+  let showButtonStatus = false;
+  let showButtonEvents = false;
 
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
+    showButtonStatus = true;
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    showButtonEvents = true;
+  }
+  {/** Heim Vereins-Account */ }
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
+    showButtonRosterHome = true;
+    showButtonEvents = true;
+  }
+  {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showButtonRosterAway = true;
+    showButtonStatus = true;
+  }
+  {/* 
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
+    showButtonRosterAway = true;
+  }
+  */}
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) {
+    showButtonRosterAway = true;
+  }
+  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS') {
+    showButtonStatus = false;
+    showButtonRosterHome = false;
+    showButtonRosterAway = false;
+    showButtonEvents = false;
+  }
 
   return (
     <Layout>
@@ -232,7 +271,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
           {/* Home Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              {(userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.home.clubId && userClubId === match.home.clubId)) && (
+              {showButtonRosterHome && (
                 <button
                   onClick={() => router.push(`/matches/${match._id}/roster/home`)}
                   className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -240,7 +279,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {match.matchStatus.key === 'INPROGRESS' && (
+              {match.matchStatus.key === 'INPROGRESS' && showButtonEvents && (
                 <>
                   <button
                     onClick={() => {
@@ -267,7 +306,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
 
           {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
-            {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
+            {showButtonStatus && (
               <>
                 {match.matchStatus.key === 'SCHEDULED' && (
                   <button
@@ -313,7 +352,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </button>
                 )}
 
-                {match.matchStatus.key === 'INPROGRESS' && (
+                {match.matchStatus.key === 'INPROGRESS' && showButtonStatus && (
                   <button
                     onClick={() => setIsFinishDialogOpen(true)}
                     className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -335,7 +374,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              {(userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.away.clubId && userClubId === match.away.clubId)) && (
+              {showButtonRosterAway && (
                 <button
                   onClick={() => router.push(`/matches/${match._id}/roster/away`)}
                   className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -343,7 +382,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {match.matchStatus.key === 'INPROGRESS' && (
+              {match.matchStatus.key === 'INPROGRESS' && showButtonEvents && (
                 <>
                   <button
                     onClick={() => {
@@ -724,9 +763,9 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                    <Dialog.Title
-                      as="h3"
-                      className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
                     Spiel beenden
                   </Dialog.Title>
 
@@ -815,14 +854,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     let userRoles: string[] = [];
     let userClubId: string | null = null;
-    
+
     if (jwt) {
       const userResponse = await fetch(`${process.env.API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` }
       });
       const userData = await userResponse.json();
       userRoles = userData.roles || [];
-      
+
       // Get user's club ID if available
       if (userData.club && userData.club.clubId) {
         userClubId = userData.club.clubId;
