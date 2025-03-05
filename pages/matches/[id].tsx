@@ -14,6 +14,7 @@ import { tournamentConfigs, allFinishTypes } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchStatusBadge from '../../components/ui/MatchStatusBadge';
 import FinishTypeSelect from '../../components/admin/ui/FinishTypeSelect';
+import AddGoalDialog from '../../components/ui/AddGoalDialog';
 
 interface MatchDetailsProps {
   match: Match;
@@ -44,6 +45,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [match, setMatch] = useState<Match>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedFinishType, setSelectedFinishType] = useState({ key: "REGULAR", value: "Regulär" });
+  const [isHomeGoalDialogOpen, setIsHomeGoalDialogOpen] = useState(false);
+  const [isAwayGoalDialogOpen, setIsAwayGoalDialogOpen] = useState(false);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -95,35 +98,73 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   let showButtonStatus = false;
   let showButtonEvents = false;
 
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
+  {/** LEAGE_ADMIN */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN'))) {
     showButtonStatus = true;
+    showButtonEvents = true;
+  }
+  {/** LEAGE_ADMIN && Spiel läuft */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
-    showButtonEvents = true;
+  }
+  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    //showButtonStatus = true;
   }
   {/** Heim Vereins-Account */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showButtonRosterHome = true;
-    showButtonEvents = true;
+    //showButtonEvents = true;
   }
   {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
     showButtonRosterAway = true;
     showButtonStatus = true;
   }
-  {/* 
+  {/** Home-Account && Spiel läuft */ }
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showButtonRosterAway = true;
+    showButtonStatus = true;
+    showButtonEvents = true;
+  }
+  {/** Away-Account && Spiel weiter als 30 Minuten in der Zukunft  */ }
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showButtonRosterAway = true;
   }
-  */}
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) {
+  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
     showButtonRosterAway = true;
   }
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS') {
+  {/** Away-Account && Spiel läuft */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showButtonRosterAway = false;
+  }
+  {/**
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN'))) {
+    showButtonRosterAway = true;
+  }
+  */}
+  {/** ADMIN  */ }
+  if (user && (user.roles.includes('ADMIN'))) {
+    showButtonStatus = true;
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    showButtonEvents = true;
+  }
+  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
     showButtonStatus = false;
     showButtonRosterHome = false;
     showButtonRosterAway = false;
     showButtonEvents = false;
+  }
+  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    showButtonEvents = true;
   }
 
   return (
@@ -279,13 +320,10 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {match.matchStatus.key === 'INPROGRESS' && showButtonEvents && (
+              {showButtonEvents && (match.matchStatus.key === "INPROGRESS" || match.matchStatus.key === "FINISHED") && (
                 <>
                   <button
-                    onClick={() => {
-                      // Open dialog to add a new goal
-                      // Will call POST API endpoint /matches/id/home/scores
-                    }}
+                    onClick={() => setIsHomeGoalDialogOpen(true)}
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tor
@@ -382,13 +420,10 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {match.matchStatus.key === 'INPROGRESS' && showButtonEvents && (
+              {showButtonEvents && (match.matchStatus.key === "INPROGRESS" || match.matchStatus.key === "FINISHED") && (
                 <>
                   <button
-                    onClick={() => {
-                      // Open dialog to add a new goal
-                      // Will call POST API endpoint /matches/id/away/scores
-                    }}
+                    onClick={() => setIsAwayGoalDialogOpen(true)}
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tor
@@ -841,6 +876,28 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
           </div>d
         </Dialog>
       </Transition>
+      
+      {/* Home Team Goal Dialog */}
+      <AddGoalDialog
+        isOpen={isHomeGoalDialogOpen}
+        onClose={() => setIsHomeGoalDialogOpen(false)}
+        matchId={match._id}
+        teamFlag="home"
+        roster={match.home.roster || []}
+        jwt={jwt || ''}
+        onSuccess={refreshMatchData}
+      />
+      
+      {/* Away Team Goal Dialog */}
+      <AddGoalDialog
+        isOpen={isAwayGoalDialogOpen}
+        onClose={() => setIsAwayGoalDialogOpen(false)}
+        matchId={match._id}
+        teamFlag="away"
+        roster={match.away.roster || []}
+        jwt={jwt || ''}
+        onSuccess={refreshMatchData}
+      />
     </Layout >
   );
 }
