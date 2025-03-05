@@ -39,7 +39,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
     if (isOpen) {
       const fetchPenaltyCodes = async () => {
         try {
-          const response = await axios.get('https://api.bishl.de/configs/penaltycode');
+          const response = await axios.get(`${process.env.API_URL}/configs/penaltycode`);
           setPenaltyCodes(response.data);
           if (response.data.length > 0) {
             setSelectedPenaltyCode(response.data[0]);
@@ -112,13 +112,14 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto" onClose={onClose}>
         <div className="min-h-screen px-4 text-center">
           <Transition.Child
-            as={Fragment}
+            as="div"
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
             leave="ease-in duration-200"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
+            className="fixed inset-0 bg-black bg-opacity-30"
           >
           </Transition.Child>
 
