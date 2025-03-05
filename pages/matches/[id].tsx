@@ -18,6 +18,7 @@ interface MatchDetailsProps {
   match: Match;
   jwt?: string;
   userRoles?: string[];
+  userClubId?: string | null;
 }
 
 interface EditMatchData {
@@ -35,7 +36,7 @@ const tabs = [
   { id: 'penalties', name: 'Strafen' },
 ]
 
-export default function MatchDetails({ match: initialMatch, jwt, userRoles }: MatchDetailsProps) {
+export default function MatchDetails({ match: initialMatch, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('roster');
@@ -231,12 +232,14 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
           {/* Home Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
-                onClick={() => router.push(`/matches/${match._id}/roster/home`)}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Aufstellung
-              </button>
+              {(userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.home.clubId && userClubId === match.home.clubId)) && (
+                <button
+                  onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                  className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Aufstellung
+                </button>
+              )}
               {match.matchStatus.key === 'INPROGRESS' && (
                 <>
                   <button
@@ -332,12 +335,14 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
-                onClick={() => router.push(`/matches/${match._id}/roster/away`)}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Aufstellung
-              </button>
+              {(userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.away.clubId && userClubId === match.away.clubId)) && (
+                <button
+                  onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                  className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Aufstellung
+                </button>
+              )}
               {match.matchStatus.key === 'INPROGRESS' && (
                 <>
                   <button
@@ -809,12 +814,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const match = await fetch(`${process.env.API_URL}/matches/${id}`).then(res => res.json());
 
     let userRoles: string[] = [];
+    let userClubId: string | null = null;
+    
     if (jwt) {
       const userResponse = await fetch(`${process.env.API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` }
       });
       const userData = await userResponse.json();
       userRoles = userData.roles || [];
+      
+      // Get user's club ID if available
+      if (userData.club && userData.club.clubId) {
+        userClubId = userData.club.clubId;
+      }
     }
 
     return {
@@ -822,6 +834,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         match,
         jwt,
         userRoles,
+        userClubId: userClubId || null,
       }
     };
   } catch (error) {
