@@ -51,7 +51,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     
     try {
       const response = await axios.post(
-        `${process.env.API_URL}/matches/${matchId}/${teamFlag}/scores`, 
+        `${process.env.API_URL}/matches/${matchId}/${teamFlag}/scores/`, 
         {
           matchTime,
           goalPlayer,
@@ -124,7 +124,6 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     <input
                       type="text"
                       pattern="[0-9]{1,2}:[0-9]{2}"
-                      placeholder="14:45"
                       value={matchTime}
                       onChange={(e) => setMatchTime(e.target.value)}
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
