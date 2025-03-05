@@ -25,7 +25,7 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
     showLinkHome = false;
     showLinkAway = false;
   }
-  
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
@@ -148,21 +148,44 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   let showLinkAway = false;
   let showMatchSheet = true;
 
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
+  {/**  LEAGE_ADMIN */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN'))) {
     showLinkEdit = true;
     showLinkStatus = true;
-    showLinkHome = true;
-    showLinkAway = true;
   }
+  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    //showLinkHome = true;
+    //showLinkAway = true;
+    //showButtonStatus = true;
+  }
+  {/** Heim Vereins-Account */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
-  }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showLinkHome = true;
   }
+  {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showLinkAway = true;
+  }
+  {/** Away-Club && Spiel ist weiter als 30 Minuten in der Zukunft */ }
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showLinkAway = true;
   }
+  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showLinkAway = true;
+  }
+  {/** Away-Account && Spiel läuft */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showLinkAway = false;
+  }
+  {/** ADMIN, LEAGE_ADMIN && Spiel beendet 
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
+    showLinkEdit = true;
+    showLinkStatus = true;
+  }
+  */ }
   if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
     showLinkEdit = false;
     showLinkStatus = false;
@@ -174,7 +197,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
     showMatchSheet = false;
   }
-  
+
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
@@ -296,7 +319,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
-          {(showLinkEdit || showLinkStatus) && (
+          {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
             <StatusMenu
               match={match}
               setMatch={setMatch}
@@ -316,16 +339,16 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
         </div>
 
         {showMatchSheet && (
-        <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          <Link href={`/matches/${match._id}`}>
-            <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-              <span className="block sm:hidden md:block">Spielbericht</span>
-              <span className="hidden sm:block md:hidden">Bericht</span>
-            </a>
-          </Link>
-        </div>
-      )}
-        
+          <div className="flex flex-col sm:flex-none justify-center sm:items-end">
+            <Link href={`/matches/${match._id}`}>
+              <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                <span className="block sm:hidden md:block">Spielbericht</span>
+                <span className="hidden sm:block md:hidden">Bericht</span>
+              </a>
+            </Link>
+          </div>
+        )}
+
       </div>
     </div>
   );

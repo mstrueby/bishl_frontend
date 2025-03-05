@@ -95,35 +95,73 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   let showButtonStatus = false;
   let showButtonEvents = false;
 
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
+  {/** LEAGE_ADMIN */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN'))) {
     showButtonStatus = true;
+    showButtonEvents = true;
+  }
+  {/** LEAGE_ADMIN && Spiel läuft */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
-    showButtonEvents = true;
+  }
+  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    //showButtonStatus = true;
   }
   {/** Heim Vereins-Account */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showButtonRosterHome = true;
-    showButtonEvents = true;
+    //showButtonEvents = true;
   }
   {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
     showButtonRosterAway = true;
     showButtonStatus = true;
   }
-  {/* 
+  {/** Home-Account && Spiel läuft */ }
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showButtonRosterAway = true;
+    showButtonStatus = true;
+    showButtonEvents = true;
+  }
+  {/** Away-Account && Spiel weiter als 30 Minuten in der Zukunft  */ }
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showButtonRosterAway = true;
   }
-  */}
+  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showButtonRosterAway = true;
+  }
+  {/** Away-Account && Spiel läuft */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showButtonRosterAway = false;
+  }
+  {/**
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showButtonRosterAway = true;
+  }
+  */}
+  {/** ADMIN  */ }
+  if (user && (user.roles.includes('ADMIN'))) {
+    showButtonStatus = true;
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    showButtonEvents = true;
   }
   if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
     showButtonStatus = false;
     showButtonRosterHome = false;
     showButtonRosterAway = false;
     showButtonEvents = false;
+  }
+  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    showButtonEvents = true;
   }
 
   return (
@@ -279,7 +317,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {match.matchStatus.key === 'INPROGRESS' && showButtonEvents && (
+              {showButtonEvents && (match.matchStatus.key === "INPROGRESS" || match.matchStatus.key === "FINISHED") && (
                 <>
                   <button
                     onClick={() => {
@@ -382,7 +420,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {match.matchStatus.key === 'INPROGRESS' && showButtonEvents && (
+              {showButtonEvents && (match.matchStatus.key === "INPROGRESS" || match.matchStatus.key === "FINISHED") && (
                 <>
                   <button
                     onClick={() => {
