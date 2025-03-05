@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
-import { Dialog } from '@headlessui/react';
+import { Dialog, Transition } from '@headlessui/react';
 import { Match } from '../../types/MatchValues';
 import Layout from '../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { tournamentConfigs } from '../../tools/consts';
+import { tournamentConfigs, allFinishTypes } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchStatusBadge from '../../components/ui/MatchStatusBadge';
+import FinishTypeSelect from '../../components/admin/ui/FinishTypeSelect';
 
 interface MatchDetailsProps {
   match: Match;
@@ -36,9 +37,11 @@ const tabs = [
 
 export default function MatchDetails({ match: initialMatch, jwt, userRoles }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('roster');
   const [match, setMatch] = useState<Match>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedFinishType, setSelectedFinishType] = useState({ key: "REGULAR", value: "Regulär" });
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -255,44 +258,64 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
             </div>
           </div>
           
-          {/* Middle Section with Start Button */}
+          {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
-            {match.matchStatus.key === 'SCHEDULED' && jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
-                      matchStatus: {
-                        key: "INPROGRESS",
-                        value: "Live"
+            {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
+              <>
+                {match.matchStatus.key === 'SCHEDULED' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                          matchStatus: {
+                            key: "INPROGRESS",
+                            value: "Live"
+                          }
+                        }, {
+                          headers: {
+                            Authorization: `Bearer ${jwt}`,
+                            'Content-Type': 'application/json'
+                          }
+                        });
+                        
+                        if (response.status === 200) {
+                          // Update local state instead of reloading
+                          const updatedMatch = response.data;
+                          setMatch(updatedMatch);
+                        }
+                      } catch (error) {
+                        console.error('Error updating match status:', error);
                       }
-                    }, {
-                      headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        'Content-Type': 'application/json'
-                      }
-                    });
-                    
-                    if (response.status === 200) {
-                      // Update local state instead of reloading
-                      const updatedMatch = response.data;
-                      setMatch(updatedMatch);
-                    }
-                  } catch (error) {
-                    console.error('Error updating match status:', error);
-                  }
-                }}
-                className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                {isRefreshing ? (
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                  </svg>
-                ) : (
-                  'Starten'
+                    }}
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    {isRefreshing ? (
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                      </svg>
+                    ) : (
+                      'Starten'
+                    )}
+                  </button>
                 )}
-              </button>
+                
+                {match.matchStatus.key === 'INPROGRESS' && (
+                  <button
+                    onClick={() => setIsFinishDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    {isRefreshing ? (
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                      </svg>
+                    ) : (
+                      'Beenden'
+                    )}
+                  </button>
+                )}
+              </>
             )}
           </div>
           
@@ -648,6 +671,113 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
         </div>
 
       </div>
+
+      {/* Finish Match Dialog */}
+      <Transition appear show={isFinishDialogOpen} as={Fragment}>
+        <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto" onClose={() => setIsFinishDialogOpen(false)}>
+          <div className="min-h-screen px-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-30" />
+            </Transition.Child>
+
+            {/* This element is to trick the browser into centering the modal contents. */}
+            <span className="inline-block h-screen align-middle" aria-hidden="true">
+              &#8203;
+            </span>
+            
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                  Spiel beenden
+                </Dialog.Title>
+                
+                <div className="mt-4">
+                  <FinishTypeSelect
+                    selectedType={selectedFinishType}
+                    types={allFinishTypes}
+                    onTypeChange={(typeKey) => {
+                      const selectedType = allFinishTypes.find(t => t.key === typeKey);
+                      if (selectedType) {
+                        setSelectedFinishType({
+                          key: typeKey,
+                          value: selectedType.value
+                        });
+                      }
+                    }}
+                    label="Art des Spielendes"
+                  />
+                </div>
+
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    onClick={() => setIsFinishDialogOpen(false)}
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    onClick={async () => {
+                      try {
+                        setIsRefreshing(true);
+                        const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                          matchStatus: {
+                            key: "FINISHED",
+                            value: "Beendet"
+                          },
+                          finishType: selectedFinishType
+                        }, {
+                          headers: {
+                            Authorization: `Bearer ${jwt}`,
+                            'Content-Type': 'application/json'
+                          }
+                        });
+                        
+                        if (response.status === 200) {
+                          // Update local state
+                          const updatedMatch = response.data;
+                          setMatch(updatedMatch);
+                          setIsFinishDialogOpen(false);
+                        }
+                      } catch (error) {
+                        console.error('Error finishing match:', error);
+                      } finally {
+                        setIsRefreshing(false);
+                      }
+                    }}
+                  >
+                    {isRefreshing ? 
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                      </svg>
+                      : null}
+                    Spiel beenden
+                  </button>
+                </div>
+              </div>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
     </Layout >
   );
 }
