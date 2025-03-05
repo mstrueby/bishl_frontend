@@ -129,35 +129,6 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.home.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.home.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.home.fullName}</h2>
-            {/* Home team buttons */}
-            <div className="flex flex-col items-center mt-4">
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => router.push(`/matches/${match._id}/roster/home`)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Aufstellung
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new goal
-                    // Will call POST API endpoint /matches/id/home/scores
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Tor
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new penalty
-                    // Will call POST API endpoint /matches/id/home/penalties
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Strafe
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Score */}
@@ -202,34 +173,71 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.away.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.away.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.away.fullName}</h2>
-            {/* Away team buttons */}
-            <div className="flex flex-col items-center mt-4">
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => router.push(`/matches/${match._id}/roster/away`)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Aufstellung
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new goal
-                    // Will call POST API endpoint /matches/id/away/scores
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Tor
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new penalty
-                    // Will call POST API endpoint /matches/id/away/penalties
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Strafe
-                </button>
-              </div>
+          </div>
+        </div>
+
+        {/* Team Buttons in Separate Row */}
+        <div className="flex justify-between mt-6 mb-4">
+          {/* Home Team Buttons */}
+          <div className="w-1/3 flex justify-center">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <button
+                onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Aufstellung
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new goal
+                  // Will call POST API endpoint /matches/id/home/scores
+                }}
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Tor
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new penalty
+                  // Will call POST API endpoint /matches/id/home/penalties
+                }}
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Strafe
+              </button>
+            </div>
+          </div>
+          
+          {/* Middle Section (Empty) */}
+          <div className="w-1/3"></div>
+          
+          {/* Away Team Buttons */}
+          <div className="w-1/3 flex justify-center">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <button
+                onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Aufstellung
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new goal
+                  // Will call POST API endpoint /matches/id/away/scores
+                }}
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Tor
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new penalty
+                  // Will call POST API endpoint /matches/id/away/penalties
+                }}
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Strafe
+              </button>
             </div>
           </div>
         </div>
