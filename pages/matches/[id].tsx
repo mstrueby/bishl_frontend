@@ -18,6 +18,7 @@ interface MatchDetailsProps {
   match: Match;
   jwt?: string;
   userRoles?: string[];
+  userClubId?: string | null;
 }
 
 interface EditMatchData {
@@ -35,7 +36,7 @@ const tabs = [
   { id: 'penalties', name: 'Strafen' },
 ]
 
-export default function MatchDetails({ match: initialMatch, jwt, userRoles }: MatchDetailsProps) {
+export default function MatchDetails({ match: initialMatch, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('roster');
@@ -231,30 +232,36 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
           {/* Home Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
-                onClick={() => router.push(`/matches/${match._id}/roster/home`)}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Aufstellung
-              </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new goal
-                  // Will call POST API endpoint /matches/id/home/scores
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Tor
-              </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new penalty
-                  // Will call POST API endpoint /matches/id/home/penalties
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Strafe
-              </button>
+              {(userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.home.clubId && userClubId === match.home.clubId)) && (
+                <button
+                  onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                  className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Aufstellung
+                </button>
+              )}
+              {match.matchStatus.key === 'INPROGRESS' && (
+                <>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new goal
+                      // Will call POST API endpoint /matches/id/home/scores
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Tor
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new penalty
+                      // Will call POST API endpoint /matches/id/home/penalties
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Strafe
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -266,6 +273,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                   <button
                     onClick={async () => {
                       try {
+                        setIsRefreshing(true);
                         const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
                           matchStatus: {
                             key: "INPROGRESS",
@@ -285,15 +293,20 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                         }
                       } catch (error) {
                         console.error('Error updating match status:', error);
+                      } finally {
+                        setIsRefreshing(false);
                       }
                     }}
-                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
                     {isRefreshing ? (
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                      </svg>
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                        </svg>
+                        Starten
+                      </>
                     ) : (
                       'Starten'
                     )}
@@ -303,7 +316,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                 {match.matchStatus.key === 'INPROGRESS' && (
                   <button
                     onClick={() => setIsFinishDialogOpen(true)}
-                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
                     {isRefreshing ? (
                       <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -322,30 +335,36 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
-                onClick={() => router.push(`/matches/${match._id}/roster/away`)}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Aufstellung
-              </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new goal
-                  // Will call POST API endpoint /matches/id/away/scores
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Tor
-              </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new penalty
-                  // Will call POST API endpoint /matches/id/away/penalties
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Strafe
-              </button>
+              {(userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.away.clubId && userClubId === match.away.clubId)) && (
+                <button
+                  onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                  className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Aufstellung
+                </button>
+              )}
+              {match.matchStatus.key === 'INPROGRESS' && (
+                <>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new goal
+                      // Will call POST API endpoint /matches/id/away/scores
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Tor
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new penalty
+                      // Will call POST API endpoint /matches/id/away/penalties
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Strafe
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -795,12 +814,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const match = await fetch(`${process.env.API_URL}/matches/${id}`).then(res => res.json());
 
     let userRoles: string[] = [];
+    let userClubId: string | null = null;
+    
     if (jwt) {
       const userResponse = await fetch(`${process.env.API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` }
       });
       const userData = await userResponse.json();
       userRoles = userData.roles || [];
+      
+      // Get user's club ID if available
+      if (userData.club && userData.club.clubId) {
+        userClubId = userData.club.clubId;
+      }
     }
 
     return {
@@ -808,6 +834,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         match,
         jwt,
         userRoles,
+        userClubId: userClubId || null,
       }
     };
   } catch (error) {
