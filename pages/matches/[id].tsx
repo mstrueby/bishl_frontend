@@ -267,7 +267,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
 
           {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
-            {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
+            {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.home.clubId && userClubId === match.home.clubId)) && (
               <>
                 {match.matchStatus.key === 'SCHEDULED' && (
                   <button
