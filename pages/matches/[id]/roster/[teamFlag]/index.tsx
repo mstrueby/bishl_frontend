@@ -819,7 +819,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             type="button"
                             onClick={handleAddPlayer}
                             disabled={loading}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 textsm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
                             Hinzufügen
@@ -996,7 +996,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     : 'Es müssen mindestens zwei Feldspieler (F) festgelegt werden'}
                             </span>
                         </div>
-                        
+
                         {/* Called players check indicator */}
                         <div className="flex items-center mt-4">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.called).length <= 5 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
@@ -1036,6 +1036,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
                                     // All checks must pass to enable the checkbox
                                     const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers;
+
+                                    // If checks don't pass, automatically set rosterPublished to false
+                                    if (!allChecksPass && rosterPublished) {
+                                        setRosterPublished(false);
+                                    }
 
                                     return (
                                         <input
@@ -1254,7 +1259,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                             <button
                                                 type="button"
                                                 onClick={() => setCallUpModalError(null)}
-                                                className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                                                className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outlinenone focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
                                             >
                                                 <span className="sr-only">Dismiss</span>
                                                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
