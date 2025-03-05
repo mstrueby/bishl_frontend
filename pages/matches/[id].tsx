@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -34,9 +34,11 @@ const tabs = [
   { id: 'penalties', name: 'Strafen' },
 ]
 
-export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProps) {
+export default function MatchDetails({ match: initialMatch, jwt, userRoles }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('roster');
+  const [match, setMatch] = useState<Match>(initialMatch);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -46,6 +48,38 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
     awayScore: match.away.stats.goalsFor
   });
   const router = useRouter();
+  const { id } = router.query;
+  
+  // Refresh match data function
+  const refreshMatchData = async () => {
+    if (!id || isRefreshing) return;
+    
+    try {
+      setIsRefreshing(true);
+      const response = await fetch(`${process.env.API_URL}/matches/${id}`);
+      const updatedMatch = await response.json();
+      setMatch(updatedMatch);
+      setIsRefreshing(false);
+    } catch (error) {
+      console.error('Error refreshing match data:', error);
+      setIsRefreshing(false);
+    }
+  };
+  
+  // Auto-refresh if match is in progress
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (match.matchStatus.key === 'INPROGRESS') {
+      interval = setInterval(() => {
+        refreshMatchData();
+      }, 30000); // Refresh every 30 seconds for live matches
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [match.matchStatus.key, id]);
 
 
 
@@ -55,6 +89,19 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
 
         {/* Match Header */}
         <div className="flex items-start justify-between sm:flex-row gap-y-2 p-4 border-b mb-6 sm:mb-8 md:mb-12">
+          {/* Refresh Button */}
+          {match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'CANCELLED' && (
+            <button 
+              onClick={refreshMatchData}
+              disabled={isRefreshing}
+              className="absolute top-4 right-4 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none"
+              title="Aktualisieren"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          )}
 
           {/* Tournament Badge */}
           <div className="">
@@ -129,35 +176,6 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.home.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.home.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.home.fullName}</h2>
-            {/* Home team buttons */}
-            <div className="flex flex-col items-center mt-4">
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => router.push(`/matches/${match._id}/roster/home`)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Aufstellung
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new goal
-                    // Will call POST API endpoint /matches/id/home/scores
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Tor
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new penalty
-                    // Will call POST API endpoint /matches/id/home/penalties
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Strafe
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Score */}
@@ -202,34 +220,109 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
             <h2 className="block sm:hidden text-xl font-bold truncate">{match.away.tinyName}</h2>
             <h2 className="hidden sm:max-md:block text-xl font-bold truncate">{match.away.shortName}</h2>
             <h2 className="hidden md:block text-xl font-bold truncate">{match.away.fullName}</h2>
-            {/* Away team buttons */}
-            <div className="flex flex-col items-center mt-4">
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => router.push(`/matches/${match._id}/roster/away`)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Aufstellung
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new goal
-                    // Will call POST API endpoint /matches/id/away/scores
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Tor
-                </button>
-                <button
-                  onClick={() => {
-                    // Open dialog to add a new penalty
-                    // Will call POST API endpoint /matches/id/away/penalties
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Strafe
-                </button>
-              </div>
+          </div>
+        </div>
+
+        {/* Team Buttons in Separate Row */}
+        <div className="flex justify-between mt-6 mb-4">
+          {/* Home Team Buttons */}
+          <div className="w-1/3 flex justify-center">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <button
+                onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Aufstellung
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new goal
+                  // Will call POST API endpoint /matches/id/home/scores
+                }}
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Tor
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new penalty
+                  // Will call POST API endpoint /matches/id/home/penalties
+                }}
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Strafe
+              </button>
+            </div>
+          </div>
+          
+          {/* Middle Section with Start Button */}
+          <div className="w-1/3 flex justify-center items-center">
+            {match.matchStatus.key === 'SCHEDULED' && jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                      matchStatus: {
+                        key: "INPROGRESS",
+                        value: "Live"
+                      }
+                    }, {
+                      headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
+                    
+                    if (response.status === 200) {
+                      // Update local state instead of reloading
+                      const updatedMatch = response.data;
+                      setMatch(updatedMatch);
+                    }
+                  } catch (error) {
+                    console.error('Error updating match status:', error);
+                  }
+                }}
+                className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                {isRefreshing ? (
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                  </svg>
+                ) : (
+                  'Starten'
+                )}
+              </button>
+            )}
+          </div>
+          
+          {/* Away Team Buttons */}
+          <div className="w-1/3 flex justify-center">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <button
+                onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Aufstellung
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new goal
+                  // Will call POST API endpoint /matches/id/away/scores
+                }}
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Tor
+              </button>
+              <button
+                onClick={() => {
+                  // Open dialog to add a new penalty
+                  // Will call POST API endpoint /matches/id/away/penalties
+                }}
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Strafe
+              </button>
             </div>
           </div>
         </div>

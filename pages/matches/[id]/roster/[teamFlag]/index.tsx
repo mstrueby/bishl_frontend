@@ -819,7 +819,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             type="button"
                             onClick={handleAddPlayer}
                             disabled={loading}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 textsm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
                             Hinzufügen
@@ -996,6 +996,26 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     : 'Es müssen mindestens zwei Feldspieler (F) festgelegt werden'}
                             </span>
                         </div>
+
+                        {/* Called players check indicator */}
+                        <div className="flex items-center mt-4">
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.called).length <= 5 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                                {rosterList.filter(player => player.called).length <= 5 ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="ml-2 text-sm">
+                                {rosterList.filter(player => player.called).length <= 5
+                                    ? `Hochgemeldete Spieler: ${rosterList.filter(player => player.called).length} von 5`
+                                    : `Zu viele hochgemeldete Spieler: ${rosterList.filter(player => player.called).length} von max. 5`}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -1011,9 +1031,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
                                     const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
                                     const hasMinFeldspieler = feldspielerCount >= 2;
+                                    const calledPlayersCount = rosterList.filter(player => player.called).length;
+                                    const hasMaxCalledPlayers = calledPlayersCount <= 5;
 
                                     // All checks must pass to enable the checkbox
-                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler;
+                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers;
+
+                                    // If checks don't pass, automatically set rosterPublished to false
+                                    if (!allChecksPass && rosterPublished) {
+                                        setRosterPublished(false);
+                                    }
 
                                     return (
                                         <input
@@ -1049,11 +1076,15 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
                                         const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
                                         const hasMinFeldspieler = feldspielerCount >= 2;
+                                        const calledPlayersCount = rosterList.filter(player => player.called).length;
+                                        const hasMaxCalledPlayers = calledPlayersCount <= 5;
 
                                         if (hasZeroJerseyNumber) {
                                             return 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)';
                                         } else if (!hasCaptain || !hasAssistant || !hasGoalie || !hasMinFeldspieler) {
                                             return 'Stelle sicher, dass ein Captain (C), ein Assistant (A), mindestens ein Goalie (G) und mindestens zwei Feldspieler (F) festgelegt sind';
+                                        } else if (!hasMaxCalledPlayers) {
+                                            return 'Es dürfen maximal 5 hochgemeldete Spieler in der Aufstellung sein';
                                         } else {
                                             return 'Aufstellung öffentlich sichtbar machen';
                                         }
@@ -1228,7 +1259,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                             <button
                                                 type="button"
                                                 onClick={() => setCallUpModalError(null)}
-                                                className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                                                className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outlinenone focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
                                             >
                                                 <span className="sr-only">Dismiss</span>
                                                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
