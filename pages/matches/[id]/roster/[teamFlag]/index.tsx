@@ -844,8 +844,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="flex-1 text-sm text-gray-900">
                                             {player.player.lastName}, {player.player.firstName}
                                         </div>
-                                        <div className="flex-1 hidden sm:block flex-1 text-xs text-gray-500">
-                                            {player.passNumber}
+                                        <div className="flex-1 hidden sm:block flex-1 text-xs">
+                                            <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                                {player.passNumber}
+                                            </span>
                                         </div>
                                         <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
                                             {player.called ? (
