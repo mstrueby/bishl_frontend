@@ -912,11 +912,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </ul>
                 </div>
 
-                {/* Publish toggle and save button */}
                 {/* Roster Completeness Check */}
                 <div className="mt-8 bg-white shadow rounded-md border p-6">
                     <h3 className="text-base font-semibold mb-4">Check:</h3>
                     <div className="space-y-3">
+
+                        {/* Captain check indicator */}
                         <div className="flex items-center">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'C') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                                 {rosterList.some(player => player.playerPosition.key === 'C') ? (
@@ -936,6 +937,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </span>
                         </div>
 
+                        {/* Assistant check indicator */}
                         <div className="flex items-center">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'A') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                                 {rosterList.some(player => player.playerPosition.key === 'A') ? (
@@ -955,6 +957,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </span>
                         </div>
 
+                        {/* Goalie check indicator */}
                         <div className="flex items-center">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'G') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                                 {rosterList.some(player => player.playerPosition.key === 'G') ? (
@@ -973,6 +976,26 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     : 'Es wurde noch kein Goalie (G) festgelegt'}
                             </span>
                         </div>
+
+                        {/* Feldspieler check indicator */}
+                        <div className="flex items-center mt-4">
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.playerPosition.key === 'F').length >= 2 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                                {rosterList.filter(player => player.playerPosition.key === 'F').length >= 2 ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="ml-2 text-sm">
+                                {rosterList.filter(player => player.playerPosition.key === 'F').length >= 2
+                                    ? `Mindestens zwei Feldspieler (F) wurden festgelegt`
+                                    : 'Es müssen mindestens zwei Feldspieler (F) festgelegt werden'}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -986,9 +1009,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
                                     const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
                                     const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                    const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
+                                    const hasMinFeldspieler = feldspielerCount >= 2;
 
                                     // All checks must pass to enable the checkbox
-                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie;
+                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler;
 
                                     return (
                                         <input
@@ -1006,6 +1031,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     );
                                 })()}
                             </div>
+                            {/* Publish chcekbox */}
                             <div className="ml-3 text-sm leading-6">
                                 <label htmlFor="rosterPublished" className={`font-medium ${(() => {
                                     const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
@@ -1021,11 +1047,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
                                         const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
                                         const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+                                        const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
+                                        const hasMinFeldspieler = feldspielerCount >= 2;
 
                                         if (hasZeroJerseyNumber) {
                                             return 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)';
-                                        } else if (!hasCaptain || !hasAssistant || !hasGoalie) {
-                                            return 'Stelle sicher, dass ein Captain (C), ein Assistant (A) und mindestens ein Goalie (G) festgelegt ist';
+                                        } else if (!hasCaptain || !hasAssistant || !hasGoalie || !hasMinFeldspieler) {
+                                            return 'Stelle sicher, dass ein Captain (C), ein Assistant (A), mindestens ein Goalie (G) und mindestens zwei Feldspieler (F) festgelegt sind';
                                         } else {
                                             return 'Aufstellung öffentlich sichtbar machen';
                                         }
@@ -1035,6 +1063,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         </div>
                     </div>
                 </div>
+
                 <div className="flex space-x-3 mt-6 justify-end">
                     <button
                         type="button"
