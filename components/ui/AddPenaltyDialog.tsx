@@ -48,7 +48,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
           console.error('Error fetching penalty codes:', error);
         }
       };
-      
+
       fetchPenaltyCodes();
       resetForm();
     }
@@ -63,7 +63,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedPlayer || !selectedPenaltyCode || !matchTimeStart) {
       return;
     }
@@ -95,7 +95,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
           }
         }
       );
-      
+
       if (response.status === 201 || response.status === 200) {
         onSuccess();
         onClose();
@@ -120,7 +120,6 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
           </Transition.Child>
 
           {/* This element is to trick the browser into centering the modal contents. */}
