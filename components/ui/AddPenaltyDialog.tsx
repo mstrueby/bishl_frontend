@@ -39,7 +39,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
     if (isOpen) {
       const fetchPenaltyCodes = async () => {
         try {
-          const response = await axios.get('https://api.bishl.de/configs/penaltycode');
+          const response = await axios.get(`${process.env.API_URL}/configs/penaltycode`);
           setPenaltyCodes(response.data);
           if (response.data.length > 0) {
             setSelectedPenaltyCode(response.data[0]);
