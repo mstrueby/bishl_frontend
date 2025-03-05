@@ -237,24 +237,28 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
               >
                 Aufstellung
               </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new goal
-                  // Will call POST API endpoint /matches/id/home/scores
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Tor
-              </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new penalty
-                  // Will call POST API endpoint /matches/id/home/penalties
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Strafe
-              </button>
+              {match.matchStatus.key === 'INPROGRESS' && (
+                <>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new goal
+                      // Will call POST API endpoint /matches/id/home/scores
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Tor
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new penalty
+                      // Will call POST API endpoint /matches/id/home/penalties
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Strafe
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -328,24 +332,28 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
               >
                 Aufstellung
               </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new goal
-                  // Will call POST API endpoint /matches/id/away/scores
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Tor
-              </button>
-              <button
-                onClick={() => {
-                  // Open dialog to add a new penalty
-                  // Will call POST API endpoint /matches/id/away/penalties
-                }}
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Strafe
-              </button>
+              {match.matchStatus.key === 'INPROGRESS' && (
+                <>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new goal
+                      // Will call POST API endpoint /matches/id/away/scores
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Tor
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Open dialog to add a new penalty
+                      // Will call POST API endpoint /matches/id/away/penalties
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Strafe
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
