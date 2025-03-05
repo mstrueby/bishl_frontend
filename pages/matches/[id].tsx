@@ -116,10 +116,10 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonRosterAway = true;
   }
   */}
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) {
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showButtonRosterAway = true;
   }
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS') {
+  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
     showButtonStatus = false;
     showButtonRosterHome = false;
     showButtonRosterAway = false;
