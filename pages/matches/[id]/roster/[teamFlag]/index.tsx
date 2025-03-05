@@ -990,7 +990,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     const hasMinFeldspieler = feldspielerCount >= 2;
 
                                     // All checks must pass to enable the checkbox
-                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler; hasGoalie;
+                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler;
 
                                     return (
                                         <input
