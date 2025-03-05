@@ -52,11 +52,11 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
   });
   const router = useRouter();
   const { id } = router.query;
-  
+
   // Refresh match data function
   const refreshMatchData = async () => {
     if (!id || isRefreshing) return;
-    
+
     try {
       setIsRefreshing(true);
       const response = await fetch(`${process.env.API_URL}/matches/${id}`);
@@ -68,17 +68,17 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
       setIsRefreshing(false);
     }
   };
-  
+
   // Auto-refresh if match is in progress
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    
+
     if (match.matchStatus.key === 'INPROGRESS') {
       interval = setInterval(() => {
         refreshMatchData();
       }, 30000); // Refresh every 30 seconds for live matches
     }
-    
+
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -257,7 +257,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
               </button>
             </div>
           </div>
-          
+
           {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
             {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
@@ -277,7 +277,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                             'Content-Type': 'application/json'
                           }
                         });
-                        
+
                         if (response.status === 200) {
                           // Update local state instead of reloading
                           const updatedMatch = response.data;
@@ -299,7 +299,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                     )}
                   </button>
                 )}
-                
+
                 {match.matchStatus.key === 'INPROGRESS' && (
                   <button
                     onClick={() => setIsFinishDialogOpen(true)}
@@ -318,7 +318,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
               </>
             )}
           </div>
-          
+
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
@@ -599,7 +599,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.penalties && match.home.penalties.length > 0 ? (
-                      <table className="min-w-full divide-y divide-gray-200">
+                      <table className="min-w-full divide-y divide-gray200">
                         <tbody className="bg-white divide-y divide-gray-200">
                           {match.home.penalties.map((penalty, index) => (
                             <tr key={`home-penalty-${index}`}>
@@ -692,7 +692,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
             <span className="inline-block h-screen align-middle" aria-hidden="true">
               &#8203;
             </span>
-            
+
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -706,7 +706,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                 <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                   Spiel beenden
                 </Dialog.Title>
-                
+
                 <div className="mt-4">
                   <FinishTypeSelect
                     selectedType={selectedFinishType}
@@ -750,7 +750,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                             'Content-Type': 'application/json'
                           }
                         });
-                        
+
                         if (response.status === 200) {
                           // Update local state
                           const updatedMatch = response.data;
