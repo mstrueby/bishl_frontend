@@ -52,11 +52,11 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
   });
   const router = useRouter();
   const { id } = router.query;
-  
+
   // Refresh match data function
   const refreshMatchData = async () => {
     if (!id || isRefreshing) return;
-    
+
     try {
       setIsRefreshing(true);
       const response = await fetch(`${process.env.API_URL}/matches/${id}`);
@@ -68,17 +68,17 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
       setIsRefreshing(false);
     }
   };
-  
+
   // Auto-refresh if match is in progress
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    
+
     if (match.matchStatus.key === 'INPROGRESS') {
       interval = setInterval(() => {
         refreshMatchData();
       }, 30000); // Refresh every 30 seconds for live matches
     }
-    
+
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -94,7 +94,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
         <div className="flex items-start justify-between sm:flex-row gap-y-2 p-4 border-b mb-6 sm:mb-8 md:mb-12">
           {/* Refresh Button */}
           {match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'CANCELLED' && (
-            <button 
+            <button
               onClick={refreshMatchData}
               disabled={isRefreshing}
               className="absolute top-4 right-4 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none"
@@ -257,7 +257,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
               </button>
             </div>
           </div>
-          
+
           {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
             {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
@@ -277,7 +277,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                             'Content-Type': 'application/json'
                           }
                         });
-                        
+
                         if (response.status === 200) {
                           // Update local state instead of reloading
                           const updatedMatch = response.data;
@@ -299,7 +299,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                     )}
                   </button>
                 )}
-                
+
                 {match.matchStatus.key === 'INPROGRESS' && (
                   <button
                     onClick={() => setIsFinishDialogOpen(true)}
@@ -318,7 +318,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
               </>
             )}
           </div>
-          
+
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
@@ -599,7 +599,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.penalties && match.home.penalties.length > 0 ? (
-                      <table className="min-w-full divide-y divide-gray-200">
+                      <table className="min-w-full divide-y divide-gray200">
                         <tbody className="bg-white divide-y divide-gray-200">
                           {match.home.penalties.map((penalty, index) => (
                             <tr key={`home-penalty-${index}`}>
@@ -674,108 +674,113 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
 
       {/* Finish Match Dialog */}
       <Transition appear show={isFinishDialogOpen} as={Fragment}>
-        <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto" onClose={() => setIsFinishDialogOpen(false)}>
-          <div className="min-h-screen px-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="fixed inset-0 bg-black bg-opacity-30" />
-            </Transition.Child>
+        <Dialog as="div" className="fixed inset-0 z-10" onClose={() => setIsFinishDialogOpen(false)}>
+          <div className="fixed inset-0 bg-black/30 transition-opacity" />
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-full p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <div className="fixed inset-0 bg-black bg-opacity-30" />
+              </Transition.Child>
 
-            {/* This element is to trick the browser into centering the modal contents. */}
-            <span className="inline-block h-screen align-middle" aria-hidden="true">
-              &#8203;
-            </span>
-            
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                  Spiel beenden
-                </Dialog.Title>
-                
-                <div className="mt-4">
-                  <FinishTypeSelect
-                    selectedType={selectedFinishType}
-                    types={allFinishTypes}
-                    onTypeChange={(typeKey) => {
-                      const selectedType = allFinishTypes.find(t => t.key === typeKey);
-                      if (selectedType) {
-                        setSelectedFinishType({
-                          key: typeKey,
-                          value: selectedType.value
-                        });
-                      }
-                    }}
-                    label="Art des Spielendes"
-                  />
-                </div>
+              {/* This element is to trick the browser into centering the modal contents. */}
+              <span className="inline-block h-screen align-middle" aria-hidden="true">
+                &#8203;
+              </span>
 
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onClick={() => setIsFinishDialogOpen(false)}
-                  >
-                    Abbrechen
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onClick={async () => {
-                      try {
-                        setIsRefreshing(true);
-                        const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
-                          matchStatus: {
-                            key: "FINISHED",
-                            value: "Beendet"
-                          },
-                          finishType: selectedFinishType
-                        }, {
-                          headers: {
-                            Authorization: `Bearer ${jwt}`,
-                            'Content-Type': 'application/json'
-                          }
-                        });
-                        
-                        if (response.status === 200) {
-                          // Update local state
-                          const updatedMatch = response.data;
-                          setMatch(updatedMatch);
-                          setIsFinishDialogOpen(false);
-                        }
-                      } catch (error) {
-                        console.error('Error finishing match:', error);
-                      } finally {
-                        setIsRefreshing(false);
-                      }
-                    }}
-                  >
-                    {isRefreshing ? 
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                      </svg>
-                      : null}
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
                     Spiel beenden
-                  </button>
-                </div>
-              </div>
-            </Transition.Child>
-          </div>
+                  </Dialog.Title>
+
+                  <div className="mt-4 mb-24">
+                    <FinishTypeSelect
+                      selectedType={selectedFinishType}
+                      types={allFinishTypes}
+                      onTypeChange={(typeKey) => {
+                        const selectedType = allFinishTypes.find(t => t.key === typeKey);
+                        if (selectedType) {
+                          setSelectedFinishType({
+                            key: typeKey,
+                            value: selectedType.value
+                          });
+                        }
+                      }}
+                      label="Art des Spielendes"
+                    />
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      onClick={() => setIsFinishDialogOpen(false)}
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      onClick={async () => {
+                        try {
+                          setIsRefreshing(true);
+                          const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                            matchStatus: {
+                              key: "FINISHED",
+                              value: "Beendet"
+                            },
+                            finishType: selectedFinishType
+                          }, {
+                            headers: {
+                              Authorization: `Bearer ${jwt}`,
+                              'Content-Type': 'application/json'
+                            }
+                          });
+
+                          if (response.status === 200) {
+                            // Update local state
+                            const updatedMatch = response.data;
+                            setMatch(updatedMatch);
+                            setIsFinishDialogOpen(false);
+                          }
+                        } catch (error) {
+                          console.error('Error finishing match:', error);
+                        } finally {
+                          setIsRefreshing(false);
+                        }
+                      }}
+                    >
+                      {isRefreshing ?
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                        </svg>
+                        : null}
+                      Spiel beenden
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>d
         </Dialog>
       </Transition>
     </Layout >
