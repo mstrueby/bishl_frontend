@@ -22,10 +22,12 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
   // deactivate new features for PROD
   // Feature-Switch
   if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
-    showLinkHome = false;
-    showLinkAway = false;
+    //showLinkHome = false;
+    //showLinkAway = false;
   }
-  
+
+  console.log('showLinkAway', showLinkAway)
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
@@ -174,160 +176,162 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
     showMatchSheet = false;
   }
-  
+
   return (
-    <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
-      {/* 1 tournament, status (mobile), date, venue */}
-      <div className="flex flex-col sm:flex-none sm:w-1/3">
-        {/* 1-1 tournament, status (mobile) */}
-        <div className="flex flex-row justify-between">
-          {/* tournament */}
-          <div className="">
-            {tournamentConfigs.map(item =>
-              item.name === match.tournament.name && (
-                <span
-                  key={item.tiny_name}
-                  className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdg_col_light)}
-                >
-                  {item.tiny_name} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
-                </span>
-              )
+    <>
+      <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
+        {/* 1 tournament, status (mobile), date, venue */}
+        <div className="flex flex-col sm:flex-none sm:w-1/3">
+          {/* 1-1 tournament, status (mobile) */}
+          <div className="flex flex-row justify-between">
+            {/* tournament */}
+            <div className="">
+              {tournamentConfigs.map(item =>
+                item.name === match.tournament.name && (
+                  <span
+                    key={item.tiny_name}
+                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdg_col_light)}
+                  >
+                    {item.tiny_name} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                  </span>
+                )
+              )}
+            </div>
+            {/* status */}
+            <div className="sm:hidden">
+              <div className="flex items-center">
+                {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
+                  <StatusMenu
+                    match={match}
+                    setMatch={setMatch}
+                    showLinkEdit={showLinkEdit}
+                    showLinkStatus={showLinkStatus}
+                    showLinkHome={showLinkHome}
+                    showLinkAway={showLinkAway}
+                    onMatchUpdate={onMatchUpdate}
+                  />
+                )}
+                <MatchStatusBadge
+                  statusKey={match.matchStatus.key}
+                  finishTypeKey={match.finishType.key}
+                  statusValue={match.matchStatus.value}
+                  finishTypeValue={match.finishType.value}
+                />
+              </div>
+            </div>
+          </div>
+          {/* 1-2 date, venue */}
+          <div className="flex flex-row sm:flex-col justify-between sm:justify-end mt-3 sm:mt-0 sm:pr-4 sm:gap-y-2 sm:h-full">
+            {/* date */}
+            <div className="flex items-center truncate">
+              <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
+              <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
+                <time dateTime={
+                  startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
+                }>
+                  {startDate ? new Date(startDate).toLocaleString('de-DE', {
+                    timeZone: 'Europe/Berlin',
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: undefined,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : 'offen'}
+                </time>
+              </p>
+              <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
+                <time dateTime={
+                  startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
+                }>
+                  {startDate ? new Date(startDate).toLocaleString('de-DE', {
+                    timeZone: 'Europe/Berlin',
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'short',
+                    year: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : 'offen'}
+                </time>
+              </p>
+            </div>
+            {/* venue */}
+            <div className="flex items-center truncate">
+              <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
+              <p className="text-xs uppercase font-light text-gray-700 truncate">{venue.name}</p>
+            </div>
+          </div>
+        </div>
+        {/* 2  scores */}
+        <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 sm:w-5/12 md:w-full">
+          {/* home */}
+          <div className="flex flex-row items-center w-full">
+            <div className="flex-none h-10 w-10">
+              <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
+            </div>
+            <div className="flex-auto ml-6 truncate text-ellipsis">
+              <p className={`block md:hidden sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.shortName}</p>
+              <p className={`hidden md:block sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
+            </div>
+            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+              <div className="flex-none w-10">
+                <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
+              </div>
             )}
           </div>
-          {/* status */}
-          <div className="sm:hidden">
-            <div className="flex items-center">
-              {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
-                <StatusMenu
-                  match={match}
-                  setMatch={setMatch}
-                  showLinkEdit={showLinkEdit}
-                  showLinkStatus={showLinkStatus}
-                  showLinkHome={showLinkHome}
-                  showLinkAway={showLinkAway}
-                  onMatchUpdate={onMatchUpdate}
-                />
-              )}
-              <MatchStatusBadge
-                statusKey={match.matchStatus.key}
-                finishTypeKey={match.finishType.key}
-                statusValue={match.matchStatus.value}
-                finishTypeValue={match.finishType.value}
+          {/* away */}
+          <div className="flex flex-row items-center w-full">
+            <div className="flex-none h-10 w-10">
+              <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
+            </div>
+            <div className="flex-auto ml-6 w-full truncate">
+              <p className={`block md:hidden sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.shortName}</p>
+              <p className={`hidden md:block sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
+            </div>
+            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+              <div className="flex-none w-10">
+                <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* 3 button Spielberich, status (tablet) */}
+        <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
+          <div className="sm:flex hidden flex-row justify-end">
+            {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
+              <StatusMenu
+                match={match}
+                setMatch={setMatch}
+                showLinkEdit={showLinkEdit}
+                showLinkStatus={showLinkStatus}
+                showLinkHome={showLinkHome}
+                showLinkAway={showLinkAway}
+                onMatchUpdate={onMatchUpdate}
               />
-            </div>
-          </div>
-        </div>
-        {/* 1-2 date, venue */}
-        <div className="flex flex-row sm:flex-col justify-between sm:justify-end mt-3 sm:mt-0 sm:pr-4 sm:gap-y-2 sm:h-full">
-          {/* date */}
-          <div className="flex items-center truncate">
-            <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={
-                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
-              }>
-                {startDate ? new Date(startDate).toLocaleString('de-DE', {
-                  timeZone: 'Europe/Berlin',
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'numeric',
-                  year: undefined,
-                  hour: '2-digit',
-                  minute: '2-digit'
-                }) : 'offen'}
-              </time>
-            </p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={
-                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
-              }>
-                {startDate ? new Date(startDate).toLocaleString('de-DE', {
-                  timeZone: 'Europe/Berlin',
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'short',
-                  year: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                }) : 'offen'}
-              </time>
-            </p>
-          </div>
-          {/* venue */}
-          <div className="flex items-center truncate">
-            <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
-            <p className="text-xs uppercase font-light text-gray-700 truncate">{venue.name}</p>
-          </div>
-        </div>
-      </div>
-      {/* 2  scores */}
-      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 sm:w-5/12 md:w-full">
-        {/* home */}
-        <div className="flex flex-row items-center w-full">
-          <div className="flex-none h-10 w-10">
-            <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
-          </div>
-          <div className="flex-auto ml-6 truncate text-ellipsis">
-            <p className={`block md:hidden sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.shortName}</p>
-            <p className={`hidden md:block sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
-          </div>
-          {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
-            <div className="flex-none w-10">
-              <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
-            </div>
-          )}
-        </div>
-        {/* away */}
-        <div className="flex flex-row items-center w-full">
-          <div className="flex-none h-10 w-10">
-            <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
-          </div>
-          <div className="flex-auto ml-6 w-full truncate">
-            <p className={`block md:hidden sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.shortName}</p>
-            <p className={`hidden md:block sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
-          </div>
-          {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
-            <div className="flex-none w-10">
-              <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
-            </div>
-          )}
-        </div>
-      </div>
-      {/* 3 button Spielberich, status (tablet) */}
-      <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
-        <div className="sm:flex hidden flex-row justify-end">
-          {(showLinkEdit || showLinkStatus) && (
-            <StatusMenu
-              match={match}
-              setMatch={setMatch}
-              showLinkEdit={showLinkEdit}
-              showLinkStatus={showLinkStatus}
-              showLinkHome={showLinkHome}
-              showLinkAway={showLinkAway}
-              onMatchUpdate={onMatchUpdate}
+            )}
+            <MatchStatusBadge
+              statusKey={match.matchStatus.key}
+              finishTypeKey={match.finishType.key}
+              statusValue={match.matchStatus.value}
+              finishTypeValue={match.finishType.value}
             />
-          )}
-          <MatchStatusBadge
-            statusKey={match.matchStatus.key}
-            finishTypeKey={match.finishType.key}
-            statusValue={match.matchStatus.value}
-            finishTypeValue={match.finishType.value}
-          />
-        </div>
+          </div>
 
-        {showMatchSheet && (
-        <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          <Link href={`/matches/${match._id}`}>
-            <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-              <span className="block sm:hidden md:block">Spielbericht</span>
-              <span className="hidden sm:block md:hidden">Bericht</span>
-            </a>
-          </Link>
+          {showMatchSheet && (
+            <div className="flex flex-col sm:flex-none justify-center sm:items-end">
+              <Link href={`/matches/${match._id}`}>
+                <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  <span className="block sm:hidden md:block">Spielbericht</span>
+                  <span className="hidden sm:block md:hidden">Bericht</span>
+                </a>
+              </Link>
+            </div>
+          )}
+
         </div>
-      )}
-        
       </div>
-    </div>
+    </>
   );
 };
 
