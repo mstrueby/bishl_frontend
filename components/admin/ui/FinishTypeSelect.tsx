@@ -1,12 +1,12 @@
-import { Fragment } from 'react';
+
+import React, { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
-import { CldImage } from 'next-cloudinary';
 import { classNames } from '../../../tools/utils';
 
 interface FinishTypeSelectProps {
   selectedType?: { key: string, value: string } | null;
-  types: { key: string, value: string }[];
+  types: { key: string, value: string, sortOrder?: number }[];
   onTypeChange: (key: string) => void;
   label?: string;
 }
@@ -53,27 +53,25 @@ const FinishTypeSelect: React.FC<FinishTypeSelectProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="relative w-full z-[100] mt-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {types.map((type) => (
                 <Listbox.Option
                   key={type.key}
-                  value={type}
-                  className={({ active, selected }) =>
+                  className={({ active }) =>
                     classNames(
                       active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                      selected ? 'bg-indigo-50 font-semibold' : '',
-                      'relative cursor-default select-none py-2 px-3'
+                      'relative cursor-default select-none py-2 pl-3 pr-9'
                     )
                   }
+                  value={type}
                 >
                   {({ selected, active }) => (
                     <>
-                      <div className="flex items-center">
-                        <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
-                          {type.value}
-                        </span>
-                      </div>
-                      {selected && (
+                      <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                        {type.value}
+                      </span>
+
+                      {selected ? (
                         <span
                           className={classNames(
                             active ? 'text-white' : 'text-indigo-600',
@@ -82,7 +80,7 @@ const FinishTypeSelect: React.FC<FinishTypeSelectProps> = ({
                         >
                           <CheckIcon className="h-5 w-5" aria-hidden="true" />
                         </span>
-                      )}
+                      ) : null}
                     </>
                   )}
                 </Listbox.Option>
