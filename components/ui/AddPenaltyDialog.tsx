@@ -40,12 +40,17 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       const fetchPenaltyCodes = async () => {
         try {
           const response = await axios.get(`${process.env.API_URL}/configs/penaltycode`);
-          setPenaltyCodes(response.data);
-          if (response.data.length > 0) {
-            setSelectedPenaltyCode(response.data[0]);
+          const data = response.data;
+          if (Array.isArray(data) && data.length > 0) {
+            setPenaltyCodes(data);
+            setSelectedPenaltyCode(data[0]);
+          } else {
+            console.error('Invalid penalty codes data format:', data);
+            setPenaltyCodes([]);
           }
         } catch (error) {
           console.error('Error fetching penalty codes:', error);
+          setPenaltyCodes([]);
         }
       };
 
@@ -219,7 +224,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
                       required
                     >
                       <option value="">Strafcode auswählen</option>
-                      {penaltyCodes && penaltyCodes.length > 0 && penaltyCodes.map((code) => (
+                      {Array.isArray(penaltyCodes) && penaltyCodes.map((code) => (
                         <option key={code.key} value={code.key}>
                           {code.key} - {code.value}
                         </option>
