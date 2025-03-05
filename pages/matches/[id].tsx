@@ -270,6 +270,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                   <button
                     onClick={async () => {
                       try {
+                        setIsRefreshing(true);
                         const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
                           matchStatus: {
                             key: "INPROGRESS",
@@ -289,6 +290,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles }: Ma
                         }
                       } catch (error) {
                         console.error('Error updating match status:', error);
+                      } finally {
+                        setIsRefreshing(false);
                       }
                     }}
                     className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
