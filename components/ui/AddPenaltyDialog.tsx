@@ -88,7 +88,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
     
     try {
       const response = await axios.post(
-        `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties`, 
+        `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/`, 
         penaltyData,
         {
           headers: {
