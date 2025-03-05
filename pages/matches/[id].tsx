@@ -267,7 +267,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
 
           {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
-            {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN') || (userRoles?.includes('CLUB_ADMIN') && userClubId && match.home.clubId && userClubId === match.home.clubId)) && (
+            {jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
               <>
                 {match.matchStatus.key === 'SCHEDULED' && (
                   <button
@@ -287,16 +287,12 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                         });
 
                         if (response.status === 200) {
-                          // Update local state with the response data
+                          // Update local state instead of reloading
                           const updatedMatch = response.data;
                           setMatch(updatedMatch);
-                          
-                          // Set up auto-refresh for live match
-                          refreshMatchData();
                         }
                       } catch (error) {
                         console.error('Error updating match status:', error);
-                        alert('Fehler beim Starten des Spiels. Bitte versuchen Sie es erneut.');
                       } finally {
                         setIsRefreshing(false);
                       }
