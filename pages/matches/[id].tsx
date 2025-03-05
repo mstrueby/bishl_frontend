@@ -208,8 +208,37 @@ export default function MatchDetails({ match, jwt, userRoles }: MatchDetailsProp
             </div>
           </div>
           
-          {/* Middle Section (Empty) */}
-          <div className="w-1/3"></div>
+          {/* Middle Section with Start Button */}
+          <div className="w-1/3 flex justify-center items-center">
+            {match.matchStatus.key === 'SCHEDULED' && jwt && (userRoles?.includes('ADMIN') || userRoles?.includes('LEAGUE_ADMIN')) && (
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                      matchStatus: {
+                        key: "INPROGRESS",
+                        value: "Live"
+                      }
+                    }, {
+                      headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
+                    
+                    if (response.status === 200) {
+                      router.reload();
+                    }
+                  } catch (error) {
+                    console.error('Error updating match status:', error);
+                  }
+                }}
+                className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Starten
+              </button>
+            )}
+          </div>
           
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
