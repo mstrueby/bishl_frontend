@@ -112,6 +112,13 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
     if (!selectedPlayer || !selectedPenaltyCode || !matchTimeStart) {
       return;
     }
+    
+    // Set a failsafe timeout to close the dialog if needed
+    const closeTimeout = setTimeout(() => {
+      console.log('Failsafe timeout triggered - forcing dialog close');
+      onSuccess();
+      onClose();
+    }, 5000);
 
     const penaltyData = {
       matchTimeStart,
@@ -152,8 +159,11 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
 
         // Close and refresh on any successful response (2xx)
         if (response.status >= 200 && response.status < 300) {
+          console.log('Edit successful, closing dialog and refreshing data');
           onSuccess();
           onClose();
+        } else {
+          console.warn('Edit response not in 2xx range:', response.status);
         }
       } else {
         // Create new penalty
@@ -179,8 +189,12 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       }
     } catch (error) {
       console.error('Error saving penalty:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('API error details:', error.response?.data);
+      }
     } finally {
       setIsLoading(false);
+      clearTimeout(closeTimeout);
     }
   };
 
