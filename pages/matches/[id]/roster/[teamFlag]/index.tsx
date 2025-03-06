@@ -103,13 +103,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         );
         const teamPlayers: PlayerValues[] = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
         let allTeamsPlayers: PlayerValues[] = [];
+        let bambiniPlayers: PlayerValues[] = [];
+        let bambiniTeamsIds: string[] = [];
 
         if (teamAgeGroup === 'Schüler') {
-            const bambiniTeams = club.teams.filter((team: TeamValues) => team.ageGroup === 'Bambini');
-            let bambiniPlayers: PlayerValues[] = [];
+            const bambiniTeams: TeamValues[] = club.teams.filter((team: TeamValues) => team.ageGroup === 'Bambini');
 
+            const bambiniTeamsIds = bambiniTeams.map((team: TeamValues) => team._id);
+            console.log("Bam IDs", bambiniTeamsIds)
             for (const bambinoTeam of bambiniTeams) {
                 console.log("Bambino Team", bambinoTeam)
+                
                 const playersResponse = await axios.get(
                     `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${bambinoTeam.alias}`, {
                         headers: {
@@ -136,9 +140,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
 
             // Find the team assignment that matches the target team ID or matches the Bambini team alias
+            console.log("teamPlayer name:", teamPlayer.firstName, teamPlayer.lastName)
+            console.log("teamPlayer.assignedTeams:", JSON.stringify(teamPlayer.assignedTeams, null, 2));
             const assignedTeam = teamPlayer.assignedTeams
                 .flatMap((assignment: Assignment) => assignment.teams || [])
-                .find((team: AssignmentTeam) => (team && team.teamId === matchTeam.teamId) || (team && team.teamAlias === 'bambini'));
+                .find((team: AssignmentTeam) => {
+                    if (!team) return false;
+                    return team.teamId === matchTeam.teamId || bambiniTeamsIds.some(id => id === team.teamId);
+                });
             return assignedTeam ? {
                 _id: teamPlayer._id,
                 firstName: teamPlayer.firstName,
