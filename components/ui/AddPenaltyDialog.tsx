@@ -1,4 +1,3 @@
-
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
@@ -47,7 +46,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
           const data = response.data.value;
           if (Array.isArray(data) && data.length > 0) {
             setPenaltyCodes(data);
-            
+
             if (!editPenalty) {
               setSelectedPenaltyCode(data[0]);
             }
@@ -62,12 +61,12 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       };
 
       fetchPenaltyCodes();
-      
+
       if (editPenalty) {
         // Fill form with data from the penalty to edit
         setMatchTimeStart(editPenalty.matchTimeStart || '');
         setMatchTimeEnd(editPenalty.matchTimeEnd || '');
-        
+
         // Set selected player
         if (editPenalty.penaltyPlayer) {
           setSelectedPlayer({
@@ -77,17 +76,17 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
             jerseyNumber: editPenalty.penaltyPlayer.jerseyNumber
           });
         }
-        
+
         // Set penalty code
         if (editPenalty.penaltyCode) {
           setSelectedPenaltyCode(editPenalty.penaltyCode);
         }
-        
+
         // Set penalty minutes
         if (editPenalty.penaltyMinutes) {
           setPenaltyMinutes(editPenalty.penaltyMinutes);
         }
-        
+
         // Set isGM and isMP
         setIsGM(editPenalty.isGM || false);
         setIsMP(editPenalty.isMP || false);
@@ -134,7 +133,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
 
     try {
       setIsLoading(true);
-      
+
       if (editPenalty && editPenalty._id) {
         // Update existing penalty
         const response = await axios.put(
@@ -147,8 +146,12 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
             }
           }
         );
-        
-        if (response.status === 200) {
+
+        // Log response for debugging
+        console.log('Edit penalty response:', response.status, response.data);
+
+        // Close and refresh on any successful response (2xx)
+        if (response.status >= 200 && response.status < 300) {
           onSuccess();
           onClose();
         }
@@ -165,7 +168,11 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
           }
         );
 
-        if (response.status === 201 || response.status === 200) {
+        // Log response for debugging
+        console.log('Create penalty response:', response.status, response.data);
+
+        // Close and refresh on any successful response (2xx)
+        if (response.status >= 200 && response.status < 300) {
           onSuccess();
           onClose();
         }
@@ -235,7 +242,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
                       required
                     />
                   </div>
-                  
+
                   {/* Match Time - End (Optional) */}
                   <div>
                     <label htmlFor="matchTimeEnd" className="block text-sm font-medium text-gray-700">
@@ -334,7 +341,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
                       ))}
                     </select>
                   </div>
-                  
+
                   {/* Penalty Type Checkboxes */}
                   <div className="flex space-x-6">
                     <div className="flex items-center">
