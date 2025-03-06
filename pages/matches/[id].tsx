@@ -964,7 +964,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-900">{match.referee1.firstName} {match.referee1.lastName}</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 1</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 1 {match.referee1.clubName && `• ${match.referee1.clubName}`}</p>
                 </div>
               </div>
             ) : (
@@ -988,7 +988,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-900">{match.referee2.firstName} {match.referee2.lastName}</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 2</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 2 {match.referee2.clubName && `• ${match.referee2.clubName}`}</p>
                 </div>
               </div>
             ) : (
