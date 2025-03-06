@@ -351,7 +351,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setCallUpModalError(null);
 
         // Optional: Show a success message
-        setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
+        setSuccessMessage(`Spieler ${selectedCallUpPlayer.displayFirstName} ${selectedCallUpPlayer.displayLastName} wurde hochgemeldet und steht zur Verfügung.`);
     };
 
     const handleEditPlayer = (player: RosterPlayer) => {
@@ -498,8 +498,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             const newPlayer: RosterPlayer = {
                 player: {
                     playerId: selectedPlayer._id,
-                    firstName: selectedPlayer.firstName,
-                    lastName: selectedPlayer.lastName,
+                    firstName: selectedPlayer.displayFirstName,
+                    lastName: selectedPlayer.displayLastName,
                     jerseyNumber: playerNumber,
                 },
                 playerPosition: {
@@ -660,7 +660,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Spieler auswählen'}
+                                                    {selectedPlayer ? `${selectedPlayer.displayLastName}, ${selectedPlayer.displayFirstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -698,7 +698,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                             selected ? 'font-semibold' : 'font-normal',
                                                                             'block truncate'
                                                                         )}>
-                                                                            {player.lastName}, {player.firstName}
+                                                                            {player.displayLastName}, {player.displayFirstName}
                                                                         </span>
 
                                                                         {selected ? (
@@ -1357,7 +1357,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedCallUpPlayer ? `${selectedCallUpPlayer.lastName}, ${selectedCallUpPlayer.firstName}` : 'Spieler auswählen'}
+                                                    {selectedCallUpPlayer ? `${selectedCallUpPlayer.displayLastName}, ${selectedCallUpPlayer.displayFirstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -1390,7 +1390,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                             selected ? 'font-semibold' : 'font-normal',
                                                                             'block truncate'
                                                                         )}>
-                                                                            {player.lastName}, {player.firstName}
+                                                                            {player.displayLastName}, {player.displayFirstName}
                                                                         </span>
 
                                                                         {selected ? (
