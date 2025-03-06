@@ -223,10 +223,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         // Sort available players by displayLastName, then by displayFirstName
         const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
             // First sort by lastName
-            const lastNameComparison = (a.displayLastName ?? "").localeCompare(b.displayLastName ?? "");
+            const lastNameComparison = ((a?.displayLastName ?? "") as string).localeCompare((b?.displayLastName ?? "") as string);
             // If lastName is the same, sort by firstName
             return lastNameComparison !== 0 ? lastNameComparison :
-                (a.displayFirstName || "").localeCompare(b.displayFirstName || "");
+                ((a?.displayFirstName ?? "") as string).localeCompare((b?.displayFirstName ?? "") as string);
         });
 
         // Keep both the full list and a filtered list of available players
