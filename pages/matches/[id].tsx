@@ -93,7 +93,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [match.matchStatus.key, id]);
+  }, [match.matchStatus.key, id, refreshMatchData]);
 
   let showLinkEdit = false;
   let showLinkStatus = false;
