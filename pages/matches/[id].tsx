@@ -106,16 +106,16 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonStatus = true;
     showButtonEvents = true;
   }
-  {/** LEAGE_ADMIN && Spiel läuft */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-  }
   {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
   if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
     //showButtonStatus = true;
+  }
+  {/** LEAGE_ADMIN && Spiel läuft */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
   }
   {/** Heim Vereins-Account */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
@@ -162,12 +162,6 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonRosterHome = false;
     showButtonRosterAway = false;
     showButtonEvents = false;
-  }
-  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    showButtonEvents = true;
   }
 
   return (
@@ -323,7 +317,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {showButtonEvents && (match.matchStatus.key === "INPROGRESS" || match.matchStatus.key === "FINISHED") && (
+              {showButtonEvents && match.matchStatus.key === "INPROGRESS" && (
                 <>
                   <button
                     onClick={() => setIsHomeGoalDialogOpen(true)}
@@ -344,68 +338,68 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
 
           {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
-            {showButtonStatus && (
-              <>
-                {match.matchStatus.key === 'SCHEDULED' && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        setIsRefreshing(true);
-                        const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
-                          matchStatus: {
-                            key: "INPROGRESS",
-                            value: "Live"
-                          }
-                        }, {
-                          headers: {
-                            Authorization: `Bearer ${jwt}`,
-                            'Content-Type': 'application/json'
-                          }
-                        });
-
-                        if (response.status === 200) {
-                          // Update local state instead of reloading
-                          const updatedMatch = response.data;
-                          setMatch(updatedMatch);
+            {showButtonStatus && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000 && (
+            <>
+              {match.matchStatus.key === 'SCHEDULED' && (
+                <button
+                  onClick={async () => {
+                    try {
+                      setIsRefreshing(true);
+                      const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                        matchStatus: {
+                          key: "INPROGRESS",
+                          value: "Live"
                         }
-                      } catch (error) {
-                        console.error('Error updating match status:', error);
-                      } finally {
-                        setIsRefreshing(false);
-                      }
-                    }}
-                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                  >
-                    {isRefreshing ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                        </svg>
-                        Starten
-                      </>
-                    ) : (
-                      'Starten'
-                    )}
-                  </button>
-                )}
+                      }, {
+                        headers: {
+                          Authorization: `Bearer ${jwt}`,
+                          'Content-Type': 'application/json'
+                        }
+                      });
 
-                {match.matchStatus.key === 'INPROGRESS' && showButtonStatus && (
-                  <button
-                    onClick={() => setIsFinishDialogOpen(true)}
-                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  >
-                    {isRefreshing ? (
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      if (response.status === 200) {
+                        // Update local state instead of reloading
+                        const updatedMatch = response.data;
+                        setMatch(updatedMatch);
+                      }
+                    } catch (error) {
+                      console.error('Error updating match status:', error);
+                    } finally {
+                      setIsRefreshing(false);
+                    }
+                  }}
+                  className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  {isRefreshing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
                       </svg>
-                    ) : (
-                      'Beenden'
-                    )}
-                  </button>
-                )}
-              </>
+                      Starten
+                    </>
+                  ) : (
+                    'Starten'
+                  )}
+                </button>
+              )}
+
+              {match.matchStatus.key === 'INPROGRESS' && showButtonStatus && (
+                <button
+                  onClick={() => setIsFinishDialogOpen(true)}
+                  className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  {isRefreshing ? (
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                    </svg>
+                  ) : (
+                    'Beenden'
+                  )}
+                </button>
+              )}
+            </>
             )}
           </div>
 
@@ -420,7 +414,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   Aufstellung
                 </button>
               )}
-              {showButtonEvents && (match.matchStatus.key === "INPROGRESS" || match.matchStatus.key === "FINISHED") && (
+              {showButtonEvents && match.matchStatus.key === "INPROGRESS" && (
                 <>
                   <button
                     onClick={() => setIsAwayGoalDialogOpen(true)}
@@ -873,7 +867,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
           </div>d
         </Dialog>
       </Transition>
-      
+
       {/* Home Team Goal Dialog */}
       <AddGoalDialog
         isOpen={isHomeGoalDialogOpen}
@@ -884,7 +878,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
       />
-      
+
       {/* Away Team Goal Dialog */}
       <AddGoalDialog
         isOpen={isAwayGoalDialogOpen}
@@ -895,7 +889,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
       />
-      
+
       {/* Home Team Penalty Dialog */}
       <AddPenaltyDialog
         isOpen={isHomePenaltyDialogOpen}
@@ -906,7 +900,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
       />
-      
+
       {/* Away Team Penalty Dialog */}
       <AddPenaltyDialog
         isOpen={isAwayPenaltyDialogOpen}

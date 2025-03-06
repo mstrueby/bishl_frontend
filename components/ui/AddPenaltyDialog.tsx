@@ -40,7 +40,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       const fetchPenaltyCodes = async () => {
         try {
           const response = await axios.get(`${process.env.API_URL}/configs/penaltycode`);
-          const data = response.data;
+          const data = response.data.value;
           if (Array.isArray(data) && data.length > 0) {
             setPenaltyCodes(data);
             setSelectedPenaltyCode(data[0]);
