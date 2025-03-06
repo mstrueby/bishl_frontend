@@ -101,14 +101,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
         }
         );
-        const teamPlayers = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
-        let allTeamsPlayers = [];
+        const teamPlayers: PlayerValues[] = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
+        let allTeamsPlayers: PlayerValues[] = [];
 
         if (teamAgeGroup === 'Schüler') {
             const bambiniTeams = club.teams.filter((team: TeamValues) => team.ageGroup === 'Bambini');
-            const bambiniPlayers: AvailablePlayer[] = [];
+            let bambiniPlayers: PlayerValues[] = [];
 
             for (const bambinoTeam of bambiniTeams) {
+                console.log("Bambino Team", bambinoTeam)
                 const playersResponse = await axios.get(
                     `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${bambinoTeam.alias}`, {
                         headers: {
@@ -116,22 +117,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                         },
                     }
                 );
-                const players = playersResponse.data.results || [];
-                bambiniPlayers.push(...players.map((player: any) => ({
-                    _id: player._id,
-                    firstName: player.firstName,
-                    lastName: player.lastName,
-                    displayFirstName: player.displayFirstName,
-                    displayLastName: player.displayLastName,
-                    position: player.position || 'Skater',
-                    fullFaceReq: player.fullFaceReq,
-                    source: player.source,
-                    imageUrl: player.imageUrl,
-                    imageVisible: player.imageVisible,
-                    passNo: player.passNo,
-                    jerseyNo: player.jerseyNo,
-                    called: false
-                })));
+                bambiniPlayers = Array.isArray(teamPlayerResponse.data.results) ? playersResponse.data.results : [];
             }
             allTeamsPlayers = [...teamPlayers, ...bambiniPlayers];
         } else {
@@ -140,22 +126,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         // Debug log to check what's coming back
         console.log("Team players count:", allTeamsPlayers.length);
-
+        //console.log("All teams players:", allTeamsPlayers);
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
         const availablePlayers = allTeamsPlayers.map((teamPlayer: PlayerValues) => {
             // Check if assignedTeams exists and is an array
-            {/**
             if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
                 console.log("Player missing assignedTeams:", teamPlayer._id);
                 return null;
             }
-            */}
 
-            // Find the team assignment that matches the target team ID
+            // Find the team assignment that matches the target team ID or matches the Bambini team alias
             const assignedTeam = teamPlayer.assignedTeams
                 .flatMap((assignment: Assignment) => assignment.teams || [])
-                .find((team: AssignmentTeam) => team && team.teamId === matchTeam.teamId);
-
+                .find((team: AssignmentTeam) => (team && team.teamId === matchTeam.teamId) || (team && team.teamAlias === 'bambini'));
             return assignedTeam ? {
                 _id: teamPlayer._id,
                 firstName: teamPlayer.firstName,
@@ -172,7 +155,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 called: false
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
-
+        
         // Keep both the full list and a filtered list of available players
         const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
         const filteredAvailablePlayers = availablePlayers.filter(player =>
