@@ -11,7 +11,7 @@ import { getFuzzyDate } from '../../../tools/dateUtils';
 import { formatFileSize } from '../../../tools/utils';
 import DataList from '../../../components/admin/ui/DataList';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
+let BASE_URL = process.env['API_URL'] + '/documents/';
 
 interface DocsProps {
   jwt: string;
@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps<DocsProps> = async (context)
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
+    const userResponse = await axios.get(`${process.env['API_URL']}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }

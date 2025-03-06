@@ -130,7 +130,7 @@ export default function Tournament({
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
+      fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -154,7 +154,7 @@ export default function Tournament({
     if (selectedRound.name) {
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
+      fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -208,7 +208,7 @@ export default function Tournament({
   useEffect(() => {
     if (selectedMatchday.name) {
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
+      fetch(`${process.env.API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
         .then((response) => response.json())
         .then((data) => setMatches(data))
         .finally(() => setIsLoadingMatches(false));
@@ -287,7 +287,7 @@ export default function Tournament({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                       >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-28 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        <Listbox.Options className="absolute right-0 z-10 mt-1 max-h-60 w-28 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                           {seasons.map((season, index) => (
                             <Listbox.Option
                               key={index}
@@ -552,7 +552,7 @@ export default function Tournament({
                       match={match}
                       onMatchUpdate={async () => {
                         // Refetch rounds to update standings
-                        const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                        const roundsResponse = await fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
                         const roundsData = await roundsResponse.json();
                         if (Array.isArray(roundsData)) {
                           const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
@@ -564,7 +564,7 @@ export default function Tournament({
                         }
 
                         // Refetch matches
-                        const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                        const matchesResponse = await fetch(`${process.env.API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
                         const matchesData = await matchesResponse.json();
                         setMatches(matchesData);
                       }}
@@ -598,12 +598,12 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+  const res = await fetch(`${process.env.API_URL}/tournaments/`);
   const allTournamentsData = await res.json();
   const paths = allTournamentsData.map((tournament: Tournament) => ({
     params: { alias: tournament.alias },
   }));
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
@@ -614,7 +614,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${alias}`);
+    const res = await fetch(`${process.env.API_URL}/tournaments/${alias}`);
     const tournamentData = await res.json();
 
     if (!tournamentData) {

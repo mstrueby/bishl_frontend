@@ -9,7 +9,7 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface AddProps {
   jwt: string;
@@ -72,6 +72,7 @@ export default function Add({ jwt }: AddProps) {
     fullFaceReq: false,
     assignedTeams: [],
     imageUrl: '',
+    imageVisible: false,
     source: 'BISHL',
   };;
 
@@ -98,7 +99,7 @@ export default function Add({ jwt }: AddProps) {
       if (response.status === 201) {
         router.push({
           pathname: '/admin/players',
-          query: { message: `SpielerIn <strong>${values.firstName} ${values.lastName}</strong>  wurde erfolgreich angelegt.` },
+          query: { message: `Spieler*in <strong>${values.firstName} ${values.lastName}</strong>  wurde erfolgreich angelegt.` },
         }, '/admin/players');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -126,7 +127,7 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
-  const sectionTitle = 'SpielerIn anlegen';
+  const sectionTitle = 'Spieler*in anlegen';
 
   return (
     <Layout>

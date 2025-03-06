@@ -100,7 +100,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   }
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}`);
+    const res = await fetch(`${process.env.API_URL}/tournaments/${tAlias}`);
     const tournamentData = await res.json();
 
     return {
@@ -119,7 +119,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 
 // Use `getStaticPaths` to define which paths will be pre-rendered
 export async function getStaticPaths() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+  const res = await fetch(`${process.env.API_URL}/tournaments/`);
   const tournaments = await res.json();
   // Generate paths with `tAlias` parameter
   const paths = tournaments.map((tournament: TournamentValues) => ({

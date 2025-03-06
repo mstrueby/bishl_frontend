@@ -1,9 +1,48 @@
+import { boolean } from "yup";
+
+interface EventPlayer {
+  playerId: string;
+  firstName: string;
+  lastName: string
+  jerseyNumber: number;
+}
+
+
+export interface RosterPlayer {
+  player: EventPlayer,
+  playerPosition: {
+    key: string;
+    value: string;
+  },
+  passNumber: string;
+  called: boolean;
+}
+
+interface ScoresBase {
+  matchTime: string;
+  goalPlayer: EventPlayer;
+  assistPlayer?: EventPlayer;
+  isPPG?: boolean;
+  isSHG?: boolean;
+  isGWG?: boolean;
+}
+
+export interface PenaltiesBase {
+  matchTimeStart: string
+  matchTimeEnd?: string;
+  penaltyPlayer: EventPlayer;
+  penaltyCode: { [key: string]: string };
+  penaltyMinutes: number;
+  isGM?: boolean
+  isMP?: boolean
+}
+
 interface TeamStats {
   goalsFor: number;
   goalsAgainst: number;
 }
 
-interface Team {
+export interface Team {
   clubId: string;
   clubName: string;
   clubAlias: string;
@@ -15,7 +54,10 @@ interface Team {
   tinyName: string;
   logo: string;
   stats: TeamStats;
-
+  roster?: RosterPlayer[];
+  rosterPublished?: boolean;
+  scores?: ScoresBase[];
+  penalties?: PenaltiesBase[];
 }
 
 export interface Referee {

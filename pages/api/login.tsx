@@ -6,7 +6,7 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const { email, password } = req.body
     try {
-      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
+      const result = await fetch(`${process.env.API_URL}/users/login`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ email, password })

@@ -10,7 +10,7 @@ import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { PlayerValues } from '../../../../../types/PlayerValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface EditProps {
   jwt: string,
@@ -91,7 +91,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
           formData.append('image', value);
         } else if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (typeof value === 'object') {
+        } else if (typeof value === 'object' && key !== 'imageUrl') {
           if (key === 'assignedTeams') {
             const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
               ...club,
@@ -125,6 +125,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
       const response = await axios.patch(`${BASE_URL}/players/${player._id}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
+          "Content-Type": "multipart/form-data"
         }
       });
       if (response.status === 200) {
@@ -176,13 +177,13 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
     assignedTeams: player?.assignedTeams || [],
     stats: player?.stats || [], // Added missing property
     imageUrl: player?.imageUrl || '',
+    imageVisible: player?.imageVisible || false, 
     legacyId: player?.legacyId || 0,
     createDate: player?.createDate || '',
     nationality: player?.nationality || '', // Added missing property
     position: player?.position || undefined, // Added missing property
   };
 
-  console.log("clubId", clubId)
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;
   // Render the form with initialValues and the edit-specific handlers
   return (

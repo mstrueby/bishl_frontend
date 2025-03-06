@@ -10,11 +10,21 @@ import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
+import { useRouter } from 'next/router';
+import MatchStatusBadge from './MatchStatusBadge';
 
-const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, showLinkEdit: boolean, showLinkStatus: boolean, onMatchUpdate?: () => Promise<void> }) => {
+const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHome, showLinkAway, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, showLinkEdit: boolean, showLinkStatus: boolean, showLinkHome: boolean, showLinkAway: boolean, onMatchUpdate?: () => Promise<void> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
+  const router = useRouter();
+
+  // deactivate new features for PROD
+  // Feature-Switch
+  if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
+    showLinkHome = false;
+    showLinkAway = false;
+  }
 
   return (
     <>
@@ -63,6 +73,36 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, onMatchUpda
                   )}
                 </Menu.Item>
               )}
+              {showLinkHome && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Aufstellung {match.home.tinyName}
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
+              {showLinkAway && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Aufstellung {match.away.tinyName}
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
             </div>
           </Menu.Items>
         </Transition>
@@ -97,35 +137,6 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, onMatchUpda
   );
 };
 
-const status = [
-  { key: 'INPROGRESS', value: 'Live', bdg_col_light: 'bg-red-600 text-white ring-red-700' },
-  { key: 'FINISHED', value: 'beendet', bdg_col_light: 'bg-gray-600 text-white ring-gray-700' },
-  { key: 'CANCELLED', value: 'abgesagt', bdg_col_light: 'bg-amber-100 text-amber-700 ring-amber-700/10' },
-  { key: 'FORFEITED', value: 'gewertet', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-400' },
-]
-
-const StatusBadge: React.FC<{ statusKey: string, finishTypeKey?: string, statusValue: string, finishTypeValue?: string }> = ({ statusKey, finishTypeKey, statusValue, finishTypeValue }) => {
-  return (
-    <>
-      {status.map(item => (
-        item.key === statusKey && (
-          <span
-            key={item.key}
-            className={classNames("inline-flex items-center gap-x-1.5 rounded-md text-xs font-medium ring-1 ring-inset py-0.5 px-2 uppercase", item.bdg_col_light)}
-          >
-            {statusValue}
-            {item.key === 'FINISHED' && finishTypeKey !== 'REGULAR' && (
-              <span>
-                {finishTypeKey === 'SHOOTOUT' ? '(PS)' : finishTypeKey === 'OVERTIME' ? '(V)' : finishTypeValue}
-              </span>
-            )}
-          </span>
-        )
-      ))}
-    </>
-  );
-};
-
 const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, onMatchUpdate }) => {
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
@@ -133,20 +144,66 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
 
   let showLinkEdit = false;
   let showLinkStatus = false;
+  let showLinkHome = false;
+  let showLinkAway = false;
+  let showMatchSheet = true;
 
+  {/**  LEAGE_ADMIN */ }
   if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
     showLinkEdit = true;
     showLinkStatus = true;
   }
+  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    //showLinkHome = true;
+    //showLinkAway = true;
+    //showButtonStatus = true;
+  }
+  {/** Heim Vereins-Account */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showLinkStatus = true;
+    showLinkHome = true;
   }
-  console.log("match", match.season.alias, "secret", process.env['NEXT_PUBLIC_CURRENT_SEASON'])
+  {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showLinkAway = true;
+  }
+  {/** Away-Club && Spiel ist weiter als 30 Minuten in der Zukunft */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
+    showLinkAway = true;
+  }
+  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showLinkAway = true;
+  }
+  {/** Away-Account && Spiel läuft */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showLinkAway = false;
+  }
+  {/** Spiel ist beendet */ }
+  if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
+    showLinkEdit = false;
+    showLinkHome = false;
+    showLinkAway = false
+  }
+  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
+    showLinkEdit = true;
+    showLinkStatus = true;
+  }
+
   if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
     showLinkEdit = false;
     showLinkStatus = false;
+    showLinkHome = false;
+    showLinkAway = false;
   }
-    
+
+  // Feature-Switch
+  if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
+    showMatchSheet = false;
+  }
+
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
@@ -169,16 +226,18 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              {(showLinkEdit || showLinkStatus) && (
+              {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
                 <StatusMenu
                   match={match}
                   setMatch={setMatch}
                   showLinkEdit={showLinkEdit}
                   showLinkStatus={showLinkStatus}
+                  showLinkHome={showLinkHome}
+                  showLinkAway={showLinkAway}
                   onMatchUpdate={onMatchUpdate}
                 />
               )}
-              <StatusBadge
+              <MatchStatusBadge
                 statusKey={match.matchStatus.key}
                 finishTypeKey={match.finishType.key}
                 statusValue={match.matchStatus.value}
@@ -194,24 +253,24 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
             <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
               <time dateTime={
-                `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
               }>
-                {new Date(startDate).toLocaleString('de-DE', {
+                {startDate ? new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'short',
                   day: 'numeric',
-                  month: 'short',
+                  month: 'numeric',
                   year: undefined,
                   hour: '2-digit',
                   minute: '2-digit'
-                })}
+                }) : 'offen'}
               </time>
             </p>
             <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
               <time dateTime={
-                `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
               }>
-                {new Date(startDate).toLocaleString('de-DE', {
+                {startDate ? new Date(startDate).toLocaleString('de-DE', {
                   timeZone: 'Europe/Berlin',
                   weekday: 'long',
                   day: 'numeric',
@@ -219,7 +278,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
                   year: '2-digit',
                   hour: '2-digit',
                   minute: '2-digit'
-                })}
+                }) : 'offen'}
               </time>
             </p>
           </div>
@@ -266,32 +325,36 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
-          {(showLinkEdit || showLinkStatus) && (
+          {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
             <StatusMenu
               match={match}
               setMatch={setMatch}
               showLinkEdit={showLinkEdit}
               showLinkStatus={showLinkStatus}
+              showLinkHome={showLinkHome}
+              showLinkAway={showLinkAway}
               onMatchUpdate={onMatchUpdate}
             />
           )}
-          <StatusBadge
+          <MatchStatusBadge
             statusKey={match.matchStatus.key}
             finishTypeKey={match.finishType.key}
             statusValue={match.matchStatus.value}
             finishTypeValue={match.finishType.value}
           />
         </div>
-        {/*
-        <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          <Link href={`/matches/${match._id}`}>
-            <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-              <span className="block sm:hidden md:block">Spielbericht</span>
-              <span className="hidden sm:block md:hidden">Bericht</span>
-            </a>
-          </Link>
-        </div>
-        */}
+
+        {showMatchSheet && (
+          <div className="flex flex-col sm:flex-none justify-center sm:items-end">
+            <Link href={`/matches/${match._id}`}>
+              <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                <span className="block sm:hidden md:block">Spielbericht</span>
+                <span className="hidden sm:block md:hidden">Bericht</span>
+              </a>
+            </Link>
+          </div>
+        )}
+
       </div>
     </div>
   );

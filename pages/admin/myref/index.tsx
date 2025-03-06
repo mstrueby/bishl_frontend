@@ -9,7 +9,7 @@ import { AssignmentValues } from '../../../types/AssignmentValues';
 import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+let BASE_URL = process.env.API_URL;
 
 interface MyRefProps {
   jwt: string;
@@ -41,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has REFEREE role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -68,7 +68,31 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       })
     ]);
 
-    matches = matchesRes.data;
+    // Sort matches by date, venue, and time
+    const sortedMatches = [...matchesRes.data].sort((a, b) => {
+      // First sort by date only (ignore time component)
+      const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
+      const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+      
+      if (dateA !== dateB) {
+        return dateA - dateB;
+      }
+      
+      // When dates are the same, sort by venue name to group matches by venue
+      const venueA = a.venue.name.toLowerCase();
+      const venueB = b.venue.name.toLowerCase();
+      
+      if (venueA !== venueB) {
+        return venueA.localeCompare(venueB);
+      }
+      
+      // Finally, for matches at the same venue on the same day, sort by time
+      const timeA = new Date(a.startDate).getTime();
+      const timeB = new Date(b.startDate).getTime();
+      return timeA - timeB;
+    });
+    
+    matches = sortedMatches;
     assignments = assignmentsRes.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -90,7 +114,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
   const [assignments, setAssignments] = useState<AssignmentValues[]>(initialAssignments);
   const [filter, setFilter] = useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Meine Schiedsrichtereinsätze";
-
+  
   const fetchData = async (filterParams: FilterState) => {
     try {
       const userRes = await axios.get(`${BASE_URL}/users/me`, {
@@ -123,7 +147,31 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         })
       ]);
 
-      setMatches(matchesRes.data);
+      // Sort matches by date, venue, and time
+      const sortedMatches = [...matchesRes.data].sort((a, b) => {
+        // First sort by date only (ignore time component)
+        const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
+        const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
+        
+        if (dateA !== dateB) {
+          return dateA - dateB;
+        }
+        
+        // When dates are the same, sort by venue name to group matches by venue
+        const venueA = a.venue.name.toLowerCase();
+        const venueB = b.venue.name.toLowerCase();
+        
+        if (venueA !== venueB) {
+          return venueA.localeCompare(venueB);
+        }
+        
+        // Finally, for matches at the same venue on the same day, sort by time
+        const timeA = new Date(a.startDate).getTime();
+        const timeB = new Date(b.startDate).getTime();
+        return timeA - timeB;
+      });
+
+      setMatches(sortedMatches);
       setAssignments(assignmentsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -186,10 +234,11 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
             const assignment = assignments.find((a: AssignmentValues) => a.matchId === match._id);
             return (
               <MatchCardRef
-                key={match._id}
+                key={`${match._id}-${assignment?._id || 'new'}`}
                 match={match}
                 assignment={assignment}
                 jwt={jwt}
+                // Force re-render with a new key when assignment changes
               />
             );
           })

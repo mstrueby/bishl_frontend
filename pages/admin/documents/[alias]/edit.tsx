@@ -9,7 +9,7 @@ import SectionHeader from "../../../../components/admin/SectionHeader";
 import { DocumentValuesForm } from '../../../../types/DocumentValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
+let BASE_URL = process.env['API_URL'] + '/documents/';
 
 interface EditProps {
   jwt: string;
@@ -26,7 +26,7 @@ export const getServerSideProps: GetServerSideProps<EditProps> = async (context)
   let doc = null
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }

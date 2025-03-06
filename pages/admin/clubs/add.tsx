@@ -9,7 +9,7 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
+let BASE_URL = process.env['API_URL'] + "/clubs/"
 
 interface AddProps {
   jwt: string;
@@ -29,7 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -79,7 +79,7 @@ export default function Add({ jwt }: AddProps) {
     logoUrl: '',
     legacyId: '',
     teams: [],
-  };;
+  };
 
   const onSubmit = async (values: ClubValues) => {
     setError(null);
@@ -98,7 +98,7 @@ export default function Add({ jwt }: AddProps) {
       if (response.status === 201) {
         router.push({
           pathname: '/admin/clubs',
-          query: { message: `Der neue Verein <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
+          query: { message: `Verein <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
         }, '/admin/clubs');
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -135,8 +135,8 @@ export default function Add({ jwt }: AddProps) {
       <ClubForm 
         initialValues={initialValues}
         onSubmit={onSubmit}
-        enableReinitialize= {false}
-        handleCancel= {handleCancel}
+        enableReinitialize={false}
+        handleCancel={handleCancel}
         loading={loading}
       />
     </Layout>

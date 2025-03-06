@@ -12,7 +12,7 @@ import DataList from '../../../components/admin/ui/DataList';
 import Pagination from '../../../components/ui/Pagination';
 import SearchBox from '../../../components/ui/SearchBox';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface PlayersProps {
   jwt: string,
@@ -233,9 +233,10 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       source: player.source,
       assignedTeams: player.assignedTeams,
       imageUrl: player.imageUrl,
+      imageVisible: player.imageVisible,
     }));
 
-  const sectionTitle = 'SpielerInnen';
+  const sectionTitle = 'Spieler';
   const newLink = '/admin/players/add';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',

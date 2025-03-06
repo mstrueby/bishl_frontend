@@ -9,6 +9,7 @@ import { PlayerValues } from '../../types/PlayerValues';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Badge from '../ui/Badge';
+import Toggle from '../ui/form/Toggle';
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -93,6 +94,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             ) : (
               <ImageUpload name="image" label="Bild" description="Das neue Bild wird erst nach <em>Speichern</em> hochgeladen." imageUrl={initialValues.imageUrl || ''} />
             )}
+            <Toggle name="imageVisible" label="Foto öffentlich anzeigen" />
             <InputText name="displayFirstName" autoComplete="off" type="text" label="Angezeigter Vorname" />
             <InputText name="displayLastName" autoComplete="off" type="text" label="Angezeigter Nachname" />
 

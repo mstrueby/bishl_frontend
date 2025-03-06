@@ -6,7 +6,7 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import DataList from '../../components/ui/DataList';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/venues/';
+let BASE_URL = process.env['API_URL'] + '/venues/';
 
 interface VenuePageProps {
   venues: VenueValues[];

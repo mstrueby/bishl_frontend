@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     try {
-      const result = await fetch(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
+      const result = await fetch(`${process.env['API_URL']}/users/me`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

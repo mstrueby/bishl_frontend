@@ -11,7 +11,7 @@ import { PlayerValues } from '../../../../types/PlayerValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { ClubValues } from '../../../../types/ClubValues';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/players/';
+let BASE_URL = process.env['API_URL'] + '/players/';
 
 interface EditProps {
   jwt: string,
@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let clubs = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -53,7 +53,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Fetch the existing club data
-    const clubResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs?active=true`, {
+    const clubResponse = await axios.get(`${process.env.API_URL}/clubs?active=true`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -95,7 +95,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
           formData.append('image', value);
         } else if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (typeof value === 'object') {
+        } else if (typeof value === 'object' && key !== 'imageUrl') {
           if (key === 'assignedTeams') {
             const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
               ...club,
@@ -133,7 +133,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
       if (response.status === 200) {
         router.push({
           pathname: `/admin/players`,
-          query: { message: `SpielerIn <strong>${values.firstName} ${values.lastName} </strong> wurde erfolgreich aktualisiert.` }
+          query: { message: `Spieler*in <strong>${values.firstName} ${values.lastName} </strong> wurde erfolgreich aktualisiert.` }
         }, `/admin/players`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -143,7 +143,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
         if (error.response?.status === 304) {
           router.push({
             pathname: `/admin/players`,
-            query: { message: `Keine Änderungen für SpielerIn <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
+            query: { message: `Keine Änderungen für Spieler*in <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
           }, `/admin/players`);
         } else {
           setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
@@ -182,10 +182,11 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
     fullFaceReq: player?.fullFaceReq || false,
     assignedTeams: player?.assignedTeams || [],
     imageUrl: player?.imageUrl || '',
+    imageVisible: player?.imageVisible || false,
     source: player?.source || 'n/a',
   };
   console.log("initial birthday", player.birthdate, new Date(player.birthdate).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' }), initialValues.birthdate)
-  const sectionTitle = 'SpielerIn bearbeiten';
+  const sectionTitle = 'Spieler*in bearbeiten';
 
   // Render the form with initialValues and the edit-specific handlers
   return (

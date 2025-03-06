@@ -9,8 +9,9 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
+import { string } from "yup";
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface ClubsProps {
   jwt: string,
@@ -40,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     
     const user = userResponse.data;
     //console.log("user:", user)
-    if (!user.roles?.includes('ADMIN')) {
+    if (!user.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role))) {
       return {
         redirect: {
           destination: '/',
@@ -105,10 +106,6 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
     }
   };
 
-  const editClub = (alias: string) => {
-    router.push(`/admin/clubs/${alias}/edit`);
-  }
-
   const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
     try {
       const formData = new FormData();
@@ -134,12 +131,12 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
         console.log('No changes were made to the club.');
       } else {
         // Handle error response
-        console.error('Failed to publish club.');
+        console.error('Failed to activate club.');
       }
     } catch (error) {
-      console.error('Error publishing club:', error);
+      console.error('Error activating club:', error);
     }
-  }
+  };
 
   useEffect(() => {
     if (router.query.message) {
@@ -167,6 +164,28 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
       ...club
     }));
 
+  const dataLisItems = clubValues.map((club: ClubValues) => {
+    return {
+      _id: club._id,
+      title: club.name,
+      alias: club.alias,
+      image: {
+        src: club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.svg',
+        width: 48,
+        height: 48,
+        gravity: 'center',
+        className: 'object-contain',
+        radius: 0,
+      },
+      published: club.active,
+      menu: [
+        { edit: { onClick: () => router.push(`/admin/clubs/${club.alias}/edit`) } },
+        { teams: { onClick: () => router.push(`/admin/clubs/${club.alias}/teams`) } },
+        { active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
+      ],
+    };
+  });
+
   const sectionTitle = 'Vereine';
   const newLink = '/admin/clubs/add';
   const statuses = {
@@ -174,27 +193,6 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
     Unpublished: 'text-gray-500 bg-gray-800/10',
     Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
   }
-
-  const dataLisItems = clubValues.map((club: ClubValues) => {
-    return {
-      _id: club._id,
-      title: club.name,
-      alias: club.alias,
-      image: {
-        src: club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png',
-        width: 32,
-        height: 32,
-        gravity: 'center',
-        className: 'object-contain',
-        radius: 0,
-      },
-      published: club.active,
-      menu: [
-        { edit: { onClick: () => editClub(club.alias) } },
-        { active: { onClick: () => toggleActive(club._id, club.active, club.logoUrl || null) } },
-      ],
-    };
-  });
 
   return (
     <Layout>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, DocumentArrowDownIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { EllipsisVerticalIcon, PencilSquareIcon, StarIcon, DocumentArrowUpIcon, DocumentArrowDownIcon, TrashIcon, CheckCircleIcon, XCircleIcon, UserGroupIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import DeleteConfirmationModal from '../../ui/DeleteConfirmationModal';
 import { classNames } from '../../../tools/utils';
@@ -12,6 +12,8 @@ type MenuItemType = {
   publish?: { onClick: () => void };
   active?: { onClick: () => void };
   delete?: { onClick?: () => void };
+  teams?: { onClick: () => void };
+  players?: { onClick: () => void };
 };
 
 interface DataListProps {
@@ -37,6 +39,8 @@ interface DataListProps {
       publish?: { onClick: () => void };
       active?: { onClick: () => void };
       delete?: { onClick: () => void };
+      teams?: { onClick: () => void };
+      players?: { onClick: () => void };
     }>;
   }[];
   statuses: { [key: string]: string };
@@ -68,6 +72,14 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
     }
     setIsModalOpen(false);
   };
+
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-6 text-sm text-gray-500">
+        keine Daten vorhanden
+      </div>
+    );
+  }
 
   return (
     <ul role="list" className="divide-y divide-gray-100">
@@ -130,12 +142,13 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
           </div>
 
           {/* Context Menu */}
-          <div className="flex-none gap-x-4">
-            <Menu as="div" className="relative flex-none">
-              <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
-                <span className="sr-only">Open options</span>
-                <EllipsisVerticalIcon aria-hidden="true" className="h-5 w-5" />
-              </MenuButton>
+          {item.menu && item.menu.length > 0 && (
+            <div className="flex-none gap-x-4">
+              <Menu as="div" className="relative flex-none">
+                <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
+                  <span className="sr-only">Open options</span>
+                  <EllipsisVerticalIcon aria-hidden="true" className="h-5 w-5" />
+                </MenuButton>
               <MenuItems
                 transition
                 className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
@@ -166,16 +179,20 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                       caption = item.featured ? "Loslösen" : "Anheften";
                       iconColor = item.featured ? "text-gray-500" : "text-indigo-500";
                       break;
+                    case "teams":
+                      IconComponent = ListBulletIcon;
+                      caption = "Mannschaften";
+                      iconColor = "text-gray-500";
+                      break;
+                    case "players":
+                      IconComponent = UserGroupIcon;
+                      caption = "Spieler";
+                      iconColor = "text-gray-500";
+                      break;
                     case "delete":
                       IconComponent = TrashIcon;
                       caption = "Löschen";
                       iconColor = "text-red-500";
-
-                    case "delete":
-                      IconComponent = TrashIcon;
-                      caption = "Löschen";
-                      iconColor = "text-red-500";
-                      //if (menuItem[key]) { menuItem[key].onClick = () => handleDeleteClick(item._id, item.title); }
                       break;
                     default:
                       break;
@@ -199,7 +216,8 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                 })}
               </MenuItems>
             </Menu>
-          </div>
+            </div>
+          )}
         </li>
       ))}
 

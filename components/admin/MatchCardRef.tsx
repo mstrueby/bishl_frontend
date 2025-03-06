@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
@@ -8,7 +8,7 @@ import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/o
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+let BASE_URL = process.env.API_URL;
 
 const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
   const { home, away, startDate, venue } = match;
@@ -21,16 +21,28 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       allRefereeAssignmentStatuses[0]
   )
 
+  const [localAssignment, setLocalAssignment] = useState(assignment);
+
+  // Update local state when the prop changes
+  useEffect(() => {
+    setLocalAssignment(assignment);
+  }, [assignment]);
+
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
     try {
-      const method = (!assignment || selected.key === 'AVAILABLE') ? 'POST' : 'PATCH';
-      const endpoint = (!assignment || selected.key === 'AVAILABLE') ?
-        `${BASE_URL}/assignments` :
-        `${BASE_URL}/assignments/${assignment._id}`;
+      const isNewAssignment = !localAssignment || selected.key === 'AVAILABLE';
+      const method = isNewAssignment ? 'POST' : 'PATCH';
+      const endpoint = isNewAssignment ?
+        `${BASE_URL}/assignments/` :
+        `${BASE_URL}/assignments/${localAssignment?._id}`;
 
-      const body = (!assignment || selected.key === 'AVAILABLE') ?
+      const body = isNewAssignment ?
         { matchId: match._id, status: newStatus.key } :
         { status: newStatus.key };
+
+      console.log('Current assignment:', localAssignment);
+      console.log('Selected status:', selected.key);
+      console.log('Request body:', body);
 
       const response = await fetch(endpoint, {
         method,
@@ -43,6 +55,18 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
       if (!response.ok) {
         throw new Error('Failed to update assignment status');
+      }
+
+      // For new assignments, save the created assignment data so we can use it
+      if (isNewAssignment) {
+        const createdAssignment = await response.json();
+        console.log('Created new assignment:', createdAssignment);
+        
+        // Update local assignment state with the newly created assignment
+        // This allows further updates without refresh
+        if (createdAssignment) {
+          setLocalAssignment(createdAssignment);
+        }
       }
     } catch (error) {
       console.error('Error updating assignment:', error);
@@ -75,10 +99,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
             <p className="text-xs font-medium uppercase">{selected.title}</p>
           </div>
           {validStatuses.length > 0 && (
-          <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
-            <span className="sr-only">Change workflow status</span>
-            <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
-          </ListboxButton>
+            <ListboxButton className={classNames("inline-flex items-center rounded-l-none rounded-r-md p-0.5 outline-none focus-visible:outline focus-visible:outline-2 ring-1 ring-inset", selected.color.background, selected.color.hover, selected.color.ring, selected.color.focus)}>
+              <span className="sr-only">Change workflow status</span>
+              <ChevronDownIcon aria-hidden="true" className={classNames("size-4 forced-colors:text-[Highlight]", selected.color.text)} />
+            </ListboxButton>
           )}
         </div>
 
@@ -138,22 +162,30 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
           {/* date */}
           <div className="flex items-center truncate">
             <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              weekday: 'short',
-              day: 'numeric',
-              month: 'short',
-              year: undefined,
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0"><time dateTime={(new Date(startDate)).toISOString()}>{(new Date(startDate)).toLocaleString('de-DE', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'short',
-              year: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</time></p>
+            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
+                {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'numeric',
+                  year: undefined,
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : 'offen'}
+              </time>
+            </p>
+            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
+              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
+                {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'short',
+                  year: undefined,
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : 'offen'}
+              </time>
+            </p>
           </div>
           {/* venue */}
           <div className="flex items-center truncate">

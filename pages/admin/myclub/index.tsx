@@ -10,7 +10,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+let BASE_URL = process.env['API_URL'];
 
 interface ClubsProps {
   jwt: string,
@@ -91,10 +91,6 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
-  const editTeam = (alias: string) => {
-    router.push(`/admin/myclub/${alias}`);
-  }
-
   useEffect(() => {
     if (router.query.message) {
       setSuccessMessage(router.query.message as string);
@@ -115,6 +111,7 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
   };
 
   const sectionTitle = club?.name || 'Mein Verein';
+  const sectionDescription = 'MANNSCHAFTEN';
   const statuses = {
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
@@ -132,20 +129,19 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     return {
       _id: team._id,
       title: team.name,
+      description: [team.ageGroup, team.fullName],
       alias: team.alias,
-      /*
       image: {
-        src: transformedUrl(team.logoUrl),
-        width: 32,
-        height: 32,
+        src: team.logoUrl ? team.logoUrl : (club.logoUrl ? club.logoUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.svg'),
+        width: 48,
+        height: 48,
         gravity: 'center',
         className: 'object-contain',
         radius: 0,
       },
-      */
       published: team.active,
       menu: [
-        { edit: { onClick: () => editTeam(team.alias) } },
+        { players: { onClick: () => router.push(`/admin/myclub/${team.alias}`) } },
       ],
     }
   });
@@ -154,6 +150,7 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
     <Layout>
       <SectionHeader
         title={sectionTitle}
+        description={sectionDescription}
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
@@ -162,6 +159,8 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
         items={dataLisItems}
         statuses={statuses}
         showStatusIndicator
+        showThumbnails
+        showThumbnailsOnMobiles
       />
 
     </Layout>

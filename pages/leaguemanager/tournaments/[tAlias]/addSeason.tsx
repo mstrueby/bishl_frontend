@@ -11,7 +11,7 @@ import { SeasonValues } from '../../../../types/TournamentValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../components/leaguemanager/navData';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/tournaments/"
+let BASE_URL = process.env['API_URL'] + "/tournaments/"
 
 interface AddProps {
   jwt: string;
@@ -20,7 +20,7 @@ interface AddProps {
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const jwt = getCookie('jwt', { req, res });
-  //const tournamentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+  //const tournamentsResponse = await fetch(`${process.env.API_URL}/tournaments/`);
   //const allTournamentsData: TournamentFormValues[] = await tournamentsResponse.json();
   return { props: { jwt } };
 }

@@ -14,16 +14,10 @@ const nextConfig = {
     locales: ["de-DE"],
     defaultLocale: "de-DE",
   },
-  webpack: (config, { isServer }) => {
-    // Custom webpack config to handle module resolution
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-      };
-    }
-    return config;
-  },
+  env: {
+    API_URL: process.env.NODE_ENV === 'production' 
+      ? 'https://api.bishl.de' : process.env.API_URL,
+  }
 }
 
 module.exports = nextConfig
