@@ -50,6 +50,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [isAwayGoalDialogOpen, setIsAwayGoalDialogOpen] = useState(false);
   const [isHomePenaltyDialogOpen, setIsHomePenaltyDialogOpen] = useState(false);
   const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
+  const [editingHomePenalty, setEditingHomePenalty] = useState(null);
+  const [editingAwayPenalty, setEditingAwayPenalty] = useState(null);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -701,6 +703,21 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
                                 </p>
                               </td>
+                              {showButtonEvents && (
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                  <button 
+                                    onClick={() => {
+                                      setEditingHomePenalty(penalty);
+                                      setIsHomePenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           ))}
                         </tbody>
@@ -738,6 +755,21 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
                                 </p>
                               </td>
+                              {showButtonEvents && (
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                  <button 
+                                    onClick={() => {
+                                      setEditingAwayPenalty(penalty);
+                                      setIsAwayPenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           ))}
                         </tbody>
@@ -893,23 +925,31 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
       {/* Home Team Penalty Dialog */}
       <AddPenaltyDialog
         isOpen={isHomePenaltyDialogOpen}
-        onClose={() => setIsHomePenaltyDialogOpen(false)}
+        onClose={() => {
+          setIsHomePenaltyDialogOpen(false);
+          setEditingHomePenalty(null);
+        }}
         matchId={match._id}
         teamFlag="home"
         roster={match.home.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editPenalty={editingHomePenalty}
       />
 
       {/* Away Team Penalty Dialog */}
       <AddPenaltyDialog
         isOpen={isAwayPenaltyDialogOpen}
-        onClose={() => setIsAwayPenaltyDialogOpen(false)}
+        onClose={() => {
+          setIsAwayPenaltyDialogOpen(false);
+          setEditingAwayPenalty(null);
+        }}
         matchId={match._id}
         teamFlag="away"
         roster={match.away.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editPenalty={editingAwayPenalty}
       />
     </Layout >
   );

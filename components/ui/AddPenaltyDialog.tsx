@@ -23,9 +23,10 @@ interface PenaltyDialogProps {
   roster: any[];
   jwt: string;
   onSuccess: () => void;
+  editPenalty?: any; // Penalty object to edit
 }
 
-const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess }: PenaltyDialogProps) => {
+const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [matchTimeStart, setMatchTimeStart] = useState('');
   const [matchTimeEnd, setMatchTimeEnd] = useState('');
@@ -46,7 +47,10 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
           const data = response.data.value;
           if (Array.isArray(data) && data.length > 0) {
             setPenaltyCodes(data);
-            setSelectedPenaltyCode(data[0]);
+            
+            if (!editPenalty) {
+              setSelectedPenaltyCode(data[0]);
+            }
           } else {
             console.error('Invalid penalty codes data format:', data);
             setPenaltyCodes([]);
@@ -58,9 +62,40 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       };
 
       fetchPenaltyCodes();
-      resetForm();
+      
+      if (editPenalty) {
+        // Fill form with data from the penalty to edit
+        setMatchTimeStart(editPenalty.matchTimeStart || '');
+        setMatchTimeEnd(editPenalty.matchTimeEnd || '');
+        
+        // Set selected player
+        if (editPenalty.penaltyPlayer) {
+          setSelectedPlayer({
+            playerId: editPenalty.penaltyPlayer.playerId,
+            firstName: editPenalty.penaltyPlayer.firstName,
+            lastName: editPenalty.penaltyPlayer.lastName,
+            jerseyNumber: editPenalty.penaltyPlayer.jerseyNumber
+          });
+        }
+        
+        // Set penalty code
+        if (editPenalty.penaltyCode) {
+          setSelectedPenaltyCode(editPenalty.penaltyCode);
+        }
+        
+        // Set penalty minutes
+        if (editPenalty.penaltyMinutes) {
+          setPenaltyMinutes(editPenalty.penaltyMinutes);
+        }
+        
+        // Set isGM and isMP
+        setIsGM(editPenalty.isGM || false);
+        setIsMP(editPenalty.isMP || false);
+      } else {
+        resetForm();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editPenalty]);
 
   const resetForm = () => {
     setMatchTimeStart('');
@@ -99,23 +134,44 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
 
     try {
       setIsLoading(true);
-      const response = await axios.post(
-        `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/`,
-        penaltyData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwt}`
+      
+      if (editPenalty && editPenalty._id) {
+        // Update existing penalty
+        const response = await axios.put(
+          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
+          penaltyData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${jwt}`
+            }
           }
+        );
+        
+        if (response.status === 200) {
+          onSuccess();
+          onClose();
         }
-      );
+      } else {
+        // Create new penalty
+        const response = await axios.post(
+          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/`,
+          penaltyData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${jwt}`
+            }
+          }
+        );
 
-      if (response.status === 201 || response.status === 200) {
-        onSuccess();
-        onClose();
+        if (response.status === 201 || response.status === 200) {
+          onSuccess();
+          onClose();
+        }
       }
     } catch (error) {
-      console.error('Error adding penalty:', error);
+      console.error('Error saving penalty:', error);
     } finally {
       setIsLoading(false);
     }
@@ -158,7 +214,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Strafe hinzufügen
+                {editPenalty ? 'Strafe bearbeiten' : 'Strafe hinzufügen'}
               </Dialog.Title>
               <form onSubmit={handleSubmit}>
                 <div className="mt-4 space-y-4">
