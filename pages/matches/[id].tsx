@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 import { Dialog, Transition } from '@headlessui/react';
-import { Match } from '../../types/MatchValues';
+import { Match, RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
 import Layout from '../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
@@ -50,6 +50,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [isAwayGoalDialogOpen, setIsAwayGoalDialogOpen] = useState(false);
   const [isHomePenaltyDialogOpen, setIsHomePenaltyDialogOpen] = useState(false);
   const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
+  const [editingHomePenalty, setEditingHomePenalty] = useState<PenaltiesBase | null>(null);
+  const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -462,7 +464,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
               {/* Sort function for roster */}
               {(() => {
                 // Sort roster by position order: C, A, G, F, then by jersey number
-                const sortRoster = (rosterToSort) => {
+                const sortRoster = (rosterToSort: RosterPlayer[]) => {
                   if (!rosterToSort || rosterToSort.length === 0) return [];
 
                   return [...rosterToSort].sort((a, b) => {
@@ -470,8 +472,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     const positionPriority = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
 
                     // Get priorities
-                    const posA = positionPriority[a.playerPosition.key] || 99;
-                    const posB = positionPriority[b.playerPosition.key] || 99;
+                    const posA = positionPriority[a.playerPosition.key as keyof typeof positionPriority] || 99;
+                    const posB = positionPriority[b.playerPosition.key as keyof typeof positionPriority] || 99;
 
                     // First sort by position priority
                     if (posA !== posB) {
@@ -484,8 +486,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 };
 
                 // Sort rosters
-                const sortedHomeRoster = sortRoster(match.home.roster);
-                const sortedAwayRoster = sortRoster(match.away.roster);
+                const sortedHomeRoster = sortRoster(match.home.roster || []);
+                const sortedAwayRoster = sortRoster(match.away.roster || []);
 
                 return (
                   <div className="flex flex-col md:flex-row md:space-x-4">
@@ -701,6 +703,21 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
                                 </p>
                               </td>
+                              {showButtonEvents && (
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                  <button 
+                                    onClick={() => {
+                                      setEditingHomePenalty(penalty);
+                                      setIsHomePenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           ))}
                         </tbody>
@@ -738,6 +755,21 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
                                 </p>
                               </td>
+                              {showButtonEvents && (
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                  <button 
+                                    onClick={() => {
+                                      setEditingAwayPenalty(penalty);
+                                      setIsAwayPenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           ))}
                         </tbody>
@@ -893,24 +925,88 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
       {/* Home Team Penalty Dialog */}
       <AddPenaltyDialog
         isOpen={isHomePenaltyDialogOpen}
-        onClose={() => setIsHomePenaltyDialogOpen(false)}
+        onClose={() => {
+          setIsHomePenaltyDialogOpen(false);
+          setEditingHomePenalty(null);
+        }}
         matchId={match._id}
         teamFlag="home"
         roster={match.home.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editPenalty={editingHomePenalty}
       />
 
       {/* Away Team Penalty Dialog */}
       <AddPenaltyDialog
         isOpen={isAwayPenaltyDialogOpen}
-        onClose={() => setIsAwayPenaltyDialogOpen(false)}
+        onClose={() => {
+          setIsAwayPenaltyDialogOpen(false);
+          setEditingAwayPenalty(null);
+        }}
         matchId={match._id}
         teamFlag="away"
         roster={match.away.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editPenalty={editingAwayPenalty}
       />
+
+      {/* Referees Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-4 border-t border-gray-200">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
+        <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
+            {match.referee1 ? (
+              <div className="flex items-center mb-3 sm:mb-0">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+                  {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">{match.referee1.firstName} {match.referee1.lastName}</p>
+                  <p className="text-xs text-gray-500">{match.referee1.clubName && `${match.referee1.clubName}`}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center mb-3 sm:mb-0">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 1</p>
+                </div>
+              </div>
+            )}
+
+            {match.referee2 ? (
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+                  {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">{match.referee2.firstName} {match.referee2.lastName}</p>
+                  <p className="text-xs text-gray-500">{match.referee2.clubName && `${match.referee2.clubName}`}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 2</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </Layout >
   );
 }

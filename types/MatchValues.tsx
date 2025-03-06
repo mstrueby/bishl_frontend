@@ -27,7 +27,7 @@ interface ScoresBase {
   isGWG?: boolean;
 }
 
-interface PenaltiesBase {
+export interface PenaltiesBase {
   matchTimeStart: string
   matchTimeEnd?: string;
   penaltyPlayer: EventPlayer;

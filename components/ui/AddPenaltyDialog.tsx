@@ -1,4 +1,3 @@
-
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
@@ -23,14 +22,18 @@ interface PenaltyDialogProps {
   roster: any[];
   jwt: string;
   onSuccess: () => void;
+  editPenalty?: any; // Penalty object to edit
 }
 
-const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess }: PenaltyDialogProps) => {
+const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [matchTimeStart, setMatchTimeStart] = useState('');
+  const [matchTimeEnd, setMatchTimeEnd] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<PenaltyPlayer | null>(null);
   const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(null);
   const [penaltyMinutes, setPenaltyMinutes] = useState<number>(2);
+  const [isGM, setIsGM] = useState(false);
+  const [isMP, setIsMP] = useState(false);
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
   const penaltyMinuteOptions = [2, 5, 10, 20];
 
@@ -43,7 +46,10 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
           const data = response.data.value;
           if (Array.isArray(data) && data.length > 0) {
             setPenaltyCodes(data);
-            setSelectedPenaltyCode(data[0]);
+
+            if (!editPenalty) {
+              setSelectedPenaltyCode(data[0]);
+            }
           } else {
             console.error('Invalid penalty codes data format:', data);
             setPenaltyCodes([]);
@@ -55,15 +61,49 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       };
 
       fetchPenaltyCodes();
-      resetForm();
+
+      if (editPenalty) {
+        // Fill form with data from the penalty to edit
+        setMatchTimeStart(editPenalty.matchTimeStart || '');
+        setMatchTimeEnd(editPenalty.matchTimeEnd || '');
+
+        // Set selected player
+        if (editPenalty.penaltyPlayer) {
+          setSelectedPlayer({
+            playerId: editPenalty.penaltyPlayer.playerId,
+            firstName: editPenalty.penaltyPlayer.firstName,
+            lastName: editPenalty.penaltyPlayer.lastName,
+            jerseyNumber: editPenalty.penaltyPlayer.jerseyNumber
+          });
+        }
+
+        // Set penalty code
+        if (editPenalty.penaltyCode) {
+          setSelectedPenaltyCode(editPenalty.penaltyCode);
+        }
+
+        // Set penalty minutes
+        if (editPenalty.penaltyMinutes) {
+          setPenaltyMinutes(editPenalty.penaltyMinutes);
+        }
+
+        // Set isGM and isMP
+        setIsGM(editPenalty.isGM || false);
+        setIsMP(editPenalty.isMP || false);
+      } else {
+        resetForm();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editPenalty]);
 
   const resetForm = () => {
     setMatchTimeStart('');
+    setMatchTimeEnd('');
     setSelectedPlayer(null);
     setSelectedPenaltyCode(null);
     setPenaltyMinutes(2);
+    setIsGM(false);
+    setIsMP(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,9 +112,17 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
     if (!selectedPlayer || !selectedPenaltyCode || !matchTimeStart) {
       return;
     }
+    
+    // Set a failsafe timeout to close the dialog if needed
+    const closeTimeout = setTimeout(() => {
+      console.log('Failsafe timeout triggered - forcing dialog close');
+      onSuccess();
+      onClose();
+    }, 5000);
 
     const penaltyData = {
       matchTimeStart,
+      matchTimeEnd: matchTimeEnd || undefined, // Only include if it has a value
       penaltyPlayer: {
         playerId: selectedPlayer.playerId,
         firstName: selectedPlayer.firstName,
@@ -85,30 +133,68 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
         key: selectedPenaltyCode.key,
         value: selectedPenaltyCode.value
       },
-      penaltyMinutes
+      penaltyMinutes,
+      isGM,
+      isMP
     };
 
     try {
       setIsLoading(true);
-      const response = await axios.post(
-        `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/`,
-        penaltyData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwt}`
-          }
-        }
-      );
 
-      if (response.status === 201 || response.status === 200) {
-        onSuccess();
-        onClose();
+      if (editPenalty && editPenalty._id) {
+        // Update existing penalty
+        const response = await axios.put(
+          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
+          penaltyData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${jwt}`
+            }
+          }
+        );
+
+        // Log response for debugging
+        console.log('Edit penalty response:', response.status, response.data);
+
+        // Close and refresh on any successful response (2xx)
+        if (response.status >= 200 && response.status < 300) {
+          console.log('Edit successful, closing dialog and refreshing data');
+          onSuccess();
+          onClose();
+        } else {
+          console.warn('Edit response not in 2xx range:', response.status);
+        }
+      } else {
+        // Create new penalty
+        const response = await axios.post(
+          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/`,
+          penaltyData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${jwt}`
+            }
+          }
+        );
+
+        // Log response for debugging
+        console.log('Create penalty response:', response.status, response.data);
+
+        // Close and refresh on any successful response (2xx)
+        if (response.status >= 200 && response.status < 300) {
+          onSuccess();
+          onClose();
+        }
       }
     } catch (error) {
-      console.error('Error adding penalty:', error);
+      console.error('Error saving penalty:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('API error details:', error.response?.data);
+      }
     } finally {
       setIsLoading(false);
+      clearTimeout(closeTimeout);
     }
   };
 
@@ -149,25 +235,42 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Strafe hinzufügen
+                {editPenalty ? 'Strafe bearbeiten' : 'Strafe hinzufügen'}
               </Dialog.Title>
               <form onSubmit={handleSubmit}>
                 <div className="mt-4 space-y-4">
-                  {/* Match Time */}
+                  {/* Match Time - Start */}
                   <div>
-                    <label htmlFor="matchTime" className="block text-sm font-medium text-gray-700">
-                      Spielzeit (mi:ss)
+                    <label htmlFor="matchTimeStart" className="block text-sm font-medium text-gray-700">
+                      Spielzeit Start (mi:ss)
                     </label>
                     <input
                       type="text"
-                      id="matchTime"
-                      name="matchTime"
+                      id="matchTimeStart"
+                      name="matchTimeStart"
                       value={matchTimeStart}
                       onChange={(e) => setMatchTimeStart(e.target.value)}
                       placeholder="z.B. 14:30"
                       pattern="[0-9]{1,2}:[0-9]{2}"
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       required
+                    />
+                  </div>
+
+                  {/* Match Time - End (Optional) */}
+                  <div>
+                    <label htmlFor="matchTimeEnd" className="block text-sm font-medium text-gray-700">
+                      Spielzeit Ende (mi:ss) <span className="text-gray-500 text-xs">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="matchTimeEnd"
+                      name="matchTimeEnd"
+                      value={matchTimeEnd}
+                      onChange={(e) => setMatchTimeEnd(e.target.value)}
+                      placeholder="z.B. 16:30"
+                      pattern="[0-9]{1,2}:[0-9]{2}"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>
 
@@ -251,6 +354,36 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  {/* Penalty Type Checkboxes */}
+                  <div className="flex space-x-6">
+                    <div className="flex items-center">
+                      <input
+                        id="isGM"
+                        name="isGM"
+                        type="checkbox"
+                        checked={isGM}
+                        onChange={(e) => setIsGM(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <label htmlFor="isGM" className="ml-2 block text-sm text-gray-700">
+                        Spieldauer (GM)
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="isMP"
+                        name="isMP"
+                        type="checkbox"
+                        checked={isMP}
+                        onChange={(e) => setIsMP(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <label htmlFor="isMP" className="ml-2 block text-sm text-gray-700">
+                        Matchstrafe (MP)
+                      </label>
+                    </div>
                   </div>
                 </div>
 

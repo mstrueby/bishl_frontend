@@ -29,6 +29,7 @@ interface AvailablePlayer {
     passNo: string,
     jerseyNo: number | undefined,
     called: boolean,
+    originalTeam: string | null; // Add this line
 }
 
 interface RosterPageProps {
@@ -103,36 +104,71 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         );
         const teamPlayers: PlayerValues[] = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
         let allTeamsPlayers: PlayerValues[] = [];
-        let bambiniPlayers: PlayerValues[] = [];
-        let bambiniTeamsIds: string[] = [];
+        let additionalPlayers: PlayerValues[] = [];
+        let additionalTeamsIds: string[] = [];
 
-        if (teamAgeGroup === 'Schüler') {
-            const bambiniTeams: TeamValues[] = club.teams.filter((team: TeamValues) => team.ageGroup === 'Bambini');
+        // Define age group progression map
+        const ageGroupMergeMap: { [key: string]: string } = {
+            'Junioren': 'Jugend',
+            'Jugend': 'Schüler',
+            'Schüler': 'Bambini',
+            'Bambini': 'Mini'
+        };
 
-            bambiniTeamsIds = bambiniTeams.map((team: TeamValues) => team._id);
-            for (const bambinoTeam of bambiniTeams) {
-                console.log("Bambino Team", bambinoTeam)
-                
-                const playersResponse = await axios.get(
-                    `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${bambinoTeam.alias}`, {
-                        headers: {
-                            Authorization: `Bearer ${jwt}`,
-                        },
-                        params: {
-                            sortby: 'lastName',
-                            active: 'true'
+        // Check if the current team's age group has younger teams to merge from
+        const youngerAgeGroup = ageGroupMergeMap[teamAgeGroup];
+
+        if (youngerAgeGroup) {
+            // Find teams from the younger age group
+            const youngerTeams: TeamValues[] = club.teams.filter((team: TeamValues) =>
+                team.ageGroup === youngerAgeGroup && team.active
+            );
+
+            if (youngerTeams.length > 0) {
+                console.log(`Found ${youngerTeams.length} ${youngerAgeGroup} teams to merge with ${teamAgeGroup}`);
+                additionalTeamsIds = youngerTeams.map((team: TeamValues) => team._id);
+
+                // Fetch players from each younger team
+                for (const youngerTeam of youngerTeams) {
+                    console.log(`Getting players from ${youngerAgeGroup} team: ${youngerTeam.name}`);
+
+                    try {
+                        const playersResponse = await axios.get(
+                            `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${youngerTeam.alias}`, {
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                            },
+                            params: {
+                                sortby: 'lastName',
+                                active: 'true'
+                            }
                         }
+                        );
+
+                        const teamPlayers = Array.isArray(playersResponse.data.results)
+                            ? playersResponse.data.results
+                            : [];
+
+                        additionalPlayers = [...additionalPlayers, ...teamPlayers];
+                    } catch (error) {
+                        console.error(`Error fetching players from ${youngerTeam.name}:`, error);
                     }
-                );
-                bambiniPlayers = Array.isArray(teamPlayerResponse.data.results) ? playersResponse.data.results : [];
+                }
+
+                // Combine the players from the current team and the younger teams
+                allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
+                console.log(`Total players after merging: ${allTeamsPlayers.length}`);
+            } else {
+                console.log(`No ${youngerAgeGroup} teams found to merge with ${teamAgeGroup}`);
+                allTeamsPlayers = teamPlayers;
             }
-            allTeamsPlayers = [...teamPlayers, ...bambiniPlayers];
         } else {
+            console.log(`No younger age group defined for ${teamAgeGroup}`);
             allTeamsPlayers = teamPlayers; // Use only the players from the current team
         }
 
         // Debug log to check what's coming back
-        //console.log("bambini IDs", bambiniTeamsIds)
+        console.log("Additional team IDs:", additionalTeamsIds);
         console.log("Team players count:", allTeamsPlayers.length);
         //console.log("All teams players:", allTeamsPlayers);
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
@@ -151,8 +187,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 .find((team: AssignmentTeam) => {
                     if (!team) return false;
                     if (team.teamId === matchTeam.teamId) return true;
-                    return bambiniTeamsIds.some(id => id === team.teamId);
+                    return additionalTeamsIds.some(id => id === team.teamId);
                 });
+            // Determine if this is a player from a merged team
+            const isFromYoungerTeam = additionalTeamsIds.some(id => assignedTeam && assignedTeam.teamId === id);
+
+            // Find original team name if the player is from another team
+            let originalTeamName = null;
+            if (isFromYoungerTeam && assignedTeam) {
+                // Find the team from club.teams that matches the assignedTeam.teamId
+                const originalTeam = club.teams.find(t => t._id === assignedTeam.teamId);
+                if (originalTeam) {
+                    originalTeamName = originalTeam.name;
+                }
+            }
+
             return assignedTeam ? {
                 _id: teamPlayer._id,
                 firstName: teamPlayer.firstName,
@@ -166,13 +215,23 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 imageVisible: teamPlayer.imageVisible,
                 passNo: assignedTeam.passNo,
                 jerseyNo: assignedTeam.jerseyNo,
-                called: false
+                called: false,
+                originalTeam: originalTeamName // Add the original team name if available
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
-        
+
+        // Sort available players by displayLastName, then by displayFirstName
+        const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
+            // First sort by lastName
+            const lastNameComparison = (a.displayLastName ?? "").localeCompare(b.displayLastName ?? "");
+            // If lastName is the same, sort by firstName
+            return lastNameComparison !== 0 ? lastNameComparison :
+                (a.displayFirstName || "").localeCompare(b.displayFirstName || "");
+        });
+
         // Keep both the full list and a filtered list of available players
         const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
-        const filteredAvailablePlayers = availablePlayers.filter(player =>
+        const filteredAvailablePlayers = sortedAvailablePlayers.filter(player =>
             !rosterPlayerIds.includes(player?._id ?? '')
         );
 
@@ -729,12 +788,23 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                             >
                                                                 {({ selected, active }) => (
                                                                     <>
-                                                                        <span className={classNames(
-                                                                            selected ? 'font-semibold' : 'font-normal',
-                                                                            'block truncate'
-                                                                        )}>
-                                                                            {player.displayLastName}, {player.displayFirstName}
-                                                                        </span>
+                                                                        <div className="flex flex-col">
+                                                                            <span className={classNames(
+                                                                                selected ? 'font-semibold' : 'font-normal',
+                                                                                'block truncate'
+                                                                            )}>
+                                                                                {player.displayLastName}, {player.displayFirstName}
+                                                                            </span>
+
+                                                                            {player.originalTeam && (
+                                                                                <span className={classNames(
+                                                                                    active ? 'text-indigo-100' : 'text-gray-500',
+                                                                                    'text-xs'
+                                                                                )}>
+                                                                                    {player.originalTeam}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
 
                                                                         {selected ? (
                                                                             <span
