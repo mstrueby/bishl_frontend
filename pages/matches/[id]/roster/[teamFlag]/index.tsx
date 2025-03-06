@@ -109,8 +109,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         if (teamAgeGroup === 'Schüler') {
             const bambiniTeams: TeamValues[] = club.teams.filter((team: TeamValues) => team.ageGroup === 'Bambini');
 
-            const bambiniTeamsIds = bambiniTeams.map((team: TeamValues) => team._id);
-            console.log("Bam IDs", bambiniTeamsIds)
+            bambiniTeamsIds = bambiniTeams.map((team: TeamValues) => team._id);
             for (const bambinoTeam of bambiniTeams) {
                 console.log("Bambino Team", bambinoTeam)
                 
@@ -119,6 +118,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                         headers: {
                             Authorization: `Bearer ${jwt}`,
                         },
+                        params: {
+                            sortby: 'lastName',
+                            active: 'true'
+                        }
                     }
                 );
                 bambiniPlayers = Array.isArray(teamPlayerResponse.data.results) ? playersResponse.data.results : [];
@@ -129,6 +132,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
 
         // Debug log to check what's coming back
+        //console.log("bambini IDs", bambiniTeamsIds)
         console.log("Team players count:", allTeamsPlayers.length);
         //console.log("All teams players:", allTeamsPlayers);
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
@@ -140,13 +144,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
 
             // Find the team assignment that matches the target team ID or matches the Bambini team alias
-            console.log("teamPlayer name:", teamPlayer.firstName, teamPlayer.lastName)
-            console.log("teamPlayer.assignedTeams:", JSON.stringify(teamPlayer.assignedTeams, null, 2));
+            //console.log("teamPlayer name:", teamPlayer.firstName, teamPlayer.lastName)
+            //console.log("teamPlayer.assignedTeams:", JSON.stringify(teamPlayer.assignedTeams, null, 2));
             const assignedTeam = teamPlayer.assignedTeams
                 .flatMap((assignment: Assignment) => assignment.teams || [])
                 .find((team: AssignmentTeam) => {
                     if (!team) return false;
-                    return team.teamId === matchTeam.teamId || bambiniTeamsIds.some(id => id === team.teamId);
+                    if (team.teamId === matchTeam.teamId) return true;
+                    return bambiniTeamsIds.some(id => id === team.teamId);
                 });
             return assignedTeam ? {
                 _id: teamPlayer._id,
