@@ -149,7 +149,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   let showMatchSheet = true;
 
   {/**  LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN'))) {
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
     showLinkEdit = true;
     showLinkStatus = true;
   }
