@@ -46,36 +46,36 @@ export interface PlayerValues {
   source: string; // e.g. "BISHL"
   assignedTeams: Assignment[];
   stats?: {
-  tournament: {
-    name: string;
-    alias: string;
-  };
-  season: {
-    name: string;
-    alias: string;
-  };
-  round: {
-    name: string;
-    alias: string;
-  };
-  matchday: {
-    name: string;
-    alias: string;
-  };
-  team: {
-    name: string;
-    fullName: string;
-    shortName: string;
-    tinyName: string;
-  };
-  gamesPlayed: number;
-  goals: number;
-  assists: number;
-  points: number;
-  penaltyMinutes: number;
-} [];
-imageUrl: string;
-imageVisible: boolean;
-legacyId ?: number;
-createDate ?: string;  // e.g. "2025-01-16T11:36:45.395Z"
+    tournament: {
+      name: string;
+      alias: string;
+    };
+    season: {
+      name: string;
+      alias: string;
+    };
+    round: {
+      name: string;
+      alias: string;
+    };
+    matchday: {
+      name: string;
+      alias: string;
+    };
+    team: {
+      name: string;
+      fullName: string;
+      shortName: string;
+      tinyName: string;
+    };
+    gamesPlayed: number;
+    goals: number;
+    assists: number;
+    points: number;
+    penaltyMinutes: number;
+  }[];
+  imageUrl: string;
+  imageVisible: boolean;
+  legacyId?: number;
+  createDate?: string;  // e.g. "2025-01-16T11:36:45.395Z"
 }
