@@ -28,6 +28,7 @@ interface PenaltyDialogProps {
 const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess }: PenaltyDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [matchTimeStart, setMatchTimeStart] = useState('');
+  const [matchTimeEnd, setMatchTimeEnd] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<PenaltyPlayer | null>(null);
   const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(null);
   const [penaltyMinutes, setPenaltyMinutes] = useState<number>(2);
@@ -61,6 +62,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
 
   const resetForm = () => {
     setMatchTimeStart('');
+    setMatchTimeEnd('');
     setSelectedPlayer(null);
     setSelectedPenaltyCode(null);
     setPenaltyMinutes(2);
@@ -75,6 +77,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
 
     const penaltyData = {
       matchTimeStart,
+      matchTimeEnd: matchTimeEnd || undefined, // Only include if it has a value
       penaltyPlayer: {
         playerId: selectedPlayer.playerId,
         firstName: selectedPlayer.firstName,
@@ -153,21 +156,38 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
               </Dialog.Title>
               <form onSubmit={handleSubmit}>
                 <div className="mt-4 space-y-4">
-                  {/* Match Time */}
+                  {/* Match Time - Start */}
                   <div>
-                    <label htmlFor="matchTime" className="block text-sm font-medium text-gray-700">
-                      Spielzeit (mi:ss)
+                    <label htmlFor="matchTimeStart" className="block text-sm font-medium text-gray-700">
+                      Spielzeit Start (mi:ss)
                     </label>
                     <input
                       type="text"
-                      id="matchTime"
-                      name="matchTime"
+                      id="matchTimeStart"
+                      name="matchTimeStart"
                       value={matchTimeStart}
                       onChange={(e) => setMatchTimeStart(e.target.value)}
                       placeholder="z.B. 14:30"
                       pattern="[0-9]{1,2}:[0-9]{2}"
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       required
+                    />
+                  </div>
+                  
+                  {/* Match Time - End (Optional) */}
+                  <div>
+                    <label htmlFor="matchTimeEnd" className="block text-sm font-medium text-gray-700">
+                      Spielzeit Ende (mi:ss) <span className="text-gray-500 text-xs">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="matchTimeEnd"
+                      name="matchTimeEnd"
+                      value={matchTimeEnd}
+                      onChange={(e) => setMatchTimeEnd(e.target.value)}
+                      placeholder="z.B. 16:30"
+                      pattern="[0-9]{1,2}:[0-9]{2}"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>
 
