@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
@@ -65,7 +65,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const { id } = router.query;
 
   // Refresh match data function
-  const refreshMatchData = async () => {
+  const refreshMatchData = useCallback(async () => {
     if (!id || isRefreshing) return;
 
     try {
@@ -78,7 +78,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
       console.error('Error refreshing match data:', error);
       setIsRefreshing(false);
     }
-  };
+  }, [id, isRefreshing]);
 
   // Auto-refresh if match is in progress
   useEffect(() => {
@@ -593,7 +593,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   <div className="text-center mb-3">
                     <h4 className="text-md font-semibold">{match.home.fullName}</h4>
                   </div>
-                  <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                  <<div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.scores && match.home.scores.length > 0 ? (
                       <table className="min-w-full divide-y divide-gray-200">
                         {/*
