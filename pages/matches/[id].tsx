@@ -93,7 +93,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [match.matchStatus.key, id]);
+  }, [match.matchStatus.key, id, refreshMatchData]);
 
   let showLinkEdit = false;
   let showLinkStatus = false;
@@ -592,7 +592,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 <div className="w-full md:w-1/2 mb-6 md:mb-0">
                   <div className="text-center mb-3">
                     <h4 className="text-md font-semibold">{match.home.fullName}</h4>
-                  </div>
+                  </</div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.scores && match.home.scores.length > 0 ? (
                       <table className="min-w-full divide-y divide-gray-200">
