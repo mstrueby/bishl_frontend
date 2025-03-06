@@ -951,6 +951,62 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
         onSuccess={refreshMatchData}
         editPenalty={editingAwayPenalty}
       />
+
+      {/* Referees Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-4 border-t border-gray-200">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
+        <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
+            {match.referee1 ? (
+              <div className="flex items-center mb-3 sm:mb-0">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+                  {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">{match.referee1.firstName} {match.referee1.lastName}</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 1</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center mb-3 sm:mb-0">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 1</p>
+                </div>
+              </div>
+            )}
+
+            {match.referee2 ? (
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+                  {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">{match.referee2.firstName} {match.referee2.lastName}</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 2</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 2</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </Layout >
   );
 }
