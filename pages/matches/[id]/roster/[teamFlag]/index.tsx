@@ -146,7 +146,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 .flatMap((assignment: Assignment) => assignment.teams || [])
                 .find((team: AssignmentTeam) => {
                     if (!team) return false;
-                    return team.teamId === matchTeam.teamId || bambiniTeamsIds.some(id => id === team.teamId);
+                    if (team.teamId === matchTeam.teamId) return true;
+                    return teamAgeGroup === 'Schüler' && bambiniTeamsIds.some(id => id === team.teamId);
                 });
             return assignedTeam ? {
                 _id: teamPlayer._id,
