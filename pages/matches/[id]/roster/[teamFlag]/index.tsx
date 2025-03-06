@@ -170,9 +170,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
         
+        // Sort available players by displayLastName, then by displayFirstName
+        const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
+            // First sort by lastName
+            const lastNameComparison = a.displayLastName.localeCompare(b.displayLastName);
+            // If lastName is the same, sort by firstName
+            return lastNameComparison !== 0 ? lastNameComparison : 
+                a.displayFirstName.localeCompare(b.displayFirstName);
+        });
+        
         // Keep both the full list and a filtered list of available players
         const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
-        const filteredAvailablePlayers = availablePlayers.filter(player =>
+        const filteredAvailablePlayers = sortedAvailablePlayers.filter(player =>
             !rosterPlayerIds.includes(player?._id ?? '')
         );
 
