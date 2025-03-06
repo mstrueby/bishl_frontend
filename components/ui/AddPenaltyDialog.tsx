@@ -32,6 +32,8 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
   const [selectedPlayer, setSelectedPlayer] = useState<PenaltyPlayer | null>(null);
   const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(null);
   const [penaltyMinutes, setPenaltyMinutes] = useState<number>(2);
+  const [isGM, setIsGM] = useState(false);
+  const [isMP, setIsMP] = useState(false);
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
   const penaltyMinuteOptions = [2, 5, 10, 20];
 
@@ -66,6 +68,8 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
     setSelectedPlayer(null);
     setSelectedPenaltyCode(null);
     setPenaltyMinutes(2);
+    setIsGM(false);
+    setIsMP(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +92,9 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
         key: selectedPenaltyCode.key,
         value: selectedPenaltyCode.value
       },
-      penaltyMinutes
+      penaltyMinutes,
+      isGM,
+      isMP
     };
 
     try {
@@ -271,6 +277,36 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
                         </option>
                       ))}
                     </select>
+                  </div>
+                  
+                  {/* Penalty Type Checkboxes */}
+                  <div className="flex space-x-6">
+                    <div className="flex items-center">
+                      <input
+                        id="isGM"
+                        name="isGM"
+                        type="checkbox"
+                        checked={isGM}
+                        onChange={(e) => setIsGM(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <label htmlFor="isGM" className="ml-2 block text-sm text-gray-700">
+                        Spieldauer (GM)
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="isMP"
+                        name="isMP"
+                        type="checkbox"
+                        checked={isMP}
+                        onChange={(e) => setIsMP(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <label htmlFor="isMP" className="ml-2 block text-sm text-gray-700">
+                        Matchstrafe (MP)
+                      </label>
+                    </div>
                   </div>
                 </div>
 
