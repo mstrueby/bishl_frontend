@@ -188,6 +188,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                     if (team.teamId === matchTeam.teamId) return true;
                     return additionalTeamsIds.some(id => id === team.teamId);
                 });
+            // Determine if this is a player from a merged team
+            const isFromYoungerTeam = additionalTeamsIds.some(id => assignedTeam && assignedTeam.teamId === id);
+            
+            // Find original team name if the player is from another team
+            let originalTeamName = null;
+            if (isFromYoungerTeam && assignedTeam) {
+                // Find the team from club.teams that matches the assignedTeam.teamId
+                const originalTeam = club.teams.find(t => t._id === assignedTeam.teamId);
+                if (originalTeam) {
+                    originalTeamName = originalTeam.name;
+                }
+            }
+
             return assignedTeam ? {
                 _id: teamPlayer._id,
                 firstName: teamPlayer.firstName,
@@ -201,7 +214,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 imageVisible: teamPlayer.imageVisible,
                 passNo: assignedTeam.passNo,
                 jerseyNo: assignedTeam.jerseyNo,
-                called: false
+                called: false,
+                originalTeam: originalTeamName // Add the original team name if available
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
         
@@ -773,12 +787,23 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                             >
                                                                 {({ selected, active }) => (
                                                                     <>
-                                                                        <span className={classNames(
-                                                                            selected ? 'font-semibold' : 'font-normal',
-                                                                            'block truncate'
-                                                                        )}>
-                                                                            {player.displayLastName}, {player.displayFirstName}
-                                                                        </span>
+                                                                        <div className="flex flex-col">
+                                                                            <span className={classNames(
+                                                                                selected ? 'font-semibold' : 'font-normal',
+                                                                                'block truncate'
+                                                                            )}>
+                                                                                {player.displayLastName}, {player.displayFirstName}
+                                                                            </span>
+                                                                            
+                                                                            {player.originalTeam && (
+                                                                                <span className={classNames(
+                                                                                    active ? 'text-indigo-100' : 'text-gray-500',
+                                                                                    'text-xs'
+                                                                                )}>
+                                                                                    {player.originalTeam}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
 
                                                                         {selected ? (
                                                                             <span
