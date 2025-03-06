@@ -29,6 +29,7 @@ interface AvailablePlayer {
     passNo: string,
     jerseyNo: number | undefined,
     called: boolean,
+    originalTeam: string | null; // Add this line
 }
 
 interface RosterPageProps {
@@ -116,44 +117,44 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         // Check if the current team's age group has younger teams to merge from
         const youngerAgeGroup = ageGroupMergeMap[teamAgeGroup];
-        
+
         if (youngerAgeGroup) {
             // Find teams from the younger age group
-            const youngerTeams: TeamValues[] = club.teams.filter((team: TeamValues) => 
+            const youngerTeams: TeamValues[] = club.teams.filter((team: TeamValues) =>
                 team.ageGroup === youngerAgeGroup && team.active
             );
 
             if (youngerTeams.length > 0) {
                 console.log(`Found ${youngerTeams.length} ${youngerAgeGroup} teams to merge with ${teamAgeGroup}`);
                 additionalTeamsIds = youngerTeams.map((team: TeamValues) => team._id);
-                
+
                 // Fetch players from each younger team
                 for (const youngerTeam of youngerTeams) {
                     console.log(`Getting players from ${youngerAgeGroup} team: ${youngerTeam.name}`);
-                    
+
                     try {
                         const playersResponse = await axios.get(
                             `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${youngerTeam.alias}`, {
-                                headers: {
-                                    Authorization: `Bearer ${jwt}`,
-                                },
-                                params: {
-                                    sortby: 'lastName',
-                                    active: 'true'
-                                }
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                            },
+                            params: {
+                                sortby: 'lastName',
+                                active: 'true'
                             }
+                        }
                         );
-                        
-                        const teamPlayers = Array.isArray(playersResponse.data.results) 
-                            ? playersResponse.data.results 
+
+                        const teamPlayers = Array.isArray(playersResponse.data.results)
+                            ? playersResponse.data.results
                             : [];
-                        
+
                         additionalPlayers = [...additionalPlayers, ...teamPlayers];
                     } catch (error) {
                         console.error(`Error fetching players from ${youngerTeam.name}:`, error);
                     }
                 }
-                
+
                 // Combine the players from the current team and the younger teams
                 allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
                 console.log(`Total players after merging: ${allTeamsPlayers.length}`);
@@ -190,7 +191,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 });
             // Determine if this is a player from a merged team
             const isFromYoungerTeam = additionalTeamsIds.some(id => assignedTeam && assignedTeam.teamId === id);
-            
+
             // Find original team name if the player is from another team
             let originalTeamName = null;
             if (isFromYoungerTeam && assignedTeam) {
@@ -218,16 +219,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 originalTeam: originalTeamName // Add the original team name if available
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
-        
+
         // Sort available players by displayLastName, then by displayFirstName
         const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
             // First sort by lastName
-            const lastNameComparison = a.displayLastName.localeCompare(b.displayLastName);
+            const lastNameComparison = (a.displayLastName ?? "").localeCompare(b.displayLastName ?? "");
             // If lastName is the same, sort by firstName
-            return lastNameComparison !== 0 ? lastNameComparison : 
-                a.displayFirstName.localeCompare(b.displayFirstName);
+            return lastNameComparison !== 0 ? lastNameComparison :
+                (a.displayFirstName || "").localeCompare(b.displayFirstName || "");
         });
-        
+
         // Keep both the full list and a filtered list of available players
         const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
         const filteredAvailablePlayers = sortedAvailablePlayers.filter(player =>
@@ -794,7 +795,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                             )}>
                                                                                 {player.displayLastName}, {player.displayFirstName}
                                                                             </span>
-                                                                            
+
                                                                             {player.originalTeam && (
                                                                                 <span className={classNames(
                                                                                     active ? 'text-indigo-100' : 'text-gray-500',

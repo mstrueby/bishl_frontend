@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 import { Dialog, Transition } from '@headlessui/react';
-import { Match } from '../../types/MatchValues';
+import { Match, RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
 import Layout from '../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
@@ -50,8 +50,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [isAwayGoalDialogOpen, setIsAwayGoalDialogOpen] = useState(false);
   const [isHomePenaltyDialogOpen, setIsHomePenaltyDialogOpen] = useState(false);
   const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
-  const [editingHomePenalty, setEditingHomePenalty] = useState(null);
-  const [editingAwayPenalty, setEditingAwayPenalty] = useState(null);
+  const [editingHomePenalty, setEditingHomePenalty] = useState<PenaltiesBase | null>(null);
+  const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -464,7 +464,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
               {/* Sort function for roster */}
               {(() => {
                 // Sort roster by position order: C, A, G, F, then by jersey number
-                const sortRoster = (rosterToSort) => {
+                const sortRoster = (rosterToSort: RosterPlayer[]) => {
                   if (!rosterToSort || rosterToSort.length === 0) return [];
 
                   return [...rosterToSort].sort((a, b) => {
@@ -472,8 +472,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     const positionPriority = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
 
                     // Get priorities
-                    const posA = positionPriority[a.playerPosition.key] || 99;
-                    const posB = positionPriority[b.playerPosition.key] || 99;
+                    const posA = positionPriority[a.playerPosition.key as keyof typeof positionPriority] || 99;
+                    const posB = positionPriority[b.playerPosition.key as keyof typeof positionPriority] || 99;
 
                     // First sort by position priority
                     if (posA !== posB) {
@@ -486,8 +486,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 };
 
                 // Sort rosters
-                const sortedHomeRoster = sortRoster(match.home.roster);
-                const sortedAwayRoster = sortRoster(match.away.roster);
+                const sortedHomeRoster = sortRoster(match.home.roster || []);
+                const sortedAwayRoster = sortRoster(match.away.roster || []);
 
                 return (
                   <div className="flex flex-col md:flex-row md:space-x-4">
@@ -964,7 +964,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-900">{match.referee1.firstName} {match.referee1.lastName}</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 1 {match.referee1.clubName && `• ${match.referee1.clubName}`}</p>
+                  <p className="text-xs text-gray-500">{match.referee1.clubName && `${match.referee1.clubName}`}</p>
                 </div>
               </div>
             ) : (
@@ -988,7 +988,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-900">{match.referee2.firstName} {match.referee2.lastName}</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 2 {match.referee2.clubName && `• ${match.referee2.clubName}`}</p>
+                  <p className="text-xs text-gray-500">{match.referee2.clubName && `${match.referee2.clubName}`}</p>
                 </div>
               </div>
             ) : (
