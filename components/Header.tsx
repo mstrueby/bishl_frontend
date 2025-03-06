@@ -242,7 +242,7 @@ const Header = () => {
                             </MenuItem>
                           )}
 
-                          {/* RMy Club administration */}
+                          {/* My Club administration */}
                           {(user.roles?.includes('CLUB_ADMIN') || user.roles?.includes('ADMIN')) && (
                             <MenuItem>
                               <MyLink href="/admin/myclub" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
@@ -251,9 +251,8 @@ const Header = () => {
                               </MyLink>
                             </MenuItem>
                           )}
-
-                          {/* ADMIN items - only for admins */}
-                          {user.roles?.includes('ADMIN') && (
+                          {/* LEAGUE_ADMIN items */}
+                          {(user.roles?.includes('LEAGUE_ADMIN') || user.roles?.includes('ADMIN')) && (
                             <>
                               <MenuItem>
                                 <MyLink href="/admin/clubs" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
@@ -262,7 +261,18 @@ const Header = () => {
                                 </MyLink>
                               </MenuItem>
                               <MenuItem>
-                                <MyLink href="/admin/venues" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>Spieler</span>
+                                </MyLink>
+                              </MenuItem>
+                            </>
+                          )}
+                          {/* ADMIN items - only for admins */}
+                          {user.roles?.includes('ADMIN') && (
+                            <>
+                              <MenuItem>
+                                <MyLink href="/admin/venues" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
                                   <RectangleStackIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                                   <span>Spielflächen</span>
                                 </MyLink>
@@ -270,17 +280,6 @@ const Header = () => {
                               <MenuItem>
                                 <MyLink href="/leaguemanager" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                   Spielbetrieb
-                                </MyLink>
-                              </MenuItem>
-                            </>
-                          )}
-                          {/* LEAGUE_ADMIN items */}
-                          {(user.roles?.includes('LEAGUE_ADMIN') || user.roles?.includes('ADMIN')) && (
-                            <>
-                              <MenuItem>
-                                <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
-                                  <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                                  <span>Spieler</span>
                                 </MyLink>
                               </MenuItem>
                             </>

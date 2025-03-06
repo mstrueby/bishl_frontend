@@ -9,6 +9,7 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
+import { string } from "yup";
 
 let BASE_URL = process.env['API_URL'];
 
@@ -40,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     
     const user = userResponse.data;
     //console.log("user:", user)
-    if (!user.roles?.includes('ADMIN')) {
+    if (!user.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role))) {
       return {
         redirect: {
           destination: '/',

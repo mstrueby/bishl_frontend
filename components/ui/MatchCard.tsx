@@ -149,7 +149,7 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   let showMatchSheet = true;
 
   {/**  LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN'))) {
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
     showLinkEdit = true;
     showLinkStatus = true;
   }
@@ -180,12 +180,18 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showLinkAway = false;
   }
-  {/** ADMIN, LEAGE_ADMIN && Spiel beendet 
+  {/** Spiel ist beendet */ }
+  if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
+    showLinkEdit = false;
+    showLinkHome = false;
+    showLinkAway = false
+  }
+  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
   if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
     showLinkEdit = true;
     showLinkStatus = true;
   }
-  */ }
+
   if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
     showLinkEdit = false;
     showLinkStatus = false;

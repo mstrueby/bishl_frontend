@@ -78,6 +78,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         // Determine which team's roster to fetch
         const matchTeam = teamFlag === 'home' ? match.home : match.away;
+        const teamAgeGroup = team.ageGroup;
 
         // get club object
         const clubResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}`);
@@ -87,7 +88,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const teamResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
         const team: TeamValues = await teamResponse.data;
 
-        // Fetch available players
+        // Fetch available players from the current team
         const teamPlayerResponse = await axios.get(
             `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
             headers: {
@@ -99,14 +100,48 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
         }
         );
-        const teamPlayerResult = teamPlayerResponse.data.results;
-        const teamPlayers = Array.isArray(teamPlayerResult) ? teamPlayerResult : [];
+        const teamPlayers = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
+        let allTeamsPlayers = [];
+
+        if (teamAgeGroup === 'Schüler') {
+            const bambiniTeams = club.teams.filter((team: TeamValues) => team.ageGroup === 'Bambini');
+            const bambiniPlayers: AvailablePlayer[] = [];
+
+            for (const bambinoTeam of bambiniTeams) {
+                const playersResponse = await axios.get(
+                    `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${bambinoTeam.alias}`, {
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                        },
+                    }
+                );
+                const players = playersResponse.data.results || [];
+                bambiniPlayers.push(...players.map((player: any) => ({
+                    _id: player._id,
+                    firstName: player.firstName,
+                    lastName: player.lastName,
+                    displayFirstName: player.displayFirstName,
+                    displayLastName: player.displayLastName,
+                    position: player.position || 'Skater',
+                    fullFaceReq: player.fullFaceReq,
+                    source: player.source,
+                    imageUrl: player.imageUrl,
+                    imageVisible: player.imageVisible,
+                    passNo: player.passNo,
+                    jerseyNo: player.jerseyNo,
+                    called: false
+                })));
+            }
+            allTeamsPlayers = [...teamPlayers, ...bambiniPlayers];
+        } else {
+            allTeamsPlayers = teamPlayers; // Use only the players from the current team
+        }
 
         // Debug log to check what's coming back
-        console.log("Team players count:", teamPlayers.length);
+        console.log("Team players count:", allTeamsPlayers.length);
 
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
-        const availablePlayers = teamPlayers.map((teamPlayer: PlayerValues) => {
+        const availablePlayers = allTeamsPlayers.map((teamPlayer: PlayerValues) => {
             // Check if assignedTeams exists and is an array
             if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
                 console.log("Player missing assignedTeams:", teamPlayer._id);
@@ -351,7 +386,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setCallUpModalError(null);
 
         // Optional: Show a success message
-        setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
+        setSuccessMessage(`Spieler ${selectedCallUpPlayer.displayFirstName} ${selectedCallUpPlayer.displayLastName} wurde hochgemeldet und steht zur Verfügung.`);
     };
 
     const handleEditPlayer = (player: RosterPlayer) => {
@@ -498,8 +533,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             const newPlayer: RosterPlayer = {
                 player: {
                     playerId: selectedPlayer._id,
-                    firstName: selectedPlayer.firstName,
-                    lastName: selectedPlayer.lastName,
+                    firstName: selectedPlayer.displayFirstName,
+                    lastName: selectedPlayer.displayLastName,
                     jerseyNumber: playerNumber,
                 },
                 playerPosition: {
@@ -660,7 +695,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Spieler auswählen'}
+                                                    {selectedPlayer ? `${selectedPlayer.displayLastName}, ${selectedPlayer.displayFirstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -698,7 +733,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                             selected ? 'font-semibold' : 'font-normal',
                                                                             'block truncate'
                                                                         )}>
-                                                                            {player.lastName}, {player.firstName}
+                                                                            {player.displayLastName}, {player.displayFirstName}
                                                                         </span>
 
                                                                         {selected ? (
@@ -1357,7 +1392,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedCallUpPlayer ? `${selectedCallUpPlayer.lastName}, ${selectedCallUpPlayer.firstName}` : 'Spieler auswählen'}
+                                                    {selectedCallUpPlayer ? `${selectedCallUpPlayer.displayLastName}, ${selectedCallUpPlayer.displayFirstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -1390,7 +1425,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                             selected ? 'font-semibold' : 'font-normal',
                                                                             'block truncate'
                                                                         )}>
-                                                                            {player.lastName}, {player.firstName}
+                                                                            {player.displayLastName}, {player.displayFirstName}
                                                                         </span>
 
                                                                         {selected ? (
