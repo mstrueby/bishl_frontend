@@ -48,6 +48,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const jwt = getCookie('jwt', context);
     if (!jwt || !id || !teamFlag)
         return { notFound: true };
+
     try {
         // First check if user has required role
         const userResponse = await axios.get(`${BASE_URL}/users/me`, {
@@ -78,7 +79,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         // Determine which team's roster to fetch
         const matchTeam = teamFlag === 'home' ? match.home : match.away;
-        const teamAgeGroup = team.ageGroup;
 
         // get club object
         const clubResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}`);
@@ -87,6 +87,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         // get team object
         const teamResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
         const team: TeamValues = await teamResponse.data;
+        const teamAgeGroup = team.ageGroup;
 
         // Fetch available players from the current team
         const teamPlayerResponse = await axios.get(
@@ -143,10 +144,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
         const availablePlayers = allTeamsPlayers.map((teamPlayer: PlayerValues) => {
             // Check if assignedTeams exists and is an array
+            {/**
             if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
                 console.log("Player missing assignedTeams:", teamPlayer._id);
                 return null;
             }
+            */}
 
             // Find the team assignment that matches the target team ID
             const assignedTeam = teamPlayer.assignedTeams
