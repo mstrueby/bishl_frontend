@@ -108,6 +108,49 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         let additionalPlayers: PlayerValues[] = [];
         let additionalTeamsIds: string[] = [];
 
+        // Handle team partnerships if they exist
+        if (team.teamPartnership && Array.isArray(team.teamPartnership) && team.teamPartnership.length > 0) {
+            console.log(`Found ${team.teamPartnership.length} team partnerships`);
+            
+            // Fetch players from each partnership team
+            for (const partnership of team.teamPartnership) {
+                if (partnership.clubAlias && partnership.teamAlias) {
+                    console.log(`Getting players from partnership: ${partnership.clubAlias}/${partnership.teamAlias}`);
+                    
+                    try {
+                        // Get the team details first to add to additionalTeamsIds
+                        const partnerTeamResponse = await axios.get(
+                            `${BASE_URL}/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`
+                        );
+                        const partnerTeam = partnerTeamResponse.data;
+                        if (partnerTeam && partnerTeam._id) {
+                            additionalTeamsIds.push(partnerTeam._id);
+                        }
+                        
+                        // Get the players from the partnership team
+                        const playersResponse = await axios.get(
+                            `${BASE_URL}/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`, {
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                            },
+                            params: {
+                                sortby: 'lastName',
+                                active: 'true'
+                            }
+                        });
+
+                        const partnershipPlayers = Array.isArray(playersResponse.data.results)
+                            ? playersResponse.data.results
+                            : [];
+
+                        additionalPlayers = [...additionalPlayers, ...partnershipPlayers];
+                    } catch (error) {
+                        console.error(`Error fetching players from partnership ${partnership.clubAlias}/${partnership.teamAlias}:`, error);
+                    }
+                }
+            }
+        }
+        
         // Define age group progression map
         const ageGroupMergeMap: { [key: string]: string } = {
             'Junioren': 'Jugend',
@@ -127,7 +170,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
             if (youngerTeams.length > 0) {
                 console.log(`Found ${youngerTeams.length} ${youngerAgeGroup} teams to merge with ${teamAgeGroup}`);
-                additionalTeamsIds = youngerTeams.map((team: TeamValues) => team._id);
+                const youngerTeamIds = youngerTeams.map((team: TeamValues) => team._id);
+                additionalTeamsIds = [...additionalTeamsIds, ...youngerTeamIds];
 
                 // Fetch players from each younger team
                 for (const youngerTeam of youngerTeams) {
@@ -146,27 +190,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                         }
                         );
 
-                        const teamPlayers = Array.isArray(playersResponse.data.results)
+                        const youngerTeamPlayers = Array.isArray(playersResponse.data.results)
                             ? playersResponse.data.results
                             : [];
 
-                        additionalPlayers = [...additionalPlayers, ...teamPlayers];
+                        additionalPlayers = [...additionalPlayers, ...youngerTeamPlayers];
                     } catch (error) {
                         console.error(`Error fetching players from ${youngerTeam.name}:`, error);
                     }
                 }
-
-                // Combine the players from the current team and the younger teams
-                allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
-                console.log(`Total players after merging: ${allTeamsPlayers.length}`);
-            } else {
-                console.log(`No ${youngerAgeGroup} teams found to merge with ${teamAgeGroup}`);
-                allTeamsPlayers = teamPlayers;
             }
-        } else {
-            console.log(`No younger age group defined for ${teamAgeGroup}`);
-            allTeamsPlayers = teamPlayers; // Use only the players from the current team
         }
+        
+        // Combine the players from the current team and all additional players
+        allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
+        console.log(`Total players after merging: ${allTeamsPlayers.length}`);
 
         // Debug log to check what's coming back
         console.log("Additional team IDs:", additionalTeamsIds);
