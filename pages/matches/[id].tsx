@@ -52,6 +52,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
   const [editingHomePenalty, setEditingHomePenalty] = useState<PenaltiesBase | null>(null);
   const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
+  const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | null>(null);
+  const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | null>(null);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -618,6 +620,21 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
                                     {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
                                 </td>
+                                {showButtonEvents && (
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                    <button
+                                      onClick={() => {
+                                        setIsHomeGoalDialogOpen(true);
+                                        setEditingHomeGoal(goal);
+                                      }}
+                                      className="text-indigo-600 hover:text-indigo-900"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                    </button>
+                                  </td>
+                                )}
                               </tr>
                             ))}
                         </tbody>
@@ -660,6 +677,21 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
                                     {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
                                 </td>
+                                {showButtonEvents && (
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                    <button
+                                      onClick={() => {
+                                        setIsAwayGoalDialogOpen(true);
+                                        setEditingAwayGoal(goal);
+                                      }}
+                                      className="text-indigo-600 hover:text-indigo-900"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                    </button>
+                                  </td>
+                                )}
                               </tr>
                             ))}
                         </tbody>
@@ -904,23 +936,31 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
       {/* Home Team Goal Dialog */}
       <AddGoalDialog
         isOpen={isHomeGoalDialogOpen}
-        onClose={() => setIsHomeGoalDialogOpen(false)}
+        onClose={() => {
+          setIsHomeGoalDialogOpen(false);
+          setEditingHomeGoal(null);
+        }}
         matchId={match._id}
         teamFlag="home"
         roster={match.home.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editGoal={editingHomeGoal}
       />
 
       {/* Away Team Goal Dialog */}
       <AddGoalDialog
         isOpen={isAwayGoalDialogOpen}
-        onClose={() => setIsAwayGoalDialogOpen(false)}
+        onClose={() => {
+          setIsAwayGoalDialogOpen(false);
+          setEditingAwayGoal(null);
+        }}
         matchId={match._id}
         teamFlag="away"
         roster={match.away.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editGoal={editingAwayGoal}
       />
 
       {/* Home Team Penalty Dialog */}

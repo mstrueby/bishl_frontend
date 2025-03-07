@@ -1,5 +1,4 @@
-
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
 
@@ -18,58 +17,99 @@ interface AddGoalDialogProps {
   roster: Array<{player: Player}>;
   jwt: string;
   onSuccess: () => void;
+  editGoal?: any;
 }
 
-const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess }: AddGoalDialogProps) => {
+const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: AddGoalDialogProps) => {
   const [matchTime, setMatchTime] = useState('');
   const [selectedGoalPlayerId, setSelectedGoalPlayerId] = useState('');
   const [selectedAssistPlayerId, setSelectedAssistPlayerId] = useState('');
+  const [isPPG, setIsPPG] = useState(false);
+  const [isSHG, setIsSHG] = useState(false);
+  const [isGWG, setIsGWG] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Fill the form with the goal data when editing
+  useEffect(() => {
+    if (isOpen && editGoal) {
+      setMatchTime(editGoal.matchTime || '');
+      setSelectedGoalPlayerId(editGoal.goalPlayer ? editGoal.goalPlayer.playerId : '');
+      setSelectedAssistPlayerId(editGoal.assistPlayer ? editGoal.assistPlayer.playerId : '');
+      setIsPPG(editGoal.isPPG || false);
+      setIsSHG(editGoal.isSHG || false);
+      setIsGWG(editGoal.isGWG || false);
+    } else if (isOpen && !editGoal) {
+      // Reset form when opening for a new goal
+      setMatchTime('');
+      setSelectedGoalPlayerId('');
+      setSelectedAssistPlayerId('');
+      setIsPPG(false);
+      setIsSHG(false);
+      setIsGWG(false);
+    }
+  }, [isOpen, editGoal]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     if (!matchTime) {
       setError('Bitte Spielzeit eingeben');
       return;
     }
-    
+
     if (!selectedGoalPlayerId) {
       setError('Bitte Torschütze auswählen');
       return;
     }
-    
+
     setIsSubmitting(true);
     setError('');
-    
+
     // Find the selected players from the roster
     const goalPlayer = roster.find(item => item.player.playerId === selectedGoalPlayerId)?.player;
     const assistPlayer = selectedAssistPlayerId 
       ? roster.find(item => item.player.playerId === selectedAssistPlayerId)?.player 
       : null;
-    
+
     try {
-      const response = await axios.post(
-        `${process.env.API_URL}/matches/${matchId}/${teamFlag}/scores/`, 
-        {
-          matchTime,
-          goalPlayer,
-          assistPlayer: assistPlayer || undefined
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwt}`
+      const goalData = {
+        matchTime,
+        goalPlayer,
+        assistPlayer: assistPlayer || undefined,
+        isPPG,
+        isSHG,
+        isGWG
+      };
+
+      if (editGoal && editGoal._id) {
+        // Update existing goal
+        await axios.patch(
+          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/scores/${editGoal._id}`,
+          goalData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${jwt}`
+            }
           }
-        }
-      );
-      
-      if (response.status === 201) {
-        onSuccess();
-        resetForm();
-        onClose();
+        );
+      } else {
+        // Create new goal
+        await axios.post(
+          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/scores/`, 
+          goalData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${jwt}`
+            }
+          }
+        );
       }
+
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error('Error adding goal:', error);
       setError('Fehler beim Speichern des Tors');
@@ -77,14 +117,17 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       setIsSubmitting(false);
     }
   };
-  
+
   const resetForm = () => {
     setMatchTime('');
     setSelectedGoalPlayerId('');
     setSelectedAssistPlayerId('');
+    setIsPPG(false);
+    setIsSHG(false);
+    setIsGWG(false);
     setError('');
   };
-  
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
@@ -107,15 +150,15 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                 <Dialog.Title
                   as="h3"
                   className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
-                  Tor hinzufügen
+                  {editGoal ? 'Tor bearbeiten' : 'Tor hinzufügen'}
                 </Dialog.Title>
-                
+
                 {error && (
                   <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
                     {error}
                   </div>
                 )}
-                
+
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -129,7 +172,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Torschütze
@@ -147,7 +190,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Assist (optional)
@@ -165,7 +208,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       ))}
                     </select>
                   </div>
-                  
+
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
