@@ -19,7 +19,6 @@ export interface RosterPlayer {
 }
 
 interface ScoresBase {
-  _id?: string;
   matchTime: string;
   goalPlayer: EventPlayer;
   assistPlayer?: EventPlayer;
