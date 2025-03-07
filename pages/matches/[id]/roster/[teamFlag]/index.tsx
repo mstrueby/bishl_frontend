@@ -88,6 +88,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         // get team object
         const teamResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
         const team: TeamValues = await teamResponse.data;
+        console.log(team)
         const teamAgeGroup = team.ageGroup;
 
         // Fetch available players from the current team
