@@ -622,7 +622,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                 </td>
                                 {showButtonEvents && (
                                   <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
-                                    <div className="flex space-x-2">
+                                    <div className="flex justify-end space-x-2">
                                       <button
                                         onClick={() => {
                                           setIsHomeGoalDialogOpen(true);
