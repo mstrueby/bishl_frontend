@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
@@ -65,7 +65,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const { id } = router.query;
 
   // Refresh match data function
-  const refreshMatchData = async () => {
+  const refreshMatchData = useCallback(async () => {
     if (!id || isRefreshing) return;
 
     try {
@@ -78,7 +78,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
       console.error('Error refreshing match data:', error);
       setIsRefreshing(false);
     }
-  };
+  }, [id, isRefreshing]);
 
   // Auto-refresh if match is in progress
   useEffect(() => {
@@ -104,18 +104,18 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   let showButtonEvents = false;
 
   {/** LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN'))) {
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
     showButtonStatus = true;
     showButtonEvents = true;
   }
   {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
     //showButtonStatus = true;
   }
   {/** LEAGE_ADMIN && Spiel läuft */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
   }
@@ -152,19 +152,20 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonRosterAway = true;
   }
   */}
-  {/** ADMIN  */ }
-  if (user && (user.roles.includes('ADMIN'))) {
-    showButtonStatus = true;
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    showButtonEvents = true;
-  }
   if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
     showButtonStatus = false;
     showButtonRosterHome = false;
     showButtonRosterAway = false;
     showButtonEvents = false;
   }
+  {/** ADMIN  */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
+    //showButtonStatus = true;
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    //showButtonEvents = true;
+  }
+  
 
   return (
     <Layout>
@@ -341,67 +342,67 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
           {/* Middle Section with Start/Finish Button */}
           <div className="w-1/3 flex justify-center items-center">
             {showButtonStatus && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000 && (
-            <>
-              {match.matchStatus.key === 'SCHEDULED' && (
-                <button
-                  onClick={async () => {
-                    try {
-                      setIsRefreshing(true);
-                      const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
-                        matchStatus: {
-                          key: "INPROGRESS",
-                          value: "Live"
-                        }
-                      }, {
-                        headers: {
-                          Authorization: `Bearer ${jwt}`,
-                          'Content-Type': 'application/json'
-                        }
-                      });
+              <>
+                {match.matchStatus.key === 'SCHEDULED' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        setIsRefreshing(true);
+                        const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                          matchStatus: {
+                            key: "INPROGRESS",
+                            value: "Live"
+                          }
+                        }, {
+                          headers: {
+                            Authorization: `Bearer ${jwt}`,
+                            'Content-Type': 'application/json'
+                          }
+                        });
 
-                      if (response.status === 200) {
-                        // Update local state instead of reloading
-                        const updatedMatch = response.data;
-                        setMatch(updatedMatch);
+                        if (response.status === 200) {
+                          // Update local state instead of reloading
+                          const updatedMatch = response.data;
+                          setMatch(updatedMatch);
+                        }
+                      } catch (error) {
+                        console.error('Error updating match status:', error);
+                      } finally {
+                        setIsRefreshing(false);
                       }
-                    } catch (error) {
-                      console.error('Error updating match status:', error);
-                    } finally {
-                      setIsRefreshing(false);
-                    }
-                  }}
-                  className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                  {isRefreshing ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    }}
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    {isRefreshing ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                        </svg>
+                        Starten
+                      </>
+                    ) : (
+                      'Starten'
+                    )}
+                  </button>
+                )}
+
+                {match.matchStatus.key === 'INPROGRESS' && showButtonStatus && (
+                  <button
+                    onClick={() => setIsFinishDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    {isRefreshing ? (
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
                       </svg>
-                      Starten
-                    </>
-                  ) : (
-                    'Starten'
-                  )}
-                </button>
-              )}
-
-              {match.matchStatus.key === 'INPROGRESS' && showButtonStatus && (
-                <button
-                  onClick={() => setIsFinishDialogOpen(true)}
-                  className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                >
-                  {isRefreshing ? (
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                    </svg>
-                  ) : (
-                    'Beenden'
-                  )}
-                </button>
-              )}
-            </>
+                    ) : (
+                      'Beenden'
+                    )}
+                  </button>
+                )}
+              </>
             )}
           </div>
 
@@ -705,7 +706,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                               </td>
                               {showButtonEvents && (
                                 <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
-                                  <button 
+                                  <button
                                     onClick={() => {
                                       setEditingHomePenalty(penalty);
                                       setIsHomePenaltyDialogOpen(true);
@@ -757,7 +758,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                               </td>
                               {showButtonEvents && (
                                 <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
-                                  <button 
+                                  <button
                                     onClick={() => {
                                       setEditingAwayPenalty(penalty);
                                       setIsAwayPenaltyDialogOpen(true);
