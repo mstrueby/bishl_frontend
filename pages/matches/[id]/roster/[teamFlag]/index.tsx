@@ -350,8 +350,29 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         });
     };
 
+    // Check if all requirements are met for publishing the roster
+    const isRosterValid = () => {
+        const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+        const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+        const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+        const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+        const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
+        const hasMinFeldspieler = feldspielerCount >= 2;
+        const calledPlayersCount = rosterList.filter(player => player.called).length;
+        const hasMaxCalledPlayers = calledPlayersCount <= 5;
+
+        return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers;
+    };
+
     // Fetch players when a team is selected
     const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
+    // Auto-set published to true if match is finished
+    const isMatchFinished = match.matchStatus.key === 'FINISHED';
+    useEffect(() => {
+        if (isMatchFinished) {
+            setRosterPublished(true);
+        }
+    }, [isMatchFinished]);
 
     // Fetch players when a team is selected
     useEffect(() => {
@@ -661,10 +682,16 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     };
 
     const handleSaveRoster = async () => {
-        //if (rosterList.length === 0) {
-        //    setError('Cannot save an empty roster');
-        //    return;
-        //}
+        // For finished matches, automatically set roster to published
+        if (match.matchStatus.key === 'FINISHED') {
+            setRosterPublished(true);
+        }
+
+        // Check if all requirements are met before saving
+        if (!isRosterValid() && (rosterPublished || match.matchStatus.key === 'FINISHED')) {
+            setError('Die Aufstellung entspricht nicht allen Anforderungen. Bitte überprüfen Sie alle Punkte in der Checkliste.');
+            return;
+        }
 
         setSavingRoster(true);
         setError('');
@@ -673,7 +700,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Prepare the data to be sent
             const rosterData = {
                 roster: rosterList,
-                published: rosterPublished
+                published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
             };
 
             // Make the API call to save the roster
@@ -687,7 +714,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Make API call to save further roster attributes
             const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
                 [teamFlag]: {
-                    rosterPublished: rosterPublished
+                    rosterPublished: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
                 }
             }, {
                 headers: {
@@ -775,8 +802,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                         availablePlayersList.map((player) => (
                                                             <Listbox.Option
                                                                 key={player._id}
-                                                                className={({ active }) =>
-                                                                    classNames(
+                                                                className={({ active }) =>                                                                    classNames(
                                                                         active ? 'bg-indigo-600 text-white' : 'text-gray-900',
                                                                         'relative cursor-default select-none py-2 pl-3 pr-9'
                                                                     )
@@ -1175,23 +1201,31 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     // All checks must pass to enable the checkbox
                                     const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers;
 
-                                    // If checks don't pass, automatically set rosterPublished to false
-                                    if (!allChecksPass && rosterPublished) {
+                                    // If match is finished, always publish roster and disable checkbox
+                                    const isFinished = match.matchStatus.key === 'FINISHED';
+
+                                    // If checks don't pass and not a finished match, automatically set rosterPublished to false
+                                    if (!allChecksPass && rosterPublished && !isFinished) {
                                         setRosterPublished(false);
+                                    }
+
+                                    // If match is finished, always set rosterPublished to true
+                                    if (isFinished && !rosterPublished) {
+                                        setRosterPublished(true);
                                     }
 
                                     return (
                                         <input
                                             id="rosterPublished"
                                             type="checkbox"
-                                            className={`h-4 w-4 rounded border-gray-300 ${allChecksPass ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
-                                            checked={rosterPublished}
+                                            className={`h-4 w-4 rounded border-gray-300 ${allChecksPass || isFinished ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
+                                            checked={rosterPublished || isFinished}
                                             onChange={(e) => {
-                                                if (allChecksPass) {
+                                                if (allChecksPass && !isFinished) {
                                                     setRosterPublished(e.target.checked);
                                                 }
                                             }}
-                                            disabled={!allChecksPass}
+                                            disabled={!allChecksPass || isFinished}
                                         />
                                     );
                                 })()}
