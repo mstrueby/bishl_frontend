@@ -18,7 +18,8 @@ export interface RosterPlayer {
   called: boolean;
 }
 
-interface ScoresBase {
+export interface ScoresBase {
+  _id?: string;
   matchTime: string;
   goalPlayer: EventPlayer;
   assistPlayer?: EventPlayer;

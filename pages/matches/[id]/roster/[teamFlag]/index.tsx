@@ -108,6 +108,49 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         let additionalPlayers: PlayerValues[] = [];
         let additionalTeamsIds: string[] = [];
 
+        // Handle team partnerships if they exist
+        if (team.teamPartnership && Array.isArray(team.teamPartnership) && team.teamPartnership.length > 0) {
+            console.log(`Found ${team.teamPartnership.length} team partnerships`);
+
+            // Fetch players from each partnership team
+            for (const partnership of team.teamPartnership) {
+                if (partnership.clubAlias && partnership.teamAlias) {
+                    console.log(`Getting players from partnership: ${partnership.clubAlias}/${partnership.teamAlias}`);
+
+                    try {
+                        // Get the team details first to add to additionalTeamsIds
+                        const partnerTeamResponse = await axios.get(
+                            `${BASE_URL}/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`
+                        );
+                        const partnerTeam = partnerTeamResponse.data;
+                        if (partnerTeam && partnerTeam._id) {
+                            additionalTeamsIds.push(partnerTeam._id);
+                        }
+
+                        // Get the players from the partnership team
+                        const playersResponse = await axios.get(
+                            `${BASE_URL}/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`, {
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                            },
+                            params: {
+                                sortby: 'lastName',
+                                active: 'true'
+                            }
+                        });
+
+                        const partnershipPlayers = Array.isArray(playersResponse.data.results)
+                            ? playersResponse.data.results
+                            : [];
+
+                        additionalPlayers = [...additionalPlayers, ...partnershipPlayers];
+                    } catch (error) {
+                        console.error(`Error fetching players from partnership ${partnership.clubAlias}/${partnership.teamAlias}:`, error);
+                    }
+                }
+            }
+        }
+
         // Define age group progression map
         const ageGroupMergeMap: { [key: string]: string } = {
             'Junioren': 'Jugend',
@@ -127,7 +170,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
             if (youngerTeams.length > 0) {
                 console.log(`Found ${youngerTeams.length} ${youngerAgeGroup} teams to merge with ${teamAgeGroup}`);
-                additionalTeamsIds = youngerTeams.map((team: TeamValues) => team._id);
+                const youngerTeamIds = youngerTeams.map((team: TeamValues) => team._id);
+                additionalTeamsIds = [...additionalTeamsIds, ...youngerTeamIds];
 
                 // Fetch players from each younger team
                 for (const youngerTeam of youngerTeams) {
@@ -146,27 +190,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                         }
                         );
 
-                        const teamPlayers = Array.isArray(playersResponse.data.results)
+                        const youngerTeamPlayers = Array.isArray(playersResponse.data.results)
                             ? playersResponse.data.results
                             : [];
 
-                        additionalPlayers = [...additionalPlayers, ...teamPlayers];
+                        additionalPlayers = [...additionalPlayers, ...youngerTeamPlayers];
                     } catch (error) {
                         console.error(`Error fetching players from ${youngerTeam.name}:`, error);
                     }
                 }
-
-                // Combine the players from the current team and the younger teams
-                allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
-                console.log(`Total players after merging: ${allTeamsPlayers.length}`);
-            } else {
-                console.log(`No ${youngerAgeGroup} teams found to merge with ${teamAgeGroup}`);
-                allTeamsPlayers = teamPlayers;
             }
-        } else {
-            console.log(`No younger age group defined for ${teamAgeGroup}`);
-            allTeamsPlayers = teamPlayers; // Use only the players from the current team
         }
+
+        // Combine the players from the current team and all additional players
+        allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
+        console.log(`Total players after merging: ${allTeamsPlayers.length}`);
 
         // Debug log to check what's coming back
         console.log("Additional team IDs:", additionalTeamsIds);
@@ -803,10 +841,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                         availablePlayersList.map((player) => (
                                                             <Listbox.Option
                                                                 key={player._id}
-                                                                className={({ active }) =>                                                                    classNames(
-                                                                        active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                                                        'relative cursor-default select-none py-2 pl-3 pr-9'
-                                                                    )
+                                                                className={({ active }) => classNames(
+                                                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                                                    'relative cursor-default select-none py-2 pl-3 pr-9'
+                                                                )
                                                                 }
                                                                 value={player}
                                                                 onClick={() => {
@@ -1005,11 +1043,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                             </button>
                                             {(() => {
                                                 // Check if player has any events (goals or penalties)
-                                                const hasScored = match[teamFlag].scores?.some(score => 
-                                                    score.goalPlayer.playerId === player.player.playerId || 
+                                                const hasScored = match[teamFlag as 'home' | 'away'].scores?.some(score =>
+                                                    score.goalPlayer.playerId === player.player.playerId ||
                                                     (score.assistPlayer && score.assistPlayer.playerId === player.player.playerId)
                                                 );
-                                                const hasPenalty = match[teamFlag].penalties?.some(penalty => 
+                                                const hasPenalty = match[teamFlag as 'home' | 'away'].penalties?.some(penalty =>
                                                     penalty.penaltyPlayer.playerId === player.player.playerId
                                                 );
                                                 const hasEvents = hasScored || hasPenalty;
@@ -1280,11 +1318,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         type="button"
                         onClick={handleSaveRoster}
                         disabled={loading || savingRoster || (match.matchStatus.key === 'FINISHED' && !isRosterValid())}
-                        className={`w-24 inline-flex justify-center items-center rounded-md border border-transparent ${
-                            match.matchStatus.key === 'FINISHED' && !isRosterValid() 
-                            ? 'bg-indigo-300 cursor-not-allowed' 
-                            : 'bg-indigo-600 hover:bg-indigo-500'
-                        } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+                        className={`w-24 inline-flex justify-center items-center rounded-md border border-transparent ${match.matchStatus.key === 'FINISHED' && !isRosterValid()
+                                ? 'bg-indigo-300 cursor-not-allowed'
+                                : 'bg-indigo-600 hover:bg-indigo-500'
+                            } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
                     >
                         {savingRoster ? (
                             <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

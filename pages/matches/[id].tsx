@@ -52,6 +52,8 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
   const [editingHomePenalty, setEditingHomePenalty] = useState<PenaltiesBase | null>(null);
   const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
+  const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | null>(null);
+  const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | null>(null);
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -618,6 +620,50 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
                                     {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
                                 </td>
+                                {showButtonEvents && (
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                    <div className="flex justify-end space-x-2">
+                                      <button
+                                        onClick={() => {
+                                          setIsHomeGoalDialogOpen(true);
+                                          setEditingHomeGoal(goal);
+                                        }}
+                                        className="text-indigo-600 hover:text-indigo-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
+                                            try {
+                                              const response = await axios.delete(
+                                                `${process.env.API_URL}/matches/${match._id}/home/scores/${goal._id}`,
+                                                {
+                                                  headers: {
+                                                    Authorization: `Bearer ${jwt}`,
+                                                    'Content-Type': 'application/json'
+                                                  }
+                                                }
+                                              );
+                                              if (response.status === 200 || response.status === 204) {
+                                                refreshMatchData();
+                                              }
+                                            } catch (error) {
+                                              console.error('Error deleting goal:', error);
+                                            }
+                                          }
+                                        }}
+                                        className="text-red-600 hover:text-red-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </td>
+                                )}
                               </tr>
                             ))}
                         </tbody>
@@ -660,6 +706,50 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                   <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
                                     {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
                                 </td>
+                                {showButtonEvents && (
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                    <div className="flex space-x-2">
+                                      <button
+                                        onClick={() => {
+                                          setIsAwayGoalDialogOpen(true);
+                                          setEditingAwayGoal(goal);
+                                        }}
+                                        className="text-indigo-600 hover:text-indigo-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
+                                            try {
+                                              const response = await axios.delete(
+                                                `${process.env.API_URL}/matches/${match._id}/away/scores/${goal._id}`,
+                                                {
+                                                  headers: {
+                                                    Authorization: `Bearer ${jwt}`,
+                                                    'Content-Type': 'application/json'
+                                                  }
+                                                }
+                                              );
+                                              if (response.status === 200 || response.status === 204) {
+                                                refreshMatchData();
+                                              }
+                                            } catch (error) {
+                                              console.error('Error deleting goal:', error);
+                                            }
+                                          }
+                                        }}
+                                        className="text-red-600 hover:text-red-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </td>
+                                )}
                               </tr>
                             ))}
                         </tbody>
@@ -904,23 +994,31 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
       {/* Home Team Goal Dialog */}
       <AddGoalDialog
         isOpen={isHomeGoalDialogOpen}
-        onClose={() => setIsHomeGoalDialogOpen(false)}
+        onClose={() => {
+          setIsHomeGoalDialogOpen(false);
+          setEditingHomeGoal(null);
+        }}
         matchId={match._id}
         teamFlag="home"
         roster={match.home.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editGoal={editingHomeGoal}
       />
 
       {/* Away Team Goal Dialog */}
       <AddGoalDialog
         isOpen={isAwayGoalDialogOpen}
-        onClose={() => setIsAwayGoalDialogOpen(false)}
+        onClose={() => {
+          setIsAwayGoalDialogOpen(false);
+          setEditingAwayGoal(null);
+        }}
         matchId={match._id}
         teamFlag="away"
         roster={match.away.roster || []}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
+        editGoal={editingAwayGoal}
       />
 
       {/* Home Team Penalty Dialog */}
