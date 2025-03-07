@@ -714,6 +714,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             if (!error) {
                 setSuccessMessage('Aufstellung erfolgreich gespeichert.');
             }
+            // Scroll to the top of the page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
