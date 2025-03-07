@@ -600,7 +600,14 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     {match.home.scores && match.home.scores.length > 0 ? (
                       <ul className="divide-y divide-gray-200">
                         {match.home.scores
-                          //.sort((a, b) => a.matchSeconds - b.matchSeconds)
+                          .sort((a, b) => {
+                            // Convert matchTime (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTime.split(":").map(Number);
+                            const timeB = b.matchTime.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
                           .map((goal, index) => (
                             <li key={`home-goal-${index}`} className="flex items-center py-3 px-4">
                               <div className="w-16 flex-shrink-0 text-sm text-gray-900">
@@ -678,7 +685,14 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     {match.away.scores && match.away.scores.length > 0 ? (
                       <ul className="divide-y divide-gray-200">
                         {match.away.scores
-                          //.sort((a, b) => a.matchSeconds - b.matchSeconds)
+                          .sort((a, b) => {
+                            // Convert matchTime (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTime.split(":").map(Number);
+                            const timeB = b.matchTime.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
                           .map((goal, index) => (
                             <li key={`away-goal-${index}`} className="flex items-center py-3 px-4">
                               <div className="w-16 flex-shrink-0 text-sm text-gray-900">
@@ -762,7 +776,16 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.penalties && match.home.penalties.length > 0 ? (
                       <ul className="divide-y divide-gray-200">
-                        {match.home.penalties.map((penalty, index) => (
+                        {match.home.penalties
+                          .sort((a, b) => {
+                            // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTimeStart.split(":").map(Number);
+                            const timeB = b.matchTimeStart.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
+                          .map((penalty, index) => (
                           <li key={`home-penalty-${index}`} className="flex items-center py-3 px-4">
                             <div className="w-20 flex-shrink-0 text-sm text-gray-900">
                               {penalty.matchTimeStart}
@@ -839,7 +862,16 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.away.penalties && match.away.penalties.length > 0 ? (
                       <ul className="divide-y divide-gray-200">
-                        {match.away.penalties.map((penalty, index) => (
+                        {match.away.penalties
+                          .sort((a, b) => {
+                            // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTimeStart.split(":").map(Number);
+                            const timeB = b.matchTimeStart.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
+                          .map((penalty, index) => (
                           <li key={`away-penalty-${index}`} className="flex items-center py-3 px-4">
                             <div className="w-20 flex-shrink-0 text-sm text-gray-900">
                               {penalty.matchTimeStart}
