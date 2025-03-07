@@ -167,7 +167,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonRosterAway = true;
     //showButtonEvents = true;
   }
-
+  
 
   return (
     <Layout>
@@ -501,33 +501,35 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                       </div>
                       <div className="overflow-hidden bg-white shadow-md rounded-md border">
                         {match.home.rosterPublished && sortedHomeRoster && sortedHomeRoster.length > 0 ? (
-                          <ul className="min-w-full divide-y divide-gray-200">
-                            {sortedHomeRoster.map((player) => (
-                              <li key={player.player.playerId} className="py-3 px-2 flex items-start sm:items-center">
-                                <div className="min-w-8 text-sm text-gray-900 font-medium text-center pr-2">
-                                  {player.player.jerseyNumber}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-gray-900 truncate">
-                                    {player.player.firstName} {player.player.lastName}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {player.playerPosition.key} - {player.passNumber}
-                                  </p>
-                                </div>
-                                <div>
-                                  {player.called && (
-                                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                      </svg>
-                                      <span className="hidden sm:inline">Hochgemeldet</span>
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {sortedHomeRoster.map((player) => (
+                                <tr key={player.player.playerId}>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">{player.player.jerseyNumber}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">{player.playerPosition.key}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    <span>{player.player.firstName} {player.player.lastName}</span>
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+
+                                    <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                      {player.passNumber}
                                     </span>
-                                  )}
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    {player.called && (
+                                      <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                          <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="hidden sm:inline">Hochgemeldet</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         ) : (
                           <div className="text-center py-4 text-sm text-gray-500">
                             {match.home.rosterPublished === false ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
@@ -543,33 +545,35 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                       </div>
                       <div className="overflow-hidden bg-white shadow-md rounded-md border">
                         {match.away.rosterPublished && sortedAwayRoster && sortedAwayRoster.length > 0 ? (
-                          <ul className="min-w-full divide-y divide-gray-200">
-                            {sortedAwayRoster.map((player) => (
-                              <li key={player.player.playerId} className="py-3 px-2 flex items-start sm:items-center">
-                                <div className="min-w-8 text-sm text-gray-900 font-medium text-center pr-2">
-                                  {player.player.jerseyNumber}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-gray-900 truncate">
-                                    {player.player.firstName} {player.player.lastName}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {player.playerPosition.key} - {player.passNumber}
-                                  </p>
-                                </div>
-                                <div>
-                                  {player.called && (
-                                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                      </svg>
-                                      <span className="hidden sm:inline">Hochgemeldet</span>
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {sortedAwayRoster.map((player) => (
+                                <tr key={player.player.playerId}>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">{player.player.jerseyNumber}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">{player.playerPosition.key}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    <span>{player.player.firstName} {player.player.lastName}</span>
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+
+                                    <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                      {player.passNumber}
                                     </span>
-                                  )}
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    {player.called && (
+                                      <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                          <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="hidden sm:inline">Hochgemeldet</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         ) : (
                           <div className="text-center py-4 text-sm text-gray-500">
                             {match.away.rosterPublished === false ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
@@ -594,67 +598,76 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.scores && match.home.scores.length > 0 ? (
-                      <ul className="divide-y divide-gray-200">
-                        {match.home.scores.map((goal, index) => (
-                          <li key={`home-goal-${index}`} className="py-3 px-2 flex items-start sm:items-center">
-                            <div className="min-w-16 text-sm text-gray-900 font-medium pr-2">
-                              {goal.matchTime}
-                            </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-gray-900 truncate">
-                                    {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
-                                  </p>
-                                  {goal.assistPlayer && (
-                                    <p className="text-xs text-gray-500 truncate">
-                                      #${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}
-                                    </p>
-                                  )}
-                                </div>
+                      <table className="min-w-full divide-y divide-gray-200">
+                        {/*
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spieler</th>
+                          </tr>
+                        </thead>
+                        */}
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {/* Sort goals by matchSeconds and map them */}
+                          {match.home.scores
+                            //.sort((a, b) => a.matchSeconds - b.matchSeconds)
+                            .map((goal, index) => (
+                              <tr key={`home-goal-${index}`}>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                  {goal.matchTime}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                  <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
+                                    {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
+                                </td>
                                 {showButtonEvents && (
-                                  <div className="flex space-x-2 ml-2">
-                                    <button
-                                      onClick={() => {
-                                        setIsHomeGoalDialogOpen(true);
-                                        setEditingHomeGoal(goal);
-                                      }}
-                                      className="text-indigo-600 hover:text-indigo-900"
-                                    >
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                      </svg>
-                                    </button>
-                                    <button
-                                      onClick={async () => {
-                                        if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
-                                          try {
-                                            const response = await axios.delete(
-                                              `${process.env.API_URL}/matches/${match._id}/home/scores/${goal._id}`,
-                                              {
-                                                headers: {
-                                                  Authorization: `Bearer ${jwt}`,
-                                                  'Content-Type': 'application/json'
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                    <div className="flex justify-end space-x-2">
+                                      <button
+                                        onClick={() => {
+                                          setIsHomeGoalDialogOpen(true);
+                                          setEditingHomeGoal(goal);
+                                        }}
+                                        className="text-indigo-600 hover:text-indigo-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
+                                            try {
+                                              const response = await axios.delete(
+                                                `${process.env.API_URL}/matches/${match._id}/home/scores/${goal._id}`,
+                                                {
+                                                  headers: {
+                                                    Authorization: `Bearer ${jwt}`,
+                                                    'Content-Type': 'application/json'
+                                                  }
                                                 }
+                                              );
+                                              if (response.status === 200 || response.status === 204) {
+                                                refreshMatchData();
                                               }
-                                            );
-                                            if (response.status === 200 || response.status === 204) {
-                                              refreshMatchData();
+                                            } catch (error) {
+                                              console.error('Error deleting goal:', error);
                                             }
-                                          } catch (error) {
-                                            console.error('Error deleting goal:', error);
                                           }
-                                        }
-                                      }}
-                                      className="text-red-600 hover:text-red-900"
-                                    >
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                      </svg>
-                                    </button>
-                                  </div>
+                                        }}
+                                        className="text-red-600 hover:text-red-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </td>
                                 )}
-                          </li>
-                        ))}
-                      </ul>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Tore vorhanden
@@ -670,67 +683,77 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.away.scores && match.away.scores.length > 0 ? (
-                      <ul className="divide-y divide-gray-200">
-                        {match.away.scores.map((goal, index) => (
-                          <li key={`away-goal-${index}`} className="py-3 px-2 flex items-start sm:items-center">
-                            <div className="min-w-16 text-sm text-gray-900 font-medium pr-2">
-                              {goal.matchTime}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-gray-900 truncate">
-                                {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
-                              </p>
-                              {goal.assistPlayer && (
-                                <p className="text-xs text-gray-500 truncate">
-                                  #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
-                                </p>
-                              )}
-                            </div>
-                            {showButtonEvents && (
-                              <div className="flex space-x-2 ml-2">
-                                <button
-                                  onClick={() => {
-                                    setIsAwayGoalDialogOpen(true);
-                                    setEditingAwayGoal(goal);
-                                  }}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
-                                      try {
-                                        const response = await axios.delete(
-                                          `${process.env.API_URL}/matches/${match._id}/away/scores/${goal._id}`,
-                                          {
-                                            headers: {
-                                              Authorization: `Bearer ${jwt}`,
-                                              'Content-Type': 'application/json'
+                      <table className="min-w-full divide-y divide-gray-200">
+                        {/*
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spieler</th>
+                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assist</th>
+                          </tr>
+                        </thead>
+                        */}
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {/* Sort goals by matchSeconds and map them */}
+                          {match.away.scores
+                            //.sort((a, b) => a.matchSeconds - b.matchSeconds)
+                            .map((goal, index) => (
+                              <tr key={`away-goal-${index}`}>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                  {goal.matchTime}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                  <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
+                                    {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
+                                </td>
+                                {showButtonEvents && (
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                    <div className="flex space-x-2">
+                                      <button
+                                        onClick={() => {
+                                          setIsAwayGoalDialogOpen(true);
+                                          setEditingAwayGoal(goal);
+                                        }}
+                                        className="text-indigo-600 hover:text-indigo-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
+                                            try {
+                                              const response = await axios.delete(
+                                                `${process.env.API_URL}/matches/${match._id}/away/scores/${goal._id}`,
+                                                {
+                                                  headers: {
+                                                    Authorization: `Bearer ${jwt}`,
+                                                    'Content-Type': 'application/json'
+                                                  }
+                                                }
+                                              );
+                                              if (response.status === 200 || response.status === 204) {
+                                                refreshMatchData();
+                                              }
+                                            } catch (error) {
+                                              console.error('Error deleting goal:', error);
                                             }
                                           }
-                                        );
-                                        if (response.status === 200 || response.status === 204) {
-                                          refreshMatchData();
-                                        }
-                                      } catch (error) {
-                                        console.error('Error deleting goal:', error);
-                                      }
-                                    }
-                                  }}
-                                  className="text-red-600 hover:text-red-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                                        }}
+                                        className="text-red-600 hover:text-red-900"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </td>
+                                )}
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Tore vorhanden
@@ -753,41 +776,43 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.penalties && match.home.penalties.length > 0 ? (
-                      <ul className="min-w-full divide-y divide-gray-200">
-                        {match.home.penalties.map((penalty, index) => (
-                          <li key={`home-penalty-${index}`} className="py-3 px-2 flex items-start sm:items-center">
-                            <div className="min-w-16 text-sm text-gray-900 font-medium pr-2">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-gray-900 truncate">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                            {showButtonEvents && (
-                              <div className="flex space-x-2 ml-2">
-                                <button
-                                  onClick={() => {
-                                    setEditingHomePenalty(penalty);
-                                    setIsHomePenaltyDialogOpen(true);
-                                  }}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                      <table className="min-w-full divide-y divide-gray200">
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.home.penalties.map((penalty, index) => (
+                            <tr key={`home-penalty-${index}`}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                {penalty.matchTimeStart}
+                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                <p>
+                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                  {penalty.isGM && ' (GM)'}
+                                  {penalty.isMP && ' (MP)'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                                </p>
+                              </td>
+                              {showButtonEvents && (
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                  <button
+                                    onClick={() => {
+                                      setEditingHomePenalty(penalty);
+                                      setIsHomePenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Strafen vorhanden
@@ -803,41 +828,43 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.away.penalties && match.away.penalties.length > 0 ? (
-                      <ul className="min-w-full divide-y divide-gray-200">
-                        {match.away.penalties.map((penalty, index) => (
-                          <li key={`away-penalty-${index}`} className="py-3 px-2 flex items-start sm:items-center">
-                            <div className="min-w-16 text-sm text-gray-900 font-medium pr-2">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-gray-900 truncate">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                            {showButtonEvents && (
-                              <div className="flex space-x-2 ml-2">
-                                <button
-                                  onClick={() => {
-                                    setEditingAwayPenalty(penalty);
-                                    setIsAwayPenaltyDialogOpen(true);
-                                  }}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {match.away.penalties.map((penalty, index) => (
+                            <tr key={`away-penalty-${index}`}>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
+                                {penalty.matchTimeStart}
+                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                <p>
+                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                  {penalty.isGM && ' (GM)'}
+                                  {penalty.isMP && ' (MP)'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                                </p>
+                              </td>
+                              {showButtonEvents && (
+                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
+                                  <button
+                                    onClick={() => {
+                                      setEditingAwayPenalty(penalty);
+                                      setIsAwayPenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Strafen vorhanden
@@ -960,7 +987,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                 </Dialog.Panel>
               </Transition.Child>
             </div>
-          </div>
+          </div>d
         </Dialog>
       </Transition>
 
