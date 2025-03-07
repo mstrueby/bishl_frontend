@@ -143,7 +143,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
 
       if (editPenalty && editPenalty._id) {
         // Update existing penalty
-        const response = await axios.put(
+        const response = await axios.patch(
           `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
           penaltyData,
           {
