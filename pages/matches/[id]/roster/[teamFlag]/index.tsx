@@ -60,7 +60,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         const user = userResponse.data;
         // console.log("user:", user)
-        if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
+        if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
             return {
                 redirect: {
                     destination: '/',

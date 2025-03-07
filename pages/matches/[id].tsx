@@ -104,18 +104,18 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   let showButtonEvents = false;
 
   {/** LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN'))) {
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
     showButtonStatus = true;
     showButtonEvents = true;
   }
   {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
     //showButtonStatus = true;
   }
   {/** LEAGE_ADMIN && Spiel läuft */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
   }
@@ -152,19 +152,20 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonRosterAway = true;
   }
   */}
-  {/** ADMIN  */ }
-  if (user && (user.roles.includes('ADMIN'))) {
-    showButtonStatus = true;
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    showButtonEvents = true;
-  }
   if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
     showButtonStatus = false;
     showButtonRosterHome = false;
     showButtonRosterAway = false;
     showButtonEvents = false;
   }
+  {/** ADMIN  */ }
+  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
+    //showButtonStatus = true;
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    //showButtonEvents = true;
+  }
+  
 
   return (
     <Layout>
