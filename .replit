@@ -85,12 +85,17 @@ externalPort = 3001
 localPort = 3002
 externalPort = 3002
 
+[[ports]]
+localPort = 3003
+externalPort = 3003
+
 [deployment]
 deploymentTarget = "cloudrun"
 build = ["sh", "-c", "npm run build"]
 run = ["sh", "-c", "npm start"]
 
 [workflows]
+runButton = "Dev"
 
 [[workflows.workflow]]
 name = "Dev"
@@ -98,4 +103,12 @@ author = 19449957
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "NODE_ENV=production npm run dev"
+args = "NODE_ENV=development npm run dev"
+
+[[workflows.workflow]]
+name = "Build"
+author = 19449957
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "NODE_ENV=production npm run build"
