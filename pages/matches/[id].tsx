@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 import { Dialog, Transition } from '@headlessui/react';
-import { Match, RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
+import { Match, RosterPlayer, PenaltiesBase, ScoresBase } from '../../types/MatchValues';
 import Layout from '../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
@@ -72,7 +72,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
 
     try {
       setIsRefreshing(true);
-      const response = await fetch(`${process.env.API_URL}/matches/${id}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`);
       const updatedMatch = await response.json();
       setMatch(updatedMatch);
       setIsRefreshing(false);
@@ -350,7 +350,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     onClick={async () => {
                       try {
                         setIsRefreshing(true);
-                        const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                        const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
                           matchStatus: {
                             key: "INPROGRESS",
                             value: "Live"
@@ -598,76 +598,76 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.scores && match.home.scores.length > 0 ? (
-                      <table className="min-w-full divide-y divide-gray-200">
-                        {/*
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
-                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spieler</th>
-                          </tr>
-                        </thead>
-                        */}
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {/* Sort goals by matchSeconds and map them */}
-                          {match.home.scores
-                            //.sort((a, b) => a.matchSeconds - b.matchSeconds)
-                            .map((goal, index) => (
-                              <tr key={`home-goal-${index}`}>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
-                                  {goal.matchTime}
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
-                                    {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
-                                </td>
-                                {showButtonEvents && (
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
-                                    <div className="flex justify-end space-x-2">
-                                      <button
-                                        onClick={() => {
-                                          setIsHomeGoalDialogOpen(true);
-                                          setEditingHomeGoal(goal);
-                                        }}
-                                        className="text-indigo-600 hover:text-indigo-900"
-                                      >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                      </button>
-                                      <button
-                                        onClick={async () => {
-                                          if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
-                                            try {
-                                              const response = await axios.delete(
-                                                `${process.env.API_URL}/matches/${match._id}/home/scores/${goal._id}`,
-                                                {
-                                                  headers: {
-                                                    Authorization: `Bearer ${jwt}`,
-                                                    'Content-Type': 'application/json'
-                                                  }
-                                                }
-                                              );
-                                              if (response.status === 200 || response.status === 204) {
-                                                refreshMatchData();
-                                              }
-                                            } catch (error) {
-                                              console.error('Error deleting goal:', error);
-                                            }
-                                          }
-                                        }}
-                                        className="text-red-600 hover:text-red-900"
-                                      >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                      </button>
-                                    </div>
-                                  </td>
+                      <ul className="divide-y divide-gray-200">
+                        {match.home.scores
+                          .sort((a, b) => {
+                            // Convert matchTime (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTime.split(":").map(Number);
+                            const timeB = b.matchTime.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
+                          .map((goal, index) => (
+                            <li key={`home-goal-${index}`} className="flex items-center py-3 px-4">
+                              <div className="w-16 flex-shrink-0 text-sm text-gray-900">
+                                {goal.matchTime}
+                              </div>
+                              <div className="flex-grow">
+                                <p className="text-sm text-gray-900">
+                                  {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
+                                </p>
+                                {goal.assistPlayer && (
+                                  <p className="text-xs text-gray-500">
+                                    #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
+                                  </p>
                                 )}
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
+                              </div>
+                              {showButtonEvents && (
+                                <div className="flex justify-end space-x-2 flex-shrink-0">
+                                  <button
+                                    onClick={() => {
+                                      setIsHomeGoalDialogOpen(true);
+                                      setEditingHomeGoal(goal);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
+                                        try {
+                                          const response = await axios.delete(
+                                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/scores/${goal._id}`,
+                                            {
+                                              headers: {
+                                                Authorization: `Bearer ${jwt}`,
+                                                'Content-Type': 'application/json'
+                                              }
+                                            }
+                                          );
+                                          if (response.status === 200 || response.status === 204) {
+                                            refreshMatchData();
+                                          }
+                                        } catch (error) {
+                                          console.error('Error deleting goal:', error);
+                                        }
+                                      }
+                                    }}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                      </ul>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Tore vorhanden
@@ -683,77 +683,76 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.away.scores && match.away.scores.length > 0 ? (
-                      <table className="min-w-full divide-y divide-gray-200">
-                        {/*
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
-                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spieler</th>
-                            <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assist</th>
-                          </tr>
-                        </thead>
-                        */}
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {/* Sort goals by matchSeconds and map them */}
-                          {match.away.scores
-                            //.sort((a, b) => a.matchSeconds - b.matchSeconds)
-                            .map((goal, index) => (
-                              <tr key={`away-goal-${index}`}>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
-                                  {goal.matchTime}
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  <p>{goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}</p><p className="text-xs text-gray-500">
-                                    {goal.assistPlayer ? `#${goal.assistPlayer.jerseyNumber} ${goal.assistPlayer.firstName} ${goal.assistPlayer.lastName}` : ''}</p>
-                                </td>
-                                {showButtonEvents && (
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
-                                    <div className="flex space-x-2">
-                                      <button
-                                        onClick={() => {
-                                          setIsAwayGoalDialogOpen(true);
-                                          setEditingAwayGoal(goal);
-                                        }}
-                                        className="text-indigo-600 hover:text-indigo-900"
-                                      >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                      </button>
-                                      <button
-                                        onClick={async () => {
-                                          if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
-                                            try {
-                                              const response = await axios.delete(
-                                                `${process.env.API_URL}/matches/${match._id}/away/scores/${goal._id}`,
-                                                {
-                                                  headers: {
-                                                    Authorization: `Bearer ${jwt}`,
-                                                    'Content-Type': 'application/json'
-                                                  }
-                                                }
-                                              );
-                                              if (response.status === 200 || response.status === 204) {
-                                                refreshMatchData();
-                                              }
-                                            } catch (error) {
-                                              console.error('Error deleting goal:', error);
-                                            }
-                                          }
-                                        }}
-                                        className="text-red-600 hover:text-red-900"
-                                      >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                      </button>
-                                    </div>
-                                  </td>
+                      <ul className="divide-y divide-gray-200">
+                        {match.away.scores
+                          .sort((a, b) => {
+                            // Convert matchTime (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTime.split(":").map(Number);
+                            const timeB = b.matchTime.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
+                          .map((goal, index) => (
+                            <li key={`away-goal-${index}`} className="flex items-center py-3 px-4">
+                              <div className="w-16 flex-shrink-0 text-sm text-gray-900">
+                                {goal.matchTime}
+                              </div>
+                              <div className="flex-grow">
+                                <p className="text-sm text-gray-900">
+                                  {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
+                                </p>
+                                {goal.assistPlayer && (
+                                  <p className="text-xs text-gray-500">
+                                    #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
+                                  </p>
                                 )}
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
+                              </div>
+                              {showButtonEvents && (
+                                <div className="flex justify-end space-x-2 flex-shrink-0">
+                                  <button
+                                    onClick={() => {
+                                      setIsAwayGoalDialogOpen(true);
+                                      setEditingAwayGoal(goal);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
+                                        try {
+                                          const response = await axios.delete(
+                                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/scores/${goal._id}`,
+                                            {
+                                              headers: {
+                                                Authorization: `Bearer ${jwt}`,
+                                                'Content-Type': 'application/json'
+                                              }
+                                            }
+                                          );
+                                          if (response.status === 200 || response.status === 204) {
+                                            refreshMatchData();
+                                          }
+                                        } catch (error) {
+                                          console.error('Error deleting goal:', error);
+                                        }
+                                      }
+                                    }}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                      </ul>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Tore vorhanden
@@ -776,43 +775,77 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.home.penalties && match.home.penalties.length > 0 ? (
-                      <table className="min-w-full divide-y divide-gray200">
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {match.home.penalties.map((penalty, index) => (
-                            <tr key={`home-penalty-${index}`}>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
-                                {penalty.matchTimeStart}
-                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                              </td>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                <p>
-                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                  {penalty.isGM && ' (GM)'}
-                                  {penalty.isMP && ' (MP)'}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                                </p>
-                              </td>
-                              {showButtonEvents && (
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
-                                  <button
-                                    onClick={() => {
-                                      setEditingHomePenalty(penalty);
-                                      setIsHomePenaltyDialogOpen(true);
-                                    }}
-                                    className="text-indigo-600 hover:text-indigo-900"
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                  </button>
-                                </td>
-                              )}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <ul className="divide-y divide-gray-200">
+                        {match.home.penalties
+                          .sort((a, b) => {
+                            // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTimeStart.split(":").map(Number);
+                            const timeB = b.matchTimeStart.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
+                          .map((penalty, index) => (
+                          <li key={`home-penalty-${index}`} className="flex items-center py-3 px-4">
+                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
+                              {penalty.matchTimeStart}
+                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
+                            </div>
+                            <div className="flex-grow">
+                              <p className="text-sm text-gray-900">
+                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                {penalty.isGM && ' (GM)'}
+                                {penalty.isMP && ' (MP)'}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                              </p>
+                            </div>
+                            {showButtonEvents && (
+                              <div className="flex justify-end space-x-2 flex-shrink-0">
+                                <button
+                                  onClick={() => {
+                                    setEditingHomePenalty(penalty);
+                                    setIsHomePenaltyDialogOpen(true);
+                                  }}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
+                                      try {
+                                        const response = await axios.delete(
+                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/penalties/${penalty._id}`,
+                                          {
+                                            headers: {
+                                              Authorization: `Bearer ${jwt}`,
+                                              'Content-Type': 'application/json'
+                                            }
+                                          }
+                                        );
+                                        if (response.status === 200 || response.status === 204) {
+                                          refreshMatchData();
+                                        }
+                                      } catch (error) {
+                                        console.error('Error deleting penalty:', error);
+                                      }
+                                    }
+                                  }}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Strafen vorhanden
@@ -828,43 +861,77 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                   </div>
                   <div className="overflow-hidden bg-white shadow-md rounded-md border">
                     {match.away.penalties && match.away.penalties.length > 0 ? (
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {match.away.penalties.map((penalty, index) => (
-                            <tr key={`away-penalty-${index}`}>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-16">
-                                {penalty.matchTimeStart}
-                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                              </td>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                <p>
-                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                  {penalty.isGM && ' (GM)'}
-                                  {penalty.isMP && ' (MP)'}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                                </p>
-                              </td>
-                              {showButtonEvents && (
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-right">
-                                  <button
-                                    onClick={() => {
-                                      setEditingAwayPenalty(penalty);
-                                      setIsAwayPenaltyDialogOpen(true);
-                                    }}
-                                    className="text-indigo-600 hover:text-indigo-900"
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                  </button>
-                                </td>
-                              )}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <ul className="divide-y divide-gray-200">
+                        {match.away.penalties
+                          .sort((a, b) => {
+                            // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
+                            const timeA = a.matchTimeStart.split(":").map(Number);
+                            const timeB = b.matchTimeStart.split(":").map(Number);
+                            const secondsA = timeA[0] * 60 + timeA[1];
+                            const secondsB = timeB[0] * 60 + timeB[1];
+                            return secondsA - secondsB;
+                          })
+                          .map((penalty, index) => (
+                          <li key={`away-penalty-${index}`} className="flex items-center py-3 px-4">
+                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
+                              {penalty.matchTimeStart}
+                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
+                            </div>
+                            <div className="flex-grow">
+                              <p className="text-sm text-gray-900">
+                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                {penalty.isGM && ' (GM)'}
+                                {penalty.isMP && ' (MP)'}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                              </p>
+                            </div>
+                            {showButtonEvents && (
+                              <div className="flex justify-end space-x-2 flex-shrink-0">
+                                <button
+                                  onClick={() => {
+                                    setEditingAwayPenalty(penalty);
+                                    setIsAwayPenaltyDialogOpen(true);
+                                  }}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
+                                      try {
+                                        const response = await axios.delete(
+                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/penalties/${penalty._id}`,
+                                          {
+                                            headers: {
+                                              Authorization: `Bearer ${jwt}`,
+                                              'Content-Type': 'application/json'
+                                            }
+                                          }
+                                        );
+                                        if (response.status === 200 || response.status === 204) {
+                                          refreshMatchData();
+                                        }
+                                      } catch (error) {
+                                        console.error('Error deleting penalty:', error);
+                                      }
+                                    }
+                                  }}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Keine Strafen vorhanden
@@ -949,7 +1016,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                       onClick={async () => {
                         try {
                           setIsRefreshing(true);
-                          const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                          const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
                             matchStatus: {
                               key: "FINISHED",
                               value: "Beendet"
@@ -1115,13 +1182,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = (getCookie('jwt', context) || '') as string;
 
   try {
-    const match = await fetch(`${process.env.API_URL}/matches/${id}`).then(res => res.json());
+    const match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
 
     let userRoles: string[] = [];
     let userClubId: string | null = null;
 
     if (jwt) {
-      const userResponse = await fetch(`${process.env.API_URL}/users/me`, {
+      const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` }
       });
       const userData = await userResponse.json();

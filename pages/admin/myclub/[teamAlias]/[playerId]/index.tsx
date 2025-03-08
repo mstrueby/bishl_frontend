@@ -10,7 +10,7 @@ import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { PlayerValues } from '../../../../../types/PlayerValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['API_URL'];
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface EditProps {
   jwt: string,

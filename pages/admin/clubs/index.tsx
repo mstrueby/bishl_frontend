@@ -11,7 +11,7 @@ import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 import { string } from "yup";
 
-let BASE_URL = process.env['API_URL'];
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface ClubsProps {
   jwt: string,

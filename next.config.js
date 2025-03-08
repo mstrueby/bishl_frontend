@@ -15,8 +15,8 @@ const nextConfig = {
     defaultLocale: "de-DE",
   },
   env: {
-    API_URL: process.env.NODE_ENV === 'production' 
-      ? 'https://api.bishl.de' : process.env.API_URL,
+    NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'production' 
+      ? 'https://api.bishl.de' : process.env.NEXT_PUBLIC_API_URL,
   }
 }
 

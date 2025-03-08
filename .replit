@@ -84,5 +84,5 @@ externalPort = 3001
 
 [deployment]
 deploymentTarget = "cloudrun"
-build = ["sh", "-c", "NODE_ENV=production npm run build"]
-run = ["sh", "-c", "NODE_ENV=production npm start"]
+build = ["sh", "-c", "npm run build"]
+run = ["sh", "-c", "npm start"]

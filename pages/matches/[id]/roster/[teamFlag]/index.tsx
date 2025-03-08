@@ -13,7 +13,7 @@ import { classNames } from '../../../../../tools/utils';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['API_URL'];
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AvailablePlayer {
     _id: string,
@@ -88,7 +88,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         // get team object
         const teamResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
         const team: TeamValues = await teamResponse.data;
-        console.log(team)
+        //console.log(team)
         const teamAgeGroup = team.ageGroup;
 
         // Fetch available players from the current team
@@ -259,13 +259,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
 
-        // Sort available players by displayLastName, then by displayFirstName
+        // Sort available players by lastName, then by firstName
         const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
             // First sort by lastName
-            const lastNameComparison = ((a?.displayLastName ?? "") as string).localeCompare((b?.displayLastName ?? "") as string);
+            const lastNameComparison = ((a?.lastName ?? "") as string).localeCompare((b?.lastName ?? "") as string);
             // If lastName is the same, sort by firstName
             return lastNameComparison !== 0 ? lastNameComparison :
-                ((a?.displayFirstName ?? "") as string).localeCompare((b?.displayFirstName ?? "") as string);
+                ((a?.firstName ?? "") as string).localeCompare((b?.firstName ?? "") as string);
         });
 
         // Keep both the full list and a filtered list of available players
@@ -505,7 +505,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setCallUpModalError(null);
 
         // Optional: Show a success message
-        setSuccessMessage(`Spieler ${selectedCallUpPlayer.displayFirstName} ${selectedCallUpPlayer.displayLastName} wurde hochgemeldet und steht zur Verfügung.`);
+        setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
     };
 
     const handleEditPlayer = (player: RosterPlayer) => {
@@ -652,8 +652,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             const newPlayer: RosterPlayer = {
                 player: {
                     playerId: selectedPlayer._id,
-                    firstName: selectedPlayer.displayFirstName,
-                    lastName: selectedPlayer.displayLastName,
+                    firstName: selectedPlayer.firstName,
+                    lastName: selectedPlayer.lastName,
                     jerseyNumber: playerNumber,
                 },
                 playerPosition: {
@@ -822,7 +822,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedPlayer ? `${selectedPlayer.displayLastName}, ${selectedPlayer.displayFirstName}` : 'Spieler auswählen'}
+                                                    {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -860,7 +860,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                                 selected ? 'font-semibold' : 'font-normal',
                                                                                 'block truncate'
                                                                             )}>
-                                                                                {player.displayLastName}, {player.displayFirstName}
+                                                                                {player.lastName}, {player.firstName}
                                                                             </span>
 
                                                                             {player.originalTeam && (
@@ -1571,7 +1571,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                 <span className="block truncate">
-                                                    {selectedCallUpPlayer ? `${selectedCallUpPlayer.displayLastName}, ${selectedCallUpPlayer.displayFirstName}` : 'Spieler auswählen'}
+                                                    {selectedCallUpPlayer ? `${selectedCallUpPlayer.lastName}, ${selectedCallUpPlayer.firstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                     <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -1604,7 +1604,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                             selected ? 'font-semibold' : 'font-normal',
                                                                             'block truncate'
                                                                         )}>
-                                                                            {player.displayLastName}, {player.displayFirstName}
+                                                                            {player.lastName}, {player.firstName}
                                                                         </span>
 
                                                                         {selected ? (

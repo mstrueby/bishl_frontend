@@ -13,7 +13,7 @@ import { navData } from '../../../../../components/leaguemanager/navData';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 
-let BASE_URL = process.env['API_URL'] + '/tournaments/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/tournaments/';
 
 interface EditProps {
   jwt: string;

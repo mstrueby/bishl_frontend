@@ -9,7 +9,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import MatchCardRefAdmin from "../../../components/admin/MatchCardRefAdmin";
 import { AssignmentValues } from '../../../types/AssignmentValues';
 
-let BASE_URL = process.env.API_URL
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface RefAdminProps {
   jwt: string;
@@ -41,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
