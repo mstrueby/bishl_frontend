@@ -29,6 +29,7 @@ export interface ScoresBase {
 }
 
 export interface PenaltiesBase {
+  _id?: string;
   matchTimeStart: string
   matchTimeEnd?: string;
   penaltyPlayer: EventPlayer;

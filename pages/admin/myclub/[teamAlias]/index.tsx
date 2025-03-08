@@ -13,7 +13,7 @@ import DataList from '../../../../components/admin/ui/DataList';
 import { getDataListItems } from '../../../../tools/playerItems';
 import Pagination from '../../../../components/ui/Pagination';
 
-let BASE_URL = process.env['API_URL'];
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface TeamProps {
   jwt: string,

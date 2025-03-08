@@ -11,7 +11,7 @@ import { RoundValues } from '../../../../../types/TournamentValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../../components/leaguemanager/navData';
 
-let BASE_URL = process.env['API_URL'] + "/tournaments/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/tournaments/"
 
 interface AddProps {
   jwt: string;

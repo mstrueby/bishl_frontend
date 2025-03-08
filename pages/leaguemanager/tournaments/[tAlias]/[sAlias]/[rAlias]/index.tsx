@@ -123,7 +123,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   }
 
   try {
-    const res = await fetch(`${process.env.API_URL}/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`);
     if (!res.ok) {
       console.error('Error fetching round:', res.statusText);
       return {
@@ -147,15 +147,15 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 }
 
 export async function getStaticPaths() {
-  const tournamentsRes = await fetch(`${process.env.API_URL}/tournaments`);
+  const tournamentsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`);
   const tournaments = await tournamentsRes.json();
   let paths: { params: { tAlias: string; sAlias: string; rAlias: string; } }[] = [];
 
   for (const tournament of tournaments) {
-    const seasonsRes = await fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/`);
+    const seasonsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`);
     const seasons = await seasonsRes.json();
     for (const season of seasons) {
-      const roundsRes = await fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`);
+      const roundsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`);
       const rounds = await roundsRes.json();
       for (const round of rounds) {
         paths.push({

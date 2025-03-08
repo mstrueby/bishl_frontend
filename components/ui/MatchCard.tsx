@@ -200,9 +200,9 @@ const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }>
   }
 
   // Feature-Switch
-  if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
-    showMatchSheet = false;
-  }
+  //if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
+  //  showMatchSheet = false;
+  //}
 
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">

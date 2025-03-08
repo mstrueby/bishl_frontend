@@ -85,7 +85,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       if (editGoal && editGoal._id) {
         // Update existing goal
         await axios.patch(
-          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/scores/${editGoal._id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/${editGoal._id}`,
           goalData,
           {
             headers: {
@@ -97,7 +97,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       } else {
         // Create new goal
         await axios.post(
-          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/scores/`, 
+          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/`, 
           goalData,
           {
             headers: {

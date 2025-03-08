@@ -10,7 +10,7 @@ import SectionHeader from '../../../../../../components/admin/SectionHeader';
 import { ClubValues, TeamValues } from '../../../../../../types/ClubValues';
 import ErrorMessage from '../../../../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['API_URL'];
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface EditProps {
   jwt: string,
@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let team = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }

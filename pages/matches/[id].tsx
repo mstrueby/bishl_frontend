@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 import { Dialog, Transition } from '@headlessui/react';
-import { Match, RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
+import { Match, RosterPlayer, PenaltiesBase, ScoresBase } from '../../types/MatchValues';
 import Layout from '../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
@@ -72,7 +72,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
 
     try {
       setIsRefreshing(true);
-      const response = await fetch(`${process.env.API_URL}/matches/${id}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`);
       const updatedMatch = await response.json();
       setMatch(updatedMatch);
       setIsRefreshing(false);
@@ -350,7 +350,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                     onClick={async () => {
                       try {
                         setIsRefreshing(true);
-                        const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                        const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
                           matchStatus: {
                             key: "INPROGRESS",
                             value: "Live"
@@ -641,7 +641,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                       if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
                                         try {
                                           const response = await axios.delete(
-                                            `${process.env.API_URL}/matches/${match._id}/home/scores/${goal._id}`,
+                                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/scores/${goal._id}`,
                                             {
                                               headers: {
                                                 Authorization: `Bearer ${jwt}`,
@@ -726,7 +726,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                       if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
                                         try {
                                           const response = await axios.delete(
-                                            `${process.env.API_URL}/matches/${match._id}/away/scores/${goal._id}`,
+                                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/scores/${goal._id}`,
                                             {
                                               headers: {
                                                 Authorization: `Bearer ${jwt}`,
@@ -819,7 +819,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                     if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
                                       try {
                                         const response = await axios.delete(
-                                          `${process.env.API_URL}/matches/${match._id}/home/penalties/${penalty._id}`,
+                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/penalties/${penalty._id}`,
                                           {
                                             headers: {
                                               Authorization: `Bearer ${jwt}`,
@@ -905,7 +905,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                                     if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
                                       try {
                                         const response = await axios.delete(
-                                          `${process.env.API_URL}/matches/${match._id}/away/penalties/${penalty._id}`,
+                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/penalties/${penalty._id}`,
                                           {
                                             headers: {
                                               Authorization: `Bearer ${jwt}`,
@@ -1016,7 +1016,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                       onClick={async () => {
                         try {
                           setIsRefreshing(true);
-                          const response = await axios.patch(`${process.env.API_URL}/matches/${match._id}`, {
+                          const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
                             matchStatus: {
                               key: "FINISHED",
                               value: "Beendet"
@@ -1182,13 +1182,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = (getCookie('jwt', context) || '') as string;
 
   try {
-    const match = await fetch(`${process.env.API_URL}/matches/${id}`).then(res => res.json());
+    const match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
 
     let userRoles: string[] = [];
     let userClubId: string | null = null;
 
     if (jwt) {
-      const userResponse = await fetch(`${process.env.API_URL}/users/me`, {
+      const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwt}` }
       });
       const userData = await userResponse.json();

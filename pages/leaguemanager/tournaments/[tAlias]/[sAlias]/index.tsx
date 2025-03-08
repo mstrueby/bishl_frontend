@@ -120,7 +120,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   }
 
   try {
-    const res = await fetch(`${process.env.API_URL}/tournaments/${tAlias}/seasons/${sAlias}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}`);
     if (!res.ok) {
       // Handle response errors, such as showing a message or logging
       console.error('Error fetching season:', res.statusText);
@@ -148,12 +148,12 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 }
 
 export async function getStaticPaths() {
-  const tournamentsRes = await fetch(`${process.env.API_URL}/tournaments`);
+  const tournamentsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`);
   const tournaments = await tournamentsRes.json();
   let paths: { params: { tAlias: string; sAlias: string; } }[] = [];
 
   for (const tournament of tournaments) {
-    const seasonsRes = await fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/`);
+    const seasonsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`);
     const seasons = await seasonsRes.json();
     const tournamentPaths = seasons.map((season: SeasonValues) => ({
       params: { tAlias: tournament.alias, sAlias: season.alias },

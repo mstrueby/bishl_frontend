@@ -42,7 +42,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
     if (isOpen) {
       const fetchPenaltyCodes = async () => {
         try {
-          const response = await axios.get(`${process.env.API_URL}/configs/penaltycode`);
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/configs/penaltycode`);
           const data = response.data.value;
           if (Array.isArray(data) && data.length > 0) {
             setPenaltyCodes(data);
@@ -144,7 +144,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       if (editPenalty && editPenalty._id) {
         // Update existing penalty
         const response = await axios.patch(
-          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
           penaltyData,
           {
             headers: {
@@ -168,7 +168,7 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
       } else {
         // Create new penalty
         const response = await axios.post(
-          `${process.env.API_URL}/matches/${matchId}/${teamFlag}/penalties/`,
+          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/penalties/`,
           penaltyData,
           {
             headers: {

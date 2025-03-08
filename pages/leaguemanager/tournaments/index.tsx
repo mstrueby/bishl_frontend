@@ -66,7 +66,7 @@ export default function Tournament({
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch(`${process.env.API_URL}/tournaments/`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
   const allTournamentData = await res.json();
   return {
     props: {
