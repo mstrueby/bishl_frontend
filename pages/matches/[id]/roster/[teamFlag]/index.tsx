@@ -7,7 +7,7 @@ import { getCookie } from 'cookies-next';
 import { Match, RosterPlayer } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
-import { Listbox, Transition } from '@headlessui/react';
+import { Listbox, Transition, Switch } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -29,7 +29,8 @@ interface AvailablePlayer {
     passNo: string,
     jerseyNo: number | undefined,
     called: boolean,
-    originalTeam: string | null; // Add this line
+    originalTeam: string | null;
+    active?: boolean;
 }
 
 interface RosterPageProps {
@@ -98,8 +99,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 Authorization: `Bearer ${jwt}`,
             },
             params: {
-                sortby: 'lastName',
-                active: 'true'
+                sortby: 'lastName'
+                // No active param - we'll fetch all players and filter on the client
             }
         }
         );
@@ -255,7 +256,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 passNo: assignedTeam.passNo,
                 jerseyNo: assignedTeam.jerseyNo,
                 called: false,
-                originalTeam: originalTeamName // Add the original team name if available
+                originalTeam: originalTeamName, // Add the original team name if available
+                active: assignedTeam.active // Include active status from team assignment
             } : null;
         }).filter((player: AvailablePlayer | null) => player !== null);
 
@@ -317,6 +319,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [playerNumber, setPlayerNumber] = useState<number>(0);
     const [playerPosition, setPlayerPosition] = useState(playerPositions[3]); // Default to 'F' (Feldspieler)
     const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
+    const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>(allAvailablePlayers || []);
     const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
@@ -326,6 +329,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [error, setError] = useState<string | null>(null);
     const [modalError, setModalError] = useState<string | null>(null);
     const [isCallUpModalOpen, setIsCallUpModalOpen] = useState(false);
+    const [includeInactivePlayers, setIncludeInactivePlayers] = useState(false);
     const [callUpTeams, setCallUpTeams] = useState<TeamValues[]>([]);
     const [selectedCallUpTeam, setSelectedCallUpTeam] = useState<TeamValues | null>(null);
     const [callUpPlayers, setCallUpPlayers] = useState<AvailablePlayer[]>([]);
@@ -405,6 +409,26 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
     // Fetch players when a team is selected
     const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
+    
+    // Update available players list when the toggle changes
+    useEffect(() => {
+        if (includeInactivePlayers) {
+            // Use all players when including inactive
+            const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
+            const filteredPlayers = allAvailablePlayersList.filter(player => 
+                !rosterPlayerIds.includes(player._id)
+            );
+            setAvailablePlayersList(filteredPlayers);
+        } else {
+            // Only show active players (filter out inactive from allAvailablePlayersList)
+            const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
+            const filteredPlayers = allAvailablePlayersList.filter(player => 
+                !rosterPlayerIds.includes(player._id) && 
+                (player.active !== false) // Only include players where active is not false
+            );
+            setAvailablePlayersList(filteredPlayers);
+        }
+    }, [includeInactivePlayers, rosterList, allAvailablePlayersList]);
     // Auto-set published to true if match is finished
     const isMatchFinished = match.matchStatus.key === 'FINISHED';
     useEffect(() => {
@@ -805,16 +829,36 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 <label className="block text-sm font-medium text-gray-700">
                                     Spieler
                                 </label>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCallUpModalOpen(true)}
-                                    className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                    </svg>
-                                    Hochmelden
-                                </button>
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex items-center">
+                                        <Switch
+                                            checked={includeInactivePlayers}
+                                            onChange={setIncludeInactivePlayers}
+                                            className={`${
+                                                includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                                            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                        >
+                                            <span className="sr-only">Inaktive Spieler anzeigen</span>
+                                            <span
+                                                aria-hidden="true"
+                                                className={`${
+                                                    includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                                                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                            />
+                                        </Switch>
+                                        <span className="ml-2 text-xs text-gray-600">Inaktive Spieler</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCallUpModalOpen(true)}
+                                        className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                        </svg>
+                                        Hochmelden
+                                    </button>
+                                </div>
                             </div>
                             <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
                                 {({ open }) => (
