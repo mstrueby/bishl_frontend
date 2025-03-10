@@ -1318,9 +1318,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     const isFinished = match.matchStatus.key === 'FINISHED';
                                     const allChecksPass = isRosterValid();
 
-                                    // If checks don't pass and not a finished match, automatically set rosterPublished to false
-                                    if (!allChecksPass && rosterPublished && !isFinished) {
-                                        setRosterPublished(false);
+                                    // If checks don't pass and not a finished match, always set rosterPublished to false
+                                    if (!allChecksPass && !isFinished) {
+                                        // Ensure rosterPublished is false if checks don't pass
+                                        if (rosterPublished) {
+                                            setRosterPublished(false);
+                                        }
                                     }
 
                                     // If match is finished, always set rosterPublished to true
