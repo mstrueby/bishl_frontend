@@ -1247,6 +1247,45 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </span>
                         </div>
 
+                        {/** Jersey No check indicator */}
+                        <div className="flex items-center mt-4">
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
+                                {rosterList.some(player => player.player.jerseyNumber === 0) ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-7a1 1 0 10-1-1v6a1 1 0 102 0V6a1 1 0 10-1 0z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0L2.707 10.707a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="ml-2 text-sm">
+                                {rosterList.some(player => player.player.jerseyNumber === 0) ? 'Es fehlen noch Rückennummern' : 'Alle Spieler müssen Rückennummern haben'}
+                            </span>
+                        </div>
+
+                        {/* Double Jersey No check indicator */}
+                        <div className="flex items-center mt-4">
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
+                                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM10 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="ml-2 text-sm">
+                                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
+                                    ? 'Doppelte Rückennummern vorhanden'
+                                    : 'Keine doppelten Rückennummern'}
+                            </span>
+                        </div>
+
+
                         {/* Called players check indicator */}
                         <div className="flex items-center mt-4">
                             <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.called).length <= 5 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
@@ -1316,7 +1355,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     );
                                 })()}
                             </div>
-                            {/* Publish chcekbox */}
+                            {/* Publish checkbox */}
                             <div className="ml-3 text-sm leading-6">
                                 <label htmlFor="rosterPublished" className={`font-medium ${(() => {
                                     const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
