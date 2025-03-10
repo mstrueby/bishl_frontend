@@ -831,7 +831,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         {/* Player Selection */}
                         <div className="">
                             <div className="flex justify-between items-center mb-1">
-                                <label className="block text-sm font-medium text-gray-700">
+                                <label className="block text-sm fontmedium text-gray-700">
                                     Spieler
                                 </label>
                                 <div className="flex items-center space-x-4">
@@ -1256,7 +1256,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     </svg>
                                 ) : (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0L2.707 10.707a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414-1.414z" clipRule="evenodd" />
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0L2.707 10.707a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
                                 )}
                             </div>
@@ -1274,7 +1274,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     </svg>
                                 ) : (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                     </svg>
                                 )}
                             </div>
@@ -1355,37 +1355,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     );
                                 })()}
                             </div>
-                            {/* Publish checkbox */}
                             <div className="ml-3 text-sm leading-6">
-                                <label htmlFor="rosterPublished" className={`font-medium ${(() => {
-                                    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
-                                    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
-                                    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
-                                    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-
-                                    return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie ? 'text-gray-900' : 'text-gray-400';
-                                })()} `}>Veröffentlichen</label>
+                                <label htmlFor="rosterPublished" className={`font-medium ${isRosterValid() ? 'text-gray-900' : 'text-gray-400'}`}>Veröffentlichen</label>
                                 <p className="text-gray-500">
-                                    {(() => {
-                                        const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
-                                        const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
-                                        const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
-                                        const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-                                        const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
-                                        const hasMinFeldspieler = feldspielerCount >= 2;
-                                        const calledPlayersCount = rosterList.filter(player => player.called).length;
-                                        const hasMaxCalledPlayers = calledPlayersCount <= 5;
-
-                                        if (hasZeroJerseyNumber) {
-                                            return 'Behebe zuerst alle Fehler in der Aufstellung (markierte Zeilen)';
-                                        } else if (!hasCaptain || !hasAssistant || !hasGoalie || !hasMinFeldspieler) {
-                                            return 'Stelle sicher, dass ein Captain (C), ein Assistant (A), mindestens ein Goalie (G) und mindestens zwei Feldspieler (F) festgelegt sind';
-                                        } else if (!hasMaxCalledPlayers) {
-                                            return 'Es dürfen maximal 5 hochgemeldete Spieler in der Aufstellung sein';
-                                        } else {
-                                            return 'Aufstellung öffentlich sichtbar machen';
-                                        }
-                                    })()}
+                                    {!isRosterValid() && "Behebe zuerst alle Fehler in der Aufstellung"}
                                 </p>
                             </div>
                         </div>
