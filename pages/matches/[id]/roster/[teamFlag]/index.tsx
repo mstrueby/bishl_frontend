@@ -99,8 +99,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 Authorization: `Bearer ${jwt}`,
             },
             params: {
-                sortby: 'lastName'
+                sortby: 'lastName',
                 // No active param - we'll fetch all players and filter on the client
+                all: true
             }
         }
         );
@@ -136,7 +137,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                             },
                             params: {
                                 sortby: 'lastName',
-                                active: 'true'
+                                // No active param - we'll fetch all players and filter on the client
+                                all: true
                             }
                         });
 
@@ -846,7 +848,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                 } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
                                             />
                                         </Switch>
-                                        <span className="ml-2 text-xs text-gray-600">Inaktive Spieler</span>
+                                        <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
                                     </div>
                                     <button
                                         type="button"
