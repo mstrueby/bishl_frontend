@@ -411,21 +411,21 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
     // Fetch players when a team is selected
     const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
-    
+
     // Update available players list when the toggle changes
     useEffect(() => {
         if (includeInactivePlayers) {
             // Use all players when including inactive
             const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
-            const filteredPlayers = allAvailablePlayersList.filter(player => 
+            const filteredPlayers = allAvailablePlayersList.filter(player =>
                 !rosterPlayerIds.includes(player._id)
             );
             setAvailablePlayersList(filteredPlayers);
         } else {
             // Only show active players (filter out inactive from allAvailablePlayersList)
             const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
-            const filteredPlayers = allAvailablePlayersList.filter(player => 
-                !rosterPlayerIds.includes(player._id) && 
+            const filteredPlayers = allAvailablePlayersList.filter(player =>
+                !rosterPlayerIds.includes(player._id) &&
                 (player.active !== false) // Only include players where active is not false
             );
             setAvailablePlayersList(filteredPlayers);
@@ -839,16 +839,14 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                         <Switch
                                             checked={includeInactivePlayers}
                                             onChange={setIncludeInactivePlayers}
-                                            className={`${
-                                                includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                                            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                            className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                                                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
                                         >
                                             <span className="sr-only">Inaktive Spieler anzeigen</span>
                                             <span
                                                 aria-hidden="true"
-                                                className={`${
-                                                    includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                                                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                                className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                                                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
                                             />
                                         </Switch>
                                         <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
@@ -1368,8 +1366,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         onClick={handleSaveRoster}
                         disabled={loading || savingRoster || (match.matchStatus.key === 'FINISHED' && !isRosterValid())}
                         className={`w-24 inline-flex justify-center items-center rounded-md border border-transparent ${match.matchStatus.key === 'FINISHED' && !isRosterValid()
-                                ? 'bg-indigo-300 cursor-not-allowed'
-                                : 'bg-indigo-600 hover:bg-indigo-500'
+                            ? 'bg-indigo-300 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-500'
                             } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
                     >
                         {savingRoster ? (
@@ -1541,16 +1539,14 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 <Switch
                                     checked={includeInactivePlayers}
                                     onChange={setIncludeInactivePlayers}
-                                    className={`${
-                                        includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                    className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
                                 >
                                     <span className="sr-only">Inaktive Spieler anzeigen</span>
                                     <span
                                         aria-hidden="true"
-                                        className={`${
-                                            includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                        className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                                            } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
                                     />
                                 </Switch>
                                 <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
@@ -1678,7 +1674,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                             )}>
                                                                                 {player.lastName}, {player.firstName}
                                                                             </span>
-                                                                            
+                                                                            {/**
                                                                             {player.active === false && (
                                                                                 <span className={classNames(
                                                                                     active ? 'text-indigo-100' : 'text-gray-500',
@@ -1687,6 +1683,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                                                     (Inaktiv)
                                                                                 </span>
                                                                             )}
+                                                                            */}
                                                                         </div>
 
                                                                         {selected ? (
