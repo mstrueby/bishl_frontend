@@ -405,8 +405,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         const hasMinFeldspieler = feldspielerCount >= 2;
         const calledPlayersCount = rosterList.filter(player => player.called).length;
         const hasMaxCalledPlayers = calledPlayersCount <= 5;
+        const hasDoubleJerseyNumbers = rosterList.some((player, index) => 
+            rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index
+        );
 
-        return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers;
+        return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
     };
 
     // Fetch players when a team is selected
