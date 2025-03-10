@@ -1312,22 +1312,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     <div className="flex items-center">
                         <div className="relative inline-flex items-center">
                             <div className="flex items-center h-6">
-                                {/* Check if all required conditions are met */}
+                                {/* Check if all required conditions are met using isRosterValid function */}
                                 {(() => {
-                                    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
-                                    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
-                                    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
-                                    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-                                    const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
-                                    const hasMinFeldspieler = feldspielerCount >= 2;
-                                    const calledPlayersCount = rosterList.filter(player => player.called).length;
-                                    const hasMaxCalledPlayers = calledPlayersCount <= 5;
-
-                                    // All checks must pass to enable the checkbox
-                                    const allChecksPass = !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers;
-
                                     // If match is finished, always publish roster and disable checkbox
                                     const isFinished = match.matchStatus.key === 'FINISHED';
+                                    const allChecksPass = isRosterValid();
 
                                     // If checks don't pass and not a finished match, automatically set rosterPublished to false
                                     if (!allChecksPass && rosterPublished && !isFinished) {
