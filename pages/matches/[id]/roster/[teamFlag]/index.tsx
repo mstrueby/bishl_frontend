@@ -451,7 +451,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         },
                         params: {
                             sortby: 'lastName',
-                            active: 'true'
+                            // If includeInactivePlayers is true, don't specify active param to get all players
+                            // Otherwise, only get active players
+                            ...(includeInactivePlayers ? { all: true } : { active: 'true' })
                         }
                     });
 
@@ -477,7 +479,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             imageVisible: player.imageVisible,
                             passNo: assignedTeam?.passNo || '',
                             jerseyNo: assignedTeam?.jerseyNo,
-                            called: true
+                            called: true,
+                            active: assignedTeam?.active // Track active status
                         };
                     }).filter((player: AvailablePlayer | null) => player !== null);
 
@@ -500,7 +503,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             setCallUpPlayers([]);
             setSelectedCallUpPlayer(null);
         }
-    }, [selectedCallUpTeam, club, jwt, rosterList]);
+    }, [selectedCallUpTeam, club, jwt, rosterList, includeInactivePlayers]);
 
     // Handle adding the selected call-up player to the available players list
     const handleConfirmCallUp = () => {
@@ -1532,6 +1535,28 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             </div>
                         )}
 
+                        {/* Include Inactive Players Toggle */}
+                        <div className="flex items-center justify-end mb-4">
+                            <div className="flex items-center">
+                                <Switch
+                                    checked={includeInactivePlayers}
+                                    onChange={setIncludeInactivePlayers}
+                                    className={`${
+                                        includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                >
+                                    <span className="sr-only">Inaktive Spieler anzeigen</span>
+                                    <span
+                                        aria-hidden="true"
+                                        className={`${
+                                            includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                    />
+                                </Switch>
+                                <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
+                            </div>
+                        </div>
+
                         {/* Team Selection */}
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1646,12 +1671,23 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                             >
                                                                 {({ selected, active }) => (
                                                                     <>
-                                                                        <span className={classNames(
-                                                                            selected ? 'font-semibold' : 'font-normal',
-                                                                            'block truncate'
-                                                                        )}>
-                                                                            {player.lastName}, {player.firstName}
-                                                                        </span>
+                                                                        <div className="flex flex-col">
+                                                                            <span className={classNames(
+                                                                                selected ? 'font-semibold' : 'font-normal',
+                                                                                'block truncate'
+                                                                            )}>
+                                                                                {player.lastName}, {player.firstName}
+                                                                            </span>
+                                                                            
+                                                                            {player.active === false && (
+                                                                                <span className={classNames(
+                                                                                    active ? 'text-indigo-100' : 'text-gray-500',
+                                                                                    'text-xs'
+                                                                                )}>
+                                                                                    (Inaktiv)
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
 
                                                                         {selected ? (
                                                                             <span
