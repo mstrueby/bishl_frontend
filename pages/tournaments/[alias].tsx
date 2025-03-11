@@ -33,6 +33,12 @@ interface StandingsTeam {
   streak: string[];
 }
 
+interface MatchdayOwner {
+  clubId: string;
+  clubName: string;
+  clubAlias: string
+}
+
 interface Matchday {
   name: string;
   alias: string;
@@ -45,6 +51,7 @@ interface Matchday {
   standings: Record<string, StandingsTeam>;
   matchSettings: Record<string, any>;
   matches: Match[];
+  owner: MatchdayOwner;
 }
 
 interface Round {
