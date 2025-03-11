@@ -137,7 +137,15 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
   );
 };
 
-const MatchCard: React.FC<{ match: Match, onMatchUpdate?: () => Promise<void> }> = ({ match: initialMatch, onMatchUpdate }) => {
+const MatchCard: React.FC<{ 
+  match: Match, 
+  onMatchUpdate?: () => Promise<void>,
+  matchdayOwner?: {
+    clubId: string;
+    clubName: string;
+    clubAlias: string;
+  }
+}> = ({ match: initialMatch, onMatchUpdate, matchdayOwner }) => {
   const [match, setMatch] = useState(initialMatch);
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
