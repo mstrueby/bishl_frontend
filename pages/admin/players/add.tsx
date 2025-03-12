@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { PlayerValues } from '../../../types/PlayerValues';
+import { ClubValues } from '../../../types/ClubValues';
 import PlayerAdminForm from '../../../components/admin/PlayerAdminForm';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
@@ -13,6 +14,7 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AddProps {
   jwt: string;
+  clubs: ClubValues[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -27,6 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  let clubs: ClubValues[] = [];
   try {
     // First check if user has required role
     const userResponse = await axios.get(`${BASE_URL}/users/me`, {
@@ -45,7 +48,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    return { props: { jwt } };
+    // Get clubs
+    const clubsResponse = await axios.get(`${BASE_URL}/clubs`, {
+      headers: {
+        'Authorization': `Bearer ${jwt}`
+      },
+      params: {
+        active: true
+      }
+    });
+    clubs = clubsResponse.data;
+
+    return { props: { jwt, clubs } };
   } catch (error) {
     return {
       redirect: {
@@ -56,7 +70,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 }
 
-export default function Add({ jwt }: AddProps) {
+export default function Add({ jwt, clubs }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -139,7 +153,7 @@ export default function Add({ jwt }: AddProps) {
         enableReinitialize={false}
         handleCancel={handleCancel}
         loading={loading}
-        clubs={[]}
+        clubs={clubs}
       />
     </Layout>
   );
