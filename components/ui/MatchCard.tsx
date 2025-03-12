@@ -167,13 +167,19 @@ const MatchCard: React.FC<{
     //showLinkAway = true;
     //showButtonStatus = true;
   }
-  {/** Heim Vereins-Account */ }
+  {/** Home-Account */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
-    showLinkStatus = true;
     showLinkHome = true;
   }
   {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
+    showLinkStatus = true;
+    showLinkAway = true;
+  }
+  {/** Matchday-Owner and match is at the same day */ }
+  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0,0,0,0) <= new Date().setHours(0,0,0,0)) {
+    showLinkStatus = true;
+    showLinkHome = true;
     showLinkAway = true;
   }
   {/** Away-Club && Spiel ist weiter als 30 Minuten in der Zukunft */ }

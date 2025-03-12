@@ -575,6 +575,7 @@ export default function Tournament({
                         const matchesData = await matchesResponse.json();
                         setMatches(matchesData);
                       }}
+                      matchdayOwner={selectedMatchday.owner}
                     />
                   ))
                 ) : (
