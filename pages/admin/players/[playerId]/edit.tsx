@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let clubs = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -53,7 +53,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Fetch the existing club data
-    const clubResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs?active=true`, {
+    const clubResponse = await axios.get(`${BASE_URL}/clubs?active=true`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
