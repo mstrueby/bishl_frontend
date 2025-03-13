@@ -182,12 +182,32 @@ export default function Tournament({
             });
             setMatchdays(sortedData);
 
-            const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
-              ? sortedData[0]
-              : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
-                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
+            // If matchday type is GROUP, select the first matchday
+              // Otherwise, find the upcoming matchday or the most recent one
+              let selectedMd;
+              
+              if (selectedRound.matchdaysType.key === 'GROUP') {
+                selectedMd = sortedData[0];
+              } else {
+                const now = new Date().getTime();
+                
+                // Find the first upcoming matchday
+                const upcomingMatchdays = sortedData
+                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() >= now)
+                  .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+                
+                if (upcomingMatchdays.length > 0) {
+                  // If there are upcoming matchdays, select the next one
+                  selectedMd = upcomingMatchdays[0];
+                } else {
+                  // If no upcoming matchdays, select the most recent one
+                  selectedMd = sortedData
+                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                    .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+                }
+              }
 
-            setSelectedMatchday(selectedMd || {} as Matchday);
+              setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
             setMatchdays([]);
@@ -217,7 +237,17 @@ export default function Tournament({
       setIsLoadingMatches(true);
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
         .then((response) => response.json())
-        .then((data) => setMatches(data))
+        .then((data) => {
+          setMatches(data);
+          
+          // After setting matches, scroll to the upcoming match section
+          setTimeout(() => {
+            const matchesSection = document.getElementById('matches-section');
+            if (matchesSection) {
+              matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 300); // Small delay to ensure rendering is complete
+        })
         .finally(() => setIsLoadingMatches(false));
     }
   }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
@@ -551,10 +581,10 @@ export default function Tournament({
               )}
 
               {/* MATCHES */}
-              {activeMatchdayTab == 'matches' && (
-                matches && matches.length > 0 ? (
-                  matches.map((match, index) => (
-                    <MatchCard
+              {activeMatchdayTab === 'matches' && (
+                <div id="matches-section">
+                  {matches && matches.length > 0 ? (
+                    matches.map((match, index) => (
                       key={index}
                       match={match}
                       onMatchUpdate={async () => {
@@ -583,6 +613,7 @@ export default function Tournament({
                     Keine Spiele verfügbar
                   </div>
                 )
+                </div>
               )}
             </section>
           )}
