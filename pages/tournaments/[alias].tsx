@@ -240,13 +240,15 @@ export default function Tournament({
         .then((data) => {
           setMatches(data);
           
-          // After setting matches, scroll to the upcoming match section
-          setTimeout(() => {
-            const matchesSection = document.getElementById('matches-section');
-            if (matchesSection) {
-              matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 300); // Small delay to ensure rendering is complete
+          // Only scroll to matches section if there's no matchday dropdown (single matchday)
+          if (matchdays.length <= 1) {
+            setTimeout(() => {
+              const matchesSection = document.getElementById('matches-section');
+              if (matchesSection) {
+                matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 300); // Small delay to ensure rendering is complete
+          }
         })
         .finally(() => setIsLoadingMatches(false));
     }
