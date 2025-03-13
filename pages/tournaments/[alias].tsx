@@ -237,7 +237,17 @@ export default function Tournament({
       setIsLoadingMatches(true);
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
         .then((response) => response.json())
-        .then((data) => setMatches(data))
+        .then((data) => {
+          setMatches(data);
+          
+          // After setting matches, scroll to the upcoming match section
+          setTimeout(() => {
+            const matchesSection = document.getElementById('matches-section');
+            if (matchesSection) {
+              matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 300); // Small delay to ensure rendering is complete
+        })
         .finally(() => setIsLoadingMatches(false));
     }
   }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
@@ -572,6 +582,7 @@ export default function Tournament({
 
               {/* MATCHES */}
               {activeMatchdayTab == 'matches' && (
+                <div id="matches-section">
                 matches && matches.length > 0 ? (
                   matches.map((match, index) => (
                     <MatchCard
@@ -603,6 +614,7 @@ export default function Tournament({
                     Keine Spiele verfügbar
                   </div>
                 )
+                </div>
               )}
             </section>
           )}
