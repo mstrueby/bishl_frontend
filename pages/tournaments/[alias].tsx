@@ -182,12 +182,32 @@ export default function Tournament({
             });
             setMatchdays(sortedData);
 
-            const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
-              ? sortedData[0]
-              : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
-                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
+            // If matchday type is GROUP, select the first matchday
+              // Otherwise, find the upcoming matchday or the most recent one
+              let selectedMd;
+              
+              if (selectedRound.matchdaysType.key === 'GROUP') {
+                selectedMd = sortedData[0];
+              } else {
+                const now = new Date().getTime();
+                
+                // Find the first upcoming matchday
+                const upcomingMatchdays = sortedData
+                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() >= now)
+                  .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+                
+                if (upcomingMatchdays.length > 0) {
+                  // If there are upcoming matchdays, select the next one
+                  selectedMd = upcomingMatchdays[0];
+                } else {
+                  // If no upcoming matchdays, select the most recent one
+                  selectedMd = sortedData
+                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                    .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+                }
+              }
 
-            setSelectedMatchday(selectedMd || {} as Matchday);
+              setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
             setMatchdays([]);
