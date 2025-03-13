@@ -13,13 +13,13 @@ let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AddProps {
   jwt: string;
-  cAlias: string;
+  club: ClubValues;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context) as string | undefined;
   const cAlias = context.params?.cAlias as string | undefined;
-  let club = null;
+  let club: ClubValues | null = null;
 
   if (!jwt) {
     return {
@@ -55,7 +55,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
     club = clubResponse.data;
 
-    return { props: { jwt, cAlias } };
+    return { props: { jwt, club } };
   } catch (error) {
     return {
       redirect: {
@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 }
 
-export default function Add({ jwt, cAlias}: AddProps) {
+export default function Add({ jwt, club }: AddProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -90,13 +90,14 @@ export default function Add({ jwt, cAlias}: AddProps) {
   const onSubmit = async (values: TeamValues) => {
     setError(null);
     setLoading(true);
+    console.log(values)
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value?.toString() || '');
       });
 
-      const response = await axios.post(`${BASE_URL}/clubs/${cAlias}/teams/`, formData, {
+      const response = await axios.post(`${BASE_URL}/clubs/${club.alias}/teams/`, formData, {
         headers: {
           'Authorization': `Bearer ${jwt}`,
         }
@@ -104,7 +105,7 @@ export default function Add({ jwt, cAlias}: AddProps) {
 
       if (response.status === 201) {
         router.push({
-          pathname: `/admin/clubs/${cAlias}/teams`,
+          pathname: `/admin/clubs/${club.alias}/teams`,
           query: { message: `Mannschaft <strong>${values.name}</strong> wurde erfolgreich angelegt.` }
         });
       } else {
@@ -121,9 +122,9 @@ export default function Add({ jwt, cAlias}: AddProps) {
       setLoading(false);
     }
   };
-  
+
   const handleCancel = () => {
-    router.push(`/admin/clubs/${cAlias}/teams`);
+    router.push(`/admin/clubs/${club.alias}/teams`);
   };
 
   useEffect(() => {
@@ -137,7 +138,7 @@ export default function Add({ jwt, cAlias}: AddProps) {
   };
 
   const sectionTitle = 'Neue Mannschaft';
-  const sectionDescription = cAlias.toUpperCase();
+  const sectionDescription = club.name.toUpperCase();
 
   return (
     <Layout>

@@ -1,18 +1,6 @@
 import Head from 'next/head';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
-import Standings from '../../components/ui/Standings';
-import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { Fragment, useEffect, useState } from 'react'
-import { Listbox, Transition } from '@headlessui/react'
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'; // Import German locale
-import ClipLoader from 'react-spinners/ClipLoader';
-import { Match } from '../../types/MatchValues';
-import MatchCard from '../../components/ui/MatchCard';
-import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]';
-import { MatchdayValues } from '../../types/TournamentValues';
 import { PostValues } from '../../types/PostValues';
 import { getFuzzyDate } from '../../tools/dateUtils';
 
