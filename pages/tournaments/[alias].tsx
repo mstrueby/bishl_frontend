@@ -242,22 +242,9 @@ export default function Tournament({
           
           // After setting matches, scroll to the upcoming match section
           setTimeout(() => {
-            // First check if there are any upcoming matches (future matches)
-            const now = new Date();
-            const upcomingMatchIndex = data.findIndex((match: Match) => new Date(match.startDate) > now);
-            
-            if (upcomingMatchIndex !== -1 && upcomingMatchIndex < data.length) {
-              // If there's an upcoming match, scroll to that specific match
-              const upcomingMatchElement = document.getElementById(`match-${upcomingMatchIndex}`);
-              if (upcomingMatchElement) {
-                upcomingMatchElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            } else {
-              // If no upcoming match found, just scroll to the matches section
-              const matchesSection = document.getElementById('matches-section');
-              if (matchesSection) {
-                matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
+            const matchesSection = document.getElementById('matches-section');
+            if (matchesSection) {
+              matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }, 300); // Small delay to ensure rendering is complete
         })
@@ -598,7 +585,6 @@ export default function Tournament({
                 <div id="matches-section">
                   {matches && matches.length > 0 ? (
                     matches.map((match, index) => (
-                      <div id={`match-${index}`} key={`match-container-${index}`}>
                       <MatchCard
                         key={index}
                         match={match}
@@ -622,7 +608,6 @@ export default function Tournament({
                         }}
                         matchdayOwner={selectedMatchday.owner}
                       />
-                      </div>
                     ))
                   ) : (
                     <div className="text-center py-12 text-gray-500">
