@@ -11,7 +11,7 @@ import { PlayerValues } from '../../../../types/PlayerValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { ClubValues } from '../../../../types/ClubValues';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/players/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface EditProps {
   jwt: string,
@@ -53,15 +53,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Fetch the existing club data
-    const clubResponse = await axios.get(`${BASE_URL}/clubs?active=true`, {
+    const clubResponse = await axios.get(`${BASE_URL}/clubs`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
+      },
+      params: {
+        active: true
       }
     });
     clubs = clubResponse.data;
 
     // Fetch player data
-    const response = await axios.get(BASE_URL + playerId, {
+    const response = await axios.get(`${BASE_URL}/players/${playerId}`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -125,7 +128,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
         console.log(pair[0] + ', ' + pair[1]);
       }
 
-      const response = await axios.patch(BASE_URL + player._id, formData, {
+      const response = await axios.patch(`${BASE_URL}/players/${player._id}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         }
