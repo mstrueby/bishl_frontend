@@ -585,34 +585,36 @@ export default function Tournament({
                 <div id="matches-section">
                   {matches && matches.length > 0 ? (
                     matches.map((match, index) => (
-                      key={index}
-                      match={match}
-                      onMatchUpdate={async () => {
-                        // Refetch rounds to update standings
-                        const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
-                        const roundsData = await roundsResponse.json();
-                        if (Array.isArray(roundsData)) {
-                          const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-                          setRounds(sortedData);
-                          setSelectedRound(prevRound => {
-                            const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
-                            return updatedRound;
-                          });
-                        }
+                      <MatchCard
+                        key={index}
+                        match={match}
+                        onMatchUpdate={async () => {
+                          // Refetch rounds to update standings
+                          const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                          const roundsData = await roundsResponse.json();
+                          if (Array.isArray(roundsData)) {
+                            const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+                            setRounds(sortedData);
+                            setSelectedRound(prevRound => {
+                              const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
+                              return updatedRound;
+                            });
+                          }
 
-                        // Refetch matches
-                        const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
-                        const matchesData = await matchesResponse.json();
-                        setMatches(matchesData);
-                      }}
-                      matchdayOwner={selectedMatchday.owner}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    Keine Spiele verfügbar
-                  </div>
-                )
+                          // Refetch matches
+                          const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                          const matchesData = await matchesResponse.json();
+                          setMatches(matchesData);
+                        }}
+                        matchdayOwner={selectedMatchday.owner}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      Keine Spiele verfügbar
+                    </div>
+                  )
+                  }
                 </div>
               )}
             </section>
