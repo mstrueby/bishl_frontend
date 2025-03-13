@@ -581,11 +581,10 @@ export default function Tournament({
               )}
 
               {/* MATCHES */}
-              {activeMatchdayTab == 'matches' && (
+              {activeMatchdayTab === 'matches' && (
                 <div id="matches-section">
-                matches && matches.length > 0 ? (
-                  matches.map((match, index) => (
-                    <MatchCard
+                  {matches && matches.length > 0 ? (
+                    matches.map((match, index) => (
                       key={index}
                       match={match}
                       onMatchUpdate={async () => {
