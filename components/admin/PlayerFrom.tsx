@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState }  from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
@@ -28,6 +28,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   loading,
   clubId,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <>
       <div className="mt-8">
@@ -109,9 +111,20 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               if (assignment.clubId === clubId) {
                 return (
                   <div key={index} className="">
-                    <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Mannschaften</h3>
-                    <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
-                    <div className="mt-6 border-t border-b border-gray-100">
+                    <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-12">
+                      <div>
+                        <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Mannschaften</h3>
+                        <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsModalOpen(true)}
+                        className="rounded-md bg-indigo-600 mt-2 sm:mt-0 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      >
+                        Neue Zuordnung
+                      </button>
+                    </div>
+                    <div className="mt-6">
                       <ul className="divide-y divide-gray-100">
                         {assignment.teams.map((team, teamIndex) => (
                           <li key={teamIndex} className="relative flex justify-between gap-x-6 py-5">
@@ -154,15 +167,13 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 onChange={(checked) => {
                                   setFieldValue(`assignedTeams.${index}.teams.${teamIndex}.active`, checked);
                                 }}
-                                className={`${
-                                  values.assignedTeams[index].teams[teamIndex].active ? 'bg-indigo-600' : 'bg-gray-200'
-                                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                className={`${values.assignedTeams[index].teams[teamIndex].active ? 'bg-indigo-600' : 'bg-gray-200'
+                                  } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
                               >
                                 <span
                                   aria-hidden="true"
-                                  className={`${
-                                    values.assignedTeams[index].teams[teamIndex].active ? 'translate-x-5' : 'translate-x-0'
-                                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                  className={`${values.assignedTeams[index].teams[teamIndex].active ? 'translate-x-5' : 'translate-x-0'
+                                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
                                 />
                               </Switch>
                             </div></li>
@@ -209,7 +220,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                             </ul>
                           </div>
                         </li>
-                    ))}
+                      ))}
                   </ul>
                 </div>
               </div>
