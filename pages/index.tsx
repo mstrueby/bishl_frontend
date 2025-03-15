@@ -13,7 +13,7 @@ import { CldImage } from 'next-cloudinary';
 import SuccessMessage from '../components/ui/SuccessMessage';
 import { classNames } from '../tools/utils';
 
-let BASE_URL = process.env['API_URL'] + '/posts/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface PostsProps {
   jwt: string | null,

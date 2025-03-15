@@ -1,3 +1,13 @@
+export interface TeamPartnership {
+  clubId: string;
+  clubAlias: string
+  clubName: string;
+  teamId: string;
+  teamAlias: string;
+  teamName: string;
+}
+
+
 // Define a Team interface
 export interface TeamValues {
   _id: string;
@@ -8,6 +18,7 @@ export interface TeamValues {
   tinyName: string;
   ageGroup: string;
   teamNumber: number;
+  teamPartnership?: TeamPartnership[];  
   active: boolean;
   external: boolean;
   logoUrl: string;

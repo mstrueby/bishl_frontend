@@ -61,6 +61,10 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                 disabled={values.source === "ISHD"} />
             <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum" 
                 disabled={values.source === "ISHD"} />
+            <div className="flex items-center justify-between mt-6 mb-2">
+              <span className="block text-sm font-medium leading-6 text-gray-900">Altersklasse</span>
+              <Badge info={values.ageGroup ? values.ageGroup : '?'} />
+            </div>
             {values.source === 'ISHD' ? (
             <div className="flex items-center justify-between mt-6 mb-2">
               <span className="block text-sm font-medium leading-6 text-gray-900">Vollvisier erforderlich</span>
@@ -69,7 +73,8 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             ) : (
                 <Toggle name="fullFaceReq" label="Vollvisier erforderlich" />
             )}
-
+            <Toggle name="managedByISHD" label="Wird von ISHD verwaltet" />
+            
             {values.imageUrl ? (
               <div className="mt-8">
                 <div>

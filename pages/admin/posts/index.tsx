@@ -11,7 +11,7 @@ import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import DataList from '../../../components/admin/ui/DataList';
 
-let BASE_URL = process.env['API_URL'] + '/posts/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface PostsProps {
   jwt: string,
@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env['API_URL']}/users/me`, {
+    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }

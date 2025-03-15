@@ -9,7 +9,7 @@ import PostForm from '../../../components/admin/PostForm'
 import { PostValuesForm } from '../../../types/PostValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['API_URL'] + "/posts/";
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/posts/";
 
 interface AddProps {
   jwt: string;
@@ -28,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let user = null
   
   try {
-    const userResponse = await axios.get(`${process.env['API_URL']}/users/me`, {
+    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },

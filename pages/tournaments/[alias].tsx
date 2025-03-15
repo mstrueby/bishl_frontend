@@ -33,6 +33,12 @@ interface StandingsTeam {
   streak: string[];
 }
 
+interface MatchdayOwner {
+  clubId: string;
+  clubName: string;
+  clubAlias: string
+}
+
 interface Matchday {
   name: string;
   alias: string;
@@ -45,6 +51,7 @@ interface Matchday {
   standings: Record<string, StandingsTeam>;
   matchSettings: Record<string, any>;
   matches: Match[];
+  owner: MatchdayOwner;
 }
 
 interface Round {
@@ -130,7 +137,7 @@ export default function Tournament({
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -154,7 +161,7 @@ export default function Tournament({
     if (selectedRound.name) {
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -175,12 +182,32 @@ export default function Tournament({
             });
             setMatchdays(sortedData);
 
-            const selectedMd = selectedRound.matchdaysType.key === 'GROUP'
-              ? sortedData[0]
-              : (sortedData.filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= new Date().getTime())
-                .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0] || sortedData[0]);
+            // If matchday type is GROUP, select the first matchday
+              // Otherwise, find the upcoming matchday or the most recent one
+              let selectedMd;
+              
+              if (selectedRound.matchdaysType.key === 'GROUP') {
+                selectedMd = sortedData[0];
+              } else {
+                const now = new Date().getTime();
+                
+                // Find the first upcoming matchday
+                const upcomingMatchdays = sortedData
+                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() >= now)
+                  .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+                
+                if (upcomingMatchdays.length > 0) {
+                  // If there are upcoming matchdays, select the next one
+                  selectedMd = upcomingMatchdays[0];
+                } else {
+                  // If no upcoming matchdays, select the most recent one
+                  selectedMd = sortedData
+                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                    .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+                }
+              }
 
-            setSelectedMatchday(selectedMd || {} as Matchday);
+              setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
             setMatchdays([]);
@@ -208,9 +235,21 @@ export default function Tournament({
   useEffect(() => {
     if (selectedMatchday.name) {
       setIsLoadingMatches(true);
-      fetch(`${process.env.API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
         .then((response) => response.json())
-        .then((data) => setMatches(data))
+        .then((data) => {
+          setMatches(data);
+          
+          // Only scroll to matches section if there's no matchday dropdown (single matchday)
+          if (matchdays.length <= 1) {
+            setTimeout(() => {
+              const matchesSection = document.getElementById('matches-section');
+              if (matchesSection) {
+                matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 300); // Small delay to ensure rendering is complete
+          }
+        })
         .finally(() => setIsLoadingMatches(false));
     }
   }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
@@ -544,37 +583,41 @@ export default function Tournament({
               )}
 
               {/* MATCHES */}
-              {activeMatchdayTab == 'matches' && (
-                matches && matches.length > 0 ? (
-                  matches.map((match, index) => (
-                    <MatchCard
-                      key={index}
-                      match={match}
-                      onMatchUpdate={async () => {
-                        // Refetch rounds to update standings
-                        const roundsResponse = await fetch(`${process.env.API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
-                        const roundsData = await roundsResponse.json();
-                        if (Array.isArray(roundsData)) {
-                          const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-                          setRounds(sortedData);
-                          setSelectedRound(prevRound => {
-                            const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
-                            return updatedRound;
-                          });
-                        }
+              {activeMatchdayTab === 'matches' && (
+                <div id="matches-section">
+                  {matches && matches.length > 0 ? (
+                    matches.map((match, index) => (
+                      <MatchCard
+                        key={index}
+                        match={match}
+                        onMatchUpdate={async () => {
+                          // Refetch rounds to update standings
+                          const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                          const roundsData = await roundsResponse.json();
+                          if (Array.isArray(roundsData)) {
+                            const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+                            setRounds(sortedData);
+                            setSelectedRound(prevRound => {
+                              const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
+                              return updatedRound;
+                            });
+                          }
 
-                        // Refetch matches
-                        const matchesResponse = await fetch(`${process.env.API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
-                        const matchesData = await matchesResponse.json();
-                        setMatches(matchesData);
-                      }}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    Keine Spiele verfügbar
-                  </div>
-                )
+                          // Refetch matches
+                          const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                          const matchesData = await matchesResponse.json();
+                          setMatches(matchesData);
+                        }}
+                        matchdayOwner={selectedMatchday.owner}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      Keine Spiele verfügbar
+                    </div>
+                  )
+                  }
+                </div>
               )}
             </section>
           )}
@@ -598,7 +641,7 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${process.env.API_URL}/tournaments/`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
   const allTournamentsData = await res.json();
   const paths = allTournamentsData.map((tournament: Tournament) => ({
     params: { alias: tournament.alias },
@@ -614,7 +657,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   try {
-    const res = await fetch(`${process.env.API_URL}/tournaments/${alias}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${alias}`);
     const tournamentData = await res.json();
 
     if (!tournamentData) {

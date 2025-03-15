@@ -12,7 +12,7 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-let BASE_URL = process.env['API_URL'] + '/posts/';
+let BASE_URL = (process.env.NEXT_PUBLIC_API_URL || '') + '/posts/';
 
 interface PostsProps {
   jwt: string,

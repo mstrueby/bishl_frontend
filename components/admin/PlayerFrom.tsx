@@ -51,6 +51,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             }</dd>
           </div>
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+            <dt className="text-sm/6 font-medium text-gray-900">Altersklasse</dt>
+            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+              <Badge info={initialValues.ageGroup ? initialValues.ageGroup : '?'} />
+            </dd>
+          </div>
+          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt className="text-sm/6 font-medium text-gray-900">Vollvisier</dt>
             <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
               <Badge info={initialValues.fullFaceReq ? "erforderlich" : "nicht erforderlich"} />
@@ -141,7 +147,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 onChange={handleChange}
                                 min="1"
                                 max="98"
-                                className="block w-16 rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
+                                className="block w-16 rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 appearance-none [-webkit-appearance:textfield] [-moz-appearance:textfield]"
                               />
                               <Switch
                                 checked={values.assignedTeams[index].teams[teamIndex].active || false}

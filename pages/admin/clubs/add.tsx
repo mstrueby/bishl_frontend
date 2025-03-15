@@ -9,7 +9,7 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
-let BASE_URL = process.env['API_URL'] + "/clubs/"
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
 
 interface AddProps {
   jwt: string;
@@ -29,7 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.API_URL}/users/me`, {
+    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }

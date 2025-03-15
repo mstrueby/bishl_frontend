@@ -5,7 +5,7 @@ import { ClubValues } from '../../types/ClubValues';
 import axios from 'axios';
 import DataList from '../../components/ui/DataList';
 
-let BASE_URL = process.env['API_URL'] + '/clubs/';
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
 
 interface ClubPageProps {
   clubs: ClubValues[];

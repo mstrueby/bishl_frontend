@@ -18,7 +18,8 @@ export interface RosterPlayer {
   called: boolean;
 }
 
-interface ScoresBase {
+export interface ScoresBase {
+  _id?: string;
   matchTime: string;
   goalPlayer: EventPlayer;
   assistPlayer?: EventPlayer;
@@ -28,6 +29,7 @@ interface ScoresBase {
 }
 
 export interface PenaltiesBase {
+  _id?: string;
   matchTimeStart: string
   matchTimeEnd?: string;
   penaltyPlayer: EventPlayer;
