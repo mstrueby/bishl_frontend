@@ -5,10 +5,6 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
   },
-  experimental: {
-    optimizeCss: true,
-    optimizeImages: true,
-  },
   staticPageGenerationTimeout: 1000,
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
