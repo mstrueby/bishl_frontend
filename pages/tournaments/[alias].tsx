@@ -183,27 +183,42 @@ export default function Tournament({
             setMatchdays(sortedData);
 
             // If matchday type is GROUP, select the first matchday
-              // Otherwise, find the upcoming matchday or the most recent one
+              // Otherwise, find today's matchday, then upcoming or most recent one if not found
               let selectedMd;
               
               if (selectedRound.matchdaysType.key === 'GROUP') {
                 selectedMd = sortedData[0];
               } else {
                 const now = new Date().getTime();
-                
-                // Find the first upcoming matchday
-                const upcomingMatchdays = sortedData
-                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() >= now)
-                  .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-                
-                if (upcomingMatchdays.length > 0) {
-                  // If there are upcoming matchdays, select the next one
-                  selectedMd = upcomingMatchdays[0];
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const todayEnd = new Date();
+                todayEnd.setHours(23, 59, 59, 999);
+
+                // Check for today's matchday
+                const todayMatchday = sortedData.find(
+                  (matchday: Matchday) =>
+                    new Date(matchday.startDate).getTime() >= todayStart.getTime() &&
+                    new Date(matchday.startDate).getTime() <= todayEnd.getTime()
+                );
+
+                if (todayMatchday) {
+                  selectedMd = todayMatchday;
                 } else {
-                  // If no upcoming matchdays, select the most recent one
-                  selectedMd = sortedData
-                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
-                    .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+                  // Find the first upcoming matchday
+                  const upcomingMatchdays = sortedData
+                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() > todayEnd.getTime())
+                    .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+                  
+                  if (upcomingMatchdays.length > 0) {
+                    // If there are upcoming matchdays, select the next one
+                    selectedMd = upcomingMatchdays[0];
+                  } else {
+                    // If no upcoming matchdays, select the most recent one
+                    selectedMd = sortedData
+                      .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                      .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+                  }
                 }
               }
 
