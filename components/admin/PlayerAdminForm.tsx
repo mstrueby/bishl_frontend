@@ -118,10 +118,10 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                 Neue Zuordnung
               </button>
             </div>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm/6 text-gray-500">
               Geänderte Zuordnungen werden erst nach Klick auf <em>Speichern</em> endgültig gespeichert.
             </p>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm/6 text-gray-500">
               Zuordnungen von der ISHD können hier <em>nicht</em> entfernt werden.
             </p>
 
