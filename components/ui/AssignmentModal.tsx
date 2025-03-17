@@ -21,7 +21,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   clubs = [],
   currentAssignments = [],
 }) => {
-  const [selectedClubId, setSelectedClubId] = useState<string | null>(clubs.length === 1 ? clubs[0]._id : null);
+  const [selectedClubId, setSelectedClubId] = useState<string | null>((clubs && clubs.length === 1) ? clubs[0]._id : null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [passNo, setPassNo] = useState<string>('');
 
