@@ -12,6 +12,7 @@ interface AssignmentModalProps {
   onSave: (assignment: Assignment) => void;
   clubs: ClubValues[];
   currentAssignments?: Assignment[];
+  nextAgeGroupOnly?: boolean;
 }
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -20,6 +21,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   onSave,
   clubs = [],
   currentAssignments = [],
+  nextAgeGroupOnly = false,
 }) => {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
@@ -102,7 +104,6 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     selectedClubId={selectedClubId}
                     clubs={clubs}
                     onClubChange={handleClubChange}
-                    disabled={clubs.length === 1}
                   />
                   {selectedClub && (
                     <TeamSelect
