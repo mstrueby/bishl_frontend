@@ -120,12 +120,27 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   {selectedClub && (
                     <TeamSelect
                       selectedTeamId={selectedTeamId}
-                      teams={(selectedClub.teams || []).filter(team => 
-                        !currentAssignments?.find(assignment => 
+                      teams={(selectedClub.teams || []).filter(team => {
+                        // First check if team is already assigned
+                        const isTeamAssigned = currentAssignments?.find(assignment => 
                           assignment.clubId === selectedClub._id && 
                           assignment.teams.some(t => t.teamId === team._id)
-                        )
-                      )}
+                        );
+                        
+                        if (isTeamAssigned) return false;
+
+                        // If nextAgeGroupOnly is true, check age group sort order
+                        if (nextAgeGroupOnly && ageGroup) {
+                          const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
+                          const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === team.ageGroup);
+                          
+                          if (!playerAgeGroupConfig || !teamAgeGroupConfig) return false;
+                          
+                          return teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder + 1;
+                        }
+                        
+                        return true;
+                      })}
                       onTeamChange={setSelectedTeamId}
                     />
                   )}
