@@ -43,7 +43,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [ageGroupAssignment, setAgeGroupAssignment] = useState<AssignmentTeam | null>(null); // assignment matched with players age group
   const getAgeGroupAltKey = (key: string) => ageGroupConfig.value.find(ag => ag.key === key)?.altKey;
-  const [passNo, setPassNo] = useState<string>('');
+  const [passNo, setPassNo] = useState<string>(nextAgeGroupOnly && ageGroupAssignment?.passNo ? ageGroupAssignment.passNo : '');
+
+  useEffect(() => {
+    if (nextAgeGroupOnly && ageGroupAssignment?.passNo) {
+      setPassNo(ageGroupAssignment.passNo);
+    }
+  }, [ageGroupAssignment, nextAgeGroupOnly]);
 
   useEffect(() => {
     if (clubs && clubs.length === 1) {
