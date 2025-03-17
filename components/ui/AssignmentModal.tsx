@@ -21,10 +21,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   clubs = [],
   currentAssignments = [],
 }) => {
-  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
+  const [selectedClubId, setSelectedClubId] = useState<string | null>(clubs.length === 1 ? clubs[0]._id : null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [passNo, setPassNo] = useState<string>('');
 
+  console.log("clubs length", clubs.length)
+  console.log("selected Club id", selectedClubId)
+  console.log("clubs", clubs)
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   const isFormComplete = selectedClubId && selectedTeamId && passNo.trim() !== '';
@@ -63,6 +66,11 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     onClose();
   }
 
+  const handleClubChange = (clubId: string | null) => {
+    setSelectedClubId(clubId);
+    setSelectedTeamId(null); //reset team selection when club changes
+  }
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-10" onClose={onClose}>
@@ -86,7 +94,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   <ClubSelect
                     selectedClubId={selectedClubId}
                     clubs={clubs}
-                    onClubChange={setSelectedClubId}
+                    onClubChange={handleClubChange}
+                    disabled={clubs.length === 1}
                   />
                   {selectedClub && (
                     <TeamSelect
