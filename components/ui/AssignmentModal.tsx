@@ -49,6 +49,10 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     }
   }, [clubs]);
 
+  useEffect(() => {
+    setPassNo(currentAssignments?.length.toString() || '')
+  }, [currentAssignments])
+
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   const isFormComplete = selectedClubId && selectedTeamId && passNo.trim() !== '';
