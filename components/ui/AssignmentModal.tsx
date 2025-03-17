@@ -126,19 +126,20 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                           assignment.clubId === selectedClub._id && 
                           assignment.teams.some(t => t.teamId === team._id)
                         );
-                        
+
                         if (isTeamAssigned) return false;
 
                         // If nextAgeGroupOnly is true, check age group sort order
                         if (nextAgeGroupOnly && ageGroup) {
                           const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
-                          const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
-                          //console.log("playerAgeGroupConfig", playerAgeGroupConfig);
-                          //console.log("teamAgeGroupConfig", teamAgeGroupConfig);
-                          
-                          return !!playerAgeGroupConfig && teamAgeGroupConfig?.sortOrder === playerAgeGroupConfig.sortOrder + 1;
+                          const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.value === team.ageGroup);
+                          console.log("playerAgeGroupConfig", playerAgeGroupConfig);
+                          console.log("teamAgeGroupConfig", teamAgeGroupConfig);
+                          console.log("team.ageGroup", team.ageGroup);
+
+                          return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder + 1;
                         }
-                        
+
                         return true;
                       })}
                       onTeamChange={setSelectedTeamId}
