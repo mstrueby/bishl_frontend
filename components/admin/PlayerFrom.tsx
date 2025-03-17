@@ -144,6 +144,8 @@ useEffect(() => {
               onClose={() => setIsModalOpen(false)}
               currentAssignments={values.assignedTeams}
               clubs={club ? [club] : []}
+              nextAgeGroupOnly={true}
+              ageGroup={initialValues.ageGroup}
               onSave={(newAssignment) => {
                 const currentAssignments = values.assignedTeams || [];
                 const existingClubIndex = currentAssignments.findIndex(
