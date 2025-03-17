@@ -11,6 +11,7 @@ import { CldImage } from 'next-cloudinary';
 import Badge from '../ui/Badge';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
+import axios from 'axios';
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -30,6 +31,24 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   clubId,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+const [club, setClub] = useState<any>(null);
+
+useEffect(() => {
+  const fetchClub = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${clubId}`);
+      if (response.status === 200) {
+        setClub(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching club:', error);
+    }
+  };
+
+  if (clubId) {
+    fetchClub();
+  }
+}, [clubId]);
 
   return (
     <>
@@ -124,7 +143,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               currentAssignments={values.assignedTeams}
-              clubs={[]}
+              clubs={club ? [club] : []}
               onSave={(newAssignment) => {
                 const currentAssignments = values.assignedTeams || [];
                 const existingClubIndex = currentAssignments.findIndex(
