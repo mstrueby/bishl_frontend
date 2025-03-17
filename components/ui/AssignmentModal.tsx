@@ -145,25 +145,38 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     onClubChange={handleClubChange}
                   />
                   {selectedClub && (
-                    <TeamSelect
-                      selectedTeamId={selectedTeamId}
-                      teams={(selectedClub.teams || []).filter(team => {
-                        // First check if team is already assigned
-                        const isTeamAssigned = currentAssignments?.find(assignment =>
-                          assignment.clubId === selectedClub._id &&
-                          assignment.teams.some(t => t.teamId === team._id)
-                        );
-                        if (isTeamAssigned) return false;
-                        // If nextAgeGroupOnly is true, check age group sort order
-                        if (nextAgeGroupOnly && ageGroup) {
-                          const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
-                          const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
-                          return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder - 1;
+                    <>
+                      {(() => {
+                        const availableTeams = (selectedClub.teams || []).filter(team => {
+                          // First check if team is already assigned
+                          const isTeamAssigned = currentAssignments?.find(assignment =>
+                            assignment.clubId === selectedClub._id &&
+                            assignment.teams.some(t => t.teamId === team._id)
+                          );
+                          if (isTeamAssigned) return false;
+                          // If nextAgeGroupOnly is true, check age group sort order
+                          if (nextAgeGroupOnly && ageGroup) {
+                            const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
+                            const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
+                            return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder - 1;
+                          }
+                          return true;
+                        });
+
+                        // Auto-select if only one team is available
+                        if (availableTeams.length === 1 && !selectedTeamId) {
+                          setSelectedTeamId(availableTeams[0]._id);
                         }
-                        return true;
-                      })}
-                      onTeamChange={setSelectedTeamId}
-                    />
+
+                        return (
+                          <TeamSelect
+                            selectedTeamId={selectedTeamId}
+                            teams={availableTeams}
+                            onTeamChange={setSelectedTeamId}
+                          />
+                        );
+                      })()}
+                    </>
                   )}
                   {selectedTeamId && (
                     <div className="">
