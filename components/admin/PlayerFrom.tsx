@@ -174,14 +174,14 @@ useEffect(() => {
                       <div key={index} className="py-4">
                         <ul className="mt-2 divide-y divide-gray-100">
                           {assignment.teams.map((team, teamIndex) => (
-                            <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600">
+                            <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600 py-3">
                               <div className="flex-1 min-w-8 gap-x-4">
                                 <div className="flex items-center gap-x-3">
                                   <p className="text-sm/6 font-semibold text-gray-900 truncate">
                                     {team.teamName}
                                   </p>
                                 </div>
-                                <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500">
+                                <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500 space-x-2">
 
                                   <span className="whitespace-nowrap truncate">
                                     {team.passNo}

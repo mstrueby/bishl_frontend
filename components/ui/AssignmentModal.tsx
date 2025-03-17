@@ -43,7 +43,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [ageGroupAssignment, setAgeGroupAssignment] = useState<AssignmentTeam | null>(null); // assignment matched with players age group
   const getAgeGroupAltKey = (key: string) => ageGroupConfig.value.find(ag => ag.key === key)?.altKey;
-  const [passNo, setPassNo] = useState<string>('');
+  const [passNo, setPassNo] = useState<string>(nextAgeGroupOnly && ageGroupAssignment?.passNo ? ageGroupAssignment.passNo : '');
+
+  useEffect(() => {
+    if (nextAgeGroupOnly && ageGroupAssignment?.passNo) {
+      setPassNo(ageGroupAssignment.passNo);
+    }
+  }, [ageGroupAssignment, nextAgeGroupOnly]);
 
   useEffect(() => {
     if (clubs && clubs.length === 1) {
@@ -139,25 +145,38 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     onClubChange={handleClubChange}
                   />
                   {selectedClub && (
-                    <TeamSelect
-                      selectedTeamId={selectedTeamId}
-                      teams={(selectedClub.teams || []).filter(team => {
-                        // First check if team is already assigned
-                        const isTeamAssigned = currentAssignments?.find(assignment =>
-                          assignment.clubId === selectedClub._id &&
-                          assignment.teams.some(t => t.teamId === team._id)
-                        );
-                        if (isTeamAssigned) return false;
-                        // If nextAgeGroupOnly is true, check age group sort order
-                        if (nextAgeGroupOnly && ageGroup) {
-                          const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
-                          const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
-                          return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder - 1;
+                    <>
+                      {(() => {
+                        const availableTeams = (selectedClub.teams || []).filter(team => {
+                          // First check if team is already assigned
+                          const isTeamAssigned = currentAssignments?.find(assignment =>
+                            assignment.clubId === selectedClub._id &&
+                            assignment.teams.some(t => t.teamId === team._id)
+                          );
+                          if (isTeamAssigned) return false;
+                          // If nextAgeGroupOnly is true, check age group sort order
+                          if (nextAgeGroupOnly && ageGroup) {
+                            const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
+                            const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
+                            return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder - 1;
+                          }
+                          return true;
+                        });
+
+                        // Auto-select if only one team is available
+                        if (availableTeams.length === 1 && !selectedTeamId) {
+                          setSelectedTeamId(availableTeams[0]._id);
                         }
-                        return true;
-                      })}
-                      onTeamChange={setSelectedTeamId}
-                    />
+
+                        return (
+                          <TeamSelect
+                            selectedTeamId={selectedTeamId}
+                            teams={availableTeams}
+                            onTeamChange={setSelectedTeamId}
+                          />
+                        );
+                      })()}
+                    </>
                   )}
                   {selectedTeamId && (
                     <div className="">
@@ -170,7 +189,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                         id="passNo"
                         value={passNo}
                         onChange={(e) => setPassNo(e.target.value)}
-                        className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none"
+                        disabled={nextAgeGroupOnly}
+                        className={`block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none ${nextAgeGroupOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                       />
                     </div>
                   )}
