@@ -17,17 +17,17 @@ interface AssignmentModalProps {
 }
 
 const ageGroupConfig = {
-   key: "AGEGROUP",
-   name: "Altersklasse",
-   value: [
-     { key: "MEN", value: "Herren", sortOrder: 1, altKey: "Herren" },
-     { key: "WOMEN", value: "Damen", sortOrder: 2, altKey: "Damen" },
-     { key: "U19", value: "U19", sortOrder: 3, altKey: "Junioren" },
-     { key: "U16", value: "U16", sortOrder: 4, altKey: "Jugend" },
-     { key: "U13", value: "U13", sortOrder: 5, altKey: "Schüler" },
-     { key: "U10", value: "U10", sortOrder: 6, altKey: "Bambini" },
-     { key: "U8", value: "U8", sortOrder: 7, altKey: "Mini" }
-   ]
+  key: "AGEGROUP",
+  name: "Altersklasse",
+  value: [
+    { key: "MEN", value: "Herren", sortOrder: 1, altKey: "Herren" },
+    { key: "WOMEN", value: "Damen", sortOrder: 2, altKey: "Damen" },
+    { key: "U19", value: "U19", sortOrder: 3, altKey: "Junioren" },
+    { key: "U16", value: "U16", sortOrder: 4, altKey: "Jugend" },
+    { key: "U13", value: "U13", sortOrder: 5, altKey: "Schüler" },
+    { key: "U10", value: "U10", sortOrder: 6, altKey: "Bambini" },
+    { key: "U8", value: "U8", sortOrder: 7, altKey: "Mini" }
+  ]
 };
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -109,7 +109,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             >
               <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
                 <Dialog.Title as="h3" className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
-                  Neue Mannschaftszuweisung - {ageGroup}/{nextAgeGroupOnly && 'true'}
+                  Neue Mannschaftszuweisung
                 </Dialog.Title>
                 <div className="mt-4 space-y-4">
                   <ClubSelect
@@ -122,23 +122,17 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                       selectedTeamId={selectedTeamId}
                       teams={(selectedClub.teams || []).filter(team => {
                         // First check if team is already assigned
-                        const isTeamAssigned = currentAssignments?.find(assignment => 
-                          assignment.clubId === selectedClub._id && 
+                        const isTeamAssigned = currentAssignments?.find(assignment =>
+                          assignment.clubId === selectedClub._id &&
                           assignment.teams.some(t => t.teamId === team._id)
                         );
-                        
                         if (isTeamAssigned) return false;
-
                         // If nextAgeGroupOnly is true, check age group sort order
                         if (nextAgeGroupOnly && ageGroup) {
                           const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
                           const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
-                          //console.log("playerAgeGroupConfig", playerAgeGroupConfig);
-                          //console.log("teamAgeGroupConfig", teamAgeGroupConfig);
-                          
-                          return !!playerAgeGroupConfig && teamAgeGroupConfig?.sortOrder === playerAgeGroupConfig.sortOrder + 1;
+                          return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder - 1;
                         }
-                        
                         return true;
                       })}
                       onTeamChange={setSelectedTeamId}
@@ -171,11 +165,10 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   </button>
                   <button
                     type="button"
-                    className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                      isFormComplete 
-                        ? 'bg-indigo-600 hover:bg-indigo-700' 
-                        : 'bg-indigo-300 cursor-not-allowed'
-                    }`}
+                    className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isFormComplete
+                      ? 'bg-indigo-600 hover:bg-indigo-700'
+                      : 'bg-indigo-300 cursor-not-allowed'
+                      }`}
                     onClick={handleSave}
                     disabled={!isFormComplete}
                   >
