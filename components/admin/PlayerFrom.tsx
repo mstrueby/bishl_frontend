@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../ui/form/InputText';
@@ -36,7 +36,7 @@ const [club, setClub] = useState<any>(null);
 useEffect(() => {
   const fetchClub = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${clubId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/id/${clubId}`);
       if (response.status === 200) {
         setClub(response.data);
       }
