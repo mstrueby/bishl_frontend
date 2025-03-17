@@ -54,24 +54,9 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const isFormComplete = selectedClubId && selectedTeamId && passNo.trim() !== '';
 
   const handleSave = () => {
-    if (selectedClub && selectedTeamId) {
+    if (selectedClub && selectedTeamId && passNo) {
       const selectedTeam = selectedClub.teams.find(team => team._id === selectedTeamId);
       if (selectedTeam) {
-        // If nextAgeGroupOnly is true, try to find matching passNo from current assignments
-        let autoPassNo = passNo;
-        if (nextAgeGroupOnly && ageGroup && currentAssignments) {
-          const existingAssignment = currentAssignments.find(assignment => 
-            assignment.teams.some(team => team.teamId === selectedTeamId)
-          );
-          if (existingAssignment) {
-            autoPassNo = existingAssignment.teams[0].passNo;
-          }
-        }
-        
-        if (!autoPassNo) {
-          return; // Don't proceed if we don't have a passNo
-        }
-
         const assignment: Assignment = {
           clubId: selectedClub._id,
           clubName: selectedClub.name,
@@ -80,7 +65,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             teamId: selectedTeam._id,
             teamName: selectedTeam.name,
             teamAlias: selectedTeam.alias,
-            passNo: autoPassNo,
+            passNo: passNo,
             source: 'BISHL',
             modifyDate: new Date().toISOString(),
             active: false
