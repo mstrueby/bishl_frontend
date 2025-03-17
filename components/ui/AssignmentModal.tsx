@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import ClubSelect from './ClubSelect';
 import TeamSelect from './TeamSelect';
 import { ClubValues, TeamValues } from '../../types/ClubValues';
-import { Assignment } from '../../types/PlayerValues';
+import { Assignment, AssignmentTeam } from '../../types/PlayerValues';
 import InputText from './form/InputText';
 
 interface AssignmentModalProps {
@@ -41,7 +41,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
 }) => {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-  const [ageGroupAssignment, setAgeGroupAssignment] = useState<Assignment | null>(null); // assignment matched with players age group
+  const [ageGroupAssignment, setAgeGroupAssignment] = useState<AssignmentTeam | null>(null); // assignment matched with players age group
   const getAgeGroupAltKey = (key: string) => ageGroupConfig.value.find(ag => ag.key === key)?.altKey;
   const [passNo, setPassNo] = useState<string>('');
 
@@ -53,14 +53,17 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
   useEffect(() => {
     if (currentAssignments && ageGroup) {
-      const matchingAssignment = currentAssignments.find(assignment => 
-        assignment.teams.some(team => {
+      const matchingTeam = currentAssignments.reduce((foundTeam: AssignmentTeam | null, assignment) => {
+        if (foundTeam) return foundTeam;
+        const matchedTeam = assignment.teams.find(team => {
           const selectedTeam = clubs.find(club => club._id === assignment.clubId)?.teams
             .find(t => t._id === team.teamId);
           return selectedTeam?.ageGroup === getAgeGroupAltKey(ageGroup || '');
-        })
-      );
-      setAgeGroupAssignment(matchingAssignment || null);
+        });
+
+        return matchedTeam || null;
+      }, null);
+      setAgeGroupAssignment(matchingTeam || null);
     } else {
       setAgeGroupAssignment(null);
     }
