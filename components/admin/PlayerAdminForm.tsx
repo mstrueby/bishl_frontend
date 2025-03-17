@@ -52,29 +52,29 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               <span className="block text-sm font-medium leading-6 text-gray-900">Quelle</span>
               <Badge info={values.source} />
             </div>
-            
 
-            
-            <InputText name="firstName" autoComplete="off" type="text" label="Vorname" 
-                disabled={values.source === "ISHD"} />
-            <InputText name="lastName" autoComplete="off" type="text" label="Nachname" 
-                disabled={values.source === "ISHD"} />
-            <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum" 
-                disabled={values.source === "ISHD"} />
+
+
+            <InputText name="firstName" autoComplete="off" type="text" label="Vorname"
+              disabled={values.source === "ISHD"} />
+            <InputText name="lastName" autoComplete="off" type="text" label="Nachname"
+              disabled={values.source === "ISHD"} />
+            <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum"
+              disabled={values.source === "ISHD"} />
             <div className="flex items-center justify-between mt-6 mb-2">
               <span className="block text-sm font-medium leading-6 text-gray-900">Altersklasse</span>
               <Badge info={values.ageGroup ? values.ageGroup : '?'} />
             </div>
             {values.source === 'ISHD' ? (
-            <div className="flex items-center justify-between mt-6 mb-2">
-              <span className="block text-sm font-medium leading-6 text-gray-900">Vollvisier erforderlich</span>
-              <Badge info={values.fullFaceReq ? 'Ja' : 'Nein'} />
-            </div>
+              <div className="flex items-center justify-between mt-6 mb-2">
+                <span className="block text-sm font-medium leading-6 text-gray-900">Vollvisier erforderlich</span>
+                <Badge info={values.fullFaceReq ? 'Ja' : 'Nein'} />
+              </div>
             ) : (
-                <Toggle name="fullFaceReq" label="Vollvisier erforderlich" />
+              <Toggle name="fullFaceReq" label="Vollvisier erforderlich" />
             )}
             <Toggle name="managedByISHD" label="Wird von ISHD verwaltet" />
-            
+
             {values.imageUrl ? (
               <div className="mt-8">
                 <div>
@@ -104,7 +104,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             <Toggle name="imageVisible" label="Foto öffentlich anzeigen" />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
 
-            
+
             {/* Display assigned clubs and teams */}
             <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-8">
               <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
@@ -125,32 +125,30 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               Zuordnungen von der ISHD können hier <em>nicht</em> entfernt werden.
             </p>
 
-            <div className="mt-2">
-              <AssignmentModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                clubs={clubs}
-                currentAssignments={values.assignedTeams}
-                onSave={(newAssignment) => {
-                  const currentAssignments = values.assignedTeams || [];
-                  const existingClubIndex = currentAssignments.findIndex(
-                    (assignment) => assignment.clubId === newAssignment.clubId
-                  );
+            <AssignmentModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              clubs={clubs}
+              currentAssignments={values.assignedTeams}
+              onSave={(newAssignment) => {
+                const currentAssignments = values.assignedTeams || [];
+                const existingClubIndex = currentAssignments.findIndex(
+                  (assignment) => assignment.clubId === newAssignment.clubId
+                );
 
-                  if (existingClubIndex === -1) {
-                    setFieldValue('assignedTeams', [...currentAssignments, newAssignment]);
-                  } else {
-                    const updatedAssignments = [...currentAssignments];
-                    updatedAssignments[existingClubIndex].teams = [
-                      ...updatedAssignments[existingClubIndex].teams,
-                      ...newAssignment.teams,
-                    ];
-                    setFieldValue('assignedTeams', updatedAssignments);
-                  }
-                  setIsModalOpen(false);
-                }}
-              />
-            </div>
+                if (existingClubIndex === -1) {
+                  setFieldValue('assignedTeams', [...currentAssignments, newAssignment]);
+                } else {
+                  const updatedAssignments = [...currentAssignments];
+                  updatedAssignments[existingClubIndex].teams = [
+                    ...updatedAssignments[existingClubIndex].teams,
+                    ...newAssignment.teams,
+                  ];
+                  setFieldValue('assignedTeams', updatedAssignments);
+                }
+                setIsModalOpen(false);
+              }}
+            />
 
             {values.assignedTeams && values.assignedTeams.length > 0 && (
               <div className="mt-2 divide-y divide-gray-100">

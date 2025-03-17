@@ -10,6 +10,7 @@ import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Badge from '../ui/Badge';
 import Toggle from '../ui/form/Toggle';
+import AssignmentModal from '../ui/AssignmentModal';
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -118,6 +119,31 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               </button>
             </div>
             <p className="mt-2 text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
+
+            <AssignmentModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              currentAssignments={values.assignedTeams}
+              clubs={[]}
+              onSave={(newAssignment) => {
+                const currentAssignments = values.assignedTeams || [];
+                const existingClubIndex = currentAssignments.findIndex(
+                  (assignment) => assignment.clubId === newAssignment.clubId
+                );
+
+                if (existingClubIndex === -1) {
+                  setFieldValue('assignedTeams', [...currentAssignments, newAssignment]);
+                } else {
+                  const updatedAssignments = [...currentAssignments];
+                  updatedAssignments[existingClubIndex].teams = [
+                    ...updatedAssignments[existingClubIndex].teams,
+                    ...newAssignment.teams,
+                  ];
+                  setFieldValue('assignedTeams', updatedAssignments);
+                }
+                setIsModalOpen(false);
+              }}
+            />
 
             {values.assignedTeams && values.assignedTeams.length > 0 && (
               <div className="mt-2 divide-y divide-gray-100">
