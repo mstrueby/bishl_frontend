@@ -235,7 +235,7 @@ useEffect(() => {
             {values.assignedTeams?.some(assignment => assignment.clubId !== clubId) && (
               <>
                 <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-12">
-                  <h3 className="text-base/7 font-semibold text-gray-900 mt-12 uppercase">Andere Vereine</h3>
+                  <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Andere Vereine</h3>
                 </div>
                 <ul className="mt-2 divide-y divide-gray-100">
                   {values.assignedTeams

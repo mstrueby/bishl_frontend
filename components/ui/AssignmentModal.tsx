@@ -25,6 +25,9 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [passNo, setPassNo] = useState<string>('');
 
+  console.log("clubs length", clubs.length)
+  console.log("selected Club id", selectedClubId)
+  console.log("clubs", clubs)
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   const isFormComplete = selectedClubId && selectedTeamId && passNo.trim() !== '';
