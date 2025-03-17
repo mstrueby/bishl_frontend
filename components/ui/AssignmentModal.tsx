@@ -109,7 +109,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             >
               <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
                 <Dialog.Title as="h3" className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
-                  Neue Mannschaftszuweisung - {ageGroup}
+                  Neue Mannschaftszuweisung - {ageGroup}/{nextAgeGroupOnly && 'true'}
                 </Dialog.Title>
                 <div className="mt-4 space-y-4">
                   <ClubSelect
@@ -132,11 +132,11 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                         // If nextAgeGroupOnly is true, check age group sort order
                         if (nextAgeGroupOnly && ageGroup) {
                           const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
-                          const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === team.ageGroup);
+                          const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
+                          //console.log("playerAgeGroupConfig", playerAgeGroupConfig);
+                          //console.log("teamAgeGroupConfig", teamAgeGroupConfig);
                           
-                          if (!playerAgeGroupConfig || !teamAgeGroupConfig) return false;
-                          
-                          return teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder + 1;
+                          return !!playerAgeGroupConfig && teamAgeGroupConfig?.sortOrder === playerAgeGroupConfig.sortOrder + 1;
                         }
                         
                         return true;
