@@ -168,12 +168,16 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                           setSelectedTeamId(availableTeams[0]._id);
                         }
 
-                        return (
+                        return availableTeams.length > 0 ? (
                           <TeamSelect
                             selectedTeamId={selectedTeamId}
                             teams={availableTeams}
                             onTeamChange={setSelectedTeamId}
                           />
+                        ) : (
+                          <div className="mt-2 text-sm text-gray-500">
+                            Keine Mannschaften verfügbar
+                          </div>
                         );
                       })()}
                     </>
