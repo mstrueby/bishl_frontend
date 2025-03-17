@@ -119,11 +119,11 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
   }
 
   const teamValues = club?.teams
-    ?.slice()
-    ?.sort((a, b) => a.name.localeCompare(b.name))
-    ?.map((team: TeamValues) => ({
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((team: TeamValues) => ({
       ...team
-    })) || [];
+    }));
 
   const dataLisItems = teamValues.map((team: TeamValues) => {
     return {
@@ -168,3 +168,6 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
 };
 
 export default MyClub;
+
+
+
