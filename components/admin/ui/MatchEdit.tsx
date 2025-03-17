@@ -38,6 +38,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
   };
   const [editData, setEditData] = useState<EditMatchData>(initialEditData);
+  const [loading, setLoading] = useState<boolean>(false);;
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -56,6 +57,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
     const formData = new FormData(event.currentTarget);
 
     const startDate = new Date(formData.get('startDate') as string);
@@ -95,6 +97,8 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
       } else {
         console.error('Error updating match:', error);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -164,9 +168,18 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-24"
                     >
-                      Speichern
+                      {loading ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                          </svg>
+                        </>
+                      ) : (
+                        'Speichern'
+                      )}
                     </button>
                   </div>
                 </form>
