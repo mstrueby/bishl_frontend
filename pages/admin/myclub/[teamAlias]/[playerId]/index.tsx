@@ -182,6 +182,7 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
     createDate: player?.createDate || '',
     nationality: player?.nationality || '', // Added missing property
     position: player?.position || undefined, // Added missing property
+    ageGroup: player?.ageGroup || undefined, // Added missing property
   };
 
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;

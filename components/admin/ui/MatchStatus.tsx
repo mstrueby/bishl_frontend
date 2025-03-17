@@ -52,9 +52,11 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
     }
   };
   const [editData, setEditData] = useState<EditData>(initialEditData);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
 
     const matchStatus = {
       key: editData.matchStatus.key,
@@ -105,6 +107,8 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
           console.error('Error updating match:', error);
         }
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -240,9 +244,18 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
                       </button>
                       <button
                         type="submit"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-24"
                       >
-                        Speichern
+                        {loading ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                            </svg>
+                          </>
+                        ) : (
+                          'Speichern'
+                        )}
                       </button>
                     </div>
                   </div>

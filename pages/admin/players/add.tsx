@@ -84,6 +84,7 @@ export default function Add({ jwt, clubs }: AddProps) {
     displayLastName: '',
     nationality: '',
     fullFaceReq: false,
+    managedByISHD: false,
     assignedTeams: [],
     imageUrl: '',
     imageVisible: false,

@@ -183,27 +183,42 @@ export default function Tournament({
             setMatchdays(sortedData);
 
             // If matchday type is GROUP, select the first matchday
-              // Otherwise, find the upcoming matchday or the most recent one
+              // Otherwise, find today's matchday, then upcoming or most recent one if not found
               let selectedMd;
               
               if (selectedRound.matchdaysType.key === 'GROUP') {
                 selectedMd = sortedData[0];
               } else {
                 const now = new Date().getTime();
-                
-                // Find the first upcoming matchday
-                const upcomingMatchdays = sortedData
-                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() >= now)
-                  .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-                
-                if (upcomingMatchdays.length > 0) {
-                  // If there are upcoming matchdays, select the next one
-                  selectedMd = upcomingMatchdays[0];
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const todayEnd = new Date();
+                todayEnd.setHours(23, 59, 59, 999);
+
+                // Check for today's matchday
+                const todayMatchday = sortedData.find(
+                  (matchday: Matchday) =>
+                    new Date(matchday.startDate).getTime() >= todayStart.getTime() &&
+                    new Date(matchday.startDate).getTime() <= todayEnd.getTime()
+                );
+
+                if (todayMatchday) {
+                  selectedMd = todayMatchday;
                 } else {
-                  // If no upcoming matchdays, select the most recent one
-                  selectedMd = sortedData
-                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
-                    .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+                  // Find the first upcoming matchday
+                  const upcomingMatchdays = sortedData
+                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() > todayEnd.getTime())
+                    .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+                  
+                  if (upcomingMatchdays.length > 0) {
+                    // If there are upcoming matchdays, select the next one
+                    selectedMd = upcomingMatchdays[0];
+                  } else {
+                    // If no upcoming matchdays, select the most recent one
+                    selectedMd = sortedData
+                      .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                      .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+                  }
                 }
               }
 
@@ -240,13 +255,15 @@ export default function Tournament({
         .then((data) => {
           setMatches(data);
           
-          // After setting matches, scroll to the upcoming match section
-          setTimeout(() => {
-            const matchesSection = document.getElementById('matches-section');
-            if (matchesSection) {
-              matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 300); // Small delay to ensure rendering is complete
+          // Only scroll to matches section if there's no matchday dropdown (single matchday)
+          if (matchdays.length <= 1) {
+            setTimeout(() => {
+              const matchesSection = document.getElementById('matches-section');
+              if (matchesSection) {
+                matchesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 300); // Small delay to ensure rendering is complete
+          }
         })
         .finally(() => setIsLoadingMatches(false));
     }
@@ -585,34 +602,36 @@ export default function Tournament({
                 <div id="matches-section">
                   {matches && matches.length > 0 ? (
                     matches.map((match, index) => (
-                      key={index}
-                      match={match}
-                      onMatchUpdate={async () => {
-                        // Refetch rounds to update standings
-                        const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
-                        const roundsData = await roundsResponse.json();
-                        if (Array.isArray(roundsData)) {
-                          const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-                          setRounds(sortedData);
-                          setSelectedRound(prevRound => {
-                            const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
-                            return updatedRound;
-                          });
-                        }
+                      <MatchCard
+                        key={index}
+                        match={match}
+                        onMatchUpdate={async () => {
+                          // Refetch rounds to update standings
+                          const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                          const roundsData = await roundsResponse.json();
+                          if (Array.isArray(roundsData)) {
+                            const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+                            setRounds(sortedData);
+                            setSelectedRound(prevRound => {
+                              const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
+                              return updatedRound;
+                            });
+                          }
 
-                        // Refetch matches
-                        const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
-                        const matchesData = await matchesResponse.json();
-                        setMatches(matchesData);
-                      }}
-                      matchdayOwner={selectedMatchday.owner}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    Keine Spiele verfügbar
-                  </div>
-                )
+                          // Refetch matches
+                          const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                          const matchesData = await matchesResponse.json();
+                          setMatches(matchesData);
+                        }}
+                        matchdayOwner={selectedMatchday.owner}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      Keine Spiele verfügbar
+                    </div>
+                  )
+                  }
                 </div>
               )}
             </section>
