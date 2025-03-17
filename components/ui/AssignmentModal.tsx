@@ -12,7 +12,23 @@ interface AssignmentModalProps {
   onSave: (assignment: Assignment) => void;
   clubs: ClubValues[];
   currentAssignments?: Assignment[];
+  nextAgeGroupOnly?: boolean;
+  ageGroup?: string;
 }
+
+const ageGroupConfig = {
+   key: "AGEGROUP",
+   name: "Altersklasse",
+   value: [
+     { key: "MEN", value: "Herren", sortOrder: 1, altKey: "Herren" },
+     { key: "WOMEN", value: "Damen", sortOrder: 2, altKey: "Damen" },
+     { key: "U19", value: "U19", sortOrder: 3, altKey: "Junioren" },
+     { key: "U16", value: "U16", sortOrder: 4, altKey: "Jugend" },
+     { key: "U13", value: "U13", sortOrder: 5, altKey: "Schüler" },
+     { key: "U10", value: "U10", sortOrder: 6, altKey: "Bambini" },
+     { key: "U8", value: "U8", sortOrder: 7, altKey: "Mini" }
+   ]
+};
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isOpen,
@@ -20,15 +36,19 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   onSave,
   clubs = [],
   currentAssignments = [],
+  nextAgeGroupOnly = false,
+  ageGroup,
 }) => {
-  const [selectedClubId, setSelectedClubId] = useState<string | null>((clubs && clubs.length === 1) ? clubs[0]._id : null);
+  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [passNo, setPassNo] = useState<string>('');
 
-  console.log("clubs length", clubs.length)
-  console.log("selected Club id", selectedClubId)
-  console.log("clubs", clubs)
-  //console.log("club id", (clubs && clubs[0].alias))
+  useEffect(() => {
+    if (clubs && clubs.length === 1) {
+      setSelectedClubId(clubs[0]._id);
+    }
+  }, [clubs]);
+
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   const isFormComplete = selectedClubId && selectedTeamId && passNo.trim() !== '';
@@ -89,14 +109,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             >
               <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
                 <Dialog.Title as="h3" className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
-                  Neue Mannschaftszuweisung
+                  Neue Mannschaftszuweisung - {ageGroup}
                 </Dialog.Title>
                 <div className="mt-4 space-y-4">
                   <ClubSelect
                     selectedClubId={selectedClubId}
                     clubs={clubs}
                     onClubChange={handleClubChange}
-                    disabled={clubs.length === 1}
                   />
                   {selectedClub && (
                     <TeamSelect
