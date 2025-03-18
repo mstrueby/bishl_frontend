@@ -1,9 +1,10 @@
 
 import { PlayerValues } from '../types/PlayerValues';
+import { TeamValues } from '../types/ClubValues';
 
 export const getDataListItems = (
   players: PlayerValues[],
-  team: { _id: string; alias: string },
+  team: TeamValues,
   editPlayer: (teamAlias: string, playerId: string) => void,
   toggleActive: (playerId: string, teamId: string, assignedTeams: any, imageUrl: string | null) => void,
   showMenuActions = true
@@ -24,6 +25,7 @@ export const getDataListItems = (
     return {
       _id: player._id,
       title: `${number ? number + ' - ' : ''}${name}`,
+      ageGroup: { value: player.ageGroup, color: player.ageGroup === team.ageGroup ? 'green' : 'yellow' },
       alias: player._id,
       description: [
         `${player.assignedTeams
@@ -45,16 +47,17 @@ export const getDataListItems = (
           .filter(Boolean)
           .join(', ')})` : ''
         }`,
+        `geb. ${new Date(player.birthdate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`,
         `${player.assignedTeams
           .map((item) => {
             const filteredTeams = item.teams.filter((teamInner) => teamInner.teamId === team._id);
             const modifyDates = filteredTeams.map((teamInner) => {
               const date = new Date(teamInner.modifyDate);
-              return date.toLocaleString('de-DE', {
+              return `mod. ${date.toLocaleString('de-DE', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
-              });
+              })}`;
             });
             return modifyDates.length > 0 ? modifyDates.join(', ') : '';
           })
