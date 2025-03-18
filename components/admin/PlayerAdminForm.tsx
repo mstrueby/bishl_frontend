@@ -108,9 +108,10 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             <Toggle name="imageVisible" label="Foto öffentlich anzeigen" />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
             
-            <div className="mt-6 mb-2 flex items-center justify-between">
-              <label className="block text-sm font-medium leading-6 text-gray-900">Geschlecht</label>
-              <div className="mt-2 space-x-4">
+            <div className="mt-6 mb-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium leading-6 text-gray-900">Geschlecht</label>
+                <div className="space-x-4">
                 <label className="inline-flex items-center">
                   <input
                     type="radio"
@@ -134,6 +135,9 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                   <span className="ml-2 text-sm text-gray-900">weiblich</span>
                 </label>
               </div>
+              {errors.sex && touched.sex && (
+                <p className="mt-2 text-sm text-red-600">{errors.sex}</p>
+              )}
             </div>
 
 
