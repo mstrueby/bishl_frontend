@@ -5,6 +5,7 @@ import TeamSelect from './TeamSelect';
 import { ClubValues, TeamValues } from '../../types/ClubValues';
 import { Assignment, AssignmentTeam } from '../../types/PlayerValues';
 import InputText from './form/InputText';
+import { ageGroupConfig } from '../../tools/consts';
 
 interface AssignmentModalProps {
   isOpen: boolean;
@@ -15,16 +16,6 @@ interface AssignmentModalProps {
   nextAgeGroupOnly?: boolean;
   ageGroup?: string;
 }
-
-const ageGroupConfig = [
-  { key: "MEN", value: "Herren", sortOrder: 1, altKey: "Herren" },
-  { key: "WOMEN", value: "Damen", sortOrder: 2, altKey: "Damen" },
-  { key: "U19", value: "U19", sortOrder: 3, altKey: "Junioren" },
-  { key: "U16", value: "U16", sortOrder: 4, altKey: "Jugend" },
-  { key: "U13", value: "U13", sortOrder: 5, altKey: "Schüler" },
-  { key: "U10", value: "U10", sortOrder: 6, altKey: "Bambini" },
-  { key: "U8", value: "U8", sortOrder: 7, altKey: "Mini" }
-];
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isOpen,
@@ -38,7 +29,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [ageGroupAssignment, setAgeGroupAssignment] = useState<AssignmentTeam | null>(null); // assignment matched with players age group
-  const getAgeGroupAltKey = (key: string) => ageGroupConfig.value.find(ag => ag.key === key)?.altKey;
+  const getAgeGroupAltKey = (key: string) => ageGroupConfig.find(ag => ag.key === key)?.altKey;
   const [passNo, setPassNo] = useState<string>(nextAgeGroupOnly && ageGroupAssignment?.passNo ? ageGroupAssignment.passNo : '');
 
   useEffect(() => {
@@ -150,8 +141,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                           if (isTeamAssigned) return false;
                           // If nextAgeGroupOnly is true, check age group sort order
                           if (nextAgeGroupOnly && ageGroup) {
-                            const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
-                            const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
+                            const playerAgeGroupConfig = ageGroupConfig.find(ag => ag.key === ageGroup);
+                            const teamAgeGroupConfig = ageGroupConfig.find(ag => ag.altKey === team.ageGroup);
                             return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder - 1;
                           }
                           return true;

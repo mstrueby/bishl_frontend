@@ -52,18 +52,20 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               <span className="block text-sm font-medium leading-6 text-gray-900">Quelle</span>
               <Badge info={values.source} />
             </div>
-
-
-
             <InputText name="firstName" autoComplete="off" type="text" label="Vorname"
               disabled={values.source === "ISHD"} />
             <InputText name="lastName" autoComplete="off" type="text" label="Nachname"
               disabled={values.source === "ISHD"} />
             <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum"
               disabled={values.source === "ISHD"} />
-            <div className="flex items-center justify-between mt-6 mb-2">
-              <span className="block text-sm font-medium leading-6 text-gray-900">Altersklasse</span>
-              <Badge info={values.ageGroup ? values.ageGroup : '?'} />
+            <div className="mt-6 mb-2">
+              <div className="flex items-center justify-between">
+                <span className="block text-sm font-medium leading-6 text-gray-900">Altersklasse</span>
+                <Badge info={values.ageGroup ? values.ageGroup : '?'} />
+              </div>
+              {!values.ageGroup && (
+                <p className="text-xs text-gray-500 italic">Wird nach dem Speichern festgelegt</p>
+              )}
             </div>
             {values.source === 'ISHD' ? (
               <div className="flex items-center justify-between mt-6 mb-2">

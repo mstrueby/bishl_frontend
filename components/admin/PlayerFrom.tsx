@@ -31,24 +31,24 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   clubId,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-const [club, setClub] = useState<any>(null);
+  const [club, setClub] = useState<any>(null);
 
-useEffect(() => {
-  const fetchClub = async () => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/id/${clubId}`);
-      if (response.status === 200) {
-        setClub(response.data);
+  useEffect(() => {
+    const fetchClub = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/id/${clubId}`);
+        if (response.status === 200) {
+          setClub(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching club:', error);
       }
-    } catch (error) {
-      console.error('Error fetching club:', error);
-    }
-  };
+    };
 
-  if (clubId) {
-    fetchClub();
-  }
-}, [clubId]);
+    if (clubId) {
+      fetchClub();
+    }
+  }, [clubId]);
 
   return (
     <>
@@ -141,6 +141,7 @@ useEffect(() => {
             {/* Team assignments section */}
             <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-12">
               <h3 className="text-base/7 font-semibold text-gray-900 uppercase">Mannschaften</h3>
+              {/** DISABLED button
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
@@ -148,6 +149,7 @@ useEffect(() => {
               >
                 Neue Zuordnung
               </button>
+              */}
             </div>
             <p className="mt-2 text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
 
