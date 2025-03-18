@@ -89,6 +89,7 @@ export default function Add({ jwt, clubs }: AddProps) {
     imageUrl: '',
     imageVisible: false,
     source: 'BISHL',
+    sex: 'männlich',
   };;
 
   const onSubmit = async (values: PlayerValues) => {
