@@ -189,6 +189,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
     source: player?.source || 'n/a',
     ageGroup: player?.ageGroup || '?',
     managedByISHD: player?.managedByISHD || false,
+    sex: player?.sex || 'männlich',
   };
   console.log("initial birthday", player.birthdate, new Date(player.birthdate).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' }), initialValues.birthdate)
   const sectionTitle = 'Spieler*in bearbeiten';

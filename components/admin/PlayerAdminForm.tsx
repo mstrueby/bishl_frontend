@@ -106,7 +106,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             <Toggle name="imageVisible" label="Foto öffentlich anzeigen" />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
             
-            <div className="mt-4">
+            <div className="mt-6 mb-2 flex items-center justify-between">
               <label className="block text-sm font-medium leading-6 text-gray-900">Geschlecht</label>
               <div className="mt-2 space-x-4">
                 <label className="inline-flex items-center">
