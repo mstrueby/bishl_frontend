@@ -5,6 +5,7 @@ import TeamSelect from './TeamSelect';
 import { ClubValues, TeamValues } from '../../types/ClubValues';
 import { Assignment, AssignmentTeam } from '../../types/PlayerValues';
 import InputText from './form/InputText';
+import { ageGroupConfig } from '../../tools/consts';
 
 interface AssignmentModalProps {
   isOpen: boolean;
@@ -15,16 +16,6 @@ interface AssignmentModalProps {
   nextAgeGroupOnly?: boolean;
   ageGroup?: string;
 }
-
-const ageGroupConfig = [
-  { key: 'MEN', value: 'Herren', altKey: 'Herren' },
-  { key: 'WOMEN', value: 'Damen', altKey: 'Damen' },
-  { key: 'U19', value: 'U19', altKey: 'Junioren' },
-  { key: 'U16', value: 'U16', altKey: 'Jugend' },
-  { key: 'U13', value: 'U13', altKey: 'Schüler' },
-  { key: 'U10', value: 'U10', altKey: 'Bambini' },
-  { key: 'U8', value: 'U8', altKey: 'Mini' }
-];
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isOpen,
@@ -150,8 +141,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                           if (isTeamAssigned) return false;
                           // If nextAgeGroupOnly is true, check age group sort order
                           if (nextAgeGroupOnly && ageGroup) {
-                            const playerAgeGroupConfig = ageGroupConfig.value.find(ag => ag.key === ageGroup);
-                            const teamAgeGroupConfig = ageGroupConfig.value.find(ag => ag.altKey === team.ageGroup);
+                            const playerAgeGroupConfig = ageGroupConfig.find(ag => ag.key === ageGroup);
+                            const teamAgeGroupConfig = ageGroupConfig.find(ag => ag.altKey === team.ageGroup);
                             return !!playerAgeGroupConfig && !!teamAgeGroupConfig && teamAgeGroupConfig.sortOrder === playerAgeGroupConfig.sortOrder - 1;
                           }
                           return true;
