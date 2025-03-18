@@ -42,6 +42,8 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
           firstName: Yup.string().required('Der Vorname ist erforderlich'),
           lastName: Yup.string().required('Der Nachname ist erforderlich'),
           birthdate: Yup.string().required('Die Geburtsdatum ist erforderlich'),
+          //sex: Yup.string().oneOf(['männlich', 'weiblich'], 'Geschlecht muss ausgewählt werden').required('Geschlecht ist erforderlich'),
+          sex: Yup.string().required('Geschlecht ist erforderlich'),
         })}
         onSubmit={onSubmit}
       >
