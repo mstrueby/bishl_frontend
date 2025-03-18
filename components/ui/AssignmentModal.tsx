@@ -17,13 +17,13 @@ interface AssignmentModalProps {
 }
 
 const ageGroupConfig = [
-  { key: "MEN", value: "Herren", sortOrder: 1, altKey: "Herren" },
-  { key: "WOMEN", value: "Damen", sortOrder: 2, altKey: "Damen" },
-  { key: "U19", value: "U19", sortOrder: 3, altKey: "Junioren" },
-  { key: "U16", value: "U16", sortOrder: 4, altKey: "Jugend" },
-  { key: "U13", value: "U13", sortOrder: 5, altKey: "Schüler" },
-  { key: "U10", value: "U10", sortOrder: 6, altKey: "Bambini" },
-  { key: "U8", value: "U8", sortOrder: 7, altKey: "Mini" }
+  { key: 'MEN', value: 'Herren', altKey: 'Herren' },
+  { key: 'WOMEN', value: 'Damen', altKey: 'Damen' },
+  { key: 'U19', value: 'U19', altKey: 'Junioren' },
+  { key: 'U16', value: 'U16', altKey: 'Jugend' },
+  { key: 'U13', value: 'U13', altKey: 'Schüler' },
+  { key: 'U10', value: 'U10', altKey: 'Bambini' },
+  { key: 'U8', value: 'U8', altKey: 'Mini' }
 ];
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -38,7 +38,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [ageGroupAssignment, setAgeGroupAssignment] = useState<AssignmentTeam | null>(null); // assignment matched with players age group
-  const getAgeGroupAltKey = (key: string) => ageGroupConfig.value.find(ag => ag.key === key)?.altKey;
+  const getAgeGroupAltKey = (key: string) => ageGroupConfig.find(ag => ag.key === key)?.altKey;
   const [passNo, setPassNo] = useState<string>(nextAgeGroupOnly && ageGroupAssignment?.passNo ? ageGroupAssignment.passNo : '');
 
   useEffect(() => {
