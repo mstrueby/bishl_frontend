@@ -75,10 +75,10 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
         validationSchema={Yup.object({
-          firstName: Yup.string().required('Der Vorname ist erforderlich'),
-          lastName: Yup.string().required('Der Nachname ist erforderlich'),
-          birthdate: Yup.string().required('Die Geburtsdatum ist erforderlich'),
-          sex: Yup.string().oneOf(['männlich', 'weiblich'], 'Geschlecht muss ausgewählt werden').required('Geschlecht ist erforderlich'),
+          firstName: Yup.string().required('Vorname ist erforderlich'),
+          lastName: Yup.string().required('Nachname ist erforderlich'),
+          birthdate: Yup.string().required('Geburtsdatum ist erforderlich'),
+          sex: Yup.string().required('Geschlecht ist erforderlich'),
         })}
         onSubmit={onSubmit}
       >
@@ -94,6 +94,9 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               disabled={values.source === "ISHD"} />
             <InputText name="birthdate" autoComplete="off" type="date" label="Geburtsdatum"
               disabled={values.source === "ISHD"} />
+            <div className="mt-6 mb-2">
+              <SexRadioGroup />
+            </div>
             <div className="mt-6 mb-2">
               <div className="flex items-center justify-between">
                 <span className="block text-sm font-medium leading-6 text-gray-900">Altersklasse</span>
@@ -141,11 +144,6 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
 
             <Toggle name="imageVisible" label="Foto öffentlich anzeigen" />
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
-            
-            <div className="mt-6 mb-2">
-              <SexRadioGroup />
-            </div>
-
 
             {/* Display assigned clubs and teams */}
             <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-8">
