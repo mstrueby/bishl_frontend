@@ -23,6 +23,10 @@ interface DataListProps {
     alias: string;
     description?: string[];
     category?: string;
+    ageGroup?: {
+      value: string;
+      color: string;
+    };
     image?: {
       src: string;
       width: number;
@@ -112,6 +116,17 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
                   className='inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10'
                 >
                   Angeheftet
+                </p>
+              )}
+              {item.ageGroup && (
+                <p
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset 
+                  ${item.ageGroup.color === 'red' ? 'bg-red-50 text-red-700 ring-red-700/10' : 
+                    item.ageGroup.color === 'green' ? 'bg-green-50 text-green-700 ring-green-700/10' : 
+                    item.ageGroup.color === 'yellow' ? 'bg-yellow-50 text-yellow-700 ring-yellow-700/10' : 
+                    'bg-indigo-50 text-indigo-700 ring-indigo-700/10'}`}
+                >
+                  {item.ageGroup.value}
                 </p>
               )}
               {item.category && (
