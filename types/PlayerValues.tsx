@@ -80,4 +80,5 @@ export interface PlayerValues {
   createDate?: string;  // e.g. "2025-01-16T11:36:45.395Z"
   ageGroup?: string;
   managedByISHD?: boolean;
+  sex?: 'männlich' | 'weiblich';
 }
