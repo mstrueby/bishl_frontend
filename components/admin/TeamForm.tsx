@@ -10,6 +10,7 @@ import { TeamValues } from '../../types/ClubValues';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import { AutoAlias } from '../../tools/autoAlias';
+import { ageGroupConfig } from '../../tools/consts';
 
 interface TeamFormProps {
   initialValues: TeamValues;
@@ -18,16 +19,6 @@ interface TeamFormProps {
   handleCancel: () => void;
   loading: boolean;
 }
-
-const ageGroup = [
-  { key: 'MEN', value: 'Herren' },
-  { key: 'WOMEN', value: 'Damen' },
-  { key: 'U19', value: 'Junioren' },
-  { key: 'U16', value: 'Jugend' },
-  { key: 'U13', value: 'Schüler' },
-  { key: 'U10', value: 'Bambini' },
-  { key: 'U8', value: 'Mini' }
-]
 
 const TeamForm: React.FC<TeamFormProps> = ({
   initialValues,
@@ -78,7 +69,7 @@ const TeamForm: React.FC<TeamFormProps> = ({
             type="text"
             label="Abkürzung"
           />
-          <MyListbox name="ageGroup" options={ageGroup} label="Altersklasse" />
+          <MyListbox name="ageGroup" options={ageGroupConfig} label="Altersklasse" />
           <InputText
             name="teamNumber"
             type="number"
