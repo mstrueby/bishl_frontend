@@ -16,19 +16,15 @@ interface AssignmentModalProps {
   ageGroup?: string;
 }
 
-const ageGroupConfig = {
-  key: "AGEGROUP",
-  name: "Altersklasse",
-  value: [
-    { key: "MEN", value: "Herren", sortOrder: 1, altKey: "Herren" },
-    { key: "WOMEN", value: "Damen", sortOrder: 2, altKey: "Damen" },
-    { key: "U19", value: "U19", sortOrder: 3, altKey: "Junioren" },
-    { key: "U16", value: "U16", sortOrder: 4, altKey: "Jugend" },
-    { key: "U13", value: "U13", sortOrder: 5, altKey: "Schüler" },
-    { key: "U10", value: "U10", sortOrder: 6, altKey: "Bambini" },
-    { key: "U8", value: "U8", sortOrder: 7, altKey: "Mini" }
-  ]
-};
+const ageGroupConfig = [
+  { key: "MEN", value: "Herren", sortOrder: 1, altKey: "Herren" },
+  { key: "WOMEN", value: "Damen", sortOrder: 2, altKey: "Damen" },
+  { key: "U19", value: "U19", sortOrder: 3, altKey: "Junioren" },
+  { key: "U16", value: "U16", sortOrder: 4, altKey: "Jugend" },
+  { key: "U13", value: "U13", sortOrder: 5, altKey: "Schüler" },
+  { key: "U10", value: "U10", sortOrder: 6, altKey: "Bambini" },
+  { key: "U8", value: "U8", sortOrder: 7, altKey: "Mini" }
+];
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isOpen,
@@ -75,9 +71,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     }
   }, [currentAssignments, ageGroup, clubs])
 
-  console.log("ageGroupAssignement", ageGroupAssignment)
   const selectedClub = clubs.find(club => club._id === selectedClubId);
-
   const isFormComplete = selectedClubId && selectedTeamId && passNo.trim() !== '';
 
   const handleSave = () => {
@@ -168,12 +162,16 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                           setSelectedTeamId(availableTeams[0]._id);
                         }
 
-                        return (
+                        return availableTeams.length > 0 ? (
                           <TeamSelect
                             selectedTeamId={selectedTeamId}
                             teams={availableTeams}
                             onTeamChange={setSelectedTeamId}
                           />
+                        ) : (
+                          <div className="mt-2 text-sm text-gray-500">
+                            Keine Mannschaften für neue Zuordnung verfügbar
+                          </div>
                         );
                       })()}
                     </>
