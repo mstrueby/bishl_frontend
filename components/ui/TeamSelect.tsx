@@ -79,10 +79,11 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
           >
             <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {teams.sort((a, b) => {
-                const aGroup = ageGroupConfig.find(ag => ag.altKey === a.ageGroup);
-                const bGroup = ageGroupConfig.find(ag => ag.altKey === b.ageGroup);
-                const sortOrderDiff = (aGroup?.sortOrder || 0) - (bGroup?.sortOrder || 0);
-                return sortOrderDiff !== 0 ? sortOrderDiff : (a.teamNumber || 0) - (b.teamNumber || 0);
+                const aGroup = ageGroupConfig.find(ag => ag.key === a.ageGroup);
+                const bGroup = ageGroupConfig.find(ag => ag.key === b.ageGroup);
+                const primarySort = (aGroup?.sortOrder || 0) - (bGroup?.sortOrder || 0);
+                if (primarySort !== 0) return primarySort;
+                return (a.teamNumber || 0) - (b.teamNumber || 0);
               }).map((team) => {
                 const color = getAgeGroupColor(team);
                 const colorClasses = getColorClasses(color);
