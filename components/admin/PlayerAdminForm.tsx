@@ -86,10 +86,12 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
       >
         {({ values, handleChange, setFieldValue, errors, touched }) => (
           <Form>
+            {/**
             <div className="flex items-center justify-between mt-6 mb-2">
               <span className="block text-sm font-medium leading-6 text-gray-900">Quelle</span>
               <Badge info={values.source} />
             </div>
+            */}
             <InputText name="firstName" autoComplete="off" type="text" label="Vorname"
               disabled={values.source === "ISHD"} />
             <InputText name="lastName" autoComplete="off" type="text" label="Nachname"
@@ -192,54 +194,85 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               }}
             />
 
-            {values.assignedTeams && values.assignedTeams.length > 0 && (
-              <div className="mt-2 divide-y divide-gray-100">
-                {values.assignedTeams.map((assignment, index) => (
-                  <div key={index} className="py-4">
+            {values.assignedTeams && values.assignedTeams.length > 0 &&
+              values.assignedTeams.map((assignment, index) => {
+                return (
+                  <div key={index} className="mt-2 py-4 divide-y divide-gray-100">
                     <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
                     <ul className="mt-2 space-y-2">
                       {assignment.teams.map((team, teamIndex) => {
                         const teamAgeGroup = clubs.find(club => club._id === assignment.clubId)
                           ?.teams.find(t => t._id === team.teamId)?.ageGroup;
-                        const color = values.ageGroup === teamAgeGroup ? 'green' :
-                          canAlsoPlayInAgeGroup(values.ageGroup || '', teamAgeGroup || '', values.overAge || false) ? 'yellow' : 'red';
-                        const bgColor = color === 'green' ? 'bg-green-50' : color === 'yellow' ? 'bg-yellow-50' : 'bg-red-50';
-                        const textColor = color === 'green' ? 'text-green-700' : color === 'yellow' ? 'text-yellow-700' : 'text-red-700';
-                        
+                        const color = values.ageGroup === teamAgeGroup ? 'green'
+                          : canAlsoPlayInAgeGroup(values.ageGroup || '', teamAgeGroup || '', values.overAge || false) ? 'yellow' : 'red';
                         return (
-                          <li key={teamIndex} className={`flex items-center justify-between text-sm ${textColor} p-2 rounded-md ${bgColor}`}>
-                            <span>{team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}</span>
-                          <TrashIcon
-                            className={`ml-2 h-4 w-4 ${team.source === 'BISHL'
-                              ? 'text-red-600 hover:text-red-500 cursor-pointer'
-                              : 'text-gray-400 cursor-not-allowed'
-                              }`}
-                            onClick={() => {
-                              if (team.source === 'BISHL') {
-                                const updatedTeams = assignment.teams.filter((_, idx) => idx !== teamIndex);
-                                const updatedAssignments = [...values.assignedTeams];
-                                if (updatedTeams.length === 0) {
-                                  // Remove entire club assignment if no teams left
-                                  const filteredAssignments = updatedAssignments.filter((_, idx) => idx !== index);
-                                  setFieldValue('assignedTeams', filteredAssignments);
-                                } else {
-                                  // Update teams for this club
-                                  updatedAssignments[index] = {
-                                    ...assignment,
-                                    teams: updatedTeams
-                                  };
-                                  setFieldValue('assignedTeams', updatedAssignments);
+                          <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600 py-3">
+                            <div>
+                              <div className="flex-1 min-w-8 gap-x-4">
+                                <div className="flex items-center gap-x-3">
+                                  <div className={`flex-none rounded-full p-1 ${color === 'green' ? 'bg-emerald-500/20' : color === 'yellow' ? 'bg-yellow-500/20' : 'bg-red-500/20'}`}>
+                                    <div className={`size-1.5 rounded-full ${color === 'green' ? 'bg-emerald-500' : color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                                  </div>
+  
+                                  <p className="text-sm/6 font-semibold text-gray-900 truncate">
+                                    {team.teamName}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500">
+                                <span className="whitespace-nowrap truncate">
+                                  {team.passNo}
+                                </span>
+                                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                                  <circle r={1} cx={1} cy={1} />
+                                </svg>
+                                <span className="whitespace-nowrap truncate">
+                                  {new Date(team.modifyDate).toLocaleDateString('de-DE', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                  })}
+                                </span>
+                                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                                  <circle r={1} cx={1} cy={1} />
+                                </svg>
+                                <span className="whitespace-nowrap truncate">
+                                  {team.source}
+                                </span>
+                              </div>
+                            </div>
+                            <TrashIcon
+                              className={`ml-2 h-4 w-4 ${team.source === 'BISHL'
+                                ? 'text-red-600 hover:text-red-500 cursor-pointer'
+                                : 'text-gray-400 cursor-not-allowed'
+                                }`}
+                              onClick={() => {
+                                if (team.source === 'BISHL') {
+                                  const updatedTeams = assignment.teams.filter((_, idx) => idx !== teamIndex);
+                                  const updatedAssignments = [...values.assignedTeams];
+                                  if (updatedTeams.length === 0) {
+                                    // Remove entire club assignment if no teams left
+                                    const filteredAssignments = updatedAssignments.filter((_, idx) => idx !== index);
+                                    setFieldValue('assignedTeams', filteredAssignments);
+                                  } else {
+                                    // Update teams for this club
+                                    updatedAssignments[index] = {
+                                      ...assignment,
+                                      teams: updatedTeams
+                                    };
+                                    setFieldValue('assignedTeams', updatedAssignments);
+                                  }
                                 }
-                              }
-                            }}
-                          />
-                        </li>
-                      ))}
+                              }}
+                            />
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })
+            }
 
             <div className="mt-4 flex justify-end py-4">
               <ButtonLight name="btnLight" type="button" onClick={handleCancel} label="Abbrechen" />
