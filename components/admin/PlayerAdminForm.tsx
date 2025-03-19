@@ -58,7 +58,7 @@ interface PlayerAdminFormProps {
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
-  clubs: ClubValues[]; // Add proper type from your ClubValues interface
+  clubs: ClubValues[];
 }
 
 const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
@@ -198,9 +198,17 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                   <div key={index} className="py-4">
                     <h4 className="text-sm font-medium text-gray-900">{assignment.clubName}</h4>
                     <ul className="mt-2 space-y-2">
-                      {assignment.teams.map((team, teamIndex) => (
-                        <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600">
-                          <span>{team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}</span>
+                      {assignment.teams.map((team, teamIndex) => {
+                        const teamAgeGroup = clubs.find(club => club._id === assignment.clubId)
+                          ?.teams.find(t => t._id === team.teamId)?.ageGroup;
+                        const color = values.ageGroup === teamAgeGroup ? 'green' :
+                          canAlsoPlayInAgeGroup(values.ageGroup || '', teamAgeGroup || '', values.overAge || false) ? 'yellow' : 'red';
+                        const bgColor = color === 'green' ? 'bg-green-50' : color === 'yellow' ? 'bg-yellow-50' : 'bg-red-50';
+                        const textColor = color === 'green' ? 'text-green-700' : color === 'yellow' ? 'text-yellow-700' : 'text-red-700';
+                        
+                        return (
+                          <li key={teamIndex} className={`flex items-center justify-between text-sm ${textColor} p-2 rounded-md ${bgColor}`}>
+                            <span>{team.teamName} {team.passNo && `• ${team.passNo}`} {team.modifyDate && `• ${team.source} • ${new Date(team.modifyDate).toLocaleDateString('de-DE')}`}</span>
                           <TrashIcon
                             className={`ml-2 h-4 w-4 ${team.source === 'BISHL'
                               ? 'text-red-600 hover:text-red-500 cursor-pointer'
