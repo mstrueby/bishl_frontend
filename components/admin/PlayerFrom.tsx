@@ -12,6 +12,7 @@ import Badge from '../ui/Badge';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
 import axios from 'axios';
+import { canAlsoPlayInAgeGroup, getAgeGroupRules } from '../../tools/consts';
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -81,7 +82,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt className="text-sm/6 font-medium text-gray-900">Altersklasse</dt>
             <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-              <Badge info={initialValues.ageGroup ? initialValues.ageGroup : '?'} />
+              <Badge info={initialValues.ageGroup ? `${initialValues.ageGroup}${initialValues.overAge ? ' (OA)' : ''}` : '?'} />
             </dd>
           </div>
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
@@ -161,6 +162,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             </div>
             <p className="mt-2 text-sm/6 text-gray-500">Für jede Mannschaft kann der Status <em>aktiv/inaktiv</em> und die <em>Trikotnummer</em> festgelegt werden.</p>
 
+            {/* 
             <AssignmentModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
@@ -187,6 +189,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 setIsModalOpen(false);
               }}
             />
+            **/}
 
             {values.assignedTeams && values.assignedTeams.length > 0 && (
               <div className="mt-2 divide-y divide-gray-100">
@@ -195,58 +198,67 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     return (
                       <div key={index} className="py-4">
                         <ul className="mt-2 divide-y divide-gray-100">
-                          {assignment.teams.map((team, teamIndex) => (
-                            <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600 py-3">
-                              <div className="flex-1 min-w-8 gap-x-4">
-                                <div className="flex items-center gap-x-3">
-                                  <p className="text-sm/6 font-semibold text-gray-900 truncate">
-                                    {team.teamName}
-                                  </p>
-                                </div>
-                                <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500 space-x-2">
+                          {assignment.teams.map((team, teamIndex) => {
+                            const color = initialValues.ageGroup === team.teamAgeGroup ? 'green' :
+                              canAlsoPlayInAgeGroup(initialValues.ageGroup, team.teamAgeGroup, initialValues.overAge) ? 'yellow' : 'red';
 
-                                  <span className="whitespace-nowrap truncate">
-                                    {team.passNo}
-                                  </span>
-                                  <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                                    <circle r={1} cx={1} cy={1} />
-                                  </svg>
-                                  <span className="whitespace-nowrap truncate">
-                                    {new Date(team.modifyDate).toLocaleDateString('de-DE', {
-                                      day: '2-digit',
-                                      month: '2-digit',
-                                      year: 'numeric',
-                                    })}
-                                  </span>
-                                </div>
-                              </div>
+                            console.log(initialValues.ageGroup, team.teamAgeGroup, initialValues.overAge, canAlsoPlayInAgeGroup(initialValues.ageGroup, team.teeamAgeGroup, initialValues.overAge), color);
+                            return (
+                              <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600 py-3">
+                                <div className="flex-1 min-w-8 gap-x-4">
+                                  <div className="flex items-center gap-x-3">
+                                    <div className={`flex-none rounded-full p-1 ${color === 'green' ? 'bg-emerald-500/20' : color === 'yellow' ? 'bg-yellow-500/20' : 'bg-red-500/20'}`}>
+                                      <div className={`size-1.5 rounded-full ${color === 'green' ? 'bg-emerald-500' : color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                                    </div>
+                                    <p className="text-sm/6 font-semibold text-gray-900 truncate">
+                                      {team.teamName}
+                                    </p>
+                                  </div>
+                                  <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500 space-x-2">
 
-                              <div className="relative gap-x-8 flex items-center">
-                                <input
-                                  type="number"
-                                  name={`assignedTeams.${index}.teams.${teamIndex}.jerseyNo`}
-                                  value={values.assignedTeams[index].teams[teamIndex].jerseyNo || ''}
-                                  onChange={handleChange}
-                                  min="1"
-                                  max="98"
-                                  className="block w-16 rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 appearance-none [-webkit-appearance:textfield] [-moz-appearance:textfield]"
-                                />
-                                <Switch
-                                  checked={values.assignedTeams[index].teams[teamIndex].active || false}
-                                  onChange={(checked) => {
-                                    setFieldValue(`assignedTeams.${index}.teams.${teamIndex}.active`, checked);
-                                  }}
-                                  className={`${values.assignedTeams[index].teams[teamIndex].active ? 'bg-indigo-600' : 'bg-gray-200'
-                                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-                                >
-                                  <span
-                                    aria-hidden="true"
-                                    className={`${values.assignedTeams[index].teams[teamIndex].active ? 'translate-x-5' : 'translate-x-0'
-                                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                    <span className="whitespace-nowrap truncate">
+                                      {team.passNo}
+                                    </span>
+                                    <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                                      <circle r={1} cx={1} cy={1} />
+                                    </svg>
+                                    <span className="whitespace-nowrap truncate">
+                                      {new Date(team.modifyDate).toLocaleDateString('de-DE', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                      })}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="relative gap-x-8 flex items-center">
+                                  <input
+                                    type="number"
+                                    name={`assignedTeams.${index}.teams.${teamIndex}.jerseyNo`}
+                                    value={values.assignedTeams[index].teams[teamIndex].jerseyNo || ''}
+                                    onChange={handleChange}
+                                    min="1"
+                                    max="98"
+                                    className="block w-16 rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 appearance-none [-webkit-appearance:textfield] [-moz-appearance:textfield]"
                                   />
-                                </Switch>
-                              </div></li>
-                          ))}
+                                  <Switch
+                                    checked={values.assignedTeams[index].teams[teamIndex].active || false}
+                                    onChange={(checked) => {
+                                      setFieldValue(`assignedTeams.${index}.teams.${teamIndex}.active`, checked);
+                                    }}
+                                    className={`${values.assignedTeams[index].teams[teamIndex].active ? 'bg-indigo-600' : 'bg-gray-200'
+                                      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      className={`${values.assignedTeams[index].teams[teamIndex].active ? 'translate-x-5' : 'translate-x-0'
+                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                    />
+                                  </Switch>
+                                </div></li>
+                            );
+                          })}
                         </ul>
                       </div>
                     )
@@ -254,7 +266,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 })}
               </div>
             )}
-
             {/* Other club assignments section */}
             {values.assignedTeams?.some(assignment => assignment.clubId !== clubId) && (
               <>

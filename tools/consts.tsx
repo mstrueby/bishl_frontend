@@ -3,33 +3,33 @@ export interface AgeGroupRule {
   value: string;
   sortOrder: number;
   altKey: string;
-  canPlayIn?: string[];
+  canAlsoPlayIn?: string[];
+  canPlayOverAgeIn?: string[];
   requiresOverAge?: boolean;
   maxOverAgePlayers?: number;
 }
 
 export const ageGroupConfig: AgeGroupRule[] = [
   { 
-    key: "MEN", 
+    key: "HERREN", 
     value: "Herren", 
     sortOrder: 1, 
     altKey: "Herren",
-    canPlayIn: [],
+    canAlsoPlayIn: [],
   },
   { 
-    key: "WOMEN", 
+    key: "DAMEN", 
     value: "Damen", 
     sortOrder: 2, 
     altKey: "Damen",
-    canPlayIn: ["MEN"],
+    canAlsoPlayIn: ["HERREN"],
   },
   { 
     key: "U19", 
     value: "U19", 
     sortOrder: 3, 
     altKey: "Junioren",
-    canPlayIn: ["MEN"],
-    requiresOverAge: true,
+    canAlsoPlayIn: ["HERREN"],
     maxOverAgePlayers: 3,
   },
   { 
@@ -37,8 +37,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
     value: "U16", 
     sortOrder: 4, 
     altKey: "Jugend",
-    canPlayIn: ["U19", "MEN"],
-    requiresOverAge: true,
+    canAlsoPlayIn: ["U19"],
     maxOverAgePlayers: 3,
   },
   { 
@@ -46,8 +45,8 @@ export const ageGroupConfig: AgeGroupRule[] = [
     value: "U13", 
     sortOrder: 5, 
     altKey: "Schüler",
-    canPlayIn: ["U16", "U19"],
-    requiresOverAge: true,
+    canAlsoPlayIn: ["U16"],
+    canPlayOverAgeIn: ["U10"],
     maxOverAgePlayers: 3,
   },
   { 
@@ -55,7 +54,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
     value: "U10", 
     sortOrder: 6, 
     altKey: "Bambini",
-    canPlayIn: ["U13"],
+    canAlsoPlayIn: ["U13"],
     requiresOverAge: true,
     maxOverAgePlayers: 2,
   },
@@ -64,8 +63,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
     value: "U8", 
     sortOrder: 7, 
     altKey: "Mini",
-    canPlayIn: ["U10"],
-    requiresOverAge: true,
+    canAlsoPlayIn: ["U10"],
     maxOverAgePlayers: 2,
   }
 ];
@@ -74,11 +72,12 @@ export const getAgeGroupRules = (ageGroupKey: string): AgeGroupRule | undefined 
   return ageGroupConfig.find(group => group.key === ageGroupKey);
 };
 
-export const canPlayInAgeGroup = (playerAgeGroup: string, targetAgeGroup: string): boolean => {
+export const canAlsoPlayInAgeGroup = (playerAgeGroup: string, targetAgeGroup: string, overAge: boolean): boolean => {
   if (playerAgeGroup === targetAgeGroup) return true;
   
   const rules = getAgeGroupRules(playerAgeGroup);
-  return rules?.canPlayIn?.includes(targetAgeGroup) || false;
+  return (rules?.canAlsoPlayIn?.includes(targetAgeGroup) ||
+          (overAge && rules?.canPlayOverAgeIn?.includes(targetAgeGroup))) || false;
 };
 
 export const tournamentConfigs = [

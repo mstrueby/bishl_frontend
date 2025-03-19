@@ -16,6 +16,7 @@ export interface AssignmentTeam {
   teamId: string;
   teamName: string;
   teamAlias: string;
+  teamAgeGroup: string;
   teamIshdId?: string;
   passNo: string;
   source: string; // e.g. "BISHL"
