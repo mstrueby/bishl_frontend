@@ -25,7 +25,10 @@ export const getDataListItems = (
     return {
       _id: player._id,
       title: `${number ? number + ' - ' : ''}${name}`,
-      ageGroup: { value: player.ageGroup, color: player.ageGroup === team.ageGroup ? 'green' : 'yellow' },
+      ageGroup: { 
+        value: player.ageGroup + (player.overAge ? ' (OA)' : ''), 
+        color: player.ageGroup === team.ageGroup ? 'green' : player.overAge ? 'yellow' : 'red'
+      },
       alias: player._id,
       description: [
         `${player.assignedTeams
@@ -48,6 +51,7 @@ export const getDataListItems = (
           .join(', ')})` : ''
         }`,
         `geb. ${new Date(player.birthdate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`,
+        `${player.sex === 'männlich' ? '♂' : '♀'}`,
         `${player.assignedTeams
           .map((item) => {
             const filteredTeams = item.teams.filter((teamInner) => teamInner.teamId === team._id);

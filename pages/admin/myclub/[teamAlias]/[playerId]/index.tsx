@@ -182,8 +182,10 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
     createDate: player?.createDate || '',
     nationality: player?.nationality || '', // Added missing property
     position: player?.position || undefined, // Added missing property
-    ageGroup: player?.ageGroup || undefined, // Added missing property
+    ageGroup: player?.ageGroup || '', // Added missing property
+    overAge: player?.overAge || false, // Added missing property
     managedByISHD: player?.managedByISHD || false, // Added missing property
+    sex: player.sex || '' // Added missing property
   };
 
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;
