@@ -4,7 +4,7 @@ import { Listbox, Transition } from '@headlessui/react';
 import { TeamValues } from '../../types/ClubValues';
 import { PlayerValues } from '../../types/PlayerValues';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
-import { canAlsoPlayInAgeGroup } from '../../tools/consts';
+import { canAlsoPlayInAgeGroup, ageGroupConfig } from '../../tools/consts';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
