@@ -12,7 +12,7 @@ import Badge from '../ui/Badge';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
 import axios from 'axios';
-import { canAlsoPlayInAgeGroup, getAgeGroupRules } from '../../tools/consts';
+import { canAlsoPlayInAgeGroup } from '../../tools/consts';
 
 interface PlayerFormProps {
   initialValues: PlayerValues;

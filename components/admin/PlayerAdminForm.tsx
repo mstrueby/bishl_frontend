@@ -147,7 +147,9 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             )}
 
             <Toggle name="imageVisible" label="Foto öffentlich anzeigen" />
+            {/** 
             <InputText name="nationality" autoComplete="off" type="text" label="Nationalität" />
+            */}
 
             {/* Display assigned clubs and teams */}
             <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-4 mt-8">
@@ -173,6 +175,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               clubs={clubs}
+              player={values}
               currentAssignments={values.assignedTeams}
               onSave={(newAssignment) => {
                 const currentAssignments = values.assignedTeams || [];
