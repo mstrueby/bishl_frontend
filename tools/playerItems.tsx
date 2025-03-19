@@ -1,6 +1,7 @@
 
 import { PlayerValues } from '../types/PlayerValues';
 import { TeamValues } from '../types/ClubValues';
+import { canAlsoPlayInAgeGroup, getAgeGroupRules } from './consts';
 
 export const getDataListItems = (
   players: PlayerValues[],
@@ -25,9 +26,9 @@ export const getDataListItems = (
     return {
       _id: player._id,
       title: `${number ? number + ' - ' : ''}${name}`,
-      ageGroup: { 
-        value: player.ageGroup + (player.overAge ? ' (OA)' : ''), 
-        color: player.ageGroup === team.ageGroup ? 'green' : player.overAge ? 'yellow' : 'red'
+      ageGroup: {
+        value: player.ageGroup + (player.overAge ? ' (OA)' : ''),
+        color: player.ageGroup === team.ageGroup ? 'green' : canAlsoPlayInAgeGroup(player.ageGroup, team.ageGroup, player.overAge) ? 'yellow' : 'red'
       },
       alias: player._id,
       description: [

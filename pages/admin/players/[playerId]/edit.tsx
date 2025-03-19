@@ -188,6 +188,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
     imageVisible: player?.imageVisible || false,
     source: player?.source || 'n/a',
     ageGroup: player?.ageGroup || '?',
+    overAge: player?.overAge || false,
     managedByISHD: player?.managedByISHD || false,
     sex: player?.sex || 'männlich',
   };
