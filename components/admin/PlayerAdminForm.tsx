@@ -12,6 +12,8 @@ import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
 import { ClubValues } from '../../types/ClubValues';
+import { canAlsoPlayInAgeGroup, getAgeGroupRules } from '../../tools/consts';
+
 
 const SexRadioGroup = () => {
   const [field, meta] = useField('sex');
@@ -100,7 +102,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
             <div className="mt-6 mb-2">
               <div className="flex items-center justify-between">
                 <span className="block text-sm font-medium leading-6 text-gray-900">Altersklasse</span>
-                <Badge info={values.ageGroup ? values.ageGroup : '?'} />
+                <Badge info={values.ageGroup ? `${values.ageGroup}${values.overAge ? ' (OA)' : ''}` : '?'} />
               </div>
               {!values.ageGroup && (
                 <p className="text-xs text-gray-500 italic">Wird nach dem Speichern festgelegt</p>
