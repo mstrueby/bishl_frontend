@@ -2,7 +2,9 @@
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { TeamValues } from '../../types/ClubValues';
+import { PlayerValues } from '../../types/PlayerValues';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
+import { canAlsoPlayInAgeGroup } from '../../tools/consts';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -13,16 +15,17 @@ interface TeamSelectProps {
   teams: TeamValues[];
   onTeamChange: (teamId: string) => void;
   label?: string;
+  player?: PlayerValues;
 }
 
 const TeamSelect: React.FC<TeamSelectProps> = ({ 
   selectedTeamId,
   teams,
   onTeamChange,
-  label = "Mannschaft"
+  label = "Mannschaft",
+  player = null
 }) => {
-  const selectedTeam = teams.find(team => team._id === selectedTeamId);
-
+  const selectedTeam: TeamValues | undefined = teams.find(team => team._id === selectedTeamId);
   return (
     <Listbox value={selectedTeamId} onChange={onTeamChange}>
       <div className="relative mt-2">
@@ -33,11 +36,20 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
         )}
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
-            <span className="flex items-center">
-              <span className="block truncate">
-                {selectedTeam ? selectedTeam.name : 'Mannschaft auswählen'}
+            {selectedTeam ? (
+              <span className="col-start-1 row-start-1 flex items-center gap-3 pr-6">
+                <span
+                  aria-label={selectedTeam.ageGroup ? 'Online' : 'Offline'}
+                  className={classNames(
+                    selectedTeam.ageGroup ? 'bg-green-400 forced-colors:bg-[Highlight]' : 'bg-gray-200',
+                    'inline-block size-2 shrink-0 rounded-full border border-transparent',
+                  )}
+                />
+                <span className="block truncate">{selectedTeam.name}</span>
               </span>
-            </span>
+            ) : (
+              <span className="block truncate text-gray-500">Mannschaft auswählen</span>
+            )}
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </span>

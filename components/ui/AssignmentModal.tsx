@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import ClubSelect from './ClubSelect';
 import TeamSelect from './TeamSelect';
 import { ClubValues, TeamValues } from '../../types/ClubValues';
-import { Assignment, AssignmentTeam } from '../../types/PlayerValues';
+import { PlayerValues, Assignment, AssignmentTeam } from '../../types/PlayerValues';
 import InputText from './form/InputText';
 import { ageGroupConfig } from '../../tools/consts';
 
@@ -12,6 +12,7 @@ interface AssignmentModalProps {
   onClose: () => void;
   onSave: (assignment: Assignment) => void;
   clubs: ClubValues[];
+  player: PlayerValues;
   currentAssignments?: Assignment[];
   nextAgeGroupOnly?: boolean;
   ageGroup?: string;
@@ -22,6 +23,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   onClose,
   onSave,
   clubs = [],
+  player,
   currentAssignments = [],
   nextAgeGroupOnly = false,
   ageGroup,
@@ -77,6 +79,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             teamId: selectedTeam._id,
             teamName: selectedTeam.name,
             teamAlias: selectedTeam.alias,
+            teamAgeGroup: selectedTeam.ageGroup,
             passNo: passNo,
             source: 'BISHL',
             modifyDate: new Date().toISOString(),
@@ -158,6 +161,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                             selectedTeamId={selectedTeamId}
                             teams={availableTeams}
                             onTeamChange={setSelectedTeamId}
+                            player={player}
                           />
                         ) : (
                           <div className="mt-2 text-sm text-gray-500">

@@ -12,7 +12,7 @@ import Badge from '../ui/Badge';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
 import axios from 'axios';
-import { canAlsoPlayInAgeGroup, getAgeGroupRules } from '../../tools/consts';
+import { canAlsoPlayInAgeGroup } from '../../tools/consts';
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -201,8 +201,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           {assignment.teams.map((team, teamIndex) => {
                             const color = initialValues.ageGroup === team.teamAgeGroup ? 'green' :
                               canAlsoPlayInAgeGroup(initialValues.ageGroup, team.teamAgeGroup, initialValues.overAge) ? 'yellow' : 'red';
-
-                            console.log(initialValues.ageGroup, team.teamAgeGroup, initialValues.overAge, canAlsoPlayInAgeGroup(initialValues.ageGroup, team.teeamAgeGroup, initialValues.overAge), color);
                             return (
                               <li key={teamIndex} className="flex items-center justify-between text-sm text-gray-600 py-3">
                                 <div className="flex-1 min-w-8 gap-x-4">
