@@ -46,7 +46,7 @@ const TeamFullNameSelect: React.FC<TeamFullNameSelectProps> = ({
                 <span className="ml-3 block truncate">{selectedTeam.fullName}</span>
               </>
             ) : (
-              <span className="ml-3 block truncate text-gray-500">Team auswählen</span>
+              <span className="ml-3 block truncate text-gray-500">Alle Mannschaften</span>
             )}
           </span>
           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -74,7 +74,7 @@ const TeamFullNameSelect: React.FC<TeamFullNameSelectProps> = ({
                 {({ selected, active }) => (
                   <>
                     <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
-                      Alle Teams
+                      Alle Mannschaften
                     </span>
                     {selected && (
                       <span
