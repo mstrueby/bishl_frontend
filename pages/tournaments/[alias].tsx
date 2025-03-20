@@ -107,7 +107,7 @@ export default function Tournament({
   const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const [matches, setMatches] = useState<Match[]>([]);
   const [currentTab, setCurrentTab] = useState('matches');
-  const [selectedTeamId, setSelectedTeamId] = useState<string>('');
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [allTeams, setAllTeams] = useState<{ id: string; name: string; }[]>([]);
 
   useEffect(() => {
@@ -116,13 +116,13 @@ export default function Tournament({
       const teamsData: { id: string; name: string; }[] = [];
 
       matches.forEach(match => {
-        if (!teams.has(match.homeTeam.fullName)) {
-          teams.add(match.homeTeam.fullName);
-          teamsData.push({ id: match.homeTeam.fullName, name: match.homeTeam.fullName });
+        if (!teams.has(match.home.fullName)) {
+          teams.add(match.home.fullName);
+          teamsData.push({ id: match.home.fullName, name: match.home.fullName });
         }
-        if (!teams.has(match.awayTeam.fullName)) {
-          teams.add(match.awayTeam.fullName);
-          teamsData.push({ id: match.awayTeam.fullName, name: match.awayTeam.fullName });
+        if (!teams.has(match.away.fullName)) {
+          teams.add(match.away.fullName);
+          teamsData.push({ id: match.away.fullName, name: match.away.fullName });
         }
       });
 
@@ -130,10 +130,10 @@ export default function Tournament({
     }
   }, [matches]);
 
-  const filteredMatches = selectedTeamId
-    ? matches.filter(match => 
-        match.homeTeam.fullName === selectedTeamId || 
-        match.awayTeam.fullName === selectedTeamId)
+  const filteredMatches = selectedTeam
+    ? matches.filter(match =>
+      match.home.fullName === selectedTeam ||
+      match.away.fullName === selectedTeam)
     : matches;
 
   let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
@@ -213,46 +213,46 @@ export default function Tournament({
             setMatchdays(sortedData);
 
             // If matchday type is GROUP, select the first matchday
-              // Otherwise, find today's matchday, then upcoming or most recent one if not found
-              let selectedMd;
+            // Otherwise, find today's matchday, then upcoming or most recent one if not found
+            let selectedMd;
 
-              if (selectedRound.matchdaysType.key === 'GROUP') {
-                selectedMd = sortedData[0];
+            if (selectedRound.matchdaysType.key === 'GROUP') {
+              selectedMd = sortedData[0];
+            } else {
+              const now = new Date().getTime();
+              const todayStart = new Date();
+              todayStart.setHours(0, 0, 0, 0);
+              const todayEnd = new Date();
+              todayEnd.setHours(23, 59, 59, 999);
+
+              // Check for today's matchday
+              const todayMatchday = sortedData.find(
+                (matchday: Matchday) =>
+                  new Date(matchday.startDate).getTime() >= todayStart.getTime() &&
+                  new Date(matchday.startDate).getTime() <= todayEnd.getTime()
+              );
+
+              if (todayMatchday) {
+                selectedMd = todayMatchday;
               } else {
-                const now = new Date().getTime();
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                const todayEnd = new Date();
-                todayEnd.setHours(23, 59, 59, 999);
+                // Find the first upcoming matchday
+                const upcomingMatchdays = sortedData
+                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() > todayEnd.getTime())
+                  .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
-                // Check for today's matchday
-                const todayMatchday = sortedData.find(
-                  (matchday: Matchday) =>
-                    new Date(matchday.startDate).getTime() >= todayStart.getTime() &&
-                    new Date(matchday.startDate).getTime() <= todayEnd.getTime()
-                );
-
-                if (todayMatchday) {
-                  selectedMd = todayMatchday;
+                if (upcomingMatchdays.length > 0) {
+                  // If there are upcoming matchdays, select the next one
+                  selectedMd = upcomingMatchdays[0];
                 } else {
-                  // Find the first upcoming matchday
-                  const upcomingMatchdays = sortedData
-                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() > todayEnd.getTime())
-                    .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-
-                  if (upcomingMatchdays.length > 0) {
-                    // If there are upcoming matchdays, select the next one
-                    selectedMd = upcomingMatchdays[0];
-                  } else {
-                    // If no upcoming matchdays, select the most recent one
-                    selectedMd = sortedData
-                      .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
-                      .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
-                  }
+                  // If no upcoming matchdays, select the most recent one
+                  selectedMd = sortedData
+                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                    .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
                 }
               }
+            }
 
-              setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
+            setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
             setMatchdays([]);
@@ -632,72 +632,49 @@ export default function Tournament({
                 <div id="matches-section">
                   <div className="mb-4">
                     <select
-                      value={selectedTeamId}
-                      onChange={(e) => setSelectedTeamId(e.target.value)}
+                      value={selectedTeam}
+                      onChange={(e) => setSelectedTeam(e.target.value)}
                       className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     >
                       <option value="">Alle Mannschaften</option>
                       {allTeams.map(team => (
-                        <option key={team.id} value={team.id}>
+                        <option key={team.id} value={team.name}>
                           {team.name}
                         </option>
                       ))}
                     </select>
                   </div>
-                  <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div className="inline-block min-w-full py-2 align-middle">
-                      <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                        <table className="min-w-full divide-y divide-gray-300">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                Team 1
-                              </th>
-                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                Ergebnis
-                              </th>
-                              <th scope="col" className="py-3.5 pr-4 pl-3 text-left text-sm font-semibold text-gray-900 sm:pr-6">
-                                Team 2
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200 bg-white">
-                            {filteredMatches && filteredMatches.length > 0 ? (
-                              filteredMatches.map((match, index) => (
-                                <MatchCard
-                                  key={index}
-                                  match={match}
-                                  onMatchUpdate={async () => {
-                                    // Refetch rounds to update standings
-                                    const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
-                                    const roundsData = await roundsResponse.json();
-                                    if (Array.isArray(roundsData)) {
-                                      const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-                                      setRounds(sortedData);
-                                      setSelectedRound(prevRound => {
-                                        const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
-                                        return updatedRound;
-                                      });
-                                    }
+                  {filteredMatches && filteredMatches.length > 0 ? (
+                    filteredMatches.map((match, index) => (
+                      <MatchCard
+                        key={index}
+                        match={match}
+                        onMatchUpdate={async () => {
+                          // Refetch rounds to update standings
+                          const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                          const roundsData = await roundsResponse.json();
+                          if (Array.isArray(roundsData)) {
+                            const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+                            setRounds(sortedData);
+                            setSelectedRound(prevRound => {
+                              const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
+                              return updatedRound;
+                            });
+                          }
 
-                                    // Refetch matches
-                                    const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
-                                    const matchesData = await matchesResponse.json();
-                                    setMatches(matchesData);
-                                  }}
-                                  matchdayOwner={selectedMatchday.owner}
-                                />
-                              ))
-                            ) : (
-                              <tr className="text-center py-12 text-gray-500">
-                                <td colSpan={3}>Keine Spiele verfügbar</td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
+                          // Refetch matches
+                          const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                          const matchesData = await matchesResponse.json();
+                          setMatches(matchesData);
+                        }}
+                        matchdayOwner={selectedMatchday.owner}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      Keine Spiele verfügbar
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </section>
