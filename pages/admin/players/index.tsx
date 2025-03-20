@@ -234,6 +234,9 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       assignedTeams: player.assignedTeams,
       imageUrl: player.imageUrl,
       imageVisible: player.imageVisible,
+      ageGroup: player.ageGroup,
+      overAge: player.overAge,
+      sex: player.sex,
     }));
 
   const sectionTitle = 'Spieler';
