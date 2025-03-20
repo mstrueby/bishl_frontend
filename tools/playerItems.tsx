@@ -27,7 +27,7 @@ export const getDataListItems = (
       _id: player._id,
       title: `${number ? number + ' - ' : ''}${name}`,
       ageGroup: {
-        value: player.ageGroup + (player.overAge ? ' (OA)' : ''),
+        value: player.ageGroup + (player.overAge && player.ageGroup !== team.ageGroup ? ' (OA)' : ''),
         color: player.ageGroup === team.ageGroup ? 'green' : canAlsoPlayInAgeGroup(player.ageGroup, team.ageGroup, player.overAge) ? 'yellow' : 'red'
       },
       alias: player._id,
