@@ -191,7 +191,17 @@ export default function Tournament({
               }
               return 0;
             });
-            setMatchdays(sortedData);
+
+            // Filter matchdays if a team is selected
+            const filteredData = selectedTeam
+              ? sortedData.filter(matchday => 
+                  matchday.matches?.some(match => 
+                    match.homeTeam.name === selectedTeam || match.awayTeam.name === selectedTeam
+                  )
+                )
+              : sortedData;
+
+            setMatchdays(filteredData);
 
             // If matchday type is GROUP, select the first matchday
             // Otherwise, find today's matchday, then upcoming or most recent one if not found
