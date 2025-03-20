@@ -9,6 +9,49 @@ export interface AgeGroupRule {
   maxOverAgePlayers?: number;
 }
 
+{/** ****** S P I E L R E G E L N
+4.1 ALTERSGRENZEN
+4.1.1 Damen / Herren
+Untergrenze: Spieler, die im laufenden Kalenderjahr das 19. Lebensjahr vollenden, sowie ältere
+Jahrgänge.
+4.1.2 Masters (Damen / Herren)
+Untergrenze: Spieler, die im laufenden Kalenderjahr das 45. Lebensjahr vollenden, sowie ältere
+Jahrgänge.
+4.1.3 Alte Herren (Veteranen (Damen / Herren))
+Untergrenze: Spieler, die im laufenden Kalenderjahr das 35. Lebensjahr vollenden, sowie ältere
+Jahrgänge.
+4.1.4 U-19 (Junioren)
+Obergrenze: Spieler, die im laufenden Kalenderjahr das 18. Lebensjahr vollenden.
+Untergrenze: Spieler, die im laufenden Kalenderjahr das 16. Lebensjahr vollenden.
+4.1.5 U-16 (Jugend)
+Obergrenze: Spieler, die im laufenden Kalenderjahr das 15. Lebensjahr vollenden.
+Untergrenze: Spieler, die im laufenden Kalenderjahr das 13. Lebensjahr vollenden.
+4.1.6 U-13 (Schüler)
+Obergrenze: Spieler, die im laufenden Kalenderjahr das 12. Lebensjahr vollenden.
+Untergrenze: Spieler, die im laufenden Kalenderjahr das 10. Lebensjahr vollenden.
+4.1.7 U-10 (Bambini)
+Obergrenze: Spieler, die im laufenden Kalenderjahr das 9. Lebensjahr vollenden.
+4.1.8 Alle Spieler der Altersklassen U-19, U-16, U-13 und U-10 dürfen in der nächst höheren Altersklasse
+spielen.
+Alle weiblichen Spieler dürfen jeweils ein Jahr länger in jeder Altersklasse spielen.
+Die vorstehende Regelung für weibliche Spieler gilt in Deutschland ausschließlich für die
+Altersklassen U-13, U-16 und U-19. In der Altersklasse U-10 gilt diese Regelung nicht.
+Alle weiblichen Spieler der Altersklassen U-16 und U-19 dürfen in der Altersklasse Damen spielen.
+Jeder Spieler, der in einer höheren Altersklasse spielt, muss eine entsprechende
+Einverständniserklärung seiner Eltern vorweisen. Dem zuständigen nationalen Verband obliegt die
+Pflicht, diese elterliche Einverständniserklärung einzuholen.
+
+
+** ********* BISHL N A C H W U C H S
+In Abweichung von §4.1.6 der gültigen Spielregeln wird für die Altersklasse U10 (Bambini) die Alters-Ober-
+grenze wie folgt definiert: Spieler, die bis zum 31.08. des laufenden Jahres das 9. Lebensjahr vollenden.“ D.
+h, dass Jungs, die nach dem 31.08. des laufenden Jahres ihren 10. Geburtstag feiern in diesem Jahr noch in
+der Altersklasse U10 spielberechtigt sind.
+In Abweichung von §4.1.7 der gültigen Spielregeln der ISHD dürfen auch in der Altersklasse U10 alle weibli-
+chen Spieler ein Jahr länger spielen („Over-Age-Regelung“).
+*/}
+
+
 export const ageGroupConfig: AgeGroupRule[] = [
   { 
     key: "HERREN", 
@@ -23,6 +66,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
     sortOrder: 2, 
     altKey: "Damen",
     canAlsoPlayIn: ["HERREN"],
+    canPlayOverAgeIn: ["U19"],
   },
   { 
     key: "U19", 
@@ -30,6 +74,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
     sortOrder: 3, 
     altKey: "Junioren",
     canAlsoPlayIn: ["HERREN"],
+    canPlayOverAgeIn: ["U16"],
     maxOverAgePlayers: 3,
   },
   { 
@@ -37,7 +82,8 @@ export const ageGroupConfig: AgeGroupRule[] = [
     value: "U16", 
     sortOrder: 4, 
     altKey: "Jugend",
-    canAlsoPlayIn: ["U19"],
+    canAlsoPlayIn: ["U19", "DAMEN"],
+    canPlayOverAgeIn: ["U13"],
     maxOverAgePlayers: 3,
   },
   { 

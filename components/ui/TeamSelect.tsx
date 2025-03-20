@@ -81,8 +81,9 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
               {teams.sort((a, b) => {
                 const aGroup = ageGroupConfig.find(ag => ag.key === a.ageGroup);
                 const bGroup = ageGroupConfig.find(ag => ag.key === b.ageGroup);
-                const sortOrderDiff = (aGroup?.sortOrder || 0) - (bGroup?.sortOrder || 0);
-                return sortOrderDiff !== 0 ? sortOrderDiff : (a.teamNumber || 0) - (b.teamNumber || 0);
+                const primarySort = (aGroup?.sortOrder || 0) - (bGroup?.sortOrder || 0);
+                if (primarySort !== 0) return primarySort;
+                return (a.teamNumber || 0) - (b.teamNumber || 0);
               }).map((team) => {
                 const color = getAgeGroupColor(team);
                 const colorClasses = getColorClasses(color);

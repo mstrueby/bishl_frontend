@@ -104,7 +104,37 @@ export default function Tournament({
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
-  const [isLoadingMatches, setIsLoadingMatches] = useState(true);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [currentTab, setCurrentTab] = useState('matches');
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [allTeams, setAllTeams] = useState<{ id: string; name: string; }[]>([]);
+
+  useEffect(() => {
+    if (matches.length > 0) {
+      const teams = new Set<string>();
+      const teamsData: { id: string; name: string; }[] = [];
+
+      matches.forEach(match => {
+        if (!teams.has(match.home.fullName)) {
+          teams.add(match.home.fullName);
+          teamsData.push({ id: match.home.fullName, name: match.home.fullName });
+        }
+        if (!teams.has(match.away.fullName)) {
+          teams.add(match.away.fullName);
+          teamsData.push({ id: match.away.fullName, name: match.away.fullName });
+        }
+      });
+
+      setAllTeams(teamsData.sort((a, b) => a.name.localeCompare(b.name)));
+    }
+  }, [matches]);
+
+  const filteredMatches = selectedTeam
+    ? matches.filter(match =>
+      match.home.fullName === selectedTeam ||
+      match.away.fullName === selectedTeam)
+    : matches;
 
   let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
   const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
@@ -112,7 +142,7 @@ export default function Tournament({
   const [selectedRound, setSelectedRound] = useState({} as Round);
   const [matchdays, setMatchdays] = useState<Matchday[]>([]);
   const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
-  const [matches, setMatches] = useState<Match[]>([]);
+
 
   const [activeTab, setActiveTab] = useState('matches');
   const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
@@ -183,46 +213,46 @@ export default function Tournament({
             setMatchdays(sortedData);
 
             // If matchday type is GROUP, select the first matchday
-              // Otherwise, find today's matchday, then upcoming or most recent one if not found
-              let selectedMd;
-              
-              if (selectedRound.matchdaysType.key === 'GROUP') {
-                selectedMd = sortedData[0];
+            // Otherwise, find today's matchday, then upcoming or most recent one if not found
+            let selectedMd;
+
+            if (selectedRound.matchdaysType.key === 'GROUP') {
+              selectedMd = sortedData[0];
+            } else {
+              const now = new Date().getTime();
+              const todayStart = new Date();
+              todayStart.setHours(0, 0, 0, 0);
+              const todayEnd = new Date();
+              todayEnd.setHours(23, 59, 59, 999);
+
+              // Check for today's matchday
+              const todayMatchday = sortedData.find(
+                (matchday: Matchday) =>
+                  new Date(matchday.startDate).getTime() >= todayStart.getTime() &&
+                  new Date(matchday.startDate).getTime() <= todayEnd.getTime()
+              );
+
+              if (todayMatchday) {
+                selectedMd = todayMatchday;
               } else {
-                const now = new Date().getTime();
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                const todayEnd = new Date();
-                todayEnd.setHours(23, 59, 59, 999);
+                // Find the first upcoming matchday
+                const upcomingMatchdays = sortedData
+                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() > todayEnd.getTime())
+                  .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
-                // Check for today's matchday
-                const todayMatchday = sortedData.find(
-                  (matchday: Matchday) =>
-                    new Date(matchday.startDate).getTime() >= todayStart.getTime() &&
-                    new Date(matchday.startDate).getTime() <= todayEnd.getTime()
-                );
-
-                if (todayMatchday) {
-                  selectedMd = todayMatchday;
+                if (upcomingMatchdays.length > 0) {
+                  // If there are upcoming matchdays, select the next one
+                  selectedMd = upcomingMatchdays[0];
                 } else {
-                  // Find the first upcoming matchday
-                  const upcomingMatchdays = sortedData
-                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() > todayEnd.getTime())
-                    .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-                  
-                  if (upcomingMatchdays.length > 0) {
-                    // If there are upcoming matchdays, select the next one
-                    selectedMd = upcomingMatchdays[0];
-                  } else {
-                    // If no upcoming matchdays, select the most recent one
-                    selectedMd = sortedData
-                      .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
-                      .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
-                  }
+                  // If no upcoming matchdays, select the most recent one
+                  selectedMd = sortedData
+                    .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() <= now)
+                    .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
                 }
               }
+            }
 
-              setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
+            setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
             setMatchdays([]);
@@ -254,7 +284,7 @@ export default function Tournament({
         .then((response) => response.json())
         .then((data) => {
           setMatches(data);
-          
+
           // Only scroll to matches section if there's no matchday dropdown (single matchday)
           if (matchdays.length <= 1) {
             setTimeout(() => {
@@ -600,8 +630,22 @@ export default function Tournament({
               {/* MATCHES */}
               {activeMatchdayTab === 'matches' && (
                 <div id="matches-section">
-                  {matches && matches.length > 0 ? (
-                    matches.map((match, index) => (
+                  <div className="mb-4">
+                    <select
+                      value={selectedTeam}
+                      onChange={(e) => setSelectedTeam(e.target.value)}
+                      className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    >
+                      <option value="">Alle Mannschaften</option>
+                      {allTeams.map(team => (
+                        <option key={team.id} value={team.name}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {filteredMatches && filteredMatches.length > 0 ? (
+                    filteredMatches.map((match, index) => (
                       <MatchCard
                         key={index}
                         match={match}
@@ -630,8 +674,7 @@ export default function Tournament({
                     <div className="text-center py-12 text-gray-500">
                       Keine Spiele verfügbar
                     </div>
-                  )
-                  }
+                  )}
                 </div>
               )}
             </section>

@@ -25,11 +25,11 @@ const tournamentConfigs = [
   { name: 'Mini', tiny_name: 'U8', href: '/tournaments/mini', bdg_col_dark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20', bdg_col_light: 'bg-pink-50 text-pink-700 ring-pink-700/10' },
 ];
 
-const men = tournamentConfigs.filter((config: { name: string }) => 
+const men = tournamentConfigs.filter((config: { name: string }) =>
   ['Regionalliga Ost', 'Landesliga'].includes(config.name)
 );
 
-const youth = tournamentConfigs.filter((config: { name: string }) => 
+const youth = tournamentConfigs.filter((config: { name: string }) =>
   ['Juniorenliga', 'Jugendliga', 'Jugendliga P', 'Schülerliga', 'Schülerliga LK2', 'Bambini', 'Bambini LK2', 'Mini'].includes(config.name)
 );
 
@@ -260,6 +260,11 @@ const Header = () => {
                                   <span>Vereine</span>
                                 </MyLink>
                               </MenuItem>
+                            </>
+                          )}
+                          {/* PLAYER_ADMIN items */}
+                          {(user.roles?.includes('PLAYER_ADMIN') || user.roles?.includes('ADMIN')) && (
+                            <>
                               <MenuItem>
                                 <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
                                   <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
