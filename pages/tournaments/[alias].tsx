@@ -297,7 +297,7 @@ export default function Tournament({
         })
         .finally(() => setIsLoadingMatches(false));
     }
-  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
+  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias, selectedTeam]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
@@ -630,20 +630,22 @@ export default function Tournament({
               {/* MATCHES */}
               {activeMatchdayTab === 'matches' && (
                 <div id="matches-section">
-                  <div className="mb-4">
-                    <select
-                      value={selectedTeam}
-                      onChange={(e) => setSelectedTeam(e.target.value)}
-                      className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    >
-                      <option value="">Alle Mannschaften</option>
-                      {allTeams.map(team => (
-                        <option key={team.id} value={team.name}>
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {['landesliga', 'regionalliga-ost'].includes(tournament.alias) && (
+                    <div className="mb-4">
+                      <select
+                        value={selectedTeam}
+                        onChange={(e) => setSelectedTeam(e.target.value)}
+                        className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      >
+                        <option value="">Alle Mannschaften</option>
+                        {allTeams.map(team => (
+                          <option key={team.id} value={team.name}>
+                            {team.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   {filteredMatches && filteredMatches.length > 0 ? (
                     filteredMatches.map((match, index) => (
                       <MatchCard
