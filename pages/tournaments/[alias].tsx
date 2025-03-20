@@ -158,9 +158,11 @@ export default function Tournament({
       // Set the initial selected season
       const sortedSeasons = tournament.seasons.sort((a, b) => b.name.localeCompare(a.name));
       setSelectedSeason(sortedSeasons[0]);
+      // Reset team filter when tournament changes
+      setSelectedTeam('');
     }
     setIsLoadingInitial(false);
-  }, [router.isFallback, tournament]);
+  }, [router.isFallback, tournament?.alias]);
 
   useEffect(() => {
     if (selectedSeason.name) {
