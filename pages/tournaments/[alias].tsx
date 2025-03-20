@@ -266,7 +266,7 @@ export default function Tournament({
       setIsLoadingMatchdays(false);
       setIsLoadingMatches(false);
     }
-  }, [selectedRound, tournament.alias, selectedSeason.alias]);
+  }, [selectedRound, tournament.alias, selectedSeason.alias, selectedTeam]);
 
   useEffect(() => {
     if (matches.length === 0) {
