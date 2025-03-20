@@ -110,6 +110,25 @@ export default function Tournament({
   const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [allTeams, setAllTeams] = useState<{ id: string; name: string; }[]>([]);
 
+  useEffect(() => {
+    if (matches.length > 0) {
+      const teams = new Set<string>();
+      const teamsData: { id: string; name: string; }[] = [];
+
+      matches.forEach(match => {
+        if (!teams.has(match.home.fullName)) {
+          teams.add(match.home.fullName);
+          teamsData.push({ id: match.home.fullName, name: match.home.fullName });
+        }
+        if (!teams.has(match.away.fullName)) {
+          teams.add(match.away.fullName);
+          teamsData.push({ id: match.away.fullName, name: match.away.fullName });
+        }
+      });
+
+      setAllTeams(teamsData.sort((a, b) => a.name.localeCompare(b.name)));
+    }
+  }, [matches]);
 
   const filteredMatches = selectedTeam
     ? matches.filter(match =>
@@ -191,17 +210,7 @@ export default function Tournament({
               }
               return 0;
             });
-
-            // Filter matchdays if a team is selected
-            const filteredData = selectedTeam
-              ? sortedData.filter(matchday => 
-                  matchday.matches?.some(match => 
-                    match.homeTeam.name === selectedTeam || match.awayTeam.name === selectedTeam
-                  )
-                )
-              : sortedData;
-
-            setMatchdays(filteredData);
+            setMatchdays(sortedData);
 
             // If matchday type is GROUP, select the first matchday
             // Otherwise, find today's matchday, then upcoming or most recent one if not found
@@ -266,33 +275,7 @@ export default function Tournament({
       setIsLoadingMatchdays(false);
       setIsLoadingMatches(false);
     }
-  }, [selectedRound, tournament.alias, selectedSeason.alias, selectedTeam]);
-
-  useEffect(() => {
-    if (matches.length === 0) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.name}&round=${selectedRound.alias}`)
-        .then(response => response.json())
-        .then(data => {
-          setMatches(data);
-
-          const teams = new Set<string>();
-          const teamsData: { id: string; name: string; }[] = [];
-
-          data.forEach((match: Match) => {
-            if (!teams.has(match.home.fullName)) {
-              teams.add(match.home.fullName);
-              teamsData.push({ id: match.home.fullName, name: match.home.fullName });
-            }
-            if (!teams.has(match.away.fullName)) {
-              teams.add(match.away.fullName);
-              teamsData.push({ id: match.away.fullName, name: match.away.fullName });
-            }
-          });
-
-          setAllTeams(teamsData.sort((a, b) => a.name.localeCompare(b.name)));
-        });
-    }
-  }, [matches, tournament.alias, selectedSeason.name, selectedRound.alias]);
+  }, [selectedRound, tournament.alias, selectedSeason.alias]);
 
   useEffect(() => {
     if (selectedMatchday.name) {
@@ -314,7 +297,7 @@ export default function Tournament({
         })
         .finally(() => setIsLoadingMatches(false));
     }
-  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias, selectedTeam]);
+  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
@@ -541,21 +524,6 @@ export default function Tournament({
                 <span>{`${selectedRound.matchdaysType.key} / ${selectedRound.matchdaysSortedBy.key}`}</span>   
               </div>  
               */}
-              {/** TEAM select box */}
-              <div className="mb-4">
-                <select
-                  value={selectedTeam}
-                  onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                >
-                  <option value="">Alle Mannschaften</option>
-                  {allTeams.map(team => (
-                    <option key={team.id} value={team.name}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
               {matchdays.length > 1 &&
                 <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>
                   {({ open }) => (
@@ -662,6 +630,20 @@ export default function Tournament({
               {/* MATCHES */}
               {activeMatchdayTab === 'matches' && (
                 <div id="matches-section">
+                  <div className="mb-4">
+                    <select
+                      value={selectedTeam}
+                      onChange={(e) => setSelectedTeam(e.target.value)}
+                      className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    >
+                      <option value="">Alle Mannschaften</option>
+                      {allTeams.map(team => (
+                        <option key={team.id} value={team.name}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   {filteredMatches && filteredMatches.length > 0 ? (
                     filteredMatches.map((match, index) => (
                       <MatchCard
