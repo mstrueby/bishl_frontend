@@ -50,10 +50,36 @@ export default function Calendar({ matches }: { matches: Match[] }) {
   const containerOffset = useRef<HTMLDivElement>(null);
 
   // Generate an array of days for the current month
-  const days = eachDayOfInterval({
-    start: startOfMonth(currentMonth),
-    end: endOfMonth(currentMonth)
-  });
+  const days = (() => {
+    const start = startOfMonth(currentMonth);
+    const end = endOfMonth(currentMonth);
+    const daysArray = eachDayOfInterval({ start, end });
+    
+    // Get the first day of the month (0 = Sunday, 1 = Monday, etc.)
+    const firstDayOfMonth = getDay(start);
+    
+    // Calculate how many days from previous month we need
+    const daysFromPrevMonth = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+    
+    // Add days from previous month
+    const prevMonthDays = Array.from({ length: daysFromPrevMonth }, (_, i) => {
+      const date = new Date(start);
+      date.setDate(date.getDate() - (daysFromPrevMonth - i));
+      return date;
+    });
+    
+    // Add days from next month to complete the grid
+    const totalDays = prevMonthDays.length + daysArray.length;
+    const daysNeeded = Math.ceil(totalDays / 7) * 7 - totalDays;
+    
+    const nextMonthDays = Array.from({ length: daysNeeded }, (_, i) => {
+      const date = new Date(end);
+      date.setDate(date.getDate() + i + 1);
+      return date;
+    });
+    
+    return [...prevMonthDays, ...daysArray, ...nextMonthDays];
+  })();
 
   const previousMonth = () => {
     const firstDayNextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
