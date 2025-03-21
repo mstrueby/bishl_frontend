@@ -44,6 +44,7 @@ export const getStaticProps: GetStaticProps = async () => {
 export default function Calendar({ matches }: { matches: Match[] }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isSelected, setIsSelected] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const containerNav = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
@@ -471,42 +472,43 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               </button>
             </div>
             <div className="mt-6 grid grid-cols-7 text-center text-xs/6 text-gray-500">
-              <div>M</div>
-              <div>T</div>
-              <div>W</div>
-              <div>T</div>
-              <div>F</div>
-              <div>S</div>
-              <div>S</div>
+              <div>Mo</div>
+              <div>Di</div>
+              <div>Mi</div>
+              <div>Do</div>
+              <div>Fr</div>
+              <div>Sa</div>
+              <div>So</div>
             </div>
             <div className="isolate mt-2 grid grid-cols-7 gap-px rounded-lg bg-gray-200 text-sm shadow ring-1 ring-gray-200">
               {days.map((day, dayIdx) => (
                 <button
-                  key={day.date}
+                  key={day.toDateString()} // Changed key to avoid potential issues
                   type="button"
                   className={classNames(
                     'py-1.5 hover:bg-gray-100 focus:z-10',
-                    day.isCurrentMonth ? 'bg-white' : 'bg-gray-50',
-                    (day.isSelected || day.isToday) && 'font-semibold',
-                    day.isSelected && 'text-white',
-                    !day.isSelected && day.isCurrentMonth && !day.isToday && 'text-gray-900',
-                    !day.isSelected && !day.isCurrentMonth && !day.isToday && 'text-gray-400',
-                    day.isToday && !day.isSelected && 'text-indigo-600',
-                    dayIdx === 0 && 'rounded-tl-lg',
-                    dayIdx === 6 && 'rounded-tr-lg',
-                    dayIdx === days.length - 7 && 'rounded-bl-lg',
-                    dayIdx === days.length - 1 && 'rounded-br-lg',
+                    isSameMonth(day, currentMonth) ? 'bg-white' : 'bg-gray-50',
+                    (isSelected || isToday(day) ? 'font-semibold' : ''),
+                    isSelected ? 'text-white' : '',
+                    (!isSelected && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
+                    (!isSelected && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
+                    (isToday(day) && !isSelected) ? 'text-indigo-600' : '',
+                    dayIdx === 0 ? 'rounded-tl-lg' : '',
+                    dayIdx === 6 ? 'rounded-tr-lg' : '',
+                    dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
+                    dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
+                    isSelected && !isToday(day) ? 'bg-gray-900' : ''
                   )}
                 >
                   <time
-                    dateTime={day.date}
+                    dateTime={format(day, 'yyyy-MM-dd')}
                     className={classNames(
                       'mx-auto flex size-7 items-center justify-center rounded-full',
-                      day.isSelected && day.isToday && 'bg-indigo-600',
-                      day.isSelected && !day.isToday && 'bg-gray-900',
+                      isSelected && isToday(day) ? 'bg-indigo-600' : '',
+                      isSelected && !isToday(day) ? 'bg-gray-900' : '',
                     )}
                   >
-                    {day.date.split('-').pop().replace(/^0/, '')}
+                    {format(day, 'd')}
                   </time>
                 </button>
               ))}
