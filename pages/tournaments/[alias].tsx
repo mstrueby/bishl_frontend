@@ -168,6 +168,7 @@ export default function Tournament({
 
   useEffect(() => {
     if (selectedSeason.name) {
+      setSelectedTeam('');
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
