@@ -536,6 +536,10 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                 <button
                   key={day.toDateString()} // Changed key to avoid potential issues
                   type="button"
+                  onClick={() => {
+                    setSelectedDate(day);
+                    setCurrentMonth(day);
+                  }}
                   className={classNames(
                     'py-1.5 hover:bg-gray-100 focus:z-10',
                     isSameMonth(day, currentMonth) ? 'bg-white' : 'bg-gray-50',
