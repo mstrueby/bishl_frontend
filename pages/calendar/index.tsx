@@ -144,7 +144,11 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedDate(new Date())}
+                onClick={() => {
+                  const today = new Date();
+                  setSelectedDate(today);
+                  setCurrentMonth(today);
+                }}
                 className="hidden border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block"
               >
                 Heute
