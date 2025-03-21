@@ -137,8 +137,8 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
   );
 };
 
-const MatchCard: React.FC<{ 
-  match: Match, 
+const MatchCard: React.FC<{
+  match: Match,
   onMatchUpdate?: () => Promise<void>,
   matchdayOwner?: {
     clubId: string;
@@ -177,7 +177,7 @@ const MatchCard: React.FC<{
     showLinkAway = true;
   }
   {/** Matchday-Owner and match is at the same day */ }
-  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0,0,0,0) <= new Date().setHours(0,0,0,0)) {
+  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
     showLinkStatus = true;
     showLinkHome = true;
     showLinkAway = true;
@@ -307,8 +307,8 @@ const MatchCard: React.FC<{
       <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 sm:w-5/12 md:w-full">
         {/* home */}
         <div className="flex flex-row items-center w-full">
-          <div className="flex-none h-10 w-10">
-            <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={40} width={40} />
+          <div className="flex-none">
+            <Image className="flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={32} width={32} />
           </div>
           <div className="flex-auto ml-6 truncate text-ellipsis">
             <p className={`block md:hidden sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.shortName}</p>
@@ -322,8 +322,8 @@ const MatchCard: React.FC<{
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
-          <div className="flex-none h-10 w-10">
-            <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={40} width={40} />
+          <div className="flex-none">
+            <Image className="flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
           </div>
           <div className="flex-auto ml-6 w-full truncate">
             <p className={`block md:hidden sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.shortName}</p>
@@ -335,32 +335,32 @@ const MatchCard: React.FC<{
             </div>
           )}
         </div>
+        {/* Referees section */}
+        {(match.referee1 || match.referee2) && (
+          <div className="flex flex-row gap-x-4 mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
+            {match.referee1 && (
+              <div className="flex items-center">
+                <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                  {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
+                </div>
+                <span className="text-xs text-gray-600 ml-2 truncate">
+                  {match.referee1.firstName} {match.referee1.lastName}
+                </span>
+              </div>
+            )}
+            {match.referee2 && (
+              <div className="flex items-center">
+                <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                  {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
+                </div>
+                <span className="text-xs text-gray-600 ml-2 truncate">
+                  {match.referee2.firstName} {match.referee2.lastName}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      {/* Referees section */}
-      {(match.referee1 || match.referee2) && (
-        <div className="flex flex-row gap-x-4 mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
-          {match.referee1 && (
-            <div className="flex items-center">
-              <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
-              </div>
-              <span className="text-xs text-gray-600 ml-2 truncate">
-                {match.referee1.firstName} {match.referee1.lastName}
-              </span>
-            </div>
-          )}
-          {match.referee2 && (
-            <div className="flex items-center">
-              <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
-              </div>
-              <span className="text-xs text-gray-600 ml-2 truncate">
-                {match.referee2.firstName} {match.referee2.lastName}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
