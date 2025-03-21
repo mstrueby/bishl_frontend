@@ -470,14 +470,18 @@ export default function Calendar({ matches }: { matches: Match[] }) {
             <div className="flex items-center text-center text-gray-900">
               <button
                 type="button"
+                onClick={previousMonth}
                 className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
               >
                 <span className="sr-only">Previous month</span>
                 <ChevronLeftIcon className="size-5" aria-hidden="true" />
               </button>
-              <div className="flex-auto text-sm font-semibold">January 2022</div>
+              <div className="flex-auto text-sm font-semibold">
+                {format(currentMonth, 'MMMM yyyy', { locale: de })}
+              </div>
               <button
                 type="button"
+                onClick={nextMonth}
                 className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
               >
                 <span className="sr-only">Next month</span>
