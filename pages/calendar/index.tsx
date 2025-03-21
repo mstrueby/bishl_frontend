@@ -50,10 +50,36 @@ export default function Calendar({ matches }: { matches: Match[] }) {
   const containerOffset = useRef<HTMLDivElement>(null);
 
   // Generate an array of days for the current month
-  const days = eachDayOfInterval({
-    start: startOfMonth(currentMonth),
-    end: endOfMonth(currentMonth)
-  });
+  const days = (() => {
+    const start = startOfMonth(currentMonth);
+    const end = endOfMonth(currentMonth);
+    const daysArray = eachDayOfInterval({ start, end });
+
+    // Get the first day of the month (0 = Sunday, 1 = Monday, etc.)
+    const firstDayOfMonth = getDay(start);
+
+    // Calculate how many days from previous month we need
+    const daysFromPrevMonth = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+    // Add days from previous month
+    const prevMonthDays = Array.from({ length: daysFromPrevMonth }, (_, i) => {
+      const date = new Date(start);
+      date.setDate(date.getDate() - (daysFromPrevMonth - i));
+      return date;
+    });
+
+    // Add days from next month to complete the grid
+    const totalDays = prevMonthDays.length + daysArray.length;
+    const daysNeeded = Math.ceil(totalDays / 7) * 7 - totalDays;
+
+    const nextMonthDays = Array.from({ length: daysNeeded }, (_, i) => {
+      const date = new Date(end);
+      date.setDate(date.getDate() + i + 1);
+      return date;
+    });
+
+    return [...prevMonthDays, ...daysArray, ...nextMonthDays];
+  })();
 
   const previousMonth = () => {
     const firstDayNextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
@@ -106,6 +132,11 @@ export default function Calendar({ matches }: { matches: Match[] }) {
             <div className="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
               <button
                 type="button"
+                onClick={() => {
+                  const prevDay = new Date(selectedDate);
+                  prevDay.setDate(prevDay.getDate() - 1);
+                  setSelectedDate(prevDay);
+                }}
                 className="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
               >
                 <span className="sr-only">Vorheriger Tag</span>
@@ -113,6 +144,11 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  const today = new Date();
+                  setSelectedDate(today);
+                  setCurrentMonth(today);
+                }}
                 className="hidden border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block"
               >
                 Heute
@@ -120,6 +156,11 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               <span className="relative -mx-px h-5 w-px bg-gray-300 md:hidden" />
               <button
                 type="button"
+                onClick={() => {
+                  const nextDay = new Date(selectedDate);
+                  nextDay.setDate(nextDay.getDate() + 1);
+                  setSelectedDate(nextDay);
+                }}
                 className="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50"
               >
                 <span className="sr-only">Nächster Tag</span>
@@ -206,12 +247,16 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                 </div>
                 <div className="py-1">
                   <MenuItem>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                    <button
+                      onClick={() => {
+                        const today = new Date();
+                        setSelectedDate(today);
+                        setCurrentMonth(today);
+                      }}
+                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                     >
                       Go to today
-                    </a>
+                    </button>
                   </MenuItem>
                 </div>
                 <div className="py-1">
@@ -459,14 +504,18 @@ export default function Calendar({ matches }: { matches: Match[] }) {
             <div className="flex items-center text-center text-gray-900">
               <button
                 type="button"
+                onClick={previousMonth}
                 className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
               >
                 <span className="sr-only">Previous month</span>
                 <ChevronLeftIcon className="size-5" aria-hidden="true" />
               </button>
-              <div className="flex-auto text-sm font-semibold">January 2022</div>
+              <div className="flex-auto text-sm font-semibold">
+                {format(currentMonth, 'MMMM yyyy', { locale: de })}
+              </div>
               <button
                 type="button"
+                onClick={nextMonth}
                 className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
               >
                 <span className="sr-only">Next month</span>
