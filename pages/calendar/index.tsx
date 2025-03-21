@@ -551,15 +551,14 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     dayIdx === 6 ? 'rounded-tr-lg' : '',
                     dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
                     dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
-                    isSelected && !isToday(day) ? 'bg-gray-900' : ''
                   )}
                 >
                   <time
                     dateTime={format(day, 'yyyy-MM-dd')}
                     className={classNames(
                       'mx-auto flex size-7 items-center justify-center rounded-full',
-                      isSelected && isToday(day) ? 'bg-indigo-600' : '',
-                      isSelected && !isToday(day) ? 'bg-gray-900' : '',
+                      (selectedDate && isSameDay(day, selectedDate) && isToday(day)) ? 'bg-indigo-600' : '',
+                      (selectedDate && isSameDay(day, selectedDate) && !isToday(day)) ? 'bg-gray-900' : '',
                     )}
                   >
                     {format(day, 'd')}
