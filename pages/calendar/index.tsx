@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import Standings from '../../components/ui/Standings';
@@ -18,10 +18,6 @@ import { Team } from '../../types/MatchValues';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [], fallback: false };
-};
 
 export const getStaticProps: GetStaticProps = async () => {
   try {
