@@ -13,6 +13,8 @@ import { Match } from '../../types/MatchValues';
 import MatchCard from '../../components/ui/MatchCard';
 import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]';
 import { MatchdayValues } from '../../types/TournamentValues';
+import TeamFullNameSelect from '../../components/ui/TeamFullNameSelect';
+import { Team } from '../../types/MatchValues';
 
 interface StandingsTeam {
   fullName: string;
@@ -104,7 +106,37 @@ export default function Tournament({
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
-  const [isLoadingMatches, setIsLoadingMatches] = useState(true);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [currentTab, setCurrentTab] = useState('matches');
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [allTeams, setAllTeams] = useState<Team[]>([]);
+
+  useEffect(() => {
+    if (matches.length > 0) {
+      const teams = new Set<string>();
+      const teamsData: Team[] = [];
+
+      matches.forEach(match => {
+        if (!teams.has(match.home.fullName)) {
+          teams.add(match.home.fullName);
+          teamsData.push(match.home);
+        }
+        if (!teams.has(match.away.fullName)) {
+          teams.add(match.away.fullName);
+          teamsData.push(match.away);
+        }
+      });
+
+      setAllTeams(teamsData.sort((a, b) => a.fullName.localeCompare(b.fullName)));
+    }
+  }, [matches]);
+
+  const filteredMatches = selectedTeam
+    ? matches.filter(match =>
+      match.home.fullName === selectedTeam ||
+      match.away.fullName === selectedTeam)
+    : matches;
 
   let seasons: Season[] = tournament ? tournament.seasons.sort((a, b) => b.name.localeCompare(a.name)) : [];
   const [selectedSeason, setSelectedSeason] = useState(seasons ? seasons[0] : {} as Season);
@@ -112,7 +144,7 @@ export default function Tournament({
   const [selectedRound, setSelectedRound] = useState({} as Round);
   const [matchdays, setMatchdays] = useState<Matchday[]>([]);
   const [selectedMatchday, setSelectedMatchday] = useState({} as Matchday);
-  const [matches, setMatches] = useState<Match[]>([]);
+
 
   const [activeTab, setActiveTab] = useState('matches');
   const [activeMatchdayTab, setActiveMatchdayTab] = useState('matches');
@@ -128,12 +160,15 @@ export default function Tournament({
       // Set the initial selected season
       const sortedSeasons = tournament.seasons.sort((a, b) => b.name.localeCompare(a.name));
       setSelectedSeason(sortedSeasons[0]);
+      // Reset team filter when tournament changes
+      setSelectedTeam('');
     }
     setIsLoadingInitial(false);
-  }, [router.isFallback, tournament]);
+  }, [router.isFallback, tournament?.alias]);
 
   useEffect(() => {
     if (selectedSeason.name) {
+      setSelectedTeam('');
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
@@ -149,6 +184,7 @@ export default function Tournament({
             setRounds([]);
             setSelectedRound({} as Round);
           }
+          setSelectedTeam('');
         })
         .finally(() => {
           setIsLoadingRounds(false);
@@ -183,19 +219,33 @@ export default function Tournament({
             setMatchdays(sortedData);
 
             // If matchday type is GROUP, select the first matchday
-              // Otherwise, find the upcoming matchday or the most recent one
-              let selectedMd;
-              
-              if (selectedRound.matchdaysType.key === 'GROUP') {
-                selectedMd = sortedData[0];
+            // Otherwise, find today's matchday, then upcoming or most recent one if not found
+            let selectedMd;
+
+            if (selectedRound.matchdaysType.key === 'GROUP') {
+              selectedMd = sortedData[0];
+            } else {
+              const now = new Date().getTime();
+              const todayStart = new Date();
+              todayStart.setHours(0, 0, 0, 0);
+              const todayEnd = new Date();
+              todayEnd.setHours(23, 59, 59, 999);
+
+              // Check for today's matchday
+              const todayMatchday = sortedData.find(
+                (matchday: Matchday) =>
+                  new Date(matchday.startDate).getTime() >= todayStart.getTime() &&
+                  new Date(matchday.startDate).getTime() <= todayEnd.getTime()
+              );
+
+              if (todayMatchday) {
+                selectedMd = todayMatchday;
               } else {
-                const now = new Date().getTime();
-                
                 // Find the first upcoming matchday
                 const upcomingMatchdays = sortedData
-                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() >= now)
+                  .filter((matchday: Matchday) => new Date(matchday.startDate).getTime() > todayEnd.getTime())
                   .sort((a: Matchday, b: Matchday) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-                
+
                 if (upcomingMatchdays.length > 0) {
                   // If there are upcoming matchdays, select the next one
                   selectedMd = upcomingMatchdays[0];
@@ -206,8 +256,9 @@ export default function Tournament({
                     .sort((a: Matchday, b: Matchday) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
                 }
               }
+            }
 
-              setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
+            setSelectedMatchday(selectedMd || sortedData[0] || {} as Matchday);
           } else {
             console.error('Received invalid data format for matchdays');
             setMatchdays([]);
@@ -239,8 +290,9 @@ export default function Tournament({
         .then((response) => response.json())
         .then((data) => {
           setMatches(data);
-          
+
           // Only scroll to matches section if there's no matchday dropdown (single matchday)
+          {/**
           if (matchdays.length <= 1) {
             setTimeout(() => {
               const matchesSection = document.getElementById('matches-section');
@@ -249,10 +301,11 @@ export default function Tournament({
               }
             }, 300); // Small delay to ensure rendering is complete
           }
+          */}
         })
         .finally(() => setIsLoadingMatches(false));
     }
-  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias]);
+  }, [selectedMatchday, tournament.alias, selectedSeason.alias, selectedRound.alias, selectedTeam]);
 
   if (!tournament) {
     return <div>Error loading tournament data.</div>;
@@ -585,8 +638,17 @@ export default function Tournament({
               {/* MATCHES */}
               {activeMatchdayTab === 'matches' && (
                 <div id="matches-section">
-                  {matches && matches.length > 0 ? (
-                    matches.map((match, index) => (
+                  {['landesliga', 'regionalliga-ost'].includes(tournament.alias) && (
+                    <div className="mb-4 relative mt-2 md:mx-28 lg:mx-56">
+                      <TeamFullNameSelect
+                        selectedTeamId={selectedTeam}
+                        teams={allTeams}
+                        onTeamChange={setSelectedTeam}
+                      />
+                    </div>
+                  )}
+                  {filteredMatches && filteredMatches.length > 0 ? (
+                    filteredMatches.map((match, index) => (
                       <MatchCard
                         key={index}
                         match={match}
@@ -615,8 +677,7 @@ export default function Tournament({
                     <div className="text-center py-12 text-gray-500">
                       Keine Spiele verfügbar
                     </div>
-                  )
-                  }
+                  )}
                 </div>
               )}
             </section>

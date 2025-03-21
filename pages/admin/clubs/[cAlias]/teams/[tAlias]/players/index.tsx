@@ -11,6 +11,7 @@ import SuccessMessage from '../../../../../../../components/ui/SuccessMessage';
 import DataList from '../../../../../../../components/admin/ui/DataList';
 import { getDataListItems } from '../../../../../../../tools/playerItems';
 import { ta } from "date-fns/locale";
+import { TeamValues } from "../../../../../../../types/ClubValues";
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -18,11 +19,7 @@ interface PlayersProps {
   jwt: string,
   cAlias: string,
   clubName: string,
-  team: {
-    _id: string,
-    name: string,
-    alias: string,
-  }  
+  team: TeamValues,
   players: PlayerValues[],
   totalPlayers: number,
 }
@@ -69,11 +66,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Content-Type': 'application/json',
       }
     });
-    team = {
-        _id: teamResponse.data._id,
-        name: teamResponse.data.name,
-        alias: teamResponse.data.alias,
-    };
+    team = teamResponse.data;
     
     // Get players
     const res = await axios.get(`${BASE_URL}/players/clubs/${cAlias}/teams/${tAlias}`, {

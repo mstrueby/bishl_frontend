@@ -154,6 +154,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
         }
 
+        {/**
         // Define age group progression map
         const ageGroupMergeMap: { [key: string]: string } = {
             'Junioren': 'Jugend',
@@ -204,6 +205,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 }
             }
         }
+        */}
+
 
         // Combine the players from the current team and all additional players
         allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
@@ -395,21 +398,23 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         });
     };
 
+    const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
+
     // Check if all requirements are met for publishing the roster
     const isRosterValid = () => {
         const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
         const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
         const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
         const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-        const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
-        const hasMinFeldspieler = feldspielerCount >= 2;
+        const skaterCount = rosterList.filter(player => player.playerPosition.key != 'G').length;
+        const hasMinSkater = skaterCount >= minSkaterCount;
         const calledPlayersCount = rosterList.filter(player => player.called).length;
         const hasMaxCalledPlayers = calledPlayersCount <= 5;
         const hasDoubleJerseyNumbers = rosterList.some((player, index) => 
             rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index
         );
 
-        return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinFeldspieler && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
+        return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinSkater && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
     };
 
     // Fetch players when a team is selected
@@ -1232,8 +1237,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
                         {/* Feldspieler check indicator */}
                         <div className="flex items-center mt-4">
-                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.playerPosition.key === 'F').length >= 2 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                                {rosterList.filter(player => player.playerPosition.key === 'F').length >= 2 ? (
+                            <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                                {rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
@@ -1244,9 +1249,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 )}
                             </div>
                             <span className="ml-2 text-sm">
-                                {rosterList.filter(player => player.playerPosition.key === 'F').length >= 2
-                                    ? `Mindestens zwei Feldspieler (F) wurden festgelegt`
-                                    : 'Es müssen mindestens zwei Feldspieler (F) festgelegt werden'}
+                                {rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount
+                                    ? `Mindestens ${minSkaterCount} Feldspieler wurden festgelegt`
+                                    : `Es müssen mindestens ${minSkaterCount} Feldspieler festgelegt werden`}
                             </span>
                         </div>
 

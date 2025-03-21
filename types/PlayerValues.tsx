@@ -16,6 +16,7 @@ export interface AssignmentTeam {
   teamId: string;
   teamName: string;
   teamAlias: string;
+  teamAgeGroup: string;
   teamIshdId?: string;
   passNo: string;
   source: string; // e.g. "BISHL"
@@ -78,6 +79,8 @@ export interface PlayerValues {
   imageVisible: boolean;
   legacyId?: number;
   createDate?: string;  // e.g. "2025-01-16T11:36:45.395Z"
-  ageGroup?: string;
+  ageGroup: string;
+  overAge: boolean;
   managedByISHD?: boolean;
+  sex: 'männlich' | 'weiblich';
 }

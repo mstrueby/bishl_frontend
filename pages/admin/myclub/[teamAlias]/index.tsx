@@ -239,7 +239,7 @@ const MyClub: NextPage<TeamProps> = ({ jwt, club, team, players: initialPlayers,
   };
 
   const dataListItems = getDataListItems(players, team, editPlayer, toggleActive, true);
-
+  
   const sectionTitle = team.name ? team.name : 'Meine Mannschaft';
   const description = club.name ? club.name.toUpperCase() : 'Mein Verein';
   const statuses = {
