@@ -118,10 +118,10 @@ export default function Calendar({ matches }: { matches: Match[] }) {
           <div>
             <h1 className="text-base font-semibold text-gray-900">
               <time dateTime="2022-01-22" className="sm:hidden">
-                {selectedDate ? format(selectedDate, 'dd. MMMM yyyy', { locale: de }) : null}
+                {selectedDate ? format(selectedDate, 'd. MMM yyyy', { locale: de }) : null}
               </time>
               <time dateTime="2022-01-22" className="hidden sm:inline">
-                {selectedDate ? format(selectedDate, 'dd. MMMM yyyy', { locale: de }) : null}
+                {selectedDate ? format(selectedDate, 'd. MMMM yyyy', { locale: de }) : null}
               </time>
             </h1>
             <p className="mt-1 text-sm text-gray-500">
