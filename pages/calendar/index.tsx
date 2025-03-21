@@ -44,7 +44,6 @@ export const getStaticProps: GetStaticProps = async () => {
 export default function Calendar({ matches }: { matches: Match[] }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [isSelected, setIsSelected] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const containerNav = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
@@ -543,11 +542,11 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   className={classNames(
                     'py-1.5 hover:bg-gray-100 focus:z-10',
                     isSameMonth(day, currentMonth) ? 'bg-white' : 'bg-gray-50',
-                    (isSelected || isToday(day) ? 'font-semibold' : ''),
-                    isSelected ? 'text-white' : '',
-                    (!isSelected && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
-                    (!isSelected && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
-                    (isToday(day) && !isSelected) ? 'text-indigo-600' : '',
+                    (selectedDate && isSameDay(day, selectedDate) || isToday(day) ? 'font-semibold' : ''),
+                    (selectedDate && isSameDay(day, selectedDate)) ? 'text-white' : '',
+                    (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
+                    (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
+                    (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
                     dayIdx === 0 ? 'rounded-tl-lg' : '',
                     dayIdx === 6 ? 'rounded-tr-lg' : '',
                     dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
