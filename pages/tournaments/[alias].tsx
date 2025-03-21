@@ -183,6 +183,7 @@ export default function Tournament({
             setRounds([]);
             setSelectedRound({} as Round);
           }
+          setSelectedTeam('');
         })
         .finally(() => {
           setIsLoadingRounds(false);
