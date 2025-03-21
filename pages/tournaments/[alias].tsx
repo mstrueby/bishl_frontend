@@ -13,6 +13,8 @@ import { Match } from '../../types/MatchValues';
 import MatchCard from '../../components/ui/MatchCard';
 import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]';
 import { MatchdayValues } from '../../types/TournamentValues';
+import TeamFullNameSelect from '../../components/ui/TeamFullNameSelect';
+import { Team } from '../../types/MatchValues';
 
 interface StandingsTeam {
   fullName: string;
@@ -108,25 +110,25 @@ export default function Tournament({
   const [matches, setMatches] = useState<Match[]>([]);
   const [currentTab, setCurrentTab] = useState('matches');
   const [selectedTeam, setSelectedTeam] = useState<string>('');
-  const [allTeams, setAllTeams] = useState<{ id: string; name: string; }[]>([]);
+  const [allTeams, setAllTeams] = useState<Team[]>([]);
 
   useEffect(() => {
     if (matches.length > 0) {
       const teams = new Set<string>();
-      const teamsData: { id: string; name: string; }[] = [];
+      const teamsData: Team[] = [];
 
       matches.forEach(match => {
         if (!teams.has(match.home.fullName)) {
           teams.add(match.home.fullName);
-          teamsData.push({ id: match.home.fullName, name: match.home.fullName });
+          teamsData.push(match.home);
         }
         if (!teams.has(match.away.fullName)) {
           teams.add(match.away.fullName);
-          teamsData.push({ id: match.away.fullName, name: match.away.fullName });
+          teamsData.push(match.away);
         }
       });
 
-      setAllTeams(teamsData.sort((a, b) => a.name.localeCompare(b.name)));
+      setAllTeams(teamsData.sort((a, b) => a.fullName.localeCompare(b.fullName)));
     }
   }, [matches]);
 
@@ -158,9 +160,11 @@ export default function Tournament({
       // Set the initial selected season
       const sortedSeasons = tournament.seasons.sort((a, b) => b.name.localeCompare(a.name));
       setSelectedSeason(sortedSeasons[0]);
+      // Reset team filter when tournament changes
+      setSelectedTeam('');
     }
     setIsLoadingInitial(false);
-  }, [router.isFallback, tournament]);
+  }, [router.isFallback, tournament?.alias]);
 
   useEffect(() => {
     if (selectedSeason.name) {
@@ -179,6 +183,7 @@ export default function Tournament({
             setRounds([]);
             setSelectedRound({} as Round);
           }
+          setSelectedTeam('');
         })
         .finally(() => {
           setIsLoadingRounds(false);
@@ -286,6 +291,7 @@ export default function Tournament({
           setMatches(data);
 
           // Only scroll to matches section if there's no matchday dropdown (single matchday)
+          {/**
           if (matchdays.length <= 1) {
             setTimeout(() => {
               const matchesSection = document.getElementById('matches-section');
@@ -294,6 +300,7 @@ export default function Tournament({
               }
             }, 300); // Small delay to ensure rendering is complete
           }
+          */}
         })
         .finally(() => setIsLoadingMatches(false));
     }
@@ -631,19 +638,12 @@ export default function Tournament({
               {activeMatchdayTab === 'matches' && (
                 <div id="matches-section">
                   {['landesliga', 'regionalliga-ost'].includes(tournament.alias) && (
-                    <div className="mb-4">
-                      <select
-                        value={selectedTeam}
-                        onChange={(e) => setSelectedTeam(e.target.value)}
-                        className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      >
-                        <option value="">Alle Mannschaften</option>
-                        {allTeams.map(team => (
-                          <option key={team.id} value={team.name}>
-                            {team.name}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="mb-4 relative mt-2 md:mx-28 lg:mx-56">
+                      <TeamFullNameSelect
+                        selectedTeamId={selectedTeam}
+                        teams={allTeams}
+                        onTeamChange={setSelectedTeam}
+                      />
                     </div>
                   )}
                   {filteredMatches && filteredMatches.length > 0 ? (
