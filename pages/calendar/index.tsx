@@ -6,7 +6,7 @@ import Standings from '../../components/ui/Standings';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon } from '@heroicons/react/20/solid'
 import { Fragment, useEffect, useState, useRef } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
-import { format } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, getDay } from 'date-fns';
 import { de } from 'date-fns/locale'; // Import German locale
 import ClipLoader from 'react-spinners/ClipLoader';
 import { Match } from '../../types/MatchValues';
@@ -45,15 +45,8 @@ export default function Calendar({ matches }: { matches: Match[] }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const container = useRef<HTMLDivElement>(null);
-
-  // Helper functions to get the start and end of the month
-  const startOfMonth = (date: Date): Date => {
-    return new Date(date.getFullYear(), date.getMonth(), 1);
-  };
-
-  const endOfMonth = (date: Date): Date => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  };
+  const containerNav = useRef<HTMLDivElement>(null);
+  const containerOffset = useRef<HTMLDivElement>(null);
 
   // Generate an array of days for the current month
   const days = eachDayOfInterval({
