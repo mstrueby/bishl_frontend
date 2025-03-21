@@ -54,30 +54,30 @@ export default function Calendar({ matches }: { matches: Match[] }) {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
     const daysArray = eachDayOfInterval({ start, end });
-    
+
     // Get the first day of the month (0 = Sunday, 1 = Monday, etc.)
     const firstDayOfMonth = getDay(start);
-    
+
     // Calculate how many days from previous month we need
     const daysFromPrevMonth = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-    
+
     // Add days from previous month
     const prevMonthDays = Array.from({ length: daysFromPrevMonth }, (_, i) => {
       const date = new Date(start);
       date.setDate(date.getDate() - (daysFromPrevMonth - i));
       return date;
     });
-    
+
     // Add days from next month to complete the grid
     const totalDays = prevMonthDays.length + daysArray.length;
     const daysNeeded = Math.ceil(totalDays / 7) * 7 - totalDays;
-    
+
     const nextMonthDays = Array.from({ length: daysNeeded }, (_, i) => {
       const date = new Date(end);
       date.setDate(date.getDate() + i + 1);
       return date;
     });
-    
+
     return [...prevMonthDays, ...daysArray, ...nextMonthDays];
   })();
 
@@ -243,12 +243,16 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                 </div>
                 <div className="py-1">
                   <MenuItem>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                    <button
+                      onClick={() => {
+                        const today = new Date();
+                        setSelectedDate(today);
+                        setCurrentMonth(today);
+                      }}
+                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                     >
                       Go to today
-                    </a>
+                    </button>
                   </MenuItem>
                 </div>
                 <div className="py-1">
