@@ -44,7 +44,6 @@ export const getStaticProps: GetStaticProps = async () => {
 export default function Calendar({ matches }: { matches: Match[] }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [isSelected, setIsSelected] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const containerNav = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
@@ -97,14 +96,24 @@ export default function Calendar({ matches }: { matches: Match[] }) {
       return isSameDay(matchDate, date);
     });
   };
+
+  const matchesByDateTime = (date: Date) => {
+    return matches.filter(match => {
+      const matchDate = new Date(match.startDate);
+      return isSameDay(matchDate, date) && matchDate.getHours() === date.getHours() && matchDate.getMinutes() === date.getMinutes();
+    })
+  };
+
   useEffect(() => {
     // Set the container scroll position based on the current time.
-    const currentMinute = new Date().getHours() * 60
-    container.current.scrollTop =
-      ((container.current.scrollHeight - containerNav.current.offsetHeight - containerOffset.current.offsetHeight) *
-        currentMinute) /
-      1440
-  }, [])
+    const currentMinute = new Date().getHours() * 60;
+    if (container.current && containerNav.current && containerOffset.current) {
+      container.current.scrollTop =
+        ((container.current.scrollHeight - containerNav.current.offsetHeight - containerOffset.current.offsetHeight) *
+          currentMinute) /
+        1440;
+    }
+  }, []);
 
 
   return (
@@ -133,7 +142,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               <button
                 type="button"
                 onClick={() => {
-                  const prevDay = new Date(selectedDate);
+                  const prevDay = selectedDate ? new Date(selectedDate) : new Date();
                   prevDay.setDate(prevDay.getDate() - 1);
                   setSelectedDate(prevDay);
                 }}
@@ -157,7 +166,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               <button
                 type="button"
                 onClick={() => {
-                  const nextDay = new Date(selectedDate);
+                  const nextDay = selectedDate ? new Date(selectedDate) : new Date();
                   nextDay.setDate(nextDay.getDate() + 1);
                   setSelectedDate(nextDay);
                 }}
@@ -459,43 +468,28 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   className="col-start-1 col-end-2 row-start-1 grid grid-cols-1"
                   style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
                 >
-                  <li className="relative mt-px flex" style={{ gridRow: '74 / span 12' }}>
-                    <a
-                      href="#"
-                      className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs/5 hover:bg-blue-100"
-                    >
-                      <p className="order-1 font-semibold text-blue-700">Breakfast</p>
-                      <p className="text-blue-500 group-hover:text-blue-700">
-                        <time dateTime="2022-01-22T06:00">6:00 AM</time>
-                      </p>
-                    </a>
-                  </li>
-                  <li className="relative mt-px flex" style={{ gridRow: '92 / span 30' }}>
-                    <a
-                      href="#"
-                      className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-pink-50 p-2 text-xs/5 hover:bg-pink-100"
-                    >
-                      <p className="order-1 font-semibold text-pink-700">Flight to Paris</p>
-                      <p className="order-1 text-pink-500 group-hover:text-pink-700">
-                        John F. Kennedy International Airport
-                      </p>
-                      <p className="text-pink-500 group-hover:text-pink-700">
-                        <time dateTime="2022-01-22T07:30">7:30 AM</time>
-                      </p>
-                    </a>
-                  </li>
-                  <li className="relative mt-px flex" style={{ gridRow: '134 / span 18' }}>
-                    <a
-                      href="#"
-                      className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-indigo-50 p-2 text-xs/5 hover:bg-indigo-100"
-                    >
-                      <p className="order-1 font-semibold text-indigo-700">Sightseeing</p>
-                      <p className="order-1 text-indigo-500 group-hover:text-indigo-700">Eiffel Tower</p>
-                      <p className="text-indigo-500 group-hover:text-indigo-700">
-                        <time dateTime="2022-01-22T11:00">11:00 AM</time>
-                      </p>
-                    </a>
-                  </li>
+                  {matchesByDate(selectedDate || new Date()).map((event, index) => (
+                    <li key={index} className="relative mt-px flex" style={{
+                      gridRow: `${Math.floor((new Date(event.startDate).getHours() * 12) + (new Date(event.startDate).getMinutes() / 30)) + 1} / span 10`,
+                      width: `${100 / matchesByDateTime(selectedDate || new Date()).length}%`
+                    }}>
+                      <a
+                        href="#"
+                        className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs/5 hover:bg-blue-100"
+                      >
+                        <p className="block sm:hidden order-1 font-semibold text-blue-700">{event.home.shortName} - {event.away.shortName}</p>
+                        <p className="hidden sm:block order-1 font-semibold text-blue-700">{event.home.fullName} - {event.away.fullName}</p>
+                        <p className="order-1 text-blue-500 group-hover:text-blue-700">
+                          {event.venue.name}
+                        </p>
+                        <p className="text-blue-500 group-hover:text-blue-700">
+                          <time dateTime={new Date(event.startDate).toISOString()}>
+                            {format(new Date(event.startDate), 'HH:mm', { locale: de })}
+                          </time> - {event.tournament.name}
+                        </p>
+                      </a>
+                    </li>
+                  ))}
                 </ol>
               </div>
             </div>
@@ -543,24 +537,23 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   className={classNames(
                     'py-1.5 hover:bg-gray-100 focus:z-10',
                     isSameMonth(day, currentMonth) ? 'bg-white' : 'bg-gray-50',
-                    (isSelected || isToday(day) ? 'font-semibold' : ''),
-                    isSelected ? 'text-white' : '',
-                    (!isSelected && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
-                    (!isSelected && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
-                    (isToday(day) && !isSelected) ? 'text-indigo-600' : '',
+                    (selectedDate && isSameDay(day, selectedDate) || isToday(day) ? 'font-semibold' : ''),
+                    (selectedDate && isSameDay(day, selectedDate)) ? 'text-white' : '',
+                    (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
+                    (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
+                    (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
                     dayIdx === 0 ? 'rounded-tl-lg' : '',
                     dayIdx === 6 ? 'rounded-tr-lg' : '',
                     dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
                     dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
-                    isSelected && !isToday(day) ? 'bg-gray-900' : ''
                   )}
                 >
                   <time
                     dateTime={format(day, 'yyyy-MM-dd')}
                     className={classNames(
                       'mx-auto flex size-7 items-center justify-center rounded-full',
-                      isSelected && isToday(day) ? 'bg-indigo-600' : '',
-                      isSelected && !isToday(day) ? 'bg-gray-900' : '',
+                      (selectedDate && isSameDay(day, selectedDate) && isToday(day)) ? 'bg-indigo-600' : '',
+                      (selectedDate && isSameDay(day, selectedDate) && !isToday(day)) ? 'bg-gray-900' : '',
                     )}
                   >
                     {format(day, 'd')}
