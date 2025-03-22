@@ -97,10 +97,10 @@ export default function Calendar({ matches }: { matches: Match[] }) {
     });
   };
 
-  const matchesByDateTime = (date: Date) => {
+  const matchesByDateTime = (date: Date, hour: number, minute: number) => {
     return matches.filter(match => {
       const matchDate = new Date(match.startDate);
-      return isSameDay(matchDate, date) && matchDate.getHours() === date.getHours() && matchDate.getMinutes() === date.getMinutes();
+      return isSameDay(matchDate, date) && matchDate.getHours() === hour && matchDate.getMinutes() === minute;
     })
   };
 
@@ -469,10 +469,14 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
                 >
                   {matchesByDate(selectedDate || new Date()).map((event, index) => (
-                    <li key={index} className="relative mt-px flex" style={{
-                      gridRow: `${Math.floor((new Date(event.startDate).getHours() * 12) + (new Date(event.startDate).getMinutes() / 30)) + 1} / span 10`,
-                      width: `${100 / matchesByDateTime(selectedDate || new Date()).length}%`
-                    }}>
+                    <li 
+                      key={index} 
+                      className="relative mt-px flex" 
+                      style={{ 
+                        gridRow: `${Math.floor((new Date(event.startDate).getHours() * 12) + (new Date(event.startDate).getMinutes() / 30)) + 1} / span 10`,
+                        width: `${100 / matchesByDateTime(selectedDate || new Date(), new Date(event.startDate).getHours(), new Date(event.startDate).getMinutes()).length}%`
+                      }}
+                    >
                       <a
                         href="#"
                         className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs/5 hover:bg-blue-100"
