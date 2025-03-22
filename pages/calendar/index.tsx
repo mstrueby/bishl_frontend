@@ -465,18 +465,34 @@ export default function Calendar({ matches }: { matches: Match[] }) {
 
                 {/* Events */}
                 <ol
-                  className="col-start-1 col-end-2 row-start-1 grid grid-cols-1"
+                  className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 relative"
                   style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
                 >
-                  {matchesByDate(selectedDate || new Date()).map((event, index) => (
-                    <li 
-                      key={index} 
-                      className="relative mt-px flex" 
-                      style={{ 
-                        gridRow: `${Math.floor((new Date(event.startDate).getHours() * 12) + (new Date(event.startDate).getMinutes() / 30)) + 1} / span 10`,
-                        width: `${100 / matchesByDateTime(selectedDate || new Date(), new Date(event.startDate).getHours(), new Date(event.startDate).getMinutes()).length}%`
-                      }}
-                    >
+                  {matchesByDate(selectedDate || new Date()).map((event, index, events) => {
+                    // Find overlapping events
+                    const eventStart = new Date(event.startDate);
+                    const overlappingEvents = events.filter((otherEvent, otherIndex) => {
+                      if (otherIndex <= index) return false;
+                      const otherStart = new Date(otherEvent.startDate);
+                      return Math.abs(eventStart.getTime() - otherStart.getTime()) <= 30 * 60000; // 30 minutes
+                    });
+                    
+                    // Calculate position for overlapping events
+                    const columnCount = overlappingEvents.length + 1;
+                    const columnIndex = overlappingEvents.findIndex(e => e.id === event.id) + 1;
+                    
+                    return (
+                      <li 
+                        key={index} 
+                        className="absolute mt-px flex" 
+                        style={{ 
+                          top: `${((new Date(event.startDate).getHours() * 60 + new Date(event.startDate).getMinutes()) * 100) / 1440}%`,
+                          height: '150px', // Adjust based on event duration
+                          left: `${(100 / columnCount) * columnIndex}%`,
+                          width: `${100 / columnCount}%`,
+                          paddingRight: '1px'
+                        }}
+                      >
                       <a
                         href="#"
                         className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs/5 hover:bg-blue-100"
