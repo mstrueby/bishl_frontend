@@ -96,6 +96,14 @@ export default function Calendar({ matches }: { matches: Match[] }) {
       return isSameDay(matchDate, date);
     });
   };
+
+  const matchesByDateTime = (date: Date) => {
+    return matches.filter(match => {
+      const matchDate = new Date(match.startDate);
+      return isSameDay(matchDate, date) && matchDate.getHours() === date.getHours() && matchDate.getMinutes() === date.getMinutes();
+    })
+  };
+
   useEffect(() => {
     // Set the container scroll position based on the current time.
     const currentMinute = new Date().getHours() * 60;
@@ -460,33 +468,15 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   className="col-start-1 col-end-2 row-start-1 grid grid-cols-1"
                   style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
                 >
-                  {matchesByDate(selectedDate || new Date()).map((event, index, events) => {
-                    // Find overlapping events
-                    const eventStart = new Date(event.startDate).getTime();
-                    const overlappingEvents = events.filter((e, i) => {
-                      const eStart = new Date(e.startDate).getTime();
-                      return i !== index && Math.abs(eStart - eventStart) < 1800000; // 30 minutes in milliseconds
-                    });
-                    
-                    // Calculate width and left offset based on overlapping events
-                    const width = overlappingEvents.length > 0 ? `${100 / (overlappingEvents.length + 1)}%` : '100%';
-                    const left = overlappingEvents.length > 0 ? `${(100 / (overlappingEvents.length + 1)) * index}%` : '0';
-                    
-                    return (
-                      <li 
-                        key={index} 
-                        className="relative mt-px flex" 
-                        style={{ 
-                          gridRow: `${Math.floor((new Date(event.startDate).getHours() * 12) + (new Date(event.startDate).getMinutes() / 30)) + 1} / span 10`,
-                          width: width,
-                          left: left,
-                          position: 'absolute'
-                        }}
+                  {matchesByDate(selectedDate || new Date()).map((event, index) => (
+                    <li key={index} className="relative mt-px flex" style={{
+                      gridRow: `${Math.floor((new Date(event.startDate).getHours() * 12) + (new Date(event.startDate).getMinutes() / 30)) + 1} / span 10`,
+                      width: `${100 / matchesByDateTime(selectedDate || new Date()).length}%`
+                    }}>
+                      <a
+                        href="#"
+                        className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs/5 hover:bg-blue-100"
                       >
-                        <a
-                          href="#"
-                          className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs/5 hover:bg-blue-100"
-                        >
                         <p className="block sm:hidden order-1 font-semibold text-blue-700">{event.home.shortName} - {event.away.shortName}</p>
                         <p className="hidden sm:block order-1 font-semibold text-blue-700">{event.home.fullName} - {event.away.fullName}</p>
                         <p className="order-1 text-blue-500 group-hover:text-blue-700">
