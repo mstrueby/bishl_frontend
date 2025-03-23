@@ -466,7 +466,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
 
                 {/* Events */}
                 <ol
-                  className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 relative"
+                  className="relative col-start-1 col-end-2 row-start-1 grid grid-cols-1" // removed relative
                   style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
                 >
                   {matchesByDate(selectedDate || new Date()).map((event, index, events) => {
@@ -486,35 +486,50 @@ export default function Calendar({ matches }: { matches: Match[] }) {
 
                     //console.log(event._id, overlappingEvents, columnCount, columnIndex)
 
-                    console.log(`${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 30) + 1}`)
+                    console.log(`${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 5) + 1}`)
+                    const matchLength = tournamentConfigs[event.tournament.alias]?.matchLenMin || 30;
+
                     return (
                       <li
                         key={index}
-                        className="absolute mt-px flex"
+                        className="absolute mt-px flex" // added border
                         style={{
-                          gridRow: `${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 5) + 2} / span 6`,
+                          gridRow: `${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 5) + 2} / span ${Math.ceil(matchLength / 5)}`,
                           left: `${(100 / columnCount) * columnIndex}%`,
                           width: `${100 / columnCount}%`,
+                          height: `calc(${matchLength / 16} * 1.75rem)`,
                           paddingRight: '1px'
                         }}
                       >
                         <a
                           href="#"
-                          className={`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg ${tournamentConfigs[event.tournament.alias]?.bdgColDark || 'bg-blue-50'} p-2 text-xs/5 hover:bg-blue-100`}
+                          className={`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg border-l-4 p-2 text-xs/5 ${(() => {
+                            switch(event.tournament.alias) {
+                              case 'regionalliga-ost':
+                                return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
+                              case 'landesliga':
+                                return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
+                              case 'schuelerliga':
+                                return 'bg-indigo-400/10 text-indigo-600 border-indigo-600/50 hover:bg-indigo-200/50';
+                              // add more cases as needed
+                              default:
+                                return '';
+                            }
+                          })()}`}
                         >
-                          <p className="block sm:hidden order-1 font-semibold text-blue-700">
+                          <p className="block sm:hidden order-1 font-semibold">
                             {columnCount >= 2
                               ? `${event.home.tinyName} - ${event.away.tinyName}`
                               : `${event.home.shortName} - ${event.away.shortName}`}
                           </p>
-                          <p className="hidden sm:block order-1 font-semibold text-blue-700">
+                          <p className="hidden sm:block order-1 font-semibold">
                             {`${event.home.fullName.length > 14 ? event.home.shortName : event.home.fullName} 
-                            - ${event.away.fullName.length > 14 ? event.away.shortName : event.away.fullName}`}
+                          - ${event.away.fullName.length > 14 ? event.away.shortName : event.away.fullName}`}
                           </p>
-                          <p className="order-1 text-blue-500 group-hover:text-blue-700">
+                          <p className="order-1 truncate">
                             {event.venue.name}
                           </p>
-                          <p className="flex items-center gap-x-1.5 text-blue-500 group-hover:text-blue-700">
+                          <p className="flex items-center gap-x-1.5">
                             <time dateTime={new Date(event.startDate).toISOString()}>
                               {format(new Date(event.startDate), 'HH:mm', { locale: de })}
                             </time>

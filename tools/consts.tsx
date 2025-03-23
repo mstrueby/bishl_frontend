@@ -53,61 +53,61 @@ chen Spieler ein Jahr länger spielen („Over-Age-Regelung“).
 
 
 export const ageGroupConfig: AgeGroupRule[] = [
-  { 
-    key: "HERREN", 
-    value: "Herren", 
-    sortOrder: 1, 
+  {
+    key: "HERREN",
+    value: "Herren",
+    sortOrder: 1,
     altKey: "Herren",
     canAlsoPlayIn: [],
   },
-  { 
-    key: "DAMEN", 
-    value: "Damen", 
-    sortOrder: 2, 
+  {
+    key: "DAMEN",
+    value: "Damen",
+    sortOrder: 2,
     altKey: "Damen",
     canAlsoPlayIn: ["HERREN"],
     canPlayOverAgeIn: ["U19"],
   },
-  { 
-    key: "U19", 
-    value: "U19", 
-    sortOrder: 3, 
+  {
+    key: "U19",
+    value: "U19",
+    sortOrder: 3,
     altKey: "Junioren",
     canAlsoPlayIn: ["HERREN"],
     canPlayOverAgeIn: ["U16"],
     maxOverAgePlayers: 3,
   },
-  { 
-    key: "U16", 
-    value: "U16", 
-    sortOrder: 4, 
+  {
+    key: "U16",
+    value: "U16",
+    sortOrder: 4,
     altKey: "Jugend",
     canAlsoPlayIn: ["U19", "DAMEN"],
     canPlayOverAgeIn: ["U13"],
     maxOverAgePlayers: 3,
   },
-  { 
-    key: "U13", 
-    value: "U13", 
-    sortOrder: 5, 
+  {
+    key: "U13",
+    value: "U13",
+    sortOrder: 5,
     altKey: "Schüler",
     canAlsoPlayIn: ["U16"],
     canPlayOverAgeIn: ["U10"],
     maxOverAgePlayers: 3,
   },
-  { 
-    key: "U10", 
-    value: "U10", 
-    sortOrder: 6, 
+  {
+    key: "U10",
+    value: "U10",
+    sortOrder: 6,
     altKey: "Bambini",
     canAlsoPlayIn: ["U13"],
     requiresOverAge: true,
     maxOverAgePlayers: 2,
   },
-  { 
-    key: "U8", 
-    value: "U8", 
-    sortOrder: 7, 
+  {
+    key: "U8",
+    value: "U8",
+    sortOrder: 7,
     altKey: "Mini",
     canAlsoPlayIn: ["U10"],
     maxOverAgePlayers: 2,
@@ -120,10 +120,10 @@ export const getAgeGroupRules = (ageGroupKey: string): AgeGroupRule | undefined 
 
 export const canAlsoPlayInAgeGroup = (playerAgeGroup: string, targetAgeGroup: string, overAge: boolean): boolean => {
   if (playerAgeGroup === targetAgeGroup) return true;
-  
+
   const rules = getAgeGroupRules(playerAgeGroup);
   return (rules?.canAlsoPlayIn?.includes(targetAgeGroup) ||
-          (overAge && rules?.canPlayOverAgeIn?.includes(targetAgeGroup))) || false;
+    (overAge && rules?.canPlayOverAgeIn?.includes(targetAgeGroup))) || false;
 };
 
 interface TournamentConfig {
@@ -132,19 +132,109 @@ interface TournamentConfig {
   href: string;
   bdgColDark: string;
   bdgColLight: string;
+  calColors: string;
+  matchLenMin: number;
 }
 export const tournamentConfigs: { [key: string]: TournamentConfig } = {
-  'regionalliga-ost': { name: 'Regionalliga Ost', tinyName: 'RLO', href: '/tournaments/regionalliga-ost', bdgColDark: 'bg-red-400/10 text-red-400 ring-red-400/20', bdgColLight: 'bg-red-50 text-red-700 ring-red-600/10' },
-  'landesliga': { name: 'Landesliga', tinyName: 'LL', href: '/tournaments/landesliga', bdgColDark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20', bdgColLight: 'bg-gray-50 text-gray-600 ring-gray-500/10' },
-  'juniorenliga': { name: 'Juniorenliga', tinyName: 'U19', href: '/tournaments/juniorenliga', bdgColDark: 'bg-green-500/10 text-green-400 ring-green-500/20', bdgColLight: 'bg-green-50 text-green-700 ring-green-600/20' },
-  'jugendliga': { name: 'Jugendliga', tinyName: 'U16', href: '/tournaments/jugendliga', bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
-  'jugendliga-p': { name: 'Jugendliga P', tinyName: 'U16-P', href: '/tournaments/jugendliga-p', bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
-  'schuelerliga': { name: 'Schülerliga', tinyName: 'U13', href: '/tournaments/schuelerliga', bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30', bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10' },
-  'schuelerliga-lk2': { name: 'Schülerliga LK2', tinyName: 'U13-II', href: '/tournaments/schuelerliga-lk2', bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30', bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10' },
-  'schhuelerliga-p': { name: 'Schülerliga P', tinyName: 'U13-P', href: '/tournaments/schuelerliga-p', bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30', bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10' },
-  'bambini': { name: 'Bambini', tinyName: 'U10', href: '/tournaments/bambini', bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
-  'bambini-lk2': { name: 'Bambini LK2', tinyName: 'U10-II', href: '/tournaments/bambini-lk2', bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
-  'mini': { name: 'Mini', tinyName: 'U8', href: '/tournaments/mini', bdgColDark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20', bdgColLight: 'bg-pink-50 text-pink-700 ring-pink-700/10' },
+  'regionalliga-ost': {
+    name: 'Regionalliga Ost',
+    tinyName: 'RLO',
+    href: '/tournaments/regionalliga-ost',
+    bdgColDark: 'bg-red-400/10 text-red-400 ring-red-400/20',
+    bdgColLight: 'bg-red-50 text-red-700 ring-red-600/10',
+    calColors: 'bg-red-400/10 text-red-400 border-red-600/50 hover:bg-red-600',
+    matchLenMin: 125
+  },
+  'landesliga': {
+    name: 'Landesliga',
+    tinyName: 'LL',
+    href: '/tournaments/landesliga',
+    bdgColDark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20',
+    bdgColLight: 'bg-gray-50 text-gray-600 ring-gray-500/10',
+    calColors: 'bg-gray-400/10 border-gray-600 text-gray-600 hover:bg-gray-600',
+    matchLenMin: 125
+  },
+  'juniorenliga': {
+    name: 'Juniorenliga',
+    tinyName: 'U19',
+    href: '/tournaments/juniorenliga',
+    bdgColDark: 'bg-green-500/10 text-green-400 ring-green-500/20',
+    bdgColLight: 'bg-green-50 text-green-700 ring-green-600/20',
+    calColors: 'bg-green-500 text-green-600 border-green-600 hover:bg-green',
+    matchLenMin: 50
+  },
+  'jugendliga': {
+    name: 'Jugendliga',
+    tinyName: 'U16',
+    href: '/tournaments/jugendliga',
+    bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
+    bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
+    calColors: 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue',
+    matchLenMin: 50
+  },
+  'jugendliga-p': {
+    name: 'Jugendliga P',
+    tinyName: 'U16-P',
+    href: '/tournaments/jugendliga-p',
+    bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
+    bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
+    calColors: 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue',
+    matchLenMin: 50
+  },
+  'schuelerliga': {
+    name: 'Schülerliga',
+    tinyName: 'U13',
+    href: '/tournaments/schuelerliga',
+    bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
+    bdgColLight: ' border-indigo-700/50 bg-indigo-50 text-indigo-700 ring-indigo-700/10 ',
+    calColors: 'bg-indigo-400/10 text-indigo-600 border-indigo-600 hover:bg-indigo-400',
+    matchLenMin: 50
+  },
+  'schuelerliga-lk2': {
+    name: 'Schülerliga LK2',
+    tinyName: 'U13-II',
+    href: '/tournaments/schuelerliga-lk2',
+    bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
+    bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
+    calColors: 'bg-indigo-400 text-indigo-600 border-indigo-600 hover:bg-indigo',
+    matchLenMin: 50
+  },
+  'schhuelerliga-p': {
+    name: 'Schülerliga P',
+    tinyName: 'U13-P',
+    href: '/tournaments/schuelerliga-p',
+    bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
+    bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
+    calColors: 'bg-indigo-400 text-indigo-600 border-indigo-600 hover:bg-indigo',
+    matchLenMin: 50
+  },
+  'bambini': {
+    name: 'Bambini',
+    tinyName: 'U10',
+    href: '/tournaments/bambini',
+    bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
+    bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
+    calColors: 'bg-purple-400 text-purple-600 border-purple-600 hover:bg-purple',
+    matchLenMin: 50
+  },
+  'bambini-lk2': {
+    name: 'Bambini LK2',
+    tinyName: 'U10-II',
+    href: '/tournaments/bambini-lk2',
+    bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
+    bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
+    calColors: 'bg-purple-400 text-purple-600 border-purple-600 hover:bg-purple',
+    matchLenMin: 50
+  },
+  'mini': {
+    name: 'Mini',
+    tinyName: 'U8',
+    href: '/tournaments/mini',
+    bdgColDark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20',
+    bdgColLight: 'bg-pink-50 text-pink-700 ring-pink-700/10',
+    calColors: 'bg-pink-400 text-pink-600 border-pink-600 hover:bg-pink',
+    matchLenMin: 50
+  }
 };
 
 export const getValidTransitions = (currentStatus: string) => {
