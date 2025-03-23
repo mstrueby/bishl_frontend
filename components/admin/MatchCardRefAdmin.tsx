@@ -87,16 +87,19 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         <div className="flex flex-row justify-between">
           {/* tournament */}
           <div className="">
-            {tournamentConfigs.map(item =>
-              item.name === match.tournament.name && (
-                <span
-                  key={item.tiny_name}
-                  className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdg_col_light)}
-                >
-                  {item.tiny_name} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
-                </span>
-              )
-            )}
+            {(() => {
+              const item = tournamentConfigs[match.tournament.alias];
+              if (item) {
+                return (
+                  <span
+                    key={item.tinyName}
+                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
+                  >
+                    {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                  </span>
+                );
+              }
+            })()}
           </div>
         </div>
         {/* 1-2 date, venue */}

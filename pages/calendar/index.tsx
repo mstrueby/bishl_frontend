@@ -17,6 +17,7 @@ import TeamFullNameSelect from '../../components/ui/TeamFullNameSelect';
 import { Team } from '../../types/MatchValues';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { classNames } from '../../tools/utils';
+import { tournamentConfigs } from '../../tools/consts';
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -97,10 +98,10 @@ export default function Calendar({ matches }: { matches: Match[] }) {
     });
   };
 
-  const matchesByDateTime = (date: Date) => {
+  const matchesByDateTime = (date: Date, hour: number, minute: number) => {
     return matches.filter(match => {
       const matchDate = new Date(match.startDate);
-      return isSameDay(matchDate, date) && matchDate.getHours() === date.getHours() && matchDate.getMinutes() === date.getMinutes();
+      return isSameDay(matchDate, date) && matchDate.getHours() === hour && matchDate.getMinutes() === minute;
     })
   };
 
@@ -465,31 +466,67 @@ export default function Calendar({ matches }: { matches: Match[] }) {
 
                 {/* Events */}
                 <ol
-                  className="col-start-1 col-end-2 row-start-1 grid grid-cols-1"
+                  className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 relative"
                   style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
                 >
-                  {matchesByDate(selectedDate || new Date()).map((event, index) => (
-                    <li key={index} className="relative mt-px flex" style={{
-                      gridRow: `${Math.floor((new Date(event.startDate).getHours() * 12) + (new Date(event.startDate).getMinutes() / 30)) + 1} / span 10`,
-                      width: `${100 / matchesByDateTime(selectedDate || new Date()).length}%`
-                    }}>
-                      <a
-                        href="#"
-                        className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs/5 hover:bg-blue-100"
+                  {matchesByDate(selectedDate || new Date()).map((event, index, events) => {
+                    // Find overlapping events
+                    const eventStart = new Date(event.startDate);
+                    const overlappingEvents = events.filter((otherEvent, otherIndex) => {
+                      //if (otherIndex <= index) {
+                      //  return false;
+                      //}
+                      const otherStart = new Date(otherEvent.startDate);
+                      return Math.abs(eventStart.getTime() - otherStart.getTime()) <= 30 * 60000; // 5 minutes
+                    });
+
+                    // Calculate position for overlapping events
+                    const columnCount = overlappingEvents.length;
+                    const columnIndex = overlappingEvents.findIndex(e => e._id === event._id);
+
+                    //console.log(event._id, overlappingEvents, columnCount, columnIndex)
+
+                    console.log(`${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 30) + 1}`)
+                    return (
+                      <li
+                        key={index}
+                        className="absolute mt-px flex"
+                        style={{
+                          gridRow: `${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 30) + 1} / span 12`,
+                          left: `${(100 / columnCount) * columnIndex}%`,
+                          width: `${100 / columnCount}%`,
+                          paddingRight: '1px'
+                        }}
                       >
-                        <p className="block sm:hidden order-1 font-semibold text-blue-700">{event.home.shortName} - {event.away.shortName}</p>
-                        <p className="hidden sm:block order-1 font-semibold text-blue-700">{event.home.fullName} - {event.away.fullName}</p>
-                        <p className="order-1 text-blue-500 group-hover:text-blue-700">
-                          {event.venue.name}
-                        </p>
-                        <p className="text-blue-500 group-hover:text-blue-700">
-                          <time dateTime={new Date(event.startDate).toISOString()}>
-                            {format(new Date(event.startDate), 'HH:mm', { locale: de })}
-                          </time> - {event.tournament.name}
-                        </p>
-                      </a>
-                    </li>
-                  ))}
+                        <a
+                          href="#"
+                          className={`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg ${tournamentConfigs[event.tournament.alias]?.bdgColDark || 'bg-blue-50'} p-2 text-xs/5 hover:bg-blue-100`}
+                        >
+                          <p className="block sm:hidden order-1 font-semibold text-blue-700">
+                            {columnCount >= 2
+                              ? `${event.home.tinyName} - ${event.away.tinyName}`
+                              : `${event.home.shortName} - ${event.away.shortName}`}
+                          </p>
+                          <p className="hidden sm:block order-1 font-semibold text-blue-700">
+                            {`${event.home.fullName.length > 14 ? event.home.shortName : event.home.fullName} 
+                            - ${event.away.fullName.length > 14 ? event.away.shortName : event.away.fullName}`}
+                          </p>
+                          <p className="order-1 text-blue-500 group-hover:text-blue-700">
+                            {event.venue.name}
+                          </p>
+                          <p className="flex items-center gap-x-1.5 text-blue-500 group-hover:text-blue-700">
+                            <time dateTime={new Date(event.startDate).toISOString()}>
+                              {format(new Date(event.startDate), 'HH:mm', { locale: de })}
+                            </time>
+                            <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                              <circle r={1} cx={1} cy={1} />
+                            </svg>
+                            {tournamentConfigs[event.tournament.alias]?.tinyName || event.tournament.name}
+                          </p>
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ol>
               </div>
             </div>
