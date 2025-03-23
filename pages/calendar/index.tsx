@@ -492,7 +492,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                         key={index}
                         className="absolute mt-px flex"
                         style={{
-                          gridRow: `${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 30) + 1} / span 12`,
+                          gridRow: `${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 5) + 2} / span 6`,
                           left: `${(100 / columnCount) * columnIndex}%`,
                           width: `${100 / columnCount}%`,
                           paddingRight: '1px'
