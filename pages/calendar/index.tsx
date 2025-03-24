@@ -332,8 +332,10 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   >
                     <span>{dayNames[index]}</span>
                     <span className={classNames(
-                      "mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold",
-                      isSelected ? "bg-gray-900 text-white" : "text-gray-900"
+                      "mt-3 flex size-8 items-center justify-center rounded-full text-base",
+                      isSelected ? "bg-indigo-600 text-white font-semibold" : 
+                      isToday(date) ? "text-indigo-600 font-semibold" : 
+                      "text-gray-900"
                     )}>
                       {date.getDate()}
                     </span>
