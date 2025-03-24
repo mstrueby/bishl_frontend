@@ -179,24 +179,24 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     name: 'Schülerliga',
     tinyName: 'U13',
     href: '/tournaments/schuelerliga',
-    bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
-    bdgColLight: ' border-indigo-700/50 bg-indigo-50 text-indigo-700 ring-indigo-700/10 ',
+    bdgColDark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30',
+    bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
     matchLenMin: 50
   },
   'schuelerliga-lk2': {
     name: 'Schülerliga LK2',
     tinyName: 'U13-II',
     href: '/tournaments/schuelerliga-lk2',
-    bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
-    bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
+    bdgColDark: 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/30',
+    bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
     matchLenMin: 50
   },
   'schhuelerliga-p': {
     name: 'Schülerliga P',
     tinyName: 'U13-P',
     href: '/tournaments/schuelerliga-p',
-    bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
-    bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
+    bdgColDark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30',
+    bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
     matchLenMin: 50
   },
   'bambini': {
