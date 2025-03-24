@@ -130,7 +130,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
 
   const matchesByDate = (date: Date) => {
     if (!date) return [];
-    return matches.filter(match => {
+    return calendarMatches.filter(match => {
       const matchDate = new Date(match.startDate);
       const dateMatches = matchDate.getDate() === date.getDate() &&
         matchDate.getMonth() === date.getMonth() &&
@@ -145,7 +145,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   };
 
   const matchesByDateTime = (date: Date, hour: number, minute: number) => {
-    return matches.filter(match => {
+    return calendarMatches.filter(match => {
       const matchDate = new Date(match.startDate);
       return isSameDay(matchDate, date) && matchDate.getHours() === hour && matchDate.getMinutes() === minute;
     })
