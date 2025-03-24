@@ -228,11 +228,21 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   };
 
   const handleMatchUpdate = async (updatedMatch: Partial<Match>) => {
-    setCalendarMatches(prevMatches => 
-      prevMatches.map(match => 
-        match._id === updatedMatch._id ? { ...match, ...updatedMatch } : match
-      )
-    );
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${updatedMatch._id}`);
+      const fullUpdatedMatch = await response.json();
+      
+      setCalendarMatches(prevMatches => 
+        prevMatches.map(match => 
+          match._id === updatedMatch._id ? fullUpdatedMatch : match
+        )
+      );
+      
+      return fullUpdatedMatch;
+    } catch (error) {
+      console.error('Error fetching updated match:', error);
+      return updatedMatch;
+    }
   };
 
   return (
