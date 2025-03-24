@@ -227,13 +227,15 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   </div>
                 </MenuItems>
               </Menu>
+              {/**
               <div className="ml-6 h-6 w-px bg-gray-300" />
               <button
                 type="button"
                 className="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                Add event
+                NEU
               </button>
+              */}
             </div>
             <Menu as="div" className="relative ml-6 md:hidden">
               <MenuButton className="-mx-2 flex items-center rounded-full border border-transparent p-2 text-gray-400 hover:text-gray-500">
@@ -245,6 +247,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                 transition
                 className="absolute right-0 z-10 mt-3 w-36 origin-top-right divide-y divide-gray-100 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
               >
+                {/**
                 <div className="py-1">
                   <MenuItem>
                     <a
@@ -255,6 +258,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     </a>
                   </MenuItem>
                 </div>
+                */}
                 <div className="py-1">
                   <MenuItem>
                     <button
@@ -331,12 +335,19 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     className="flex flex-col items-center pb-1.5 pt-3"
                   >
                     <span>{dayNames[index]}</span>
-                    <span className={classNames(
-                      "mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold",
-                      isSelected ? "bg-gray-900 text-white" : "text-gray-900"
-                    )}>
-                      {date.getDate()}
-                    </span>
+                    <div className="relative">
+                      <span className={classNames(
+                        "mt-3 flex size-8 items-center justify-center rounded-full text-base",
+                        isSelected ? "bg-indigo-600 text-white font-semibold" : 
+                        isToday(date) ? "text-indigo-600 font-semibold" : 
+                        "text-gray-900"
+                      )}>
+                        {date.getDate()}
+                      </span>
+                      {matchesByDate(date).length > 0 && (
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-indigo-600"></div>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -468,12 +479,8 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     // Calculate position for overlapping events
                     const columnCount = overlappingEvents.length;
                     const columnIndex = overlappingEvents.findIndex(e => e._id === event._id);
-
-                    console.log(event._id, overlappingEvents, columnCount, columnIndex)
-
-
+                    //console.log(event._id, overlappingEvents, columnCount, columnIndex)
                     const matchLength = tournamentConfigs[event.tournament.alias]?.matchLenMin || 30;
-
                     return (
                       <li
                         key={index}
