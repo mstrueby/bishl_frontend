@@ -308,7 +308,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
           </div>
         </header>
         <div className="isolate flex flex-auto overflow-hidden bg-white">
-          <div ref={container} className="flex flex-auto flex-col overflow-auto">
+          <div ref={container} className="flex flex-auto flex-col overflow-auto h-[75vh]">
             <div
               ref={containerNav}
               className="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow ring-1 ring-black/5 md:hidden"
