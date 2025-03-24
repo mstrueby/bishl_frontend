@@ -114,7 +114,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
           nineAMMinute) /
         1440;
     }
-  }, [selectedDay]); // Add selectedDay to dependency array
+  }, [selectedDate]); // Add selectedDay to dependency array
 
 
   return (
@@ -124,18 +124,18 @@ export default function Calendar({ matches }: { matches: Match[] }) {
       </Head>
 
       <div className="flex h-full flex-col">
-        <header className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
+        <header className="flex flex-none items-center justify-between border-b border-gray-200 px-2 sm:px-6 py-4">
           <div>
             <h1 className="text-base font-semibold text-gray-900">
               <time dateTime="2022-01-22" className="sm:hidden">
-                {selectedDate ? format(selectedDate, 'd. MMM yyyy', { locale: de }) : null}
+                {selectedDate ? format(selectedDate, 'EE, d. MMM yyyy', { locale: de }) : null}
               </time>
               <time dateTime="2022-01-22" className="hidden sm:inline">
-                {selectedDate ? format(selectedDate, 'd. MMMM yyyy', { locale: de }) : null}
+                {selectedDate ? format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de }) : null}
               </time>
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              {selectedDate ? format(selectedDate, 'EEEE', { locale: de }) : null}
+              {selectedDate && matchesByDate(selectedDate).length > 0 ? matchesByDate(selectedDate).length === 1 ? '1 Spiel' : `${matchesByDate(selectedDate).length} Spiele` : 'Keine Spiele'}
             </p>
           </div>
           <div className="flex items-center">
@@ -504,27 +504,27 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                         <a
                           href="#"
                           className={`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg border-l-4 p-2 text-xs/5 ${(() => {
-                            switch(event.tournament.alias) {
+                            switch (event.tournament.alias) {
                               case 'regionalliga-ost':
                                 return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
                               case 'landesliga':
                                 return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
                               case 'juniorenliga':
                               case 'juniorenliga-p':
-                                return 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue';
+                                return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';
                               case 'jugendliga':
                               case 'jugendliga-lk2':
                               case 'jugendliga-p':
-                                return 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue';
+                                return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
                               case 'schuelerliga':
                               case 'schuelerliga-lk2':
                               case 'schuelerliga-p':
-                                return 'bg-indigo-400/10 text-indigo-600 border-indigo-600/50 hover:bg-indigo-200/50';
+                                return 'bg-cyan-400/10 text-cyan-600 border-cyan-600/50 hover:bg-cyan-200/50';
                               case 'bambini':
                               case 'bambini-lk2':
-                                return 'bg-purple-400 text-purple-600 border-purple-600 hover:bg-purple';
+                                return 'bg-purple-400/10 text-purple-600 border-purple-600 hover:bg-purple-200/50';
                               case 'mini':
-                                return 'bg-pink-400 text-pink-600 border-pink-600 hover:bg-pink';
+                                return 'bg-pink-400 text-pink-600 border-pink-600 hover:bg-pink-200/50';
                               default:
                                 return '';
                             }
