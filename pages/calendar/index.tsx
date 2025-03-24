@@ -128,7 +128,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
           <div>
             <h1 className="text-base font-semibold text-gray-900">
               <time dateTime="2022-01-22" className="sm:hidden">
-                {selectedDate ? format(selectedDate, 'EE, d. MMM yyyy', { locale: de }) : null}
+                {selectedDate ? format(selectedDate, 'EE, d. MMMM', { locale: de }) : null}
               </time>
               <time dateTime="2022-01-22" className="hidden sm:inline">
                 {selectedDate ? format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de }) : null}
@@ -265,7 +265,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                       }}
                       className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                     >
-                      Go to today
+                      Heute
                     </button>
                   </MenuItem>
                 </div>
@@ -314,44 +314,44 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               className="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow ring-1 ring-black/5 md:hidden"
             >
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>W</span>
+                <span>Mo</span>
                 {/* Default: "text-gray-900", Selected: "bg-gray-900 text-white", Today (Not Selected): "text-indigo-600", Today (Selected): "bg-indigo-600 text-white" */}
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   19
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>T</span>
+                <span>Di</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-indigo-600">
                   20
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>F</span>
+                <span>Mi</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   21
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>S</span>
+                <span>Do</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full bg-gray-900 text-base font-semibold text-white">
                   22
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>S</span>
+                <span>Fr</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   23
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>M</span>
+                <span>Sa</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   24
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>T</span>
+                <span>So</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   25
                 </span>
