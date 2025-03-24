@@ -106,15 +106,15 @@ export default function Calendar({ matches }: { matches: Match[] }) {
   };
 
   useEffect(() => {
-    // Set the container scroll position based on the current time.
-    const currentMinute = new Date().getHours() * 60;
+    // Always scroll to 9AM.
+    const nineAMMinute = 9 * 60;
     if (container.current && containerNav.current && containerOffset.current) {
       container.current.scrollTop =
         ((container.current.scrollHeight - containerNav.current.offsetHeight - containerOffset.current.offsetHeight) *
-          currentMinute) /
+          nineAMMinute) /
         1440;
     }
-  }, []);
+  }, [selectedDate]); // Add selectedDay to dependency array
 
 
   return (
@@ -124,18 +124,18 @@ export default function Calendar({ matches }: { matches: Match[] }) {
       </Head>
 
       <div className="flex h-full flex-col">
-        <header className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
+        <header className="flex flex-none items-center justify-between border-b border-gray-200 px-2 sm:px-6 py-4">
           <div>
             <h1 className="text-base font-semibold text-gray-900">
               <time dateTime="2022-01-22" className="sm:hidden">
-                {selectedDate ? format(selectedDate, 'd. MMM yyyy', { locale: de }) : null}
+                {selectedDate ? format(selectedDate, 'EE, d. MMMM', { locale: de }) : null}
               </time>
               <time dateTime="2022-01-22" className="hidden sm:inline">
-                {selectedDate ? format(selectedDate, 'd. MMMM yyyy', { locale: de }) : null}
+                {selectedDate ? format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de }) : null}
               </time>
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              {selectedDate ? format(selectedDate, 'EEEE', { locale: de }) : null}
+              {selectedDate && matchesByDate(selectedDate).length > 0 ? matchesByDate(selectedDate).length === 1 ? '1 Spiel' : `${matchesByDate(selectedDate).length} Spiele` : 'Keine Spiele'}
             </p>
           </div>
           <div className="flex items-center">
@@ -265,7 +265,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                       }}
                       className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                     >
-                      Go to today
+                      Heute
                     </button>
                   </MenuItem>
                 </div>
@@ -308,50 +308,50 @@ export default function Calendar({ matches }: { matches: Match[] }) {
           </div>
         </header>
         <div className="isolate flex flex-auto overflow-hidden bg-white">
-          <div ref={container} className="flex flex-auto flex-col overflow-auto">
+          <div ref={container} className="flex flex-auto flex-col overflow-auto h-[75vh]">
             <div
               ref={containerNav}
               className="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow ring-1 ring-black/5 md:hidden"
             >
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>W</span>
+                <span>Mo</span>
                 {/* Default: "text-gray-900", Selected: "bg-gray-900 text-white", Today (Not Selected): "text-indigo-600", Today (Selected): "bg-indigo-600 text-white" */}
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   19
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>T</span>
+                <span>Di</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-indigo-600">
                   20
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>F</span>
+                <span>Mi</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   21
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>S</span>
+                <span>Do</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full bg-gray-900 text-base font-semibold text-white">
                   22
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>S</span>
+                <span>Fr</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   23
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>M</span>
+                <span>Sa</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   24
                 </span>
               </button>
               <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>T</span>
+                <span>So</span>
                 <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
                   25
                 </span>
@@ -367,106 +367,106 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                 >
                   <div ref={containerOffset} className="row-end-1 h-7"></div>
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">12AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">0:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">1AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">1:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">2AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">2:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">3AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">3:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">4AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">4:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">5AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">5:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">6AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">6:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">7AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">7:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">8AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">8:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">9AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">9:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">10AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">10:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">11AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">11:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">12PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">12:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">1PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">13:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">2PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">14:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">3PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">15:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">4PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">16:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">5PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">17:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">6PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">18:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">7PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">19:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">8PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">20:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">9PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">21:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">10PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">22:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">11PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">23:00</div>
                   </div>
                   <div />
                 </div>
 
                 {/* Events */}
                 <ol
-                  className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 relative"
+                  className="relative col-start-1 col-end-2 row-start-1 grid grid-cols-1" // removed relative
                   style={{ gridTemplateRows: '1.75rem repeat(288, minmax(0, 1fr)) auto' }}
                 >
                   {matchesByDate(selectedDate || new Date()).map((event, index, events) => {
@@ -477,44 +477,81 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                       //  return false;
                       //}
                       const otherStart = new Date(otherEvent.startDate);
-                      return Math.abs(eventStart.getTime() - otherStart.getTime()) <= 30 * 60000; // 5 minutes
+                      return Math.abs(eventStart.getTime() - otherStart.getTime()) <= 22 * 60000; // 5 minutes
                     });
 
                     // Calculate position for overlapping events
                     const columnCount = overlappingEvents.length;
                     const columnIndex = overlappingEvents.findIndex(e => e._id === event._id);
 
-                    //console.log(event._id, overlappingEvents, columnCount, columnIndex)
+                    console.log(event._id, overlappingEvents, columnCount, columnIndex)
 
-                    console.log(`${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 30) + 1}`)
+                    
+                    const matchLength = tournamentConfigs[event.tournament.alias]?.matchLenMin || 30;
+
                     return (
                       <li
                         key={index}
-                        className="absolute mt-px flex"
+                        className="absolute mt-px flex" // added border
                         style={{
-                          gridRow: `${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 30) + 1} / span 12`,
+                          gridRow: `${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 5) + 2} / span ${Math.ceil(matchLength / 5)}`,
                           left: `${(100 / columnCount) * columnIndex}%`,
                           width: `${100 / columnCount}%`,
+                          height: `calc(${matchLength / 16} * 1.75rem)`,
                           paddingRight: '1px'
                         }}
                       >
                         <a
                           href="#"
-                          className={`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg ${tournamentConfigs[event.tournament.alias]?.bdgColDark || 'bg-blue-50'} p-2 text-xs/5 hover:bg-blue-100`}
+                          className={`group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
+                            switch (event.tournament.alias) {
+                              case 'regionalliga-ost':
+                                return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
+                              case 'landesliga':
+                                return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
+                              case 'juniorenliga':
+                              case 'juniorenliga-p':
+                                return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';
+                              case 'jugendliga':
+                              case 'jugendliga-lk2':
+                              case 'jugendliga-p':
+                                return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
+                              case 'schuelerliga':
+                              case 'schuelerliga-lk2':
+                              case 'schuelerliga-p':
+                                return 'bg-cyan-400/10 text-cyan-600 border-cyan-600/50 hover:bg-cyan-200/50';
+                              case 'bambini':
+                              case 'bambini-lk2':
+                                return 'bg-purple-400/10 text-purple-600 border-purple-600 hover:bg-purple-200/50';
+                              case 'mini':
+                                return 'bg-pink-400/10 text-pink-600 border-pink-600 hover:bg-pink-200/50';
+                              default:
+                                return '';
+                            }
+                          })()}`}
                         >
-                          <p className="block sm:hidden order-1 font-semibold text-blue-700">
+                          <p className="block sm:hidden order-1 font-semibold truncate">
                             {columnCount >= 2
                               ? `${event.home.tinyName} - ${event.away.tinyName}`
                               : `${event.home.shortName} - ${event.away.shortName}`}
                           </p>
-                          <p className="hidden sm:block order-1 font-semibold text-blue-700">
-                            {`${event.home.fullName.length > 14 ? event.home.shortName : event.home.fullName} 
-                            - ${event.away.fullName.length > 14 ? event.away.shortName : event.away.fullName}`}
+                          <p className="hidden sm:block order-1 font-semibold truncate">
+                            {`${columnCount === 1
+                              ? event.home.fullName 
+                              : columnCount <= 3
+                              ? event.home.shortName
+                              : event.home.tinyName
+                            } - ${columnCount === 1
+                              ? event.away.fullName 
+                              : columnCount <= 3
+                              ? event.away.shortName
+                              : event.away.tinyName
+                            }`}
                           </p>
-                          <p className="order-1 text-blue-500 group-hover:text-blue-700">
+                          <p className="order-1 truncate">
                             {event.venue.name}
                           </p>
-                          <p className="flex items-center gap-x-1.5 text-blue-500 group-hover:text-blue-700">
+                          <p className="flex items-center gap-x-1.5 truncate">
                             <time dateTime={new Date(event.startDate).toISOString()}>
                               {format(new Date(event.startDate), 'HH:mm', { locale: de })}
                             </time>
@@ -576,7 +613,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     isSameMonth(day, currentMonth) ? 'bg-white' : 'bg-gray-50',
                     (selectedDate && isSameDay(day, selectedDate) || isToday(day) ? 'font-semibold' : ''),
                     (selectedDate && isSameDay(day, selectedDate)) ? 'text-white' : '',
-                    (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
+                    (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' :'',
                     (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
                     (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
                     dayIdx === 0 ? 'rounded-tl-lg' : '',
@@ -585,16 +622,28 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                   )}
                 >
-                  <time
-                    dateTime={format(day, 'yyyy-MM-dd')}
-                    className={classNames(
-                      'mx-auto flex size-7 items-center justify-center rounded-full',
-                      (selectedDate && isSameDay(day, selectedDate) && isToday(day)) ? 'bg-indigo-600' : '',
-                      (selectedDate && isSameDay(day, selectedDate) && !isToday(day)) ? 'bg-gray-900' : '',
+                  <div className="relative w-full h-full flex flex-col items-center">
+                    <time
+                      dateTime={format(day, 'yyyy-MM-dd')}
+                      className={classNames(
+                        'mx-auto flex h-7 w-7 items-center justify-center rounded-full',
+                        (selectedDate && isSameDay(day, selectedDate) || isToday(day)) ? 'font-semibold' : '',
+                        (selectedDate && isSameDay(day, selectedDate)) ? 'bg-indigo-600 text-white' : '',
+                        (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
+                        (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
+                        (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
+                        dayIdx === 0 ? 'rounded-tl-lg' : '',
+                        dayIdx === 6 ? 'rounded-tr-lg' : '',
+                        dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
+                        dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
+                      )}
+                    >
+                      <span>{format(day, 'd')}</span>
+                    </time>
+                    {matchesByDate(day).length > 0 && (
+                      <div className="absolute bottom-0 h-1 w-1 mt-0.5 rounded-full bg-indigo-600"></div>
                     )}
-                  >
-                    {format(day, 'd')}
-                  </time>
+                  </div>
                 </button>
               ))}
             </div>
