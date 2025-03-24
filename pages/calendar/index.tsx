@@ -309,6 +309,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
         </header>
         <div className="isolate flex flex-auto overflow-hidden bg-white">
           <div ref={container} className="flex flex-auto flex-col overflow-auto h-[75vh]">
+            {/** WEEK date picker (mobile) */}
             <div
               ref={containerNav}
               className="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow ring-1 ring-black/5 md:hidden"
@@ -340,6 +341,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                 );
               })}
             </div>
+            {/** EVENTS view */}
             <div className="flex w-full flex-auto">
               <div className="w-14 flex-none bg-white ring-1 ring-gray-100" />
               <div className="grid flex-auto grid-cols-1 grid-rows-1">
@@ -551,6 +553,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               </div>
             </div>
           </div>
+          {/** MONTH date picker (tablet) */}
           <div className="hidden w-1/2 max-w-md flex-none border-l border-gray-100 px-8 py-10 md:block">
             <div className="flex items-center text-center text-gray-900">
               <button
@@ -616,7 +619,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                         (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
                         (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
                         dayIdx === 0 ? 'rounded-tl-lg' : '',
-                        dayIdx === 6 ? 'rounded-trlg' : '',
+                        dayIdx === 6 ? 'rounded-tr-lg' : '',
                         dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
                         dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                       )}
