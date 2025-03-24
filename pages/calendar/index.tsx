@@ -25,14 +25,17 @@ const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
 
 export const getStaticProps: GetStaticProps = async () => {
   try {
-    const res = await fetch(`${BASE_URL}/matches?season=${CURRENT_SEASON}`);
+    const today = new Date();
+    const firstDay = startOfMonth(today);
+    const lastDay = endOfMonth(today);
+    
+    const res = await fetch(`${BASE_URL}/matches?season=${CURRENT_SEASON}&date_from=${format(firstDay, 'yyyy-MM-dd')}&date_to=${format(lastDay, 'yyyy-MM-dd')}`);
     const matchesData: Match[] = await res.json();
-    if (!matchesData || matchesData.length === 0) {
-      return { notFound: true };
-    }
+    
     return {
       props: {
-        matches: matchesData,
+        matches: matchesData || [],
+        initialMonth: format(today, 'yyyy-MM'),
       },
       revalidate: 60
     };
@@ -42,9 +45,22 @@ export const getStaticProps: GetStaticProps = async () => {
   }
 };
 
-export default function Calendar({ matches }: { matches: Match[] }) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+export default function Calendar({ matches: initialMatches, initialMonth }: { matches: Match[], initialMonth: string }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date(initialMonth));
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [matches, setMatches] = useState<Match[]>(initialMatches);
+  
+  const fetchMonthMatches = async (date: Date) => {
+    const firstDay = startOfMonth(date);
+    const lastDay = endOfMonth(date);
+    try {
+      const res = await fetch(`${BASE_URL}/matches?season=${CURRENT_SEASON}&date_from=${format(firstDay, 'yyyy-MM-dd')}&date_to=${format(lastDay, 'yyyy-MM-dd')}`);
+      const newMatches = await res.json();
+      setMatches(newMatches || []);
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+    }
+  };
   const container = useRef<HTMLDivElement>(null);
   const containerNav = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
@@ -81,14 +97,16 @@ export default function Calendar({ matches }: { matches: Match[] }) {
     return [...prevMonthDays, ...daysArray, ...nextMonthDays];
   })();
 
-  const previousMonth = () => {
-    const firstDayNextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
-    setCurrentMonth(firstDayNextMonth);
+  const previousMonth = async () => {
+    const firstDayPrevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    setCurrentMonth(firstDayPrevMonth);
+    await fetchMonthMatches(firstDayPrevMonth);
   };
 
-  const nextMonth = () => {
+  const nextMonth = async () => {
     const firstDayNextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
     setCurrentMonth(firstDayNextMonth);
+    await fetchMonthMatches(firstDayNextMonth);
   };
 
   const matchesByDate = (date: Date) => {
