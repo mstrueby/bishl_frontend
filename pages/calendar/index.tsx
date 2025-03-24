@@ -845,24 +845,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                 <MatchCard 
                   key={match._id} 
                   match={match} 
-                  onMatchUpdate={async () => {
-                    // Refetch rounds to update standings
-                    const roundsResponse = await fetch(`${BASE_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/`);
-                    const roundsData = await roundsResponse.json();
-                    if (Array.isArray(roundsData)) {
-                      const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-                      setRounds(sortedData);
-                      setSelectedRound(prevRound => {
-                        const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
-                        return updatedRound;
-                      });
-                    }
-
-                    // Refetch matches
-                    const matchesResponse = await fetch(`${BASE_URL}/matches/?tournament=${match.tournament.alias}&season=${match.season.alias}&round=${match.round.alias}&matchday=${match.matchday.alias}`);
-                    const matchesData = await matchesResponse.json();
-                    setMatches(matchesData);
-                  }}
+                  
                 />
               ))}
             </div>
