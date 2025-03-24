@@ -44,7 +44,11 @@ export const getStaticProps: GetStaticProps = async () => {
     if (!matchesData || matchesData.length === 0) {
       return { notFound: true };
     }
-    const venuesRes = await axios(`${BASE_URL}/venues`);
+    const venuesRes = await axios(`${BASE_URL}/venues`, {
+      params: {
+        active: true,
+      }
+    });
     const venuesData: VenueValues[] = venuesRes.data
     const clubsRes = await axios(`${BASE_URL}/clubs`, {
       params: {
@@ -76,6 +80,9 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   const [selectedVenue, setSelectedVenue] = useState<VenueValues | null>(null);
   const [selectedClub, setSelectedClub] = useState<ClubValues | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<TeamValues | null>(null);
+  const [filterVenue, setFilterVenue] = useState<VenueValues | null>(null);
+  const [filterClub, setFilterClub] = useState<ClubValues | null>(null);
+  const [filterTeam, setFilterTeam] = useState<TeamValues | null>(null);
 
 
   // Generate an array of days for the current month
@@ -144,15 +151,19 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   };
 
   useEffect(() => {
-    // Always scroll to 9AM.
-    const nineAMMinute = 9 * 60;
+    // Scroll to the first match of the selected date.
     if (container.current && containerNav.current && containerOffset.current) {
+      const firstMatch = matchesByDate(selectedDate || new Date())[0];
+      const firstMatchHour = firstMatch ? new Date(firstMatch.startDate).getHours() : 9;
+      const firstMatchMinutes = firstMatch ? new Date(firstMatch.startDate).getMinutes() : 0;
+      const minuteOfDay = firstMatchHour * 60 + firstMatchMinutes;
+
       container.current.scrollTop =
         ((container.current.scrollHeight - containerNav.current.offsetHeight - containerOffset.current.offsetHeight) *
-          nineAMMinute) /
+          minuteOfDay) /
         1440;
     }
-  }, [selectedDate, selectedVenue, selectedClub, selectedTeam]); // Add selectedDay to dependency array
+  }, [selectedDate, selectedVenue, selectedClub, selectedTeam]);
 
   // Store initial values when opening the modal
   const [initialValues, setInitialValues] = useState<{
@@ -176,23 +187,29 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   }, [isFilterOpen, selectedClub, selectedTeam, selectedVenue])
 
   const handleApplyFilter = () => {
-    setSelectedVenue(initialValues.venue);
-    setSelectedClub(initialValues.club);
-    setSelectedTeam(initialValues.team);
+    setSelectedClub(filterClub);
+    setSelectedTeam(filterTeam);
+    setSelectedVenue(filterVenue);
     setIsFilterOpen(false);
   }
-  
+
   const handleCancel = () => {
     setSelectedClub(initialValues.club);
     setSelectedTeam(initialValues.team);
     setSelectedVenue(initialValues.venue);
+    setFilterClub(initialValues.club);
+    setFilterTeam(initialValues.team);
+    setFilterVenue(initialValues.venue);
     setIsFilterOpen(false);
   };
-  
+
   const handleResetFilter = () => {
     setSelectedClub(null);
     setSelectedTeam(null);
     setSelectedVenue(null);
+    setFilterClub(null);
+    setFilterTeam(null);
+    setFilterVenue(null);
     setIsFilterOpen(false);
   };
 
@@ -223,7 +240,12 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
               onClick={() => setIsFilterOpen(true)}
               className="inline-flex items-center rounded-md bg-white px-3 py-2 mr-4 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
             >
-              <FunnelIconOutline className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />Filter
+              {(selectedVenue || selectedClub || selectedTeam) ? (
+                <FunnelIconSolid className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+              ) : (
+                <FunnelIconOutline className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+              )}
+              Filter
             </button>
             <div className="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
               <button
@@ -707,7 +729,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
             </div>
           </div>
           <Transition appear show={isFilterOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={() => setIsOpen(false)}>
+            <Dialog as="div" className="relative z-10" onClose={() => setIsFilterOpen(false)}>
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -738,8 +760,8 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                       <div className="mt-2">
                         <VenueSelect
                           venues={venues}
-                          selectedVenueId={selectedVenue?._id || ''}
-                          onVenueChange={(venueId) => setSelectedVenue(venues.find(v => v._id === venueId) || null)}
+                          selectedVenueId={filterVenue?._id || ''}
+                          onVenueChange={(venueId) => setFilterVenue(venues.find(v => v._id === venueId) || null)}
                           label="Venue"
                         />
                       </div>
@@ -747,18 +769,18 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                       <div className="mt-3">
                         <ClubSelect
                           clubs={clubs}
-                          selectedClubId={selectedClub?._id || ''}
-                          onClubChange={(clubId) => setSelectedClub(clubs.find(c => c._id === clubId) || null)}
+                          selectedClubId={filterClub?._id || ''}
+                          onClubChange={(clubId) => setFilterClub(clubs.find(c => c._id === clubId) || null)}
                           label="Club"
                         />
                       </div>
 
-                      {selectedClub && (
+                      {filterClub && (
                         <div className="mt-3">
                           <TeamSelect
-                            teams={selectedClub.teams}
-                            selectedTeamId={selectedTeam?._id || ''}
-                            onTeamChange={(teamId) => setSelectedTeam(selectedClub.teams.find(t => t._id === teamId) || null)}
+                            teams={filterClub.teams}
+                            selectedTeamId={filterTeam?._id || ''}
+                            onTeamChange={(teamId) => setFilterTeam(filterClub.teams.find(t => t._id === teamId) || null)}
                             label="Team"
                           />
                         </div>
