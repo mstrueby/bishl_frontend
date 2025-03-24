@@ -227,8 +227,12 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
     }
   };
 
-  const handleMatchUpdate = async () => {
-    await refreshMatches();
+  const handleMatchUpdate = async (updatedMatch: Partial<Match>) => {
+    setCalendarMatches(prevMatches => 
+      prevMatches.map(match => 
+        match._id === updatedMatch._id ? { ...match, ...updatedMatch } : match
+      )
+    );
   };
 
   return (
