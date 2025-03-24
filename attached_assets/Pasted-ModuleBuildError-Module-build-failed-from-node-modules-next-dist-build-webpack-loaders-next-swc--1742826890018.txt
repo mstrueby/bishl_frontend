@@ -1,0 +1,44 @@
+ModuleBuildError: Module build failed (from ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js):
+Error: 
+  x cannot reassign to a variable declared with `const`
+    ,-[73:1]
+ 73 | export default function Calendar({ matches, venues, clubs }: CalendarProps) {
+    :                                    ^^^|^^^
+    :                                       `-- cannot reassign
+ 74 |   const [currentMonth, setCurrentMonth] = useState(new Date());
+ 75 |   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+ 76 |   const container = useRef<HTMLDivElement>(null);
+ 77 |   const containerNav = useRef<HTMLDivElement>(null);
+ 78 |   const containerOffset = useRef<HTMLDivElement>(null);
+ 79 |   const [isFilterOpen, setIsFilterOpen] = useState(false);
+ 80 |   const [selectedVenue, setSelectedVenue] = useState<VenueValues | null>(null);
+ 81 |   const [selectedClub, setSelectedClub] = useState<ClubValues | null>(null);
+ 82 |   const [selectedTeam, setSelectedTeam] = useState<TeamValues | null>(null);
+ 83 |   const [filterVenue, setFilterVenue] = useState<VenueValues | null>(null);
+ 84 |   const [filterClub, setFilterClub] = useState<ClubValues | null>(null);
+ 85 |   const [filterTeam, setFilterTeam] = useState<TeamValues | null>(null);
+ 86 |   const [matches, setMatches] = useState(matches); // Added state for matches
+    :          ^^^|^^^
+    :             `-- const variable was declared here
+    `----
+
+  x the name `matches` is defined multiple times
+    ,-[73:1]
+ 73 | export default function Calendar({ matches, venues, clubs }: CalendarProps) {
+    :                                    ^^^|^^^
+    :                                       `-- previous definition of `matches` here
+ 74 |   const [currentMonth, setCurrentMonth] = useState(new Date());
+ 75 |   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+ 76 |   const container = useRef<HTMLDivElement>(null);
+ 77 |   const containerNav = useRef<HTMLDivElement>(null);
+ 78 |   const containerOffset = useRef<HTMLDivElement>(null);
+ 79 |   const [isFilterOpen, setIsFilterOpen] = useState(false);
+ 80 |   const [selectedVenue, setSelectedVenue] = useState<VenueValues | null>(null);
+ 81 |   const [selectedClub, setSelectedClub] = useState<ClubValues | null>(null);
+ 82 |   const [selectedTeam, setSelectedTeam] = useState<TeamValues | null>(null);
+ 83 |   const [filterVenue, setFilterVenue] = useState<VenueValues | null>(null);
+ 84 |   const [filterClub, setFilterClub] = useState<ClubValues | null>(null);
+ 85 |   const [filterTeam, setFilterTeam] = useState<TeamValues | null>(null);
+ 86 |   const [matches, setMatches] = useState(matches); // Added state for matches
+    :          ^^^|^^^
+    :             `-- `matches` redefined here
