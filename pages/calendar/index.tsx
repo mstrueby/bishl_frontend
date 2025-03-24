@@ -13,7 +13,8 @@ import { Match } from '../../types/MatchValues';
 import MatchCard from '../../components/ui/MatchCard';
 import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]';
 import { MatchdayValues } from '../../types/TournamentValues';
-import TeamFullNameSelect from '../../components/ui/TeamFullNameSelect';
+import ClubSelect from '../../components/ui/ClubSelect';
+import TeamSelect from '../../components/ui/TeamSelect';
 import { Team } from '../../types/MatchValues';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { classNames } from '../../tools/utils';
@@ -682,7 +683,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                         >
                           <option value="">All Venues</option>
                           {venues.map(venue => (
-                            <option key={venue._id} value={venue._id}>{venue.name}</option>
+                            <option key={venue._id} value={venue.}>{venue.name}</option>
                           ))}
                         </select>
 
