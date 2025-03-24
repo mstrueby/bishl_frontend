@@ -219,7 +219,7 @@ const MatchCard: React.FC<{
   //}
 
   return (
-    <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
+    <div className="flex flex-col sm:flex-row gap-y-2 p-4 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
       <div className="flex flex-col sm:flex-none sm:w-1/3">
         {/* 1-1 tournament, status (mobile) */}

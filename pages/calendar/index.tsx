@@ -204,13 +204,10 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   };
 
   const handleResetFilter = () => {
-    setSelectedClub(null);
-    setSelectedTeam(null);
-    setSelectedVenue(null);
     setFilterClub(null);
     setFilterTeam(null);
     setFilterVenue(null);
-    setIsFilterOpen(false);
+    //setIsFilterOpen(false);
   };
 
   return (
@@ -238,7 +235,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
             <button
               type="button"
               onClick={() => setIsFilterOpen(true)}
-              className="inline-flex items-center rounded-md bg-white px-3 py-2 mr-4 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              className="hidden md:inline-flex items-center rounded-md bg-white px-3 py-2 mr-4 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
             >
               {(selectedVenue || selectedClub || selectedTeam) ? (
                 <FunnelIconSolid className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -291,7 +288,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                   type="button"
                   className="flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
-                  Day view
+                  Tag
                   <ChevronDownIcon className="-mr-1 size-5 text-gray-400" aria-hidden="true" />
                 </MenuButton>
 
@@ -305,7 +302,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                         href="#"
                         className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                       >
-                        Day view
+                        Tag
                       </a>
                     </MenuItem>
                     <MenuItem>
@@ -349,6 +346,16 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                 <div className="py-1">
                   <MenuItem>
                     <button
+                      onClick={() => setIsFilterOpen(true)}
+                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                    >
+                      Filter
+                    </button>
+                  </MenuItem>
+                </div>
+                <div className="py-1">
+                  <MenuItem>
+                    <button
                       onClick={() => {
                         const today = new Date();
                         setSelectedDate(today);
@@ -366,7 +373,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                       href="#"
                       className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                     >
-                      Day view
+                      Tag
                     </a>
                   </MenuItem>
                   <MenuItem>
@@ -646,7 +653,11 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                 </ol>
               </div>
             </div>
+
+            
+            
           </div>
+          
           {/* MONTH date picker (tablet) */}
           <div className="hidden w-1/2 max-w-md flex-none border-l border-gray-100 px-8 py-10 md:block">
             <div className="flex items-center text-center text-gray-900">
@@ -728,6 +739,10 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
               ))}
             </div>
           </div>
+
+
+
+          {/** Filter Modal */}
           <Transition appear show={isFilterOpen} as={Fragment}>
             <Dialog as="div" className="relative z-10" onClose={() => setIsFilterOpen(false)}>
               <Transition.Child
@@ -814,9 +829,47 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
               </div>
             </Dialog>
           </Transition>
+          
         </div>
       </div>
 
+      <div className="mt-8 px-2 sm:px-6 py-4 border-b border-gray-200 pb-5">
+        <h3 className="text-base font-semibold text-gray-900">Liste</h3>
+      </div>
+      
+        {/* Display MatchCards for all selected matches */}
+        <div className="px-2 sm:px-6 py-4">
+          {selectedDate && matchesByDate(selectedDate).length > 0 ? (
+            <div className="grid grid-cols-1 gap-4">
+              {matchesByDate(selectedDate).map((match) => (
+                <MatchCard 
+                  key={match._id} 
+                  match={match} 
+                  onMatchUpdate={async () => {
+                    // Refetch rounds to update standings
+                    const roundsResponse = await fetch(`${BASE_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/`);
+                    const roundsData = await roundsResponse.json();
+                    if (Array.isArray(roundsData)) {
+                      const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+                      setRounds(sortedData);
+                      setSelectedRound(prevRound => {
+                        const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
+                        return updatedRound;
+                      });
+                    }
+
+                    // Refetch matches
+                    const matchesResponse = await fetch(`${BASE_URL}/matches/?tournament=${match.tournament.alias}&season=${match.season.alias}&round=${match.round.alias}&matchday=${match.matchday.alias}`);
+                    const matchesData = await matchesResponse.json();
+                    setMatches(matchesData);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-center py-12 text-gray-500">Keine Spiele verfügbar</p>
+          )}
+        </div>
     </Layout >
   )
 };
