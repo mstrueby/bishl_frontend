@@ -83,7 +83,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   const [filterVenue, setFilterVenue] = useState<VenueValues | null>(null);
   const [filterClub, setFilterClub] = useState<ClubValues | null>(null);
   const [filterTeam, setFilterTeam] = useState<TeamValues | null>(null);
-  const [matches, setMatches] = useState(matches); // Added state for matches
+  const [calendarMatches, setCalendarMatches] = useState(matches); // State for calendar matches
 
 
   // Generate an array of days for the current month
@@ -213,9 +213,15 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
 
   const refreshMatches = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches`);
-      const data = await response.json();
-      setMatches(data);
+      const matchesRes = await axios(`${BASE_URL}/matches`, {
+        params: {
+          season: CURRENT_SEASON,
+        }
+      });
+      const matchesData: Match[] = matchesRes.data;
+      //const response = await fetch(`${BASE_URL}/matches`);
+      //const data = await response.json();
+      setCalendarMatches(matchesData);
     } catch (error) {
       console.error('Error refreshing matches:', error);
     }
