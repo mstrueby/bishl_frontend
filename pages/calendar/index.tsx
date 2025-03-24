@@ -477,16 +477,16 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                       //  return false;
                       //}
                       const otherStart = new Date(otherEvent.startDate);
-                      return Math.abs(eventStart.getTime() - otherStart.getTime()) <= 30 * 60000; // 5 minutes
+                      return Math.abs(eventStart.getTime() - otherStart.getTime()) <= 22 * 60000; // 5 minutes
                     });
 
                     // Calculate position for overlapping events
                     const columnCount = overlappingEvents.length;
                     const columnIndex = overlappingEvents.findIndex(e => e._id === event._id);
 
-                    //console.log(event._id, overlappingEvents, columnCount, columnIndex)
+                    console.log(event._id, overlappingEvents, columnCount, columnIndex)
 
-                    console.log(`${new Date(event.startDate).getHours() * 12 + Math.floor(new Date(event.startDate).getMinutes() / 5) + 1}`)
+                    
                     const matchLength = tournamentConfigs[event.tournament.alias]?.matchLenMin || 30;
 
                     return (
@@ -503,7 +503,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                       >
                         <a
                           href="#"
-                          className={`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg border-l-4 p-2 text-xs/5 ${(() => {
+                          className={`group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
                             switch (event.tournament.alias) {
                               case 'regionalliga-ost':
                                 return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
@@ -524,25 +524,34 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                               case 'bambini-lk2':
                                 return 'bg-purple-400/10 text-purple-600 border-purple-600 hover:bg-purple-200/50';
                               case 'mini':
-                                return 'bg-pink-400 text-pink-600 border-pink-600 hover:bg-pink-200/50';
+                                return 'bg-pink-400/10 text-pink-600 border-pink-600 hover:bg-pink-200/50';
                               default:
                                 return '';
                             }
                           })()}`}
                         >
-                          <p className="block sm:hidden order-1 font-semibold">
+                          <p className="block sm:hidden order-1 font-semibold truncate">
                             {columnCount >= 2
                               ? `${event.home.tinyName} - ${event.away.tinyName}`
                               : `${event.home.shortName} - ${event.away.shortName}`}
                           </p>
-                          <p className="hidden sm:block order-1 font-semibold">
-                            {`${event.home.fullName.length > 14 ? event.home.shortName : event.home.fullName} 
-                          - ${event.away.fullName.length > 14 ? event.away.shortName : event.away.fullName}`}
+                          <p className="hidden sm:block order-1 font-semibold truncate">
+                            {`${columnCount === 1
+                              ? event.home.fullName 
+                              : columnCount <= 3
+                              ? event.home.shortName
+                              : event.home.tinyName
+                            } - ${columnCount === 1
+                              ? event.away.fullName 
+                              : columnCount <= 3
+                              ? event.away.shortName
+                              : event.away.tinyName
+                            }`}
                           </p>
                           <p className="order-1 truncate">
                             {event.venue.name}
                           </p>
-                          <p className="flex items-center gap-x-1.5">
+                          <p className="flex items-center gap-x-1.5 truncate">
                             <time dateTime={new Date(event.startDate).toISOString()}>
                               {format(new Date(event.startDate), 'HH:mm', { locale: de })}
                             </time>
@@ -623,10 +632,10 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                         (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
                         (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
                         (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
-                        dayIdx === 0 && 'rounded-tl-lg',
-                        dayIdx === 6 && 'rounded-tr-lg',
-                        dayIdx === days.length - 7 && 'rounded-bl-lg',
-                        dayIdx === days.length - 1 && 'rounded-br-lg',
+                        dayIdx === 0 ? 'rounded-tl-lg' : '',
+                        dayIdx === 6 ? 'rounded-tr-lg' : '',
+                        dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
+                        dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                       )}
                     >
                       <span>{format(day, 'd')}</span>
