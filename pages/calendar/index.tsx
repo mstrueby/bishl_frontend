@@ -106,12 +106,12 @@ export default function Calendar({ matches }: { matches: Match[] }) {
   };
 
   useEffect(() => {
-    // Set the container scroll position based on the current time.
-    const currentMinute = new Date().getHours() * 60;
+    // Always scroll to 9AM.
+    const nineAMMinute = 9 * 60;
     if (container.current && containerNav.current && containerOffset.current) {
       container.current.scrollTop =
         ((container.current.scrollHeight - containerNav.current.offsetHeight - containerOffset.current.offsetHeight) *
-          currentMinute) /
+          nineAMMinute) /
         1440;
     }
   }, []);
@@ -367,99 +367,99 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                 >
                   <div ref={containerOffset} className="row-end-1 h-7"></div>
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">12AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">0:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">1AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">1:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">2AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">2:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">3AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">3:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">4AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">4:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">5AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">5:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">6AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">6:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">7AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">7:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">8AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">8:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">9AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">9:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">10AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">10:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">11AM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">11:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">12PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">12:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">1PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">13:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">2PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">14:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">3PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">15:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">4PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">16:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">5PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">17:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">6PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">18:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">7PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">19:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">8PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">20:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">9PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">21:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">10PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">22:00</div>
                   </div>
                   <div />
                   <div>
-                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">11PM</div>
+                    <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs/5 text-gray-400">23:00</div>
                   </div>
                   <div />
                 </div>
@@ -509,9 +509,22 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                                 return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
                               case 'landesliga':
                                 return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
+                              case 'juniorenliga':
+                              case 'juniorenliga-p':
+                                return 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue';
+                              case 'jugendliga':
+                              case 'jugendliga-lk2':
+                              case 'jugendliga-p':
+                                return 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue';
                               case 'schuelerliga':
+                              case 'schuelerliga-lk2':
+                              case 'schuelerliga-p':
                                 return 'bg-indigo-400/10 text-indigo-600 border-indigo-600/50 hover:bg-indigo-200/50';
-                              // add more cases as needed
+                              case 'bambini':
+                              case 'bambini-lk2':
+                                return 'bg-purple-400 text-purple-600 border-purple-600 hover:bg-purple';
+                              case 'mini':
+                                return 'bg-pink-400 text-pink-600 border-pink-600 hover:bg-pink';
                               default:
                                 return '';
                             }

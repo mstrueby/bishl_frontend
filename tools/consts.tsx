@@ -132,7 +132,6 @@ interface TournamentConfig {
   href: string;
   bdgColDark: string;
   bdgColLight: string;
-  calColors: string;
   matchLenMin: number;
 }
 export const tournamentConfigs: { [key: string]: TournamentConfig } = {
@@ -142,7 +141,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/regionalliga-ost',
     bdgColDark: 'bg-red-400/10 text-red-400 ring-red-400/20',
     bdgColLight: 'bg-red-50 text-red-700 ring-red-600/10',
-    calColors: 'bg-red-400/10 text-red-400 border-red-600/50 hover:bg-red-600',
     matchLenMin: 125
   },
   'landesliga': {
@@ -151,7 +149,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/landesliga',
     bdgColDark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20',
     bdgColLight: 'bg-gray-50 text-gray-600 ring-gray-500/10',
-    calColors: 'bg-gray-400/10 border-gray-600 text-gray-600 hover:bg-gray-600',
     matchLenMin: 125
   },
   'juniorenliga': {
@@ -160,7 +157,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/juniorenliga',
     bdgColDark: 'bg-green-500/10 text-green-400 ring-green-500/20',
     bdgColLight: 'bg-green-50 text-green-700 ring-green-600/20',
-    calColors: 'bg-green-500 text-green-600 border-green-600 hover:bg-green',
     matchLenMin: 50
   },
   'jugendliga': {
@@ -169,7 +165,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/jugendliga',
     bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
     bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
-    calColors: 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue',
     matchLenMin: 50
   },
   'jugendliga-p': {
@@ -178,7 +173,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/jugendliga-p',
     bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
     bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
-    calColors: 'bg-blue-400 text-blue-600 border-blue-600 hover:bg-blue',
     matchLenMin: 50
   },
   'schuelerliga': {
@@ -187,7 +181,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/schuelerliga',
     bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
     bdgColLight: ' border-indigo-700/50 bg-indigo-50 text-indigo-700 ring-indigo-700/10 ',
-    calColors: 'bg-indigo-400/10 text-indigo-600 border-indigo-600 hover:bg-indigo-400',
     matchLenMin: 50
   },
   'schuelerliga-lk2': {
@@ -196,7 +189,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/schuelerliga-lk2',
     bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
     bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
-    calColors: 'bg-indigo-400 text-indigo-600 border-indigo-600 hover:bg-indigo',
     matchLenMin: 50
   },
   'schhuelerliga-p': {
@@ -205,7 +197,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/schuelerliga-p',
     bdgColDark: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30',
     bdgColLight: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
-    calColors: 'bg-indigo-400 text-indigo-600 border-indigo-600 hover:bg-indigo',
     matchLenMin: 50
   },
   'bambini': {
@@ -214,7 +205,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/bambini',
     bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
     bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
-    calColors: 'bg-purple-400 text-purple-600 border-purple-600 hover:bg-purple',
     matchLenMin: 50
   },
   'bambini-lk2': {
@@ -223,7 +213,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/bambini-lk2',
     bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
     bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
-    calColors: 'bg-purple-400 text-purple-600 border-purple-600 hover:bg-purple',
     matchLenMin: 50
   },
   'mini': {
@@ -232,7 +221,6 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/mini',
     bdgColDark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20',
     bdgColLight: 'bg-pink-50 text-pink-700 ring-pink-700/10',
-    calColors: 'bg-pink-400 text-pink-600 border-pink-600 hover:bg-pink',
     matchLenMin: 50
   }
 };
