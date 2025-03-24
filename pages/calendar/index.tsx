@@ -475,12 +475,8 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     // Calculate position for overlapping events
                     const columnCount = overlappingEvents.length;
                     const columnIndex = overlappingEvents.findIndex(e => e._id === event._id);
-
-                    console.log(event._id, overlappingEvents, columnCount, columnIndex)
-
-
+                    //console.log(event._id, overlappingEvents, columnCount, columnIndex)
                     const matchLength = tournamentConfigs[event.tournament.alias]?.matchLenMin || 30;
-
                     return (
                       <li
                         key={index}
