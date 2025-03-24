@@ -3,7 +3,8 @@ import { GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import Standings from '../../components/ui/Standings';
-import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, FunnelIcon } from '@heroicons/react/20/solid'
+import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid'
+import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline'
 import { Fragment, useEffect, useState, useRef } from 'react'
 import { Listbox, Transition, Dialog } from '@headlessui/react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, getDay } from 'date-fns';
@@ -15,27 +16,47 @@ import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[m
 import { MatchdayValues } from '../../types/TournamentValues';
 import ClubSelect from '../../components/ui/ClubSelect';
 import TeamSelect from '../../components/ui/TeamSelect';
+import VenueSelect from '../../components/ui/VenueSelect';
 import { Team } from '../../types/MatchValues';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { classNames } from '../../tools/utils';
 import { tournamentConfigs } from '../../tools/consts';
 import type { VenueValues } from '../../types/VenueValues';
 import type { ClubValues, TeamValues } from '../../types/ClubValues';
-
+import axios from 'axios';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
 
+interface CalendarProps {
+  matches: Match[];
+  venues: VenueValues[];
+  clubs: ClubValues[];
+}
 export const getStaticProps: GetStaticProps = async () => {
   try {
-    const res = await fetch(`${BASE_URL}/matches?season=${CURRENT_SEASON}`);
-    const matchesData: Match[] = await res.json();
+    const matchesRes = await axios(`${BASE_URL}/matches`, {
+      params: {
+        season: CURRENT_SEASON,
+      }
+    });
+    const matchesData: Match[] = matchesRes.data;
     if (!matchesData || matchesData.length === 0) {
       return { notFound: true };
     }
+    const venuesRes = await axios(`${BASE_URL}/venues`);
+    const venuesData: VenueValues[] = venuesRes.data
+    const clubsRes = await axios(`${BASE_URL}/clubs`, {
+      params: {
+        active: true
+      }
+    });
+    const clubsData: ClubValues[] = clubsRes.data;
     return {
       props: {
         matches: matchesData,
+        venues: venuesData,
+        clubs: clubsData,
       },
       revalidate: 60
     };
@@ -45,13 +66,13 @@ export const getStaticProps: GetStaticProps = async () => {
   }
 };
 
-export default function Calendar({ matches }: { matches: Match[] }) {
+export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const container = useRef<HTMLDivElement>(null);
   const containerNav = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState<VenueValues | null>(null);
   const [selectedClub, setSelectedClub] = useState<ClubValues | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<TeamValues | null>(null);
@@ -133,6 +154,44 @@ export default function Calendar({ matches }: { matches: Match[] }) {
     }
   }, [selectedDate, selectedVenue, selectedClub, selectedTeam]); // Add selectedDay to dependency array
 
+  // Store initial values when opening the modal
+  const [initialValues, setInitialValues] = useState<{
+    club: ClubValues | null;
+    team: TeamValues | null;
+    venue: VenueValues | null;
+  }>({
+    club: null,
+    team: null,
+    venue: null,
+  });
+
+  useEffect(() => {
+    if (isFilterOpen) {
+      setInitialValues({
+        club: selectedClub,
+        team: selectedTeam,
+        venue: selectedVenue,
+      })
+    }
+  }, [isFilterOpen, selectedClub, selectedTeam, selectedVenue])
+
+  const handleApplyFilter = () => {
+    setIsFilterOpen(false);
+  }
+  
+  const handleCancel = () => {
+    setSelectedClub(initialValues.club);
+    setSelectedTeam(initialValues.team);
+    setSelectedVenue(initialValues.venue);
+    setIsFilterOpen(false);
+  };
+  
+  const handleResetFilter = () => {
+    setSelectedClub(null);
+    setSelectedTeam(null);
+    setSelectedVenue(null);
+    setIsFilterOpen(false);
+  };
 
   return (
     <Layout>
@@ -156,6 +215,13 @@ export default function Calendar({ matches }: { matches: Match[] }) {
             </p>
           </div>
           <div className="flex items-center">
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(true)}
+              className="inline-flex items-center rounded-md bg-white px-3 py-2 mr-4 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+              <FunnelIconOutline className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />Filter
+            </button>
             <div className="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
               <button
                 type="button"
@@ -244,13 +310,6 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                   </div>
                 </MenuItems>
               </Menu>
-              <button
-                type="button"
-                onClick={() => setIsOpen(true)}
-                className="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                <FunnelIcon className="h-5 w-5" aria-hidden="true" /> Filter
-              </button>
             </div>
             <Menu as="div" className="relative ml-6 md:hidden">
               <MenuButton className="-mx-2 flex items-center rounded-full border border-transparent p-2 text-gray-400 hover:text-gray-500">
@@ -534,14 +593,14 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                             {`${columnCount === 1
                               ? event.home.fullName
                               : columnCount <= 3
-                              ? event.home.shortName
-                              : event.home.tinyName
-                            } - ${columnCount === 1
-                              ? event.away.fullName
-                              : columnCount <= 3
-                              ? event.away.shortName
-                              : event.away.tinyName
-                            }`}
+                                ? event.home.shortName
+                                : event.home.tinyName
+                              } - ${columnCount === 1
+                                ? event.away.fullName
+                                : columnCount <= 3
+                                  ? event.away.shortName
+                                  : event.away.tinyName
+                              }`}
                           </p>
                           <p className="order-1 truncate">
                             {event.venue.name}
@@ -614,7 +673,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
                     dayIdx === 0 ? 'rounded-tl-lg' : '',
                     dayIdx === 6 ? 'rounded-tr-lg' : '',
-                    dayIdx=== 0 ? 'rounded-bl-lg' : '',
+                    dayIdx === 0 ? 'rounded-bl-lg' : '',
                     dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                   )}
                 >
@@ -644,7 +703,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               ))}
             </div>
           </div>
-          <Transition appear show={isOpen} as={Fragment}>
+          <Transition appear show={isFilterOpen} as={Fragment}>
             <Dialog as="div" className="relative z-10" onClose={() => setIsOpen(false)}>
               <Transition.Child
                 as={Fragment}
@@ -674,59 +733,54 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                         Filter Matches
                       </Dialog.Title>
                       <div className="mt-2">
-                        <label className="block text-sm font-medium text-gray-700">Venue</label>
-                        {/* Venue select */}
-                        <select
-                          value={selectedVenue?._id || ''}
-                          onChange={e => setSelectedVenue(venues.find(v => v._id === e.target.value))}
-                          className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
-                          <option value="">All Venues</option>
-                          {venues.map(venue => (
-                            <option key={venue._id} value={venue.}>{venue.name}</option>
-                          ))}
-                        </select>
-
-                        <label className="mt-3 block text-sm font-medium text-gray-700">Club</label>
-                        {/* Club select */}
-                        <select
-                          value={selectedClub?._id || ''}
-                          onChange={e => setSelectedClub(clubs.find(c => c._id === e.target.value))}
-                          className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
-                          <option value="">All Clubs</option>
-                          {clubs.map(club => (
-                            <option key={club._id} value={club._id}>{club.name}</option>
-                          ))}
-                        </select>
-
-                        <label className="mt-3 block text-sm font-medium text-gray-700">Team</label>
-                        {/* Team select */}
-                        <select
-                          value={selectedTeam?._id || ''}
-                          onChange={e => setSelectedTeam(teams.find(t => t._id === e.target.value))}
-                          className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
-                          <option value="">All Teams</option>
-                          {teams.map(team => (
-                            <option key={team._id} value={team._id}>{team.name}</option>
-                          ))}
-                        </select>
+                        <VenueSelect
+                          venues={venues}
+                          selectedVenueId={selectedVenue?._id || ''}
+                          onVenueChange={(venueId) => setSelectedVenue(venues.find(v => v._id === venueId) || null)}
+                          label="Venue"
+                        />
                       </div>
-                      <div className="mt-5 flex justify-end">
+
+                      <div className="mt-3">
+                        <ClubSelect
+                          clubs={clubs}
+                          selectedClubId={selectedClub?._id || ''}
+                          onClubChange={(clubId) => setSelectedClub(clubs.find(c => c._id === clubId) || null)}
+                          label="Club"
+                        />
+                      </div>
+
+                      {selectedClub && (
+                        <div className="mt-3">
+                          <TeamSelect
+                            teams={selectedClub.teams}
+                            selectedTeamId={selectedTeam?._id || ''}
+                            onTeamChange={(teamId) => setSelectedTeam(selectedClub.teams.find(t => t._id === teamId) || null)}
+                            label="Team"
+                          />
+                        </div>
+                      )}
+                      <div className="mt-6 flex justify-end items-center">
                         <button
                           type="button"
-                          className="bg-white py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                          onClick={() => setIsOpen(false)}
+                          className="text-sm text-indigo-600 hover:underline mr-3"
+                          onClick={handleResetFilter}
                         >
-                          Cancel
+                          Reset
+                        </button>
+                        <button
+                          type="button"
+                          className="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          onClick={handleCancel}
+                        >
+                          Abbrechen
                         </button>
                         <button
                           type="button"
                           className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                          onClick={() => setIsOpen(false)}
+                          onClick={handleApplyFilter}
                         >
-                          Apply
+                          Anwenden
                         </button>
                       </div>
                     </Dialog.Panel>
@@ -738,6 +792,6 @@ export default function Calendar({ matches }: { matches: Match[] }) {
         </div>
       </div>
 
-    </Layout>
+    </Layout >
   )
 };
