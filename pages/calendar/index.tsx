@@ -83,6 +83,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   const [filterVenue, setFilterVenue] = useState<VenueValues | null>(null);
   const [filterClub, setFilterClub] = useState<ClubValues | null>(null);
   const [filterTeam, setFilterTeam] = useState<TeamValues | null>(null);
+  const [matches, setMatches] = useState(matches); // Added state for matches
 
 
   // Generate an array of days for the current month
@@ -208,6 +209,20 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
     setFilterTeam(null);
     setFilterVenue(null);
     //setIsFilterOpen(false);
+  };
+
+  const refreshMatches = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches`);
+      const data = await response.json();
+      setMatches(data);
+    } catch (error) {
+      console.error('Error refreshing matches:', error);
+    }
+  };
+
+  const handleMatchUpdate = async () => {
+    await refreshMatches();
   };
 
   return (
@@ -654,10 +669,10 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
               </div>
             </div>
 
-            
-            
+
+
           </div>
-          
+
           {/* MONTH date picker (tablet) */}
           <div className="hidden w-1/2 max-w-md flex-none border-l border-gray-100 px-8 py-10 md:block">
             <div className="flex items-center text-center text-gray-900">
@@ -829,14 +844,14 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
               </div>
             </Dialog>
           </Transition>
-          
+
         </div>
       </div>
 
       <div className="mt-8 px-2 sm:px-6 py-4 border-b border-gray-200 pb-5">
         <h3 className="text-base font-semibold text-gray-900">Liste</h3>
       </div>
-      
+
         {/* Display MatchCards for all selected matches */}
         <div className="px-2 sm:px-6 py-4">
           {selectedDate && matchesByDate(selectedDate).length > 0 ? (
@@ -845,7 +860,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                 <MatchCard 
                   key={match._id} 
                   match={match} 
-                  
+                  onMatchUpdate={handleMatchUpdate}
                 />
               ))}
             </div>
