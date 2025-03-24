@@ -176,6 +176,9 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
   }, [isFilterOpen, selectedClub, selectedTeam, selectedVenue])
 
   const handleApplyFilter = () => {
+    setSelectedVenue(initialValues.venue);
+    setSelectedClub(initialValues.club);
+    setSelectedTeam(initialValues.team);
     setIsFilterOpen(false);
   }
   
