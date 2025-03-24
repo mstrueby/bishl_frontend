@@ -331,14 +331,19 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     className="flex flex-col items-center pb-1.5 pt-3"
                   >
                     <span>{dayNames[index]}</span>
-                    <span className={classNames(
-                      "mt-3 flex size-8 items-center justify-center rounded-full text-base",
-                      isSelected ? "bg-indigo-600 text-white font-semibold" : 
-                      isToday(date) ? "text-indigo-600 font-semibold" : 
-                      "text-gray-900"
-                    )}>
-                      {date.getDate()}
-                    </span>
+                    <div className="relative">
+                      <span className={classNames(
+                        "mt-3 flex size-8 items-center justify-center rounded-full text-base",
+                        isSelected ? "bg-indigo-600 text-white font-semibold" : 
+                        isToday(date) ? "text-indigo-600 font-semibold" : 
+                        "text-gray-900"
+                      )}>
+                        {date.getDate()}
+                      </span>
+                      {matchesByDate(date).length > 0 && (
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-indigo-600"></div>
+                      )}
+                    </div>
                   </button>
                 );
               })}
