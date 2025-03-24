@@ -114,7 +114,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
           nineAMMinute) /
         1440;
     }
-  }, []);
+  }, [selectedDay]); // Add selectedDay to dependency array
 
 
   return (
