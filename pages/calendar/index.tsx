@@ -604,7 +604,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     isSameMonth(day, currentMonth) ? 'bg-white' : 'bg-gray-50',
                     (selectedDate && isSameDay(day, selectedDate) || isToday(day) ? 'font-semibold' : ''),
                     (selectedDate && isSameDay(day, selectedDate)) ? 'text-white' : '',
-                    (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
+                    (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' :'',
                     (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
                     (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
                     dayIdx === 0 ? 'rounded-tl-lg' : '',
@@ -613,16 +613,28 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                     dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                   )}
                 >
-                  <time
-                    dateTime={format(day, 'yyyy-MM-dd')}
-                    className={classNames(
-                      'mx-auto flex size-7 items-center justify-center rounded-full',
-                      (selectedDate && isSameDay(day, selectedDate) && isToday(day)) ? 'bg-indigo-600' : '',
-                      (selectedDate && isSameDay(day, selectedDate) && !isToday(day)) ? 'bg-gray-900' : '',
+                  <div className="relative w-full h-full flex flex-col items-center">
+                    <time
+                      dateTime={format(day, 'yyyy-MM-dd')}
+                      className={classNames(
+                        'mx-auto flex h-7 w-7 items-center justify-center rounded-full',
+                        (selectedDate && isSameDay(day, selectedDate) || isToday(day)) ? 'font-semibold' : '',
+                        (selectedDate && isSameDay(day, selectedDate)) ? 'bg-indigo-600 text-white' : '',
+                        (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
+                        (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
+                        (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
+                        dayIdx === 0 && 'rounded-tl-lg',
+                        dayIdx === 6 && 'rounded-tr-lg',
+                        dayIdx === days.length - 7 && 'rounded-bl-lg',
+                        dayIdx === days.length - 1 && 'rounded-br-lg',
+                      )}
+                    >
+                      <span>{format(day, 'd')}</span>
+                    </time>
+                    {matchesByDate(day).length > 0 && (
+                      <div className="absolute bottom-0 h-1 w-1 mt-0.5 rounded-full bg-indigo-600"></div>
                     )}
-                  >
-                    {format(day, 'd')}
-                  </time>
+                  </div>
                 </button>
               ))}
             </div>
