@@ -313,49 +313,32 @@ export default function Calendar({ matches }: { matches: Match[] }) {
               ref={containerNav}
               className="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow ring-1 ring-black/5 md:hidden"
             >
-              <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>Mo</span>
-                {/* Default: "text-gray-900", Selected: "bg-gray-900 text-white", Today (Not Selected): "text-indigo-600", Today (Selected): "bg-indigo-600 text-white" */}
-                <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
-                  19
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>Di</span>
-                <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-indigo-600">
-                  20
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>Mi</span>
-                <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
-                  21
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>Do</span>
-                <span className="mt-3 flex size-8 items-center justify-center rounded-full bg-gray-900 text-base font-semibold text-white">
-                  22
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>Fr</span>
-                <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
-                  23
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>Sa</span>
-                <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
-                  24
-                </span>
-              </button>
-              <button type="button" className="flex flex-col items-center pb-1.5 pt-3">
-                <span>So</span>
-                <span className="mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold text-gray-900">
-                  25
-                </span>
-              </button>
+              {[...Array(7)].map((_, index) => {
+                const date = new Date(selectedDate || new Date());
+                const currentDay = date.getDay();
+                const diff = currentDay === 0 ? -6 : 1 - currentDay; // Adjust to start from Monday
+                date.setDate(date.getDate() + diff + index);
+
+                const dayNames = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+                const isSelected = selectedDate && isSameDay(date, selectedDate);
+
+                return (
+                  <button 
+                    key={date.toISOString()} 
+                    type="button" 
+                    onClick={() => setSelectedDate(date)}
+                    className="flex flex-col items-center pb-1.5 pt-3"
+                  >
+                    <span>{dayNames[index]}</span>
+                    <span className={classNames(
+                      "mt-3 flex size-8 items-center justify-center rounded-full text-base font-semibold",
+                      isSelected ? "bg-gray-900 text-white" : "text-gray-900"
+                    )}>
+                      {date.getDate()}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             <div className="flex w-full flex-auto">
               <div className="w-14 flex-none bg-white ring-1 ring-gray-100" />
@@ -486,7 +469,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
 
                     console.log(event._id, overlappingEvents, columnCount, columnIndex)
 
-                    
+
                     const matchLength = tournamentConfigs[event.tournament.alias]?.matchLenMin || 30;
 
                     return (
@@ -633,7 +616,7 @@ export default function Calendar({ matches }: { matches: Match[] }) {
                         (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
                         (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
                         dayIdx === 0 ? 'rounded-tl-lg' : '',
-                        dayIdx === 6 ? 'rounded-tr-lg' : '',
+                        dayIdx === 6 ? 'rounded-trlg' : '',
                         dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
                         dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                       )}
