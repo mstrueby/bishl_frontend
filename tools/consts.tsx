@@ -134,6 +134,7 @@ interface TournamentConfig {
   bdgColLight: string;
   matchLenMin: number;
   active: boolean;
+  sortOrder: number;
 }
 export const tournamentConfigs: { [key: string]: TournamentConfig } = {
   'regionalliga-ost': {
@@ -144,6 +145,7 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColLight: 'bg-red-50 text-red-700 ring-red-600/10',
     matchLenMin: 125,
     active: true,
+    sortOrder: 10,
   },
   'landesliga': {
     name: 'Landesliga',
@@ -153,6 +155,7 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColLight: 'bg-gray-50 text-gray-600 ring-gray-500/10',
     matchLenMin: 125,
     active: true,
+    sortOrder: 11,
   },
   'juniorenliga': {
     name: 'Juniorenliga',
@@ -162,6 +165,7 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColLight: 'bg-green-50 text-green-700 ring-green-600/20',
     matchLenMin: 50,
     active: true,
+    sortOrder: 30,
   },
   'jugendliga': {
     name: 'Jugendliga',
@@ -170,7 +174,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
     bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
     matchLenMin: 50,
-    active: true
+    active: true,
+    sortOrder: 40,
   },
   'jugendliga-p': {
     name: 'Jugendliga P',
@@ -179,7 +184,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
     bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
     matchLenMin: 50,
-    active: true
+    active: true,
+    sortOrder: 45,
   },
   'schuelerliga': {
     name: 'Schülerliga',
@@ -188,7 +194,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30',
     bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
     matchLenMin: 50,
-    active: true
+    active: true,
+    sortOrder: 50,
   },
   'schuelerliga-lk2': {
     name: 'Schülerliga LK2',
@@ -197,7 +204,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/30',
     bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
     matchLenMin: 50,
-    active: true
+    active: true,
+    sortOrder: 51,
   },
   'schuelerliga-p': {
     name: 'Schülerliga P',
@@ -206,7 +214,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30',
     bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
     matchLenMin: 50,
-    active: false
+    active: false,
+    sortOrder: 55
   },
   'bambini': {
     name: 'Bambini',
@@ -215,7 +224,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
     bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
     matchLenMin: 50,
-    active: true
+    active: true,
+    sortOrder: 60,
   },
   'bambini-lk2': {
     name: 'Bambini LK2',
@@ -224,7 +234,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
     bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
     matchLenMin: 50,
-    active: true
+    active: true,
+    sortOrder: 61
   },
   'mini': {
     name: 'Mini',
@@ -233,7 +244,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     bdgColDark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20',
     bdgColLight: 'bg-pink-50 text-pink-700 ring-pink-700/10',
     matchLenMin: 50,
-    active: false
+    active: false,
+    sortOrder: 70
   }
 };
 
