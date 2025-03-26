@@ -121,7 +121,12 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
 
   const teamValues = club?.teams
     .slice()
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => {
+      const aGroup = ageGroupConfig.find(ag => ag.key === a.ageGroup);
+      const bGroup = ageGroupConfig.find(ag => ag.key === b.ageGroup);
+      const sortOrderDiff = (aGroup?.sortOrder || 0) - (bGroup?.sortOrder || 0);
+      return sortOrderDiff !== 0 ? sortOrderDiff : (a.teamNumber || 0) - (b.teamNumber || 0);
+    })
     .map((team: TeamValues) => ({
       ...team
     }));
