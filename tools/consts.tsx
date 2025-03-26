@@ -133,6 +133,7 @@ interface TournamentConfig {
   bdgColDark: string;
   bdgColLight: string;
   matchLenMin: number;
+  active: boolean;
 }
 export const tournamentConfigs: { [key: string]: TournamentConfig } = {
   'regionalliga-ost': {
@@ -141,7 +142,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/regionalliga-ost',
     bdgColDark: 'bg-red-400/10 text-red-400 ring-red-400/20',
     bdgColLight: 'bg-red-50 text-red-700 ring-red-600/10',
-    matchLenMin: 125
+    matchLenMin: 125,
+    active: true,
   },
   'landesliga': {
     name: 'Landesliga',
@@ -149,7 +151,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/landesliga',
     bdgColDark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20',
     bdgColLight: 'bg-gray-50 text-gray-600 ring-gray-500/10',
-    matchLenMin: 125
+    matchLenMin: 125,
+    active: true,
   },
   'juniorenliga': {
     name: 'Juniorenliga',
@@ -157,7 +160,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/juniorenliga',
     bdgColDark: 'bg-green-500/10 text-green-400 ring-green-500/20',
     bdgColLight: 'bg-green-50 text-green-700 ring-green-600/20',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: true,
   },
   'jugendliga': {
     name: 'Jugendliga',
@@ -165,7 +169,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/jugendliga',
     bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
     bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: true
   },
   'jugendliga-p': {
     name: 'Jugendliga P',
@@ -173,7 +178,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/jugendliga-p',
     bdgColDark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30',
     bdgColLight: 'bg-blue-50 text-blue-700 ring-blue-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: true
   },
   'schuelerliga': {
     name: 'Schülerliga',
@@ -181,7 +187,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/schuelerliga',
     bdgColDark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30',
     bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: true
   },
   'schuelerliga-lk2': {
     name: 'Schülerliga LK2',
@@ -189,15 +196,17 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/schuelerliga-lk2',
     bdgColDark: 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/30',
     bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: true
   },
-  'schhuelerliga-p': {
+  'schuelerliga-p': {
     name: 'Schülerliga P',
     tinyName: 'U13-P',
     href: '/tournaments/schuelerliga-p',
     bdgColDark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30',
     bdgColLight: 'bg-cyan-400/10 text-cyan-700 ring-cyan-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: false
   },
   'bambini': {
     name: 'Bambini',
@@ -205,7 +214,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/bambini',
     bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
     bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: true
   },
   'bambini-lk2': {
     name: 'Bambini LK2',
@@ -213,7 +223,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/bambini-lk2',
     bdgColDark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30',
     bdgColLight: 'bg-purple-50 text-purple-700 ring-purple-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: true
   },
   'mini': {
     name: 'Mini',
@@ -221,7 +232,8 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/mini',
     bdgColDark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20',
     bdgColLight: 'bg-pink-50 text-pink-700 ring-pink-700/10',
-    matchLenMin: 50
+    matchLenMin: 50,
+    active: false
   }
 };
 
