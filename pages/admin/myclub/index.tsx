@@ -9,6 +9,7 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
+import { ageGroupConfig } from '../../../tools/consts';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
