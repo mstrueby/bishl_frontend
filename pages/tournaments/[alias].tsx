@@ -637,9 +637,9 @@ export default function Tournament({
 
               {/* MATCHES */}
               {activeMatchdayTab === 'matches' && (
-                <div id="matches-section">
+                <div id="matches-section" className="px-2 sm:px-6 py-4">
                   {['landesliga', 'regionalliga-ost'].includes(tournament.alias) && (
-                    <div className="mb-4 relative mt-2 md:mx-28 lg:mx-56">
+                    <div className="mb-8 relative mt-2 md:mx-28 lg:mx-56">
                       <TeamFullNameSelect
                         selectedTeamId={selectedTeam}
                         teams={allTeams}
@@ -647,37 +647,39 @@ export default function Tournament({
                       />
                     </div>
                   )}
-                  {filteredMatches && filteredMatches.length > 0 ? (
-                    filteredMatches.map((match, index) => (
-                      <MatchCard
-                        key={index}
-                        match={match}
-                        onMatchUpdate={async () => {
-                          // Refetch rounds to update standings
-                          const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
-                          const roundsData = await roundsResponse.json();
-                          if (Array.isArray(roundsData)) {
-                            const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
-                            setRounds(sortedData);
-                            setSelectedRound(prevRound => {
-                              const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
-                              return updatedRound;
-                            });
-                          }
+                  <div className="grid grid-cols-1 gap-4">
+                    {filteredMatches && filteredMatches.length > 0 ? (
+                      filteredMatches.map((match, index) => (
+                        <MatchCard
+                          key={index}
+                          match={match}
+                          onMatchUpdate={async () => {
+                            // Refetch rounds to update standings
+                            const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                            const roundsData = await roundsResponse.json();
+                            if (Array.isArray(roundsData)) {
+                              const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
+                              setRounds(sortedData);
+                              setSelectedRound(prevRound => {
+                                const updatedRound = sortedData.find(r => r.alias === prevRound.alias) || prevRound;
+                                return updatedRound;
+                              });
+                            }
 
-                          // Refetch matches
-                          const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
-                          const matchesData = await matchesResponse.json();
-                          setMatches(matchesData);
-                        }}
-                        matchdayOwner={selectedMatchday.owner}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-center py-12 text-gray-500">
-                      Keine Spiele verfügbar
-                    </div>
-                  )}
+                            // Refetch matches
+                            const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                            const matchesData = await matchesResponse.json();
+                            setMatches(matchesData);
+                          }}
+                          matchdayOwner={selectedMatchday.owner}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-sm text-center py-12 text-gray-500">
+                        Keine Spiele verfügbar
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </section>

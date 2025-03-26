@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Standings from '../../components/ui/Standings';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid'
@@ -17,12 +18,14 @@ import { MatchdayValues } from '../../types/TournamentValues';
 import ClubSelect from '../../components/ui/ClubSelect';
 import TeamSelect from '../../components/ui/TeamSelect';
 import VenueSelect from '../../components/ui/VenueSelect';
+import TournamentSelect from '../../components/ui/TournamentSelect';
 import { Team } from '../../types/MatchValues';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { classNames } from '../../tools/utils';
 import { tournamentConfigs } from '../../tools/consts';
 import type { VenueValues } from '../../types/VenueValues';
 import type { ClubValues, TeamValues } from '../../types/ClubValues';
+import type { TournamentValues } from '../../types/TournamentValues';
 import axios from 'axios';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -32,6 +35,7 @@ interface CalendarProps {
   matches: Match[];
   venues: VenueValues[];
   clubs: ClubValues[];
+  tournaments: TournamentValues[];
 }
 export const getStaticProps: GetStaticProps = async () => {
   try {
@@ -41,9 +45,6 @@ export const getStaticProps: GetStaticProps = async () => {
       }
     });
     const matchesData: Match[] = matchesRes.data;
-    if (!matchesData || matchesData.length === 0) {
-      return { notFound: true };
-    }
     const venuesRes = await axios(`${BASE_URL}/venues`, {
       params: {
         active: true,
@@ -56,11 +57,18 @@ export const getStaticProps: GetStaticProps = async () => {
       }
     });
     const clubsData: ClubValues[] = clubsRes.data;
+    const tournamentsRes = await axios(`${BASE_URL}/tournaments`, {
+      params: {
+        active: true
+      }
+    });
+    const tournamentsData: TournamentValues[] = tournamentsRes.data
     return {
       props: {
         matches: matchesData,
         venues: venuesData,
         clubs: clubsData,
+        tournaments: tournamentsData
       },
       revalidate: 60
     };
@@ -70,19 +78,21 @@ export const getStaticProps: GetStaticProps = async () => {
   }
 };
 
-export default function Calendar({ matches, venues, clubs }: CalendarProps) {
+export default function Calendar({ matches, venues, clubs, tournaments }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const container = useRef<HTMLDivElement>(null);
   const containerNav = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedVenue, setSelectedVenue] = useState<VenueValues | null>(null);
+  const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [selectedClub, setSelectedClub] = useState<ClubValues | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<TeamValues | null>(null);
-  const [filterVenue, setFilterVenue] = useState<VenueValues | null>(null);
+  const [selectedVenue, setSelectedVenue] = useState<VenueValues | null>(null);
+  const [filterTournament, setFilterTournament] = useState<TournamentValues | null>(null);
   const [filterClub, setFilterClub] = useState<ClubValues | null>(null);
   const [filterTeam, setFilterTeam] = useState<TeamValues | null>(null);
+  const [filterVenue, setFilterVenue] = useState<VenueValues | null>(null);
   const [calendarMatches, setCalendarMatches] = useState(matches); // State for calendar matches
 
 
@@ -139,8 +149,9 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
       const venueMatches = !selectedVenue || match.venue.venueId === selectedVenue._id;
       const clubMatches = !selectedClub || match.home.clubId === selectedClub._id || match.away.clubId === selectedClub._id;
       const teamMatches = !selectedTeam || match.home.teamId === selectedTeam._id || match.away.teamId === selectedTeam._id;
+      const tournamentMatches = !selectedTournament || match.tournament.alias === selectedTournament.alias;
 
-      return dateMatches && venueMatches && clubMatches && teamMatches;
+      return dateMatches && venueMatches && clubMatches && teamMatches && tournamentMatches;
     });
   };
 
@@ -164,17 +175,19 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
           minuteOfDay) /
         1440;
     }
-  }, [selectedDate, selectedVenue, selectedClub, selectedTeam]);
+  }, [selectedDate, selectedVenue, selectedClub, selectedTeam, selectedTournament]);
 
   // Store initial values when opening the modal
   const [initialValues, setInitialValues] = useState<{
     club: ClubValues | null;
     team: TeamValues | null;
     venue: VenueValues | null;
+    tournament: TournamentValues | null;
   }>({
     club: null,
     team: null,
     venue: null,
+    tournament: null
   });
 
   useEffect(() => {
@@ -183,14 +196,16 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
         club: selectedClub,
         team: selectedTeam,
         venue: selectedVenue,
+        tournament: selectedTournament
       })
     }
-  }, [isFilterOpen, selectedClub, selectedTeam, selectedVenue])
+  }, [isFilterOpen, selectedClub, selectedTeam, selectedVenue, selectedTournament])
 
   const handleApplyFilter = () => {
     setSelectedClub(filterClub);
     setSelectedTeam(filterTeam);
     setSelectedVenue(filterVenue);
+    setSelectedTournament(filterTournament);
     setIsFilterOpen(false);
   }
 
@@ -198,9 +213,11 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
     setSelectedClub(initialValues.club);
     setSelectedTeam(initialValues.team);
     setSelectedVenue(initialValues.venue);
+    setSelectedTournament(initialValues.tournament);
     setFilterClub(initialValues.club);
     setFilterTeam(initialValues.team);
     setFilterVenue(initialValues.venue);
+    setFilterTournament(initialValues.tournament);
     setIsFilterOpen(false);
   };
 
@@ -208,27 +225,26 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
     setFilterClub(null);
     setFilterTeam(null);
     setFilterVenue(null);
+    setFilterTournament(null);
     //setIsFilterOpen(false);
   };
 
-  const refreshMatches = async () => {
+  const handleMatchUpdate = async (updatedMatch: Partial<Match>) => {
     try {
-      const matchesRes = await axios(`${BASE_URL}/matches`, {
-        params: {
-          season: CURRENT_SEASON,
-        }
-      });
-      const matchesData: Match[] = matchesRes.data;
-      //const response = await fetch(`${BASE_URL}/matches`);
-      //const data = await response.json();
-      setCalendarMatches(matchesData);
-    } catch (error) {
-      console.error('Error refreshing matches:', error);
-    }
-  };
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${updatedMatch._id}`);
+      const fullUpdatedMatch = await response.json();
 
-  const handleMatchUpdate = async () => {
-    await refreshMatches();
+      setCalendarMatches(prevMatches =>
+        prevMatches.map(match =>
+          match._id === updatedMatch._id ? fullUpdatedMatch : match
+        )
+      );
+
+      return fullUpdatedMatch;
+    } catch (error) {
+      console.error('Error fetching updated match:', error);
+      return updatedMatch;
+    }
   };
 
   return (
@@ -258,7 +274,7 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
               onClick={() => setIsFilterOpen(true)}
               className="hidden md:inline-flex items-center rounded-md bg-white px-3 py-2 mr-4 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
             >
-              {(selectedVenue || selectedClub || selectedTeam) ? (
+              {(selectedVenue || selectedClub || selectedTeam || selectedTournament) ? (
                 <FunnelIconSolid className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
               ) : (
                 <FunnelIconOutline className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -608,66 +624,67 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                           paddingRight: '1px'
                         }}
                       >
-                        <a
-                          href="#"
-                          className={`group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
-                            switch (event.tournament.alias) {
-                              case 'regionalliga-ost':
-                                return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
-                              case 'landesliga':
-                                return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
-                              case 'juniorenliga':
-                              case 'juniorenliga-p':
-                                return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';
-                              case 'jugendliga':
-                              case 'jugendliga-lk2':
-                              case 'jugendliga-p':
-                                return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
-                              case 'schuelerliga':
-                              case 'schuelerliga-lk2':
-                              case 'schuelerliga-p':
-                                return 'bg-cyan-400/10 text-cyan-600 border-cyan-600/50 hover:bg-cyan-200/50';
-                              case 'bambini':
-                              case 'bambini-lk2':
-                                return 'bg-purple-400/10 text-purple-600 border-purple-600 hover:bg-purple-200/50';
-                              case 'mini':
-                                return 'bg-pink-400/10 text-pink-600 border-pink-600 hover:bg-pink-200/50';
-                              default:
-                                return '';
-                            }
-                          })()}`}
-                        >
-                          <p className="block sm:hidden order-1 font-semibold truncate">
-                            {columnCount >= 2
-                              ? `${event.home.tinyName} - ${event.away.tinyName}`
-                              : `${event.home.shortName} - ${event.away.shortName}`}
-                          </p>
-                          <p className="hidden sm:block order-1 font-semibold truncate">
-                            {`${columnCount === 1
-                              ? event.home.fullName
-                              : columnCount <= 3
-                                ? event.home.shortName
-                                : event.home.tinyName
-                              } - ${columnCount === 1
-                                ? event.away.fullName
+                        <Link href={`/matches/${event._id}`}>
+                          <a
+                            className={`group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
+                              switch (event.tournament.alias) {
+                                case 'regionalliga-ost':
+                                  return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
+                                case 'landesliga':
+                                  return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
+                                case 'juniorenliga':
+                                case 'juniorenliga-p':
+                                  return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';
+                                case 'jugendliga':
+                                case 'jugendliga-lk2':
+                                case 'jugendliga-p':
+                                  return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
+                                case 'schuelerliga':
+                                case 'schuelerliga-lk2':
+                                case 'schuelerliga-p':
+                                  return 'bg-cyan-400/10 text-cyan-600 border-cyan-600/50 hover:bg-cyan-200/50';
+                                case 'bambini':
+                                case 'bambini-lk2':
+                                  return 'bg-purple-400/10 text-purple-600 border-purple-600 hover:bg-purple-200/50';
+                                case 'mini':
+                                  return 'bg-pink-400/10 text-pink-600 border-pink-600 hover:bg-pink-200/50';
+                                default:
+                                  return '';
+                              }
+                            })()}`}
+                          >
+                            <p className="block sm:hidden order-1 font-semibold truncate">
+                              {columnCount >= 2
+                                ? `${event.home.tinyName} - ${event.away.tinyName}`
+                                : `${event.home.shortName} - ${event.away.shortName}`}
+                            </p>
+                            <p className="hidden sm:block order-1 font-semibold truncate">
+                              {`${columnCount === 1
+                                ? event.home.fullName
                                 : columnCount <= 3
-                                  ? event.away.shortName
-                                  : event.away.tinyName
-                              }`}
-                          </p>
-                          <p className="order-1 truncate">
-                            {event.venue.name}
-                          </p>
-                          <p className="flex items-center gap-x-1.5 truncate">
-                            <time dateTime={new Date(event.startDate).toISOString()}>
-                              {format(new Date(event.startDate), 'HH:mm', { locale: de })}
-                            </time>
-                            <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                              <circle r={1} cx={1} cy={1} />
-                            </svg>
-                            {tournamentConfigs[event.tournament.alias]?.tinyName || event.tournament.name}
-                          </p>
-                        </a>
+                                  ? event.home.shortName
+                                  : event.home.tinyName
+                                } - ${columnCount === 1
+                                  ? event.away.fullName
+                                  : columnCount <= 3
+                                    ? event.away.shortName
+                                    : event.away.tinyName
+                                }`}
+                            </p>
+                            <p className="order-1 truncate">
+                              {event.venue.name}
+                            </p>
+                            <p className="flex items-center gap-x-1.5 truncate">
+                              <time dateTime={new Date(event.startDate).toISOString()}>
+                                {format(new Date(event.startDate), 'HH:mm', { locale: de })}
+                              </time>
+                              <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                                <circle r={1} cx={1} cy={1} />
+                              </svg>
+                              {tournamentConfigs[event.tournament.alias]?.tinyName || event.tournament.name}
+                            </p>
+                          </a>
+                        </Link>
                       </li>
                     );
                   })}
@@ -728,10 +745,6 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                     (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
                     (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
                     (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
-                    dayIdx === 0 ? 'rounded-tl-lg' : '',
-                    dayIdx === 6 ? 'rounded-tr-lg' : '',
-                    dayIdx === 0 ? 'rounded-bl-lg' : '',
-                    dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                   )}
                 >
                   <div className="relative w-full h-full flex flex-col items-center">
@@ -744,10 +757,6 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                         (!selectedDate && isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-900' : '',
                         (!selectedDate && !isSameMonth(day, currentMonth) && !isToday(day)) ? 'text-gray-400' : '',
                         (isToday(day) && (!selectedDate || !isSameDay(day, selectedDate))) ? 'text-indigo-600' : '',
-                        dayIdx === 0 ? 'rounded-tl-lg' : '',
-                        dayIdx === 6 ? 'rounded-tr-lg' : '',
-                        dayIdx === days.length - 7 ? 'rounded-bl-lg' : '',
-                        dayIdx === days.length - 1 ? 'rounded-br-lg' : '',
                       )}
                     >
                       <span>{format(day, 'd')}</span>
@@ -765,21 +774,10 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
 
           {/** Filter Modal */}
           <Transition appear show={isFilterOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={() => setIsFilterOpen(false)}>
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
-                <div className="fixed inset-0 bg-black bg-opacity-25" />
-              </Transition.Child>
-
-              <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
+            <Dialog as="div" className="fixed inset-0 z-10" onClose={() => setIsFilterOpen(false)}>
+              <div className="fixed inset-0 bg-black/30 transition-opacity" />
+              <div className="fixed inset-0 overflow-y-auto">
+                <div className="flex items-center justify-center min-h-full p-4">
                   <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -789,39 +787,37 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                     leaveFrom="opacity-100 scale-100"
                     leaveTo="opacity-0 scale-95"
                   >
-                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                      <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                        Filter Matches
+                    <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
+                      <Dialog.Title as="h3" className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
+                        Spiele filtern
                       </Dialog.Title>
-                      <div className="mt-2">
-                        <VenueSelect
-                          venues={venues}
-                          selectedVenueId={filterVenue?._id || ''}
-                          onVenueChange={(venueId) => setFilterVenue(venues.find(v => v._id === venueId) || null)}
-                          label="Venue"
+                      <div className="mt-4 space-y-4">
+                        <TournamentSelect
+                          selectedTournament={filterTournament}
+                          onTournamentChange={setFilterTournament}
+                          allTournamentsData={tournaments}
                         />
-                      </div>
 
-                      <div className="mt-3">
                         <ClubSelect
                           clubs={clubs}
                           selectedClubId={filterClub?._id || ''}
                           onClubChange={(clubId) => setFilterClub(clubs.find(c => c._id === clubId) || null)}
-                          label="Club"
                         />
-                      </div>
 
-                      {filterClub && (
-                        <div className="mt-3">
+                        {filterClub && (
                           <TeamSelect
                             teams={filterClub.teams}
                             selectedTeamId={filterTeam?._id || ''}
                             onTeamChange={(teamId) => setFilterTeam(filterClub.teams.find(t => t._id === teamId) || null)}
-                            label="Team"
                           />
-                        </div>
-                      )}
-                      <div className="mt-6 flex justify-end items-center">
+                        )}
+                        <VenueSelect
+                          venues={venues}
+                          selectedVenueId={filterVenue?._id || ''}
+                          onVenueChange={(venueId) => setFilterVenue(venues.find(v => v._id === venueId) || null)}
+                        />
+                      </div>
+                      <div className="mt-6 flex justify-end items-center space-x-3">
                         <button
                           type="button"
                           className="text-sm text-indigo-600 hover:underline mr-3"
@@ -831,14 +827,14 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
                         </button>
                         <button
                           type="button"
-                          className="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                           onClick={handleCancel}
                         >
                           Abbrechen
                         </button>
                         <button
                           type="button"
-                          className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 bg-indigo-600 hover:bg-indigo-700"
                           onClick={handleApplyFilter}
                         >
                           Anwenden
@@ -858,22 +854,22 @@ export default function Calendar({ matches, venues, clubs }: CalendarProps) {
         <h3 className="text-base font-semibold text-gray-900">Liste</h3>
       </div>
 
-        {/* Display MatchCards for all selected matches */}
-        <div className="px-2 sm:px-6 py-4">
-          {selectedDate && matchesByDate(selectedDate).length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
-              {matchesByDate(selectedDate).map((match) => (
-                <MatchCard 
-                  key={match._id} 
-                  match={match} 
-                  onMatchUpdate={handleMatchUpdate}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-center py-12 text-gray-500">Keine Spiele verfügbar</p>
-          )}
-        </div>
+      {/* Display MatchCards for all selected matches */}
+      <div className="px-2 sm:px-6 py-4">
+        {selectedDate && matchesByDate(selectedDate).length > 0 ? (
+          <div className="grid grid-cols-1 gap-4">
+            {matchesByDate(selectedDate).map((match) => (
+              <MatchCard
+                key={match._id}
+                match={match}
+                onMatchUpdate={handleMatchUpdate}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-center py-12 text-gray-500">Keine Spiele verfügbar</p>
+        )}
+      </div>
     </Layout >
   )
 };
