@@ -9,7 +9,7 @@ import { Match, RosterPlayer, PenaltiesBase, ScoresBase } from '../../types/Matc
 import Layout from '../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs, allFinishTypes } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchStatusBadge from '../../components/ui/MatchStatusBadge';
@@ -167,12 +167,20 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonRosterAway = true;
     //showButtonEvents = true;
   }
-  
+
 
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-0 lg:px-8 py-0 lg:py-4">
-
+        <button
+          aria-label="Back button"
+          className="flex items-center"
+          onClick={() => router.back()}>
+          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+            Zurück
+          </span>
+        </button>
         {/* Match Header */}
         <div className="flex items-start justify-between sm:flex-row gap-y-2 p-4 border-b mb-6 sm:mb-8 md:mb-12">
           {/* Refresh Button */}
@@ -195,16 +203,18 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
               const item = tournamentConfigs[match.tournament.alias];
               if (item) {
                 return (
-                  <span
-                    key={item.tinyName}
-                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
-                  >
-                    {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
-                  </span>
+                    <span
+                      key={item.tinyName}
+                      className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                    >
+                      {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                    </span>
                 );
               }
             })()}
+            
           </div>
+
           {/* Match StartDate, Venue */}
           <div className="flex flex-col items-end gap-y-2">
             <div className="flex items-center space-x-2">
@@ -789,65 +799,65 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                             return secondsA - secondsB;
                           })
                           .map((penalty, index) => (
-                          <li key={`home-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                            {showButtonEvents && (
-                              <div className="flex justify-end space-x-2 flex-shrink-0">
-                                <button
-                                  onClick={() => {
-                                    setEditingHomePenalty(penalty);
-                                    setIsHomePenaltyDialogOpen(true);
-                                  }}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
-                                      try {
-                                        const response = await axios.delete(
-                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/penalties/${penalty._id}`,
-                                          {
-                                            headers: {
-                                              Authorization: `Bearer ${jwt}`,
-                                              'Content-Type': 'application/json'
-                                            }
-                                          }
-                                        );
-                                        if (response.status === 200 || response.status === 204) {
-                                          refreshMatchData();
-                                        }
-                                      } catch (error) {
-                                        console.error('Error deleting penalty:', error);
-                                      }
-                                    }
-                                  }}
-                                  className="text-red-600 hover:text-red-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
+                            <li key={`home-penalty-${index}`} className="flex items-center py-3 px-4">
+                              <div className="w-20 flex-shrink-0 text-sm text-gray-900">
+                                {penalty.matchTimeStart}
+                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
                               </div>
-                            )}
-                          </li>
-                        ))}
+                              <div className="flex-grow">
+                                <p className="text-sm text-gray-900">
+                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                  {penalty.isGM && ' (GM)'}
+                                  {penalty.isMP && ' (MP)'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                                </p>
+                              </div>
+                              {showButtonEvents && (
+                                <div className="flex justify-end space-x-2 flex-shrink-0">
+                                  <button
+                                    onClick={() => {
+                                      setEditingHomePenalty(penalty);
+                                      setIsHomePenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
+                                        try {
+                                          const response = await axios.delete(
+                                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/penalties/${penalty._id}`,
+                                            {
+                                              headers: {
+                                                Authorization: `Bearer ${jwt}`,
+                                                'Content-Type': 'application/json'
+                                              }
+                                            }
+                                          );
+                                          if (response.status === 200 || response.status === 204) {
+                                            refreshMatchData();
+                                          }
+                                        } catch (error) {
+                                          console.error('Error deleting penalty:', error);
+                                        }
+                                      }
+                                    }}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              )}
+                            </li>
+                          ))}
                       </ul>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
@@ -875,65 +885,65 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
                             return secondsA - secondsB;
                           })
                           .map((penalty, index) => (
-                          <li key={`away-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                            {showButtonEvents && (
-                              <div className="flex justify-end space-x-2 flex-shrink-0">
-                                <button
-                                  onClick={() => {
-                                    setEditingAwayPenalty(penalty);
-                                    setIsAwayPenaltyDialogOpen(true);
-                                  }}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
-                                      try {
-                                        const response = await axios.delete(
-                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/penalties/${penalty._id}`,
-                                          {
-                                            headers: {
-                                              Authorization: `Bearer ${jwt}`,
-                                              'Content-Type': 'application/json'
-                                            }
-                                          }
-                                        );
-                                        if (response.status === 200 || response.status === 204) {
-                                          refreshMatchData();
-                                        }
-                                      } catch (error) {
-                                        console.error('Error deleting penalty:', error);
-                                      }
-                                    }
-                                  }}
-                                  className="text-red-600 hover:text-red-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
+                            <li key={`away-penalty-${index}`} className="flex items-center py-3 px-4">
+                              <div className="w-20 flex-shrink-0 text-sm text-gray-900">
+                                {penalty.matchTimeStart}
+                                {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
                               </div>
-                            )}
-                          </li>
-                        ))}
+                              <div className="flex-grow">
+                                <p className="text-sm text-gray-900">
+                                  {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                                  {penalty.isGM && ' (GM)'}
+                                  {penalty.isMP && ' (MP)'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                                </p>
+                              </div>
+                              {showButtonEvents && (
+                                <div className="flex justify-end space-x-2 flex-shrink-0">
+                                  <button
+                                    onClick={() => {
+                                      setEditingAwayPenalty(penalty);
+                                      setIsAwayPenaltyDialogOpen(true);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
+                                        try {
+                                          const response = await axios.delete(
+                                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/penalties/${penalty._id}`,
+                                            {
+                                              headers: {
+                                                Authorization: `Bearer ${jwt}`,
+                                                'Content-Type': 'application/json'
+                                              }
+                                            }
+                                          );
+                                          if (response.status === 200 || response.status === 204) {
+                                            refreshMatchData();
+                                          }
+                                        } catch (error) {
+                                          console.error('Error deleting penalty:', error);
+                                        }
+                                      }
+                                    }}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              )}
+                            </li>
+                          ))}
                       </ul>
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
