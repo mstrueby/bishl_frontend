@@ -9,7 +9,7 @@ import Layout from '../../../../../components/Layout';
 import SectionHeader from "../../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import DataList from '../../../../../components/admin/ui/DataList';
-import { ta } from "date-fns/locale";
+import { ageGroupConfig } from '../../../../../tools/consts';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -173,7 +173,12 @@ const Teams: NextPage<TeamsProps> = ({ jwt, club, teams: initialTeams }) => {
 
   const teamValues = teams
     .slice()
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => {
+      const aGroup = ageGroupConfig.find(ag => ag.key === a.ageGroup);
+      const bGroup = ageGroupConfig.find(ag => ag.key === b.ageGroup);
+      const sortOrderDiff = (aGroup?.sortOrder || 0) - (bGroup?.sortOrder || 0);
+      return sortOrderDiff !== 0 ? sortOrderDiff : (a.teamNumber || 0) - (b.teamNumber || 0);
+    })
     .map((team: TeamValues) => ({
       ...team
     }));
