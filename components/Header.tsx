@@ -273,6 +273,12 @@ const Header = () => {
                               </MenuItem>
                             </>
                           )}
+                            <MenuItem>
+                              <MyLink href="/calendar" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                <CalendarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <span>Spielplan</span>
+                              </MyLink>
+                            </MenuItem>
                           {/* ADMIN items - only for admins */}
                           {user.roles?.includes('ADMIN') && (
                             <>
