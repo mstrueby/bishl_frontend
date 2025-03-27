@@ -265,7 +265,11 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
               </time>
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              {selectedDate && matchesByDate(selectedDate).length > 0 ? matchesByDate(selectedDate).length === 1 ? '1 Spiel' : `${matchesByDate(selectedDate).length} Spiele` : 'Keine Spiele'}
+              {selectedDate && matchesByDate(selectedDate).length > 0 ? (
+                <a href="#match-list" className="hover:text-gray-700">
+                  {matchesByDate(selectedDate).length} {matchesByDate(selectedDate).length === 1 ? 'Spiel' : 'Spiele'}
+                </a>
+              ) : 'Keine Spiele'}
             </p>
           </div>
           <div className="flex items-center">
@@ -859,7 +863,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
       </div>
 
       {/* Display MatchCards for all selected matches */}
-      <div className="sm:px-6 py-4">
+      <div id="match-list" className="sm:px-6 py-4"> {/* Added id="match-list" */}
         {selectedDate && matchesByDate(selectedDate).length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {matchesByDate(selectedDate).map((match) => (
