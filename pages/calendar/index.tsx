@@ -859,7 +859,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
       </div>
 
       {/* Display MatchCards for all selected matches */}
-      <div className="px-2 sm:px-6 py-4">
+      <div className="sm:px-6 py-4">
         {selectedDate && matchesByDate(selectedDate).length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {matchesByDate(selectedDate).map((match) => (
