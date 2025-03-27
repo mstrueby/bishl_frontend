@@ -342,6 +342,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                         Tag
                       </a>
                     </MenuItem>
+                    {/**
                     <MenuItem>
                       <a
                         href="#"
@@ -366,6 +367,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                         Year view
                       </a>
                     </MenuItem>
+                    */}
                   </div>
                 </MenuItems>
               </Menu>
@@ -413,6 +415,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                       Tag
                     </a>
                   </MenuItem>
+                  {/**
                   <MenuItem>
                     <a
                       href="#"
@@ -437,6 +440,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                       Year view
                     </a>
                   </MenuItem>
+                  */}
                 </div>
               </MenuItems>
             </Menu>
