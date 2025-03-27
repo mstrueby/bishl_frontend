@@ -637,7 +637,7 @@ export default function Tournament({
 
               {/* MATCHES */}
               {activeMatchdayTab === 'matches' && (
-                <div id="matches-section" className="px-2 sm:px-6 py-4">
+                <div id="matches-section" className="sm:px-6 py-4">
                   {['landesliga', 'regionalliga-ost'].includes(tournament.alias) && (
                     <div className="mb-8 relative mt-2 md:mx-28 lg:mx-56">
                       <TeamFullNameSelect

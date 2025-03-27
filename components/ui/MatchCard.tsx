@@ -347,7 +347,7 @@ const MatchCard: React.FC<{
                   {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
                 </div>
                 <span className="text-xs text-gray-600 ml-2 truncate">
-                  {match.referee1.firstName} {match.referee1.lastName}
+                  {match.referee1.firstName} {match.referee1.lastName.charAt(0)}
                 </span>
               </div>
             )}
@@ -357,7 +357,7 @@ const MatchCard: React.FC<{
                   {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
                 </div>
                 <span className="text-xs text-gray-600 ml-2 truncate">
-                  {match.referee2.firstName} {match.referee2.lastName}
+                  {match.referee2.firstName} {match.referee2.lastName.charAt(0)}
                 </span>
               </div>
             )}
