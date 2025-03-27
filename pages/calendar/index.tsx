@@ -862,7 +862,8 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
               <MatchCard
                 key={match._id}
                 match={match}
-                onMatchUpdate={handleMatchUpdate}
+                // Wrapping handleMatchUpdate to ignore the `event` parameter
+                onMatchUpdate={() => handleMatchUpdate(match)}
               />
             ))}
           </div>
