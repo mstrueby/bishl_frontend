@@ -40,6 +40,9 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
     <span className="font-normal block truncate">
       {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
     </span>
+    <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+      {assignment.referee.level}
+    </span>
   </div>
 );
 
