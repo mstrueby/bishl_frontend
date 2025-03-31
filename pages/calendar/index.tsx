@@ -270,7 +270,14 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
               className="mt-1 text-sm text-gray-500 hover:text-gray-700 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
             >
               {selectedDate && matchesByDate(selectedDate).length > 0 ? (
-                <a href="#match-list">
+                <a 
+                  href="#match-list" 
+                  className="hover:text-gray-700"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('match-list')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
                   {matchesByDate(selectedDate).length} {matchesByDate(selectedDate).length === 1 ? 'Spiel' : 'Spiele'}
                 </a>
               ) : 'Keine Spiele'}
@@ -650,7 +657,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                                 case 'jugendliga':
                                 case 'jugendliga-lk2':
                                 case 'jugendliga-p':
-                                  return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
+                                  return 'bg-blue400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
                                 case 'schuelerliga':
                                 case 'schuelerliga-lk2':
                                 case 'schuelerliga-p':
