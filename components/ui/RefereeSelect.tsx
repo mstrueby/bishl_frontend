@@ -104,7 +104,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
 
   // Placeholder component for the listbox
   const Placeholder = () => (
-    <span className="block truncate text-gray-400">(auswählen)</span>
+    <span className={`block truncate ${disabled ? 'text-red-700' : 'text-gray-400'}`}>{disabled ? "(gesperrt)" : "(auswählen)"}</span>
   );
 
   return (
