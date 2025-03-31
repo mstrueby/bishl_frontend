@@ -27,7 +27,7 @@ interface FilterState {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context) as string | undefined;
   let matches: Match[] = [];
-  let assignments = null;
+  let assignments: { [key: string]: AssignmentValues[] } = {};
   const currentDate = new Date().toISOString().split('T')[0];
 
   if (!jwt) {

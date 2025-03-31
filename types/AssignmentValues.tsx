@@ -9,6 +9,7 @@ export interface AssignmentValues {
     clubId: string;
     clubName: string;
     points: number;
+    level: string;
   };
   position: number;
 }
