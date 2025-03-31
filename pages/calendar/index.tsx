@@ -264,13 +264,16 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                 {selectedDate ? format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de }) : null}
               </time>
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <button
+              type="button"
+              className="mt-1 text-sm text-gray-500 hover:text-gray-700 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
               {selectedDate && matchesByDate(selectedDate).length > 0 ? (
-                <a href="#match-list" className="hover:text-gray-700">
+                <a href="#match-list">
                   {matchesByDate(selectedDate).length} {matchesByDate(selectedDate).length === 1 ? 'Spiel' : 'Spiele'}
                 </a>
               ) : 'Keine Spiele'}
-            </p>
+            </button>
           </div>
           <div className="flex items-center">
             <button
@@ -858,12 +861,12 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
         </div>
       </div>
 
-      <div className="mt-8 px-2 sm:px-6 py-4 border-b border-gray-200 pb-5">
+      <div id="match-list"  className="mt-8 px-2 sm:px-6 py-4 border-b border-gray-200 pb-5">
         <h3 className="text-base font-semibold text-gray-900">Liste</h3>
       </div>
 
       {/* Display MatchCards for all selected matches */}
-      <div id="match-list" className="sm:px-6 py-4"> {/* Added id="match-list" */}
+      <div className="sm:px-6 py-4"> {/* Added id="match-list" */}
         {selectedDate && matchesByDate(selectedDate).length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {matchesByDate(selectedDate).map((match) => (
