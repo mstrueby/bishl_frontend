@@ -96,7 +96,8 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   position,
   jwt,
   onConfirm,
-  onAssignmentComplete
+  onAssignmentComplete,
+  disabled = false
 }) => {
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
