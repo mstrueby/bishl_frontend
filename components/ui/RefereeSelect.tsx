@@ -16,6 +16,36 @@ interface RefereeSelectProps {
   jwt: string;
   onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => Promise<void>;
   onAssignmentComplete: (referee: Referee) => void;
+
+// Configuration for referee level colors
+const refereeLevelColors = {
+  'A': {
+    background: 'bg-green-50',
+    text: 'text-green-700',
+    ring: 'ring-green-600/20',
+    dot: 'fill-green-500'
+  },
+  'B': {
+    background: 'bg-blue-50',
+    text: 'text-blue-700',
+    ring: 'ring-blue-600/20',
+    dot: 'fill-blue-500'
+  },
+  'C': {
+    background: 'bg-yellow-50',
+    text: 'text-yellow-700',
+    ring: 'ring-yellow-600/20',
+    dot: 'fill-yellow-500'
+  },
+  'DEFAULT': {
+    background: 'bg-gray-50',
+    text: 'text-gray-700',
+    ring: 'ring-gray-600/20',
+    dot: 'fill-gray-400'
+  }
+};
+
+
 }
 
 
@@ -40,7 +70,10 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
     <span className="font-normal block truncate">
       {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
     </span>
-    <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+    <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
+      ${refereeLevelColors[assignment.referee.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
+      ${refereeLevelColors[assignment.referee.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
+      ${refereeLevelColors[assignment.referee.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
       {assignment.referee.level}
     </span>
   </div>
