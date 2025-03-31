@@ -19,6 +19,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [unassignLoading, setUnassignLoading] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
+  // Calculate if referee assignment should be disabled based on match date
+  const now = new Date();
+  const matchStart = new Date(startDate);
+  const daysDiff = Math.ceil((matchStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const isDisabled = daysDiff <= 14 && daysDiff >= 7;
+
 
 
   const getValidTransitions = (currentStatus: string) => {
@@ -159,11 +165,6 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         <div className="w-full">
           <>
             {(() => {
-              const now = new Date();
-              const matchStart = new Date(startDate);
-              const daysDiff = Math.ceil((matchStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-              const isDisabled = daysDiff <= 14 && daysDiff >= 7;
-
               return referee1 ? (
                 <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
                   {/* status indicator, avatar, name */}
