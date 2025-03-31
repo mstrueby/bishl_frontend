@@ -16,6 +16,7 @@ interface RefereeSelectProps {
   jwt: string;
   onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => Promise<void>;
   onAssignmentComplete: (referee: Referee) => void;
+  disabled?: boolean;
 }
 
 // Configuration for referee level colors
@@ -106,8 +107,10 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox value={selected}
+    <Listbox 
+      value={selected}
       onChange={setSelected}
+      disabled={disabled}
     >
       {({ open }) => (
         <>

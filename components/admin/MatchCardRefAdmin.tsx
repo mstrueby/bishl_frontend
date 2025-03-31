@@ -157,8 +157,14 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
       <div className="flex flex-col justify-between mt-3 sm:mt-0 pt-2 sm:pt-0 gap-y-2 sm:w-1/3 md:w-1/3 border-t sm:border-0">
         {/* referee 1 (assigned or select box) */}
         <div className="w-full">
-          {referee1 ? (
-            <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
+          {(() => {
+            const now = new Date();
+            const matchStart = new Date(startDate);
+            const daysDiff = Math.ceil((matchStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            const isDisabled = daysDiff <= 14 && daysDiff >= 7;
+
+            return referee1 ? (
+              <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
               {/** status indicator, avatar, name */}
               <div className="flex items-center gap-x-3">
                 {(() => {
@@ -224,6 +230,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               jwt={jwt}
               onConfirm={updateAssignmentStatus}
               onAssignmentComplete={setReferee1}
+              disabled={isDisabled}
             />
           )}
         </div>
@@ -292,7 +299,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               jwt={jwt}
               onConfirm={updateAssignmentStatus}
               onAssignmentComplete={setReferee2}
+              disabled={isDisabled}
             />
+)}())}
           )}
         </div>
       </div>
