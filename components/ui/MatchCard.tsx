@@ -147,8 +147,40 @@ const MatchCard: React.FC<{
   }
 }> = ({ match: initialMatch, onMatchUpdate, matchdayOwner }) => {
   const [match, setMatch] = useState(initialMatch);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
+
+  // Auto-refresh for in-progress matches
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    const refreshMatch = async () => {
+      if (isRefreshing) return;
+      
+      try {
+        setIsRefreshing(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`);
+        const updatedMatch = await response.json();
+        setMatch(updatedMatch);
+        if (onMatchUpdate) {
+          await onMatchUpdate();
+        }
+      } catch (error) {
+        console.error('Error refreshing match:', error);
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+
+    if (match.matchStatus.key === 'INPROGRESS') {
+      interval = setInterval(refreshMatch, 30000); // Refresh every 30 seconds
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [match._id, match.matchStatus.key, onMatchUpdate, isRefreshing]);
 
   let showLinkEdit = false;
   let showLinkStatus = false;
