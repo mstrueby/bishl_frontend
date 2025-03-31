@@ -264,6 +264,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                 {selectedDate ? format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de }) : null}
               </time>
             </h1>
+            {/** Button to match list */}
             <button
               type="button"
               className="mt-1 text-sm text-gray-500 hover:text-gray-700 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
