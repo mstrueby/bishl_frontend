@@ -16,26 +16,39 @@ interface RefereeSelectProps {
   jwt: string;
   onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => Promise<void>;
   onAssignmentComplete: (referee: Referee) => void;
+}
 
 // Configuration for referee level colors
 const refereeLevelColors = {
-  'A': {
+  'SM': {
     background: 'bg-green-50',
     text: 'text-green-700',
     ring: 'ring-green-600/20',
     dot: 'fill-green-500'
   },
-  'B': {
+  'S': {
     background: 'bg-blue-50',
     text: 'text-blue-700',
     ring: 'ring-blue-600/20',
     dot: 'fill-blue-500'
   },
-  'C': {
+  'SR': {
     background: 'bg-yellow-50',
     text: 'text-yellow-700',
     ring: 'ring-yellow-600/20',
     dot: 'fill-yellow-500'
+  },
+  'PS': {
+    background: 'bg-red-50',
+    text: 'text-red-700',
+    ring: 'ring-red-600/20',
+    dot: 'fill-red-500'
+  },
+  'PR': {
+    background: 'bg-purple-50',
+    text: 'text-purple-700',
+    ring: 'ring-purple-600/20',
+    dot: 'fill-purple-500'
   },
   'DEFAULT': {
     background: 'bg-gray-50',
@@ -44,9 +57,6 @@ const refereeLevelColors = {
     dot: 'fill-gray-400'
   }
 };
-
-
-}
 
 
 {/** Referee Item */ }
