@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { Referee } from '../../types/MatchValues';
-import { CalendarIcon, MapPinIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, XCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs, allRefereeAssignmentStatuses } from '../../tools/consts';
@@ -19,7 +19,11 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [unassignLoading, setUnassignLoading] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
-
+  // Calculate if referee assignment should be disabled based on match date
+  const now = new Date();
+  const matchStart = new Date(startDate);
+  const daysDiff = Math.ceil((matchStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const isDisabled = daysDiff <= 14 && daysDiff >= 7;
 
   const getValidTransitions = (currentStatus: string) => {
     switch (currentStatus) {
@@ -157,82 +161,77 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
       <div className="flex flex-col justify-between mt-3 sm:mt-0 pt-2 sm:pt-0 gap-y-2 sm:w-1/3 md:w-1/3 border-t sm:border-0">
         {/* referee 1 (assigned or select box) */}
         <div className="w-full">
-          <>
-            {(() => {
-              const now = new Date();
-              const matchStart = new Date(startDate);
-              const daysDiff = Math.ceil((matchStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-              const isDisabled = daysDiff <= 14 && daysDiff >= 7;
+          {referee1 ? (
+            <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
+              {/* status indicator, avatar, name */}
+              <div className="flex items-center gap-x-3">
+                {(() => {
+                  const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
+                  const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === referee1Assignment?.status);
+                  console.log('Referee1 Assignment:', referee1Assignment);
 
-              return referee1 ? (
-                <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
-                  {/* status indicator, avatar, name */}
-                  <div className="flex items-center gap-x-3">
-                    {(() => {
-                      const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
-                      const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === referee1Assignment?.status);
-                      console.log('Referee1 Assignment:', referee1Assignment);
-
-                      const statusColor = statusConfig?.color.dotRefAdmin || 'fill-gray-400';
-                      return (
-                        <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8">
-                          <circle cx="4" cy="4" r="4" />
-                        </svg>
-                      );
-                    })()}
-                    <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                      {referee1.firstName.charAt(0)}{referee1.lastName.charAt(0)}
-                    </div>
-                    <span>
-                      {referee1.firstName} {referee1.lastName}
-                    </span>
-                  </div>
-                  {/* unassign button */}
-                  <button
-                    onClick={async () => {
-                      const assignment = assignments.find(a => a.referee.userId === referee1.userId);
-                      if (assignment && deleteConfirmationMap[referee1.userId]) {
-                        setUnassignLoading(prev => ({ ...prev, [referee1.userId]: true }));
-                        await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
-                        setReferee1(null);
-                        setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
-                        setUnassignLoading(prev => ({ ...prev, [referee1.userId]: false }));
-                      } else if (assignment) {
-                        setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: true }));
-                        if (timeoutRef.current[referee1.userId]) {
-                          clearTimeout(timeoutRef.current[referee1.userId]);
-                        }
-                        timeoutRef.current[referee1.userId] = setTimeout(() => {
-                          setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
-                        }, 3000);
-                      }
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    {unassignLoading[referee1.userId] ? (
-                      <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                      </svg>
-                    ) : deleteConfirmationMap[referee1.userId] ? (
-                      <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                    ) : (
-                      <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
-                    )}
-                  </button>
+                  const statusColor = statusConfig?.color.dotRefAdmin || 'fill-gray-400';
+                  return (
+                    <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8">
+                      <circle cx="4" cy="4" r="4" />
+                    </svg>
+                  );
+                })()}
+                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  {referee1.firstName.charAt(0)}{referee1.lastName.charAt(0)}
                 </div>
+                <span>
+                  {referee1.firstName} {referee1.lastName}
+                </span>
+              </div>
+              {/* unassign button */}
+              {isDisabled ? (
+                <LockClosedIcon className="h-4 w-4 text-red-700" aria-hidden="true" />
               ) : (
-                <RefereeSelect
-                  assignments={assignments.filter(a => (!referee2 || a.referee.userId !== referee2.userId) && a.status !== 'UNAVAILABLE')}
-                  position={1}
-                  jwt={jwt}
-                  onConfirm={updateAssignmentStatus}
-                  onAssignmentComplete={setReferee1}
-                  disabled={isDisabled}
-                />
-              );
-            })()};
-          </>
+                <button
+                  onClick={async () => {
+                    const assignment = assignments.find(a => a.referee.userId === referee1.userId);
+                    if (assignment && deleteConfirmationMap[referee1.userId]) {
+                      setUnassignLoading(prev => ({ ...prev, [referee1.userId]: true }));
+                      await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
+                      setReferee1(null);
+                      setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
+                      setUnassignLoading(prev => ({ ...prev, [referee1.userId]: false }));
+                    } else if (assignment) {
+                      setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: true }));
+                      if (timeoutRef.current[referee1.userId]) {
+                        clearTimeout(timeoutRef.current[referee1.userId]);
+                      }
+                      timeoutRef.current[referee1.userId] = setTimeout(() => {
+                        setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
+                      }, 3000);
+                    }
+                  }}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  {unassignLoading[referee1.userId] ? (
+                    <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  ) : deleteConfirmationMap[referee1.userId] ? (
+                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                  ) : (
+                    <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                  )}
+                </button>
+              )}
+            </div>
+          ) : (
+            <RefereeSelect
+              assignments={assignments.filter(a => (!referee2 || a.referee.userId !== referee2.userId) && a.status !== 'UNAVAILABLE')}
+              position={1}
+              jwt={jwt}
+              onConfirm={updateAssignmentStatus}
+              onAssignmentComplete={setReferee1}
+              disabled={isDisabled}
+            />
+          )}
         </div>
         {/* referee 2 (assigned or select box) */}
         <div className="w-full">
@@ -261,38 +260,43 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                   {referee2.firstName} {referee2.lastName}
                 </span>
               </div>
-              <button
-                onClick={async () => {
-                  const assignment = assignments.find(a => a.referee.userId === referee2.userId);
-                  if (assignment && deleteConfirmationMap[referee2.userId]) {
-                    setUnassignLoading(prev => ({ ...prev, [referee2.userId]: true }));
-                    await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 2);
-                    setReferee2(null);
-                    setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
-                    setUnassignLoading(prev => ({ ...prev, [referee2.userId]: false }));
-                  } else if (assignment) {
-                    setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: true }));
-                    if (timeoutRef.current[referee2.userId]) {
-                      clearTimeout(timeoutRef.current[referee2.userId]);
-                    }
-                    timeoutRef.current[referee2.userId] = setTimeout(() => {
+              {/* unassign button */}
+              {isDisabled ? (
+                <LockClosedIcon className="h-4 w-4 text-red-700" aria-hidden="true" />
+              ) : (
+                <button
+                  onClick={async () => {
+                    const assignment = assignments.find(a => a.referee.userId === referee2.userId);
+                    if (assignment && deleteConfirmationMap[referee2.userId]) {
+                      setUnassignLoading(prev => ({ ...prev, [referee2.userId]: true }));
+                      await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 2);
+                      setReferee2(null);
                       setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
-                    }, 3000);
-                  }
-                }}
-                className="text-red-500 hover:text-red-700"
-              >
-                {unassignLoading[referee2.userId] ? (
-                  <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                ) : deleteConfirmationMap[referee2.userId] ? (
-                  <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                ) : (
-                  <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
-                )}
-              </button>
+                      setUnassignLoading(prev => ({ ...prev, [referee2.userId]: false }));
+                    } else if (assignment) {
+                      setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: true }));
+                      if (timeoutRef.current[referee2.userId]) {
+                        clearTimeout(timeoutRef.current[referee2.userId]);
+                      }
+                      timeoutRef.current[referee2.userId] = setTimeout(() => {
+                        setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
+                      }, 3000);
+                    }
+                  }}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  {unassignLoading[referee2.userId] ? (
+                    <svg className="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  ) : deleteConfirmationMap[referee2.userId] ? (
+                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                  ) : (
+                    <XCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                  )}
+                </button>
+              )}
             </div>
           ) : (
             <RefereeSelect
@@ -306,7 +310,6 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
           )}
         </div>
       </div>
-      )
     </div>
   )
 };
