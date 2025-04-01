@@ -1366,6 +1366,20 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 <div className="flex space-x-3 mt-6 justify-end">
+                    <PDFDownloadLink
+                      document={
+                        <RosterPDF
+                          teamName={team.fullName}
+                          matchDate={new Date(match.startDate).toLocaleDateString()}
+                          venue={match.venue.name}
+                          roster={rosterList}
+                        />
+                      }
+                      fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
+                      className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                      {({ loading }) => (loading ? 'Generiere PDF...' : 'PDF herunterladen')}
+                    </PDFDownloadLink>
                     <button
                         type="button"
                         onClick={() => router.back()}
