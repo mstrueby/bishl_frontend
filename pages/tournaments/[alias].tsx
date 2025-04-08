@@ -164,7 +164,7 @@ export default function Tournament({
       setSelectedTeam('');
     }
     setIsLoadingInitial(false);
-  }, [router.isFallback, tournament?.alias]);
+  }, [router.isFallback, tournament, tournament?.alias]);
 
   useEffect(() => {
     if (selectedSeason.name) {
