@@ -175,7 +175,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
           minuteOfDay) /
         1440;
     }
-  }, [selectedDate, selectedVenue, selectedClub, selectedTeam, selectedTournament]);
+  }, [selectedDate, selectedVenue, selectedClub, selectedTeam, selectedTournament, matchesByDate]);
 
   // Store initial values when opening the modal
   const [initialValues, setInitialValues] = useState<{
