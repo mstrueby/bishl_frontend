@@ -6,7 +6,7 @@ import Layout from '../../components/Layout';
 import Standings from '../../components/ui/Standings';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid'
 import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline'
-import { Fragment, useEffect, useState, useRef } from 'react'
+import { Fragment, useEffect, useState, useRef, useCallback } from 'react'
 import { Listbox, Transition, Dialog } from '@headlessui/react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, getDay } from 'date-fns';
 import { de } from 'date-fns/locale'; // Import German locale
@@ -138,7 +138,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
     setCurrentMonth(firstDayNextMonth);
   };
 
-  const matchesByDate = (date: Date) => {
+  const matchesByDate = useCallback((date: Date) => {
     if (!date) return [];
     return calendarMatches.filter(match => {
       const matchDate = new Date(match.startDate);
@@ -153,7 +153,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
 
       return dateMatches && venueMatches && clubMatches && teamMatches && tournamentMatches;
     });
-  };
+  }, [calendarMatches, selectedVenue, selectedClub, selectedTeam, selectedTournament]);
 
   const matchesByDateTime = (date: Date, hour: number, minute: number) => {
     return calendarMatches.filter(match => {
