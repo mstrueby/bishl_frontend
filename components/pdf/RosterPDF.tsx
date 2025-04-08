@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   table: {
-    display: 'table',
     width: '100%',
     marginBottom: 10,
   },
