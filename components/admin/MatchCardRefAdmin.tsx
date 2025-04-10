@@ -8,6 +8,7 @@ import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs, allRefereeAssignmentStatuses } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+import axios from 'axios';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -19,6 +20,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [unassignLoading, setUnassignLoading] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
+  if (match._id==='67c1f27eefe0c2f17eba73bf') {
+    console.log("assignments", assignments)
+  }
   // Calculate if referee assignment should be disabled based on match date
   const now = new Date();
   const matchStart = new Date(startDate);
@@ -26,8 +30,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const isDisabled = daysDiff <= 14 && daysDiff >= 7;
 
   const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
+    let newId: string = ''
     try {
-      const method = assignment?._id ? 'PATCH' : 'POST';
+      const method = assignment?._id ? 'patch' : 'post';
       const endpoint = `${BASE_URL}/assignments${assignment?._id ? `/${assignment._id}` : '/'}`;
 
       const body = {
@@ -38,26 +43,29 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
         position: position
       };
 
-      { console.log("enpoint", endpoint) }
+      { console.log("endpoint", endpoint) }
       { console.log('Body: ', body) }
 
-      const response = await fetch(endpoint, {
+      const response = await axios({
         method,
+        url: endpoint,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`,
         },
-        body: JSON.stringify(body)
+        data: body
       });
+      console.log("response", response.data._id)
+      newId = response.data._id;
 
-      if (!response.ok) {
+      if (response.status !== 200 && response.status !== 201) {
         throw new Error('Failed to update assignment status');
       }
 
       // Update the local assignments array with the new status
       const updatedAssignments = assignments.map(a =>
         a.referee.userId === assignment.referee.userId
-          ? { ...a, status: assignment.status }
+          ? { ...a, _id: newId, status: assignment.status }
           : a
       );
       assignments.splice(0, assignments.length, ...updatedAssignments);
@@ -68,18 +76,26 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
   const deleteAssignment = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     try {
-      const response = await fetch(`${BASE_URL}/assignments/${assignment._id}`, {
+      const response = await axios({
         method: 'DELETE',
+        url: `${BASE_URL}/assignments/${assignment._id}`,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`,
         }
       });
-      if (!response.ok) {
+      if (response.status !== 204) { // Assuming delete returns a 204 No Content
         throw new Error('Failed to delete assignment');
       } else {
-        console.log(response)
+        console.log(response);
       }
+      // Update the local assignments array with the new status
+      const updatedAssignments = assignments.map(a =>
+        a.referee.userId === assignment.referee.userId
+          ? { ...a, _id: '', status: 'AVAILABLE' }
+          : a
+      );
+      assignments.splice(0, assignments.length, ...updatedAssignments);
 
     } catch (error) {
       console.error('Error deleting assignment:', error);
@@ -196,8 +212,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                     const assignment = assignments.find(a => a.referee.userId === referee1.userId);
                     if (assignment && deleteConfirmationMap[referee1.userId]) {
                       setUnassignLoading(prev => ({ ...prev, [referee1.userId]: true }));
-                      await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
-                      // await deleteAssignment(jwt, assignment, 1);
+                      //await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
+                      await deleteAssignment(jwt, assignment, 1);
                       setReferee1(null);
                       setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
                       setUnassignLoading(prev => ({ ...prev, [referee1.userId]: false }));
