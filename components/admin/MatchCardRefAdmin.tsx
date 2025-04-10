@@ -66,6 +66,26 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
     }
   }
 
+  const deleteAssignment = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
+    try {
+      const response = await fetch(`${BASE_URL}/assignments/${assignment._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`,
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete assignment');
+      } else {
+        console.log(response)
+      }
+
+    } catch (error) {
+      console.error('Error deleting assignment:', error);
+    }
+  }
+
   return (
     <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
@@ -176,7 +196,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                     const assignment = assignments.find(a => a.referee.userId === referee1.userId);
                     if (assignment && deleteConfirmationMap[referee1.userId]) {
                       setUnassignLoading(prev => ({ ...prev, [referee1.userId]: true }));
-                      await updateAssignmentStatus(jwt, { ...assignment, status: 'AVAILABLE' }, 1);
+                      await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
+                      // await deleteAssignment(jwt, assignment, 1);
                       setReferee1(null);
                       setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
                       setUnassignLoading(prev => ({ ...prev, [referee1.userId]: false }));
@@ -252,7 +273,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                     const assignment = assignments.find(a => a.referee.userId === referee2.userId);
                     if (assignment && deleteConfirmationMap[referee2.userId]) {
                       setUnassignLoading(prev => ({ ...prev, [referee2.userId]: true }));
-                      await updateAssignmentStatus(jwt, { ...assignment, status: 'AVAILABLE' }, 2);
+                      // await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 2);
+                      await deleteAssignment(jwt, assignment, 2);
                       setReferee2(null);
                       setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
                       setUnassignLoading(prev => ({ ...prev, [referee2.userId]: false }));
