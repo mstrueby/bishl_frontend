@@ -652,6 +652,8 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                                   return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
                                 case 'landesliga':
                                   return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
+                                case 'hobbyliga':
+                                  return 'bg-stone-400/10 text-stone-600 border-stone-600/50 hover:bg-stone-300/50';
                                 case 'juniorenliga':
                                 case 'juniorenliga-p':
                                   return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';

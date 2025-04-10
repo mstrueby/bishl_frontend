@@ -25,27 +25,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const daysDiff = Math.ceil((matchStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   const isDisabled = daysDiff <= 14 && daysDiff >= 7;
 
-  const getValidTransitions = (currentStatus: string) => {
-    switch (currentStatus) {
-      case 'AVAILABLE':
-        return ['REQUESTED', 'UNAVAILABLE'];
-      case 'REQUESTED':
-        return ['UNAVAILABLE'];
-      case 'ASSIGNED':
-        return ['ACCEPTED'];
-      case 'ACCEPTED':
-        return [];
-      case 'UNAVAILABLE':
-        return ['REQUESTED'];
-      default:
-        return ['AVAILABLE'];
-    }
-  }
-
   const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     try {
       const method = assignment?._id ? 'PATCH' : 'POST';
-      const endpoint = `${BASE_URL}/assignments${assignment?._id ? `/${assignment._id}` : ''}`;
+      const endpoint = `${BASE_URL}/assignments${assignment?._id ? `/${assignment._id}` : '/'}`;
 
       const body = {
         matchId: assignment.matchId,
@@ -193,7 +176,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                     const assignment = assignments.find(a => a.referee.userId === referee1.userId);
                     if (assignment && deleteConfirmationMap[referee1.userId]) {
                       setUnassignLoading(prev => ({ ...prev, [referee1.userId]: true }));
-                      await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
+                      await updateAssignmentStatus(jwt, { ...assignment, status: 'AVAILABLE' }, 1);
                       setReferee1(null);
                       setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
                       setUnassignLoading(prev => ({ ...prev, [referee1.userId]: false }));
@@ -269,7 +252,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                     const assignment = assignments.find(a => a.referee.userId === referee2.userId);
                     if (assignment && deleteConfirmationMap[referee2.userId]) {
                       setUnassignLoading(prev => ({ ...prev, [referee2.userId]: true }));
-                      await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 2);
+                      await updateAssignmentStatus(jwt, { ...assignment, status: 'AVAILABLE' }, 2);
                       setReferee2(null);
                       setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
                       setUnassignLoading(prev => ({ ...prev, [referee2.userId]: false }));
