@@ -542,7 +542,7 @@ export default function Tournament({
                         <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                           <span className="inline-flex w-full truncate">
                             <span className="truncate uppercase font-semibold">{selectedMatchday.name}</span>
-                            {selectedRound.matchdaysType.key !== 'GROUP' && (
+                            {selectedRound.matchdaysType.key !== 'GROUP' && selectedMatchday.startDate && selectedMatchday.endDate && (
                               <span className="ml-2 truncate text-indigo-100">{formatDate(selectedMatchday.startDate, selectedMatchday.endDate)}</span>
                             )}
                           </span>
@@ -576,7 +576,7 @@ export default function Tournament({
                                       <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate uppercase')}>
                                         {matchday.name}
                                       </span>
-                                      {selectedRound.matchdaysType.key !== 'GROUP' && (
+                                      {selectedRound.matchdaysType.key !== 'GROUP' && matchday.startDate && matchday.endDate && (
                                         <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
                                           {formatDate(matchday.startDate, matchday.endDate)}
                                         </span>
