@@ -6,7 +6,7 @@ import Layout from '../../components/Layout';
 import Standings from '../../components/ui/Standings';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid'
 import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline'
-import { Fragment, useEffect, useState, useRef } from 'react'
+import { Fragment, useEffect, useState, useRef, useCallback } from 'react'
 import { Listbox, Transition, Dialog } from '@headlessui/react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, getDay } from 'date-fns';
 import { de } from 'date-fns/locale'; // Import German locale
@@ -138,7 +138,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
     setCurrentMonth(firstDayNextMonth);
   };
 
-  const matchesByDate = (date: Date) => {
+  const matchesByDate = useCallback((date: Date) => {
     if (!date) return [];
     return calendarMatches.filter(match => {
       const matchDate = new Date(match.startDate);
@@ -153,7 +153,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
 
       return dateMatches && venueMatches && clubMatches && teamMatches && tournamentMatches;
     });
-  };
+  }, [calendarMatches, selectedVenue, selectedClub, selectedTeam, selectedTournament]);
 
   const matchesByDateTime = (date: Date, hour: number, minute: number) => {
     return calendarMatches.filter(match => {
@@ -652,6 +652,8 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                                   return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
                                 case 'landesliga':
                                   return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
+                                case 'hobbyliga':
+                                  return 'bg-stone-400/10 text-stone-600 border-stone-600/50 hover:bg-stone-300/50';
                                 case 'juniorenliga':
                                 case 'juniorenliga-p':
                                   return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';
