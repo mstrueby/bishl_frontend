@@ -14,6 +14,7 @@ function classNames(...classes: string[]) {
 const tournamentConfigs = [
   { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '/tournaments/regionalliga-ost', bdg_col_dark: 'bg-red-400/10 text-red-400 ring-red-400/20', bdg_col_light: 'bg-red-50 text-red-700 ring-red-600/10' },
   { name: 'Landesliga', tiny_name: 'LL', href: '/tournaments/landesliga', bdg_col_dark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-500/10' },
+  { name: 'Hobbyliga', tiny_name: 'HL', href: '/tournaments/hobbyliga', bdg_col_dark: 'bg-stone-200/10 text-stone-400 ring-stone-200/20', bdg_col_light: 'bg-stone-100 text-stone-600 ring-stone-800/10' },
   { name: 'Juniorenliga', tiny_name: 'U19', href: '/tournaments/juniorenliga', bdg_col_dark: 'bg-green-500/10 text-green-400 ring-green-500/20', bdg_col_light: 'bg-green-50 text-green-700 ring-green-600/20' },
   { name: 'Jugendliga', tiny_name: 'U16', href: '/tournaments/jugendliga', bdg_col_dark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdg_col_light: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
   { name: 'Jugendliga P', tiny_name: 'U16-P', href: '/tournaments/jugendliga-p', bdg_col_dark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdg_col_light: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
@@ -26,7 +27,7 @@ const tournamentConfigs = [
 ];
 
 const men = tournamentConfigs.filter((config: { name: string }) =>
-  ['Regionalliga Ost', 'Landesliga'].includes(config.name)
+  ['Regionalliga Ost', 'Landesliga', 'Hobbyliga'].includes(config.name)
 );
 
 const youth = tournamentConfigs.filter((config: { name: string }) =>

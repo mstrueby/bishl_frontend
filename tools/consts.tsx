@@ -157,6 +157,16 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     active: true,
     sortOrder: 11,
   },
+  'hobbyliga': {
+    name: 'Hobbyliga',
+    tinyName: 'HL',
+    href: '/tournaments/hobbyliga',
+    bdgColDark: 'bg-stone-200/10 text-stone-400 ring-stone-200/20',
+    bdgColLight: 'bg-stone-100 text-stone-600 ring-stone-800/10',
+    matchLenMin: 45,
+    active: true,
+    sortOrder: 12,
+  },
   'juniorenliga': {
     name: 'Juniorenliga',
     tinyName: 'U19',
