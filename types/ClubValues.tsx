@@ -39,9 +39,9 @@ export interface ClubValues {
   yearOfFoundation: number | '';
   description: string;
   website: string;
-  ishdId: number | '';
+  ishdId: string | '';
   active: boolean;
   logoUrl: string;
-  legacyId: number | '';
+  legacyId: string | '';
   teams: TeamValues[]; // Use the new Team interface
 }

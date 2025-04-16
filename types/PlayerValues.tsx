@@ -2,6 +2,7 @@ export interface NewClubAssignment {
   clubId: string;
   clubName: string;
   clubAlias: string;
+  clubIshdId?: number;
   teams: {
     teamId: string;
     teamName: string;
@@ -29,7 +30,7 @@ export interface Assignment {
   clubId: string;
   clubName: string;
   clubAlias: string;
-  clubIshdId?: number;
+  clubIshdId?: string | '';
   teams: AssignmentTeam[];
 };
 

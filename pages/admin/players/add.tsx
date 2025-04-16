@@ -104,7 +104,31 @@ export default function Add({ jwt, clubs }: AddProps) {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value as string);
+        if (key === 'image' && value instanceof File) {
+          formData.append('image', value);
+        } else if (typeof value === 'object' && key !== 'imageUrl') {
+          if (key === 'assignedTeams') {
+            const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
+              ...club,
+              teams: club.teams.map(team => {
+                if (team.jerseyNo === null) {
+                  const { jerseyNo, ...restTeam } = team;
+                  return restTeam;
+                }
+                return team;
+              })
+            }));
+            formData.append(key, JSON.stringify(cleanedTeams));
+          } else {
+            formData.append(key, JSON.stringify(value));
+          }
+        } else {
+          if (key === 'imageUrl' && value !== null) {
+            formData.append(key, value);
+          } else if (key !== 'imageUrl') {
+            formData.append(key, value);
+          }
+        }
       });
 
       console.log('FormData entries:', Array.from(formData.entries()));

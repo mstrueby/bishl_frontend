@@ -124,9 +124,7 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
         }
       });
 
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
+      console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await axios.patch(`${BASE_URL}/players/${player._id}`, formData, {
         headers: {
