@@ -75,6 +75,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           clubId: selectedClub._id,
           clubName: selectedClub.name,
           clubAlias: selectedClub.alias,
+          clubIshdId: selectedClub.ishdId,
           teams: [{
             teamId: selectedTeam._id,
             teamName: selectedTeam.name,
