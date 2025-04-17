@@ -40,7 +40,7 @@ const Footer = () => {
             <Link href="/">
               <div className="hover:cursor-pointer flex justify-center items-center">
                 <Image
-                  src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                  src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo_mono.svg"
                   alt="BISHL"
                   width={64}
                   height={64}
@@ -56,7 +56,7 @@ const Footer = () => {
             <Link href="/">
               <div className="hover:cursor-pointer flex justify-center items-center">
                 <Image
-                  src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                  src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo_mono.svg"
                   alt="BISHL"
                   width={128}
                   height={128}
