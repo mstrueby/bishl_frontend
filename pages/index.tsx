@@ -76,15 +76,22 @@ export default function Home() {
                     <div className="flex-grow">Deutscher Rollsport- und Inline-Verband</div>
                     </div>
                   </div>
-                  <div className="mt-10 flex items-center justify-center gap-x-6">
-
+                  <div className="mt-32 flex items-center justify-center gap-x-6">
+                    <div className="hover:cursor-pointer flex justify-center items-center">
+                      <Image
+                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo_mono.svg"
+                        alt="BISHL"
+                        width={96}
+                        height={96}
+                        layout="fixed"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     </>
   );
