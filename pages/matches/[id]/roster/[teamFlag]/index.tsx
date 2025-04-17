@@ -1376,6 +1376,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                           matchDate={new Date(match.startDate).toLocaleDateString()}
                           venue={match.venue.name}
                           roster={rosterList}
+                          teamLogo={team.logo}
                         />
                       }
                       fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}

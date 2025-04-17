@@ -1,37 +1,83 @@
 
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { RosterPlayer } from '../../types/MatchValues';
 
 const styles = StyleSheet.create({
   page: {
-    padding: 30,
+    padding: 40,
+    fontSize: 12,
   },
   header: {
-    marginBottom: 20,
-    textAlign: 'center',
+    marginBottom: 30,
+    borderBottom: 1,
+    paddingBottom: 10,
+    borderColor: '#666',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 60,
+    height: 60,
+  },
+  teamInfo: {
+    flex: 1,
+    marginLeft: 20,
   },
   title: {
-    fontSize: 18,
-    marginBottom: 10,
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
   },
   table: {
     width: '100%',
-    marginBottom: 10,
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#000',
+    borderBottomColor: '#EEEEEE',
     borderBottomStyle: 'solid',
     alignItems: 'center',
-    height: 24,
+    minHeight: 30,
+    paddingVertical: 5,
   },
   tableHeader: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F3F4F6',
+    borderBottomColor: '#666',
+    borderBottomWidth: 2,
   },
-  tableCell: {
-    width: '25%',
-    padding: 5,
+  numberCell: {
+    width: '15%',
+    paddingHorizontal: 8,
+  },
+  positionCell: {
+    width: '20%',
+    paddingHorizontal: 8,
+  },
+  nameCell: {
+    width: '45%',
+    paddingHorizontal: 8,
+  },
+  passCell: {
+    width: '20%',
+    paddingHorizontal: 8,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 40,
+    right: 40,
+    textAlign: 'center',
+    color: '#666',
+    borderTop: 1,
+    borderColor: '#666',
+    paddingTop: 10,
   },
 });
 
@@ -40,35 +86,50 @@ interface RosterPDFProps {
   matchDate: string;
   venue: string;
   roster: RosterPlayer[];
+  teamLogo?: string;
 }
 
-const RosterPDF = ({ teamName, matchDate, venue, roster }: RosterPDFProps) => (
+const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.title}>{teamName}</Text>
-        <Text>{matchDate} - {venue}</Text>
+        <View style={styles.headerContent}>
+          {teamLogo && (
+            <Image
+              style={styles.logo}
+              src={teamLogo}
+            />
+          )}
+          <View style={styles.teamInfo}>
+            <Text style={styles.title}>{teamName}</Text>
+            <Text style={styles.subtitle}>{matchDate} - {venue}</Text>
+          </View>
+        </View>
       </View>
 
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
-          <Text style={styles.tableCell}>Nr.</Text>
-          <Text style={styles.tableCell}>Position</Text>
-          <Text style={styles.tableCell}>Name</Text>
-          <Text style={styles.tableCell}>Pass-Nr.</Text>
+          <Text style={styles.numberCell}>Nr.</Text>
+          <Text style={styles.positionCell}>Position</Text>
+          <Text style={styles.nameCell}>Name</Text>
+          <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
         
         {roster.map((player) => (
           <View key={player.player.playerId} style={styles.tableRow}>
-            <Text style={styles.tableCell}>{player.player.jerseyNumber}</Text>
-            <Text style={styles.tableCell}>{player.playerPosition.key}</Text>
-            <Text style={styles.tableCell}>
+            <Text style={styles.numberCell}>{player.player.jerseyNumber}</Text>
+            <Text style={styles.positionCell}>{player.playerPosition.key}</Text>
+            <Text style={styles.nameCell}>
               {player.player.lastName}, {player.player.firstName}
               {player.called && ' (H)'}
             </Text>
-            <Text style={styles.tableCell}>{player.passNumber}</Text>
+            <Text style={styles.passCell}>{player.passNumber}</Text>
           </View>
         ))}
+      </View>
+
+      <View style={styles.footer}>
+        <Text>Generated on {new Date().toLocaleDateString()}</Text>
       </View>
     </Page>
   </Document>
