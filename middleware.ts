@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
     );
   }
   
-  // Allow only the home page and essential paths
+  // Allow only essential paths and redirect everything else to home
   const allowedPaths = ['/', '/api', '/_next', '/static'];
   const isAllowedPath = allowedPaths.some(path => request.nextUrl.pathname.startsWith(path));
   
