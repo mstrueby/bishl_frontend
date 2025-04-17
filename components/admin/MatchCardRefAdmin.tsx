@@ -27,7 +27,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const now = new Date();
   const matchStart = new Date(startDate);
   const daysDiff = Math.ceil((matchStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  const isDisabled = daysDiff <= 14 && daysDiff >= 7;
+  let isDisabled = daysDiff <= 14 && daysDiff >= 7;
+
+  // Feature-Switch
+  if (process.env.NODE_ENV === 'production') {
+    isDisabled = false;
+  }
 
   const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     let newId: string = ''
