@@ -1,14 +1,12 @@
 
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  const url = request.url;
+  const hostname = request.headers.get('host');
 
-  const url = request.url; // corrected variable name
-  let cookie = request.cookies.get('jwt'); // corrected variable name
-
-  const hostname = request.headers.get('host')
-
+  // Keep the www redirect
   if (hostname === 'bishl.de') {
     return NextResponse.redirect(
       `https://www.bishl.de${request.nextUrl.pathname}${request.nextUrl.search}`,
@@ -16,9 +14,12 @@ export function middleware(request: NextRequest) {
     );
   }
   
-  if ((url.includes('/leaguemanager') || url.includes('/admin')) && !cookie) {
-    const loginUrl = new URL('/login', process.env.NEXT_PUBLIC_URL || 'https://' + request.headers.get('host'));
-    return NextResponse.redirect(loginUrl.toString());
+  // Allow only the home page and essential paths
+  const allowedPaths = ['/', '/api', '/_next', '/static'];
+  const isAllowedPath = allowedPaths.some(path => request.nextUrl.pathname.startsWith(path));
+  
+  if (!isAllowedPath) {
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return NextResponse.next();
