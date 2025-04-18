@@ -52,6 +52,8 @@ export default function Home() {
                   <p className="mt-6 leading-8 text-gray-600">
                     Du fehlst, und wir wünschen deiner Familie, Freunden,
                     und dem Verein Red Devils Berlin viel Kraft und alles erdenklich Gute.
+                  </p>
+                  <p className="mt-6 leading-8 text-gray-600">
                     Wir trauern um einen großen Pionier des Sports
                   </p>
                   <p className="mt-16 sm:mt-32 leading-8 text-gray-600 text-left">
