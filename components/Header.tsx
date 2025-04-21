@@ -78,7 +78,7 @@ const Header = () => {
                   <Link href="/">
                     <div className="hover:cursor-pointer flex justify-center items-center">
                       <Image
-                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo_mono.svg"
                         alt="Logo"
                         width={48}
                         height={48}

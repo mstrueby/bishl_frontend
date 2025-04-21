@@ -65,7 +65,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
-  
+
   const postItems = posts
     .slice()
     .sort((a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime())
@@ -92,8 +92,65 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
       </Head>
       <Layout>
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-        <div className="bg-white py-24 sm:py-32">
+        <div className="bg-white py-12 sm:py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            {/** Matze */}
+            <div className="text-center max-w-4xl mx-auto mb-24 sm:mb-36 p-4 sm:p-8 border-4 border-black">
+              <div className="mb-6">
+                <CldImage
+                  src="https://res.cloudinary.com/dajtykxvp/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1744883924/Matze.jpg"
+                  alt="Matze"
+                  width={175}
+                  height={175} // Maintain aspect ratio
+                  gravity="face"
+                  crop="fill"
+                  grayscale
+                  className="rounded-full shadow-md"
+                />
+              </div>
+              <div>
+                <h1 className="text-lg/6 font-semibold text-gray-900 tracking-tight uppercase font-serif">
+                  Lieber Matze
+                </h1>
+                <div className="mt-5 text-sm/6 text-gray-600">
+                  <p className="mt-2">
+                    Mit dir verlieren wir eine prägende Persönlichkeit der ersten Stunde.
+                    Deine besondere Herzenswärme war für jeden spürbar, der dich umgab.
+                    Danke für deinen Einsatz als Spieler, Trainer, Schiedsrichter,
+                    Schiedsrichter-Obmann und Vereinsvorsitzenden.
+                  </p>
+                  <p className="mt-2">
+                    Du fehlst, und wir wünschen deiner Familie, Freunden,
+                    und dem Verein Red Devils Berlin viel Kraft und alles erdenklich Gute.
+                  </p>
+                  <p className="mt-2">
+                    Wir trauern um einen großen Pionier des Sports.
+                  </p>
+                  <p className="mt-2 mt-6 sm:mt-6 text-left">
+                    Traueranzeige für Matthias Pipke,<br />
+                    Red Devils Berlin, im Namen der
+                  </p>
+                  <div className="mt-3 sm:mt-3 text-left flex flex-col">
+                    <div className="flex flex-row">
+                      <div className="flex-shrink-0 w-16">BISHL</div>
+                      <div className="flex-grow">Berliner Inline Skaterhockey Liga</div>
+                    </div>
+                    <div className="flex flex-row">
+                      <div className="flex-shrink-0 w-16">ISHD</div>
+                      <div className="flex-grow">Inline-Skaterhockey Deutschland</div>
+                    </div>
+                    <div className="flex flex-row">
+                      <div className="flex-shrink-0 w-16">IRVB</div>
+                      <div className="flex-grow">Inline- und Rollsport-Verband Berlin</div>
+                    </div>
+                    <div className="flex flex-row">
+                      <div className="flex-shrink-0 w-16">DRIV</div>
+                      <div className="flex-grow">Deutscher Rollsport- und Inline-Verband</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/*<div className="mx-auto max-w-2xl text-center">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
                 Aktuelles
