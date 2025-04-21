@@ -21,7 +21,7 @@ export default function Home() {
       <div className="flex flex-col min-h-screen">
         <Head>
           <meta name="robots" content="index, follow" />
-          <title>BISHL - Bundesliga Inline-Skaterhockey</title>
+          <title>BISHL - Berliner Inline-Skaterhockey</title>
         </Head>
         <main className="flex-grow w-full mx-auto max-w-7xl my-6 px-4 sm:px-6 lg:px-8">        
           <div className="bg-white">
