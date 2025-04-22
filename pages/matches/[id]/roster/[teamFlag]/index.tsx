@@ -1368,7 +1368,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 <div className="flex space-x-3 mt-6 justify-end">
-                    {/** 
+                    
                     <PDFDownloadLink
                       document={
                         <RosterPDF
@@ -1384,7 +1384,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     >
                       {({ loading }) => (loading ? 'Generiere PDF...' : 'PDF herunterladen')}
                     </PDFDownloadLink>
-                    */}
+                    
                     <button
                         type="button"
                         onClick={() => router.back()}
