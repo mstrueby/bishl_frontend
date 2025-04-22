@@ -69,7 +69,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       setPosts(res.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Error fetching docs:', error);
+        console.error('Error fetching posts:', error);
       }
     }
   };
