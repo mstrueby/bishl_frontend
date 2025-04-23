@@ -6,7 +6,7 @@ import { Referee } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, XCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
-import { tournamentConfigs, allRefereeAssignmentStatuses } from '../../tools/consts';
+import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevelColors } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import axios from 'axios';
 
@@ -206,6 +206,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                 </div>
                 <span>
                   {referee1.firstName} {referee1.lastName}
+                </span>
+                <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
+                  ${refereeLevelColors[referee1.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
+                  ${refereeLevelColors[referee1.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
+                  ${refereeLevelColors[referee1.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
+                  {referee1.level}
                 </span>
               </div>
               {/* unassign button */}
