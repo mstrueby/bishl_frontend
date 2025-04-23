@@ -1,3 +1,10 @@
+export interface RefereeValues {
+  level: string;
+  passNo: string;
+  ishdLevel: string;
+  active: boolean;
+}
+
 export interface UserValues {
   _id: string;
   email: string;
@@ -8,5 +15,6 @@ export interface UserValues {
     clubId: string;
     clubName: string;
   };
+  referee?: RefereeValues;
   roles: []
 }

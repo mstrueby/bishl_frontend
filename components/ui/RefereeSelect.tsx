@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { UserValues } from '../../types/UserValues';
 import { Referee } from '../../types/MatchValues';
-import { allRefereeAssignmentStatuses } from '../../tools/consts';
+import { allRefereeAssignmentStatuses, refereeLevelColors } from '../../tools/consts';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { AssignmentValues } from '../../types/AssignmentValues';
 
@@ -18,47 +18,6 @@ interface RefereeSelectProps {
   onAssignmentComplete: (referee: Referee) => void;
   disabled?: boolean;
 }
-
-// Configuration for referee level colors
-const refereeLevelColors = {
-  'SM': {
-    background: 'bg-green-50',
-    text: 'text-green-700',
-    ring: 'ring-green-600/20',
-    dot: 'fill-green-500'
-  },
-  'S': {
-    background: 'bg-blue-50',
-    text: 'text-blue-700',
-    ring: 'ring-blue-600/20',
-    dot: 'fill-blue-500'
-  },
-  'SR': {
-    background: 'bg-yellow-50',
-    text: 'text-yellow-700',
-    ring: 'ring-yellow-600/20',
-    dot: 'fill-yellow-500'
-  },
-  'PS': {
-    background: 'bg-red-50',
-    text: 'text-red-700',
-    ring: 'ring-red-600/20',
-    dot: 'fill-red-500'
-  },
-  'PR': {
-    background: 'bg-purple-50',
-    text: 'text-purple-700',
-    ring: 'ring-purple-600/20',
-    dot: 'fill-purple-500'
-  },
-  'DEFAULT': {
-    background: 'bg-gray-50',
-    text: 'text-gray-700',
-    ring: 'ring-gray-600/20',
-    dot: 'fill-gray-400'
-  }
-};
-
 
 {/** Referee Item */ }
 const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boolean }> = ({ assignment, showLastName = true }) => (

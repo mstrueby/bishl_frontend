@@ -2,7 +2,7 @@ import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon, StarIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon, StarIcon, ListBulletIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 // import { tournamentConfigs } from '../tools/consts'
 
@@ -78,7 +78,7 @@ const Header = () => {
                   <Link href="/">
                     <div className="hover:cursor-pointer flex justify-center items-center">
                       <Image
-                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo_mono.svg"
                         alt="Logo"
                         width={48}
                         height={48}
@@ -228,12 +228,21 @@ const Header = () => {
 
                           {/* Referee admin items - only for referee admins */}
                           {(user.roles?.includes('REF_ADMIN') || user.roles?.includes('ADMIN')) && (
-                            <MenuItem>
-                              <MyLink href="/admin/refadmin" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                <CalendarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
-                                <span>Schiris einteilen</span>
-                              </MyLink>
-                            </MenuItem>
+                            <>
+                              <MenuItem>
+                                <MyLink href="/admin/refadmin/referees" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  <ListBulletIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>Schiedsrichter</span>
+                                </MyLink>
+                              </MenuItem>
+                              <MenuItem>
+                                <MyLink href="/admin/refadmin" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                  <CalendarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                  <span>Schiris einteilen</span>
+                                </MyLink>
+                              </MenuItem>
+                            </>
+
                           )}
 
                           {/* Referee items - only for referees */}
