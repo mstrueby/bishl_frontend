@@ -20,7 +20,46 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [unassignLoading, setUnassignLoading] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
-  if (match._id==='67c1f27eefe0c2f17eba73bf') {
+  const fetchRefereeDetails = async (userId: string) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/referee/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      const refereeData = response.data;
+      return {
+        userId: refereeData._id,
+        firstName: refereeData.firstName,
+        lastName: refereeData.lastName,
+        level: refereeData.referee?.level || 'N/A'
+      };
+    } catch (error) {
+      console.error('Error fetching referee details:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const updateRefereeDetails = async () => {
+      if (referee1?.userId) {
+        const details = await fetchRefereeDetails(referee1.userId);
+        if (details) {
+          setReferee1(prev => ({ ...prev, ...details }));
+        }
+      }
+      if (referee2?.userId) {
+        const details = await fetchRefereeDetails(referee2.userId);
+        if (details) {
+          setReferee2(prev => ({ ...prev, ...details }));
+        }
+      }
+    };
+
+    updateRefereeDetails();
+  }, [referee1?.userId, referee2?.userId]);
+
+  if (match._id === '67c1f27eefe0c2f17eba73bf') {
     console.log("assignments", assignments)
   }
   // Calculate if referee assignment should be disabled based on match date
@@ -190,29 +229,32 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               {/* status indicator, avatar, name */}
               <div className="flex items-center gap-x-3">
                 {(() => {
-                  const referee1Assignment = assignments.find(a => a.referee.userId === referee1?.userId);
-                  const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === referee1Assignment?.status);
-                  console.log('Referee1 Assignment:', referee1Assignment);
+                  const ref = referee1
+                  const refAssignment = assignments.find(a => a.referee.userId === ref.userId);
+                  const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === refAssignment?.status);
+                  console.log('Referee1 Assignment:', refAssignment);
 
                   const statusColor = statusConfig?.color.dotRefAdmin || 'fill-gray-400';
                   return (
-                    <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8">
-                      <circle cx="4" cy="4" r="4" />
-                    </svg>
+                    <>
+                      <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="4" />
+                      </svg>
+                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                        {ref.firstName.charAt(0)}{ref.lastName.charAt(0)}
+                      </div>
+                      <span>
+                        {ref.firstName} {ref.lastName}
+                      </span>
+                      <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
+                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
+                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
+                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
+                        {refAssignment?.referee.level}
+                      </span>
+                    </>
                   );
                 })()}
-                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                  {referee1.firstName.charAt(0)}{referee1.lastName.charAt(0)}
-                </div>
-                <span>
-                  {referee1.firstName} {referee1.lastName}
-                </span>
-                <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
-                  ${refereeLevelColors[referee1.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
-                  ${refereeLevelColors[referee1.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
-                  ${refereeLevelColors[referee1.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
-                  {referee1.level}
-                </span>
               </div>
               {/* unassign button */}
               {isDisabled ? (
@@ -270,26 +312,32 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
             <div className="px-3 text-sm text-gray-700 flex items-center justify-between">
               <div className="flex items-center gap-x-3">
                 {(() => {
-                  const referee2Assignment = assignments.find(a => a.referee.userId === referee2?.userId);
-                  const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === referee2Assignment?.status);
-                  console.log('Referee1 Assignment:', referee2Assignment);
-                  console.log('Assignment Status:', referee2Assignment?.status);
-                  console.log('Status Config:', statusConfig);
-                  {/**
-                  */}
+                  const ref = referee2
+                  const refAssignment = assignments.find(a => a.referee.userId === ref.userId);
+                  const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === refAssignment?.status);
+                  console.log('Referee1 Assignment:', refAssignment);
+
                   const statusColor = statusConfig?.color.dotRefAdmin || 'fill-gray-400';
                   return (
-                    <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8" aria-hidden="true">
-                      <circle cx="4" cy="4" r="4" />
-                    </svg>
+                    <>
+                      <svg className={`h-2 w-2 ${statusColor}`} viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="4" />
+                      </svg>
+                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                        {ref.firstName.charAt(0)}{ref.lastName.charAt(0)}
+                      </div>
+                      <span>
+                        {ref.firstName} {ref.lastName}
+                      </span>
+                      <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
+                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
+                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
+                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
+                        {refAssignment?.referee.level}
+                      </span>
+                    </>
                   );
                 })()}
-                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                  {referee2.firstName.charAt(0)}{referee2.lastName.charAt(0)}
-                </div>
-                <span>
-                  {referee2.firstName} {referee2.lastName}
-                </span>
               </div>
               {/* unassign button */}
               {isDisabled ? (
