@@ -20,6 +20,45 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   const [unassignLoading, setUnassignLoading] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
 
+  const fetchRefereeDetails = async (userId: string) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/referee/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      const refereeData = response.data;
+      return {
+        userId: refereeData._id,
+        firstName: refereeData.firstName,
+        lastName: refereeData.lastName,
+        level: refereeData.referee?.level || 'N/A'
+      };
+    } catch (error) {
+      console.error('Error fetching referee details:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const updateRefereeDetails = async () => {
+      if (referee1?.userId) {
+        const details = await fetchRefereeDetails(referee1.userId);
+        if (details) {
+          setReferee1(prev => ({ ...prev, ...details }));
+        }
+      }
+      if (referee2?.userId) {
+        const details = await fetchRefereeDetails(referee2.userId);
+        if (details) {
+          setReferee2(prev => ({ ...prev, ...details }));
+        }
+      }
+    };
+
+    updateRefereeDetails();
+  }, [referee1?.userId, referee2?.userId]);
+
   if (match._id==='67c1f27eefe0c2f17eba73bf') {
     console.log("assignments", assignments)
   }
