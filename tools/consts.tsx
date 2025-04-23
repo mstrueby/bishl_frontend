@@ -342,37 +342,37 @@ export const allRefereeAssignmentStatuses = [
 
 // Configuration for referee level colors
 export const refereeLevelColors = {
-  'SM': {
+  SM: {
     background: 'bg-green-50',
     text: 'text-green-700',
     ring: 'ring-green-600/20',
     dot: 'fill-green-500'
   },
-  'S': {
+  S: {
     background: 'bg-blue-50',
     text: 'text-blue-700',
     ring: 'ring-blue-600/20',
     dot: 'fill-blue-500'
   },
-  'SR': {
+  SR: {
     background: 'bg-yellow-50',
     text: 'text-yellow-700',
     ring: 'ring-yellow-600/20',
     dot: 'fill-yellow-500'
   },
-  'PS': {
+  PS: {
     background: 'bg-red-50',
     text: 'text-red-700',
     ring: 'ring-red-600/20',
     dot: 'fill-red-500'
   },
-  'PR': {
+  PR: {
     background: 'bg-purple-50',
     text: 'text-purple-700',
     ring: 'ring-purple-600/20',
     dot: 'fill-purple-500'
   },
-  'DEFAULT': {
+  DEFAULT: {
     background: 'bg-gray-50',
     text: 'text-gray-700',
     ring: 'ring-gray-600/20',
