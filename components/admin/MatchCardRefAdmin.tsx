@@ -297,12 +297,13 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
             </div>
           ) : (
             <RefereeSelect
-              assignments={assignments.filter(a => (!referee2 || a.referee.userId !== referee2.userId) && a.status !== 'UNAVAILABLE')}
+              matchId={match._id}
               position={1}
               jwt={jwt}
               onConfirm={updateAssignmentStatus}
               onAssignmentComplete={setReferee1}
               disabled={isDisabled}
+              excludeRefereeId={referee2?.userId}
             />
           )}
         </div>
@@ -380,12 +381,13 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
             </div>
           ) : (
             <RefereeSelect
-              assignments={assignments.filter(a => (!referee1 || a.referee.userId !== referee1.userId) && a.status !== 'UNAVAILABLE')}
+              matchId={match._id}
               position={2}
               jwt={jwt}
               onConfirm={updateAssignmentStatus}
               onAssignmentComplete={setReferee2}
               disabled={isDisabled}
+              excludeRefereeId={referee1?.userId}
             />
           )}
         </div>
