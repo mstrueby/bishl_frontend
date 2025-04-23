@@ -131,7 +131,7 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
               )}
               {item.category && (
                 <p
-                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${categories && categories[item.category.toLowerCase()]}`}
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${categories && categories[item.category.toUpperCase()]}`}
                 >
                   {item.category}
                 </p>
