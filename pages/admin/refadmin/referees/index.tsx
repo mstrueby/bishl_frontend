@@ -123,7 +123,10 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
     Unpublished: 'text-gray-500 bg-gray-800/10',
   }
   const categories = Object.fromEntries(
-    Object.entries(refereeLevelColors).map(([key, value]) => [key, value.text])
+    Object.entries(refereeLevelColors).map(([key, value]) => [
+      key, 
+      `${value.background} ${value.text} ${value.ring} ${value.dot}`
+    ])
   );
   console.log(categories)
 
