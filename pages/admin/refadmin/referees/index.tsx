@@ -9,6 +9,7 @@ import Layout from "../../../../components/Layout";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
 import { getFuzzyDate } from '../../../../tools/dateUtils';
+import { refereeLevelColors } from '../../../../tools/consts'
 import DataList from '../../../../components/admin/ui/DataList';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
@@ -121,6 +122,10 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
     Published: 'text-green-500 bg-green-500/20',
     Unpublished: 'text-gray-500 bg-gray-800/10',
   }
+  const categories = Object.fromEntries(
+    Object.entries(refereeLevelColors).map(([key, value]) => [key, value.text])
+  );
+  console.log(categories)
 
   const dataListItems = referees.map((referee) => {
     return {
@@ -153,6 +158,7 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
 
       <DataList
         items={dataListItems}
+        categories={categories}
         statuses={statuses}
         showThumbnails={false}
         showStatusIndicator
