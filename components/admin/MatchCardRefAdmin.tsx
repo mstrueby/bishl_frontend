@@ -40,24 +40,33 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
     }
   };
 
+  {/**
   useEffect(() => {
     const updateRefereeDetails = async () => {
       if (referee1?.userId) {
         const details = await fetchRefereeDetails(referee1.userId);
         if (details) {
-          setReferee1(prev => ({ ...prev, ...details }));
+          setReferee1(prev => ({
+            ...prev,
+            ...details,
+            points: 0 // Ensures points is a number
+          }));
         }
       }
       if (referee2?.userId) {
         const details = await fetchRefereeDetails(referee2.userId);
         if (details) {
-          setReferee2(prev => ({ ...prev, ...details }));
+          setReferee2(prev => ({
+            ...prev,
+            ...details,
+            points: 0 // Ensures points is a number
+          }));
         }
       }
     };
-
     updateRefereeDetails();
   }, [referee1?.userId, referee2?.userId]);
+  */}
 
   if (match._id === '67c1f27eefe0c2f17eba73bf') {
     console.log("assignments", assignments)
@@ -297,13 +306,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
             </div>
           ) : (
             <RefereeSelect
-              matchId={match._id}
+              assignments={assignments.filter(a => (!referee2 || a.referee.userId !== referee2.userId) && a.status !== 'UNAVAILABLE')}
               position={1}
               jwt={jwt}
               onConfirm={updateAssignmentStatus}
               onAssignmentComplete={setReferee1}
               disabled={isDisabled}
-              excludeRefereeId={referee2?.userId}
             />
           )}
         </div>
@@ -381,13 +389,12 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
             </div>
           ) : (
             <RefereeSelect
-              matchId={match._id}
+              assignments={assignments.filter(a => (!referee1 || a.referee.userId !== referee1.userId) && a.status !== 'UNAVAILABLE')}
               position={2}
               jwt={jwt}
               onConfirm={updateAssignmentStatus}
               onAssignmentComplete={setReferee2}
               disabled={isDisabled}
-              excludeRefereeId={referee1?.userId}
             />
           )}
         </div>
