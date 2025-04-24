@@ -58,7 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const [matchesRes] = await Promise.all([
-      axios.get(`${BASE_URL}/matches`, {
+      axios.get(`${BASE_URL}/matches/`, {
         params: { date_from: currentDate }
       })
     ]);
@@ -89,6 +89,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     
     matches = sortedMatches;
 
+    
     const assignmentPromises = matches.map((match: Match) =>
       axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
         params: {
@@ -114,6 +115,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
       return acc;
     }, {} as { [key: string]: AssignmentValues[] });
+    
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching data:', error);
@@ -148,7 +150,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
       if (filterParams.showUnassignedOnly) params.assigned = false;
 
       // Fetch matches with error handling
-      const matchesRes = await axios.get(`${BASE_URL}/matches`, {
+      const matchesRes = await axios.get(`${BASE_URL}/matches/`, {
         params
       });
 
@@ -183,6 +185,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
       const matches = sortedMatches;
 
       // Only proceed with assignments if we have matches
+      
       console.log("Matches length", matches.length)
       if (matches.length > 0) {
         // Fetch assignments for each match
@@ -202,7 +205,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
             return { data: [] }; // Return empty array on error for individual match
           })
         );
-
+        
         const assignmentResults = await Promise.all(assignmentPromises);
         const assignmentsMap = assignmentResults.reduce((acc, result, index) => {
           if (result && Array.isArray(result.data)) {
@@ -226,6 +229,8 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         console.log('No matches found');
         setMatchAssignments({});
       }
+      
+
 
       setMatches(matches);
     } catch (error) {

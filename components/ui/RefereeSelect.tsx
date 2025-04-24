@@ -51,37 +51,16 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
 
 
 const RefereeSelect: React.FC<RefereeSelectProps> = ({
-  matchId,
+  assignments,
   position,
   jwt,
   onConfirm,
   onAssignmentComplete,
-  disabled = false,
-  excludeRefereeId
+  disabled = false
 }) => {
-  disabled=false;
+  disabled = false;
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [assignments, setAssignments] = useState<AssignmentValues[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const fetchAssignments = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${matchId}`, {
-        headers: { Authorization: `Bearer ${jwt}` }
-      });
-      const data = await response.json();
-      const filteredAssignments = data.filter((assignment: AssignmentValues) => 
-        (!excludeRefereeId || assignment.referee.userId !== excludeRefereeId) && 
-        assignment.status !== 'UNAVAILABLE'
-      );
-      setAssignments(filteredAssignments);
-    } catch (error) {
-      console.error('Error fetching assignments:', error);
-    }
-    setIsLoading(false);
-  };
 
   // Placeholder component for the listbox
   const Placeholder = () => (
@@ -89,20 +68,13 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox 
-      value={selected}
-      onChange={setSelected}
-      disabled={disabled}
-    >
-      {({ open }) => {
-        React.useEffect(() => {
-          if (open) {
-            fetchAssignments();
-          }
-        }, [open]);
-
-        return (
-          <>
+    <>
+      <Listbox
+        value={selected}
+        onChange={setSelected}
+        disabled={disabled}
+      >
+        {({ open }) => (
           <div className="relative">
             <div className="relative w-full flex items-center gap-2">
               <div className="relative flex-1">
@@ -160,11 +132,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               leaveTo="opacity-0"
             >
               <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                {isLoading ? (
-                  <div className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-500">
-                    Loading...
-                  </div>
-                ) : assignments?.length === 0 ? (
+                {assignments?.length === 0 ? (
                   <div className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-500">
                     Niemand verfügbar
                   </div>
@@ -187,10 +155,9 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               </Listbox.Options>
             </Transition>
           </div>
-
-        </>
-      )}
-    </Listbox>
+        )}
+      </Listbox>
+    </>
   );
 };
 export default RefereeSelect;
