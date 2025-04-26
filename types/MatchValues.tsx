@@ -86,7 +86,7 @@ export interface Match {
     name: string;
     alias: string;
   };
-  maatchday: {
+  matchday: {
     name: string;
     alias: string;
   }
