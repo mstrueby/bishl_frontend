@@ -2,7 +2,7 @@ import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon, StarIcon, ListBulletIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon, StarIcon, ListBulletIcon, CalendarDaysIcon } from '@heroicons/react/24/outline'
 import useAuth from '../hooks/useAuth'
 // import { tournamentConfigs } from '../tools/consts'
 
@@ -78,7 +78,7 @@ const Header = () => {
                   <Link href="/">
                     <div className="hover:cursor-pointer flex justify-center items-center">
                       <Image
-                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo_mono.svg"
+                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
                         alt="Logo"
                         width={48}
                         height={48}
@@ -91,7 +91,7 @@ const Header = () => {
                   <div className="flex space-x-4">
                     {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
                     <Link href="/calendar">
-                      <a className={item}>Spielplan</a>
+                      <a className={item}>Kalender</a>
                     </Link>
                     <Menu as="div" className="relative inline-block text-left">
                       <MenuButton className={item}>Herren</MenuButton>
@@ -368,44 +368,39 @@ const Header = () => {
                 {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
                 <Disclosure.Button
                   as={MyLink}
+                  key="calendar"
                   href="/calendar"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
+                  className="block inline-flex items-center justify-center rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
                 >
-                  Spielplan
+                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium mr-5 w-16 text-gray-300">
+                    <CalendarDaysIcon className="h-5 w-5 text-gray-300" aria-hidden="true" />
+                  </span>
+                  Kalender
                 </Disclosure.Button>
-                <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
-                  <span>Herren</span>
-                </div>
-                <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
-                  {men.map((item, index) => (
-                    <Disclosure.Button
-                      as={MyLink}
-                      key={index}
-                      href={item.href}
-                      className='block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 text-gray-300 hover:text-white hover:no-underline'
-                    >
-                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
-                      {item.name}
-                    </Disclosure.Button>
-                  ))}
-                </div>
 
-                <div className="block rounded-md px-3 py-2 text-base font-medium text-gray-300">
-                  <span>Nachwuchs</span>
-                </div>
-                <div className="block left-0 mx-6 px-1 origin-top-right rounded-md bg-gray-900/50 py-1 text-gray-300">
-                  {youth.map((item, index) => (
-                    <Disclosure.Button
-                      as={MyLink}
-                      key={index}
-                      href={item.href}
-                      className="block rounded-md px-3 py-2 text-base font-medium hover:bg-gray-800 text-gray-300 hover:text-white hover:no-underline"
-                    >
-                      <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
-                      {item.name}
-                    </Disclosure.Button>
-                  ))}
-                </div>
+                {men.map((item, index) => (
+                  <Disclosure.Button
+                    as={MyLink}
+                    key={index}
+                    href={item.href}
+                    className='block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline'
+                  >
+                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
+                    {item.name}
+                  </Disclosure.Button>
+                ))}
+
+                {youth.map((item, index) => (
+                  <Disclosure.Button
+                    as={MyLink}
+                    key={index}
+                    href={item.href}
+                    className='block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline'
+                  >
+                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
+                    {item.name}
+                  </Disclosure.Button>
+                ))}
 
               </div>
             </Disclosure.Panel>
