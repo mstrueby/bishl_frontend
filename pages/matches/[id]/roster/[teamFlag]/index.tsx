@@ -839,46 +839,41 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
                     <div className="flex flex-col gap-4">
                         {/* Player Selection */}
-                        <div className="">
-                            <div className="flex justify-between items-center mb-1">
-                                <label className="block text-sm fontmedium text-gray-700">
-                                    Spieler
-                                </label>
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex items-center">
-                                        <Switch
-                                            checked={includeInactivePlayers}
-                                            onChange={setIncludeInactivePlayers}
-                                            className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                                                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-                                        >
-                                            <span className="sr-only">Inaktive Spieler anzeigen</span>
-                                            <span
-                                                aria-hidden="true"
-                                                className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                                                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                                            />
-                                        </Switch>
-                                        <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCallUpModalOpen(true)}
-                                        className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                        </svg>
-                                        Hochmelden
-                                    </button>
-                                </div>
+                        <div className="flex flex-col gap-3 sm:gap-4">
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCallUpModalOpen(true)}
+                                    className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                    Hochmelden
+                                </button>
+                            </div>
+                            <div className="flex flex-row items-center justify-between sm:justify-end">
+                                <span className="ml-2 text-sm font-medium text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
+                                <Switch
+                                    checked={includeInactivePlayers}
+                                    onChange={setIncludeInactivePlayers}
+                                    className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                                >
+                                    <span className="sr-only">Inaktive Spieler anzeigen</span>
+                                    <span
+                                        aria-hidden="true"
+                                        className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                                            } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                    />
+                                </Switch>
                             </div>
                             <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
                                 {({ open }) => (
                                     <>
                                         <div className="relative">
                                             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                                <span className="block truncate">
+                                                <span className={`block truncate ${!selectedPlayer ? 'text-gray-400' : ''}`}>
                                                     {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Spieler auswählen'}
                                                 </span>
                                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
