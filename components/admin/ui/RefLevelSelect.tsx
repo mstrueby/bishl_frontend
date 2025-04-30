@@ -1,21 +1,22 @@
+
 import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { TournamentValues } from '../../types/TournamentValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { classNames } from '../../../tools/utils';
-import { tournamentConfigs } from '../../../tools/consts';
+import { refereeLevels } from '../../../tools/consts';
 
 interface RefLevelSelectProps {
   selectedLevel: string;
   onLevelChange: (level: string) => void;
-  allLevels: string[];
+  allLevels?: string[];
   label?: string
 }
 
 const RefLevelSelect: React.FC<RefLevelSelectProps> = ({
   selectedLevel,
   onLevelChange,
-  allLevels,
+  allLevels = Object.keys(refereeLevels).filter(key => key !== 'DEFAULT'),
   label = 'Level'
 }) => {
   return (
@@ -85,10 +86,8 @@ const RefLevelSelect: React.FC<RefLevelSelectProps> = ({
             </Transition>
           </div>
         </>
-
       )}
     </Listbox>
-
   )
 };
 
