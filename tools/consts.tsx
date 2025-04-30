@@ -344,22 +344,22 @@ export const allRefereeAssignmentStatuses = [
 export const refereeLevels = {
   SM: {
     caption: 'Schiedsrichter (Mentor)',
-    background: 'bg-blue-50',
+    background: 'bg-blue-500',
     text: 'text-blue-700',
     ring: 'ring-blue-600/20',
     dot: 'fill-blue-500'
   },
   S3: {
     caption: 'Schiedsrichter (gut)',
-    background: 'bg-green-50',
-    text: 'text-green-700',
+    background: 'bg-green-500',
+    text: 'text-white',
     ring: 'ring-green-600/20',
     dot: 'fill-green-500'
   },
   S2: {
     caption: 'Schiedsrichter (mittel)',
-    background: 'bg-green-50',
-    text: 'text-green-700',
+    background: 'bg-green-200',
+    text: 'text-green-800',
     ring: 'ring-green-600/20',
     dot: 'fill-green-500'
   },
@@ -372,21 +372,21 @@ export const refereeLevels = {
   },
   PM: {
     caption: 'Perspektiv-Schiri (Mentor)',
-    background: 'bg-orange-50',
-    text: 'text-orange-700',
-    ring: 'ring-orange-600/20',
-    dot: 'fill-orange-500'
+    background: 'bg-red-50',
+    text: 'text-red-700',
+    ring: 'ring-red-600/20',
+    dot: 'fill-red-500'
   },
   P3: {
     caption: 'Perspektiv-Schiri (gut)',
-    background: 'bg-yellow-400',
-    text: 'text-yellow-700',
+    background: 'bg-yellow-500',
+    text: 'text-white',
     ring: 'ring-yellow-600/20',
     dot: 'fill-yellow-500'
   },
   P2: {
     caption: 'Perspektiv-Schiri (mittel)',
-    background: 'bg-yellow-200',
+    background: 'bg-yellow-50',
     text: 'text-yellow-700',
     ring: 'ring-yellow-600/20',
     dot: 'fill-yellow-500'
