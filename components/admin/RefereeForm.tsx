@@ -34,6 +34,17 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
 
   const handleLevelChange = (level: keyof typeof refereeLevels) => {
     setSelectedLevel(level);
+    // Update Formik form values
+    if (initialValues.referee) {
+      initialValues.referee.level = level;
+    } else {
+      initialValues.referee = {
+        level, 
+        passNo: '',       // default value for passNo
+        ishdLevel: '',    // default value for ishdLevel
+        active: false     // default value for active
+      };
+    }
   }
   
   return (
