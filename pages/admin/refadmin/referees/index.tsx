@@ -128,7 +128,6 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
       `${value.background} ${value.text} ${value.ring} ${value.dot}`
     ])
   );
-  console.log(categories)
 
   const dataListItems = referees.map((referee) => {
     return {
