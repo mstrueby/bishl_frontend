@@ -38,7 +38,12 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
     if (initialValues.referee) {
       initialValues.referee.level = level;
     } else {
-      initialValues.referee = { level };
+      initialValues.referee = {
+        level, 
+        passNo: '',       // default value for passNo
+        ishdLevel: '',    // default value for ishdLevel
+        active: false     // default value for active
+      };
     }
   }
   
