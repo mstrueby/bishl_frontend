@@ -9,6 +9,7 @@ import Toggle from '../ui/form/Toggle'
 import MyListbox from '../ui/form/Listbox'
 import RefLevelSelect from './ui/RefLevelSelect'
 import { UserValues } from '../../types/UserValues'
+import { refereeLevels } from '../../tools/consts'
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 
@@ -27,8 +28,28 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
   handleCancel,
   loading,
 }) => {
+  const [selectedLevel, setSelectedLevel] = React.useState<keyof typeof refereeLevels>(
+    initialValues.referee?.level as keyof typeof refereeLevels || 'n/a'
+  );
+
+  const handleLevelChange = (level: keyof typeof refereeLevels) => {
+    setSelectedLevel(level);
+  }
+  
   return (
     <>
+      <div className="my-6 border-b border-gray-100">
+        <dl className="divide-y divide-gray-100">
+          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+            <dt className="text-sm/6 font-medium text-gray-900">Name, Vorname</dt>
+            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{initialValues.lastName}, {initialValues.firstName}</dd>
+          </div>
+          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+            <dt className="text-sm/6 font-medium text-gray-900">E-Mail</dt>
+            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{initialValues.email}</dd>
+          </div>
+        </dl>
+      </div>
       <Formik
         initialValues={initialValues}
         enableReinitialize={enableReinitialize}
@@ -36,28 +57,31 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
       >
         <Form>
           <RefLevelSelect
-            name="level"
-            autoComplete="off"
-            type="text"
+            selectedLevel={selectedLevel}
             label="Level"
+            onLevelChange={handleLevelChange}
           />
           <InputText
-            name="passNo"
+            name="referee.passNo"
             autoComplete="off"
             type="text"
             label="Passnummer"
           />
           <InputText
-            name="ishdLevel"
+            name="referee.ishdLevel"
             autoComplete="off"
             type="text"
             label="ISHD Level"
           />
           <Toggle
-            name="active"
+            name="referee.active"
             type="checkbox"
             label="Aktiv"
           />
+          <div className="mt-4 flex justify-end py-4">
+            <ButtonLight onClick={handleCancel} name="btnLight" type="button" label="Abbrechen" />
+            <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" loading={loading} />
+          </div>
         </Form>
       </Formik>
     </>

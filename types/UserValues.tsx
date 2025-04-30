@@ -8,7 +8,7 @@ export interface RefereeValues {
 export interface UserValues {
   _id: string;
   email: string;
-  password: string;
+  //password: string;
   firstName: string;
   lastName: string;
   club?: {
