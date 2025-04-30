@@ -1,4 +1,3 @@
-// pages/leaguemanager/venues/[alias]/edit.tsx
 import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -46,7 +45,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
     // Fetch the existing referee data
-    const response = await axios.get(BASE_URL + userId, {
+    const response = await axios.get(`${BASE_URL}/users/` + userId, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -74,11 +73,17 @@ const Edit: NextPage<EditProps> = ({ jwt, referee }) => {
       Object.entries(values).forEach(([key, value]) => {
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
+        } else if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key, item));
+        } else if (typeof value === 'object' && value !== null) {
+          formData.append(key, JSON.stringify(value));
         } else {
           formData.append(key, value);
         }
       });
-      const response = await axios.patch(BASE_URL + referee._id, formData, {
+      console.log('FormData entries:', Array.from(formData.entries()));
+
+      const response = await axios.patch(`${BASE_URL}/users/` + referee._id, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -86,7 +91,7 @@ const Edit: NextPage<EditProps> = ({ jwt, referee }) => {
       if (response.status === 200) {
         router.push({
           pathname: '/admin/refadmin/referees',
-          query: { message: `Der Schiedsrichter <strong>${values.firstName} ${values.lastName}</strong> wurde erfolgreich aktualisiert.` }
+          query: { message: `Schiedsrichter <strong>${values.firstName} ${values.lastName}</strong> wurde erfolgreich aktualisiert.` }
         }, `/admin/refadmin/referees`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
@@ -96,7 +101,7 @@ const Edit: NextPage<EditProps> = ({ jwt, referee }) => {
         if (error.response?.status === 304) {
           router.push({
             pathname: '/admin/refadmin/referees',
-            query: { message: `Keine Änderungen für den Schiedsrichter <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
+            query: { message: `Keine Änderungen für <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
           }, `/admin/refadmin/referees`);
         } else {
           setError('Ein Fehler ist aufgetreten.');
@@ -126,7 +131,6 @@ const Edit: NextPage<EditProps> = ({ jwt, referee }) => {
   const initialValues: UserValues = {
     _id: referee?._id || '',
     email: referee?.email || '',
-    password: referee?.password || '',
     firstName: referee?.firstName || '',
     lastName: referee?.lastName || '',
     club: referee?.club || undefined,

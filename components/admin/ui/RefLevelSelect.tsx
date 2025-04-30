@@ -6,17 +6,19 @@ import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, Magnify
 import { classNames } from '../../../tools/utils';
 import { refereeLevels } from '../../../tools/consts';
 
+type RefereeLevel = keyof typeof refereeLevels
+
 interface RefLevelSelectProps {
-  selectedLevel: string;
-  onLevelChange: (level: string) => void;
-  allLevels?: string[];
+  selectedLevel: RefereeLevel;
+  onLevelChange: (level: RefereeLevel) => void;
+  allLevels?: RefereeLevel[];
   label?: string
 }
 
 const RefLevelSelect: React.FC<RefLevelSelectProps> = ({
   selectedLevel,
   onLevelChange,
-  allLevels = Object.keys(refereeLevels).filter(key => key !== 'DEFAULT'),
+  allLevels = Object.keys(refereeLevels).filter(key => key !== 'n/a') as RefereeLevel[],
   label = 'Level'
 }) => {
   return (
@@ -28,15 +30,20 @@ const RefLevelSelect: React.FC<RefLevelSelectProps> = ({
           )}
           <div className="relative mt-2 mb-4">
             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-              <span className="flex items-center">
-                {selectedLevel ? (
+              <div className="flex items-center">
+                {selectedLevel && selectedLevel !== 'n/a' ? (
                   <>
-                    <span className="block truncate">{selectedLevel}</span>
+                    {refereeLevels[selectedLevel] && (
+                      <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-3 ${refereeLevels[selectedLevel].background} ${refereeLevels[selectedLevel].text} ${refereeLevels[selectedLevel].ring}`}>
+                        {selectedLevel}
+                      </span>
+                    )}
+                    <span className="block truncate">{refereeLevels[selectedLevel].caption}</span>
                   </>
                 ) : (
                   <span className="block truncate text-gray-400">(auswählen)</span>
                 )}
-              </span>
+              </div>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </span>
@@ -64,8 +71,18 @@ const RefLevelSelect: React.FC<RefLevelSelectProps> = ({
                     {({ selected, active }) => (
                       <>
                         <div className="flex items-center">
-                          <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
-                            {level}
+
+                          {refereeLevels[level] && (
+                            <div className="w-10 flex flex-col items-center">
+                              <span
+                                className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", refereeLevels[level].background, refereeLevels[level].text, refereeLevels[level].ring)}
+                              >
+                                {level}
+                              </span>
+                            </div>
+                          )}
+                          <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}>
+                            {refereeLevels[level].caption}
                           </span>
                         </div>
                         {selected && (
@@ -86,8 +103,9 @@ const RefLevelSelect: React.FC<RefLevelSelectProps> = ({
             </Transition>
           </div>
         </>
-      )}
-    </Listbox>
+      )
+      }
+    </Listbox >
   )
 };
 
