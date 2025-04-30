@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { UserValues } from '../../types/UserValues';
 import { Referee } from '../../types/MatchValues';
-import { allRefereeAssignmentStatuses, refereeLevelColors } from '../../tools/consts';
+import { allRefereeAssignmentStatuses, refereeLevels } from '../../tools/consts';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { AssignmentValues } from '../../types/AssignmentValues';
 
@@ -41,9 +41,9 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
       {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
     </span>
     <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
-      ${refereeLevelColors[assignment.referee.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
-      ${refereeLevelColors[assignment.referee.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
-      ${refereeLevelColors[assignment.referee.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
+      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.background || refereeLevels.DEFAULT.background}
+      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.text || refereeLevels.DEFAULT.text}
+      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels.DEFAULT.ring}`}>
       {assignment.referee.level}
     </span>
   </div>
@@ -58,7 +58,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   onAssignmentComplete,
   disabled = false
 }) => {
-  disabled=false;
+  disabled = false;
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
@@ -68,14 +68,13 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   );
 
   return (
-    <Listbox 
-      value={selected}
-      onChange={setSelected}
-      disabled={disabled}
-    >
-      {({ open }) => (
-        <>
-          {/*<Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Wettbewerb:</Listbox.Label>*/}
+    <>
+      <Listbox
+        value={selected}
+        onChange={setSelected}
+        disabled={disabled}
+      >
+        {({ open }) => (
           <div className="relative">
             <div className="relative w-full flex items-center gap-2">
               <div className="relative flex-1">
@@ -156,10 +155,9 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               </Listbox.Options>
             </Transition>
           </div>
-
-        </>
-      )}
-    </Listbox>
+        )}
+      </Listbox>
+    </>
   );
 };
 export default RefereeSelect;

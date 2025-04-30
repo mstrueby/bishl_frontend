@@ -95,6 +95,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
         <div className="bg-white py-12 sm:py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             {/** Matze */}
+            {/**
             <div className="text-center max-w-4xl mx-auto mb-24 sm:mb-36 p-4 sm:p-8 border-4 border-black">
               <div className="mb-6">
                 <CldImage
@@ -151,6 +152,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
                 </div>
               </div>
             </div>
+            */}
             {/*<div className="mx-auto max-w-2xl text-center">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
                 Aktuelles

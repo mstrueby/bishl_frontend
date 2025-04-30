@@ -230,7 +230,8 @@ const MatchCard: React.FC<{
   if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
     showLinkEdit = false;
     showLinkHome = false;
-    showLinkAway = false
+    showLinkAway = false;
+    showLinkStatus = false;
   }
   {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
   if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {

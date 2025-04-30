@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 import { Dialog, Transition } from '@headlessui/react';
 import { Match, RosterPlayer, PenaltiesBase, ScoresBase } from '../../types/MatchValues';
+import { MatchdayOwner } from '../../types/TournamentValues'
 import Layout from '../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
@@ -19,13 +20,14 @@ import AddPenaltyDialog from '../../components/ui/AddPenaltyDialog';
 
 interface MatchDetailsProps {
   match: Match;
+  matchdayOwner: MatchdayOwner;
   jwt?: string;
   userRoles?: string[];
   userClubId?: string | null;
 }
 
 interface EditMatchData {
-  venue: { name: string; alias: string };
+  venue: { venueId: string, name: string; alias: string };
   startDate: string;
   matchStatus: { key: string; value: string };
   finishType: { key: string; value: string };
@@ -39,7 +41,7 @@ const tabs = [
   { id: 'penalties', name: 'Strafen' },
 ]
 
-export default function MatchDetails({ match: initialMatch, jwt, userRoles, userClubId }: MatchDetailsProps) {
+export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('roster');
@@ -54,6 +56,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
   const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
   const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | null>(null);
   const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | null>(null);
+  {/** 
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -62,6 +65,7 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     homeScore: match.home.stats.goalsFor,
     awayScore: match.away.stats.goalsFor
   });
+  */}
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
@@ -137,6 +141,14 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
     showButtonStatus = true;
     showButtonEvents = true;
   }
+  {/** Matchday-Owner and match is at the same day */ }
+  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
+    //showLinkStatus = true;
+    showButtonRosterHome = true;
+    showButtonRosterAway = true;
+    showButtonStatus = true;
+    showButtonEvents = true;
+  }
   {/** Away-Account && Spiel weiter als 30 Minuten in der Zukunft  */ }
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showButtonRosterAway = true;
@@ -203,16 +215,16 @@ export default function MatchDetails({ match: initialMatch, jwt, userRoles, user
               const item = tournamentConfigs[match.tournament.alias];
               if (item) {
                 return (
-                    <span
-                      key={item.tinyName}
-                      className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
-                    >
-                      {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
-                    </span>
+                  <span
+                    key={item.tinyName}
+                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                  >
+                    {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                  </span>
                 );
               }
             })()}
-            
+
           </div>
 
           {/* Match StartDate, Venue */}
@@ -1195,8 +1207,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = (getCookie('jwt', context) || '') as string;
 
   try {
-    const match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
-
+    const match: Match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
+    console.log("match", match)
     let userRoles: string[] = [];
     let userClubId: string | null = null;
 
@@ -1213,9 +1225,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     }
 
+    const matchday = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`).then(res => res.json())
+
     return {
       props: {
         match,
+        matchdayOwner: matchday.owner,
         jwt,
         userRoles,
         userClubId: userClubId || null,

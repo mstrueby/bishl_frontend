@@ -6,7 +6,7 @@ import { Referee } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, XCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
-import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevelColors } from '../../tools/consts';
+import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevels } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import axios from 'axios';
 
@@ -40,24 +40,33 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
     }
   };
 
+  {/**
   useEffect(() => {
     const updateRefereeDetails = async () => {
       if (referee1?.userId) {
         const details = await fetchRefereeDetails(referee1.userId);
         if (details) {
-          setReferee1(prev => ({ ...prev, ...details }));
+          setReferee1(prev => ({
+            ...prev,
+            ...details,
+            points: 0 // Ensures points is a number
+          }));
         }
       }
       if (referee2?.userId) {
         const details = await fetchRefereeDetails(referee2.userId);
         if (details) {
-          setReferee2(prev => ({ ...prev, ...details }));
+          setReferee2(prev => ({
+            ...prev,
+            ...details,
+            points: 0 // Ensures points is a number
+          }));
         }
       }
     };
-
     updateRefereeDetails();
   }, [referee1?.userId, referee2?.userId]);
+  */}
 
   if (match._id === '67c1f27eefe0c2f17eba73bf') {
     console.log("assignments", assignments)
@@ -247,9 +256,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                         {ref.firstName} {ref.lastName}
                       </span>
                       <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
-                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
-                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
-                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.background || refereeLevels.DEFAULT.background}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.text || refereeLevels.DEFAULT.text}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels.DEFAULT.ring}`}>
                         {refAssignment?.referee.level}
                       </span>
                     </>
@@ -330,9 +339,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                         {ref.firstName} {ref.lastName}
                       </span>
                       <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
-                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.background || refereeLevelColors.DEFAULT.background}
-                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.text || refereeLevelColors.DEFAULT.text}
-                  ${refereeLevelColors[refAssignment?.referee.level as keyof typeof refereeLevelColors]?.ring || refereeLevelColors.DEFAULT.ring}`}>
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.background || refereeLevels.DEFAULT.background}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.text || refereeLevels.DEFAULT.text}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels.DEFAULT.ring}`}>
                         {refAssignment?.referee.level}
                       </span>
                     </>

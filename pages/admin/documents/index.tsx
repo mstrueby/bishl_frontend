@@ -175,9 +175,9 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
     Unpublished: 'text-gray-500 bg-gray-800/10',
   }
   const categories = {
-    allgemein: 'text-indigo-700 bg-indigo-50 ring-indigo-700/10 ',
-    spielbetrieb: 'text-red-700 bg-red-50 ring-red-600/10 ',
-    hobbyliga: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20 ',
+    ALLGEMEIN: 'text-indigo-700 bg-indigo-50 ring-indigo-700/10 ',
+    SPIELBETRIEB: 'text-red-700 bg-red-50 ring-red-600/10 ',
+    HOBBYLIGA: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20 ',
   }
 
   const dataListItems = docValues.map((doc) => {
