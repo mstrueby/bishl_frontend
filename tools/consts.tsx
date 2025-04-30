@@ -341,7 +341,7 @@ export const allRefereeAssignmentStatuses = [
 ];
 
 // Configuration for referee level colors
-export const refereeLevelColors = {
+export const refereeLevels = {
   SM: {
     background: 'bg-blue-50',
     text: 'text-blue-700',
