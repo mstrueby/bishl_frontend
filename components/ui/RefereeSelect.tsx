@@ -41,9 +41,9 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
       {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
     </span>
     <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
-      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.background || refereeLevels.DEFAULT.background}
-      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.text || refereeLevels.DEFAULT.text}
-      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels.DEFAULT.ring}`}>
+      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.background || refereeLevels['n/a'].background}
+      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.text || refereeLevels['n/a'].text}
+      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels['n/a'].ring}`}>
       {assignment.referee.level}
     </span>
   </div>
