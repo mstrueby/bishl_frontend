@@ -56,8 +56,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
     if (selectedClub && initialValues.referee) {
       initialValues.referee.club = {
         clubId: selectedClub._id,
-        clubName: selectedClub.name,
-        clubAlias: selectedClub.alias
+        clubName: selectedClub.name
       };
     }
   };
