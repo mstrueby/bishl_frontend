@@ -153,7 +153,7 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
     <Layout>
       <SectionHeader
         title={sectionTitle}
-        newLink={newLink}
+        //newLink={newLink}
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={() => setSuccessMessage(null)} />}
