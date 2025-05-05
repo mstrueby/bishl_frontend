@@ -51,17 +51,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
     }
   }
 
-  const handleClubChange = (clubId: string) => {
-    setSelectedClubId(clubId);
-    const selectedClub = clubs.find(club => club._id === clubId);
-    if (selectedClub) {
-      setFieldValue('referee.club', {
-        clubId: selectedClub._id,
-        clubName: selectedClub.name,
-        clubAlias: selectedClub.alias
-      });
-    }
-  };
+
 
   return (
     <>
@@ -82,45 +72,58 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
         enableReinitialize={enableReinitialize}
         onSubmit={onSubmit}
       >
-        {({ setFieldValue }) => (
-        <Form>
-          <RefLevelSelect
-            selectedLevel={selectedLevel}
-            label="Level"
-            onLevelChange={handleLevelChange}
-          />
-          <ClubSelect
-            selectedClubId={selectedClubId}
-            clubs={clubs}
-            onClubChange={handleClubChange}
-            label="Verein"
-          />
-          <InputText
-            name="referee.passNo"
-            autoComplete="off"
-            type="text"
-            label="Passnummer"
-          />
-          <InputText
-            name="referee.ishdLevel"
-            autoComplete="off"
-            type="text"
-            label="ISHD Level"
-          />
-          <Toggle
-            name="referee.active"
-            type="checkbox"
-            label="Aktiv"
-          />
-          <div className="mt-4 flex justify-end py-4">
-            <ButtonLight onClick={handleCancel} name="btnLight" type="button" label="Abbrechen" />
-            <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" loading={loading} />
-          </div>
-        </Form>
-        )}
+        {({ setFieldValue }) => {
+          const handleClubChange = (clubId: string) => {
+            setSelectedClubId(clubId);
+            const selectedClub = clubs.find(club => club._id === clubId);
+            if (selectedClub) {
+              setFieldValue('referee.club', {
+                clubId: selectedClub._id,
+                clubName: selectedClub.name,
+              });
+            }
+          };
+
+          return (
+            <Form>
+              <RefLevelSelect
+                selectedLevel={selectedLevel}
+                label="Level"
+                onLevelChange={handleLevelChange}
+              />
+              <ClubSelect
+                selectedClubId={selectedClubId}
+                clubs={clubs}
+                onClubChange={handleClubChange}
+                label="Verein"
+              />
+              <InputText
+                name="referee.passNo"
+                autoComplete="off"
+                type="text"
+                label="Passnummer"
+              />
+              <InputText
+                name="referee.ishdLevel"
+                autoComplete="off"
+                type="text"
+                label="ISHD Level"
+              />
+              <Toggle
+                name="referee.active"
+                type="checkbox"
+                label="Aktiv"
+              />
+              <div className="mt-4 flex justify-end py-4">
+                <ButtonLight onClick={handleCancel} name="btnLight" type="button" label="Abbrechen" />
+                <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" loading={loading} />
+              </div>
+            </Form>
+          );
+        }}
       </Formik>
     </>
-  )
+  );
 }
 
 export default RefereeForm
