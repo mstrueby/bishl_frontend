@@ -1,4 +1,3 @@
-
 import React from 'react'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
@@ -60,7 +59,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
       };
     }
   };
-  
+
   return (
     <>
       <div className="my-6 border-b border-gray-100">
