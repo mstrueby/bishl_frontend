@@ -143,7 +143,7 @@ const Edit: NextPage<EditProps> = ({ jwt, referee, clubs }) => {
     email: referee?.email || '',
     firstName: referee?.firstName || '',
     lastName: referee?.lastName || '',
-    club: referee?.club || undefined,
+    //club: referee?.club || undefined,
     referee: referee?.referee || undefined,
     roles: referee?.roles || []
   };

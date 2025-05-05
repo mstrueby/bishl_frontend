@@ -1,5 +1,4 @@
-
-import React from 'react'
+import { useState, useEffect } from 'react';
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import InputText from '../ui/form/InputText'
@@ -32,9 +31,10 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
   loading,
   clubs = [], // Provide default empty array
 }) => {
-  const [selectedLevel, setSelectedLevel] = React.useState<keyof typeof refereeLevels>(
+  const [selectedLevel, setSelectedLevel] = useState<keyof typeof refereeLevels>(
     initialValues.referee?.level as keyof typeof refereeLevels || 'n/a'
   );
+  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
 
   const handleLevelChange = (level: keyof typeof refereeLevels) => {
     setSelectedLevel(level);
@@ -43,7 +43,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
       initialValues.referee.level = level;
     } else {
       initialValues.referee = {
-        level, 
+        level,
         passNo: '',       // default value for passNo
         ishdLevel: '',    // default value for ishdLevel
         active: false     // default value for active
@@ -52,15 +52,9 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
   }
 
   const handleClubChange = (clubId: string) => {
-    const selectedClub = clubs.find(club => club._id === clubId);
-    if (selectedClub && initialValues.referee) {
-      initialValues.referee.club = {
-        clubId: selectedClub._id,
-        clubName: selectedClub.name
-      };
-    }
+    setSelectedClubId(clubId);
   };
-  
+
   return (
     <>
       <div className="my-6 border-b border-gray-100">
@@ -87,7 +81,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
             onLevelChange={handleLevelChange}
           />
           <ClubSelect
-            selectedClubId={initialValues.referee?.club?.clubId}
+            selectedClubId={selectedClubId}
             clubs={clubs}
             onClubChange={handleClubChange}
             label="Verein"
