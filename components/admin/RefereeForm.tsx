@@ -53,6 +53,14 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
 
   const handleClubChange = (clubId: string) => {
     setSelectedClubId(clubId);
+    const selectedClub = clubs.find(club => club._id === clubId);
+    if (selectedClub) {
+      setFieldValue('referee.club', {
+        clubId: selectedClub._id,
+        clubName: selectedClub.name,
+        clubAlias: selectedClub.alias
+      });
+    }
   };
 
   return (
