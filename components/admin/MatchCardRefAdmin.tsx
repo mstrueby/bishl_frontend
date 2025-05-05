@@ -256,10 +256,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                         {ref.firstName} {ref.lastName}
                       </span>
                       <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
-                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.background || refereeLevels.DEFAULT.background}
-                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.text || refereeLevels.DEFAULT.text}
-                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels.DEFAULT.ring}`}>
-                        {refAssignment?.referee.level}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.background || refereeLevels['n/a'].background}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.text || refereeLevels['n/a'].text}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels['n/a'].ring}`}>
+                        {refAssignment?.referee.level || 'n/a'}
                       </span>
                     </>
                   );
@@ -339,10 +339,10 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                         {ref.firstName} {ref.lastName}
                       </span>
                       <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
-                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.background || refereeLevels.DEFAULT.background}
-                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.text || refereeLevels.DEFAULT.text}
-                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels.DEFAULT.ring}`}>
-                        {refAssignment?.referee.level}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.background || refereeLevels['n/a'].background}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.text || refereeLevels['n/a'].text}
+                  ${refereeLevels[refAssignment?.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels['n/a'].ring}`}>
+                        {refAssignment?.referee.level || 'n/a'}
                       </span>
                     </>
                   );
