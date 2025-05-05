@@ -74,6 +74,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
         enableReinitialize={enableReinitialize}
         onSubmit={onSubmit}
       >
+        {({ setFieldValue }) => (
         <Form>
           <RefLevelSelect
             selectedLevel={selectedLevel}
@@ -108,6 +109,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
             <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" loading={loading} />
           </div>
         </Form>
+        )}
       </Formik>
     </>
   )
