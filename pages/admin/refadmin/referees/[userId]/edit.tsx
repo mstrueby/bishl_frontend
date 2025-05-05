@@ -59,6 +59,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
+      params: {
+        active: true
+      }
     });
     clubs = clubsResponse.data;
   } catch (error) {
@@ -143,7 +146,6 @@ const Edit: NextPage<EditProps> = ({ jwt, referee, clubs }) => {
     email: referee?.email || '',
     firstName: referee?.firstName || '',
     lastName: referee?.lastName || '',
-    //club: referee?.club || undefined,
     referee: referee?.referee || undefined,
     roles: referee?.roles || []
   };
