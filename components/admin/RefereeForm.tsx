@@ -53,6 +53,14 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
 
   const handleClubChange = (clubId: string) => {
     setSelectedClubId(clubId);
+    const selectedClub = clubs.find(club => club._id === clubId);
+    if (selectedClub) {
+      setFieldValue('referee.club', {
+        clubId: selectedClub._id,
+        clubName: selectedClub.name,
+        clubAlias: selectedClub.alias
+      });
+    }
   };
 
   return (
@@ -74,6 +82,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
         enableReinitialize={enableReinitialize}
         onSubmit={onSubmit}
       >
+        {({ setFieldValue }) => (
         <Form>
           <RefLevelSelect
             selectedLevel={selectedLevel}
@@ -108,6 +117,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
             <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" loading={loading} />
           </div>
         </Form>
+        )}
       </Formik>
     </>
   )
