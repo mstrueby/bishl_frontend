@@ -3,6 +3,10 @@ export interface RefereeValues {
   passNo: string;
   ishdLevel: string;
   active: boolean;
+  club?: {
+    clubId: string;
+    clubName: string;
+  };
 }
 
 export interface UserValues {

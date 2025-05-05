@@ -7,13 +7,15 @@ import RefereeForm from '../../../../../components/admin/RefereeForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { UserValues } from '../../../../../types/UserValues';
+import { ClubValues } from '../../../../../types/ClubValues'
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface EditProps {
   jwt: string,
-  referee: UserValues
+  referee: UserValues,
+  clubs: ClubValues[],
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -28,6 +30,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
   let referee = null;
+  let clubs = null;
   try {
     // First check if user has required role
     const userResponse = await axios.get(`${BASE_URL}/users/me`, {
@@ -51,15 +54,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     });
     referee = response.data;
+    // Fetch Clubs data
+    const clubsResponse = await axios.get(`${BASE_URL}/clubs/`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+    clubs = clubsResponse.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching referee:', error.message);
     }
   }
-  return referee ? { props: { jwt, referee } } : { notFound: true };
+  return referee ? { props: { jwt, referee, clubs } } : { notFound: true };
 };
 
-const Edit: NextPage<EditProps> = ({ jwt, referee }) => {
+const Edit: NextPage<EditProps> = ({ jwt, referee, clubs }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -150,6 +160,7 @@ const Edit: NextPage<EditProps> = ({ jwt, referee }) => {
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
+        clubs={clubs}
       />
     </Layout>
   );

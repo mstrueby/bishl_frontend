@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
@@ -12,6 +13,7 @@ import { UserValues } from '../../types/UserValues'
 import { refereeLevels } from '../../tools/consts'
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
+import ClubSelect from '../ui/ClubSelect';
 
 interface RefereeFormProps {
   initialValues: UserValues;
@@ -19,6 +21,7 @@ interface RefereeFormProps {
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
+  clubs?: any[]; // Add clubs prop
 }
 
 const RefereeForm: React.FC<RefereeFormProps> = ({
@@ -27,6 +30,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
   enableReinitialize,
   handleCancel,
   loading,
+  clubs = [], // Provide default empty array
 }) => {
   const [selectedLevel, setSelectedLevel] = React.useState<keyof typeof refereeLevels>(
     initialValues.referee?.level as keyof typeof refereeLevels || 'n/a'
@@ -46,6 +50,16 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
       };
     }
   }
+
+  const handleClubChange = (clubId: string) => {
+    const selectedClub = clubs.find(club => club._id === clubId);
+    if (selectedClub && initialValues.referee) {
+      initialValues.referee.club = {
+        clubId: selectedClub._id,
+        clubName: selectedClub.name
+      };
+    }
+  };
   
   return (
     <>
@@ -71,6 +85,12 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
             selectedLevel={selectedLevel}
             label="Level"
             onLevelChange={handleLevelChange}
+          />
+          <ClubSelect
+            selectedClubId={initialValues.referee?.club?.clubId}
+            clubs={clubs}
+            onClubChange={handleClubChange}
+            label="Verein"
           />
           <InputText
             name="referee.passNo"
