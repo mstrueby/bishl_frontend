@@ -7,6 +7,7 @@ export interface RefereeValues {
     clubId: string;
     clubName: string;
   };
+  points: number;
 }
 
 export interface UserValues {
