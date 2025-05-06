@@ -129,7 +129,9 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
     ])
   );
 
-  const dataListItems = referees.map((referee) => {
+  const dataListItems = [...referees]
+    .sort((a, b) => a.firstName.localeCompare(b.firstName))
+    .map((referee) => {
     return {
       _id: referee._id,
       title: `${referee.firstName} ${referee.lastName}`,
