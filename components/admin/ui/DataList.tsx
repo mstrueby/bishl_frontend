@@ -158,9 +158,9 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
           </div>
 
           {/* Count Pill */}
-          {item.count !== undefined && (
+          {item.count !== undefined && item.published && (
             <div className="flex-none mr-4">
-              <span className="inline-flex items-center rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-900">
+              <span className={`inline-flex items-center rounded-full  px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 ${item.count >= 20 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                 {item.count}
               </span>
             </div>
