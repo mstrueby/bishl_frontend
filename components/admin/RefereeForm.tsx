@@ -34,7 +34,9 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
   const [selectedLevel, setSelectedLevel] = useState<keyof typeof refereeLevels>(
     initialValues.referee?.level as keyof typeof refereeLevels || 'n/a'
   );
-  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
+  const [selectedClubId, setSelectedClubId] = useState<string | null>(
+    initialValues.referee?.club?.clubId || null
+  );
 
   const handleLevelChange = (level: keyof typeof refereeLevels) => {
     setSelectedLevel(level);
@@ -86,16 +88,16 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
 
           return (
             <Form>
-              <RefLevelSelect
-                selectedLevel={selectedLevel}
-                label="Level"
-                onLevelChange={handleLevelChange}
-              />
               <ClubSelect
                 selectedClubId={selectedClubId}
                 clubs={clubs}
                 onClubChange={handleClubChange}
                 label="Verein"
+              />
+              <RefLevelSelect
+                selectedLevel={selectedLevel}
+                label="Level"
+                onLevelChange={handleLevelChange}
               />
               <InputText
                 name="referee.passNo"
