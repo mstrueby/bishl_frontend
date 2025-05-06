@@ -48,7 +48,8 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
         level,
         passNo: '',       // default value for passNo
         ishdLevel: '',    // default value for ishdLevel
-        active: false     // default value for active
+        active: false ,   // default value for active
+        points: 0,        // default value for points
       };
     }
   }

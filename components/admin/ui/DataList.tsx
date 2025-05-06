@@ -23,6 +23,7 @@ interface DataListProps {
     alias: string;
     description?: string[];
     category?: string;
+    count?: number;
     ageGroup?: {
       value: string;
       color: string;
