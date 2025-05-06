@@ -157,6 +157,15 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
             )}
           </div>
 
+          {/* Count Pill */}
+          {item.count !== undefined && (
+            <div className="flex-none mr-4">
+              <span className="inline-flex items-center rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-900">
+                {item.count}
+              </span>
+            </div>
+          )}
+
           {/* Context Menu */}
           {item.menu && item.menu.length > 0 && (
             <div className="flex-none gap-x-4">
