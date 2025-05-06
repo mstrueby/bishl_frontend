@@ -403,7 +403,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
       </div>
       {isDisabled && (
         <div className="mt-3 border-t font-light text-center text-xs">
-          <p className="p-1.5 text-red-700">Spiel gesperrt, warten auf Anfragen von P-Schiedsrichtern (bis {new Date(Date.now() + 13 * 24 * 60 * 60 * 1000).toLocaleDateString('de-DE')})</p>
+          <p className="p-1.5 text-red-700">Spiel gesperrt, warten auf Anfragen von P-Schiedsrichtern (bis {new Date(new Date(startDate).getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('de-DE')})</p>
         </div>
       )}
     </div>
