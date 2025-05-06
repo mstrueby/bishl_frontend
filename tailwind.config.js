@@ -75,7 +75,16 @@ module.exports = {
     'ring-stone-800/10',
     'ring-cyan-700/10',
     'ring-purple-700/10',
-    'ring-pink-700/10'
+    'ring-pink-700/10',
+
+    // Fill colors
+    'fill-blue-500',
+    'fill-green-500',
+    'fill-green-300',
+    'fill-red-500',
+    'fill-orange-500',
+    'fill-yellow-500',
+    'fill-gray-400'
   ],
   theme: {
     extend: {},
