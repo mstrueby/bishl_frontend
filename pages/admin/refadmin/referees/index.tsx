@@ -136,7 +136,7 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
       alias: referee._id,
       description: [
         referee.referee?.club?.clubName || 'Kein Verein',
-        referee.referee?.passNo ? `${referee.referee?.passNo}` : undefined
+        referee.referee?.passNo ? `${referee.referee?.passNo}` : ''
       ].filter(Boolean),
       category: referee.referee?.level !== undefined && referee.referee.level !== "n/a" ? referee.referee.level : undefined,
       image: undefined,

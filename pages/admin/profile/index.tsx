@@ -127,7 +127,6 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
       clubName: profile.club ? profile.club.clubName : '',
     },
     roles: profile.roles,
-    password: '',
   };
 
   const sectionTitle = 'Mein Profil';

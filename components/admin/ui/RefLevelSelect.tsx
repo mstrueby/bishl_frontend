@@ -1,7 +1,5 @@
-
 import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { TournamentValues } from '../../types/TournamentValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { classNames } from '../../../tools/utils';
 import { refereeLevels } from '../../../tools/consts';
