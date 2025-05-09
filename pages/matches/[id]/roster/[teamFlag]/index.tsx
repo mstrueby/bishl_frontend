@@ -828,8 +828,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     return (
         <Layout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                 <MatchCard match={match} /> {/* Add MatchCard component here */}
-                <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
+                <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung</h1>
+                <div className="mb-12">
+                    <MatchCard
+                        match={match} />
+                </div>
+                <h2 className="text-xl font-bold mb-6">{team.fullName} / {team.name}</h2>
+
 
                 {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
                 {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
@@ -1411,7 +1416,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </button>
                 </div>
             </div>
-            
+
             {/* Edit Player Modal */}
             {isEditModalOpen && editingPlayer && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
@@ -1772,3 +1777,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
             )}
+        </Layout>
+    );
+};
+
+export default RosterPage;
