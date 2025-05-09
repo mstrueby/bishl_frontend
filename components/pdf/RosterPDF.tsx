@@ -29,17 +29,15 @@ const styles = StyleSheet.create({
     borderColor: '#333',
   },
   headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    width: '100%',
   },
   logo: {
     width: 80,
     height: 80,
+    objectFit: 'contain',
   },
   teamInfo: {
     flex: 1,
-    marginLeft: 20,
   },
   title: {
     fontSize: 24,
@@ -121,12 +119,14 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
         />
       </View>
       <View style={styles.header}>
-        <View style={styles.headerContent}>
+        <View style={[styles.headerContent, { flexDirection: 'row', alignItems: 'center' }]}>
           {teamLogo && (
-            <Image
-              style={styles.logo}
-              src={teamLogo}
-            />
+            <View style={{ width: 80, marginRight: 20 }}>
+              <Image
+                style={styles.logo}
+                src={teamLogo}
+              />
+            </View>
           )}
           <View style={styles.teamInfo}>
             <Text style={styles.title}>{teamName}</Text>
