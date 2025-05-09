@@ -8,6 +8,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Helvetica',
   },
+  topHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  bishlLogo: {
+    width: 60,
+    height: 60,
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginRight: 20,
+  },
   header: {
     marginBottom: 20,
     borderBottom: 2,
@@ -99,6 +114,13 @@ interface RosterPDFProps {
 const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
+      <View style={styles.topHeader}>
+        <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
+        <Image
+          style={styles.bishlLogo}
+          src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+        />
+      </View>
       <View style={styles.header}>
         <View style={styles.headerContent}>
           {teamLogo && (
