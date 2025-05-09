@@ -141,6 +141,7 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
         referee.referee?.passNo ? `${referee.referee?.passNo}` : ''
       ].filter(Boolean),
       category: referee.referee?.level !== undefined && referee.referee.level !== "n/a" ? referee.referee.level : undefined,
+      count: referee.referee?.points,
       image: undefined,
       published: referee.referee?.active,
       featured: false,
