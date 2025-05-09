@@ -1,17 +1,32 @@
-
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { RosterPlayer } from '../../types/MatchValues';
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    padding: 30,
     fontSize: 12,
+    fontFamily: 'Helvetica',
+  },
+  topHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  bishlLogo: {
+    width: 60,
+    height: 60,
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginRight: 20,
   },
   header: {
-    marginBottom: 30,
-    borderBottom: 1,
-    paddingBottom: 10,
-    borderColor: '#666',
+    marginBottom: 20,
+    borderBottom: 2,
+    paddingBottom: 15,
+    borderColor: '#333',
   },
   headerContent: {
     flexDirection: 'row',
@@ -19,8 +34,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
   },
   teamInfo: {
     flex: 1,
@@ -29,56 +44,62 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 5,
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
-    marginTop: 5,
+    marginBottom: 3,
   },
   table: {
     width: '100%',
+    marginTop: 20,
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
+    borderBottomColor: '#DDDDDD',
     borderBottomStyle: 'solid',
     alignItems: 'center',
-    minHeight: 30,
-    paddingVertical: 5,
+    minHeight: 35,
+    paddingVertical: 8,
   },
   tableHeader: {
-    backgroundColor: '#F3F4F6',
-    borderBottomColor: '#666',
+    backgroundColor: '#E5E7EB',
+    borderBottomColor: '#333',
     borderBottomWidth: 2,
+    fontWeight: 'bold',
   },
   numberCell: {
+    width: '12%',
+    paddingHorizontal: 8,
+    textAlign: 'center',
+  },
+  positionCell: {
     width: '15%',
     paddingHorizontal: 8,
   },
-  positionCell: {
-    width: '20%',
-    paddingHorizontal: 8,
-  },
   nameCell: {
-    width: '45%',
+    width: '53%',
     paddingHorizontal: 8,
   },
   passCell: {
     width: '20%',
     paddingHorizontal: 8,
+    textAlign: 'center',
   },
   footer: {
     position: 'absolute',
     bottom: 30,
-    left: 40,
-    right: 40,
+    left: 30,
+    right: 30,
     textAlign: 'center',
     color: '#666',
     borderTop: 1,
-    borderColor: '#666',
+    borderColor: '#999',
     paddingTop: 10,
-  },
+    fontSize: 10,
+  }
 });
 
 interface RosterPDFProps {
@@ -92,6 +113,13 @@ interface RosterPDFProps {
 const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
+      <View style={styles.topHeader}>
+        <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
+        <Image
+          style={styles.bishlLogo}
+          src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.png"
+        />
+      </View>
       <View style={styles.header}>
         <View style={styles.headerContent}>
           {teamLogo && (
@@ -102,7 +130,8 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
           )}
           <View style={styles.teamInfo}>
             <Text style={styles.title}>{teamName}</Text>
-            <Text style={styles.subtitle}>{matchDate} - {venue}</Text>
+            <Text style={styles.subtitle}>Spieltag: {matchDate}</Text>
+            <Text style={styles.subtitle}>Spielort: {venue}</Text>
           </View>
         </View>
       </View>
@@ -115,21 +144,23 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
         
-        {roster.map((player) => (
-          <View key={player.player.playerId} style={styles.tableRow}>
-            <Text style={styles.numberCell}>{player.player.jerseyNumber}</Text>
-            <Text style={styles.positionCell}>{player.playerPosition.key}</Text>
-            <Text style={styles.nameCell}>
-              {player.player.lastName}, {player.player.firstName}
-              {player.called && ' (H)'}
-            </Text>
-            <Text style={styles.passCell}>{player.passNumber}</Text>
-          </View>
-        ))}
+        {roster
+          .sort((a, b) => (a.player.jerseyNumber || 0) - (b.player.jerseyNumber || 0))
+          .map((player) => (
+            <View key={player.player.playerId} style={styles.tableRow}>
+              <Text style={styles.numberCell}>{player.player.jerseyNumber || '-'}</Text>
+              <Text style={styles.positionCell}>{player.playerPosition.key}</Text>
+              <Text style={styles.nameCell}>
+                {`${player.player.lastName}, ${player.player.firstName}`}
+                {player.called && ' (H)'}
+              </Text>
+              <Text style={styles.passCell}>{player.passNumber || '-'}</Text>
+            </View>
+          ))}
       </View>
 
       <View style={styles.footer}>
-        <Text>Generated on {new Date().toLocaleDateString()}</Text>
+        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')}</Text>
       </View>
     </Page>
   </Document>

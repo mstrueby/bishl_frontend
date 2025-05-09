@@ -14,6 +14,7 @@ import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
+import MatchCard from '../../../../../components/ui/MatchCard'; // Added import for MatchCard
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -197,7 +198,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                         );
 
                         const youngerTeamPlayers = Array.isArray(playersResponse.data.results)
-                            ? playersResponse.data.results
+                            ? youngerTeamPlayers.data.results
                             : [];
 
                         additionalPlayers = [...additionalPlayers, ...youngerTeamPlayers];
@@ -827,7 +828,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     return (
         <Layout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
+                <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung</h1>
+                <div className="mb-12">
+                    <MatchCard
+                        match={match} />
+                </div>
+                <h2 className="text-xl font-bold mb-6">{team.fullName} / {team.name}</h2>
+
 
                 {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
                 {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
