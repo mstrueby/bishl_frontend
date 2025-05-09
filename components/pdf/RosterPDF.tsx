@@ -1,4 +1,3 @@
-
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { RosterPlayer } from '../../types/MatchValues';
 
@@ -118,7 +117,7 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
         <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
         <Image
           style={styles.bishlLogo}
-          src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+          src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.png"
         />
       </View>
       <View style={styles.header}>
