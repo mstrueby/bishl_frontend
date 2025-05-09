@@ -14,6 +14,7 @@ import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
+import MatchCard from '../../../../../components/ui/MatchCard'; // Added import for MatchCard
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -197,7 +198,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                         );
 
                         const youngerTeamPlayers = Array.isArray(playersResponse.data.results)
-                            ? playersResponse.data.results
+                            ? youngerTeamPlayers.data.results
                             : [];
 
                         additionalPlayers = [...additionalPlayers, ...youngerTeamPlayers];
@@ -827,6 +828,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     return (
         <Layout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                 <MatchCard match={match} /> {/* Add MatchCard component here */}
                 <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
 
                 {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
@@ -1409,7 +1411,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </button>
                 </div>
             </div>
-
+            
             {/* Edit Player Modal */}
             {isEditModalOpen && editingPlayer && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
@@ -1770,8 +1772,3 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
             )}
-        </Layout>
-    );
-};
-
-export default RosterPage;
