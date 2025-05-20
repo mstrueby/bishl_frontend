@@ -61,7 +61,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       if (isNewAssignment) {
         const createdAssignment = await response.json();
         console.log('Created new assignment:', createdAssignment);
-        
+
         // Update local assignment state with the newly created assignment
         // This allows further updates without refresh
         if (createdAssignment) {
@@ -221,15 +221,17 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
         </div>
         <div className="flex flex-col sm:flex-none justify-center">
           {/* assigned Referees */}
-          <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center justify-between truncate">
             {match.referee1 && (
-              <div className="flex items-center gap-x-2">
+              <div className="flex items-center gap-x-2 mr-3">
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
                   {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
                 </div>
-                <span className="text-sm text-gray-600 truncate">
-                  {match.referee1.firstName} {match.referee1.lastName}
-                </span>
+                <div className="text-sm text-gray-600 truncate">
+                  <span>{match.referee1.firstName}</span>
+                  <span className="inline lg:hidden"> {match.referee1.lastName.charAt(0)}.</span>
+                  <span className="hidden lg:inline"> {match.referee1.lastName}</span  >
+                </div>
               </div>
             )}
             {match.referee2 && (
@@ -237,9 +239,11 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
                   {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
                 </div>
-                <span className="text-sm text-gray-600 truncate">
-                  {match.referee2.firstName} {match.referee2.lastName}
-                </span>
+                <div className="text-sm text-gray-600 truncate">
+                  <span>{match.referee2.firstName}</span>
+                  <span className="inline lg:hidden"> {match.referee2.lastName.charAt(0)}.</span>
+                  <span className="hidden lg:inline"> {match.referee2.lastName}</span  >
+                </div>
               </div>
             )}
           </div>
