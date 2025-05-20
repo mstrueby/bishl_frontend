@@ -240,7 +240,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, user, initialMatches, initialAssignm
           className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-4 sm:px-6 xl:px-8"
         >
           <dt className="text-sm/6 font-medium text-gray-500">Punkte</dt>
-          <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900">{user.referee?.points}</dd>
+          <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900">{user.referee?.points ?? 0}</dd>
         </div>
       </dl>
 
