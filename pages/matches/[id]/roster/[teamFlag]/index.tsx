@@ -293,10 +293,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 Authorization: `Bearer ${jwt}`,
             },
             params: {
-                matchday: match.matchday,
-                round: match.round,
-                season: match.season,
-                tournament: match.tournament,
+                matchday: match.matchday.alias,
+                round: match.round.alias,
+                season: match.season.alias,
+                tournament: match.tournament.alias,
+                club: matchTeam.clubAlias,
+                team: matchTeam.teamAlias
             },
         });
         const matches: Match[] = matchesResponse.data;
@@ -791,33 +793,38 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         setSavingRoster(true);
         setError('');
 
-        try {
-            // Prepare the data to be sent
-            const rosterData = {
-                roster: rosterList,
-                published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
-            };
+        // Prepare the data to be sent
+        const rosterData = {
+            roster: rosterList,
+            published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
+        };
 
+
+        
+        try {
             // Make the API call to save the roster for the main match
-            const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
+            const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
                 }
             });
-
+            console.log('Roster saved:', rosterResponse.data);
+            
             // Update roster published status for the main match
             const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
                 [teamFlag]: {
-                    rosterPublished: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
+                    rosterPublished: rosterData.published
                 }
             }, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                 }
             });
+            console.log('Roster published status updated:', publishResponse.data);
 
             // Save roster for selected additional matches
+            console.log('Selected matches:', selectedMatches);
             for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
                  try {
                     // Save roster for this match
@@ -836,7 +843,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     await axios.patch(
                         `${BASE_URL}/matches/${m._id}`,
                         {
-```text
                             [teamFlag]: {
                                 rosterPublished: rosterPublished || match.matchStatus.key === 'FINISHED'
                             }
@@ -862,12 +868,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Ignore 304 Not Modified errors as they're not actual errors
             if (axios.isAxiosError(error) && error.response?.status === 304) {
                 console.log('Match not changed (304 Not Modified), continuing normally');
-                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
+                setSuccessMessage('Keine Änderungen vorgenommen.');
             } else {
                 console.error('Error saving roster/match:', error);
                 setError('Aufstellung konnte nicht gespeichert werden.');
             }
-        } finally {            console.log("Roster successfully changed");
+        } finally {            
+            console.log("Roster successfully changed");
             setSavingRoster(false);
             // Set success message if no error occurred
             if (!error) {
@@ -1463,12 +1470,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     value={m._id}
                                                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                                     onChange={(e) => {
-                                                            // Just track which matches are selected for bulk save
-                                                            setSelectedMatches(prev => 
-                                                                e.target.checked 
-                                                                    ? [...prev, m._id]
-                                                                    : prev.filter(id => id !== m._id)
-                                                            );
+                                                            if (e.target.checked) {
+                                                                setSelectedMatches(prev => [...prev, m._id]);
+                                                            } else {
+                                                                setSelectedMatches(prev => prev.filter(id => id !== m._id));
+                                                            }
+                                                            console.log("Selected matches:", selectedMatches)
                                                         }}
                                                 />
                                                 <label htmlFor={`match-${m._id}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
@@ -1872,7 +1879,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
             )}
-
 
         </Layout>
     );
