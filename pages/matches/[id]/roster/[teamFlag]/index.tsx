@@ -1465,25 +1465,14 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     }}
                                                 />
                                                 <div className="flex-shrink-0 h-8 w-8">
-                                                    {m.home.logo && (
-                                                        <img
-                                                            className="h-8 w-8"
-                                                            src={m.home.logo}
-                                                            alt={m.home.shortName}
-                                                        />
-                                                    )}
+                                                    <img
+                                                        className="h-8 w-8"
+                                                        src={m[m.home.teamId === match[teamFlag].teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                                        alt="Team logo"
+                                                    />
                                                 </div>
-                                                <div className="text-sm text-gray-900">{m.home.shortName}</div>
-                                                <div className="text-sm text-gray-500">vs</div>
-                                                <div className="text-sm text-gray-900">{m.away.shortName}</div>
-                                                <div className="flex-shrink-0 h-8 w-8">
-                                                    {m.away.logo && (
-                                                        <img
-                                                            className="h-8 w-8"
-                                                            src={m.away.logo}
-                                                            alt={m.away.shortName}
-                                                        />
-                                                    )}
+                                                <div className="text-sm text-gray-900">
+                                                    {m[m.home.teamId === match[teamFlag].teamId ? 'away' : 'home'].shortName}
                                                 </div>
                                             </div>
                                             <div className="text-sm text-gray-500">
