@@ -1493,7 +1493,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                         } else {
                                                             setSelectedMatches(prev => prev.filter(id => id !== m._id));
                                                         }
-                                                        console.log("Selected matches:", selectedMatches)
                                                     }}
                                                 />
                                                 <label htmlFor={`match-${m._id}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
