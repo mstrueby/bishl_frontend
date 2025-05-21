@@ -15,6 +15,7 @@ import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
 import { CldImage } from 'next-cloudinary';
+import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -793,14 +794,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
         setSavingRoster(true);
         setError('');
+        let cntAdditionalMatches = 0;
 
         // Prepare the data to be sent
         const rosterData = {
             roster: rosterList,
             published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
         };
-
-
 
         try {
             // Make the API call to save the roster for the main match
@@ -851,6 +851,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         }
                     );
                     console.log(`Roster successfully saved for match ${m._id} as ${matchTeamFlag} team:`, rosterResponse.data);
+                    cntAdditionalMatches += 1;
 
                     try {
                         // Update roster published status with correct team flag
@@ -897,7 +898,19 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             setSavingRoster(false);
             // Set success message if no error occurred
             if (!error) {
-                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
+                let successMsg = '';
+                if (cntAdditionalMatches === 0) {
+                    successMsg = 'Aufstellung erfolgreich gespeichert.';
+                }
+                else {
+                    successMsg += `Aufstellungen erfolgreich gespeichert`;
+                    if (cntAdditionalMatches === 1) {
+                        successMsg += ` (inklusive für ein weiteres Spiel).`;
+                    } else {
+                        successMsg += ` (inklusive für ${cntAdditionalMatches} weitere Spiele).`;
+                    }
+                }
+                setSuccessMessage(successMsg);
             }
             // Scroll to the top of the page
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1473,18 +1486,27 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                         height={32}
                                                         gravity="center"
                                                         className="object-contain"
-                                                        
+
                                                     />
                                                 </div>
                                                 <div className="text-sm text-gray-900">
                                                     {m[m.home.teamId === match[teamFlag].teamId ? 'away' : 'home'].shortName}
                                                 </div>
                                             </div>
-                                            <div className="text-sm text-gray-500">
-                                                {new Date(m.startDate).toLocaleTimeString('de-DE', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
+                                            <div className="text-xs text-gray-500">
+                                                {m.matchStatus.key === 'SCHEDULED' ? (
+                                                    new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    }) + ' Uhr'
+                                                ) : (
+                                                    <MatchStatusBadge
+                                                        statusKey={m.matchStatus.key}
+                                                        finishTypeKey={m.finishType.key}
+                                                        statusValue={m.matchStatus.value}
+                                                        finishTypeValue={m.finishType.value}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                     </li>
