@@ -835,9 +835,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             console.log('Selected matches:', selectedMatches);
             for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
                 try {
+                    // Determine if the team is home or away in this match
+                    const matchTeamFlag = m.home.teamId === match[teamFlag].teamId ? 'home' : 'away';
+                    
                     // Save roster for this match
                     const rosterResponse = await axios.put(
-                        `${BASE_URL}/matches/${m._id}/${teamFlag}/roster/`,
+                        `${BASE_URL}/matches/${m._id}/${matchTeamFlag}/roster/`,
                         rosterData.roster,
                         {
                             headers: {
@@ -846,14 +849,14 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             }
                         }
                     );
-                    console.log(`Roster successfully saved for match ${m._id}:`, rosterResponse.data);
+                    console.log(`Roster successfully saved for match ${m._id} as ${matchTeamFlag} team:`, rosterResponse.data);
 
                     try {
-                        // Update roster published status
+                        // Update roster published status with correct team flag
                         await axios.patch(
                             `${BASE_URL}/matches/${m._id}`,
                             {
-                                [teamFlag]: {
+                                [matchTeamFlag]: {
                                     rosterPublished: rosterData.published
                                 }
                             },
@@ -863,13 +866,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                 }
                             }
                         );
-                        console.log(`Roster published status updated for match ${m._id}`)
+                        console.log(`Roster published status updated for match ${m._id} as ${matchTeamFlag} team`);
                     } catch (error) {
                         // Ignore 304 responses and continue
                         if (axios.isAxiosError(error) && error.response?.status !== 304) {
                             throw error;
                         }
-                        console.log('Roster published status not changed (304) for match', m._id);
+                        console.log(`Roster published status not changed (304) for match ${m._id}`);
                     }
 
                 } catch (error) {
