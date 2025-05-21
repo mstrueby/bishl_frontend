@@ -811,17 +811,25 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             });
             console.log('Roster saved:', rosterResponse.data);
             
-            // Update roster published status for the main match
-            const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
-                [teamFlag]: {
-                    rosterPublished: rosterData.published
+            try {
+                // Update roster published status for the main match
+                const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
+                    [teamFlag]: {
+                        rosterPublished: rosterData.published
+                    }
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                    }
+                });
+                console.log('Roster published status updated:', publishResponse.data);
+            } catch (error) {
+                // Ignore 304 responses and continue
+                if (axios.isAxiosError(error) && error.response?.status !== 304) {
+                    throw error;
                 }
-            }, {
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                }
-            });
-            console.log('Roster published status updated:', publishResponse.data);
+                console.log('Match not modified (304), continuing normally');
+            }
 
             // Save roster for selected additional matches
             console.log('Selected matches:', selectedMatches);
