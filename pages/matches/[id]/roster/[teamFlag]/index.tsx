@@ -837,7 +837,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 try {
                     // Determine if the team is home or away in this match
                     const matchTeamFlag = m.home.teamId === match[teamFlag].teamId ? 'home' : 'away';
-                    
+
                     // Save roster for this match
                     const rosterResponse = await axios.put(
                         `${BASE_URL}/matches/${m._id}/${matchTeamFlag}/roster/`,
@@ -1442,46 +1442,15 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
                 {/* Other Matchday Matches */}
                 <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-                <div className="bg-white shadow rounded-md border p-6">
-                    <div className="divide-y divide-gray-200">
-                        {match.matchday && match.round && match.season && match.tournament && (
-                            <div className="space-y-4">
-                                {matches
-                                    .filter(m => m._id !== match._id) // Exclude current match
-                                    .map((m) => (
-                                        <div key={m._id} className="pt-4 first:pt-0">
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="flex-shrink-0 h-8 w-8">
-                                                        {m.home.logo && (
-                                                            <img
-                                                                className="h-8 w-8"
-                                                                src={m.home.logo}
-                                                                alt={m.home.shortName}
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    <div className="text-sm text-gray-900">{m.home.shortName}</div>
-                                                    <div className="text-sm text-gray-500">vs</div>
-                                                    <div className="text-sm text-gray-900">{m.away.shortName}</div>
-                                                    <div className="flex-shrink-0 h-8 w-8">
-                                                        {m.away.logo && (
-                                                            <img
-                                                                className="h-8 w-8"
-                                                                src={m.away.logo}
-                                                                alt={m.away.shortName}
-                                                            />
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="text-sm text-gray-500">
-                                                    {new Date(m.startDate).toLocaleTimeString('de-DE', {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center mt-2">
+                <div className="bg-white shadow rounded-md border mb-6">
+                    {match.matchday && match.round && match.season && match.tournament && (
+                        <ul className="divide-y divide-gray-200">
+                            {matches
+                                .filter(m => m._id !== match._id) // Exclude current match
+                                .map((m) => (
+                                    <li key={m._id} className="px-6 py-4">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center space-x-4">
                                                 <input
                                                     id={`match-${m._id}`}
                                                     type="checkbox"
@@ -1495,15 +1464,39 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                         }
                                                     }}
                                                 />
-                                                <label htmlFor={`match-${m._id}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                    Auch speichern
-                                                </label>
+                                                <div className="flex-shrink-0 h-8 w-8">
+                                                    {m.home.logo && (
+                                                        <img
+                                                            className="h-8 w-8"
+                                                            src={m.home.logo}
+                                                            alt={m.home.shortName}
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-gray-900">{m.home.shortName}</div>
+                                                <div className="text-sm text-gray-500">vs</div>
+                                                <div className="text-sm text-gray-900">{m.away.shortName}</div>
+                                                <div className="flex-shrink-0 h-8 w-8">
+                                                    {m.away.logo && (
+                                                        <img
+                                                            className="h-8 w-8"
+                                                            src={m.away.logo}
+                                                            alt={m.away.shortName}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="text-sm text-gray-500">
+                                                {new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
                                             </div>
                                         </div>
-                                    ))}
-                            </div>
-                        )}
-                    </div>
+                                    </li>
+                                ))}
+                        </ul>
+                    )}
                 </div>
 
                 {/* Close, Save buttons */}
