@@ -848,10 +848,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
                 {/* Add Player Form */}
+                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Spieler aufstellen</h2>
                 <div className="bg-white shadow rounded-md border p-4 mb-6">
-                    <h2 className="text-lg font-medium mb-4">Spieler aufstellen</h2>
-
-
                     <div className="flex flex-col gap-4">
                         {/* Player Selection */}
                         <div className="flex flex-col gap-3 sm:gap-4">
@@ -1067,8 +1065,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 {/* Roster List */}
-                <h3 className="mt-8 text-lg font-medium text-gray-900">Aufstellung</h3>
-                <div className="bg-white shadow-md rounded-md border-2 mt-4">
+                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Aufstellung</h2>
+                <div className="bg-white shadow rounded-md border mb-6">
                     <ul className="divide-y divide-gray-200">
                         {rosterList.length > 0 ? (
                             rosterList.map((player) => (
@@ -1183,8 +1181,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 {/* Roster Completeness Check */}
-                <div className="mt-8 bg-white shadow rounded-md border p-6">
-                    <h3 className="text-base font-semibold mb-4">Check:</h3>
+                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Check</h2>
+                <div className="bg-white shadow rounded-md border p-6">
                     <div className="space-y-3">
 
                         {/* Captain check indicator */}
@@ -1328,7 +1326,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-6 bg-white shadow rounded-lg p-6">
+                {/* Publish Roster Checkbox */}
+                <div className="flex items-center justify-between mt-8 bg-white shadow rounded-md border p-6">
                     <div className="flex items-center">
                         <div className="relative inline-flex items-center">
                             <div className="flex items-center h-6">
@@ -1377,8 +1376,56 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
 
+                {/* Other Matchday Matches */}
+                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+                <div className="bg-white shadow rounded-md border p-6">
+                    <div className="divide-y divide-gray-200">
+                        {match.matchday && match.round && match.season && match.tournament && (
+                            <div className="space-y-4">
+                                {matches
+                                    .filter(m => m._id !== match._id) // Exclude current match
+                                    .map((m) => (
+                                        <div key={m._id} className="pt-4 first:pt-0">
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="flex-shrink-0 h-8 w-8">
+                                                        {m.home.logo && (
+                                                            <img
+                                                                className="h-8 w-8"
+                                                                src={m.home.logo}
+                                                                alt={m.home.shortName}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-gray-900">{m.home.shortName}</div>
+                                                    <div className="text-sm text-gray-500">vs</div>
+                                                    <div className="text-sm text-gray-900">{m.away.shortName}</div>
+                                                    <div className="flex-shrink-0 h-8 w-8">
+                                                        {m.away.logo && (
+                                                            <img
+                                                                className="h-8 w-8"
+                                                                src={m.away.logo}
+                                                                alt={m.away.shortName}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="text-sm text-gray-500">
+                                                    {new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                
+                {/* Close, Save buttons */}
                 <div className="flex space-x-3 mt-6 justify-end">
-
                     <button
                         type="button"
                         onClick={() => router.back()}
@@ -1768,53 +1815,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
             )}
 
-            {/* Other Matchday Matches */}
-            <div className="mt-8 bg-white shadow rounded-md border p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Andere Spiele des Spieltags</h3>
-                <div className="divide-y divide-gray-200">
-                    {match.matchday && match.round && match.season && match.tournament && (
-                        <div className="space-y-4">
-                            {matches
-                                .filter(m => m._id !== match._id) // Exclude current match
-                                .map((m) => (
-                                    <div key={m._id} className="pt-4 first:pt-0">
-                                        <div className="flex justify-between items-center">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="flex-shrink-0 h-8 w-8">
-                                                    {m.home.logo && (
-                                                        <img
-                                                            className="h-8 w-8"
-                                                            src={m.home.logo}
-                                                            alt={m.home.shortName}
-                                                        />
-                                                    )}
-                                                </div>
-                                                <div className="text-sm text-gray-900">{m.home.shortName}</div>
-                                                <div className="text-sm text-gray-500">vs</div>
-                                                <div className="text-sm text-gray-900">{m.away.shortName}</div>
-                                                <div className="flex-shrink-0 h-8 w-8">
-                                                    {m.away.logo && (
-                                                        <img
-                                                            className="h-8 w-8"
-                                                            src={m.away.logo}
-                                                            alt={m.away.shortName}
-                                                        />
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="text-sm text-gray-500">
-                                                {new Date(m.startDate).toLocaleTimeString('de-DE', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
-            </div>
+            
         </Layout>
     );
 };
