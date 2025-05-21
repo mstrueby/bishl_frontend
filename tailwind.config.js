@@ -35,6 +35,7 @@ module.exports = {
     
     // Text colors
     'text-blue-700',
+    'text-blue-600',
     'text-blue-400',
     'text-green-800',
     'text-green-700',
