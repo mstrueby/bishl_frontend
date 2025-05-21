@@ -1481,11 +1481,20 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                 </div>
                                             </div>
                                             <div className="text-sm text-gray-500">
-                                                {new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                            {m.matchStatus.key === 'SCHEDULED' ? (
+                                                new Date(m.startDate).toLocaleTimeString('de-DE', {
                                                     hour: '2-digit',
                                                     minute: '2-digit'
-                                                })}
-                                            </div>
+                                                })
+                                            ) : (
+                                                <MatchStatusBadge
+                                                    statusKey={m.matchStatus.key}
+                                                    finishTypeKey={m.finishType.key}
+                                                    statusValue={m.matchStatus.value}
+                                                    finishTypeValue={m.finishType.value}
+                                                />
+                                            )}
+                                        </div>
                                         </div>
                                     </li>
                                 ))}
