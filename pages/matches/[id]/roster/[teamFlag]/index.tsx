@@ -14,6 +14,7 @@ import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
+import { CldImage } from 'next-cloudinary';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -1465,10 +1466,14 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     }}
                                                 />
                                                 <div className="flex-shrink-0 h-8 w-8">
-                                                    <img
-                                                        className="h-8 w-8"
+                                                    <CldImage
                                                         src={m[m.home.teamId === match[teamFlag].teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
                                                         alt="Team logo"
+                                                        width={32}
+                                                        height={32}
+                                                        gravity="center"
+                                                        className="object-contain"
+                                                        
                                                     />
                                                 </div>
                                                 <div className="text-sm text-gray-900">
