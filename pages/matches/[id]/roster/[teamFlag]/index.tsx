@@ -358,6 +358,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [callUpPlayers, setCallUpPlayers] = useState<AvailablePlayer[]>([]);
     const [selectedCallUpPlayer, setSelectedCallUpPlayer] = useState<AvailablePlayer | null>(null);
     const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
+    const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
 
     // Handler to close the success message
     const handleCloseSuccessMessage = () => {
@@ -797,7 +798,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
             };
 
-            // Make the API call to save the roster
+            // Make the API call to save the roster for the main match
             const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
@@ -805,7 +806,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 }
             });
 
-            // Make API call to save further roster attributes
+            // Update roster published status for the main match
             const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
                 [teamFlag]: {
                     rosterPublished: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
@@ -815,6 +816,44 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     Authorization: `Bearer ${jwt}`,
                 }
             });
+
+            // Save roster for selected additional matches
+            for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
+                 try {
+                    // Save roster for this match
+                    const rosterResponse = await axios.put(
+                        `${BASE_URL}/matches/${m._id}/${teamFlag}/roster/`,
+                        rosterList,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    // Update roster published status
+                    await axios.patch(
+                        `${BASE_URL}/matches/${m._id}`,
+                        {
+```text
+                            [teamFlag]: {
+                                rosterPublished: rosterPublished || match.matchStatus.key === 'FINISHED'
+                            }
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                            }
+                        }
+                    );
+
+                    setSuccessMessage(`Aufstellung für ${m.home.shortName} vs ${m.away.shortName} erfolgreich gespeichert.`);
+                } catch (error) {
+                    console.error('Error saving roster for additional match:', error);
+                    setError(`Fehler beim Speichern der Aufstellung für ${m.home.shortName} vs ${m.away.shortName}`);
+                }
+            }
 
             // Show success message or redirect
             setError(null);
@@ -1417,13 +1456,32 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     })}
                                                 </div>
                                             </div>
+                                            <div className="flex items-center mt-2">
+                                                <input
+                                                    id={`match-${m._id}`}
+                                                    type="checkbox"
+                                                    value={m._id}
+                                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                    onChange={(e) => {
+                                                            // Just track which matches are selected for bulk save
+                                                            setSelectedMatches(prev => 
+                                                                e.target.checked 
+                                                                    ? [...prev, m._id]
+                                                                    : prev.filter(id => id !== m._id)
+                                                            );
+                                                        }}
+                                                />
+                                                <label htmlFor={`match-${m._id}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                    Auch speichern
+                                                </label>
+                                            </div>
                                         </div>
                                     ))}
                             </div>
                         )}
                     </div>
                 </div>
-                
+
                 {/* Close, Save buttons */}
                 <div className="flex space-x-3 mt-6 justify-end">
                     <button
@@ -1815,7 +1873,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
             )}
 
-            
+
         </Layout>
     );
 };
