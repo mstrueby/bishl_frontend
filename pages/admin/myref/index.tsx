@@ -8,11 +8,14 @@ import { Match } from '../../../types/MatchValues';
 import { AssignmentValues } from '../../../types/AssignmentValues';
 import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
+import { UserValues } from "../../../types/UserValues";
+import { classNames } from "../../../tools/utils"
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface MyRefProps {
   jwt: string;
+  user: UserValues;
   initialMatches: Match[];
   initialAssignments: AssignmentValues[];
 }
@@ -26,6 +29,7 @@ interface FilterState {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context) as string | undefined;
+  let user = null;
   let matches = null;
   let assignments = null;
   const currentDate = new Date().toISOString().split('T')[0];
@@ -46,8 +50,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Authorization': `Bearer ${jwt}`
       }
     });
-    
-    const user = userResponse.data;
+
+    user = userResponse.data;
     if (!user.roles?.includes('REFEREE')) {
       return {
         redirect: {
@@ -73,25 +77,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       // First sort by date only (ignore time component)
       const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
       const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
-      
+
       if (dateA !== dateB) {
         return dateA - dateB;
       }
-      
+
       // When dates are the same, sort by venue name to group matches by venue
       const venueA = a.venue.name.toLowerCase();
       const venueB = b.venue.name.toLowerCase();
-      
+
       if (venueA !== venueB) {
         return venueA.localeCompare(venueB);
       }
-      
+
       // Finally, for matches at the same venue on the same day, sort by time
       const timeA = new Date(a.startDate).getTime();
       const timeB = new Date(b.startDate).getTime();
       return timeA - timeB;
     });
-    
+
     matches = sortedMatches;
     assignments = assignmentsRes.data;
   } catch (error) {
@@ -103,18 +107,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       jwt,
+      user,
       initialMatches: matches || [],
       initialAssignments: assignments || []
     }
   };
 };
 
-const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }) => {
+const MyRef: NextPage<MyRefProps> = ({ jwt, user, initialMatches, initialAssignments }) => {
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [assignments, setAssignments] = useState<AssignmentValues[]>(initialAssignments);
   const [filter, setFilter] = useState<FilterState>({ tournament: 'all', showUnassignedOnly: false });
   const sectionTitle = "Meine Schiedsrichtereinsätze";
-  
+
   const fetchData = async (filterParams: FilterState) => {
     try {
       const userRes = await axios.get(`${BASE_URL}/users/me`, {
@@ -122,7 +127,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
       });
       const userId = userRes.data._id;
 
-      const params: any = { 
+      const params: any = {
         date_from: filterParams.date_from || new Date().toISOString().split('T')[0]
       };
       if (filterParams.date_to) {
@@ -152,19 +157,19 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         // First sort by date only (ignore time component)
         const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
         const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
-        
+
         if (dateA !== dateB) {
           return dateA - dateB;
         }
-        
+
         // When dates are the same, sort by venue name to group matches by venue
         const venueA = a.venue.name.toLowerCase();
         const venueB = b.venue.name.toLowerCase();
-        
+
         if (venueA !== venueB) {
           return venueA.localeCompare(venueB);
         }
-        
+
         // Finally, for matches at the same venue on the same day, sort by time
         const timeA = new Date(a.startDate).getTime();
         const timeB = new Date(b.startDate).getTime();
@@ -197,13 +202,13 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
             const promises = matches.map(match => {
               const assignment = assignments.find(a => a.matchId === match._id);
               const method = !assignment ? 'POST' : 'PATCH';
-              const endpoint = !assignment ? 
+              const endpoint = !assignment ?
                 `${BASE_URL}/assignments` :
                 `${BASE_URL}/assignments/${assignment._id}`;
               const body = !assignment ?
                 { matchId: match._id, status } :
                 { status };
-              
+
               return fetch(endpoint, {
                 method,
                 headers: {
@@ -228,6 +233,17 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
         }}
       />
 
+      {/** Einsätze und Punkte */}
+      <dl className="mx-auto grid grid-cols-1 gap-px bg-gray-900/5 sm:grid-cols-1 lg:grid-cols-1">
+        <div
+          key="points"
+          className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-4 sm:px-6 xl:px-8"
+        >
+          <dt className="text-sm/6 font-medium text-gray-500">Punkte</dt>
+          <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900">{user.referee?.points ?? 0}</dd>
+        </div>
+      </dl>
+
       <ul>
         {matches && matches.length > 0 ? (
           matches.map((match: Match) => {
@@ -238,7 +254,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, initialMatches, initialAssignments }
                 match={match}
                 assignment={assignment}
                 jwt={jwt}
-                // Force re-render with a new key when assignment changes
+              // Force re-render with a new key when assignment changes
               />
             );
           })
