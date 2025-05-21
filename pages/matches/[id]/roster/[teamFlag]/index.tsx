@@ -287,8 +287,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         console.log("All available players:", availablePlayers.length);
         console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
 
-         // Fetch other matches of the same matchday
-         const matchesResponse = await axios.get(`${BASE_URL}/matches`, {
+        // Fetch other matches of the same matchday
+        const matchesResponse = await axios.get(`${BASE_URL}/matches`, {
             headers: {
                 Authorization: `Bearer ${jwt}`,
             },
@@ -800,7 +800,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
         };
 
 
-        
+
         try {
             // Make the API call to save the roster for the main match
             const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
@@ -809,8 +809,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     'Content-Type': 'application/json'
                 }
             });
-            console.log('Roster saved:', rosterResponse.data);
-            
+            console.log('Roster successfully saved:', rosterResponse.data);
+
             try {
                 // Update roster published status for the main match
                 const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
@@ -822,23 +822,23 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                         Authorization: `Bearer ${jwt}`,
                     }
                 });
-                console.log('Roster published status updated:', publishResponse.data);
+                console.log('Roster published status updated:', rosterData.published);
             } catch (error) {
                 // Ignore 304 responses and continue
                 if (axios.isAxiosError(error) && error.response?.status !== 304) {
                     throw error;
                 }
-                console.log('Match not modified (304), continuing normally');
+                console.log('Roster published status not changed (304)');
             }
 
             // Save roster for selected additional matches
             console.log('Selected matches:', selectedMatches);
             for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
-                 try {
+                try {
                     // Save roster for this match
                     const rosterResponse = await axios.put(
                         `${BASE_URL}/matches/${m._id}/${teamFlag}/roster/`,
-                        rosterList,
+                        rosterData.roster,
                         {
                             headers: {
                                 Authorization: `Bearer ${jwt}`,
@@ -846,23 +846,32 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                             }
                         }
                     );
+                    console.log(`Roster successfully saved for match ${m._id}:`, rosterResponse.data);
 
-                    // Update roster published status
-                    await axios.patch(
-                        `${BASE_URL}/matches/${m._id}`,
-                        {
-                            [teamFlag]: {
-                                rosterPublished: rosterPublished || match.matchStatus.key === 'FINISHED'
+                    try {
+                        // Update roster published status
+                        await axios.patch(
+                            `${BASE_URL}/matches/${m._id}`,
+                            {
+                                [teamFlag]: {
+                                    rosterPublished: rosterData.published
+                                }
+                            },
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${jwt}`,
+                                }
                             }
-                        },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${jwt}`,
-                            }
+                        );
+                        console.log(`Roster published status updated for match ${m._id}`)
+                    } catch (error) {
+                        // Ignore 304 responses and continue
+                        if (axios.isAxiosError(error) && error.response?.status !== 304) {
+                            throw error;
                         }
-                    );
+                        console.log('Roster published status not changed (304) for match', m._id);
+                    }
 
-                    setSuccessMessage(`Aufstellung für ${m.home.shortName} vs ${m.away.shortName} erfolgreich gespeichert.`);
                 } catch (error) {
                     console.error('Error saving roster for additional match:', error);
                     setError(`Fehler beim Speichern der Aufstellung für ${m.home.shortName} vs ${m.away.shortName}`);
@@ -876,13 +885,11 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Ignore 304 Not Modified errors as they're not actual errors
             if (axios.isAxiosError(error) && error.response?.status === 304) {
                 console.log('Match not changed (304 Not Modified), continuing normally');
-                setSuccessMessage('Keine Änderungen vorgenommen.');
             } else {
                 console.error('Error saving roster/match:', error);
                 setError('Aufstellung konnte nicht gespeichert werden.');
             }
-        } finally {            
-            console.log("Roster successfully changed");
+        } finally {
             setSavingRoster(false);
             // Set success message if no error occurred
             if (!error) {
@@ -1478,13 +1485,13 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     value={m._id}
                                                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                                     onChange={(e) => {
-                                                            if (e.target.checked) {
-                                                                setSelectedMatches(prev => [...prev, m._id]);
-                                                            } else {
-                                                                setSelectedMatches(prev => prev.filter(id => id !== m._id));
-                                                            }
-                                                            console.log("Selected matches:", selectedMatches)
-                                                        }}
+                                                        if (e.target.checked) {
+                                                            setSelectedMatches(prev => [...prev, m._id]);
+                                                        } else {
+                                                            setSelectedMatches(prev => prev.filter(id => id !== m._id));
+                                                        }
+                                                        console.log("Selected matches:", selectedMatches)
+                                                    }}
                                                 />
                                                 <label htmlFor={`match-${m._id}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                                                     Auch speichern
