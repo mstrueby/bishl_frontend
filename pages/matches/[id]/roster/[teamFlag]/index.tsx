@@ -45,6 +45,7 @@ interface RosterPageProps {
     teamFlag: string;
     availablePlayers: AvailablePlayer[];
     allAvailablePlayers: AvailablePlayer[];
+    matches: Match[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -286,6 +287,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         console.log("All available players:", availablePlayers.length);
         console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
 
+         // Fetch other matches of the same matchday
+         const matchesResponse = await axios.get(`${BASE_URL}/matches`, {
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+            },
+            params: {
+                matchday: match.matchday,
+                round: match.round,
+                season: match.season,
+                tournament: match.tournament,
+            },
+        });
+        const matches: Match[] = matchesResponse.data;
+
         return {
             props: {
                 jwt,
@@ -297,6 +312,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 teamFlag,
                 availablePlayers: filteredAvailablePlayers || [],
                 allAvailablePlayers: availablePlayers || [],
+                matches: matches || [],
             }
         };
 
@@ -318,7 +334,7 @@ const playerPositions = [
     { key: 'F', value: 'Feldspieler' },
 ];
 
-const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [] }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
@@ -812,8 +828,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 console.error('Error saving roster/match:', error);
                 setError('Aufstellung konnte nicht gespeichert werden.');
             }
-        } finally {
-            console.log("Roster successfully changed");
+        } finally {            console.log("Roster successfully changed");
             setSavingRoster(false);
             // Set success message if no error occurred
             if (!error) {
@@ -1770,6 +1785,54 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
             )}
+
+            {/* Other Matchday Matches */}
+            <div className="mt-8 bg-white shadow rounded-md border p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Andere Spiele des Spieltags</h3>
+                <div className="divide-y divide-gray-200">
+                    {match.matchday && match.round && match.season && match.tournament && (
+                        <div className="space-y-4">
+                            {matches
+                                .filter(m => m._id !== match._id) // Exclude current match
+                                .map((m) => (
+                                    <div key={m._id} className="pt-4 first:pt-0">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="flex-shrink-0 h-8 w-8">
+                                                    {m.home.logo && (
+                                                        <img
+                                                            className="h-8 w-8"
+                                                            src={m.home.logo}
+                                                            alt={m.home.shortName}
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-gray-900">{m.home.shortName}</div>
+                                                <div className="text-sm text-gray-500">vs</div>
+                                                <div className="text-sm text-gray-900">{m.away.shortName}</div>
+                                                <div className="flex-shrink-0 h-8 w-8">
+                                                    {m.away.logo && (
+                                                        <img
+                                                            className="h-8 w-8"
+                                                            src={m.away.logo}
+                                                            alt={m.away.shortName}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="text-sm text-gray-500">
+                                                {new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
+            </div>
         </Layout>
     );
 };
