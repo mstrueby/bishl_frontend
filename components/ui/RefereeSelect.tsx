@@ -22,7 +22,7 @@ interface RefereeSelectProps {
 {/** Referee Item */ }
 const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boolean }> = ({ assignment, showLastName = true }) => (
   <div className="flex items-center gap-x-3">
-    <div className="flex items-center gap-x-3 flex-1">
+    <div className="flex items-center gap-x-3 flex-1 truncate">
       {/** status indicator */}
       <svg
         className={classNames(
@@ -145,7 +145,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                       className={({ active }) =>
                         classNames(
                           active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                          'relative cursor-default select-none py-2 pl-3 pr-9'
+                          'relative cursor-default select-none py-2 px-3'
                         )
                       }
                       value={assignment}
