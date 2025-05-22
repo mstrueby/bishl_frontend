@@ -4,7 +4,7 @@ import { GetServerSideProps } from 'next';
 import axios from 'axios';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
-import { Match, RosterPlayer } from '../../../../../types/MatchValues';
+import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
@@ -15,6 +15,8 @@ import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
 import MatchCard from '../../../../../components/ui/MatchCard'; // Added import for MatchCard
+import { CldImage } from 'next-cloudinary';
+import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -39,6 +41,7 @@ interface AvailablePlayer {
 interface RosterPageProps {
     jwt: string;
     match: Match;
+    matchTeam: Team;
     club: ClubValues;
     team: TeamValues;
     roster: RosterPlayer[];
@@ -46,6 +49,7 @@ interface RosterPageProps {
     teamFlag: string;
     availablePlayers: AvailablePlayer[];
     allAvailablePlayers: AvailablePlayer[];
+    matches: Match[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -83,7 +87,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const match: Match = await matchResponse.data;
 
         // Determine which team's roster to fetch
-        const matchTeam = teamFlag === 'home' ? match.home : match.away;
+        const matchTeam: Team = teamFlag === 'home' ? match.home : match.away;
 
         // get club object
         const clubResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}`);
@@ -287,10 +291,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         console.log("All available players:", availablePlayers.length);
         console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
 
+        // Fetch other matches of the same matchday
+        const matchesResponse = await axios.get(`${BASE_URL}/matches`, {
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+            },
+            params: {
+                matchday: match.matchday.alias,
+                round: match.round.alias,
+                season: match.season.alias,
+                tournament: match.tournament.alias,
+                club: matchTeam.clubAlias,
+                team: matchTeam.teamAlias
+            },
+        });
+        const matches: Match[] = matchesResponse.data;
+
         return {
             props: {
                 jwt,
                 match,
+                matchTeam,
                 club,
                 team,
                 roster: matchTeam.roster || [],
@@ -298,6 +319,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 teamFlag,
                 availablePlayers: filteredAvailablePlayers || [],
                 allAvailablePlayers: availablePlayers || [],
+                matches: matches || [],
             }
         };
 
@@ -319,7 +341,7 @@ const playerPositions = [
     { key: 'F', value: 'Feldspieler' },
 ];
 
-const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [] }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
@@ -343,6 +365,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
     const [callUpPlayers, setCallUpPlayers] = useState<AvailablePlayer[]>([]);
     const [selectedCallUpPlayer, setSelectedCallUpPlayer] = useState<AvailablePlayer | null>(null);
     const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
+    const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
 
     // Handler to close the success message
     const handleCloseSuccessMessage = () => {
@@ -774,32 +797,94 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
 
         setSavingRoster(true);
         setError('');
+        let cntAdditionalMatches = 0;
+
+        // Prepare the data to be sent
+        const rosterData = {
+            roster: rosterList,
+            published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
+        };
 
         try {
-            // Prepare the data to be sent
-            const rosterData = {
-                roster: rosterList,
-                published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
-            };
-
-            // Make the API call to save the roster
-            const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterList, {
+            // Make the API call to save the roster for the main match
+            const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
                 }
             });
+            console.log('Roster successfully saved:', rosterResponse.data);
 
-            // Make API call to save further roster attributes
-            const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
-                [teamFlag]: {
-                    rosterPublished: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
+            try {
+                // Update roster published status for the main match
+                const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
+                    [teamFlag]: {
+                        rosterPublished: rosterData.published
+                    }
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                    }
+                });
+                console.log('Roster published status updated:', rosterData.published);
+            } catch (error) {
+                // Ignore 304 responses and continue
+                if (axios.isAxiosError(error) && error.response?.status !== 304) {
+                    throw error;
                 }
-            }, {
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
+                console.log('Roster published status not changed (304)');
+            }
+
+            // Save roster for selected additional matches
+            console.log('Selected matches:', selectedMatches);
+            for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
+                try {
+                    // Determine if the team is home or away in this match
+                    const matchTeamFlag: 'home' | 'away' = m.home.teamId === matchTeam.teamId ? 'home' : 'away';
+
+                    // Save roster for this match
+                    const rosterResponse = await axios.put(
+                        `${BASE_URL}/matches/${m._id}/${matchTeamFlag}/roster/`,
+                        rosterData.roster,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+                    console.log(`Roster successfully saved for match ${m._id} as ${matchTeamFlag} team:`, rosterResponse.data);
+                    cntAdditionalMatches += 1;
+
+                    try {
+                        // Update roster published status with correct team flag
+                        await axios.patch(
+                            `${BASE_URL}/matches/${m._id}`,
+                            {
+                                [matchTeamFlag]: {
+                                    rosterPublished: rosterData.published
+                                }
+                            },
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${jwt}`,
+                                }
+                            }
+                        );
+                        console.log(`Roster published status updated for match ${m._id} as ${matchTeamFlag} team`);
+                    } catch (error) {
+                        // Ignore 304 responses and continue
+                        if (axios.isAxiosError(error) && error.response?.status !== 304) {
+                            throw error;
+                        }
+                        console.log(`Roster published status not changed (304) for match ${m._id}`);
+                    }
+
+                } catch (error) {
+                    console.error('Error saving roster for additional match:', error);
+                    setError(`Fehler beim Speichern der Aufstellung für ${m.home.shortName} vs ${m.away.shortName}`);
                 }
-            });
+            }
 
             // Show success message or redirect
             setError(null);
@@ -808,17 +893,27 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             // Ignore 304 Not Modified errors as they're not actual errors
             if (axios.isAxiosError(error) && error.response?.status === 304) {
                 console.log('Match not changed (304 Not Modified), continuing normally');
-                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
             } else {
                 console.error('Error saving roster/match:', error);
                 setError('Aufstellung konnte nicht gespeichert werden.');
             }
         } finally {
-            console.log("Roster successfully changed");
             setSavingRoster(false);
             // Set success message if no error occurred
             if (!error) {
-                setSuccessMessage('Aufstellung erfolgreich gespeichert.');
+                let successMsg = '';
+                if (cntAdditionalMatches === 0) {
+                    successMsg = 'Aufstellung erfolgreich gespeichert.';
+                }
+                else {
+                    successMsg += `Aufstellungen erfolgreich gespeichert`;
+                    if (cntAdditionalMatches === 1) {
+                        successMsg += ` (inklusive für ein weiteres Spiel).`;
+                    } else {
+                        successMsg += ` (inklusive für ${cntAdditionalMatches} weitere Spiele).`;
+                    }
+                }
+                setSuccessMessage(successMsg);
             }
             // Scroll to the top of the page
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -840,10 +935,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
                 {/* Add Player Form */}
+                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Spieler aufstellen</h2>
                 <div className="bg-white shadow rounded-md border p-4 mb-6">
-                    <h2 className="text-lg font-medium mb-4">Spieler aufstellen</h2>
-
-
                     <div className="flex flex-col gap-4">
                         {/* Player Selection */}
                         <div className="flex flex-col gap-3 sm:gap-4">
@@ -1059,8 +1152,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 {/* Roster List */}
-                <h3 className="mt-8 text-lg font-medium text-gray-900">Aufstellung</h3>
-                <div className="bg-white shadow-md rounded-md border-2 mt-4">
+                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Aufstellung</h2>
+                <div className="bg-white shadow rounded-md border mb-6">
                     <ul className="divide-y divide-gray-200">
                         {rosterList.length > 0 ? (
                             rosterList.map((player) => (
@@ -1175,8 +1268,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 {/* Roster Completeness Check */}
-                <div className="mt-8 bg-white shadow rounded-md border p-6">
-                    <h3 className="text-base font-semibold mb-4">Check:</h3>
+                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Check</h2>
+                <div className="bg-white shadow rounded-md border p-6">
                     <div className="space-y-3">
 
                         {/* Captain check indicator */}
@@ -1320,7 +1413,8 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-6 bg-white shadow rounded-lg p-6">
+                {/* Publish Roster Checkbox */}
+                <div className="flex items-center justify-between mt-8 bg-white shadow rounded-md border p-6">
                     <div className="flex items-center">
                         <div className="relative inline-flex items-center">
                             <div className="flex items-center h-6">
@@ -1369,8 +1463,90 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
 
-                <div className="flex space-x-3 mt-6 justify-end">
+                {/* Other Matchday Matches */}
+                {matches.filter(m => {
+                    if (m._id === match._id) return false;
+                    const matchDate = new Date(match.startDate);
+                    const otherMatchDate = new Date(m.startDate);
+                    return matchDate.toDateString() === otherMatchDate.toDateString();
+                }).length > 0 && (
+                        <>
+                            <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+                            <div className="bg-white shadow rounded-md border mb-6">
+                                {match.matchday && match.round && match.season && match.tournament && (
+                                    <ul className="divide-y divide-gray-200">
+                                        {matches
+                                            .filter(m => {
+                                                // Exclude current match
+                                                if (m._id === match._id) return false;
 
+                                                // Only show matches on the same date
+                                                const matchDate = new Date(match.startDate);
+                                                const otherMatchDate = new Date(m.startDate);
+                                                return matchDate.toDateString() === otherMatchDate.toDateString();
+                                            })
+                                            .map((m) => (
+                                                <li key={m._id} className="px-6 py-4">
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="flex items-center space-x-4">
+                                                            <input
+                                                                id={`match-${m._id}`}
+                                                                type="checkbox"
+                                                                value={m._id}
+                                                                disabled={m.matchStatus.key !== 'SCHEDULED'}
+                                                                className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${m.matchStatus.key === 'SCHEDULED'
+                                                                        ? 'text-blue-600 bg-gray-100'
+                                                                        : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                                                    }`}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setSelectedMatches(prev => [...prev, m._id]);
+                                                                    } else {
+                                                                        setSelectedMatches(prev => prev.filter(id => id !== m._id));
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <div className="flex-shrink-0 h-8 w-8">
+                                                                <CldImage
+                                                                    src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                                                    alt="Team logo"
+                                                                    width={32}
+                                                                    height={32}
+                                                                    gravity="center"
+                                                                    className="object-contain"
+
+                                                                />
+                                                            </div>
+                                                            <div className="text-sm text-gray-900">
+                                                                {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {m.matchStatus.key === 'SCHEDULED' ? (
+                                                                new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                }) + ' Uhr'
+                                                            ) : (
+                                                                <MatchStatusBadge
+                                                                    statusKey={m.matchStatus.key}
+                                                                    finishTypeKey={m.finishType.key}
+                                                                    statusValue={m.matchStatus.value}
+                                                                    finishTypeValue={m.finishType.value}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                {/* Close, Save buttons */}
+                <div className="flex space-x-3 mt-6 justify-end">
                     <PDFDownloadLink
                         document={
                             <RosterPDF
@@ -1777,6 +1953,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     </div>
                 </div>
             )}
+
         </Layout>
     );
 };

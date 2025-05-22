@@ -660,7 +660,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                                 case 'jugendliga':
                                 case 'jugendliga-lk2':
                                 case 'jugendliga-p':
-                                  return 'bg-blue400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
+                                  return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
                                 case 'schuelerliga':
                                 case 'schuelerliga-lk2':
                                 case 'schuelerliga-p':
