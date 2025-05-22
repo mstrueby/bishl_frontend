@@ -86,8 +86,17 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     );
   }, [selected.key]);
 
-  const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[] }> = ({ selected, handleStatusChange, validStatuses }) => (
-    <Listbox value={selected} onChange={handleStatusChange}>
+  // Calculate isDisabled outside of WorkflowListbox
+  const startDateObj = startDate ? new Date(startDate) : null;
+  const now = new Date();
+  const diffInDays = startDateObj ? (startDateObj.getTime() - now.getTime()) / (1000 * 3600 * 24) : 0;
+  const refereesClubIsNotHomeOrAwayClub = (match.referee1?.club !== home.club) && (match.referee1?.club !== away.club);
+
+  const isDisabled = diffInDays >= 7 && diffInDays <= 14 && refereesClubIsNotHomeOrAwayClub;
+
+
+  const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[], isDisabled: boolean }> = ({ selected, handleStatusChange, validStatuses, isDisabled }) => (
+    <Listbox value={selected} onChange={handleStatusChange} disabled={isDisabled}>
       <Label className="sr-only">Change workflow status</Label>
       <div className="relative">
         <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
@@ -157,7 +166,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
           </div>
           {/* workflow dropdown */}
           <div className="sm:hidden">
-            <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
+            <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={isDisabled ? [] : validStatuses} isDisabled={isDisabled} />
           </div>
         </div>
         {/* 1-2 date, venue */}
@@ -217,7 +226,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       {/* 3 assigned Referees, workflow drop-down (tablet) */}
       <div className="flex flex-col justify-between mt-1.5 sm:mt-0 pt-2 sm:pt-0 sm:pb-1 sm:w-1/3 border-t sm:border-t-0 sm:border-l sm:pl-3">
         <div className="sm:flex hidden flex-row justify-end">
-          <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
+          <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={isDisabled ? [] : validStatuses} isDisabled={isDisabled} />
         </div>
         <div className="flex flex-col sm:flex-none justify-center">
           {/* assigned Referees */}
