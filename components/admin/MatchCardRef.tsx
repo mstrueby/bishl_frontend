@@ -87,16 +87,16 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   }, [selected.key]);
 
   // Calculate isDisabled outside of WorkflowListbox
-  const startDateObj = startDate ? new Date(startDate) : null;
   const now = new Date();
-  const diffInDays = startDateObj ? (startDateObj.getTime() - now.getTime()) / (1000 * 3600 * 24) : 0;
-  const refereesClubIsNotHomeOrAwayClub = (match.referee1?.club !== home.club) && (match.referee1?.club !== away.club);
-
-  const isDisabled = diffInDays >= 7 && diffInDays <= 14 && refereesClubIsNotHomeOrAwayClub;
+  const matchStart = new Date(startDate);
+  const daysDiff = Math.ceil((matchStart.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+  const refereesClubIsNotHomeOrAwayClub = (match.referee1?.clubId !== home.clubId) && (match.referee1?.clubId !== away.clubId);
+  const isDisabled = daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub;
 
 
   const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[], isDisabled: boolean }> = ({ selected, handleStatusChange, validStatuses, isDisabled }) => (
     <Listbox value={selected} onChange={handleStatusChange} disabled={isDisabled}>
+      <div className="text-xs">{`ref: ${refereesClubIsNotHomeOrAwayClub}, dis: ${isDisabled}, dif: ${daysDiff}`}</div>
       <Label className="sr-only">Change workflow status</Label>
       <div className="relative">
         <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
