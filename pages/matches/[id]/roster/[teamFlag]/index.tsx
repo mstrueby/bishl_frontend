@@ -40,6 +40,7 @@ interface AvailablePlayer {
 interface RosterPageProps {
     jwt: string;
     match: Match;
+    matchTeam: Team;
     club: ClubValues;
     team: TeamValues;
     roster: RosterPlayer[];
@@ -85,7 +86,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const match: Match = await matchResponse.data;
 
         // Determine which team's roster to fetch
-        const matchTeam = teamFlag === 'home' ? match.home : match.away;
+        const matchTeam: Team = teamFlag === 'home' ? match.home : match.away;
 
         // get club object
         const clubResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}`);
@@ -309,6 +310,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             props: {
                 jwt,
                 match,
+                matchTeam,
                 club,
                 team,
                 roster: matchTeam.roster || [],
@@ -338,7 +340,7 @@ const playerPositions = [
     { key: 'F', value: 'Feldspieler' },
 ];
 
-const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [savingRoster, setSavingRoster] = useState(false);
@@ -837,8 +839,6 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
                 try {
                     // Determine if the team is home or away in this match
-                    //const matchTeamFlag: 'home' | 'away' = m.home.teamId === match[teamFlag as keyof Match]?.teamId ? 'home' : 'away';
-                    const matchTeam = match[teamFlag as 'home' | 'away'] as Team;
                     const matchTeamFlag: 'home' | 'away' = m.home.teamId === matchTeam.teamId ? 'home' : 'away';
 
                     // Save roster for this match
@@ -1502,7 +1502,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                 />
                                                 <div className="flex-shrink-0 h-8 w-8">
                                                     <CldImage
-                                                        src={m[m.home.teamId === match[teamFlag].teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                                        src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
                                                         alt="Team logo"
                                                         width={32}
                                                         height={32}
@@ -1512,7 +1512,7 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     />
                                                 </div>
                                                 <div className="text-sm text-gray-900">
-                                                    {m[m.home.teamId === match[teamFlag].teamId ? 'away' : 'home'].shortName}
+                                                    {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
                                                 </div>
                                             </div>
                                             <div className="text-xs text-gray-500">
