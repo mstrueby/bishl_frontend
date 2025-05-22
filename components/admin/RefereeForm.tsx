@@ -83,6 +83,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
               setFieldValue('referee.club', {
                 clubId: selectedClub._id,
                 clubName: selectedClub.name,
+                logoUrl: selectedClub.logoUrl
               });
             }
           };

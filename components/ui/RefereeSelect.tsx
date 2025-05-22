@@ -5,6 +5,7 @@ import { Referee } from '../../types/MatchValues';
 import { allRefereeAssignmentStatuses, refereeLevels } from '../../tools/consts';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { AssignmentValues } from '../../types/AssignmentValues';
+import { CldImage } from 'next-cloudinary';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -42,6 +43,18 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
         {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
       </span>
     </div>
+    {/** Club Logo */}
+    {assignment.referee.logoUrl && (
+      <CldImage
+        src={assignment.referee.logoUrl}
+        alt={assignment.referee.clubName}
+        className="h-6 w-6"
+        width={20}
+        height={20}
+        crop="fill_pad"
+      />
+    )}
+
     <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ml-auto
       ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.background || refereeLevels['n/a'].background}
       ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.text || refereeLevels['n/a'].text}
