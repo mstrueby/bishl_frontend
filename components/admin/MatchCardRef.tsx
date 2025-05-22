@@ -7,6 +7,7 @@ import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@h
 import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+import useAuth from '../../hooks/useAuth';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -90,7 +91,8 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   const now = new Date();
   const matchStart = new Date(startDate);
   const daysDiff = Math.ceil((matchStart.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-  const refereesClubIsNotHomeOrAwayClub = (match.referee1?.clubId !== home.clubId) && (match.referee1?.clubId !== away.clubId);
+  const { user } = useAuth();
+  const refereesClubIsNotHomeOrAwayClub = (user?.club?.clubId !== home.clubId) && (user?.club?.clubId !== away.clubId);
   const isDisabled = daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub;
 
 
