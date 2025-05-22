@@ -4,7 +4,7 @@ import { GetServerSideProps } from 'next';
 import axios from 'axios';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
-import { Match, RosterPlayer } from '../../../../../types/MatchValues';
+import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
@@ -837,7 +837,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
                 try {
                     // Determine if the team is home or away in this match
-                    const matchTeamFlag = m.home.teamId === match[teamFlag].teamId ? 'home' : 'away';
+                    //const matchTeamFlag: 'home' | 'away' = m.home.teamId === match[teamFlag as keyof Match]?.teamId ? 'home' : 'away';
+                    const matchTeam = match[teamFlag as 'home' | 'away'] as Team;
+                    const matchTeamFlag: 'home' | 'away' = m.home.teamId === matchTeam.teamId ? 'home' : 'away';
 
                     // Save roster for this match
                     const rosterResponse = await axios.put(
