@@ -1455,10 +1455,17 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 {/* Other Matchday Matches */}
-                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-                <div className="bg-white shadow rounded-md border mb-6">
-                    {match.matchday && match.round && match.season && match.tournament && (
-                        <ul className="divide-y divide-gray-200">
+                {matches.filter(m => {
+                    if (m._id === match._id) return false;
+                    const matchDate = new Date(match.startDate);
+                    const otherMatchDate = new Date(m.startDate);
+                    return matchDate.toDateString() === otherMatchDate.toDateString();
+                }).length > 0 && (
+                    <>
+                        <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+                        <div className="bg-white shadow rounded-md border mb-6">
+                            {match.matchday && match.round && match.season && match.tournament && (
+                                <ul className="divide-y divide-gray-200">
                             {matches
                                 .filter(m => {
                                     // Exclude current match
@@ -1525,8 +1532,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     </li>
                                 ))}
                         </ul>
-                    )}
-                </div>
+                            )}
+                        </div>
+                    </>
+                )}
 
                 {/* Close, Save buttons */}
                 <div className="flex space-x-3 mt-6 justify-end">
