@@ -22,25 +22,27 @@ interface RefereeSelectProps {
 {/** Referee Item */ }
 const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boolean }> = ({ assignment, showLastName = true }) => (
   <div className="flex items-center gap-x-3">
-    {/** status indicator */}
-    <svg
-      className={classNames(
-        "flex-shrink-0 h-2 w-2",
-        allRefereeAssignmentStatuses.find(status => status.key === assignment.status)?.color.dotRefAdmin ?? 'fill-black'
-      )}
-      viewBox="0 0 8 8"
-    >
-      <circle cx="4" cy="4" r="4" />
-    </svg>
-    {/** Profile Avatar */}
-    <div className="size-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-      {assignment.referee.firstName.charAt(0)}{assignment.referee.lastName.charAt(0)}
+    <div className="flex items-center gap-x-3 flex-1">
+      {/** status indicator */}
+      <svg
+        className={classNames(
+          "flex-shrink-0 h-2 w-2",
+          allRefereeAssignmentStatuses.find(status => status.key === assignment.status)?.color.dotRefAdmin ?? 'fill-black'
+        )}
+        viewBox="0 0 8 8"
+      >
+        <circle cx="4" cy="4" r="4" />
+      </svg>
+      {/** Profile Avatar */}
+      <div className="size-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+        {assignment.referee.firstName.charAt(0)}{assignment.referee.lastName.charAt(0)}
+      </div>
+      {/** Name */}
+      <span className="font-normal block truncate">
+        {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
+      </span>
     </div>
-    {/** Name */}
-    <span className="font-normal block truncate">
-      {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
-    </span>
-    <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset
+    <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ml-auto
       ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.background || refereeLevels['n/a'].background}
       ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.text || refereeLevels['n/a'].text}
       ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels['n/a'].ring}`}>
