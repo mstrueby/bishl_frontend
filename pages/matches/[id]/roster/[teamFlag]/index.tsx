@@ -1460,7 +1460,15 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                     {match.matchday && match.round && match.season && match.tournament && (
                         <ul className="divide-y divide-gray-200">
                             {matches
-                                .filter(m => m._id !== match._id) // Exclude current match
+                                .filter(m => {
+                                    // Exclude current match
+                                    if (m._id === match._id) return false;
+                                    
+                                    // Only show matches on the same date
+                                    const matchDate = new Date(match.startDate);
+                                    const otherMatchDate = new Date(m.startDate);
+                                    return matchDate.toDateString() === otherMatchDate.toDateString();
+                                })
                                 .map((m) => (
                                     <li key={m._id} className="px-6 py-4">
                                         <div className="flex justify-between items-center">
