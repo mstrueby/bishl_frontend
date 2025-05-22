@@ -4,7 +4,7 @@ import { GetServerSideProps } from 'next';
 import axios from 'axios';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
-import { Match, RosterPlayer } from '../../../../../types/MatchValues';
+import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
@@ -837,7 +837,9 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
             for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
                 try {
                     // Determine if the team is home or away in this match
-                    const matchTeamFlag = m.home.teamId === match[teamFlag].teamId ? 'home' : 'away';
+                    //const matchTeamFlag: 'home' | 'away' = m.home.teamId === match[teamFlag as keyof Match]?.teamId ? 'home' : 'away';
+                    const matchTeam = match[teamFlag as 'home' | 'away'] as Team;
+                    const matchTeamFlag: 'home' | 'away' = m.home.teamId === matchTeam.teamId ? 'home' : 'away';
 
                     // Save roster for this match
                     const rosterResponse = await axios.put(
@@ -1455,12 +1457,27 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                 </div>
 
                 {/* Other Matchday Matches */}
-                <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-                <div className="bg-white shadow rounded-md border mb-6">
-                    {match.matchday && match.round && match.season && match.tournament && (
-                        <ul className="divide-y divide-gray-200">
+                {matches.filter(m => {
+                    if (m._id === match._id) return false;
+                    const matchDate = new Date(match.startDate);
+                    const otherMatchDate = new Date(m.startDate);
+                    return matchDate.toDateString() === otherMatchDate.toDateString();
+                }).length > 0 && (
+                    <>
+                        <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+                        <div className="bg-white shadow rounded-md border mb-6">
+                            {match.matchday && match.round && match.season && match.tournament && (
+                                <ul className="divide-y divide-gray-200">
                             {matches
-                                .filter(m => m._id !== match._id) // Exclude current match
+                                .filter(m => {
+                                    // Exclude current match
+                                    if (m._id === match._id) return false;
+                                    
+                                    // Only show matches on the same date
+                                    const matchDate = new Date(match.startDate);
+                                    const otherMatchDate = new Date(m.startDate);
+                                    return matchDate.toDateString() === otherMatchDate.toDateString();
+                                })
                                 .map((m) => (
                                     <li key={m._id} className="px-6 py-4">
                                         <div className="flex justify-between items-center">
@@ -1469,7 +1486,12 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                                     id={`match-${m._id}`}
                                                     type="checkbox"
                                                     value={m._id}
-                                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                    disabled={m.matchStatus.key !== 'SCHEDULED'}
+                                                    className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+                                                        m.matchStatus.key === 'SCHEDULED' 
+                                                        ? 'text-blue-600 bg-gray-100' 
+                                                        : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                                    }`}
                                                     onChange={(e) => {
                                                         if (e.target.checked) {
                                                             setSelectedMatches(prev => [...prev, m._id]);
@@ -1512,8 +1534,10 @@ const RosterPage = ({ jwt, match, club, team, roster, rosterPublished: initialRo
                                     </li>
                                 ))}
                         </ul>
-                    )}
-                </div>
+                            )}
+                        </div>
+                    </>
+                )}
 
                 {/* Close, Save buttons */}
                 <div className="flex space-x-3 mt-6 justify-end">
