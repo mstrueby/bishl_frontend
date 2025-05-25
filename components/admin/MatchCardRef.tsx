@@ -118,13 +118,13 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
         <ListboxOptions
           transition
-          className="absolute right-0 z-10 mt-2 w-auto p-3 grid gap-y-4 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
+          className="absolute right-0 z-10 mt-2 w-auto py-3 grid gap-y-3 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in"
         >
           {validStatuses.map((option) => (
             <ListboxOption
               key={option.title}
               value={option}
-              className="group cursor-default select-none text-sm text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
+              className="px-3 py-1 group cursor-default select-none text-sm text-gray-900 data-[focus]:bg-gray-100"
             >
               <div className="flex flex-col">
                 <div className="flex justify-between">

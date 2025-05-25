@@ -6,6 +6,7 @@ export interface RefereeValues {
   club?: {
     clubId: string;
     clubName: string;
+    logoUrl: string;
   };
   points: number;
 }
@@ -19,6 +20,7 @@ export interface UserValues {
   club?: {
     clubId: string;
     clubName: string;
+    logoUrl: string;
   };
   referee?: RefereeValues;
   roles: []
