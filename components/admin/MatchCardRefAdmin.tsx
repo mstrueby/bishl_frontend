@@ -78,9 +78,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   let isDisabled = daysDiff <= 14 && daysDiff > 7;
 
   // Feature-Switch
-  if (process.env.NODE_ENV === 'production') {
-    isDisabled = false;
-  }
+  //if (process.env.NODE_ENV === 'production') {
+  isDisabled = false;
+  //}
 
   const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     let newId: string = ''
