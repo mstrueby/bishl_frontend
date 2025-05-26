@@ -5,6 +5,7 @@ import { Referee } from '../../types/MatchValues';
 import { allRefereeAssignmentStatuses, refereeLevels } from '../../tools/consts';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { AssignmentValues } from '../../types/AssignmentValues';
+import { CldImage } from 'next-cloudinary';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -20,7 +21,7 @@ interface RefereeSelectProps {
 }
 
 {/** Referee Item */ }
-const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boolean }> = ({ assignment, showLastName = true }) => (
+const RefereeItem: React.FC<{ assignment: AssignmentValues, showDetails?: boolean }> = ({ assignment, showDetails = true }) => (
   <div className="flex items-center gap-x-3">
     <div className="flex items-center gap-x-3 flex-1 truncate">
       {/** status indicator */}
@@ -39,15 +40,31 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showLastName?: boole
       </div>
       {/** Name */}
       <span className="font-normal block truncate">
-        {assignment.referee.firstName}{showLastName ? ` ${assignment.referee.lastName}` : ''}
+        {assignment.referee.firstName}{showDetails ? ` ${assignment.referee.lastName}` : ''}
       </span>
     </div>
-    <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ml-auto
-      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.background || refereeLevels['n/a'].background}
-      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.text || refereeLevels['n/a'].text}
-      ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels['n/a'].ring}`}>
-      {assignment.referee.level}
-    </span>
+    {showDetails && (
+      <>
+        {/** Club Logo */}
+        {assignment.referee.logoUrl && (
+          <CldImage
+            src={assignment.referee.logoUrl}
+            alt={assignment.referee.clubName}
+            className="h-6 w-6"
+            width={20}
+            height={20}
+            crop="fill_pad"
+          />
+        )}
+
+        <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ml-auto
+          ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.background || refereeLevels['n/a'].background}
+          ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.text || refereeLevels['n/a'].text}
+          ${refereeLevels[assignment.referee.level as keyof typeof refereeLevels]?.ring || refereeLevels['n/a'].ring}`}>
+          {assignment.referee.level}
+        </span>
+      </>
+    )}
   </div>
 );
 
@@ -82,7 +99,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
               <div className="relative flex-1">
                 <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
                   {selected ? (
-                    <RefereeItem assignment={selected} showLastName={false} />
+                    <RefereeItem assignment={selected} showDetails={false} />
                   ) : (
                     <Placeholder />
                   )}
