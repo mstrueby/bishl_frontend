@@ -55,6 +55,7 @@ const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimePr
         value={field.value}
         onChange={handleChange}
         onBlur={field.onBlur}
+        placeholder="00:00"
       />
       {meta.touched && meta.error ? (
         <p className="mt-2 text-sm text-red-600">
