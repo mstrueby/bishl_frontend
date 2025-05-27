@@ -17,9 +17,9 @@ const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimePr
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^\d]/g, ''); // Only allow digits
     
-    // Limit to 4 digits maximum
-    if (value.length > 4) {
-      value = value.substring(0, 4);
+    // Limit to 5 digits maximum
+    if (value.length > 5) {
+      value = value.substring(0, 5);
     }
     
     // Auto-format with colon before last 2 digits
