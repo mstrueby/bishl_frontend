@@ -45,14 +45,7 @@ const tabs = [
 export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
-  // Get active tab from query parameter, default to 'roster'
-  const getActiveTabFromQuery = () => {
-    const { tab } = router.query;
-    const validTabs = ['roster', 'goals', 'penalties'];
-    return validTabs.includes(tab as string) ? (tab as string) : 'roster';
-  };
-
-  const [activeTab, setActiveTab] = useState(getActiveTabFromQuery());
+  const [activeTab, setActiveTab] = useState('roster');
   const [match, setMatch] = useState<Match>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedFinishType, setSelectedFinishType] = useState({ key: "REGULAR", value: "Regulär" });
@@ -78,13 +71,20 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const { user } = useAuth();
   const { id } = router.query;
 
+  // Get active tab from query parameter, default to 'roster'
+  const getActiveTabFromQuery = () => {
+    const { tab } = router.query;
+    const validTabs = ['roster', 'goals', 'penalties'];
+    return validTabs.includes(tab as string) ? (tab as string) : 'roster';
+  };
+
   // Update active tab when query parameter changes
   useEffect(() => {
     const newActiveTab = getActiveTabFromQuery();
     if (newActiveTab !== activeTab) {
       setActiveTab(newActiveTab);
     }
-  }, [router.query.tab]);
+  }, [router.query.tab, activeTab]);
 
   // Refresh match data function
   const refreshMatchData = useCallback(async () => {
