@@ -9,10 +9,24 @@ import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
-import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
+import { Formik, Form, FieldArray } from 'formik';
+import * as Yup from 'yup';
+import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
+import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface Goal {
+  player: string;
+  assist: string;
+  time: string;
+}
+
+interface GoalFormValues {
+  goals: Goal[];
+}
 
 interface GoalRegisterFormProps {
   jwt: string;
@@ -39,7 +53,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
 
     const user = userResponse.data;
-    // console.log("user:", user)
     if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
       return {
         redirect: {
@@ -90,6 +103,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [match, setMatch] = useState<Match>(initialMatch);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
   const { user } = useAuth();
@@ -114,47 +128,58 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
-  const handleCloseErrorMesssage = () => {
+
+  const handleCloseErrorMessage = () => {
     setError(null);
-  }
-
-  const [goals, setGoals] = useState([{
-    player: '',
-    assist: '',
-    time: '',
-  }]);
-
-  const handleInputChange = (index: number, event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const values = [...goals];
-    values[index][event.target.name as keyof typeof values[0]] = event.target.value;
-    setGoals(values);
   };
 
-  const handleAddGoal = () => {
-    setGoals([...goals, { player: '', assist: '', time: '' }]);
+  // Initial form values
+  const initialValues: GoalFormValues = {
+    goals: [{ player: '', assist: '', time: '' }]
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (match._id) {
-      try {
-        const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`,
-          },
-          body: JSON.stringify({ goals }),
-        });
+  // Validation schema
+  const validationSchema = Yup.object({
+    goals: Yup.array().of(
+      Yup.object({
+        player: Yup.string().required('Spieler ist erforderlich'),
+        assist: Yup.string(), // Optional
+        time: Yup.number()
+          .min(0, 'Zeit muss positiv sein')
+          .max(120, 'Zeit darf nicht über 120 Minuten sein')
+          .required('Zeit ist erforderlich')
+      })
+    ).min(1, 'Mindestens ein Tor muss hinzugefügt werden')
+  });
 
-        if (!response.ok) {
-          console.error('Failed to save the goal sheet');
-        } else {
-          console.log('Goal sheet saved successfully');
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
+  // Form submission
+  const onSubmit = async (values: GoalFormValues) => {
+    if (!match._id) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`,
+        },
+        body: JSON.stringify({ goals: values.goals }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save the goal sheet');
       }
+
+      setSuccessMessage('Tore wurden erfolgreich gespeichert');
+      console.log('Goal sheet saved successfully');
+    } catch (error) {
+      console.error('An error occurred:', error);
+      setError('Fehler beim Speichern der Tore');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -177,64 +202,147 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           onRefresh={handleRefreshMatch}
         />
         
-        <h1 className="text-2xl font-bold mb-6">Tore: {team.fullName} / {team.name}</h1>
+        <h1 className="text-2xl font-bold mb-6">Tore: {team?.fullName} / {team?.name}</h1>
 
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-        {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
+        {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
 
-        <form onSubmit={handleSubmit}>
-          {goals.map((goal, index) => (
-            <div key={index}>
-              <label>
-                Player:
-                <select
-                  name="player"
-                  value={goal.player}
-                  onChange={(event) => handleInputChange(index, event)}
-                >
-                  <option value="">Select a player</option>
-                  {roster.map((rosterPlayer) => (
-                    <option
-                      key={rosterPlayer.player.playerId}
-                      value={rosterPlayer.player.playerId}
-                    >
-                      #{rosterPlayer.player.jerseyNumber} {rosterPlayer.player.firstName} {rosterPlayer.player.lastName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Assist:
-                <select
-                  name="assist"
-                  value={goal.assist}
-                  onChange={(event) => handleInputChange(index, event)}
-                >
-                  <option value="">Select a player</option>
-                  {roster.map((rosterPlayer) => (
-                    <option
-                      key={rosterPlayer.player.playerId}
-                      value={rosterPlayer.player.playerId}
-                    >
-                      #{rosterPlayer.player.jerseyNumber} {rosterPlayer.player.firstName} {rosterPlayer.player.lastName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Time (min):
-                <input
-                  type="number"
-                  name="time"
-                  value={goal.time}
-                  onChange={(event) => handleInputChange(index, event)}
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={onSubmit}
+        >
+          {({ values, errors, touched }) => (
+            <Form>
+              <FieldArray name="goals">
+                {({ remove, push }) => (
+                  <div className="space-y-6">
+                    {values.goals.map((goal, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-lg font-medium">Tor {index + 1}</h3>
+                          {values.goals.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => remove(index)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Entfernen
+                            </button>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Player Selection */}
+                          <div>
+                            <label htmlFor={`goals.${index}.player`} className="block text-sm font-medium leading-6 text-gray-900 mb-2">
+                              Torschütze *
+                            </label>
+                            <select
+                              name={`goals.${index}.player`}
+                              id={`goals.${index}.player`}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              value={goal.player}
+                              onChange={(e) => {
+                                values.goals[index].player = e.target.value;
+                              }}
+                            >
+                              <option value="">Spieler auswählen</option>
+                              {roster.map((rosterPlayer) => (
+                                <option
+                                  key={rosterPlayer.player.playerId}
+                                  value={rosterPlayer.player.playerId}
+                                >
+                                  #{rosterPlayer.player.jerseyNumber} {rosterPlayer.player.firstName} {rosterPlayer.player.lastName}
+                                </option>
+                              ))}
+                            </select>
+                            {errors.goals?.[index]?.player && touched.goals?.[index]?.player && (
+                              <p className="mt-2 text-sm text-red-600">{errors.goals[index]?.player}</p>
+                            )}
+                          </div>
+
+                          {/* Assist Selection */}
+                          <div>
+                            <label htmlFor={`goals.${index}.assist`} className="block text-sm font-medium leading-6 text-gray-900 mb-2">
+                              Vorlage
+                            </label>
+                            <select
+                              name={`goals.${index}.assist`}
+                              id={`goals.${index}.assist`}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              value={goal.assist}
+                              onChange={(e) => {
+                                values.goals[index].assist = e.target.value;
+                              }}
+                            >
+                              <option value="">Spieler auswählen</option>
+                              {roster.map((rosterPlayer) => (
+                                <option
+                                  key={rosterPlayer.player.playerId}
+                                  value={rosterPlayer.player.playerId}
+                                >
+                                  #{rosterPlayer.player.jerseyNumber} {rosterPlayer.player.firstName} {rosterPlayer.player.lastName}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Time Input */}
+                          <div>
+                            <label htmlFor={`goals.${index}.time`} className="block text-sm font-medium leading-6 text-gray-900 mb-2">
+                              Zeit (min) *
+                            </label>
+                            <input
+                              type="number"
+                              name={`goals.${index}.time`}
+                              id={`goals.${index}.time`}
+                              min="0"
+                              max="120"
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              value={goal.time}
+                              onChange={(e) => {
+                                values.goals[index].time = e.target.value;
+                              }}
+                            />
+                            {errors.goals?.[index]?.time && touched.goals?.[index]?.time && (
+                              <p className="mt-2 text-sm text-red-600">{errors.goals[index]?.time}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => push({ player: '', assist: '', time: '' })}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        Weiteres Tor hinzufügen
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </FieldArray>
+
+              <div className="mt-8 flex justify-end py-4 space-x-3">
+                <ButtonLight 
+                  name="btnCancel" 
+                  type="button" 
+                  onClick={() => router.back()} 
+                  label="Abbrechen" 
                 />
-              </label>
-            </div>
-          ))}
-          <button type="button" onClick={handleAddGoal}>Add Goal</button>
-          <button type="submit">Save Goals</button>
-        </form>
+                <ButtonPrimary 
+                  name="btnSubmit" 
+                  type="submit" 
+                  label="Tore speichern" 
+                  loading={loading} 
+                />
+              </div>
+            </Form>
+          )}
+        </Formik>
       </div>
     </Layout>
   );
