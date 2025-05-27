@@ -166,7 +166,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     setLoading(true);
     setError(null);
 
-    console.log("submitted values", values)
+    // Structure the payload with teamFlag
+    const payload = {
+      [teamFlag]: {
+        scores: values
+      }
+    };
+
+    console.log("submitted payload", payload);
 
     try {
       const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
@@ -175,7 +182,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`,
         },
-        body: JSON.stringify({ values }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
