@@ -19,6 +19,7 @@ import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+/*
 interface Goal {
   player: string;
   assist: string;
@@ -28,7 +29,7 @@ interface Goal {
 interface GoalFormValues {
   goals: Goal[];
 }
-
+*/
 interface GoalRegisterFormProps {
   jwt: string;
   match: Match;
@@ -145,16 +146,16 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
   // Validation schema
   const validationSchema = Yup.object({
-    goals: Yup.array().of(
-      Yup.object({
+    Yup.array().of(
+      Yup.object().shape({
         player: Yup.string().required('Spieler ist erforderlich'),
-        assist: Yup.string(), // Optional
+        assist: Yup.string().nullable(), // Optional
         time: Yup.number()
           .min(0, 'Zeit muss positiv sein')
           .max(120, 'Zeit darf nicht über 120 Minuten sein')
           .required('Zeit ist erforderlich')
       })
-    ).min(1, 'Mindestens ein Tor muss hinzugefügt werden')
+    )
   });
 
   // Form submission
@@ -171,7 +172,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`,
         },
-        body: JSON.stringify({ goals: values.goals }),
+        body: JSON.stringify({ values }),
       });
 
       if (!response.ok) {
@@ -244,13 +245,13 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                             id={`goals.${index}.player`}
                             selectedPlayer={goal.player}
                             onChange={(e) => {
-                              values.goals[index].player = e.target.value;
+                              values[index].goalPlayer = e.target.value;
                             }}
                             roster={roster}
                             required={true}
                             error={
-                              errors.goals?.[index]?.player && touched.goals?.[index]?.player
-                                ? errors.goals[index]?.player
+                              errors[index]?.goalPlayer && touched[index]?.goalPlayer
+                                ? errors[index]?.goalPlayer
                                 : undefined
                             }
                             placeholder="Torschützen auswählen"

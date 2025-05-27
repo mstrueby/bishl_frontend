@@ -1,6 +1,6 @@
 import { boolean } from "yup";
 
-interface EventPlayer {
+export interface EventPlayer {
   playerId: string;
   firstName: string;
   lastName: string
