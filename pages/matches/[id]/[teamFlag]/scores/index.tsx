@@ -165,6 +165,8 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     setLoading(true);
     setError(null);
 
+    console.log("submitted values", values)
+
     try {
       const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
         method: 'PATCH',
