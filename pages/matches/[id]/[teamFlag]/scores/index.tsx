@@ -221,7 +221,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           {({ values, errors, touched }) => (
             <Form>
               <FieldArray
-                name="scores"
+                name=""
                 render={({ remove, push }) => (
                   <div className="space-y-6">
                     {values.map((score, index) => (
@@ -252,7 +252,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                   jerseyNumber: selectedRosterPlayer.player.jerseyNumber
                                 };
                               } else {
-                                undefined;
+                                values[index].goalPlayer = null;
                               }
                             }}
                             roster={roster}
@@ -272,7 +272,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                   jerseyNumber: selectedRosterPlayer.player.jerseyNumber
                                 };
                               } else {
-                                values[index].assistPlayer = undefined;
+                                values[index].assistPlayer = null;
                               }
                             }}
                             roster={roster}
