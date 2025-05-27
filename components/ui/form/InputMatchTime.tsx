@@ -8,11 +8,16 @@ interface InputMatchTimeProps extends ComponentPropsWithoutRef<'input'> {
 }
 
 const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimeProps) => {
-  const [field, meta] = useField(name);
+  const [field, meta, helpers] = useField(name);
   const classInputDef = "block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none";
   const classInputErr = "block w-full rounded-md border-0  py-2 pl-3 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6 appearance-none";
 
   props.id = props.id || name;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, ''); // Only allow digits
+    helpers.setValue(value);
+  };
 
   return (
     <div>
@@ -29,7 +34,10 @@ const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimePr
         {...props}
         type="text"
         className={meta.touched && meta.error ? classInputErr : classInputDef}
-        {...field}
+        name={field.name}
+        value={field.value}
+        onChange={handleChange}
+        onBlur={field.onBlur}
       />
       {meta.touched && meta.error ? (
         <p className="mt-2 text-sm text-red-600">
