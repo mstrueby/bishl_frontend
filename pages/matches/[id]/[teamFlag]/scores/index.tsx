@@ -166,10 +166,22 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     setLoading(true);
     setError(null);
 
+    // Sort scores by matchTime before submitting
+    const sortedScores = [...values].sort((a, b) => {
+      // Convert time strings to comparable format (mm:ss -> minutes * 60 + seconds)
+      const timeToSeconds = (timeStr: string) => {
+        if (!timeStr) return 0;
+        const [minutes, seconds] = timeStr.split(':').map(Number);
+        return (minutes || 0) * 60 + (seconds || 0);
+      };
+      
+      return timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime);
+    });
+
     // Structure the payload with teamFlag
     const payload = {
       [teamFlag]: {
-        scores: values
+        scores: sortedScores
       }
     };
 
