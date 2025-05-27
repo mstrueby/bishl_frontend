@@ -165,6 +165,8 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     setLoading(true);
     setError(null);
 
+    console.log("submitted values", values)
+
     try {
       const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
         method: 'PATCH',
@@ -214,21 +216,21 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
 
         <Formik
-          initialValues={initialScores}
+          initialValues={{ scores: initialScores }}
           //validationSchema={validationSchema}
-          onSubmit={onSubmit}
+          onSubmit={(values) => onSubmit(values.scores)}
         >
-          {({ values, errors, touched }) => (
+          {({ values, errors, touched, setFieldValue }) => (
             <Form>
               <FieldArray
                 name="scores"
                 render={({ remove, push }: FieldArrayRenderProps) => (
                   <div className="space-y-6">
-                    {values.map((score, index) => (
+                    {values.scores.map((score, index) => (
                       <div key={index} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="text-lg font-medium">Tor {index + 1}</h3>
-                          {values.length > 1 && (
+                          {values.scores.length > 1 && (
                             <button
                               type="button"
                               onClick={() => remove(index)}
@@ -245,13 +247,15 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                             selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                             onChange={(selectedRosterPlayer) => {
                               if (selectedRosterPlayer) {
-                                values[index].goalPlayer = {
+                                setFieldValue(`scores.${index}.goalPlayer`, {
                                   playerId: selectedRosterPlayer.player.playerId,
                                   firstName: selectedRosterPlayer.player.firstName,
                                   lastName: selectedRosterPlayer.player.lastName,
                                   jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                };
-                              };
+                                });
+                              } else {
+                                setFieldValue(`scores.${index}.goalPlayer`, null);
+                              }
                             }}
                             roster={roster}
                             required={true}
@@ -263,13 +267,15 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                             selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
                             onChange={(selectedRosterPlayer) => {
                               if (selectedRosterPlayer) {
-                                values[index].assistPlayer = {
+                                setFieldValue(`scores.${index}.assistPlayer`, {
                                   playerId: selectedRosterPlayer.player.playerId,
                                   firstName: selectedRosterPlayer.player.firstName,
                                   lastName: selectedRosterPlayer.player.lastName,
                                   jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                };
-                              };
+                                });
+                              } else {
+                                setFieldValue(`scores.${index}.assistPlayer`, null);
+                              }
                             }}
                             roster={roster}
                             required={false}
@@ -280,26 +286,26 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         {/* Time Input */}
                         <div>
                           <label
-                            htmlFor={`goals.${index}.time`}
+                            htmlFor={`scores.${index}.matchTime`}
                             className="block text-sm font-medium leading-6 text-gray-900 mb-2"
                           >
                             Zeit (min) *
                           </label>
                           <input
                             type="number"
-                            name={`goals.${index}.time`}
-                            id={`goals.${index}.time`}
+                            name={`scores.${index}.matchTime`}
+                            id={`scores.${index}.matchTime`}
                             min="0"
                             max="120"
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             value={score.matchTime}
                             onChange={(e) => {
-                              values[index].matchTime = e.target.value;
+                              setFieldValue(`scores.${index}.matchTime`, e.target.value);
                             }}
                           />
-                          {errors[index]?.matchTime && touched[index]?.matchTime && (
+                          {errors.scores?.[index]?.matchTime && touched.scores?.[index]?.matchTime && (
                             <p className="mt-2 text-sm text-red-600">
-                              {errors[index]?.matchTime}
+                              {errors.scores[index]?.matchTime}
                             </p>
                           )}
                         </div>
