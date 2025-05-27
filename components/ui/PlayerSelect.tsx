@@ -9,8 +9,8 @@ interface PlayerSelectProps {
   name: string;
   id: string;
   selectedPlayer: RosterPlayer | null;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  value?: string;
+  onChange: (selectedPlayer: RosterPlayer | null) => void;
   roster: RosterPlayer[];
   label?: string;
   required?: boolean;
@@ -39,12 +39,17 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
     setSelectedPlayer(propSelectedPlayer);
   }, [propSelectedPlayer]);
 
+  const handlePlayerChange = (player: RosterPlayer | null) => {
+    setSelectedPlayer(player);
+    onChange(player);
+  };
+
   const Placeholder = () => (
     <span className="block truncate text-gray-400">{placeholder}</span>
   );
 
   return (
-    <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
+    <Listbox value={selectedPlayer} onChange={handlePlayerChange}>
       {({ open }) => (
         <>
           {label && (
