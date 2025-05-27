@@ -145,6 +145,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   //};
 
   // Validation schema
+  /*
   const validationSchema = Yup.object({
     Yup.array().of(
       Yup.object().shape({
@@ -157,7 +158,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
       })
     )
   });
-
+  */
   // Form submission
   const onSubmit = async (values: ScoresBase[]) => {
     if (!match._id) return;
@@ -215,12 +216,12 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
         <Formik
           initialValues={initialScores}
-          validationSchema={validationSchema}
+          //validationSchema={validationSchema}
           onSubmit={onSubmit}
         >
           {({ values, errors, touched }) => (
             <Form>
-              <FieldArray name="goals">
+              <FieldArray name="scores">
                 {({ remove, push }) => (
                   <div className="space-y-6">
                     {values.map((score, index) => (
@@ -243,7 +244,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           <PlayerSelect
                             name={`goals.${index}.player`}
                             id={`goals.${index}.player`}
-                            selectedPlayer={goal.player}
+                            selectedPlayer={score.goalPlayer}
                             onChange={(e) => {
                               values[index].goalPlayer = e.target.value;
                             }}
@@ -261,9 +262,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           <PlayerSelect
                             name={`goals.${index}.assist`}
                             id={`goals.${index}.assist`}
-                            selectedPlayer={goal.assist}
+                            selectedPlayer={score.assistPlayer}
                             onChange={(e) => {
-                              values.goals[index].assist = e.target.value;
+                              values[index].assistPlayer = e.target.value;
                             }}
                             roster={roster}
                             required={false}
@@ -288,12 +289,12 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             value={goal.time}
                             onChange={(e) => {
-                              values.goals[index].time = e.target.value;
+                              values[index].matchTime = e.target.value;
                             }}
                           />
-                          {errors.goals?.[index]?.time && touched.goals?.[index]?.time && (
+                          {errors[index]?.matchTime && touched[index]?.matchTime && (
                             <p className="mt-2 text-sm text-red-600">
-                              {errors.goals[index]?.time}
+                              {errors[index]?.matchTime}
                             </p>
                           )}
                         </div>
