@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { Match, RosterPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
+import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -220,8 +220,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         >
           {({ values, errors, touched }) => (
             <Form>
-              <FieldArray name="scores">
-                {({ remove, push }) => (
+              <FieldArray
+                name="scores"
+                render={({ remove, push }) => (
                   <div className="space-y-6">
                     {values.map((score, index) => (
                       <div key={index} className="border border-gray-200 rounded-lg p-4">
@@ -241,29 +242,38 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* Player Selection */}
                           <PlayerSelect
-                            name={`goals.${index}.player`}
-                            id={`goals.${index}.player`}
-                            selectedPlayer={score.goalPlayer}
-                            onChange={(e) => {
-                              values[index].goalPlayer = e.target.value;
+                            selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
+                            onChange={(selectedRosterPlayer) => {
+                              if (selectedRosterPlayer) {
+                                values[index].goalPlayer = {
+                                  playerId: selectedRosterPlayer.player.playerId,
+                                  firstName: selectedRosterPlayer.player.firstName,
+                                  lastName: selectedRosterPlayer.player.lastName,
+                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                };
+                              } else {
+                                undefined;
+                              }
                             }}
                             roster={roster}
                             required={true}
-                            error={
-                              errors[index]?.goalPlayer && touched[index]?.goalPlayer
-                                ? errors[index]?.goalPlayer
-                                : undefined
-                            }
                             placeholder="Torschützen auswählen"
                           />
 
                           {/* Assist Selection */}
                           <PlayerSelect
-                            name={`goals.${index}.assist`}
-                            id={`goals.${index}.assist`}
-                            selectedPlayer={score.assistPlayer}
-                            onChange={(e) => {
-                              values[index].assistPlayer = e.target.value;
+                            selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
+                            onChange={(selectedRosterPlayer) => {
+                              if (selectedRosterPlayer) {
+                                values[index].assistPlayer = {
+                                  playerId: selectedRosterPlayer.player.playerId,
+                                  firstName: selectedRosterPlayer.player.firstName,
+                                  lastName: selectedRosterPlayer.player.lastName,
+                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                };
+                              } else {
+                                values[index].assistPlayer = undefined;
+                              }
                             }}
                             roster={roster}
                             required={false}
@@ -303,35 +313,43 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                     <div className="flex justify-center">
                       <button
                         type="button"
-                        onClick={() => push({ player: '', assist: '', time: '' })}
+                        onClick={() => push({
+                          matchTime: '',
+                          goalPlayer: null,
+                          assistPlayer: null,
+                          isPPG: false,
+                          isSHG: false,
+                          isGWG: false
+                        })}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         Weiteres Tor hinzufügen
                       </button>
                     </div>
+
+
+                    <div className="mt-8 flex justify-end py-4 space-x-3">
+                      <ButtonLight
+                        name="btnCancel"
+                        type="button"
+                        onClick={() => router.back()}
+                        label="Abbrechen"
+                      />
+                      <ButtonPrimary
+                        name="btnSubmit"
+                        type="submit"
+                        label="Tore speichern"
+                        loading={loading}
+                      />
+                    </div>
                   </div>
                 )}
-              </FieldArray>
-
-              <div className="mt-8 flex justify-end py-4 space-x-3">
-                <ButtonLight
-                  name="btnCancel"
-                  type="button"
-                  onClick={() => router.back()}
-                  label="Abbrechen"
-                />
-                <ButtonPrimary
-                  name="btnSubmit"
-                  type="submit"
-                  label="Tore speichern"
-                  loading={loading}
-                />
-              </div>
+              />
             </Form>
           )}
         </Formik>
       </div>
-    </Layout>
+    </Layout >
   );
 };
 
