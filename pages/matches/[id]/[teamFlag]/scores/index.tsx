@@ -243,9 +243,18 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           <PlayerSelect
                             name={`goals.${index}.player`}
                             id={`goals.${index}.player`}
-                            selectedPlayer={score.goalPlayer}
-                            onChange={(e) => {
-                              values[index].goalPlayer = e.target.value;
+                            selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
+                            onChange={(selectedRosterPlayer) => {
+                              if (selectedRosterPlayer) {
+                                values[index].goalPlayer = {
+                                  playerId: selectedRosterPlayer.player.playerId,
+                                  firstName: selectedRosterPlayer.player.firstName,
+                                  lastName: selectedRosterPlayer.player.lastName,
+                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                };
+                              } else {
+                                values[index].goalPlayer = null;
+                              }
                             }}
                             roster={roster}
                             required={true}
@@ -261,9 +270,18 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           <PlayerSelect
                             name={`goals.${index}.assist`}
                             id={`goals.${index}.assist`}
-                            selectedPlayer={score.assistPlayer}
-                            onChange={(e) => {
-                              values[index].assistPlayer = e.target.value;
+                            selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer.playerId) || null : null}
+                            onChange={(selectedRosterPlayer) => {
+                              if (selectedRosterPlayer) {
+                                values[index].assistPlayer = {
+                                  playerId: selectedRosterPlayer.player.playerId,
+                                  firstName: selectedRosterPlayer.player.firstName,
+                                  lastName: selectedRosterPlayer.player.lastName,
+                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                };
+                              } else {
+                                values[index].assistPlayer = null;
+                              }
                             }}
                             roster={roster}
                             required={false}
@@ -303,7 +321,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                     <div className="flex justify-center">
                       <button
                         type="button"
-                        onClick={() => push({ player: '', assist: '', time: '' })}
+                        onClick={() => push({ 
+                          matchTime: '', 
+                          goalPlayer: null, 
+                          assistPlayer: null,
+                          isPPG: false,
+                          isSHG: false,
+                          isGWG: false
+                        })}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         Weiteres Tor hinzufügen
