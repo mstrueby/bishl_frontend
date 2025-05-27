@@ -45,14 +45,7 @@ const tabs = [
 export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
-  // Get active tab from query parameter, default to 'roster'
-  const getActiveTabFromQuery = () => {
-    const { tab } = router.query;
-    const validTabs = ['roster', 'goals', 'penalties'];
-    return validTabs.includes(tab as string) ? (tab as string) : 'roster';
-  };
-
-  const [activeTab, setActiveTab] = useState(getActiveTabFromQuery());
+  const [activeTab, setActiveTab] = useState('roster');
   const [match, setMatch] = useState<Match>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedFinishType, setSelectedFinishType] = useState({ key: "REGULAR", value: "Regulär" });
@@ -78,13 +71,20 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const { user } = useAuth();
   const { id } = router.query;
 
+  // Get active tab from query parameter, default to 'roster'
+  const getActiveTabFromQuery = () => {
+    const { tab } = router.query;
+    const validTabs = ['roster', 'goals', 'penalties'];
+    return validTabs.includes(tab as string) ? (tab as string) : 'roster';
+  };
+
   // Update active tab when query parameter changes
   useEffect(() => {
     const newActiveTab = getActiveTabFromQuery();
     if (newActiveTab !== activeTab) {
       setActiveTab(newActiveTab);
     }
-  }, [router.query.tab]);
+  }, [router.query.tab, activeTab]);
 
   // Refresh match data function
   const refreshMatchData = useCallback(async () => {
@@ -434,7 +434,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       </div>
                       {showButtonRosterHome && (
                         <button
-                          onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                          onClick={() => router.push(`/matches/${match._id}/home/roster`)}
                           className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                           Aufstellung
@@ -486,7 +486,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       </div>
                       {showButtonRosterAway && (
                         <button
-                          onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                          onClick={() => router.push(`/matches/${match._id}/away/roster`)}
                           className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                           Aufstellung
