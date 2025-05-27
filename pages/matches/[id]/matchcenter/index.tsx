@@ -434,7 +434,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       </div>
                       {showButtonRosterHome && (
                         <button
-                          onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                          onClick={() => router.push(`/matches/${match._id}/home/roster`)}
                           className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                           Aufstellung
@@ -486,7 +486,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       </div>
                       {showButtonRosterAway && (
                         <button
-                          onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                          onClick={() => router.push(`/matches/${match._id}/away/roster`)}
                           className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                           Aufstellung
