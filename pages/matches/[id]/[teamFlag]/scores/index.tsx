@@ -10,7 +10,7 @@ import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
-import { Formik, Form, FieldArray } from 'formik';
+import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
 import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
@@ -222,7 +222,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
             <Form>
               <FieldArray
                 name="scores"
-                render={({ remove, push }) => (
+                render={({ remove, push }: FieldArrayRenderProps) => (
                   <div className="space-y-6">
                     {values.map((score, index) => (
                       <div key={index} className="border border-gray-200 rounded-lg p-4">
@@ -251,9 +251,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                   lastName: selectedRosterPlayer.player.lastName,
                                   jerseyNumber: selectedRosterPlayer.player.jerseyNumber
                                 };
-                              } else {
-                                undefined;
-                              }
+                              };
                             }}
                             roster={roster}
                             required={true}
@@ -271,9 +269,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                   lastName: selectedRosterPlayer.player.lastName,
                                   jerseyNumber: selectedRosterPlayer.player.jerseyNumber
                                 };
-                              } else {
-                                values[index].assistPlayer = undefined;
-                              }
+                              };
                             }}
                             roster={roster}
                             required={false}
