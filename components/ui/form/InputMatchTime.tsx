@@ -15,8 +15,25 @@ const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimePr
   props.id = props.id || name;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, ''); // Only allow digits
-    helpers.setValue(value);
+    let value = e.target.value.replace(/[^\d]/g, ''); // Only allow digits
+    
+    // Limit to 4 digits maximum
+    if (value.length > 4) {
+      value = value.substring(0, 4);
+    }
+    
+    // Auto-format with colon before last 2 digits
+    let formattedValue = '';
+    if (value.length <= 2) {
+      formattedValue = value;
+    } else {
+      // Insert colon before last 2 digits
+      const minutes = value.substring(0, value.length - 2);
+      const seconds = value.substring(value.length - 2);
+      formattedValue = minutes + ':' + seconds;
+    }
+    
+    helpers.setValue(formattedValue);
   };
 
   return (
