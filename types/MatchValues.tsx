@@ -30,13 +30,13 @@ export interface ScoresBase {
 
 export interface PenaltiesBase {
   _id?: string;
-  matchTimeStart: string
+  matchTimeStart: string;
   matchTimeEnd?: string;
   penaltyPlayer: EventPlayer;
   penaltyCode: { [key: string]: string };
   penaltyMinutes: number;
-  isGM?: boolean
-  isMP?: boolean
+  isGM?: boolean;
+  isMP?: boolean;
 }
 
 interface TeamStats {
