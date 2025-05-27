@@ -6,31 +6,21 @@ import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, Magnify
 import { classNames } from '../../tools/utils';
 
 interface PlayerSelectProps {
-  name: string;
-  id: string;
   selectedPlayer: RosterPlayer | null;
-  value?: string;
   onChange: (selectedPlayer: RosterPlayer | null) => void;
   roster: RosterPlayer[];
   label?: string;
   required?: boolean;
   placeholder?: string;
-  className?: string;
-  error?: string;
 }
 
 const PlayerSelect: React.FC<PlayerSelectProps> = ({
-  name,
-  id,
   selectedPlayer: propSelectedPlayer,
-  value,
   onChange,
   roster,
   label,
   required = false,
   placeholder = "Spieler auswählen",
-  className = "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
-  error
 }) => {
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
 
