@@ -45,7 +45,14 @@ const tabs = [
 export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('roster');
+  // Get active tab from query parameter, default to 'roster'
+  const getActiveTabFromQuery = () => {
+    const { tab } = router.query;
+    const validTabs = ['roster', 'goals', 'penalties'];
+    return validTabs.includes(tab as string) ? (tab as string) : 'roster';
+  };
+
+  const [activeTab, setActiveTab] = useState(getActiveTabFromQuery());
   const [match, setMatch] = useState<Match>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedFinishType, setSelectedFinishType] = useState({ key: "REGULAR", value: "Regulär" });
@@ -70,6 +77,14 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
+
+  // Update active tab when query parameter changes
+  useEffect(() => {
+    const newActiveTab = getActiveTabFromQuery();
+    if (newActiveTab !== activeTab) {
+      setActiveTab(newActiveTab);
+    }
+  }, [router.query.tab]);
 
   // Refresh match data function
   const refreshMatchData = useCallback(async () => {
@@ -321,7 +336,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
             {tabs.map((tab) => (
               <button
                 key={tab.name}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  router.push({
+                    pathname: router.pathname,
+                    query: { ...router.query, tab: tab.id }
+                  }, undefined, { shallow: true });
+                }}
                 aria-current={activeTab === tab.id ? 'page' : undefined}
                 className={classNames(
                   activeTab === tab.id
