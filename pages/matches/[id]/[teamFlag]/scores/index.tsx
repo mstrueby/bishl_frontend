@@ -15,6 +15,7 @@ import { Formik, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
+import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -234,59 +235,32 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* Player Selection */}
-                          <div>
-                            <label htmlFor={`goals.${index}.player`} className="block text-sm font-medium leading-6 text-gray-900 mb-2">
-                              Torschütze *
-                            </label>
-                            <select
-                              name={`goals.${index}.player`}
-                              id={`goals.${index}.player`}
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                              value={goal.player}
-                              onChange={(e) => {
-                                values.goals[index].player = e.target.value;
-                              }}
-                            >
-                              <option value="">Spieler auswählen</option>
-                              {roster.map((rosterPlayer) => (
-                                <option
-                                  key={rosterPlayer.player.playerId}
-                                  value={rosterPlayer.player.playerId}
-                                >
-                                  #{rosterPlayer.player.jerseyNumber} {rosterPlayer.player.firstName} {rosterPlayer.player.lastName}
-                                </option>
-                              ))}
-                            </select>
-                            {errors.goals?.[index]?.player && touched.goals?.[index]?.player && (
-                              <p className="mt-2 text-sm text-red-600">{errors.goals[index]?.player}</p>
-                            )}
-                          </div>
+                          <PlayerSelect
+                            name={`goals.${index}.player`}
+                            id={`goals.${index}.player`}
+                            value={goal.player}
+                            onChange={(e) => {
+                              values.goals[index].player = e.target.value;
+                            }}
+                            roster={roster}
+                            label="Torschütze"
+                            required={true}
+                            error={errors.goals?.[index]?.player && touched.goals?.[index]?.player ? errors.goals[index]?.player : undefined}
+                          />
 
                           {/* Assist Selection */}
-                          <div>
-                            <label htmlFor={`goals.${index}.assist`} className="block text-sm font-medium leading-6 text-gray-900 mb-2">
-                              Vorlage
-                            </label>
-                            <select
-                              name={`goals.${index}.assist`}
-                              id={`goals.${index}.assist`}
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                              value={goal.assist}
-                              onChange={(e) => {
-                                values.goals[index].assist = e.target.value;
-                              }}
-                            >
-                              <option value="">Spieler auswählen</option>
-                              {roster.map((rosterPlayer) => (
-                                <option
-                                  key={rosterPlayer.player.playerId}
-                                  value={rosterPlayer.player.playerId}
-                                >
-                                  #{rosterPlayer.player.jerseyNumber} {rosterPlayer.player.firstName} {rosterPlayer.player.lastName}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                          <PlayerSelect
+                            name={`goals.${index}.assist`}
+                            id={`goals.${index}.assist`}
+                            value={goal.assist}
+                            onChange={(e) => {
+                              values.goals[index].assist = e.target.value;
+                            }}
+                            roster={roster}
+                            label="Vorlage"
+                            required={false}
+                            placeholder="Kein Assist"
+                          /></div>
 
                           {/* Time Input */}
                           <div>
