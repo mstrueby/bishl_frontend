@@ -15,6 +15,7 @@ import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
+import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -284,31 +285,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         </div>
 
                         {/* Time Input */}
-                        <div>
-                          <label
-                            htmlFor={`scores.${index}.matchTime`}
-                            className="block text-sm font-medium leading-6 text-gray-900 mb-2"
-                          >
-                            Zeit (min) *
-                          </label>
-                          <input
-                            type="number"
-                            name={`scores.${index}.matchTime`}
-                            id={`scores.${index}.matchTime`}
-                            min="0"
-                            max="120"
-                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            value={score.matchTime}
-                            onChange={(e) => {
-                              setFieldValue(`scores.${index}.matchTime`, e.target.value);
-                            }}
-                          />
-                          {errors.scores?.[index]?.matchTime && touched.scores?.[index]?.matchTime && (
-                            <p className="mt-2 text-sm text-red-600">
-                              {errors.scores[index]?.matchTime}
-                            </p>
-                          )}
-                        </div>
+                        <InputMatchTime
+                          name={`scores.${index}.matchTime`}
+                          label="Zeit (mm:ss) *"
+                          description="Geben Sie die Zeit im Format mm:ss ein (z.B. 15:30)"
+                        />
                       </div>
                     ))}
 
