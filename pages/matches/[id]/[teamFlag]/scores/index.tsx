@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import useAuth from '../../../../../hooks/useAuth';
 import { useRouter } from 'next/router';
@@ -208,7 +207,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           isRefreshing={isRefreshing}
           onRefresh={handleRefreshMatch}
         />
-        
+
         <h1 className="text-2xl font-bold mb-6">Tore: {team?.fullName} / {team?.name}</h1>
 
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
@@ -287,7 +286,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                             min="0"
                             max="120"
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            value={goal.time}
+                            value={score.matchTime}
                             onChange={(e) => {
                               values[index].matchTime = e.target.value;
                             }}

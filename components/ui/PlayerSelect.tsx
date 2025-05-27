@@ -9,8 +9,8 @@ interface PlayerSelectProps {
   name: string;
   id: string;
   selectedPlayer: RosterPlayer | null;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  value?: string;
+  onChange: (selectedPlayer: RosterPlayer | null) => void;
   roster: RosterPlayer[];
   label?: string;
   required?: boolean;
@@ -39,12 +39,17 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
     setSelectedPlayer(propSelectedPlayer);
   }, [propSelectedPlayer]);
 
+  const handlePlayerChange = (player: RosterPlayer | null) => {
+    setSelectedPlayer(player);
+    onChange(player);
+  };
+
   const Placeholder = () => (
     <span className="block truncate text-gray-400">{placeholder}</span>
   );
 
   return (
-    <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
+    <Listbox value={selectedPlayer} onChange={handlePlayerChange}>
       {({ open }) => (
         <>
           {label && (
@@ -56,8 +61,8 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
             <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
               {selectedPlayer ? (
                 <div className="flex items-center block truncate">
-                  <span className="w-4 text-center">{selectedPlayer.player.jerseyNumber}</span>
-                  <span className="ml-4">{selectedPlayer.player.lastName}, {selectedPlayer.player.firstName}</span>
+                  <span className="w-4 text-center">{selectedPlayer.player?.jerseyNumber}</span>
+                  <span className="ml-4">{selectedPlayer.player?.lastName}, {selectedPlayer.player?.firstName}</span>
                 </div>
               ) : (
                 <Placeholder />
