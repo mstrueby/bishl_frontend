@@ -55,39 +55,25 @@ const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimePr
       value = value.substring(0, 4);
     }
     
-    // Auto-format with colon
+    // Auto-format with colon before last 2 digits
     let formattedValue = '';
-    if (value.length === 0) {
-      formattedValue = '';
-    } else if (value.length === 1) {
+    if (value.length <= 2) {
       formattedValue = value;
-    } else if (value.length === 2) {
-      formattedValue = value;
-    } else if (value.length === 3) {
-      // Insert colon before last 2 digits: abc -> a:bc
-      formattedValue = value.substring(0, 1) + ':' + value.substring(1);
-    } else if (value.length === 4) {
-      // Insert colon before last 2 digits: abcd -> ab:cd
-      formattedValue = value.substring(0, 2) + ':' + value.substring(2);
+    } else {
+      // Insert colon before last 2 digits
+      const minutes = value.substring(0, value.length - 2);
+      const seconds = value.substring(value.length - 2);
+      formattedValue = minutes + ':' + seconds;
     }
     
-    // Validate the format and convert to seconds for storage
-    if (formattedValue === '') {
-      helpers.setValue('');
-    } else if (formattedValue.includes(':')) {
-      // Complete format with colon, convert to seconds
-      const totalSeconds = parseTimeString(formattedValue);
-      helpers.setValue(totalSeconds.toString());
-    } else {
-      // Still typing, store as is
-      helpers.setValue(formattedValue);
-    }
+    // Store the formatted value directly
+    helpers.setValue(formattedValue);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // On blur, ensure we store the value as total seconds
+    // On blur, convert to seconds for storage if we have a valid time format
     const currentValue = e.target.value;
-    if (currentValue && currentValue !== '') {
+    if (currentValue && currentValue.includes(':')) {
       const totalSeconds = parseTimeString(currentValue);
       helpers.setValue(totalSeconds.toString());
     }
@@ -97,7 +83,7 @@ const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimePr
     }
   };
 
-  // Display value should be in mm:ss format
+  // Display value should be in mm:ss format or show stored seconds as formatted time
   const displayValue = field.value && field.value.toString().includes(':') 
     ? field.value 
     : formatToTimeString(field.value);
