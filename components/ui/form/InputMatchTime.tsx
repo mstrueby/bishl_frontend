@@ -47,37 +47,40 @@ const InputMatchTime = ({ label, name, description, ...props }: InputMatchTimePr
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     
-    // Remove any non-digit characters except colon
-    value = value.replace(/[^\d:]/g, '');
+    // Remove any non-digit characters
+    value = value.replace(/[^\d]/g, '');
     
-    // Ensure proper format
-    if (value.length === 1 && /\d/.test(value)) {
-      // First digit entered
-      value = '0' + value + ':';
-    } else if (value.length === 2 && /\d{2}/.test(value)) {
-      // Two digits entered, add colon
-      value = value + ':';
-    } else if (value.length === 4 && value.endsWith(':')) {
-      // Remove trailing colon if we have mm:
-      value = value;
-    } else if (value.length > 5) {
-      // Limit to mm:ss format
-      value = value.substring(0, 5);
+    // Limit to 4 digits maximum (mmss)
+    if (value.length > 4) {
+      value = value.substring(0, 4);
+    }
+    
+    // Auto-format with colon
+    let formattedValue = '';
+    if (value.length === 0) {
+      formattedValue = '';
+    } else if (value.length === 1) {
+      formattedValue = value;
+    } else if (value.length === 2) {
+      formattedValue = value;
+    } else if (value.length === 3) {
+      // Insert colon before last 2 digits: abc -> a:bc
+      formattedValue = value.substring(0, 1) + ':' + value.substring(1);
+    } else if (value.length === 4) {
+      // Insert colon before last 2 digits: abcd -> ab:cd
+      formattedValue = value.substring(0, 2) + ':' + value.substring(2);
     }
     
     // Validate the format and convert to seconds for storage
-    if (value === '' || value === ':') {
+    if (formattedValue === '') {
       helpers.setValue('');
-    } else if (/^\d{1,2}:\d{0,2}$/.test(value)) {
-      // Valid partial or complete format
-      if (value.endsWith(':')) {
-        // Still typing seconds
-        helpers.setValue(value);
-      } else {
-        // Complete format, convert to seconds
-        const totalSeconds = parseTimeString(value);
-        helpers.setValue(totalSeconds.toString());
-      }
+    } else if (formattedValue.includes(':')) {
+      // Complete format with colon, convert to seconds
+      const totalSeconds = parseTimeString(formattedValue);
+      helpers.setValue(totalSeconds.toString());
+    } else {
+      // Still typing, store as is
+      helpers.setValue(formattedValue);
     }
   };
 
