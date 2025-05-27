@@ -194,6 +194,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
             Zurück
           </span>
         </button>
+        
         <MatchHeader 
           match={match} 
           isRefreshing={isRefreshing} 
@@ -566,7 +567,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     )}
                   </div>
                   <button
-                    onClick={() => router.push(`/matches/${match._id}/goals/home`)}
+                    onClick={() => router.push(`/matches/${match._id}/home/scores`)}
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tore
@@ -657,7 +658,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     )}
                   </div>
                   <button
-                    onClick={() => router.push(`/matches/${match._id}/goals/away`)}
+                    onClick={() => router.push(`/matches/${match._id}/away/scores`)}
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tore
