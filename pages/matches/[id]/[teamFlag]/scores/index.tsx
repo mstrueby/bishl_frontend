@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
+import { Match, RosterPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -35,6 +35,7 @@ interface GoalRegisterFormProps {
   teamFlag: string;
   team: Team;
   initialRoster: RosterPlayer[];
+  initialScores: ScoresBase[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -74,6 +75,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // Roster is obtained directly from the match data
     const roster = matchTeam.roster;
+    const scores = matchTeam.scores;
 
     return {
       props: {
@@ -81,7 +83,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         match,
         teamFlag,
         team: matchTeam,
-        initialRoster: roster || []
+        initialRoster: roster || [],
+        initialScores: scores || []
       }
     };
   } catch (error) {
@@ -92,13 +95,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         match: null,
         teamFlag,
         team: null,
-        initialRoster: []
+        initialRoster: [],
+        initialScores: []
       }
     };
   }
 };
 
-const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster }) => {
+const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster, initialScores }) => {
   const [roster, setRoster] = useState<RosterPlayer[]>(initialRoster);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -135,9 +139,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   };
 
   // Initial form values
-  const initialValues: GoalFormValues = {
-    goals: [{ player: '', assist: '', time: '' }]
-  };
+  ///const initialValues: ScoresBase[] = {
+  //  goals: [{ player: '', assist: '', time: '' }]
+  //};
 
   // Validation schema
   const validationSchema = Yup.object({
@@ -154,7 +158,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   });
 
   // Form submission
-  const onSubmit = async (values: GoalFormValues) => {
+  const onSubmit = async (values: ScoresBase[]) => {
     if (!match._id) return;
 
     setLoading(true);
@@ -209,7 +213,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
 
         <Formik
-          initialValues={initialValues}
+          initialValues={initialScores}
           validationSchema={validationSchema}
           onSubmit={onSubmit}
         >
@@ -218,11 +222,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
               <FieldArray name="goals">
                 {({ remove, push }) => (
                   <div className="space-y-6">
-                    {values.goals.map((goal, index) => (
+                    {values.map((score, index) => (
                       <div key={index} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="text-lg font-medium">Tor {index + 1}</h3>
-                          {values.goals.length > 1 && (
+                          {values.length > 1 && (
                             <button
                               type="button"
                               onClick={() => remove(index)}
@@ -232,61 +236,69 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                             </button>
                           )}
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* Player Selection */}
                           <PlayerSelect
                             name={`goals.${index}.player`}
                             id={`goals.${index}.player`}
-                            value={goal.player}
+                            selectedPlayer={goal.player}
                             onChange={(e) => {
                               values.goals[index].player = e.target.value;
                             }}
                             roster={roster}
-                            label="Torschütze"
                             required={true}
-                            error={errors.goals?.[index]?.player && touched.goals?.[index]?.player ? errors.goals[index]?.player : undefined}
+                            error={
+                              errors.goals?.[index]?.player && touched.goals?.[index]?.player
+                                ? errors.goals[index]?.player
+                                : undefined
+                            }
+                            placeholder="Torschützen auswählen"
                           />
 
                           {/* Assist Selection */}
                           <PlayerSelect
                             name={`goals.${index}.assist`}
                             id={`goals.${index}.assist`}
-                            value={goal.assist}
+                            selectedPlayer={goal.assist}
                             onChange={(e) => {
                               values.goals[index].assist = e.target.value;
                             }}
                             roster={roster}
-                            label="Vorlage"
                             required={false}
-                            placeholder="Kein Assist"
-                          /></div>
+                            placeholder="Keine Vorlage"
+                          />
+                        </div>
 
-                          {/* Time Input */}
-                          <div>
-                            <label htmlFor={`goals.${index}.time`} className="block text-sm font-medium leading-6 text-gray-900 mb-2">
-                              Zeit (min) *
-                            </label>
-                            <input
-                              type="number"
-                              name={`goals.${index}.time`}
-                              id={`goals.${index}.time`}
-                              min="0"
-                              max="120"
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                              value={goal.time}
-                              onChange={(e) => {
-                                values.goals[index].time = e.target.value;
-                              }}
-                            />
-                            {errors.goals?.[index]?.time && touched.goals?.[index]?.time && (
-                              <p className="mt-2 text-sm text-red-600">{errors.goals[index]?.time}</p>
-                            )}
-                          </div>
+                        {/* Time Input */}
+                        <div>
+                          <label
+                            htmlFor={`goals.${index}.time`}
+                            className="block text-sm font-medium leading-6 text-gray-900 mb-2"
+                          >
+                            Zeit (min) *
+                          </label>
+                          <input
+                            type="number"
+                            name={`goals.${index}.time`}
+                            id={`goals.${index}.time`}
+                            min="0"
+                            max="120"
+                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            value={goal.time}
+                            onChange={(e) => {
+                              values.goals[index].time = e.target.value;
+                            }}
+                          />
+                          {errors.goals?.[index]?.time && touched.goals?.[index]?.time && (
+                            <p className="mt-2 text-sm text-red-600">
+                              {errors.goals[index]?.time}
+                            </p>
+                          )}
                         </div>
                       </div>
                     ))}
-                    
+
                     <div className="flex justify-center">
                       <button
                         type="button"
@@ -301,17 +313,17 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
               </FieldArray>
 
               <div className="mt-8 flex justify-end py-4 space-x-3">
-                <ButtonLight 
-                  name="btnCancel" 
-                  type="button" 
-                  onClick={() => router.back()} 
-                  label="Abbrechen" 
+                <ButtonLight
+                  name="btnCancel"
+                  type="button"
+                  onClick={() => router.back()}
+                  label="Abbrechen"
                 />
-                <ButtonPrimary 
-                  name="btnSubmit" 
-                  type="submit" 
-                  label="Tore speichern" 
-                  loading={loading} 
+                <ButtonPrimary
+                  name="btnSubmit"
+                  type="submit"
+                  label="Tore speichern"
+                  loading={loading}
                 />
               </div>
             </Form>
