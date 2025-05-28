@@ -208,6 +208,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         body: JSON.stringify(payload),
       });
 
+      // Ignore 304 Not Modified status - no changes needed
+      if (response.status === 304) {
+        setSuccessMessage('Keine Änderungen erforderlich');
+        console.log('No changes needed (304)');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to save the goal sheet');
       }
@@ -275,19 +283,36 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         ) : (
                           values.scores.map((score, index) => (
                             <div key={index} className="p-3">
-                              <div className="flex flex-cols md:flex-rows gap-4 items-center">
-                                {/* index */}
-                                <div className="flex-none w-8 text-center">
-                                  <span className="text-gray-500">{index + 1}</span>
-                                </div>
+                              <div className="flex flex-col md:flex-row gap-4 md:items-center">
+                              {/* Mobile header with index and remove button */}
+                              <div className="flex items-center justify-between md:hidden">
+                                <span className="font-medium text-gray-700">Tor #{index + 1}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => remove(index)}
+                                  className="text-red-600 hover:text-red-800 p-1"
+                                  title="Tor entfernen"
+                                >
+                                  <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                                </button>
+                              </div>
+
+                              {/* Desktop index (hidden on mobile) */}
+                              <div className="hidden md:flex flex-none w-8 text-center">
+                                <span className="text-gray-500">{index + 1}</span>
+                              </div>
+
+                              {/* Form fields container */}
+                              <div className="flex flex-col md:flex-row gap-4 flex-1">
                                 {/* Time Input */}
                                 <div className="flex-none w-20">
                                   <InputMatchTime
                                     name={`scores.${index}.matchTime`}
                                   />
                                 </div>
-                                {/* Player Selection */}
-                                <div className="flex-auto w-32">
+
+                                {/* Scores Selection */}
+                                <div className="w-full md:flex-auto">
                                   <PlayerSelect
                                     selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
@@ -308,8 +333,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     error={!!(errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer)}
                                   />
                                 </div>
+
                                 {/* Assist Selection */}
-                                <div className="flex-auto w-32">
+                                <div className="w-full md:flex-auto">
                                   <PlayerSelect
                                     selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
@@ -329,18 +355,20 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     placeholder="Keine Vorlage"
                                   />
                                 </div>
-                                {/* remove button */}
-                                <div className="flex-none">
-                                  <button
-                                    type="button"
-                                    onClick={() => remove(index)}
-                                    className="text-red-600 hover:text-red-800 p-1"
-                                    title="Tor entfernen"
-                                  >
-                                    <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                                  </button>
-                                </div>
                               </div>
+
+                              {/* Desktop remove button (hidden on mobile) */}
+                              <div className="hidden md:flex flex-none">
+                                <button
+                                  type="button"
+                                  onClick={() => remove(index)}
+                                  className="text-red-600 hover:text-red-800 p-1"
+                                  title="Tor entfernen"
+                                >
+                                  <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                                </button>
+                              </div>
+                            </div>
                             </div>
                           ))
                         )}
