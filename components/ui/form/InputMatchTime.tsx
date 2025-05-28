@@ -1,3 +1,4 @@
+import React from 'react';
 import { useField } from 'formik';
 import type { ComponentPropsWithoutRef } from 'react';
 
@@ -7,7 +8,7 @@ interface InputMatchTimeProps extends ComponentPropsWithoutRef<'input'> {
   description?: string;
 }
 
-const InputMatchTime = ({ name, label, description, ...props }: InputMatchTimeProps) => {
+const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>(({ name, label, description, ...props }, ref) => {
   const [field, meta, helpers] = useField(name);
   const classInputDef = "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none";
   const classInputErr = "block w-full rounded-md border-0  py-1.5 px-3 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6 appearance-none";
@@ -52,6 +53,7 @@ const InputMatchTime = ({ name, label, description, ...props }: InputMatchTimePr
       <div className="relative">
         <input
           {...props}
+          ref={ref}
           type="text"
           className={meta.touched && meta.error ? classInputErr : classInputDef}
           name={field.name}
@@ -70,6 +72,8 @@ const InputMatchTime = ({ name, label, description, ...props }: InputMatchTimePr
       </div>
     </>
   );
-};
+});
+
+InputMatchTime.displayName = 'InputMatchTime';
 
 export default InputMatchTime;
