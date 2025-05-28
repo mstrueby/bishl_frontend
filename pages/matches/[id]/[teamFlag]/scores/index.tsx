@@ -151,7 +151,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     scores: Yup.array().of(
       Yup.object().shape({
         matchTime: Yup.string()
-          .required('Zeit ist erforderlich')
+          .required()
           .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
         goalPlayer: Yup.object()
           .nullable()
@@ -260,10 +260,10 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                   <div className="space-y-6">
                     <div className="divide-y divide-gray-200 shadow rounded-md border">
                       {values.scores.map((score, index) => (
-                        <div key={index} className="p-4">
-                          <div className="flex md:flex-rows gap-4 items-center">
+                        <div key={index} className="p-3">
+                          <div className="flex flex-cols md:flex-rows gap-4 items-center">
                             {/* index */}
-                            <div className="flex-none w-10">
+                            <div className="flex-none w-8 text-center">
                               <span className="text-gray-500">{index + 1}</span>
                             </div>
                             {/* Time Input */}
