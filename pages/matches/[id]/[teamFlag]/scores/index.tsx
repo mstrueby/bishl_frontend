@@ -208,6 +208,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         body: JSON.stringify(payload),
       });
 
+      // Ignore 304 Not Modified status - no changes needed
+      if (response.status === 304) {
+        setSuccessMessage('Keine Änderungen erforderlich');
+        console.log('No changes needed (304)');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to save the goal sheet');
       }
