@@ -250,14 +250,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
 
         <Formik
-          initialValues={{ scores: initialScores && initialScores.length > 0 ? initialScores : [{
-            matchTime: '',
-            goalPlayer: null,
-            assistPlayer: null,
-            isPPG: false,
-            isSHG: false,
-            isGWG: false
-          }] }}
+          initialValues={{ scores: initialScores }}
           validationSchema={validationSchema}
           onSubmit={(values) => onSubmit(values.scores)}
         >
@@ -273,13 +266,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                   render={({ remove, push }: FieldArrayRenderProps) => (
                     <div className="space-y-6 sm:px-3">
                       <div className="divide-y divide-gray-200 shadow rounded-md border">
-                        {values.scores.length === 0 ? (
-                          <div className="p-8 text-center text-gray-500">
-                            <p className="text-sm">Noch keine Tore eingetragen.</p>
-                            <p className="text-xs mt-2">Klicken Sie auf "Weiteres Tor hinzufügen", um zu beginnen.</p>
-                          </div>
-                        ) : (
-                          values.scores.map((score, index) => (
+                        {values.scores.map((score, index) => (
                           <div key={index} className="p-3">
                             <div className="flex flex-cols md:flex-rows gap-4 items-center">
                               {/* index */}
@@ -350,8 +337,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                               </div>
                             </div>
                           </div>
-                          ))
-                        )}
+                        ))}
                       </div>
 
                       {/* Score mismatch indicator */}
