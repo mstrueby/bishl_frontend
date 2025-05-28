@@ -9,7 +9,7 @@ import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
-import { ChevronLeftIcon, TrashIcon} from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
@@ -18,6 +18,7 @@ import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
+import SectionHeader from '../../../../../components/admin/SectionHeader';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -241,8 +242,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           isRefreshing={isRefreshing}
           onRefresh={handleRefreshMatch}
         />
-
-        <h1 className="text-2xl font-bold mb-6">Tore: {team?.fullName} / {team?.name}</h1>
+        <div className="mt-12">
+          <SectionHeader title="Tore" description={`Hier können alle Tore für ${team?.fullName} (${team?.name}) eingetragen werden.`} />
+        </div>
 
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
         {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
@@ -257,7 +259,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
               <FieldArray
                 name="scores"
                 render={({ remove, push }: FieldArrayRenderProps) => (
-                  <div className="space-y-6">
+                  <div className="space-y-6 sm:px-3">
                     <div className="divide-y divide-gray-200 shadow rounded-md border">
                       {values.scores.map((score, index) => (
                         <div key={index} className="p-3">
@@ -271,11 +273,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                               <InputMatchTime
                                 name={`scores.${index}.matchTime`}
                               />
-                              {errors.scores?.[index]?.matchTime && touched.scores?.[index]?.matchTime && (
-                                <p className="mt-1 text-xs text-red-600">
-                                  {errors.scores[index].matchTime}
-                                </p>
-                              )}
                             </div>
                             {/* Player Selection */}
                             <div className="flex-auto w-32">
