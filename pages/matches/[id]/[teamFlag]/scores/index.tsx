@@ -9,7 +9,7 @@ import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
-import { ChevronLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
@@ -19,7 +19,6 @@ import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
