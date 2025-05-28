@@ -147,20 +147,28 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   //};
 
   // Validation schema
-  /*
   const validationSchema = Yup.object({
-    Yup.array().of(
+    scores: Yup.array().of(
       Yup.object().shape({
-        player: Yup.string().required('Spieler ist erforderlich'),
-        assist: Yup.string().nullable(), // Optional
-        time: Yup.number()
-          .min(0, 'Zeit muss positiv sein')
-          .max(120, 'Zeit darf nicht über 120 Minuten sein')
+        matchTime: Yup.string()
           .required('Zeit ist erforderlich')
+          .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
+        goalPlayer: Yup.object()
+          .nullable()
+          .required('Torschütze ist erforderlich')
+          .shape({
+            playerId: Yup.string().required(),
+            firstName: Yup.string().required(),
+            lastName: Yup.string().required(),
+            jerseyNumber: Yup.number().required()
+          }),
+        assistPlayer: Yup.object().nullable(), // Optional
+        isPPG: Yup.boolean(),
+        isSHG: Yup.boolean(),
+        isGWG: Yup.boolean()
       })
     )
   });
-  */
   // Form submission
   const onSubmit = async (values: ScoresBase[]) => {
     if (!match._id) return;
@@ -241,7 +249,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
         <Formik
           initialValues={{ scores: initialScores }}
-          //validationSchema={validationSchema}
+          validationSchema={validationSchema}
           onSubmit={(values) => onSubmit(values.scores)}
         >
           {({ values, errors, touched, setFieldValue }) => (
@@ -263,6 +271,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                               <InputMatchTime
                                 name={`scores.${index}.matchTime`}
                               />
+                              {errors.scores?.[index]?.matchTime && touched.scores?.[index]?.matchTime && (
+                                <p className="mt-1 text-xs text-red-600">
+                                  {errors.scores[index].matchTime}
+                                </p>
+                              )}
                             </div>
                             {/* Player Selection */}
                             <div className="flex-auto w-32">
@@ -284,6 +297,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 required={true}
                                 placeholder="Torschützen auswählen"
                               />
+                              {errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer && (
+                                <p className="mt-1 text-xs text-red-600">
+                                  Torschütze ist erforderlich
+                                </p>
+                              )}
                             </div>
                             {/* Assist Selection */}
                             <div className="flex-auto w-32">
