@@ -6,6 +6,7 @@ interface InputMatchTimeProps extends ComponentPropsWithoutRef<'input'> {
   name: string;
   label?: string;
   description?: string;
+  tabIndex?: number;
 }
 
 const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>(({ name, label, description, ...props }, ref) => {
@@ -61,6 +62,7 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
           onChange={handleChange}
           onBlur={field.onBlur}
           placeholder="00:00"
+          tabIndex={props.tabIndex}
         />
         {/**
         {meta.touched && meta.error ? (

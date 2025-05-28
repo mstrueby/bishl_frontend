@@ -13,6 +13,7 @@ interface PlayerSelectProps {
   required?: boolean;
   placeholder?: string;
   error?: boolean;
+  tabIndex?: number;
 }
 
 const PlayerSelect: React.FC<PlayerSelectProps> = ({
@@ -23,6 +24,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   required = false,
   placeholder = "Spieler auswählen",
   error = false,
+  tabIndex,
 }) => {
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
 
@@ -50,7 +52,9 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
             </Listbox.Label>
           )}
           <div className="relative">
-            <Listbox.Button className={`relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ${error ? 'ring-red-300' : 'ring-gray-300'} focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-50 text-red-900' : 'focus:ring-indigo-500 text-gray-900'} sm:text-sm sm:leading-6`}>
+            <Listbox.Button 
+              tabIndex={tabIndex}
+              className={`relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ${error ? 'ring-red-300' : 'ring-gray-300'} focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-50 text-red-900' : 'focus:ring-indigo-500 text-gray-900'} sm:text-sm sm:leading-6`}>
               {selectedPlayer ? (
                 <div className="flex items-center block truncate">
                   <span className="w-4 text-center">{selectedPlayer.player?.jerseyNumber}</span>

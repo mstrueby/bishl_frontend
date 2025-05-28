@@ -309,6 +309,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 <div className="justify-center md:justify-start">
                                   <InputMatchTime
                                     name={`scores.${index}.matchTime`}
+                                    tabIndex={index * 3 + 1}
                                     ref={(el: HTMLInputElement | null) => {
                                       inputRefs.current[index] = el;
                                     }}
@@ -335,6 +336,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     required={true}
                                     placeholder="Torschützen auswählen"
                                     error={!!(errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer)}
+                                    tabIndex={index * 3 + 2}
                                   />
                                 </div>
 
@@ -357,6 +359,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     roster={roster}
                                     required={false}
                                     placeholder="Keine Vorlage"
+                                    tabIndex={index * 3 + 3}
                                   />
                                 </div>
                               </div>
@@ -393,6 +396,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                       <div className="flex justify-center">
                         <button
                           type="button"
+                          tabIndex={values.scores.length * 3 + 1}
                           onClick={() => {
                             const newIndex = values.scores.length;
                             push({
