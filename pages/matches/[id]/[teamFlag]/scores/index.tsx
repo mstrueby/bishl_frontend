@@ -9,7 +9,7 @@ import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
-import { ChevronLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
@@ -343,16 +343,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                       {/* Score mismatch indicator */}
                       {scoresMismatch && (
                         <div className="flex items-center p-4 mb-6 text-amber-800 rounded-lg bg-amber-50 border border-amber-200">
-                          <svg className="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                          </svg>
+                          <ExclamationTriangleIcon className="flex-shrink-0 w-5 h-5" aria-hidden="true" />
                           <span className="sr-only">Warnung</span>
                           <div className="ms-3 text-sm font-medium">
-                            Die Anzahl der eingetragenen Tore ({currentGoalsCount}) stimmt nicht mit dem Spielstand ({expectedGoals}) überein.
+                            <strong>Achtung:</strong> Die Anzahl der eingetragenen Tore ({currentGoalsCount}) stimmt nicht mit dem Spielstand ({expectedGoals}) überein.
                           </div>
                         </div>
                       )}
-                      
+
                       {/* add score */}
                       <div className="flex justify-center">
                         <button
