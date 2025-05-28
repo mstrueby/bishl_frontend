@@ -256,7 +256,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         >
           {({ values, errors, touched, setFieldValue }) => {
             const expectedGoals = teamFlag === 'home' ? match?.home?.stats?.goalsFor || 0 : match?.away?.stats?.goalsFor || 0;
-            const currentGoalsCount = values.scores.filter(score => score.goalPlayer && score.matchTime).length;
+            const currentGoalsCount = values.scores.length;
             const scoresMismatch = currentGoalsCount !== expectedGoals;
 
             return (
