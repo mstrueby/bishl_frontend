@@ -246,8 +246,10 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           <SectionHeader title="Tore" description={`Hier können alle Tore für ${team?.fullName} (${team?.name}) eingetragen werden.`} />
         </div>
 
-        {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-        {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
+        <div className="sm:px-3 pb-2">
+          {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+          {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
+        </div>
 
         <Formik
           initialValues={{ scores: initialScores || [] }}
@@ -267,70 +269,68 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                     <div className="space-y-6 sm:px-3">
                       <div className="divide-y divide-gray-200 shadow rounded-md border">
                         {values.scores.length === 0 ? (
-                          <div className="p-8 text-center text-gray-500">
-                            <p className="text-sm">Noch keine Tore eingetragen.</p>
-                            <p className="text-xs mt-2">Klicken Sie auf "Tor hinzufügen", um zu beginnen.</p>
+                          <div className="p-4 text-center text-gray-500">
+                            <p className="text-sm">Keine Tore vorhanden.</p>
                           </div>
                         ) : (
                           values.scores.map((score, index) => (
-                          <div key={index} className="p-3">
-                            <div className="flex flex-cols md:flex-rows gap-4 items-center">
-                              {/* index */}
-                              <div className="flex-none w-8 text-center">
-                                <span className="text-gray-500">{index + 1}</span>
-                              </div>
-                              {/* Time Input */}
-                              <div className="flex-none w-20">
-                                <InputMatchTime
-                                  name={`scores.${index}.matchTime`}
-                                />
-                              </div>
-                              {/* Player Selection */}
-                              <div className="flex-auto w-32">
-                                <PlayerSelect
-                                  selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
-                                  onChange={(selectedRosterPlayer) => {
-                                    if (selectedRosterPlayer) {
-                                      setFieldValue(`scores.${index}.goalPlayer`, {
-                                        playerId: selectedRosterPlayer.player.playerId,
-                                        firstName: selectedRosterPlayer.player.firstName,
-                                        lastName: selectedRosterPlayer.player.lastName,
-                                        jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                      });
-                                    } else {
-                                      setFieldValue(`scores.${index}.goalPlayer`, null);
-                                    }
-                                  }}
-                                  roster={roster}
-                                  required={true}
-                                  placeholder="Torschützen auswählen"
-                                  error={!!(errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer)}
-                                />
-                              </div>
-                              {/* Assist Selection */}
-                              <div className="flex-auto w-32">
-                                <PlayerSelect
-                                  selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
-                                  onChange={(selectedRosterPlayer) => {
-                                    if (selectedRosterPlayer) {
-                                      setFieldValue(`scores.${index}.assistPlayer`, {
-                                        playerId: selectedRosterPlayer.player.playerId,
-                                        firstName: selectedRosterPlayer.player.firstName,
-                                        lastName: selectedRosterPlayer.player.lastName,
-                                        jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                      });
-                                    } else {
-                                      setFieldValue(`scores.${index}.assistPlayer`, null);
-                                    }
-                                  }}
-                                  roster={roster}
-                                  required={false}
-                                  placeholder="Keine Vorlage"
-                                />
-                              </div>
-                              {/* remove button */}
-                              <div className="flex-none">
-                                {values.scores.length > 1 && (
+                            <div key={index} className="p-3">
+                              <div className="flex flex-cols md:flex-rows gap-4 items-center">
+                                {/* index */}
+                                <div className="flex-none w-8 text-center">
+                                  <span className="text-gray-500">{index + 1}</span>
+                                </div>
+                                {/* Time Input */}
+                                <div className="flex-none w-20">
+                                  <InputMatchTime
+                                    name={`scores.${index}.matchTime`}
+                                  />
+                                </div>
+                                {/* Player Selection */}
+                                <div className="flex-auto w-32">
+                                  <PlayerSelect
+                                    selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
+                                    onChange={(selectedRosterPlayer) => {
+                                      if (selectedRosterPlayer) {
+                                        setFieldValue(`scores.${index}.goalPlayer`, {
+                                          playerId: selectedRosterPlayer.player.playerId,
+                                          firstName: selectedRosterPlayer.player.firstName,
+                                          lastName: selectedRosterPlayer.player.lastName,
+                                          jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                        });
+                                      } else {
+                                        setFieldValue(`scores.${index}.goalPlayer`, null);
+                                      }
+                                    }}
+                                    roster={roster}
+                                    required={true}
+                                    placeholder="Torschützen auswählen"
+                                    error={!!(errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer)}
+                                  />
+                                </div>
+                                {/* Assist Selection */}
+                                <div className="flex-auto w-32">
+                                  <PlayerSelect
+                                    selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
+                                    onChange={(selectedRosterPlayer) => {
+                                      if (selectedRosterPlayer) {
+                                        setFieldValue(`scores.${index}.assistPlayer`, {
+                                          playerId: selectedRosterPlayer.player.playerId,
+                                          firstName: selectedRosterPlayer.player.firstName,
+                                          lastName: selectedRosterPlayer.player.lastName,
+                                          jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                        });
+                                      } else {
+                                        setFieldValue(`scores.${index}.assistPlayer`, null);
+                                      }
+                                    }}
+                                    roster={roster}
+                                    required={false}
+                                    placeholder="Keine Vorlage"
+                                  />
+                                </div>
+                                {/* remove button */}
+                                <div className="flex-none">
                                   <button
                                     type="button"
                                     onClick={() => remove(index)}
@@ -339,10 +339,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                   >
                                     <TrashIcon className="h-5 w-5" aria-hidden="true" />
                                   </button>
-                                )}
+                                </div>
                               </div>
                             </div>
-                          </div>
                           ))
                         )}
                       </div>
