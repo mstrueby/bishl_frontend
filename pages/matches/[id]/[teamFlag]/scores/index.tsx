@@ -296,12 +296,8 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 roster={roster}
                                 required={true}
                                 placeholder="Torschützen auswählen"
+                                error={!!(errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer)}
                               />
-                              {errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer && (
-                                <p className="mt-1 text-xs text-red-600">
-                                  Torschütze ist erforderlich
-                                </p>
-                              )}
                             </div>
                             {/* Assist Selection */}
                             <div className="flex-auto w-32">
