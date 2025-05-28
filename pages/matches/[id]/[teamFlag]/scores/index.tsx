@@ -298,14 +298,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                               </div>
 
                               {/* Desktop index (hidden on mobile) */}
-                              <div className="hidden md:flex flex-none w-8 text-center">
+                              <div className="hidden md:block w-8 text-center">
                                 <span className="text-gray-500">{index + 1}</span>
                               </div>
 
                               {/* Form fields container */}
                               <div className="flex flex-col md:flex-row gap-4 flex-1">
                                 {/* Time Input */}
-                                <div className="flex-none w-20">
+                                <div className="justify-center md:justify-start">
                                   <InputMatchTime
                                     name={`scores.${index}.matchTime`}
                                   />
