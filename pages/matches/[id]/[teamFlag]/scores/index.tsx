@@ -175,7 +175,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         const [minutes, seconds] = timeStr.split(':').map(Number);
         return (minutes || 0) * 60 + (seconds || 0);
       };
-      
+
       return timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime);
     });
 
@@ -204,7 +204,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
       setSuccessMessage('Tore wurden erfolgreich gespeichert');
       console.log('Goal sheet saved successfully');
-      
+
       // Scroll to top of page
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -264,54 +264,61 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex md:flex-rows gap-4">
+
+                          {/* Time Input */}
+                          <div className="flex-none w-24">
+                            <InputMatchTime
+                              name={`scores.${index}.matchTime`}
+                            />
+                          </div>
+
                           {/* Player Selection */}
-                          <PlayerSelect
-                            selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
-                            onChange={(selectedRosterPlayer) => {
-                              if (selectedRosterPlayer) {
-                                setFieldValue(`scores.${index}.goalPlayer`, {
-                                  playerId: selectedRosterPlayer.player.playerId,
-                                  firstName: selectedRosterPlayer.player.firstName,
-                                  lastName: selectedRosterPlayer.player.lastName,
-                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                });
-                              } else {
-                                setFieldValue(`scores.${index}.goalPlayer`, null);
-                              }
-                            }}
-                            roster={roster}
-                            required={true}
-                            placeholder="Torschützen auswählen"
-                          />
+                          <div className="flex-auto">
+                            <PlayerSelect
+                              selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
+                              onChange={(selectedRosterPlayer) => {
+                                if (selectedRosterPlayer) {
+                                  setFieldValue(`scores.${index}.goalPlayer`, {
+                                    playerId: selectedRosterPlayer.player.playerId,
+                                    firstName: selectedRosterPlayer.player.firstName,
+                                    lastName: selectedRosterPlayer.player.lastName,
+                                    jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                  });
+                                } else {
+                                  setFieldValue(`scores.${index}.goalPlayer`, null);
+                                }
+                              }}
+                              roster={roster}
+                              required={true}
+                              placeholder="Torschützen auswählen"
+                            />
+                          </div>
 
                           {/* Assist Selection */}
-                          <PlayerSelect
-                            selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
-                            onChange={(selectedRosterPlayer) => {
-                              if (selectedRosterPlayer) {
-                                setFieldValue(`scores.${index}.assistPlayer`, {
-                                  playerId: selectedRosterPlayer.player.playerId,
-                                  firstName: selectedRosterPlayer.player.firstName,
-                                  lastName: selectedRosterPlayer.player.lastName,
-                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                });
-                              } else {
-                                setFieldValue(`scores.${index}.assistPlayer`, null);
-                              }
-                            }}
-                            roster={roster}
-                            required={false}
-                            placeholder="Keine Vorlage"
-                          />
+                          <div className="flex-auto">
+                            <PlayerSelect
+                              selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
+                              onChange={(selectedRosterPlayer) => {
+                                if (selectedRosterPlayer) {
+                                  setFieldValue(`scores.${index}.assistPlayer`, {
+                                    playerId: selectedRosterPlayer.player.playerId,
+                                    firstName: selectedRosterPlayer.player.firstName,
+                                    lastName: selectedRosterPlayer.player.lastName,
+                                    jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                  });
+                                } else {
+                                  setFieldValue(`scores.${index}.assistPlayer`, null);
+                                }
+                              }}
+                              roster={roster}
+                              required={false}
+                              placeholder="Keine Vorlage"
+                            />
+                          </div>
+
                         </div>
 
-                        {/* Time Input */}
-                        <InputMatchTime
-                          name={`scores.${index}.matchTime`}
-                          label="Zeit (mm:ss) *"
-                          description="Geben Sie die Zeit im Format mm:ss ein (z.B. 15:30)"
-                        />
                       </div>
                     ))}
 
@@ -335,7 +342,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
                     <div className="mt-8 flex justify-end space-x-3">
                       <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
-                        <a className="inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                           Abbrechen
                         </a>
                       </Link>
