@@ -203,6 +203,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
       setSuccessMessage('Tore wurden erfolgreich gespeichert');
       console.log('Goal sheet saved successfully');
+      
+      // Scroll to top of page
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('An error occurred:', error);
       setError('Fehler beim Speichern der Tore');
@@ -342,7 +345,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         name="btnSubmit"
                         type="submit"
                         label="Speichern"
-                        loading={loading}
+                        isLoading={loading}
                         className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                       />
                     </div>
