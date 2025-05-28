@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
+import Link from 'next/link';
 import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
@@ -174,7 +175,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         const [minutes, seconds] = timeStr.split(':').map(Number);
         return (minutes || 0) * 60 + (seconds || 0);
       };
-      
+
       return timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime);
     });
 
@@ -203,7 +204,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
       setSuccessMessage('Tore wurden erfolgreich gespeichert');
       console.log('Goal sheet saved successfully');
-      
+
       // Scroll to top of page
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -217,15 +218,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-0 lg:px-8 py-0 lg:py-4">
-        <button
-          aria-label="Back button"
-          className="flex items-center"
-          onClick={() => router.back()}>
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Zurück
-          </span>
-        </button>
+        <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+          <a className="flex items-center" aria-label="Back to Match Center">
+            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+            <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+              Zurück zum Match Center
+            </span>
+          </a>
+        </Link>
 
         <MatchHeader
           match={match}
@@ -264,54 +264,61 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex md:flex-rows gap-4">
+
+                          {/* Time Input */}
+                          <div className="flex-none w-24">
+                            <InputMatchTime
+                              name={`scores.${index}.matchTime`}
+                            />
+                          </div>
+
                           {/* Player Selection */}
-                          <PlayerSelect
-                            selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
-                            onChange={(selectedRosterPlayer) => {
-                              if (selectedRosterPlayer) {
-                                setFieldValue(`scores.${index}.goalPlayer`, {
-                                  playerId: selectedRosterPlayer.player.playerId,
-                                  firstName: selectedRosterPlayer.player.firstName,
-                                  lastName: selectedRosterPlayer.player.lastName,
-                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                });
-                              } else {
-                                setFieldValue(`scores.${index}.goalPlayer`, null);
-                              }
-                            }}
-                            roster={roster}
-                            required={true}
-                            placeholder="Torschützen auswählen"
-                          />
+                          <div className="flex-auto">
+                            <PlayerSelect
+                              selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
+                              onChange={(selectedRosterPlayer) => {
+                                if (selectedRosterPlayer) {
+                                  setFieldValue(`scores.${index}.goalPlayer`, {
+                                    playerId: selectedRosterPlayer.player.playerId,
+                                    firstName: selectedRosterPlayer.player.firstName,
+                                    lastName: selectedRosterPlayer.player.lastName,
+                                    jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                  });
+                                } else {
+                                  setFieldValue(`scores.${index}.goalPlayer`, null);
+                                }
+                              }}
+                              roster={roster}
+                              required={true}
+                              placeholder="Torschützen auswählen"
+                            />
+                          </div>
 
                           {/* Assist Selection */}
-                          <PlayerSelect
-                            selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
-                            onChange={(selectedRosterPlayer) => {
-                              if (selectedRosterPlayer) {
-                                setFieldValue(`scores.${index}.assistPlayer`, {
-                                  playerId: selectedRosterPlayer.player.playerId,
-                                  firstName: selectedRosterPlayer.player.firstName,
-                                  lastName: selectedRosterPlayer.player.lastName,
-                                  jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                });
-                              } else {
-                                setFieldValue(`scores.${index}.assistPlayer`, null);
-                              }
-                            }}
-                            roster={roster}
-                            required={false}
-                            placeholder="Keine Vorlage"
-                          />
+                          <div className="flex-auto">
+                            <PlayerSelect
+                              selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
+                              onChange={(selectedRosterPlayer) => {
+                                if (selectedRosterPlayer) {
+                                  setFieldValue(`scores.${index}.assistPlayer`, {
+                                    playerId: selectedRosterPlayer.player.playerId,
+                                    firstName: selectedRosterPlayer.player.firstName,
+                                    lastName: selectedRosterPlayer.player.lastName,
+                                    jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                  });
+                                } else {
+                                  setFieldValue(`scores.${index}.assistPlayer`, null);
+                                }
+                              }}
+                              roster={roster}
+                              required={false}
+                              placeholder="Keine Vorlage"
+                            />
+                          </div>
+
                         </div>
 
-                        {/* Time Input */}
-                        <InputMatchTime
-                          name={`scores.${index}.matchTime`}
-                          label="Zeit (mm:ss) *"
-                          description="Geben Sie die Zeit im Format mm:ss ein (z.B. 15:30)"
-                        />
                       </div>
                     ))}
 
@@ -334,13 +341,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
 
                     <div className="mt-8 flex justify-end space-x-3">
-                      <ButtonLight
-                        name="btnCancel"
-                        type="button"
-                        onClick={() => router.back()}
-                        label="Abbrechen"
-                        className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                      />
+                      <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+                        <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                          Abbrechen
+                        </a>
+                      </Link>
                       <ButtonPrimary
                         name="btnSubmit"
                         type="submit"
