@@ -334,13 +334,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
 
                     <div className="mt-8 flex justify-end space-x-3">
-                      <ButtonLight
-                        name="btnCancel"
-                        type="button"
-                        onClick={() => router.back()}
-                        label="Abbrechen"
-                        className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                      />
+                      <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+                        <a className="inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                          Abbrechen
+                        </a>
+                      </Link>
                       <ButtonPrimary
                         name="btnSubmit"
                         type="submit"
