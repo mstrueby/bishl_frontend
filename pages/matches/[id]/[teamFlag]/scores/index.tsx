@@ -166,7 +166,26 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     setLoading(true);
     setError(null);
 
-    console.log("submitted values", values)
+    // Sort scores by matchTime before submitting
+    const sortedScores = [...values].sort((a, b) => {
+      // Convert time strings to comparable format (mm:ss -> minutes * 60 + seconds)
+      const timeToSeconds = (timeStr: string) => {
+        if (!timeStr) return 0;
+        const [minutes, seconds] = timeStr.split(':').map(Number);
+        return (minutes || 0) * 60 + (seconds || 0);
+      };
+      
+      return timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime);
+    });
+
+    // Structure the payload with teamFlag
+    const payload = {
+      [teamFlag]: {
+        scores: sortedScores
+      }
+    };
+
+    console.log("submitted payload", payload);
 
     try {
       const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
@@ -175,7 +194,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`,
         },
-        body: JSON.stringify({ values }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -311,18 +330,20 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                     </div>
 
 
-                    <div className="mt-8 flex justify-end py-4 space-x-3">
+                    <div className="mt-8 flex justify-end space-x-3">
                       <ButtonLight
                         name="btnCancel"
                         type="button"
                         onClick={() => router.back()}
                         label="Abbrechen"
+                        className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                       />
                       <ButtonPrimary
                         name="btnSubmit"
                         type="submit"
-                        label="Tore speichern"
+                        label="Speichern"
                         loading={loading}
+                        className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                       />
                     </div>
                   </div>
