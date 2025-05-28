@@ -330,18 +330,20 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                     </div>
 
 
-                    <div className="mt-8 flex justify-end py-4 space-x-3">
+                    <div className="mt-8 flex justify-end space-x-3">
                       <ButtonLight
                         name="btnCancel"
                         type="button"
                         onClick={() => router.back()}
                         label="Abbrechen"
+                        className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                       />
                       <ButtonPrimary
                         name="btnSubmit"
                         type="submit"
-                        label="Tore speichern"
+                        label="Speichern"
                         loading={loading}
+                        className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                       />
                     </div>
                   </div>
