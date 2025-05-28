@@ -9,7 +9,7 @@ import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
-import { ChevronLeftIcon, TrashIcon} from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
@@ -18,6 +18,7 @@ import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
+import SectionHeader from '../../../../../components/admin/SectionHeader';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -241,8 +242,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           isRefreshing={isRefreshing}
           onRefresh={handleRefreshMatch}
         />
-
-        <h1 className="text-2xl font-bold mb-6">Tore: {team?.fullName} / {team?.name}</h1>
+        <div className="mt-12">
+          <SectionHeader title="Tore" description={`Hier können alle Tore für ${team?.fullName} (${team?.name}) eingetragen werden.`} />
+        </div>
 
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
         {error && <ErrorMessage error={error} onClose={handleCloseErrorMessage} />}
@@ -252,134 +254,144 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           validationSchema={validationSchema}
           onSubmit={(values) => onSubmit(values.scores)}
         >
-          {({ values, errors, touched, setFieldValue }) => (
-            <Form>
-              <FieldArray
-                name="scores"
-                render={({ remove, push }: FieldArrayRenderProps) => (
-                  <div className="space-y-6">
-                    <div className="divide-y divide-gray-200 shadow rounded-md border">
-                      {values.scores.map((score, index) => (
-                        <div key={index} className="p-3">
-                          <div className="flex flex-cols md:flex-rows gap-4 items-center">
-                            {/* index */}
-                            <div className="flex-none w-8 text-center">
-                              <span className="text-gray-500">{index + 1}</span>
-                            </div>
-                            {/* Time Input */}
-                            <div className="flex-none w-20">
-                              <InputMatchTime
-                                name={`scores.${index}.matchTime`}
-                              />
-                              {errors.scores?.[index]?.matchTime && touched.scores?.[index]?.matchTime && (
-                                <p className="mt-1 text-xs text-red-600">
-                                  {errors.scores[index].matchTime}
-                                </p>
-                              )}
-                            </div>
-                            {/* Player Selection */}
-                            <div className="flex-auto w-32">
-                              <PlayerSelect
-                                selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
-                                onChange={(selectedRosterPlayer) => {
-                                  if (selectedRosterPlayer) {
-                                    setFieldValue(`scores.${index}.goalPlayer`, {
-                                      playerId: selectedRosterPlayer.player.playerId,
-                                      firstName: selectedRosterPlayer.player.firstName,
-                                      lastName: selectedRosterPlayer.player.lastName,
-                                      jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                    });
-                                  } else {
-                                    setFieldValue(`scores.${index}.goalPlayer`, null);
-                                  }
-                                }}
-                                roster={roster}
-                                required={true}
-                                placeholder="Torschützen auswählen"
-                              />
-                              {errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer && (
-                                <p className="mt-1 text-xs text-red-600">
-                                  Torschütze ist erforderlich
-                                </p>
-                              )}
-                            </div>
-                            {/* Assist Selection */}
-                            <div className="flex-auto w-32">
-                              <PlayerSelect
-                                selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
-                                onChange={(selectedRosterPlayer) => {
-                                  if (selectedRosterPlayer) {
-                                    setFieldValue(`scores.${index}.assistPlayer`, {
-                                      playerId: selectedRosterPlayer.player.playerId,
-                                      firstName: selectedRosterPlayer.player.firstName,
-                                      lastName: selectedRosterPlayer.player.lastName,
-                                      jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                    });
-                                  } else {
-                                    setFieldValue(`scores.${index}.assistPlayer`, null);
-                                  }
-                                }}
-                                roster={roster}
-                                required={false}
-                                placeholder="Keine Vorlage"
-                              />
-                            </div>
-                            {/* remove button */}
-                            <div className="flex-none">
-                              {values.scores.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => remove(index)}
-                                  className="text-red-600 hover:text-red-800 p-1"
-                                  title="Tor entfernen"
-                                >
-                                  <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                                </button>
-                              )}
+          {({ values, errors, touched, setFieldValue }) => {
+            const expectedGoals = teamFlag === 'home' ? match?.home?.stats?.goalsFor || 0 : match?.away?.stats?.goalsFor || 0;
+            const currentGoalsCount = values.scores.filter(score => score.goalPlayer && score.matchTime).length;
+            const scoresMismatch = currentGoalsCount !== expectedGoals;
+
+            return (
+              <Form>
+                <FieldArray
+                  name="scores"
+                  render={({ remove, push }: FieldArrayRenderProps) => (
+                    <div className="space-y-6 sm:px-3">
+                      <div className="divide-y divide-gray-200 shadow rounded-md border">
+                        {values.scores.map((score, index) => (
+                          <div key={index} className="p-3">
+                            <div className="flex flex-cols md:flex-rows gap-4 items-center">
+                              {/* index */}
+                              <div className="flex-none w-8 text-center">
+                                <span className="text-gray-500">{index + 1}</span>
+                              </div>
+                              {/* Time Input */}
+                              <div className="flex-none w-20">
+                                <InputMatchTime
+                                  name={`scores.${index}.matchTime`}
+                                />
+                              </div>
+                              {/* Player Selection */}
+                              <div className="flex-auto w-32">
+                                <PlayerSelect
+                                  selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
+                                  onChange={(selectedRosterPlayer) => {
+                                    if (selectedRosterPlayer) {
+                                      setFieldValue(`scores.${index}.goalPlayer`, {
+                                        playerId: selectedRosterPlayer.player.playerId,
+                                        firstName: selectedRosterPlayer.player.firstName,
+                                        lastName: selectedRosterPlayer.player.lastName,
+                                        jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                      });
+                                    } else {
+                                      setFieldValue(`scores.${index}.goalPlayer`, null);
+                                    }
+                                  }}
+                                  roster={roster}
+                                  required={true}
+                                  placeholder="Torschützen auswählen"
+                                  error={!!(errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer)}
+                                />
+                              </div>
+                              {/* Assist Selection */}
+                              <div className="flex-auto w-32">
+                                <PlayerSelect
+                                  selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
+                                  onChange={(selectedRosterPlayer) => {
+                                    if (selectedRosterPlayer) {
+                                      setFieldValue(`scores.${index}.assistPlayer`, {
+                                        playerId: selectedRosterPlayer.player.playerId,
+                                        firstName: selectedRosterPlayer.player.firstName,
+                                        lastName: selectedRosterPlayer.player.lastName,
+                                        jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                      });
+                                    } else {
+                                      setFieldValue(`scores.${index}.assistPlayer`, null);
+                                    }
+                                  }}
+                                  roster={roster}
+                                  required={false}
+                                  placeholder="Keine Vorlage"
+                                />
+                              </div>
+                              {/* remove button */}
+                              <div className="flex-none">
+                                {values.scores.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => remove(index)}
+                                    className="text-red-600 hover:text-red-800 p-1"
+                                    title="Tor entfernen"
+                                  >
+                                    <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
+                        ))}
+                      </div>
+
+                      {/* Score mismatch indicator */}
+                      {scoresMismatch && (
+                        <div className="flex items-center p-4 mb-6 text-amber-800 rounded-lg bg-amber-50 border border-amber-200">
+                          <svg className="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                          </svg>
+                          <span className="sr-only">Warnung</span>
+                          <div className="ms-3 text-sm font-medium">
+                            Die Anzahl der eingetragenen Tore ({currentGoalsCount}) stimmt nicht mit dem Spielstand ({expectedGoals}) überein.
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      )}
+                      
+                      {/* add score */}
+                      <div className="flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => push({
+                            matchTime: '',
+                            goalPlayer: null,
+                            assistPlayer: null,
+                            isPPG: false,
+                            isSHG: false,
+                            isGWG: false
+                          })}
+                          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        >
+                          <PlusCircleIcon className="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
+                          Weiteres Tor hinzufügen
+                        </button>
+                      </div>
 
-                    {/* add score */}
-                    <div className="flex justify-center">
-                      <button
-                        type="button"
-                        onClick={() => push({
-                          matchTime: '',
-                          goalPlayer: null,
-                          assistPlayer: null,
-                          isPPG: false,
-                          isSHG: false,
-                          isGWG: false
-                        })}
-                        className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                      >
-                        <PlusCircleIcon className="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
-                        Weiteres Tor hinzufügen
-                      </button>
+                      {/* buttons */}
+                      <div className="flex justify-end space-x-3 pt-8">
+                        <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+                          <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Abbrechen
+                          </a>
+                        </Link>
+                        <ButtonPrimary
+                          name="btnSubmit"
+                          type="submit"
+                          label="Speichern"
+                          isLoading={loading}
+                        />
+                      </div>
                     </div>
-
-                    {/* buttons */}
-                    <div className="flex justify-end space-x-3 pt-8">
-                      <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
-                        <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                          Abbrechen
-                        </a>
-                      </Link>
-                      <ButtonPrimary
-                        name="btnSubmit"
-                        type="submit"
-                        label="Speichern"
-                        isLoading={loading}
-                      />
-                    </div>
-                  </div>
-                )}
-              />
-            </Form>
-          )}
+                  )}
+                />
+              </Form>
+            );
+          }}
         </Formik>
       </div>
     </Layout >

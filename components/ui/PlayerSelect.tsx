@@ -12,6 +12,7 @@ interface PlayerSelectProps {
   label?: string;
   required?: boolean;
   placeholder?: string;
+  error?: boolean;
 }
 
 const PlayerSelect: React.FC<PlayerSelectProps> = ({
@@ -21,6 +22,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   label,
   required = false,
   placeholder = "Spieler auswählen",
+  error = false,
 }) => {
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
 
@@ -35,7 +37,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   };
 
   const Placeholder = () => (
-    <span className="block truncate text-gray-400">{placeholder}</span>
+    <span className={`block truncate ${error ? 'text-red-300' : 'text-gray-400'}`}>{placeholder}</span>
   );
 
   return (
@@ -48,7 +50,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
             </Listbox.Label>
           )}
           <div className="relative">
-            <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            <Listbox.Button className={`relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ${error ? 'ring-red-300' : 'ring-gray-300'} focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-50 text-red-900' : 'focus:ring-indigo-500 text-gray-900'} sm:text-sm sm:leading-6`}>
               {selectedPlayer ? (
                 <div className="flex items-center block truncate">
                   <span className="w-4 text-center">{selectedPlayer.player?.jerseyNumber}</span>
