@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
+import Link from 'next/link';
 import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
@@ -217,15 +218,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-0 lg:px-8 py-0 lg:py-4">
-        <button
-          aria-label="Back button"
-          className="flex items-center"
-          onClick={() => router.back()}>
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Zurück
-          </span>
-        </button>
+        <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+          <a className="flex items-center" aria-label="Back to Match Center">
+            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+            <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+              Zurück zum Match Center
+            </span>
+          </a>
+        </Link>
 
         <MatchHeader
           match={match}
