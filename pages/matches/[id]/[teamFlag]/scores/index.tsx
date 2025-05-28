@@ -286,7 +286,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                               <div className="flex flex-col md:flex-row gap-4 md:items-center">
                               {/* Mobile header with index and remove button */}
                               <div className="flex items-center justify-between md:hidden">
-                                <span className="text-sm font-medium text-gray-700">Tor #{index + 1}</span>
+                                <span className="font-medium text-gray-700">Tor #{index + 1}</span>
                                 <button
                                   type="button"
                                   onClick={() => remove(index)}
@@ -305,20 +305,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                               {/* Form fields container */}
                               <div className="flex flex-col md:flex-row gap-4 flex-1">
                                 {/* Time Input */}
-                                <div className="w-full md:w-20">
-                                  <label className="block text-xs font-medium text-gray-700 mb-1 md:hidden">
-                                    Zeit
-                                  </label>
+                                <div className="flex-none w-20">
                                   <InputMatchTime
                                     name={`scores.${index}.matchTime`}
                                   />
                                 </div>
 
-                                {/* Player Selection */}
+                                {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
-                                  <label className="block text-xs font-medium text-gray-700 mb-1 md:hidden">
-                                    Torschütze
-                                  </label>
                                   <PlayerSelect
                                     selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
@@ -342,9 +336,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
                                 {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
-                                  <label className="block text-xs font-medium text-gray-700 mb-1 md:hidden">
-                                    Vorlage
-                                  </label>
                                   <PlayerSelect
                                     selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
