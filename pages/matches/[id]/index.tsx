@@ -1,22 +1,22 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
-import useAuth from '../../hooks/useAuth';
+import useAuth from '../../../hooks/useAuth';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 import { Dialog, Transition } from '@headlessui/react';
-import { Match, RosterPlayer, PenaltiesBase, ScoresBase } from '../../types/MatchValues';
-import { MatchdayOwner } from '../../types/TournamentValues'
-import Layout from '../../components/Layout';
+import { Match, RosterPlayer, PenaltiesBase, ScoresBase } from '../../../types/MatchValues';
+import { MatchdayOwner } from '../../../types/TournamentValues'
+import Layout from '../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { tournamentConfigs, allFinishTypes } from '../../tools/consts';
-import { classNames } from '../../tools/utils';
-import MatchStatusBadge from '../../components/ui/MatchStatusBadge';
-import FinishTypeSelect from '../../components/admin/ui/FinishTypeSelect';
-import AddGoalDialog from '../../components/ui/AddGoalDialog';
-import AddPenaltyDialog from '../../components/ui/AddPenaltyDialog';
+import { tournamentConfigs, allFinishTypes } from '../../../tools/consts';
+import { classNames } from '../../../tools/utils';
+import MatchStatusBadge from '../../../components/ui/MatchStatusBadge';
+import FinishTypeSelect from '../../../components/admin/ui/FinishTypeSelect';
+import AddGoalDialog from '../../../components/ui/AddGoalDialog';
+import AddPenaltyDialog from '../../../components/ui/AddPenaltyDialog';
 
 interface MatchDetailsProps {
   match: Match;
@@ -337,6 +337,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         {/* Team Buttons in Separate Row */}
         <div className="flex justify-between mt-6 mb-4">
           {/* Home Team Buttons */}
+          {/**
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               {showButtonRosterHome && (
@@ -365,8 +366,11 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               )}
             </div>
           </div>
+          */}
 
           {/* Middle Section with Start/Finish Button */}
+          <h1 className="text-lg font-semibold text-gray-900">TODO: Öffentliche Spielberichtsseite - keine Buttons!</h1>
+          {/**
           <div className="w-1/3 flex justify-center items-center">
             {showButtonStatus && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000 && (
               <>
@@ -432,8 +436,10 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               </>
             )}
           </div>
+          */}
 
           {/* Away Team Buttons */}
+          {/**
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               {showButtonRosterAway && (
@@ -462,6 +468,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               )}
             </div>
           </div>
+          */}
         </div>
 
         {/* Sub navigation */}
@@ -1208,7 +1215,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     const match: Match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
-    console.log("match", match)
+   //console.log("match", match)
     let userRoles: string[] = [];
     let userClubId: string | null = null;
 

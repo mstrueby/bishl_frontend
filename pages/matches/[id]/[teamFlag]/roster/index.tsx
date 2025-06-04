@@ -557,8 +557,17 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       called: true
     };
 
-    // Add the player to the available players list
-    setAvailablePlayersList(prev => [...prev, playerWithCalled]);
+    // Add the player to the available players list and sort alphabetically
+    setAvailablePlayersList(prev => {
+      const newList = [...prev, playerWithCalled];
+      return newList.sort((a, b) => {
+        // First sort by lastName
+        const lastNameComparison = a.lastName.localeCompare(b.lastName);
+        // If lastName is the same, sort by firstName
+        return lastNameComparison !== 0 ? lastNameComparison :
+          a.firstName.localeCompare(b.firstName);
+      });
+    });
 
     // Close the modal and reset selections
     setIsCallUpModalOpen(false);
@@ -1541,6 +1550,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
         {/* Close, Save buttons */}
         <div className="flex space-x-3 mt-6 justify-end">
+          <PDFDownloadLink
+            document={
+              <RosterPDF
+                teamName={team.fullName}
+                matchDate={new Date(match.startDate).toLocaleDateString()}
+                venue={match.venue.name}
+                roster={rosterList}
+                teamLogo={team.logoUrl}
+              />
+            }
+            fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
+            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          >
+            {({ loading }) => (
+              <span>{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
+            )}
+          </PDFDownloadLink>
+          
           <button
             type="button"
             onClick={() => router.back()}
