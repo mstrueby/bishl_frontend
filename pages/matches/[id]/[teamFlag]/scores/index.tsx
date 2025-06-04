@@ -235,7 +235,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           onRefresh={() => {}}
         />
         <div className="mt-12">
-          <SectionHeader title="Tore" description={`Hier können alle Tore für ${team?.fullName} (${team?.name}) eingetragen werden.`} />
+          <SectionHeader title="Tore" description={`${team?.fullName} / ${team?.name}`} />
         </div>
 
         <div className="sm:px-3 pb-2">
@@ -258,7 +258,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                 <FieldArray
                   name="scores"
                   render={({ remove, push }: FieldArrayRenderProps) => (
-                    <div className="space-y-6 sm:px-3">
+                    <div className="space-y-6 sm:px-0">
                       <div className="divide-y divide-gray-200 shadow rounded-md border">
                         {values.scores.length === 0 ? (
                           <div className="p-4 text-center text-gray-500">
