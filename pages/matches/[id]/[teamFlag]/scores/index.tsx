@@ -241,7 +241,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           <a className="flex items-center" aria-label="Back to Match Center">
             <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
             <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-              Zurück zum Match Center
+              Match Center
             </span>
           </a>
         </Link>
