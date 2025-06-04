@@ -410,27 +410,29 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   }, [isCallUpModalOpen, club, team, jwt]);
 
   // Sort roster by position order: C, A, G, F, then by jersey number
-  const sortRoster = React.useCallback((rosterToSort: RosterPlayer[]): RosterPlayer[] => {
-    if (!rosterToSort || rosterToSort.length === 0) return [];
+  const sortRoster = React.useMemo(() => {
+    return (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+      if (!rosterToSort || rosterToSort.length === 0) return [];
 
-    return [...rosterToSort].sort((a, b) => {
-      // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-      const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+      return [...rosterToSort].sort((a, b) => {
+        // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
 
-      // Get priorities
-      const posA = positionPriority[a.playerPosition.key] || 99;
-      const posB = positionPriority[b.playerPosition.key] || 99;
+        // Get priorities
+        const posA = positionPriority[a.playerPosition.key] || 99;
+        const posB = positionPriority[b.playerPosition.key] || 99;
 
-      // First sort by position priority
-      if (posA !== posB) {
-        return posA - posB;
-      }
+        // First sort by position priority
+        if (posA !== posB) {
+          return posA - posB;
+        }
 
-      // If positions are the same, sort by jersey number
-      const jerseyA = a.player.jerseyNumber || 999;
-      const jerseyB = b.player.jerseyNumber || 999;
-      return jerseyA - jerseyB;
-    });
+        // If positions are the same, sort by jersey number
+        const jerseyA = a.player.jerseyNumber || 999;
+        const jerseyB = b.player.jerseyNumber || 999;
+        return jerseyA - jerseyB;
+      });
+    };
   }, []);
 
   const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
@@ -1552,23 +1554,25 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         {/* Close, Save buttons */}
         <div className="flex space-x-3 mt-6 justify-end">
 
-          <PDFDownloadLink
-            document={
-              <RosterPDF
-                teamName={team.fullName}
-                matchDate={new Date(match.startDate).toLocaleDateString()}
-                venue={match.venue.name}
-                roster={rosterList}
-                teamLogo={team.logoUrl}
-              />
-            }
-            fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
-            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-          >
-            {({ loading }) => (
-              <span>{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
-            )}
-          </PDFDownloadLink>
+          {React.useMemo(() => (
+            <PDFDownloadLink
+              document={
+                <RosterPDF
+                  teamName={team.fullName}
+                  matchDate={new Date(match.startDate).toLocaleDateString()}
+                  venue={match.venue.name}
+                  roster={rosterList}
+                  teamLogo={team.logoUrl}
+                />
+              }
+              fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
+              className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+              {({ loading }) => (
+                <span>{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
+              )}
+            </PDFDownloadLink>
+          ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, rosterList])}
 
           <button
             type="button"
