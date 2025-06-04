@@ -410,7 +410,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   }, [isCallUpModalOpen, club, team, jwt]);
 
   // Sort roster by position order: C, A, G, F, then by jersey number
-  const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+  const sortRoster = React.useCallback((rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+    if (!rosterToSort || rosterToSort.length === 0) return [];
+
     return [...rosterToSort].sort((a, b) => {
       // Define position priorities (C = 1, A = 2, G = 3, F = 4)
       const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
@@ -425,9 +427,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       }
 
       // If positions are the same, sort by jersey number
-      return a.player.jerseyNumber - b.player.jerseyNumber;
+      const jerseyA = a.player.jerseyNumber || 999;
+      const jerseyB = b.player.jerseyNumber || 999;
+      return jerseyA - jerseyB;
     });
-  };
+  }, []);
 
   const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
 
@@ -469,7 +473,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       );
       setAvailablePlayersList(filteredPlayers);
     }
-  }, [includeInactivePlayers, rosterList, allAvailablePlayersList]);
+  }, [includeInactivePlayers, rosterList, allAvailablePlayersList, sortRoster]);
   // Auto-set published to true if match is finished
   const isMatchFinished = match.matchStatus.key === 'FINISHED';
   useEffect(() => {
@@ -735,24 +739,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Add player to roster
       const updatedRoster = [...rosterList, newPlayer];
 
-      // Sort roster by position order: C, A, G, F, then by jersey number
-      const sortedRoster = updatedRoster.sort((a, b) => {
-        // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-        // Get priorities
-        const posA = positionPriority[a.playerPosition.key] || 99;
-        const posB = positionPriority[b.playerPosition.key] || 99;
-
-        // First sort by position priority
-        if (posA !== posB) {
-          return posA - posB;
-        }
-
-        // If positions are the same, sort by jersey number
-        return a.player.jerseyNumber - b.player.jerseyNumber;
-      });
-
+      // Sort roster using the sortRoster function
+      const sortedRoster = sortRoster(updatedRoster);
+      console.log("updatedRoster", updatedRoster);
+      console.log("sortedRoster", sortedRoster);
       setRosterList(sortedRoster);
 
       // Remove the selected player from the available players list
@@ -1369,7 +1359,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
                   {rosterList.some(player => player.player.jerseyNumber === 0) ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM10 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                     </svg>
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -1579,7 +1569,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <span>{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
             )}
           </PDFDownloadLink>
-          
+
           <button
             type="button"
             onClick={() => router.back()}
@@ -1735,7 +1725,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
