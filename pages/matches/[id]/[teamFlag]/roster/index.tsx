@@ -409,6 +409,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+    if (!rosterToSort || rosterToSort.length === 0) return [];
+    
     return [...rosterToSort].sort((a, b) => {
       // Define position priorities (C = 1, A = 2, G = 3, F = 4)
       const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
@@ -423,7 +425,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       }
 
       // If positions are the same, sort by jersey number
-      return a.player.jerseyNumber - b.player.jerseyNumber;
+      return (a.player.jerseyNumber || 0) - (b.player.jerseyNumber || 0);
     });
   };
 
@@ -750,23 +752,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Add player to roster
       const updatedRoster = [...rosterList, newPlayer];
 
-      // Sort roster by position order: C, A, G, F, then by jersey number
-      const sortedRoster = updatedRoster.sort((a, b) => {
-        // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-        // Get priorities
-        const posA = positionPriority[a.playerPosition.key] || 99;
-        const posB = positionPriority[b.playerPosition.key] || 99;
-
-        // First sort by position priority
-        if (posA !== posB) {
-          return posA - posB;
-        }
-
-        // If positions are the same, sort by jersey number
-        return a.player.jerseyNumber - b.player.jerseyNumber;
-      });
+      // Sort roster using the sortRoster function
+      const sortedRoster = sortRoster(updatedRoster);
 
       setRosterList(sortedRoster);
 
