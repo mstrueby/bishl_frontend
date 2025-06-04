@@ -9,7 +9,8 @@ import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
-import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
+import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames } from '../../../../../tools/utils';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
@@ -17,6 +18,8 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
 import { CldImage } from 'next-cloudinary';
 import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
+import MatchHeader from '../../../../../components/ui/MatchHeader';
+import SectionHeader from '../../../../../components/admin/SectionHeader';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -939,7 +942,26 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-0 lg:px-8 py-0 lg:py-4">
+        <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+          <a className="flex items-center" aria-label="Back to Match Center">
+            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+            <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+              Match Center
+            </span>
+          </a>
+        </Link>
+        
+        <MatchHeader
+          match={match}
+          isRefreshing={isRefreshing}
+          onRefresh={handleRefreshMatch}
+        />
+        <div className="mt-12">
+          <SectionHeader title="Tore" description={`Hier können alle Tore für ${team?.fullName} (${team?.name}) eingetragen werden.`} />
+        </div>       
+        
+        
         <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
 
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
