@@ -78,9 +78,9 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   let isDisabled = daysDiff <= 14 && daysDiff > 7;
 
   // Feature-Switch
-  if (process.env.NODE_ENV === 'production') {
-    isDisabled = false;
-  }
+  //if (process.env.NODE_ENV === 'production') {
+  isDisabled = false;
+  //}
 
   const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
     let newId: string = ''
@@ -156,7 +156,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   }
 
   return (
-        <div className={classNames('my-10 px-4 pt-4 border-2 rounded-xl shadow-md', isDisabled ? '' : 'pb-4')}>
+    <div className={classNames('my-10 px-4 pt-4 border-2 rounded-xl shadow-md', isDisabled ? '' : 'pb-4')}>
       <div className="flex flex-col sm:flex-row gap-y-2">
         {/* 1 tournament, status (mobile), date, venue */}
         <div className="flex flex-col sm:w-1/3">

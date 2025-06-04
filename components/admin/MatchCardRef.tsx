@@ -7,6 +7,7 @@ import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@h
 import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
+import useAuth from '../../hooks/useAuth';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -86,8 +87,17 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     );
   }, [selected.key]);
 
-  const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[] }> = ({ selected, handleStatusChange, validStatuses }) => (
-    <Listbox value={selected} onChange={handleStatusChange}>
+  // Calculate isDisabled outside of WorkflowListbox
+  const now = new Date();
+  const matchStart = new Date(startDate);
+  const daysDiff = Math.ceil((matchStart.setHours(0, 0, 0, 0) - now.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
+  const { user } = useAuth();
+  const refereesClubIsNotHomeOrAwayClub = (user?.referee?.club?.clubId !== home.clubId) && (user?.referee?.club?.clubId !== away.clubId);
+  const isDisabled = daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub;
+
+
+  const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[], isDisabled: boolean }> = ({ selected, handleStatusChange, validStatuses, isDisabled }) => (
+    <Listbox value={selected} onChange={handleStatusChange} disabled={isDisabled}>
       <Label className="sr-only">Change workflow status</Label>
       <div className="relative">
         <div className={classNames("inline-flex rounded-md outline-none", selected.color.divide)}>
@@ -134,121 +144,128 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
 
   return (
-    <div className="flex flex-col sm:flex-row gap-y-2 p-4 my-10 border-2 rounded-xl shadow-md">
-      {/* 1 tournament, workflow drop-down (mobile), date, venue */}
-      <div className="flex flex-col sm:w-1/3">
-        {/* 1-1 tournament, workflow drop-down (mobile) */}
-        <div className="flex flex-row justify-between">
-          {/* tournament */}
-          <div className="">
-            {(() => {
-              const item = tournamentConfigs[match.tournament.alias];
-              if (item) {
-                return (
-                  <span
-                    key={item.tinyName}
-                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
-                  >
-                    {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
-                  </span>
-                );
-              }
-            })()}
+    <div className={classNames('my-10 px-4 pt-4 border-2 rounded-xl shadow-md', isDisabled ? '' : 'pb-4')}>
+      <div className="flex flex-col sm:flex-row gap-y-2">
+        {/* 1 tournament, workflow drop-down (mobile), date, venue */}
+        <div className="flex flex-col sm:w-1/3">
+          {/* 1-1 tournament, workflow drop-down (mobile) */}
+          <div className="flex flex-row justify-between">
+            {/* tournament */}
+            <div className="">
+              {(() => {
+                const item = tournamentConfigs[match.tournament.alias];
+                if (item) {
+                  return (
+                    <span
+                      key={item.tinyName}
+                      className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
+                    >
+                      {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                    </span>
+                  );
+                }
+              })()}
+            </div>
+            {/* workflow dropdown */}
+            <div className="sm:hidden">
+              <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={isDisabled ? [] : validStatuses} isDisabled={isDisabled} />
+            </div>
           </div>
-          {/* workflow dropdown */}
-          <div className="sm:hidden">
-            <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
+          {/* 1-2 date, venue */}
+          <div className="flex flex-row sm:flex-col justify-between sm:justify-end mt-3 sm:mt-0 sm:pr-4 sm:gap-y-2 sm:h-full">
+            {/* date */}
+            <div className="flex items-center truncate">
+              <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
+              <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
+                <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
+                  {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: undefined,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : 'offen'}
+                </time>
+              </p>
+              <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
+                <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
+                  {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'short',
+                    year: undefined,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : 'offen'}
+                </time>
+              </p>
+            </div>
+            {/* venue */}
+            <div className="flex items-center truncate">
+              <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
+              <p className="text-xs uppercase font-light text-gray-700 truncate">{venue.name}</p>
+            </div>
           </div>
         </div>
-        {/* 1-2 date, venue */}
-        <div className="flex flex-row sm:flex-col justify-between sm:justify-end mt-3 sm:mt-0 sm:pr-4 sm:gap-y-2 sm:h-full">
-          {/* date */}
-          <div className="flex items-center truncate">
-            <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
-            <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
-                {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'numeric',
-                  year: undefined,
-                  hour: '2-digit',
-                  minute: '2-digit'
-                }) : 'offen'}
-              </time>
-            </p>
-            <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={startDate ? (new Date(startDate)).toISOString() : undefined}>
-                {startDate ? (new Date(startDate)).toLocaleString('de-DE', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'short',
-                  year: undefined,
-                  hour: '2-digit',
-                  minute: '2-digit'
-                }) : 'offen'}
-              </time>
-            </p>
+        {/* 2  matchup */}
+        <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/3">
+          {/* home */}
+          <div className="flex flex-row items-center w-full">
+            <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={32} width={32} />
+            <div className="flex-auto ml-6">
+              <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{home.shortName}</p>
+            </div>
           </div>
-          {/* venue */}
-          <div className="flex items-center truncate">
-            <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
-            <p className="text-xs uppercase font-light text-gray-700 truncate">{venue.name}</p>
+          {/* away */}
+          <div className="flex flex-row items-center w-full">
+            <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
+            <div className="flex-auto ml-6">
+              <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.shortName}</p>
+            </div>
+          </div>
+        </div>
+        {/* 3 assigned Referees, workflow drop-down (tablet) */}
+        <div className="flex flex-col justify-between mt-1.5 sm:mt-0 pt-2 sm:pt-0 sm:pb-1 sm:w-1/3 border-t sm:border-t-0 sm:border-l sm:pl-3">
+          <div className="sm:flex hidden flex-row justify-end">
+            <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={isDisabled ? [] : validStatuses} isDisabled={isDisabled} />
+          </div>
+          <div className="flex flex-col sm:flex-none justify-center">
+            {/* assigned Referees */}
+            <div className="flex flex-row items-center justify-between truncate">
+              {match.referee1 && (
+                <div className="flex items-center gap-x-2 mr-3">
+                  <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                    {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
+                  </div>
+                  <div className="text-sm text-gray-600 truncate">
+                    <span>{match.referee1.firstName}</span>
+                    <span className="inline lg:hidden"> {match.referee1.lastName.charAt(0)}.</span>
+                    <span className="hidden lg:inline"> {match.referee1.lastName}</span  >
+                  </div>
+                </div>
+              )}
+              {match.referee2 && (
+                <div className="flex items-center gap-x-2">
+                  <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                    {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
+                  </div>
+                  <div className="text-sm text-gray-600 truncate">
+                    <span>{match.referee2.firstName}</span>
+                    <span className="inline lg:hidden"> {match.referee2.lastName.charAt(0)}.</span>
+                    <span className="hidden lg:inline"> {match.referee2.lastName}</span  >
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-      {/* 2  matchup */}
-      <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/3">
-        {/* home */}
-        <div className="flex flex-row items-center w-full">
-          <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={32} width={32} />
-          <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{home.shortName}</p>
-          </div>
+      {isDisabled && (
+        <div className="mt-3 border-t font-light text-center text-xs">
+          <p className="p-1.5 text-blue-800">Spiel gesperrt (bis {new Date(new Date(startDate).getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('de-DE')})</p>
         </div>
-        {/* away */}
-        <div className="flex flex-row items-center w-full">
-          <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
-          <div className="flex-auto ml-6">
-            <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.shortName}</p>
-          </div>
-        </div>
-      </div>
-      {/* 3 assigned Referees, workflow drop-down (tablet) */}
-      <div className="flex flex-col justify-between mt-1.5 sm:mt-0 pt-2 sm:pt-0 sm:pb-1 sm:w-1/3 border-t sm:border-t-0 sm:border-l sm:pl-3">
-        <div className="sm:flex hidden flex-row justify-end">
-          <WorkflowListbox selected={selected} handleStatusChange={handleStatusChange} validStatuses={validStatuses} />
-        </div>
-        <div className="flex flex-col sm:flex-none justify-center">
-          {/* assigned Referees */}
-          <div className="flex flex-row items-center justify-between truncate">
-            {match.referee1 && (
-              <div className="flex items-center gap-x-2 mr-3">
-                <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                  {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
-                </div>
-                <div className="text-sm text-gray-600 truncate">
-                  <span>{match.referee1.firstName}</span>
-                  <span className="inline lg:hidden"> {match.referee1.lastName.charAt(0)}.</span>
-                  <span className="hidden lg:inline"> {match.referee1.lastName}</span  >
-                </div>
-              </div>
-            )}
-            {match.referee2 && (
-              <div className="flex items-center gap-x-2">
-                <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                  {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
-                </div>
-                <div className="text-sm text-gray-600 truncate">
-                  <span>{match.referee2.firstName}</span>
-                  <span className="inline lg:hidden"> {match.referee2.lastName.charAt(0)}.</span>
-                  <span className="hidden lg:inline"> {match.referee2.lastName}</span  >
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 };
