@@ -409,6 +409,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+    if (!rosterToSort || rosterToSort.length === 0) return [];
+
     return [...rosterToSort].sort((a, b) => {
       // Define position priorities (C = 1, A = 2, G = 3, F = 4)
       const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
@@ -423,7 +425,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       }
 
       // If positions are the same, sort by jersey number
-      return a.player.jerseyNumber - b.player.jerseyNumber;
+      const jerseyA = a.player.jerseyNumber || 999;
+      const jerseyB = b.player.jerseyNumber || 999;
+      return jerseyA - jerseyB;
     });
   };
 
@@ -446,8 +450,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinSkater && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
   };
 
-  // Fetch players when a team is selected
-  const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
+  // Initialize roster list with sorted data
+  const [rosterList, setRosterList] = useState<RosterPlayer[]>(() => sortRoster(roster || []));
 
   // Update available players list when the toggle changes
   useEffect(() => {
@@ -657,9 +661,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       return player;
     });
 
-    console.log("updatedRoster", updatedRoster)
-    setRosterList(sortRoster(updatedRoster));
-    console.log("rosterList", rosterList)
+    const sortedRoster = sortRoster(updatedRoster);
+    console.log("updatedRoster", updatedRoster);
+    console.log("sortedRoster", sortedRoster);
+    setRosterList(sortedRoster);
     setIsEditModalOpen(false);
     setEditingPlayer(null);
     setModalError(null);
@@ -753,9 +758,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       const updatedRoster = [...rosterList, newPlayer];
 
       // Sort roster using the sortRoster function
-      console.log("updatedRoster", updatedRoster)
       const sortedRoster = sortRoster(updatedRoster);
-      console.log("sortedRoster", sortedRoster)
+      console.log("updatedRoster", updatedRoster);
+      console.log("sortedRoster", sortedRoster);
       setRosterList(sortedRoster);
 
 
