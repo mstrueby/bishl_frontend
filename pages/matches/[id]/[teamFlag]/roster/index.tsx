@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
+import Link from 'next/link';
 import axios from 'axios';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
@@ -1568,13 +1569,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             )}
           </PDFDownloadLink>
           
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-          >
-            Schließen
-          </button>
+          <Link href={`/matches/${router.query.id}`}>
+            <a className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+              Schließen
+            </a>
+          </Link>
           <button
             type="button"
             onClick={handleSaveRoster}
