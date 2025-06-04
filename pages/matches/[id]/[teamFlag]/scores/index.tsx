@@ -107,7 +107,29 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster, initialScores }) => {
-  const [roster, setRoster] = useState<RosterPlayer[]>(initialRoster);
+  // Sort roster by position order: C, A, G, F, then by jersey number
+  const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+    if (!rosterToSort || rosterToSort.length === 0) return [];
+    
+    return [...rosterToSort].sort((a, b) => {
+      // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+      const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+
+      // Get priorities
+      const posA = positionPriority[a.playerPosition.key] || 99;
+      const posB = positionPriority[b.playerPosition.key] || 99;
+
+      // First sort by position priority
+      if (posA !== posB) {
+        return posA - posB;
+      }
+
+      // If positions are the same, sort by jersey number
+      return (a.player.jerseyNumber || 0) - (b.player.jerseyNumber || 0);
+    });
+  };
+
+  const [roster, setRoster] = useState<RosterPlayer[]>(sortRoster(initialRoster));
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<Match>(initialMatch);
