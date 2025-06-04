@@ -107,29 +107,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster, initialScores }) => {
-  // Sort roster by position order: C, A, G, F, then by jersey number
-  const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
-    if (!rosterToSort || rosterToSort.length === 0) return [];
-    
-    return [...rosterToSort].sort((a, b) => {
-      // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-      const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-      // Get priorities
-      const posA = positionPriority[a.playerPosition.key] || 99;
-      const posB = positionPriority[b.playerPosition.key] || 99;
-
-      // First sort by position priority
-      if (posA !== posB) {
-        return posA - posB;
-      }
-
-      // If positions are the same, sort by jersey number
-      return (a.player.jerseyNumber || 0) - (b.player.jerseyNumber || 0);
-    });
-  };
-
-  const [roster, setRoster] = useState<RosterPlayer[]>(sortRoster(initialRoster));
+  const [roster, setRoster] = useState<RosterPlayer[]>(initialRoster);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<Match>(initialMatch);
@@ -257,7 +235,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           onRefresh={() => {}}
         />
         <div className="mt-12">
-          <SectionHeader title="Tore" description={`${team?.fullName} / ${team?.name}`} />
+          <SectionHeader title="Tore" description={`Hier können alle Tore für ${team?.fullName} (${team?.name}) eingetragen werden.`} />
         </div>
 
         <div className="sm:px-3 pb-2">
@@ -280,7 +258,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                 <FieldArray
                   name="scores"
                   render={({ remove, push }: FieldArrayRenderProps) => (
-                    <div className="space-y-6 sm:px-0">
+                    <div className="space-y-6 sm:px-3">
                       <div className="divide-y divide-gray-200 shadow rounded-md border">
                         {values.scores.length === 0 ? (
                           <div className="p-4 text-center text-gray-500">
