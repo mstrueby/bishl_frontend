@@ -145,7 +145,24 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
         </View>
         
         {roster
-          .sort((a, b) => (a.player.jerseyNumber || 0) - (b.player.jerseyNumber || 0))
+          .sort((a, b) => {
+            // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+            const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+
+            // Get priorities
+            const posA = positionPriority[a.playerPosition.key] || 99;
+            const posB = positionPriority[b.playerPosition.key] || 99;
+
+            // First sort by position priority
+            if (posA !== posB) {
+              return posA - posB;
+            }
+
+            // If positions are the same, sort by jersey number
+            const jerseyA = a.player.jerseyNumber || 999;
+            const jerseyB = b.player.jerseyNumber || 999;
+            return jerseyA - jerseyB;
+          })
           .map((player) => (
             <View key={player.player.playerId} style={styles.tableRow}>
               <Text style={styles.numberCell}>{player.player.jerseyNumber || '-'}</Text>
