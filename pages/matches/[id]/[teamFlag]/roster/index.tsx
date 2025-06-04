@@ -1561,7 +1561,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   teamName={team.fullName}
                   matchDate={new Date(match.startDate).toLocaleDateString()}
                   venue={match.venue.name}
-                  roster={rosterList}
+                  roster={sortRoster(rosterList)}
                   teamLogo={team.logoUrl}
                 />
               }
