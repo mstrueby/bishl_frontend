@@ -750,25 +750,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Add player to roster
       const updatedRoster = [...rosterList, newPlayer];
 
-      // Sort roster by position order: C, A, G, F, then by jersey number
-      const sortedRoster = updatedRoster.sort((a, b) => {
-        // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-        // Get priorities
-        const posA = positionPriority[a.playerPosition.key] || 99;
-        const posB = positionPriority[b.playerPosition.key] || 99;
-
-        // First sort by position priority
-        if (posA !== posB) {
-          return posA - posB;
-        }
-
-        // If positions are the same, sort by jersey number
-        return a.player.jerseyNumber - b.player.jerseyNumber;
-      });
-
+      // Sort roster using the sortRoster function
+      const sortedRoster = sortRoster(updatedRoster);
+      console.log("sortedRoster", sortedRoster)
       setRosterList(sortedRoster);
+
 
       // Remove the selected player from the available players list
       if (selectedPlayer) {
@@ -1440,7 +1426,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             </div>
           </div>
         </div>
-        
+
         {/* Publish Roster Checkbox */}
         <div className="flex items-center justify-between mt-8 bg-white shadow rounded-md border p-6">
           <div className="flex items-center">
