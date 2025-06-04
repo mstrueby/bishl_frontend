@@ -1569,7 +1569,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             )}
           </PDFDownloadLink>
           
-          <Link href={`/matches/${router.query.id}`}>
+          <Link href={`/matches/${router.query.id}/matchcenter`}>
             <a className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
               Schließen
             </a>
