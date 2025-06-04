@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import useAuth from '../../../../../hooks/useAuth';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
@@ -110,7 +110,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const [roster, setRoster] = useState<RosterPlayer[]>(initialRoster);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [match, setMatch] = useState<Match>(initialMatch);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
@@ -118,22 +117,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
-
-  // Refresh match data function
-  const handleRefreshMatch = useCallback(async () => {
-    if (!id || isRefreshing) return;
-
-    try {
-      setIsRefreshing(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`);
-      const updatedMatch = await response.json();
-      setMatch(updatedMatch);
-      setIsRefreshing(false);
-    } catch (error) {
-      console.error('Error refreshing match data:', error);
-      setIsRefreshing(false);
-    }
-  }, [id, isRefreshing]);
 
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
@@ -248,11 +231,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
         <MatchHeader
           match={match}
-          isRefreshing={isRefreshing}
-          onRefresh={handleRefreshMatch}
+          isRefreshing={false}
+          onRefresh={() => {}}
         />
         <div className="mt-12">
-          <SectionHeader title="Tore" description={`Hier können alle Tore für ${team?.fullName} (${team?.name}) eingetragen werden.`} />
+          <SectionHeader title="Tore" description={`${team?.fullName} / ${team?.name}`} />
         </div>
 
         <div className="sm:px-3 pb-2">
@@ -275,7 +258,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                 <FieldArray
                   name="scores"
                   render={({ remove, push }: FieldArrayRenderProps) => (
-                    <div className="space-y-6 sm:px-3">
+                    <div className="space-y-6 sm:px-0">
                       <div className="divide-y divide-gray-200 shadow rounded-md border">
                         {values.scores.length === 0 ? (
                           <div className="p-4 text-center text-gray-500">
