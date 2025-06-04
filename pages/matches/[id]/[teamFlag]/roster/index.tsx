@@ -21,6 +21,8 @@ import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 
+
+
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
 interface AvailablePlayer {
@@ -561,25 +563,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       called: true
     };
 
-    // Add the player to the available players list and sort alphabetically
-    setAvailablePlayersList(prev => {
-      const newList = [...prev, playerWithCalled];
-      return newList.sort((a, b) => {
-        // First sort by lastName
-        const lastNameComparison = a.lastName.localeCompare(b.lastName);
-        // If lastName is the same, sort by firstName
-        return lastNameComparison !== 0 ? lastNameComparison :
-          a.firstName.localeCompare(b.firstName);
-      });
-    });
-
-    // Automatically select the added player in the form
-    setSelectedPlayer(playerWithCalled);
-
-    // Set the jersey number if available
-    if (playerWithCalled.jerseyNo) {
-      setPlayerNumber(playerWithCalled.jerseyNo);
-    }
+    // Add the player to the available players list
+    setAvailablePlayersList(prev => [...prev, playerWithCalled]);
 
     // Close the modal and reset selections
     setIsCallUpModalOpen(false);
@@ -657,9 +642,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       return player;
     });
 
-    console.log("updatedRoster", updatedRoster)
     setRosterList(sortRoster(updatedRoster));
-    console.log("rosterList", rosterList)
     setIsEditModalOpen(false);
     setEditingPlayer(null);
     setModalError(null);
@@ -752,12 +735,25 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Add player to roster
       const updatedRoster = [...rosterList, newPlayer];
 
-      // Sort roster using the sortRoster function
-      console.log("updatedRoster", updatedRoster)
-      const sortedRoster = sortRoster(updatedRoster);
-      console.log("sortedRoster", sortedRoster)
-      setRosterList(sortedRoster);
+      // Sort roster by position order: C, A, G, F, then by jersey number
+      const sortedRoster = updatedRoster.sort((a, b) => {
+        // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
 
+        // Get priorities
+        const posA = positionPriority[a.playerPosition.key] || 99;
+        const posB = positionPriority[b.playerPosition.key] || 99;
+
+        // First sort by position priority
+        if (posA !== posB) {
+          return posA - posB;
+        }
+
+        // If positions are the same, sort by jersey number
+        return a.player.jerseyNumber - b.player.jerseyNumber;
+      });
+
+      setRosterList(sortedRoster);
 
       // Remove the selected player from the available players list
       if (selectedPlayer) {
@@ -1487,83 +1483,85 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           const otherMatchDate = new Date(m.startDate);
           return matchDate.toDateString() === otherMatchDate.toDateString();
         }).length > 0 && (
-            <>
-              <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-              <div className="bg-white shadow rounded-md border mb-6">
-                {match.matchday && match.round && match.season && match.tournament && (
-                  <ul className="divide-y divide-gray-200">
-                    {matches
-                      .filter(m => {
-                        // Exclude current match
-                        if (m._id === match._id) return false;
+          <>
+            <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+            <div className="bg-white shadow rounded-md border mb-6">
+              {match.matchday && match.round && match.season && match.tournament && (
+                <ul className="divide-y divide-gray-200">
+              {matches
+                .filter(m => {
+                  // Exclude current match
+                  if (m._id === match._id) return false;
 
-                        // Only show matches on the same date
-                        const matchDate = new Date(match.startDate);
-                        const otherMatchDate = new Date(m.startDate);
-                        return matchDate.toDateString() === otherMatchDate.toDateString();
-                      })
-                      .map((m) => (
-                        <li key={m._id} className="px-6 py-4">
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center space-x-4">
-                              <input
-                                id={`match-${m._id}`}
-                                type="checkbox"
-                                value={m._id}
-                                disabled={m.matchStatus.key !== 'SCHEDULED'}
-                                className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${m.matchStatus.key === 'SCHEDULED'
-                                  ? 'text-blue-600 bg-gray-100'
-                                  : 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                  }`}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedMatches(prev => [...prev, m._id]);
-                                  } else {
-                                    setSelectedMatches(prev => prev.filter(id => id !== m._id));
-                                  }
-                                }}
-                              />
-                              <div className="flex-shrink-0 h-8 w-8">
-                                <CldImage
-                                  src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                                  alt="Team logo"
-                                  width={32}
-                                  height={32}
-                                  gravity="center"
-                                  className="object-contain"
+                  // Only show matches on the same date
+                  const matchDate = new Date(match.startDate);
+                  const otherMatchDate = new Date(m.startDate);
+                  return matchDate.toDateString() === otherMatchDate.toDateString();
+                })
+                .map((m) => (
+                  <li key={m._id} className="px-6 py-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-4">
+                        <input
+                          id={`match-${m._id}`}
+                          type="checkbox"
+                          value={m._id}
+                          disabled={m.matchStatus.key !== 'SCHEDULED'}
+                          className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+                            m.matchStatus.key === 'SCHEDULED' 
+                            ? 'text-blue-600 bg-gray-100' 
+                            : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                          }`}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedMatches(prev => [...prev, m._id]);
+                            } else {
+                              setSelectedMatches(prev => prev.filter(id => id !== m._id));
+                            }
+                          }}
+                        />
+                        <div className="flex-shrink-0 h-8 w-8">
+                          <CldImage
+                            src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                            alt="Team logo"
+                            width={32}
+                            height={32}
+                            gravity="center"
+                            className="object-contain"
 
-                                />
-                              </div>
-                              <div className="text-sm text-gray-900">
-                                {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
-                              </div>
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {m.matchStatus.key === 'SCHEDULED' ? (
-                                new Date(m.startDate).toLocaleTimeString('de-DE', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                }) + ' Uhr'
-                              ) : (
-                                <MatchStatusBadge
-                                  statusKey={m.matchStatus.key}
-                                  finishTypeKey={m.finishType.key}
-                                  statusValue={m.matchStatus.value}
-                                  finishTypeValue={m.finishType.value}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                  </ul>
-                )}
-              </div>
-            </>
-          )}
+                          />
+                        </div>
+                        <div className="text-sm text-gray-900">
+                          {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {m.matchStatus.key === 'SCHEDULED' ? (
+                          new Date(m.startDate).toLocaleTimeString('de-DE', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) + ' Uhr'
+                        ) : (
+                          <MatchStatusBadge
+                            statusKey={m.matchStatus.key}
+                            finishTypeKey={m.finishType.key}
+                            statusValue={m.matchStatus.value}
+                            finishTypeValue={m.finishType.value}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+            </ul>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Close, Save buttons */}
         <div className="flex space-x-3 mt-6 justify-end">
+
           <PDFDownloadLink
             document={
               <RosterPDF
@@ -1581,12 +1579,14 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <span>{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
             )}
           </PDFDownloadLink>
-
-          <Link href={`/matches/${router.query.id}/matchcenter`}>
-            <a className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-              Schließen
-            </a>
-          </Link>
+          
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          >
+            Schließen
+          </button>
           <button
             type="button"
             onClick={handleSaveRoster}
