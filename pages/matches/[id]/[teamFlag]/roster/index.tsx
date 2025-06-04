@@ -570,6 +570,14 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       });
     });
 
+    // Automatically select the added player in the form
+    setSelectedPlayer(playerWithCalled);
+    
+    // Set the jersey number if available
+    if (playerWithCalled.jerseyNo) {
+      setPlayerNumber(playerWithCalled.jerseyNo);
+    }
+
     // Close the modal and reset selections
     setIsCallUpModalOpen(false);
     setSelectedCallUpTeam(null);
