@@ -657,7 +657,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       return player;
     });
 
+    console.log("updatedRoster", updatedRoster)
     setRosterList(sortRoster(updatedRoster));
+    console.log("rosterList", rosterList)
     setIsEditModalOpen(false);
     setEditingPlayer(null);
     setModalError(null);
@@ -751,6 +753,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       const updatedRoster = [...rosterList, newPlayer];
 
       // Sort roster using the sortRoster function
+      console.log("updatedRoster", updatedRoster)
       const sortedRoster = sortRoster(updatedRoster);
       console.log("sortedRoster", sortedRoster)
       setRosterList(sortedRoster);
