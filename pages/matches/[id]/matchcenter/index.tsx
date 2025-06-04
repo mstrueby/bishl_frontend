@@ -1107,7 +1107,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     const match: Match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
-    console.log("match", match)
+    //console.log("match", match)
     let userRoles: string[] = [];
     let userClubId: string | null = null;
 
