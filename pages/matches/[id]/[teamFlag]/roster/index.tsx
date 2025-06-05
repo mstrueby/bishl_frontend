@@ -962,14 +962,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   </button>
                 </div>
                 <div className="flex flex-row items-center justify-between sm:justify-end">
-                  <span className="ml-2 text-sm font-medium text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
+                  <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
                   <Switch
                     checked={includeInactivePlayers}
                     onChange={setIncludeInactivePlayers}
                     className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
                       } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
                   >
-                    <span className="sr-only">Inaktive Spieler anzeigen</span>
                     <span
                       aria-hidden="true"
                       className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
@@ -1475,81 +1474,80 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           const otherMatchDate = new Date(m.startDate);
           return matchDate.toDateString() === otherMatchDate.toDateString();
         }).length > 0 && (
-          <>
-            <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-            <div className="bg-white shadow rounded-md border mb-6">
-              {match.matchday && match.round && match.season && match.tournament && (
-                <ul className="divide-y divide-gray-200">
-              {matches
-                .filter(m => {
-                  // Exclude current match
-                  if (m._id === match._id) return false;
+            <>
+              <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+              <div className="bg-white shadow rounded-md border mb-6">
+                {match.matchday && match.round && match.season && match.tournament && (
+                  <ul className="divide-y divide-gray-200">
+                    {matches
+                      .filter(m => {
+                        // Exclude current match
+                        if (m._id === match._id) return false;
 
-                  // Only show matches on the same date
-                  const matchDate = new Date(match.startDate);
-                  const otherMatchDate = new Date(m.startDate);
-                  return matchDate.toDateString() === otherMatchDate.toDateString();
-                })
-                .map((m) => (
-                  <li key={m._id} className="px-6 py-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-4">
-                        <input
-                          id={`match-${m._id}`}
-                          type="checkbox"
-                          value={m._id}
-                          disabled={m.matchStatus.key !== 'SCHEDULED'}
-                          className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-                            m.matchStatus.key === 'SCHEDULED' 
-                            ? 'text-blue-600 bg-gray-100' 
-                            : 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                          }`}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedMatches(prev => [...prev, m._id]);
-                            } else {
-                              setSelectedMatches(prev => prev.filter(id => id !== m._id));
-                            }
-                          }}
-                        />
-                        <div className="flex-shrink-0 h-8 w-8">
-                          <CldImage
-                            src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                            alt="Team logo"
-                            width={32}
-                            height={32}
-                            gravity="center"
-                            className="object-contain"
+                        // Only show matches on the same date
+                        const matchDate = new Date(match.startDate);
+                        const otherMatchDate = new Date(m.startDate);
+                        return matchDate.toDateString() === otherMatchDate.toDateString();
+                      })
+                      .map((m) => (
+                        <li key={m._id} className="px-6 py-4">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center space-x-4">
+                              <input
+                                id={`match-${m._id}`}
+                                type="checkbox"
+                                value={m._id}
+                                disabled={m.matchStatus.key !== 'SCHEDULED'}
+                                className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${m.matchStatus.key === 'SCHEDULED'
+                                  ? 'text-blue-600 bg-gray-100'
+                                  : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                  }`}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedMatches(prev => [...prev, m._id]);
+                                  } else {
+                                    setSelectedMatches(prev => prev.filter(id => id !== m._id));
+                                  }
+                                }}
+                              />
+                              <div className="flex-shrink-0 h-8 w-8">
+                                <CldImage
+                                  src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                  alt="Team logo"
+                                  width={32}
+                                  height={32}
+                                  gravity="center"
+                                  className="object-contain"
 
-                          />
-                        </div>
-                        <div className="text-sm text-gray-900">
-                          {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {m.matchStatus.key === 'SCHEDULED' ? (
-                          new Date(m.startDate).toLocaleTimeString('de-DE', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          }) + ' Uhr'
-                        ) : (
-                          <MatchStatusBadge
-                            statusKey={m.matchStatus.key}
-                            finishTypeKey={m.finishType.key}
-                            statusValue={m.matchStatus.value}
-                            finishTypeValue={m.finishType.value}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-            </ul>
-              )}
-            </div>
-          </>
-        )}
+                                />
+                              </div>
+                              <div className="text-sm text-gray-900">
+                                {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {m.matchStatus.key === 'SCHEDULED' ? (
+                                new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }) + ' Uhr'
+                              ) : (
+                                <MatchStatusBadge
+                                  statusKey={m.matchStatus.key}
+                                  finishTypeKey={m.finishType.key}
+                                  statusValue={m.matchStatus.value}
+                                  finishTypeValue={m.finishType.value}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
 
         {/* Close, Save buttons */}
         <div className="flex space-x-3 mt-6 justify-end">
@@ -1754,23 +1752,20 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             )}
 
             {/* Include Inactive Players Toggle */}
-            <div className="flex items-center justify-end mb-4">
-              <div className="flex items-center">
-                <Switch
-                  checked={includeInactivePlayers}
-                  onChange={setIncludeInactivePlayers}
-                  className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-                >
-                  <span className="sr-only">Inaktive Spieler anzeigen</span>
-                  <span
-                    aria-hidden="true"
-                    className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                  />
-                </Switch>
-                <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
-              </div>
+            <div className="flex flex-row items-center justify-between sm:justify-end">
+              <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
+              <Switch
+                checked={includeInactivePlayers}
+                onChange={setIncludeInactivePlayers}
+                className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                  } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                />
+              </Switch>
             </div>
 
             {/* Team Selection */}
