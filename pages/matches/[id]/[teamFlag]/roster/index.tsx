@@ -569,8 +569,20 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       called: true
     };
 
-    // Add the player to the available players list
-    setAvailablePlayersList(prev => [...prev, playerWithCalled]);
+    // Add the player to the available players list and sort alphabetically
+    setAvailablePlayersList(prev => {
+      const newList = [...prev, playerWithCalled];
+      return newList.sort((a, b) => {
+        // First sort by lastName
+        const lastNameComparison = a.lastName.localeCompare(b.lastName);
+        // If lastName is the same, sort by firstName
+        return lastNameComparison !== 0 ? lastNameComparison :
+          a.firstName.localeCompare(b.firstName);
+      });
+    });
+
+    // Auto-select the newly called up player
+    setSelectedPlayer(playerWithCalled);
 
     // Close the modal and reset selections
     setIsCallUpModalOpen(false);
