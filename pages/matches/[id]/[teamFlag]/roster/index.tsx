@@ -1098,6 +1098,21 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                                   addButtonRef.current.focus();
                                 }
                               }
+                              // Handle letter key presses for position selection
+                              const key = e.key.toUpperCase();
+                              if (['C', 'A', 'G', 'F'].includes(key)) {
+                                e.preventDefault();
+                                const position = playerPositions.find(pos => pos.key === key);
+                                if (position) {
+                                  setPlayerPosition(position);
+                                  // Focus the Add button after keyboard selection
+                                  setTimeout(() => {
+                                    if (addButtonRef.current) {
+                                      addButtonRef.current.focus();
+                                    }
+                                  }, 100);
+                                }
+                              }
                             }}
                             className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                             <span className="block truncate">
@@ -1650,7 +1665,19 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 {({ open }) => (
                   <>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                      <Listbox.Button 
+                        onKeyDown={(e) => {
+                          // Handle letter key presses for position selection
+                          const key = e.key.toUpperCase();
+                          if (['C', 'A', 'G', 'F'].includes(key)) {
+                            e.preventDefault();
+                            const position = playerPositions.find(pos => pos.key === key);
+                            if (position) {
+                              setEditPlayerPosition(position);
+                            }
+                          }
+                        }}
+                        className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                         <span className="block truncate">
                           {editPlayerPosition.key} - {editPlayerPosition.value}
                         </span>
