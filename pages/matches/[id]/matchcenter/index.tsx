@@ -209,11 +209,11 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
             Zurück
           </span>
         </button>
-        
-        <MatchHeader 
-          match={match} 
-          isRefreshing={isRefreshing} 
-          onRefresh={refreshMatchData} 
+
+        <MatchHeader
+          match={match}
+          isRefreshing={isRefreshing}
+          onRefresh={refreshMatchData}
         />
 
         {/* Team Buttons in Separate Row */}
@@ -392,10 +392,18 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   <div className="flex flex-col md:flex-row md:space-x-4">
                     {/* Home team roster */}
                     <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                      <div className="text-center mb-3">
-                        <h4 className="text-md font-semibold">{match.home.fullName}</h4>
+                      <div className="border-b border-gray-200 pb-5 flex items-center justify-between mt-3 sm:mt-0 sm:ml-4">
+                        <h3 className="text-md font-semibold text-gray-900 truncate">{match.home.fullName}</h3>
+                        {showButtonRosterHome && (
+                          <button
+                            onClick={() => router.push(`/matches/${match._id}/home/roster`)}
+                            className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                          >
+                            Bearbeiten
+                          </button>
+                        )}
                       </div>
-                      <div className="overflow-hidden bg-white shadow-md rounded-md border">
+                      <div className="overflow-auto bg-white shadow-md rounded-md border">
                         {match.home.rosterPublished && sortedHomeRoster && sortedHomeRoster.length > 0 ? (
                           <table className="min-w-full divide-y divide-gray-200">
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -432,14 +440,6 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                           </div>
                         )}
                       </div>
-                      {showButtonRosterHome && (
-                        <button
-                          onClick={() => router.push(`/matches/${match._id}/home/roster`)}
-                          className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          Aufstellung
-                        </button>
-                      )}
                     </div>
 
                     {/* Away team roster */}
@@ -484,14 +484,6 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                           </div>
                         )}
                       </div>
-                      {showButtonRosterAway && (
-                        <button
-                          onClick={() => router.push(`/matches/${match._id}/away/roster`)}
-                          className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          Aufstellung
-                        </button>
-                      )}
                     </div>
                   </div>
                 );
