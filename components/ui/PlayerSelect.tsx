@@ -27,15 +27,51 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   tabIndex,
 }) => {
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filteredRoster, setFilteredRoster] = useState<RosterPlayer[]>(roster);
 
   // When the 'propSelectedPlayer' changes, update the local state
   useEffect(() => {
     setSelectedPlayer(propSelectedPlayer);
   }, [propSelectedPlayer]);
 
+  // Update filtered roster when search query or roster changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredRoster(roster);
+    } else {
+      const filtered = roster.filter(player => {
+        const jerseyMatch = player.player.jerseyNumber?.toString().includes(searchQuery);
+        const nameMatch = `${player.player.firstName} ${player.player.lastName}`.toLowerCase().includes(searchQuery.toLowerCase());
+        return jerseyMatch || nameMatch;
+      });
+      setFilteredRoster(filtered);
+    }
+  }, [searchQuery, roster]);
+
   const handlePlayerChange = (player: RosterPlayer | null) => {
     setSelectedPlayer(player);
     onChange(player);
+    setSearchQuery(''); // Clear search when player is selected
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // If user types a jersey number and there's an exact match, auto-select it
+    if (value && /^\d+$/.test(value)) {
+      const jerseyNumber = parseInt(value);
+      const exactMatch = roster.find(player => player.player.jerseyNumber === jerseyNumber);
+      if (exactMatch && value.length <= 2) { // Limit to 2 digits for jersey numbers
+        handlePlayerChange(exactMatch);
+      }
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setFilteredRoster(roster);
   };
 
   const Placeholder = () => (
@@ -75,12 +111,42 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
               leaveTo="opacity-0"
             >
               <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                {roster?.length === 0 ? (
+                {/* Search Input */}
+                <div className="sticky top-0 bg-white border-b border-gray-200 p-2">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                    </div>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      placeholder="Nr. oder Name eingeben..."
+                      className="block w-full pl-9 pr-8 py-1.5 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearSearch();
+                        }}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      >
+                        <XMarkIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Player Options */}
+                {filteredRoster?.length === 0 ? (
                   <div className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-500">
-                    Niemand verfügbar
+                    {searchQuery ? 'Kein Spieler gefunden' : 'Niemand verfügbar'}
                   </div>
                 ) : (
-                  roster?.map((player) => (
+                  filteredRoster?.map((player) => (
                     <Listbox.Option
                       key={player.player.playerId}
                       className={({ active }) =>
