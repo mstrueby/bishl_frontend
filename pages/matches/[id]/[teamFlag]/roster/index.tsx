@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
@@ -349,6 +349,7 @@ const playerPositions = [
 
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
+  const playerSelectRef = useRef<any>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
@@ -773,6 +774,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setPlayerPosition(playerPositions[3]); // Reset to 'F' (Feldspieler)
       setError('');
 
+      // Focus on PlayerSelect after a short delay to ensure it's rendered
+      setTimeout(() => {
+        if (playerSelectRef.current && playerSelectRef.current.focus) {
+          playerSelectRef.current.focus();
+        }
+      }, 100);
+
       // Here you would make the actual API call to update the roster
       /*
       await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
@@ -990,6 +998,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   </Switch>
                 </div>
                 <PlayerSelect
+                  ref={playerSelectRef}
                   selectedPlayer={selectedPlayer ? {
                     player: {
                       playerId: selectedPlayer._id,
