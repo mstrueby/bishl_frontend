@@ -529,10 +529,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                                 <p className="text-sm text-gray-900">
                                   {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
                                 </p>
-                                {goal.assistPlayer && (
+                                {goal.assistPlayer ? (
                                   <p className="text-xs text-gray-500">
                                     #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
                                   </p>
+                                ) : (
+                                  <p className="text-xs text-gray-500">keine Vorlage</p>
                                 )}
                               </div>
                               {showButtonEvents && (
@@ -620,10 +622,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                                 <p className="text-sm text-gray-900">
                                   {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
                                 </p>
-                                {goal.assistPlayer && (
+                                {goal.assistPlayer ? (
                                   <p className="text-xs text-gray-500">
                                     #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
                                   </p>
+                                ) : (
+                                  <p className="text-xs text-gray-500">keine Vorlage</p>
                                 )}
                               </div>
                               {showButtonEvents && (
