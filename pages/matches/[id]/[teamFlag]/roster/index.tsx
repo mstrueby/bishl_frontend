@@ -13,6 +13,7 @@ import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, Exc
 import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames } from '../../../../../tools/utils';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
+import RosterList from '../../../../../components/ui/RosterList';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -1189,7 +1190,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             </div>
           </div>
 
-          {/* Roster List */}
+          {/* Roster List - Editable View */}
           <div className="">
             <ul className="divide-y divide-gray-200">
               {rosterList.length > 0 ? (
