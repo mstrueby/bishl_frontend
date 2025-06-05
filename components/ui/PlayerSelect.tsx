@@ -125,6 +125,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
               onChange={handleQueryChange}
               value={selectedPlayer ? displayValue(selectedPlayer) : query}
               placeholder={placeholder}
+              autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
