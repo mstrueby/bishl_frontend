@@ -350,6 +350,9 @@ const playerPositions = [
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
   const playerSelectRef = useRef<any>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const jerseyNumberRef = useRef<HTMLInputElement>(null);
+  const positionSelectRef = useRef<HTMLButtonElement>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
@@ -1018,6 +1021,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                         if (availablePlayer.jerseyNo) {
                           setPlayerNumber(availablePlayer.jerseyNo);
                         }
+                        // Focus the jersey number input after player selection
+                        setTimeout(() => {
+                          if (jerseyNumberRef.current) {
+                            jerseyNumberRef.current.focus();
+                            jerseyNumberRef.current.select(); // Also select the text for easy replacement
+                          }
+                        }, 100);
                       }
                     } else {
                       setSelectedPlayer(null);
@@ -1044,23 +1054,67 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     Nr.
                   </label>
                   <input
+                    ref={jerseyNumberRef}
                     type="text"
                     id="player-number"
                     value={playerNumber}
                     onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
                     className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     placeholder="##"
+                     onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === 'Tab') {
+                        e.preventDefault();
+                        // Focus the position select dropdown when Enter or Tab is pressed
+                        if (positionSelectRef.current) {
+                          positionSelectRef.current.focus();
+                        }
+                      }
+                    }}
                   />
                 </div>
                 <div className="w-full ml-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Position
                   </label>
-                  <Listbox value={playerPosition} onChange={setPlayerPosition}>
+                  <Listbox value={playerPosition} onChange={(position) => {
+                    setPlayerPosition(position);
+                    // Focus the Add button after position selection
+                    setTimeout(() => {
+                      if (addButtonRef.current) {
+                        addButtonRef.current.focus();
+                      }
+                    }, 100);
+                  }}>
                     {({ open }) => (
                       <>
                         <div className="relative">
-                          <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                          <Listbox.Button 
+                            ref={positionSelectRef}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !open) {
+                                e.preventDefault();
+                                // Focus the Add button when Enter is pressed and dropdown is closed
+                                if (addButtonRef.current) {
+                                  addButtonRef.current.focus();
+                                }
+                              }
+                              // Handle letter key presses for position selection
+                              const key = e.key.toUpperCase();
+                              if (['C', 'A', 'G', 'F'].includes(key)) {
+                                e.preventDefault();
+                                const position = playerPositions.find(pos => pos.key === key);
+                                if (position) {
+                                  setPlayerPosition(position);
+                                  // Focus the Add button after keyboard selection
+                                  setTimeout(() => {
+                                    if (addButtonRef.current) {
+                                      addButtonRef.current.focus();
+                                    }
+                                  }, 100);
+                                }
+                              }
+                            }}
+                            className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                             <span className="block truncate">
                               {playerPosition.key} - {playerPosition.value}
                             </span>
@@ -1123,6 +1177,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/** Button */}
             <div className="mt-4 flex justify-end">
               <button
+                ref={addButtonRef}
                 type="button"
                 onClick={handleAddPlayer}
                 disabled={loading}
@@ -1338,7 +1393,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
                   {rosterList.some(player => player.player.jerseyNumber === 0) ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM10 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M18 10a8 8 011-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM10 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                     </svg>
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -1610,7 +1665,19 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 {({ open }) => (
                   <>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                      <Listbox.Button 
+                        onKeyDown={(e) => {
+                          // Handle letter key presses for position selection
+                          const key = e.key.toUpperCase();
+                          if (['C', 'A', 'G', 'F'].includes(key)) {
+                            e.preventDefault();
+                            const position = playerPositions.find(pos => pos.key === key);
+                            if (position) {
+                              setEditPlayerPosition(position);
+                            }
+                          }
+                        }}
+                        className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                         <span className="block truncate">
                           {editPlayerPosition.key} - {editPlayerPosition.value}
                         </span>
@@ -1756,7 +1823,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   <>
                     <div className="relative">
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                        <span className="block truncate">
+                        <span className={`block truncate ${selectedCallUpTeam ? '' : 'text-gray-400'}`}>
                           {selectedCallUpTeam ? selectedCallUpTeam.name : 'Mannschaft auswählen'}
                         </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
