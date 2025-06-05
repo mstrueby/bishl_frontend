@@ -351,6 +351,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const router = useRouter();
   const playerSelectRef = useRef<any>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
+  const jerseyNumberRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
@@ -1019,6 +1020,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                         if (availablePlayer.jerseyNo) {
                           setPlayerNumber(availablePlayer.jerseyNo);
                         }
+                        // Focus the jersey number input after player selection
+                        setTimeout(() => {
+                          if (jerseyNumberRef.current) {
+                            jerseyNumberRef.current.focus();
+                            jerseyNumberRef.current.select(); // Also select the text for easy replacement
+                          }
+                        }, 100);
                       }
                     } else {
                       setSelectedPlayer(null);
@@ -1045,6 +1053,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     Nr.
                   </label>
                   <input
+                    ref={jerseyNumberRef}
                     type="text"
                     id="player-number"
                     value={playerNumber}
