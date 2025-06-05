@@ -9,8 +9,8 @@ import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
-import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { CheckIcon, ChevronUpDownIcon, PlusIcon, ExclamationTriangleIcon as ExclamationTriangleIconSolid } from '@heroicons/react/24/solid';
+import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames } from '../../../../../tools/utils';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -1061,7 +1061,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
                     className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     placeholder="##"
-                     onKeyDown={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === 'Tab') {
                         e.preventDefault();
                         // Focus the position select dropdown when Enter or Tab is pressed
@@ -1088,7 +1088,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     {({ open }) => (
                       <>
                         <div className="relative">
-                          <Listbox.Button 
+                          <Listbox.Button
                             ref={positionSelectRef}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && !open) {
@@ -1306,9 +1306,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <div className="flex items-center">
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'C') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                   {rosterList.some(player => player.playerPosition.key === 'C') ? (
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckCircleIcon className="h-6 w-6" />
                   ) : (
-                    <ExclamationTriangleIconSolid className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-6 w-6" />
                   )}
                 </div>
                 <span className="ml-2 text-sm">
@@ -1322,9 +1322,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <div className="flex items-center">
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'A') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                   {rosterList.some(player => player.playerPosition.key === 'A') ? (
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckCircleIcon className="h-6 w-6" />
                   ) : (
-                    <ExclamationTriangleIconSolid className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-6 w-6" />
                   )}
                 </div>
                 <span className="ml-2 text-sm">
@@ -1338,9 +1338,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <div className="flex items-center">
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'G') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                   {rosterList.some(player => player.playerPosition.key === 'G') ? (
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckCircleIcon className="h-6 w-6" />
                   ) : (
-                    <ExclamationTriangleIconSolid className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-6 w-6" />
                   )}
                 </div>
                 <span className="ml-2 text-sm">
@@ -1354,9 +1354,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <div className="flex items-center mt-4">
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                   {rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? (
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckCircleIcon className="h-6 w-6" />
                   ) : (
-                    <ExclamationTriangleIconSolid className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-6 w-6" />
                   )}
                 </div>
                 <span className="ml-2 text-sm">
@@ -1370,9 +1370,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <div className="flex items-center mt-4">
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
                   {rosterList.some(player => player.player.jerseyNumber === 0) ? (
-                    <ExclamationTriangleIconSolid className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-6 w-6" />
                   ) : (
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckCircleIcon className="h-6 w-6" />
                   )}
                 </div>
                 <span className="ml-2 text-sm">
@@ -1384,9 +1384,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <div className="flex items-center mt-4">
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
                   {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
-                    <ExclamationTriangleIconSolid className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-6 w-6" />
                   ) : (
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckCircleIcon className="h-6 w-6" />
                   )}
                 </div>
                 <span className="ml-2 text-sm">
@@ -1401,9 +1401,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <div className="flex items-center mt-4">
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.called).length <= 5 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
                   {rosterList.filter(player => player.called).length <= 5 ? (
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckCircleIcon className="h-6 w-6" />
                   ) : (
-                    <ExclamationTriangleIconSolid className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-6 w-6" />
                   )}
                 </div>
                 <span className="ml-2 text-sm">
@@ -1631,7 +1631,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 {({ open }) => (
                   <>
                     <div className="relative">
-                      <Listbox.Button 
+                      <Listbox.Button
                         onKeyDown={(e) => {
                           // Handle letter key presses for position selection
                           const key = e.key.toUpperCase();
