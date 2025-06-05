@@ -9,7 +9,7 @@ import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
-import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames } from '../../../../../tools/utils';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
@@ -1226,7 +1226,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                           onClick={() => handleEditPlayer(player)}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
-                          <PencilIcon className="h-5 w-5" aria-hidden="true" />
+                          <PencilSquareIcon className="h-5 w-5" aria-hidden="true" />
                         </button>
                         {(() => {
                           // Check if player has any events (goals or penalties)
