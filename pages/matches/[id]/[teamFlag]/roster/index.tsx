@@ -341,10 +341,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 // Player position options
 const playerPositions = [
+  { key: 'F', value: 'Feldspieler' },
   { key: 'C', value: 'Captain' },
   { key: 'A', value: 'Assistant' },
   { key: 'G', value: 'Goalie' },
-  { key: 'F', value: 'Feldspieler' },
 ];
 
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
@@ -354,14 +354,14 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
   const [playerNumber, setPlayerNumber] = useState<number>(0);
-  const [playerPosition, setPlayerPosition] = useState(playerPositions[3]); // Default to 'F' (Feldspieler)
+  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]); // Default to 'F' (Feldspieler)
   const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
   const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>(allAvailablePlayers || []);
   const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
   const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
-  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[3]);
+  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[0]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -601,7 +601,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setEditPlayerNumber(player.player.jerseyNumber);
     // Find the position in playerPositions that matches the player's position
     const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
-    setEditPlayerPosition(position || playerPositions[3]); // Default to 'F' if not found
+    setEditPlayerPosition(position || playerPositions[0]); // Default to 'F' if not found
     setModalError(null); // Clear any modal errors when opening the dialog
     setError(null)
     setIsEditModalOpen(true);
@@ -771,7 +771,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Reset form
       setSelectedPlayer(null);
       setPlayerNumber(0);
-      setPlayerPosition(playerPositions[3]); // Reset to 'F' (Feldspieler)
+      setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
 
       // Focus on PlayerSelect after a short delay to ensure it's rendered
