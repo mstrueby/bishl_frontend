@@ -33,11 +33,11 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   // When the 'propSelectedPlayer' changes, update the local state
   useEffect(() => {
     setSelectedPlayer(propSelectedPlayer);
-    // Update query to show selected player's name when prop changes
+    // Update query to show selected player's name when prop changes, or clear when null
     if (propSelectedPlayer) {
       setQuery(`${propSelectedPlayer.player.lastName}, ${propSelectedPlayer.player.firstName}`);
     } else {
-      setQuery('');
+      setQuery(''); // Clear the query to show placeholder
     }
   }, [propSelectedPlayer]);
 
@@ -97,7 +97,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   };
 
   const displayValue = (player: RosterPlayer | null) => {
-    if (!player) return '';
+    if (!player) return query; // Return current query when no player selected
     return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
 
@@ -135,7 +135,19 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
               leave="transition ease-in duration-100"
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
-              afterLeave={() => setQuery('')}
+              afterLeave={() => {
+                // Only clear query if no player is selected and query doesn't match any player
+                if (!selectedPlayer && query) {
+                  const hasMatchingPlayer = roster.some(player => {
+                    const playerName = `${player.player.lastName}, ${player.player.firstName}`;
+                    return playerName.toLowerCase().includes(query.toLowerCase()) ||
+                           player.player.jerseyNumber?.toString().includes(query);
+                  });
+                  if (!hasMatchingPlayer) {
+                    setQuery('');
+                  }
+                }
+              }}
             >
               <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 {filteredRoster.length === 0 && query !== '' ? (
