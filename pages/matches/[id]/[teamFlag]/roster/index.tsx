@@ -350,6 +350,7 @@ const playerPositions = [
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
   const playerSelectRef = useRef<any>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
@@ -1056,7 +1057,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Position
                   </label>
-                  <Listbox value={playerPosition} onChange={setPlayerPosition}>
+                  <Listbox value={playerPosition} onChange={(position) => {
+                    setPlayerPosition(position);
+                    // Focus the Add button after position selection
+                    setTimeout(() => {
+                      if (addButtonRef.current) {
+                        addButtonRef.current.focus();
+                      }
+                    }, 100);
+                  }}>
                     {({ open }) => (
                       <>
                         <div className="relative">
@@ -1123,6 +1132,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/** Button */}
             <div className="mt-4 flex justify-end">
               <button
+                ref={addButtonRef}
                 type="button"
                 onClick={handleAddPlayer}
                 disabled={loading}
