@@ -89,7 +89,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
 
   const displayValue = (player: RosterPlayer | null) => {
     if (!player) return '';
-    return `${player.player.lastName}, ${player.player.firstName}`;
+    return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
 
   return (
