@@ -827,12 +827,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     };
 
     try {
-      // Make the```typescript
-// Add ref and keyboard navigation to position dropdown
-    const positionSelectRef = useRef<HTMLButtonElement>(null);
-    // Main Analysis: This code adds a ref to the position select dropdown and implements keyboard navigation.
-
-      // API call to save the roster for the main match
+      // Make the API call to save the roster for the main match
       const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
         headers: {
           Authorization: `Bearer ${jwt}`,
