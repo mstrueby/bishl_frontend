@@ -417,6 +417,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           type="submit"
                           label="Speichern"
                           isLoading={loading}
+                          tabIndex={values.scores.length * 3 + 2}
                         />
                       </div>
                     </div>
