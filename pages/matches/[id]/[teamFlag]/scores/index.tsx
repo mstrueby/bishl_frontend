@@ -409,7 +409,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                       <div className="flex justify-end space-x-3 pt-8">
                         <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
                           <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                            Abbrechen
+                            Schließen
                           </a>
                         </Link>
                         <ButtonPrimary
