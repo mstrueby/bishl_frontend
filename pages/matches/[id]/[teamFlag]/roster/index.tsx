@@ -1889,88 +1889,43 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
             {/* Player Selection */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Spieler
-              </label>
-              <Listbox value={selectedCallUpPlayer} onChange={setSelectedCallUpPlayer}>
-                {({ open }) => (
-                  <>
-                    <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                        <span className="block truncate">
-                          {selectedCallUpPlayer ? `${selectedCallUpPlayer.lastName}, ${selectedCallUpPlayer.firstName}` : 'Spieler auswählen'}
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        </span>
-                      </Listbox.Button>
-
-                      <Transition
-                        show={open}
-                        as={React.Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {callUpPlayers.length > 0 ? (
-                            callUpPlayers.map((player) => (
-                              <Listbox.Option
-                                key={player._id}
-                                className={({ active }) =>
-                                  classNames(
-                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                    'relative cursor-default select-none py-2 pl-3 pr-9'
-                                  )
-                                }
-                                value={player}
-                              >
-                                {({ selected, active }) => (
-                                  <>
-                                    <div className="flex flex-col">
-                                      <span className={classNames(
-                                        selected ? 'font-semibold' : 'font-normal',
-                                        'block truncate'
-                                      )}>
-                                        {player.lastName}, {player.firstName}
-                                      </span>
-                                      {/**
-                                      {player.active === false && (
-                                        <span className={classNames(
-                                          active ? 'text-indigo-100' : 'text-gray-500',
-                                          'text-xs'
-                                        )}>
-                                          (Inaktiv)
-                                        </span>
-                                      )}
-                                      */}
-                                    </div>
-
-                                    {selected ? (
-                                      <span
-                                        className={classNames(
-                                          active ? 'text-white' : 'text-indigo-600',
-                                          'absolute inset-y-0 right-0 flex items-center pr-4'
-                                        )}
-                                      >
-                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                      </span>
-                                    ) : null}
-                                  </>
-                                )}
-                              </Listbox.Option>
-                            ))
-                          ) : (
-                            <div className="py-2 px-3 text-gray-500 italic">
-                              {selectedCallUpTeam ? 'Keine Spieler verfügbar' : 'Bitte zuerst eine Mannschaft auswählen'}
-                            </div>
-                          )}
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  </>
-                )}
-              </Listbox>
+              <PlayerSelect
+                selectedPlayer={selectedCallUpPlayer ? {
+                  player: {
+                    playerId: selectedCallUpPlayer._id,
+                    firstName: selectedCallUpPlayer.firstName,
+                    lastName: selectedCallUpPlayer.lastName,
+                    jerseyNumber: selectedCallUpPlayer.jerseyNo || 0
+                  },
+                  playerPosition: { key: 'F', value: 'Feldspieler' },
+                  passNumber: selectedCallUpPlayer.passNo,
+                  called: selectedCallUpPlayer.called
+                } : null}
+                onChange={(selectedRosterPlayer) => {
+                  if (selectedRosterPlayer) {
+                    const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
+                    if (availablePlayer) {
+                      setSelectedCallUpPlayer(availablePlayer);
+                    }
+                  } else {
+                    setSelectedCallUpPlayer(null);
+                  }
+                }}
+                roster={callUpPlayers.map(player => ({
+                  player: {
+                    playerId: player._id,
+                    firstName: player.firstName,
+                    lastName: player.lastName,
+                    jerseyNumber: player.jerseyNo || 0
+                  },
+                  playerPosition: { key: 'F', value: 'Feldspieler' },
+                  passNumber: player.passNo,
+                  called: player.called
+                }))}
+                label="Spieler"
+                placeholder={selectedCallUpTeam ? 'Spieler auswählen' : 'Bitte zuerst eine Mannschaft auswählen'}
+                required={false}
+              />
             </div>
 
             {/* Modal Actions */}
