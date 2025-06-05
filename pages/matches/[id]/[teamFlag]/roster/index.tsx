@@ -352,6 +352,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const playerSelectRef = useRef<any>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
+  const positionSelectRef = useRef<HTMLButtonElement>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
@@ -826,7 +827,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     };
 
     try {
-      // Make the API call to save the roster for the main match
+      // Make the```typescript
+// Add ref and keyboard navigation to position dropdown
+    const positionSelectRef = useRef<HTMLButtonElement>(null);
+    // Main Analysis: This code adds a ref to the position select dropdown and implements keyboard navigation.
+
+      // API call to save the roster for the main match
       const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -1060,6 +1066,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
                     className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     placeholder="##"
+                     onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === 'Tab') {
+                        e.preventDefault();
+                        // Focus the position select dropdown when Enter or Tab is pressed
+                        if (positionSelectRef.current) {
+                          positionSelectRef.current.focus();
+                        }
+                      }
+                    }}
                   />
                 </div>
                 <div className="w-full ml-4">
@@ -1078,7 +1093,18 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     {({ open }) => (
                       <>
                         <div className="relative">
-                          <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                          <Listbox.Button 
+                            ref={positionSelectRef}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !open) {
+                                e.preventDefault();
+                                // Focus the Add button when Enter is pressed and dropdown is closed
+                                if (addButtonRef.current) {
+                                  addButtonRef.current.focus();
+                                }
+                              }
+                            }}
+                            className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                             <span className="block truncate">
                               {playerPosition.key} - {playerPosition.value}
                             </span>
@@ -1357,7 +1383,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
                   {rosterList.some(player => player.player.jerseyNumber === 0) ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM10 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M18 10a8 8 011-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM10 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                     </svg>
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
