@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ import { Listbox, Transition, Switch } from '@headlessui/react';
 import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames } from '../../../../../tools/utils';
+import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -340,26 +341,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 // Player position options
 const playerPositions = [
+  { key: 'F', value: 'Feldspieler' },
   { key: 'C', value: 'Captain' },
   { key: 'A', value: 'Assistant' },
   { key: 'G', value: 'Goalie' },
-  { key: 'F', value: 'Feldspieler' },
 ];
 
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
+  const playerSelectRef = useRef<any>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
   const [playerNumber, setPlayerNumber] = useState<number>(0);
-  const [playerPosition, setPlayerPosition] = useState(playerPositions[3]); // Default to 'F' (Feldspieler)
+  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]); // Default to 'F' (Feldspieler)
   const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
   const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>(allAvailablePlayers || []);
   const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
   const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
-  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[3]);
+  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[0]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -569,8 +571,20 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       called: true
     };
 
-    // Add the player to the available players list
-    setAvailablePlayersList(prev => [...prev, playerWithCalled]);
+    // Add the player to the available players list and sort alphabetically
+    setAvailablePlayersList(prev => {
+      const newList = [...prev, playerWithCalled];
+      return newList.sort((a, b) => {
+        // First sort by lastName
+        const lastNameComparison = a.lastName.localeCompare(b.lastName);
+        // If lastName is the same, sort by firstName
+        return lastNameComparison !== 0 ? lastNameComparison :
+          a.firstName.localeCompare(b.firstName);
+      });
+    });
+
+    // Auto-select the newly called up player
+    setSelectedPlayer(playerWithCalled);
 
     // Close the modal and reset selections
     setIsCallUpModalOpen(false);
@@ -587,7 +601,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setEditPlayerNumber(player.player.jerseyNumber);
     // Find the position in playerPositions that matches the player's position
     const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
-    setEditPlayerPosition(position || playerPositions[3]); // Default to 'F' if not found
+    setEditPlayerPosition(position || playerPositions[0]); // Default to 'F' if not found
     setModalError(null); // Clear any modal errors when opening the dialog
     setError(null)
     setIsEditModalOpen(true);
@@ -757,8 +771,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Reset form
       setSelectedPlayer(null);
       setPlayerNumber(0);
-      setPlayerPosition(playerPositions[3]); // Reset to 'F' (Feldspieler)
+      setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
+
+      // Focus on PlayerSelect after a short delay to ensure it's rendered
+      setTimeout(() => {
+        if (playerSelectRef.current && playerSelectRef.current.focus) {
+          playerSelectRef.current.focus();
+        }
+      }, 100);
 
       // Here you would make the actual API call to update the roster
       /*
@@ -962,14 +983,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   </button>
                 </div>
                 <div className="flex flex-row items-center justify-between sm:justify-end">
-                  <span className="ml-2 text-sm font-medium text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
+                  <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
                   <Switch
                     checked={includeInactivePlayers}
                     onChange={setIncludeInactivePlayers}
                     className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
                       } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
                   >
-                    <span className="sr-only">Inaktive Spieler anzeigen</span>
                     <span
                       aria-hidden="true"
                       className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
@@ -977,88 +997,45 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     />
                   </Switch>
                 </div>
-                <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
-                  {({ open }) => (
-                    <>
-                      <div className="relative">
-                        <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                          <span className={`block truncate ${!selectedPlayer ? 'text-gray-400' : ''}`}>
-                            {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Spieler auswählen'}
-                          </span>
-                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                          </span>
-                        </Listbox.Button>
-
-                        <Transition
-                          show={open}
-                          as={React.Fragment}
-                          leave="transition ease-in duration-100"
-                          leaveFrom="opacity-100"
-                          leaveTo="opacity-0"
-                        >
-                          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                            {Array.isArray(availablePlayersList) && availablePlayersList.length > 0 ? (
-                              availablePlayersList.map((player) => (
-                                <Listbox.Option
-                                  key={player._id}
-                                  className={({ active }) => classNames(
-                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                    'relative cursor-default select-none py-2 pl-3 pr-9'
-                                  )
-                                  }
-                                  value={player}
-                                  onClick={() => {
-                                    if (player.jerseyNo) {
-                                      setPlayerNumber(player.jerseyNo);
-                                    }
-                                  }}
-                                >
-                                  {({ selected, active }) => (
-                                    <>
-                                      <div className="flex flex-col">
-                                        <span className={classNames(
-                                          selected ? 'font-semibold' : 'font-normal',
-                                          'block truncate'
-                                        )}>
-                                          {player.lastName}, {player.firstName}
-                                        </span>
-
-                                        {player.originalTeam && (
-                                          <span className={classNames(
-                                            active ? 'text-indigo-100' : 'text-gray-500',
-                                            'text-xs'
-                                          )}>
-                                            {player.originalTeam}
-                                          </span>
-                                        )}
-                                      </div>
-
-                                      {selected ? (
-                                        <span
-                                          className={classNames(
-                                            active ? 'text-white' : 'text-indigo-600',
-                                            'absolute inset-y-0 right-0 flex items-center pr-4'
-                                          )}
-                                        >
-                                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                        </span>
-                                      ) : null}
-                                    </>
-                                  )}
-                                </Listbox.Option>
-                              ))
-                            ) : (
-                              <div className="py-2 px-3 text-gray-500 italic">
-                                Keine Spieler verfügbar
-                              </div>
-                            )}
-                          </Listbox.Options>
-                        </Transition>
-                      </div>
-                    </>
-                  )}
-                </Listbox>
+                <PlayerSelect
+                  ref={playerSelectRef}
+                  selectedPlayer={selectedPlayer ? {
+                    player: {
+                      playerId: selectedPlayer._id,
+                      firstName: selectedPlayer.firstName,
+                      lastName: selectedPlayer.lastName,
+                      jerseyNumber: selectedPlayer.jerseyNo || 0
+                    },
+                    playerPosition: { key: 'F', value: 'Feldspieler' },
+                    passNumber: selectedPlayer.passNo,
+                    called: selectedPlayer.called
+                  } : null}
+                  onChange={(selectedRosterPlayer) => {
+                    if (selectedRosterPlayer) {
+                      const availablePlayer = availablePlayersList.find(p => p._id === selectedRosterPlayer.player.playerId);
+                      if (availablePlayer) {
+                        setSelectedPlayer(availablePlayer);
+                        if (availablePlayer.jerseyNo) {
+                          setPlayerNumber(availablePlayer.jerseyNo);
+                        }
+                      }
+                    } else {
+                      setSelectedPlayer(null);
+                    }
+                  }}
+                  roster={availablePlayersList.map(player => ({
+                    player: {
+                      playerId: player._id,
+                      firstName: player.firstName,
+                      lastName: player.lastName,
+                      jerseyNumber: player.jerseyNo || 0
+                    },
+                    playerPosition: { key: 'F', value: 'Feldspieler' },
+                    passNumber: player.passNo,
+                    called: player.called
+                  }))}
+                  placeholder="Spieler auswählen"
+                />
               </div>
               {/* Jersey Number and Position */}
               <div className="flex flex-row justify-between items-center mb-1">
@@ -1475,81 +1452,80 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           const otherMatchDate = new Date(m.startDate);
           return matchDate.toDateString() === otherMatchDate.toDateString();
         }).length > 0 && (
-          <>
-            <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-            <div className="bg-white shadow rounded-md border mb-6">
-              {match.matchday && match.round && match.season && match.tournament && (
-                <ul className="divide-y divide-gray-200">
-              {matches
-                .filter(m => {
-                  // Exclude current match
-                  if (m._id === match._id) return false;
+            <>
+              <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+              <div className="bg-white shadow rounded-md border mb-6">
+                {match.matchday && match.round && match.season && match.tournament && (
+                  <ul className="divide-y divide-gray-200">
+                    {matches
+                      .filter(m => {
+                        // Exclude current match
+                        if (m._id === match._id) return false;
 
-                  // Only show matches on the same date
-                  const matchDate = new Date(match.startDate);
-                  const otherMatchDate = new Date(m.startDate);
-                  return matchDate.toDateString() === otherMatchDate.toDateString();
-                })
-                .map((m) => (
-                  <li key={m._id} className="px-6 py-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-4">
-                        <input
-                          id={`match-${m._id}`}
-                          type="checkbox"
-                          value={m._id}
-                          disabled={m.matchStatus.key !== 'SCHEDULED'}
-                          className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-                            m.matchStatus.key === 'SCHEDULED' 
-                            ? 'text-blue-600 bg-gray-100' 
-                            : 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                          }`}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedMatches(prev => [...prev, m._id]);
-                            } else {
-                              setSelectedMatches(prev => prev.filter(id => id !== m._id));
-                            }
-                          }}
-                        />
-                        <div className="flex-shrink-0 h-8 w-8">
-                          <CldImage
-                            src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                            alt="Team logo"
-                            width={32}
-                            height={32}
-                            gravity="center"
-                            className="object-contain"
+                        // Only show matches on the same date
+                        const matchDate = new Date(match.startDate);
+                        const otherMatchDate = new Date(m.startDate);
+                        return matchDate.toDateString() === otherMatchDate.toDateString();
+                      })
+                      .map((m) => (
+                        <li key={m._id} className="px-6 py-4">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center space-x-4">
+                              <input
+                                id={`match-${m._id}`}
+                                type="checkbox"
+                                value={m._id}
+                                disabled={m.matchStatus.key !== 'SCHEDULED'}
+                                className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${m.matchStatus.key === 'SCHEDULED'
+                                  ? 'text-blue-600 bg-gray-100'
+                                  : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                  }`}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedMatches(prev => [...prev, m._id]);
+                                  } else {
+                                    setSelectedMatches(prev => prev.filter(id => id !== m._id));
+                                  }
+                                }}
+                              />
+                              <div className="flex-shrink-0 h-8 w-8">
+                                <CldImage
+                                  src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                  alt="Team logo"
+                                  width={32}
+                                  height={32}
+                                  gravity="center"
+                                  className="object-contain"
 
-                          />
-                        </div>
-                        <div className="text-sm text-gray-900">
-                          {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {m.matchStatus.key === 'SCHEDULED' ? (
-                          new Date(m.startDate).toLocaleTimeString('de-DE', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          }) + ' Uhr'
-                        ) : (
-                          <MatchStatusBadge
-                            statusKey={m.matchStatus.key}
-                            finishTypeKey={m.finishType.key}
-                            statusValue={m.matchStatus.value}
-                            finishTypeValue={m.finishType.value}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-            </ul>
-              )}
-            </div>
-          </>
-        )}
+                                />
+                              </div>
+                              <div className="text-sm text-gray-900">
+                                {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {m.matchStatus.key === 'SCHEDULED' ? (
+                                new Date(m.startDate).toLocaleTimeString('de-DE', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }) + ' Uhr'
+                              ) : (
+                                <MatchStatusBadge
+                                  statusKey={m.matchStatus.key}
+                                  finishTypeKey={m.finishType.key}
+                                  statusValue={m.matchStatus.value}
+                                  finishTypeValue={m.finishType.value}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
 
         {/* Close, Save buttons */}
         <div className="flex space-x-3 mt-6 justify-end">
@@ -1754,23 +1730,20 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             )}
 
             {/* Include Inactive Players Toggle */}
-            <div className="flex items-center justify-end mb-4">
-              <div className="flex items-center">
-                <Switch
-                  checked={includeInactivePlayers}
-                  onChange={setIncludeInactivePlayers}
-                  className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-                >
-                  <span className="sr-only">Inaktive Spieler anzeigen</span>
-                  <span
-                    aria-hidden="true"
-                    className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                  />
-                </Switch>
-                <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
-              </div>
+            <div className="flex flex-row items-center justify-between sm:justify-end">
+              <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
+              <Switch
+                checked={includeInactivePlayers}
+                onChange={setIncludeInactivePlayers}
+                className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                  } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                />
+              </Switch>
             </div>
 
             {/* Team Selection */}
