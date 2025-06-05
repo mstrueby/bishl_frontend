@@ -97,7 +97,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   };
 
   const displayValue = (player: RosterPlayer | null) => {
-    if (!player) return query; // Return current query when no player selected
+    if (!player) return ''; // Return empty string when no player selected to show placeholder
     return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
 
@@ -123,7 +123,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
               tabIndex={tabIndex}
               className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ${error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
               onChange={handleQueryChange}
-              displayValue={displayValue}
+              value={selectedPlayer ? displayValue(selectedPlayer) : query}
               placeholder={placeholder}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
