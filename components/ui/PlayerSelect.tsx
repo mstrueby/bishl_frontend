@@ -16,7 +16,7 @@ interface PlayerSelectProps {
   tabIndex?: number;
 }
 
-const PlayerSelect: React.FC<PlayerSelectProps> = ({
+const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   selectedPlayer: propSelectedPlayer,
   onChange,
   roster,
@@ -25,7 +25,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   placeholder = "Spieler auswählen",
   error = false,
   tabIndex,
-}) => {
+}, ref) => {
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,6 +61,15 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
       setQuery('');
     }
   };
+
+  // Add focus method to ref
+  React.useImperativeHandle(ref, () => ({
+    focus: () => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  }), []);
 
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -103,7 +112,14 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
           )}
           <div className="relative">
             <Combobox.Input
-              ref={inputRef}
+              ref={(el) => {
+                inputRef.current = el;
+                if (typeof ref === 'function') {
+                  ref(el);
+                } else if (ref) {
+                  ref.current = el;
+                }
+              }}
               tabIndex={tabIndex}
               className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ${error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
               onChange={handleQueryChange}
@@ -171,6 +187,8 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
       )}
     </Combobox>
   );
-};
+});
+
+PlayerSelect.displayName = 'PlayerSelect';
 
 export default PlayerSelect;
