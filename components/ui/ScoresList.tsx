@@ -12,6 +12,9 @@ interface ScoresListProps {
   scores: ScoresBase[];
   showEditButton?: boolean;
   editUrl?: string;
+  refreshMatchData?: () => void;
+  setIsHomeGoalDialogOpen?: (open: boolean) => void;
+  setEditingHomeGoal?: (goal: ScoresBase | null) => void;
 }
 
 const ScoresList: React.FC<ScoresListProps> = ({
@@ -21,6 +24,9 @@ const ScoresList: React.FC<ScoresListProps> = ({
   scores,
   showEditButton = false,
   editUrl,
+  refreshMatchData,
+  setIsHomeGoalDialogOpen,
+  setEditingHomeGoal,
 }) => {
   return (
     <div className="w-full">
@@ -69,8 +75,10 @@ const ScoresList: React.FC<ScoresListProps> = ({
                       <div className="flex justify-end space-x-2 flex-shrink-0">
                         <button
                           onClick={() => {
-                            setIsHomeGoalDialogOpen(true);
-                            setEditingHomeGoal(goal);
+                            if (setIsHomeGoalDialogOpen && setEditingHomeGoal) {
+                              setIsHomeGoalDialogOpen(true);
+                              setEditingHomeGoal(goal);
+                            }
                           }}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
@@ -90,7 +98,9 @@ const ScoresList: React.FC<ScoresListProps> = ({
                                   }
                                 );
                                 if (response.status === 200 || response.status === 204) {
-                                  refreshMatchData();
+                                  if (refreshMatchData) {
+                                    refreshMatchData();
+                                  }
                                 }
                               } catch (error) {
                                 console.error('Error deleting goal:', error);
