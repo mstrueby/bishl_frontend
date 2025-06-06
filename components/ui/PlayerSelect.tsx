@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions, Label } from '@headlessui/react';
-import { RosterPlayer } from '../../types/MatchValues';
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+
+import React, { Fragment, useState, useEffect, useRef } from 'react';
+import { Combobox, Transition } from '@headlessui/react';
+import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
+import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { classNames } from '../../tools/utils';
 
 interface PlayerSelectProps {
   selectedPlayer: RosterPlayer | null;
@@ -69,7 +71,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
     }
   }), []);
 
-    const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
     
@@ -95,64 +97,113 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   };
 
   const displayValue = (player: RosterPlayer | null) => {
-    if (!player) return '';
+    if (!player) return ''; // Return empty string when no player selected to show placeholder
     return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
 
   return (
-    <Combobox
-      as="div"
-      value={selectedPlayer}
-      onChange={handlePlayerChange}
-    >
-      {label && (
-        <Label className="block text-sm font-medium leading-6 text-gray-900">
-          {label}
-        </Label>
+    <Combobox value={selectedPlayer} onChange={handlePlayerChange}>
+      {({ open }) => (
+        <>
+          {label && (
+            <Combobox.Label className="block text-sm font-medium leading-6 text-gray-900">
+              {label}
+            </Combobox.Label>
+          )}
+          <div className="relative">
+            <Combobox.Input
+              ref={(el) => {
+                inputRef.current = el;
+                if (typeof ref === 'function') {
+                  ref(el);
+                } else if (ref) {
+                  ref.current = el;
+                }
+              }}
+              tabIndex={tabIndex}
+              className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ${error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
+              onChange={handleQueryChange}
+              value={selectedPlayer ? displayValue(selectedPlayer) : query}
+              placeholder={placeholder}
+              autoComplete="off"
+            />
+            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            </Combobox.Button>
+
+            <Transition
+              as={Fragment}
+              leave="transition ease-in duration-100"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+              afterLeave={() => {
+                // Only clear query if no player is selected and query doesn't match any player
+                if (!selectedPlayer && query) {
+                  const hasMatchingPlayer = roster.some(player => {
+                    const playerName = `${player.player.lastName}, ${player.player.firstName}`;
+                    return playerName.toLowerCase().includes(query.toLowerCase()) ||
+                           player.player.jerseyNumber?.toString().includes(query);
+                  });
+                  if (!hasMatchingPlayer) {
+                    setQuery('');
+                  }
+                }
+              }}
+            >
+              <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {roster.length === 0 ? (
+                  <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                    Niemand verfügbar.
+                  </div>
+                ) : (
+                  roster.map((player) => {
+                    const isSelected = selectedPlayer?.player.playerId === player.player.playerId;
+                    const matchesQuery = query === '' || 
+                      player.player.jerseyNumber?.toString().includes(query) ||
+                      `${player.player.firstName} ${player.player.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
+                      `${player.player.lastName}, ${player.player.firstName}`.toLowerCase().includes(query.toLowerCase());
+                    
+                    // Show all players, but highlight those that match the search
+                    return (
+                      <Combobox.Option
+                        key={player.player.playerId}
+                        className={({ active }) =>
+                          classNames(
+                            'relative cursor-default select-none py-2 pl-3 pr-9',
+                            active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                            !matchesQuery && query !== '' ? 'opacity-40' : 'opacity-100'
+                          )
+                        }
+                        value={player}
+                      >
+                        {({ active }) => (
+                          <>
+                            <div className={classNames('flex items-center', isSelected ? 'font-semibold' : 'font-normal')}>
+                              <span className="w-6 text-center mr-3">{player.player.jerseyNumber}</span>
+                              <span className="truncate">{player.player.lastName}, {player.player.firstName}</span>
+                            </div>
+
+                            {isSelected ? (
+                              <span
+                                className={classNames(
+                                  'absolute inset-y-0 right-0 flex items-center pr-4',
+                                  active ? 'text-white' : 'text-indigo-600'
+                                )}
+                              >
+                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Combobox.Option>
+                    );
+                  })
+                )}
+              </Combobox.Options>
+            </Transition>
+          </div>
+        </>
       )}
-      <div className="relative mt-2">
-        <ComboboxInput
-          ref={(el) => {
-            inputRef.current = el;
-            if (typeof ref === 'function') {
-              ref(el);
-            } else if (ref) {
-              ref.current = el;
-            }
-          }}
-          tabIndex={tabIndex}
-          className={`block w-full rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 ${error ? 'outline-red-300 focus:outline-red-500' : 'outline-gray-300 focus:outline-indigo-600'} placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 sm:text-sm`}
-          onChange={(event) => {setQuery(event.target.value); handleQueryChange(event)}}
-          onBlur={() => setQuery('')}
-          displayValue={displayValue}
-          placeholder={placeholder}
-          autoComplete="off"
-        />
-        <ComboboxButton className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden">
-          <ChevronUpDownIcon className="size-5 text-gray-400" aria-hidden="true" />
-        </ComboboxButton>
-
-        {filteredRoster.length > 0 && (
-          <ComboboxOptions className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-hidden sm:text-sm">
-            {filteredRoster.map((player) => (
-              <ComboboxOption
-                key={player.player.playerId}
-                value={player}
-                className="group relative cursor-default py-2 pr-9 pl-3 text-gray-900 select-none data-focus:bg-indigo-600 data-focus:text-white data-focus:outline-hidden"
-              >
-                <div className="flex items-center group-data-selected:font-semibold">
-                  <span className="w-6 text-center mr-3">{player.player.jerseyNumber}</span>
-                  <span className="truncate">{player.player.lastName}, {player.player.firstName}</span>
-                </div>
-
-                <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-focus:text-white group-data-selected:flex">
-                  <CheckIcon className="size-5" aria-hidden="true" />
-                </span>
-              </ComboboxOption>
-            ))}
-          </ComboboxOptions>
-        )}
-      </div>
     </Combobox>
   );
 });
