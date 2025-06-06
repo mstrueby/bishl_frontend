@@ -527,6 +527,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   showEditButton={true}
                   editUrl={`/matches/${match._id}/away/scores`}
                   refreshMatchData={refreshMatchData}
+                  setIsHomeGoalDialogOpen={setIsAwayGoalDialogOpen}
+                  setEditingHomeGoal={setEditingAwayGoal}
                 />
               </div>
             </div>
