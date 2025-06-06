@@ -186,7 +186,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       roster={roster}
                       label="Torschütze"
                       required={true}
-                      placeholder="Torschützen auswählen"
+                      placeholder="Spieler auswählen"
                     />
                   </div>
 
@@ -195,9 +195,9 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       selectedPlayer={selectedAssistPlayer}
                       onChange={setSelectedAssistPlayer}
                       roster={roster}
-                      label="Assist (optional)"
+                      label="Vorlage (optional)"
                       required={false}
-                      placeholder="Assist auswählen"
+                      placeholder="Spieler auswählen"
                     />
                   </div>
 
