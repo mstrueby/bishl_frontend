@@ -151,47 +151,53 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
               }}
             >
               <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                {filteredRoster.length === 0 && query !== '' ? (
-                  <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                    Kein Spieler gefunden.
-                  </div>
-                ) : filteredRoster.length === 0 ? (
+                {roster.length === 0 ? (
                   <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                     Niemand verfügbar.
                   </div>
                 ) : (
-                  filteredRoster.map((player) => (
-                    <Combobox.Option
-                      key={player.player.playerId}
-                      className={({ active }) =>
-                        classNames(
-                          'relative cursor-default select-none py-2 pl-3 pr-9',
-                          active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-                        )
-                      }
-                      value={player}
-                    >
-                      {({ selected, active }) => (
-                        <>
-                          <div className={classNames('flex items-center', selected ? 'font-semibold' : 'font-normal')}>
-                            <span className="w-6 text-center mr-3">{player.player.jerseyNumber}</span>
-                            <span className="truncate">{player.player.lastName}, {player.player.firstName}</span>
-                          </div>
+                  roster.map((player) => {
+                    const isSelected = selectedPlayer?.player.playerId === player.player.playerId;
+                    const matchesQuery = query === '' || 
+                      player.player.jerseyNumber?.toString().includes(query) ||
+                      `${player.player.firstName} ${player.player.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
+                      `${player.player.lastName}, ${player.player.firstName}`.toLowerCase().includes(query.toLowerCase());
+                    
+                    // Show all players, but highlight those that match the search
+                    return (
+                      <Combobox.Option
+                        key={player.player.playerId}
+                        className={({ active }) =>
+                          classNames(
+                            'relative cursor-default select-none py-2 pl-3 pr-9',
+                            active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                            !matchesQuery && query !== '' ? 'opacity-40' : 'opacity-100'
+                          )
+                        }
+                        value={player}
+                      >
+                        {({ active }) => (
+                          <>
+                            <div className={classNames('flex items-center', isSelected ? 'font-semibold' : 'font-normal')}>
+                              <span className="w-6 text-center mr-3">{player.player.jerseyNumber}</span>
+                              <span className="truncate">{player.player.lastName}, {player.player.firstName}</span>
+                            </div>
 
-                          {selected ? (
-                            <span
-                              className={classNames(
-                                'absolute inset-y-0 right-0 flex items-center pr-4',
-                                active ? 'text-white' : 'text-indigo-600'
-                              )}
-                            >
-                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                            </span>
-                          ) : null}
-                        </>
-                      )}
-                    </Combobox.Option>
-                  ))
+                            {isSelected ? (
+                              <span
+                                className={classNames(
+                                  'absolute inset-y-0 right-0 flex items-center pr-4',
+                                  active ? 'text-white' : 'text-indigo-600'
+                                )}
+                              >
+                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Combobox.Option>
+                    );
+                  })
                 )}
               </Combobox.Options>
             </Transition>
