@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Link from 'next/link';
 import { RosterPlayer } from '../../types/MatchValues';
@@ -49,7 +48,7 @@ const RosterList: React.FC<RosterListProps> = ({
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="border-b border-gray-200 pb-5 flex items-center justify-between mt-3 sm:mt-0 sm:ml-4">
+      <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3">
         <h3 className="text-md font-semibold text-gray-900 truncate">{teamName}</h3>
         {showEditButton && editUrl && (
           <Link href={editUrl}>
@@ -64,34 +63,40 @@ const RosterList: React.FC<RosterListProps> = ({
       <div className="overflow-auto bg-white shadow-md rounded-md border">
         {isPublished && sortedRoster && sortedRoster.length > 0 ? (
           <table className="min-w-full divide-y divide-gray-200">
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200 text-gray-900 text-sm">
               {sortedRoster.map((player) => (
-                <tr key={player.player.playerId}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    #{player.player.jerseyNumber}
+                <tr key={player.player.playerId} className="h-11">
+                  <td className="px-3 py-2 whitespace-nowrap w-8 text-center">
+                    {player.player.jerseyNumber}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-3 py-2 whitespace-nowrap w-4">
                     {player.playerPosition.key}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     {player.player.lastName}, {player.player.firstName}
                   </td>
-                  {player.called && (
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2 whitespace-nowrap">
+
+                    <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                      {player.passNumber}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {player.called && (
                       <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
                         </svg>
-                        Hochgemeldet
+                        <span className="hidden sm:inline">Hochgemeldet</span>
                       </span>
-                    </td>
-                  )}
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <div className="p-6 text-center text-gray-500">
+          <div className="text-center py-4 text-sm text-gray-500">
             {!isPublished ? 'Aufstellung nicht veröffentlicht' : 'Keine Spieler eingetragen'}
           </div>
         )}
