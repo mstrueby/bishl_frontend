@@ -13,6 +13,8 @@ interface ScoresListProps {
   showEditButton?: boolean;
   editUrl?: string;
   refreshMatchData?: () => void;
+  setIsHomeGoalDialogOpen?: (open: boolean) => void;
+  setEditingHomeGoal?: (goal: ScoresBase | null) => void;
 }
 
 const ScoresList: React.FC<ScoresListProps> = ({
@@ -23,6 +25,8 @@ const ScoresList: React.FC<ScoresListProps> = ({
   showEditButton = false,
   editUrl,
   refreshMatchData,
+  setIsHomeGoalDialogOpen,
+  setEditingHomeGoal,
 }) => {
   return (
     <div className="w-full">
@@ -71,9 +75,10 @@ const ScoresList: React.FC<ScoresListProps> = ({
                       <div className="flex justify-end space-x-2 flex-shrink-0">
                         <button
                           onClick={() => {
-                            // Note: setIsHomeGoalDialogOpen and setEditingHomeGoal would need to be passed as props
-                            // or handled differently based on your implementation
-                            console.log('Edit goal clicked for:', goal);
+                            if (setIsHomeGoalDialogOpen && setEditingHomeGoal) {
+                              setIsHomeGoalDialogOpen(true);
+                              setEditingHomeGoal(goal);
+                            }
                           }}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
