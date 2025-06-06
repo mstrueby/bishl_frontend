@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
+import PlayerSelect from './PlayerSelect';
 
 interface Player {
   playerId: string;
@@ -22,8 +23,8 @@ interface AddGoalDialogProps {
 
 const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: AddGoalDialogProps) => {
   const [matchTime, setMatchTime] = useState('');
-  const [selectedGoalPlayerId, setSelectedGoalPlayerId] = useState('');
-  const [selectedAssistPlayerId, setSelectedAssistPlayerId] = useState('');
+  const [selectedGoalPlayer, setSelectedGoalPlayer] = useState<{player: Player} | null>(null);
+  const [selectedAssistPlayer, setSelectedAssistPlayer] = useState<{player: Player} | null>(null);
   const [isPPG, setIsPPG] = useState(false);
   const [isSHG, setIsSHG] = useState(false);
   const [isGWG, setIsGWG] = useState(false);
@@ -34,21 +35,32 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   useEffect(() => {
     if (isOpen && editGoal) {
       setMatchTime(editGoal.matchTime || '');
-      setSelectedGoalPlayerId(editGoal.goalPlayer ? editGoal.goalPlayer.playerId : '');
-      setSelectedAssistPlayerId(editGoal.assistPlayer ? editGoal.assistPlayer.playerId : '');
+      
+      // Find and set goal player
+      const goalPlayer = editGoal.goalPlayer 
+        ? roster.find(item => item.player.playerId === editGoal.goalPlayer.playerId) || null 
+        : null;
+      setSelectedGoalPlayer(goalPlayer);
+      
+      // Find and set assist player
+      const assistPlayer = editGoal.assistPlayer 
+        ? roster.find(item => item.player.playerId === editGoal.assistPlayer.playerId) || null 
+        : null;
+      setSelectedAssistPlayer(assistPlayer);
+      
       setIsPPG(editGoal.isPPG || false);
       setIsSHG(editGoal.isSHG || false);
       setIsGWG(editGoal.isGWG || false);
     } else if (isOpen && !editGoal) {
       // Reset form when opening for a new goal
       setMatchTime('');
-      setSelectedGoalPlayerId('');
-      setSelectedAssistPlayerId('');
+      setSelectedGoalPlayer(null);
+      setSelectedAssistPlayer(null);
       setIsPPG(false);
       setIsSHG(false);
       setIsGWG(false);
     }
-  }, [isOpen, editGoal]);
+  }, [isOpen, editGoal, roster]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,7 +70,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       return;
     }
 
-    if (!selectedGoalPlayerId) {
+    if (!selectedGoalPlayer) {
       setError('Bitte Torschütze auswählen');
       return;
     }
@@ -66,17 +78,11 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setIsSubmitting(true);
     setError('');
 
-    // Find the selected players from the roster
-    const goalPlayer = roster.find(item => item.player.playerId === selectedGoalPlayerId)?.player;
-    const assistPlayer = selectedAssistPlayerId 
-      ? roster.find(item => item.player.playerId === selectedAssistPlayerId)?.player 
-      : null;
-
     try {
       const goalData = {
         matchTime,
-        goalPlayer,
-        assistPlayer: assistPlayer || undefined,
+        goalPlayer: selectedGoalPlayer.player,
+        assistPlayer: selectedAssistPlayer ? selectedAssistPlayer.player : undefined,
         isPPG,
         isSHG,
         isGWG
@@ -120,8 +126,8 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
   const resetForm = () => {
     setMatchTime('');
-    setSelectedGoalPlayerId('');
-    setSelectedAssistPlayerId('');
+    setSelectedGoalPlayer(null);
+    setSelectedAssistPlayer(null);
     setIsPPG(false);
     setIsSHG(false);
     setIsGWG(false);
@@ -174,39 +180,25 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Torschütze
-                    </label>
-                    <select
-                      value={selectedGoalPlayerId}
-                      onChange={(e) => setSelectedGoalPlayerId(e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    >
-                      <option value="">Spieler auswählen</option>
-                      {roster && roster.map((item) => (
-                        <option key={item.player.playerId} value={item.player.playerId}>
-                          #{item.player.jerseyNumber} {item.player.firstName} {item.player.lastName}
-                        </option>
-                      ))}
-                    </select>
+                    <PlayerSelect
+                      selectedPlayer={selectedGoalPlayer}
+                      onChange={setSelectedGoalPlayer}
+                      roster={roster}
+                      label="Torschütze"
+                      required={true}
+                      placeholder="Torschützen auswählen"
+                    />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Assist (optional)
-                    </label>
-                    <select
-                      value={selectedAssistPlayerId}
-                      onChange={(e) => setSelectedAssistPlayerId(e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    >
-                      <option value="">Kein Assist</option>
-                      {roster && roster.map((item) => (
-                        <option key={item.player.playerId} value={item.player.playerId}>
-                          #{item.player.jerseyNumber} {item.player.firstName} {item.player.lastName}
-                        </option>
-                      ))}
-                    </select>
+                    <PlayerSelect
+                      selectedPlayer={selectedAssistPlayer}
+                      onChange={setSelectedAssistPlayer}
+                      roster={roster}
+                      label="Assist (optional)"
+                      required={false}
+                      placeholder="Assist auswählen"
+                    />
                   </div>
 
                   <div className="mt-6 flex justify-end space-x-3">
