@@ -41,8 +41,10 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
     }
   }, [propSelectedPlayer]);
 
-  // Filter roster based on query
-  const filteredRoster = query === ''
+  const [showAllOptions, setShowAllOptions] = useState(false);
+
+  // Filter roster based on query and showAllOptions flag
+  const filteredRoster = showAllOptions || query === ''
     ? roster
     : roster.filter((player) => {
         const jerseyMatch = player.player.jerseyNumber?.toString().includes(query);
@@ -74,6 +76,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
+    setShowAllOptions(false); // Reset to filtered mode when typing
     
     // If user types a jersey number and there's an exact match, auto-select it
     if (value && /^\d+$/.test(value)) {
@@ -127,7 +130,10 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
               placeholder={placeholder}
               autoComplete="off"
             />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <Combobox.Button 
+              className="absolute inset-y-0 right-0 flex items-center pr-2"
+              onClick={() => setShowAllOptions(true)}
+            >
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </Combobox.Button>
 
@@ -151,27 +157,25 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
               }}
             >
               <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                {roster.length === 0 ? (
+                {filteredRoster.length === 0 && query !== '' ? (
+                  <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                    Kein Spieler gefunden.
+                  </div>
+                ) : filteredRoster.length === 0 ? (
                   <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                     Niemand verfügbar.
                   </div>
                 ) : (
-                  roster.map((player) => {
+                  filteredRoster.map((player) => {
                     const isSelected = selectedPlayer?.player.playerId === player.player.playerId;
-                    const matchesQuery = query === '' || 
-                      player.player.jerseyNumber?.toString().includes(query) ||
-                      `${player.player.firstName} ${player.player.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
-                      `${player.player.lastName}, ${player.player.firstName}`.toLowerCase().includes(query.toLowerCase());
                     
-                    // Show all players, but highlight those that match the search
                     return (
                       <Combobox.Option
                         key={player.player.playerId}
                         className={({ active }) =>
                           classNames(
                             'relative cursor-default select-none py-2 pl-3 pr-9',
-                            active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                            !matchesQuery && query !== '' ? 'opacity-40' : 'opacity-100'
+                            active ? 'bg-indigo-600 text-white' : 'text-gray-900'
                           )
                         }
                         value={player}
