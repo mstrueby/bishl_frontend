@@ -3,6 +3,7 @@ import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { Combobox, Transition } from '@headlessui/react';
 import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { MinusCircleIcon} from '@heroicons/react/24/outline'
 import { classNames } from '../../tools/utils';
 
 interface PlayerSelectProps {
@@ -110,7 +111,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   };
 
   return (
-    <div className="flex">
+    <div className="w-full">
       <Combobox value={selectedPlayer} onChange={handlePlayerChange}>
         {({ open }) => (
           <>
@@ -119,114 +120,114 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
                 {label}
               </Combobox.Label>
             )}
-            <div className="flex relative">
-              <Combobox.Input
-                ref={(el) => {
-                  inputRef.current = el;
-                  if (typeof ref === 'function') {
-                    ref(el);
-                  } else if (ref) {
-                    ref.current = el;
-                  }
-                }}
-                tabIndex={tabIndex}
-                className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ${error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
-                onChange={handleQueryChange}
-                value={selectedPlayer ? displayValue(selectedPlayer) : query}
-                placeholder={placeholder}
-                autoComplete="off"
-              />
-              <Combobox.Button
-                className="absolute inset-y-0 right-0 flex items-center pr-2"
-                onClick={() => setShowAllOptions(true)}
-              >
-                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </Combobox.Button>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Combobox.Input
+                  ref={(el) => {
+                    inputRef.current = el;
+                    if (typeof ref === 'function') {
+                      ref(el);
+                    } else if (ref) {
+                      ref.current = el;
+                    }
+                  }}
+                  tabIndex={tabIndex}
+                  className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ${error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
+                  onChange={handleQueryChange}
+                  value={selectedPlayer ? displayValue(selectedPlayer) : query}
+                  placeholder={placeholder}
+                  autoComplete="off"
+                />
+                <Combobox.Button
+                  className="absolute inset-y-0 right-0 flex items-center pr-2"
+                  onClick={() => setShowAllOptions(true)}
+                >
+                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </Combobox.Button>
 
               <Transition
-                as={Fragment}
-                leave="transition ease-in duration-100"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-                afterLeave={() => {
-                  // Only clear query if no player is selected and query doesn't match any player
-                  if (!selectedPlayer && query) {
-                    const hasMatchingPlayer = roster.some(player => {
-                      const playerName = `${player.player.lastName}, ${player.player.firstName}`;
-                      return playerName.toLowerCase().includes(query.toLowerCase()) ||
-                        player.player.jerseyNumber?.toString().includes(query);
-                    });
-                    if (!hasMatchingPlayer) {
-                      setQuery('');
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                  afterLeave={() => {
+                    // Only clear query if no player is selected and query doesn't match any player
+                    if (!selectedPlayer && query) {
+                      const hasMatchingPlayer = roster.some(player => {
+                        const playerName = `${player.player.lastName}, ${player.player.firstName}`;
+                        return playerName.toLowerCase().includes(query.toLowerCase()) ||
+                          player.player.jerseyNumber?.toString().includes(query);
+                      });
+                      if (!hasMatchingPlayer) {
+                        setQuery('');
+                      }
                     }
-                  }
-                }}
-              >
-                <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                  {filteredRoster.length === 0 && query !== '' ? (
-                    <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                      Kein Spieler gefunden.
-                    </div>
-                  ) : filteredRoster.length === 0 ? (
-                    <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                      Niemand verfügbar.
-                    </div>
-                  ) : (
-                    filteredRoster.map((player) => {
-                      const isSelected = selectedPlayer?.player.playerId === player.player.playerId;
+                  }}
+                >
+                  <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    {filteredRoster.length === 0 && query !== '' ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Kein Spieler gefunden.
+                      </div>
+                    ) : filteredRoster.length === 0 ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Niemand verfügbar.
+                      </div>
+                    ) : (
+                      filteredRoster.map((player) => {
+                        const isSelected = selectedPlayer?.player.playerId === player.player.playerId;
 
-                      return (
-                        <Combobox.Option
-                          key={player.player.playerId}
-                          className={({ active }) =>
-                            classNames(
-                              'relative cursor-default select-none py-2 pl-3 pr-9',
-                              active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-                            )
-                          }
-                          value={player}
-                        >
-                          {({ active }) => (
-                            <>
-                              <div className={classNames('flex items-center', isSelected ? 'font-semibold' : 'font-normal')}>
-                                <span className="w-6 text-center mr-3">{player.player.jerseyNumber}</span>
-                                <span className="truncate">{player.player.lastName}, {player.player.firstName}</span>
-                              </div>
+                        return (
+                          <Combobox.Option
+                            key={player.player.playerId}
+                            className={({ active }) =>
+                              classNames(
+                                'relative cursor-default select-none py-2 pl-3 pr-9',
+                                active ? 'bg-indigo-600 text-white' : 'text-gray-900'
+                              )
+                            }
+                            value={player}
+                          >
+                            {({ active }) => (
+                              <>
+                                <div className={classNames('flex items-center', isSelected ? 'font-semibold' : 'font-normal')}>
+                                  <span className="w-6 text-center mr-3">{player.player.jerseyNumber}</span>
+                                  <span className="truncate">{player.player.lastName}, {player.player.firstName}</span>
+                                </div>
 
-                              {isSelected ? (
-                                <span
-                                  className={classNames(
-                                    'absolute inset-y-0 right-0 flex items-center pr-4',
-                                    active ? 'text-white' : 'text-indigo-600'
-                                  )}
-                                >
-                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Combobox.Option>
-                      );
-                    })
-                  )}
-                </Combobox.Options>
-              </Transition>
+                                {isSelected ? (
+                                  <span
+                                    className={classNames(
+                                      'absolute inset-y-0 right-0 flex items-center pr-4',
+                                      active ? 'text-white' : 'text-indigo-600'
+                                    )}
+                                  >
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Combobox.Option>
+                        );
+                      })
+                    )}
+                  </Combobox.Options>
+                </Transition>
+              </div>
+              {removeButton && selectedPlayer && (
+                <button
+                  type="button"
+                  onClick={() => handlePlayerChange(null)}
+                  className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md border border-gray-300 shadow-sm transition-colors flex-shrink-0"
+                  title="Spieler entfernen"
+                >
+                  <MinusCircleIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+              )}
             </div>
           </>
         )}
       </Combobox>
-      {removeButton && selectedPlayer && (
-        <button
-          type="button"
-          onClick={() => handlePlayerChange(null)}
-          className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
-          title="Spieler entfernen"
-        >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
-      )}
     </div>
   );
 });
