@@ -22,10 +22,6 @@ const validationSchema = Yup.object().shape({
   matchTime: Yup.string()
     .required()
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
-  goalPlayer: Yup.object()
-    .nullable()
-    .required(),
-  assistPlayer: Yup.object().nullable(), // Optional
 });
 
 const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: AddGoalDialogProps) => {
@@ -66,7 +62,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setError(''); // Clear any previous errors when dialog opens
   }, [isOpen, editGoal, roster]);
 
-  const handleSubmit = async (values: { matchTime: string; goalPlayer: RosterPlayer | null }) => {
+  const handleSubmit = async (values: { matchTime: string }) => {
     setIsSubmitting(true);
     setError('');
 
