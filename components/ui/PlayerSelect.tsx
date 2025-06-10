@@ -86,7 +86,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
         inputRef.current.focus();
       }
     }
-  }), []);
+  } as Partial<HTMLInputElement>), []);
 
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -110,7 +110,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   };
 
   return (
-    <>
+    <div className="flex">
       <Combobox value={selectedPlayer} onChange={handlePlayerChange}>
         {({ open }) => (
           <>
@@ -119,7 +119,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
                 {label}
               </Combobox.Label>
             )}
-            <div className="relative">
+            <div className="flex relative">
               <Combobox.Input
                 ref={(el) => {
                   inputRef.current = el;
@@ -227,7 +227,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
           </svg>
         </button>
       )}
-    </>
+    </div>
   );
 });
 
