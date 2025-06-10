@@ -88,6 +88,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
         isGWG
       };
 
+      console.log('Goal Data:', goalData)
       if (editGoal && editGoal._id) {
         // Update existing goal
         await axios.patch(
