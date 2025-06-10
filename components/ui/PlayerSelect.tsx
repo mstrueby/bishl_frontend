@@ -90,16 +90,6 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
     const value = event.target.value;
     setQuery(value);
     setShowAllOptions(false); // Reset to filtered mode when typing
-    
-    // If user types a jersey number and there's an exact match, auto-select it
-    if (value && /^\d+$/.test(value)) {
-      const jerseyNumber = parseInt(value);
-      const exactMatch = roster.find(player => player.player.jerseyNumber === jerseyNumber);
-      if (exactMatch && value.length <= 2) { // Limit to 2 digits for jersey numbers
-        handlePlayerChange(exactMatch);
-        return;
-      }
-    }
 
     // If query doesn't match current selection, clear selection
     if (selectedPlayer) {
