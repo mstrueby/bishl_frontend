@@ -47,10 +47,23 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   const filteredRoster = showAllOptions || query === ''
     ? roster
     : roster.filter((player) => {
-        const jerseyMatch = player.player.jerseyNumber?.toString().includes(query);
-        const nameMatch = `${player.player.firstName} ${player.player.lastName}`.toLowerCase().includes(query.toLowerCase());
-        const reverseNameMatch = `${player.player.lastName}, ${player.player.firstName}`.toLowerCase().includes(query.toLowerCase());
-        return jerseyMatch || nameMatch || reverseNameMatch;
+        const queryLower = query.toLowerCase().trim();
+        
+        // Jersey number search (exact match and partial match)
+        const jerseyNumber = player.player.jerseyNumber?.toString() || '';
+        const jerseyMatch = jerseyNumber.includes(query) || jerseyNumber === query;
+        
+        // Name searches
+        const fullName = `${player.player.firstName} ${player.player.lastName}`.toLowerCase();
+        const reverseName = `${player.player.lastName}, ${player.player.firstName}`.toLowerCase();
+        const nameMatch = fullName.includes(queryLower) || reverseName.includes(queryLower);
+        
+        // Combined search (e.g., "12 Smith" or "Smith 12")
+        const combinedMatch = queryLower.includes(jerseyNumber.toLowerCase()) || 
+                             `${jerseyNumber} ${fullName}`.includes(queryLower) ||
+                             `${jerseyNumber} ${reverseName}`.includes(queryLower);
+        
+        return jerseyMatch || nameMatch || combinedMatch;
       });
 
   const handlePlayerChange = (player: RosterPlayer | null) => {
