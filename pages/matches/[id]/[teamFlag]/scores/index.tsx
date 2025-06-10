@@ -343,6 +343,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     required={false}
                                     placeholder="Keine Vorlage"
                                     tabIndex={index * 3 + 3}
+                                    removeButton={true}
                                   />
                                 </div>
                               </div>

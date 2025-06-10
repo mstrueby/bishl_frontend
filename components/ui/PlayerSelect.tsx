@@ -3,6 +3,7 @@ import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { Combobox, Transition } from '@headlessui/react';
 import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { MinusCircleIcon} from '@heroicons/react/24/outline'
 import { classNames } from '../../tools/utils';
 
 interface PlayerSelectProps {
@@ -120,7 +121,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
               </Combobox.Label>
             )}
             <div className="flex items-center gap-2">
-              <div className="flex relative flex-1">
+              <div className="flex-1 relative">
                 <Combobox.Input
                   ref={(el) => {
                     inputRef.current = el;
@@ -217,12 +218,10 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
                 <button
                   type="button"
                   onClick={() => handlePlayerChange(null)}
-                  className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
+                  className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md border border-gray-300 shadow-sm transition-colors flex-shrink-0"
                   title="Spieler entfernen"
                 >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  <MinusCircleIcon className="h-5 w-5" aria-hidden="true" />
                 </button>
               )}
             </div>
