@@ -2,20 +2,14 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
 import PlayerSelect from './PlayerSelect';
-
-interface Player {
-  playerId: string;
-  firstName: string;
-  lastName: string;
-  jerseyNumber: number;
-}
+import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
 
 interface AddGoalDialogProps {
   isOpen: boolean;
   onClose: () => void;
   matchId: string;
   teamFlag: 'home' | 'away';
-  roster: Array<{player: Player}>;
+  roster: RosterPlayer[];
   jwt: string;
   onSuccess: () => void;
   editGoal?: any;
@@ -23,8 +17,8 @@ interface AddGoalDialogProps {
 
 const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: AddGoalDialogProps) => {
   const [matchTime, setMatchTime] = useState('');
-  const [selectedGoalPlayer, setSelectedGoalPlayer] = useState<{player: Player} | null>(null);
-  const [selectedAssistPlayer, setSelectedAssistPlayer] = useState<{player: Player} | null>(null);
+  const [selectedGoalPlayer, setSelectedGoalPlayer] = useState<RosterPlayer | null>(null);
+  const [selectedAssistPlayer, setSelectedAssistPlayer] = useState<RosterPlayer | null>(null);
   const [isPPG, setIsPPG] = useState(false);
   const [isSHG, setIsSHG] = useState(false);
   const [isGWG, setIsGWG] = useState(false);
