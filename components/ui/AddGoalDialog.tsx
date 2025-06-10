@@ -20,11 +20,11 @@ interface AddGoalDialogProps {
 
 const validationSchema = Yup.object().shape({
   matchTime: Yup.string()
-    .required('Spielzeit ist erforderlich')
+    .required()
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
   goalPlayer: Yup.object()
     .nullable()
-    .required('Torschütze ist erforderlich'),
+    .required(),
   assistPlayer: Yup.object().nullable(), // Optional
 });
 
@@ -186,11 +186,6 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                           placeholder="Spieler auswählen"
                           error={!!(errors.goalPlayer && touched.goalPlayer)}
                         />
-                        {errors.goalPlayer && touched.goalPlayer && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {errors.goalPlayer as string}
-                          </p>
-                        )}
                       </div>
 
                       <div>
