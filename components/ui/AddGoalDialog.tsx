@@ -45,13 +45,13 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
         ? roster.find(item => item.player.playerId === editGoal.goalPlayer.playerId) || null 
         : null;
       setSelectedGoalPlayer(goalPlayer);
-      
+
       // Find and set assist player
       const assistPlayer = editGoal.assistPlayer 
         ? roster.find(item => item.player.playerId === editGoal.assistPlayer.playerId) || null 
         : null;
       setSelectedAssistPlayer(assistPlayer);
-      
+
       setIsPPG(editGoal.isPPG || false);
       setIsSHG(editGoal.isSHG || false);
       setIsGWG(editGoal.isGWG || false);
@@ -70,10 +70,16 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setIsSubmitting(true);
     setError('');
 
+    if (!selectedGoalPlayer) {
+      setError('Torschütze ist erforderlich');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const goalData = {
         matchTime: values.matchTime,
-        goalPlayer: values.goalPlayer?.player,
+        goalPlayer: selectedGoalPlayer?.player,
         assistPlayer: selectedAssistPlayer ? selectedAssistPlayer.player : undefined,
         isPPG,
         isSHG,
@@ -160,7 +166,6 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                 <Formik
                   initialValues={{
                     matchTime: editGoal?.matchTime || '',
-                    goalPlayer: selectedGoalPlayer
                   }}
                   validationSchema={validationSchema}
                   enableReinitialize={true}
@@ -176,16 +181,18 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       <div>
                         <PlayerSelect
                           selectedPlayer={selectedGoalPlayer}
-                          onChange={(player) => {
-                            setSelectedGoalPlayer(player);
-                            setFieldValue('goalPlayer', player);
-                          }}
+                          onChange={setSelectedGoalPlayer}
                           roster={roster}
                           label="Torschütze"
                           required={true}
                           placeholder="Spieler auswählen"
-                          error={!!(errors.goalPlayer && touched.goalPlayer)}
+                          error={!selectedGoalPlayer && error.includes('Torschütze')}
                         />
+                        {!selectedGoalPlayer && error.includes('Torschütze') && (
+                          <p className="mt-1 text-sm text-red-600">
+                            Torschütze ist erforderlich
+                          </p>
+                        )}
                       </div>
 
                       <div>
