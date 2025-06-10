@@ -49,9 +49,9 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
     : roster.filter((player) => {
         const queryLower = query.toLowerCase().trim();
         
-        // Jersey number search (exact match and partial match)
+        // Jersey number search (exact match and starts-with match)
         const jerseyNumber = player.player.jerseyNumber?.toString() || '';
-        const jerseyMatch = jerseyNumber.includes(query) || jerseyNumber === query;
+        const jerseyMatch = jerseyNumber === query || jerseyNumber.startsWith(query);
         
         // Name searches
         const fullName = `${player.player.firstName} ${player.player.lastName}`.toLowerCase();
