@@ -86,7 +86,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
         inputRef.current.focus();
       }
     }
-  }), []);
+  } as Partial<HTMLInputElement>), []);
 
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -110,7 +110,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   };
 
   return (
-    <>
+    <div className="flex">
       <Combobox value={selectedPlayer} onChange={handlePlayerChange}>
         {({ open }) => (
           <>
@@ -119,7 +119,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
                 {label}
               </Combobox.Label>
             )}
-            <div className="relative">
+            <div className="flex relative">
               <Combobox.Input
                 ref={(el) => {
                   inputRef.current = el;
@@ -215,17 +215,19 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
           </>
         )}
       </Combobox>
-      <button
-        type="button"
-        onClick={() => setSelectedAssistPlayer(null)}
-        className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
-        title="Vorlage entfernen"
-      >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-      </button>
-    </>
+      {removeButton && selectedPlayer && (
+        <button
+          type="button"
+          onClick={() => handlePlayerChange(null)}
+          className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
+          title="Spieler entfernen"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      )}
+    </div>
   );
 });
 
