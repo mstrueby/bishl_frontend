@@ -32,7 +32,6 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   const [isGWG, setIsGWG] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [goalPlayerError, setGoalPlayerError] = useState('');
 
   // Fill the form with the goal data when editing
   useEffect(() => {
@@ -61,16 +60,14 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       setIsGWG(false);
     }
     setError(''); // Clear any previous errors when dialog opens
-    setGoalPlayerError(''); // Clear goalPlayer error when dialog opens
   }, [isOpen, editGoal, roster]);
 
   const handleSubmit = async (values: { matchTime: string }) => {
     setIsSubmitting(true);
     setError('');
-    setGoalPlayerError('');
 
     if (!selectedGoalPlayer) {
-      setGoalPlayerError('Torschütze ist erforderlich');
+      setError('Torschütze ist erforderlich');
       setIsSubmitting(false);
       return;
     }
@@ -129,7 +126,6 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setIsSHG(false);
     setIsGWG(false);
     setError('');
-    setGoalPlayerError('');
   };
 
   return (
@@ -181,21 +177,16 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       <div>
                         <PlayerSelect
                           selectedPlayer={selectedGoalPlayer}
-                          onChange={(player) => {
-                            setSelectedGoalPlayer(player);
-                            if (player && goalPlayerError) {
-                              setGoalPlayerError('');
-                            }
-                          }}
+                          onChange={setSelectedGoalPlayer}
                           roster={roster}
                           label="Torschütze"
                           required={true}
                           placeholder="Spieler auswählen"
-                          error={!!goalPlayerError}
+                          error={!selectedGoalPlayer && error.includes('Torschütze')}
                         />
-                        {goalPlayerError && (
+                        {!selectedGoalPlayer && error.includes('Torschütze') && (
                           <p className="mt-1 text-sm text-red-600">
-                            {goalPlayerError}
+                            Torschütze ist erforderlich
                           </p>
                         )}
                       </div>
