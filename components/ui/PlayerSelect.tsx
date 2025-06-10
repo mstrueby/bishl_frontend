@@ -59,8 +59,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
         const nameMatch = fullName.includes(queryLower) || reverseName.includes(queryLower);
         
         // Combined search (e.g., "12 Smith" or "Smith 12")
-        const combinedMatch = queryLower.includes(jerseyNumber.toLowerCase()) || 
-                             `${jerseyNumber} ${fullName}`.includes(queryLower) ||
+        const combinedMatch = `${jerseyNumber} ${fullName}`.includes(queryLower) ||
                              `${jerseyNumber} ${reverseName}`.includes(queryLower);
         
         return jerseyMatch || nameMatch || combinedMatch;
