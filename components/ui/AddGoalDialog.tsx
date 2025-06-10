@@ -24,13 +24,7 @@ const validationSchema = Yup.object().shape({
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
   goalPlayer: Yup.object()
     .nullable()
-    .required('Torschütze ist erforderlich')
-    .shape({
-      playerId: Yup.string().required(),
-      firstName: Yup.string().required(),
-      lastName: Yup.string().required(),
-      jerseyNumber: Yup.number().required()
-    }),
+    .required(),
   assistPlayer: Yup.object().nullable(), // Optional
 });
 
@@ -69,21 +63,17 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       setIsSHG(false);
       setIsGWG(false);
     }
+    setError(''); // Clear any previous errors when dialog opens
   }, [isOpen, editGoal, roster]);
 
-  const handleSubmit = async (values: { matchTime: string }) => {
-    if (!selectedGoalPlayer) {
-      setError('Bitte Torschütze auswählen');
-      return;
-    }
-
+  const handleSubmit = async (values: { matchTime: string; goalPlayer: RosterPlayer | null }) => {
     setIsSubmitting(true);
     setError('');
 
     try {
       const goalData = {
         matchTime: values.matchTime,
-        goalPlayer: selectedGoalPlayer.player,
+        goalPlayer: values.goalPlayer?.player,
         assistPlayer: selectedAssistPlayer ? selectedAssistPlayer.player : undefined,
         isPPG,
         isSHG,
@@ -169,13 +159,14 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
                 <Formik
                   initialValues={{
-                    matchTime: editGoal?.matchTime || ''
+                    matchTime: editGoal?.matchTime || '',
+                    goalPlayer: selectedGoalPlayer
                   }}
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={handleSubmit}
                 >
-                  {({ isValid }) => (
+                  {({ values, setFieldValue, errors, touched, isValid }) => (
                     <Form className="mt-4 space-y-4">
                       <InputMatchTime
                         name="matchTime"
@@ -185,12 +176,15 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       <div>
                         <PlayerSelect
                           selectedPlayer={selectedGoalPlayer}
-                          onChange={setSelectedGoalPlayer}
+                          onChange={(player) => {
+                            setSelectedGoalPlayer(player);
+                            setFieldValue('goalPlayer', player);
+                          }}
                           roster={roster}
                           label="Torschütze"
                           required={true}
                           placeholder="Spieler auswählen"
-                          error={error}
+                          error={!!(errors.goalPlayer && touched.goalPlayer)}
                         />
                       </div>
 
@@ -219,8 +213,8 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         </button>
                         <button
                           type="submit"
-                          disabled={isSubmitting}
-                          className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          disabled={isSubmitting || !isValid}
+                          className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmitting ? (
                             <>
