@@ -63,6 +63,7 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
           onBlur={field.onBlur}
           placeholder="00:00"
           tabIndex={props.tabIndex}
+          autocomplete="off"
         />
         {/**
         {meta.touched && meta.error ? (
