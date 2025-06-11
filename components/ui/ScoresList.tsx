@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { ScoresBase } from '../../types/MatchValues';
 import GoalRegisterForm from '../../pages/matches/[id]/[teamFlag]/scores';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface ScoresListProps {
   jwt: string;
@@ -28,6 +29,39 @@ const ScoresList: React.FC<ScoresListProps> = ({
   setIsHomeGoalDialogOpen,
   setEditingHomeGoal,
 }) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<ScoresBase | null>(null);
+
+  const handleDeleteClick = (goal: ScoresBase) => {
+    setGoalToDelete(goal);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!goalToDelete) return;
+
+    try {
+      const response = await axios.delete(
+        `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/home/scores/${goalToDelete._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      if (response.status === 200 || response.status === 204) {
+        if (refreshMatchData) {
+          refreshMatchData();
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setGoalToDelete(null);
+    }
+  };
   return (
     <div className="w-full">
       {/* Header */}
@@ -85,28 +119,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
                           <PencilIcon className="h-5 w-5" aria-hidden="true" />
                         </button>
                         <button
-                          onClick={async () => {
-                            if (window.confirm("Sind Sie sicher, dass Sie dieses Tor löschen möchten?")) {
-                              try {
-                                const response = await axios.delete(
-                                  `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/home/scores/${goal._id}`,
-                                  {
-                                    headers: {
-                                      Authorization: `Bearer ${jwt}`,
-                                      'Content-Type': 'application/json'
-                                    }
-                                  }
-                                );
-                                if (response.status === 200 || response.status === 204) {
-                                  if (refreshMatchData) {
-                                    refreshMatchData();
-                                  }
-                                }
-                              } catch (error) {
-                                console.error('Error deleting goal:', error);
-                              }
-                            }
-                          }}
+                          onClick={() => handleDeleteClick(goal)}
                           className="text-red-600 hover:text-red-900"
                         >
                           <TrashIcon className="h-5 w-5" aria-hidden="true" />
@@ -122,6 +135,18 @@ const ScoresList: React.FC<ScoresListProps> = ({
           </div>
         )}
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setGoalToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Tor löschen"
+        description={`Sind Sie sicher, dass Sie das Tor von <strong>${goalToDelete?.goalPlayer ? `#${goalToDelete.goalPlayer.jerseyNumber} ${goalToDelete.goalPlayer.firstName} ${goalToDelete.goalPlayer.lastName} (Zeit ${goalToDelete.matchTime})` : 'Unbekannt'}</strong> löschen möchten?`}
+        descriptionSubText="Diese Aktion kann nicht rückgängig gemacht werden."
+      />
     </div>
   );
 };
