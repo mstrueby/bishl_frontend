@@ -104,20 +104,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     }
   }, [id, isRefreshing]);
 
-  // Auto-refresh if match is in progress
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (match.matchStatus.key === 'INPROGRESS') {
-      interval = setInterval(() => {
-        refreshMatchData();
-      }, 30000); // Refresh every 30 seconds for live matches
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [match.matchStatus.key, id, refreshMatchData]);
+  
 
   let showLinkEdit = false;
   let showLinkStatus = false;
