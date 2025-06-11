@@ -32,19 +32,20 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   const [isGWG, setIsGWG] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [goalPlayerError, setGoalPlayerError] = useState(false);
 
   // Fill the form with the goal data when editing
   useEffect(() => {
     if (isOpen && editGoal) {
       // Find and set goal player
-      const goalPlayer = editGoal.goalPlayer 
-        ? roster.find(item => item.player.playerId === editGoal.goalPlayer.playerId) || null 
+      const goalPlayer = editGoal.goalPlayer
+        ? roster.find(item => item.player.playerId === editGoal.goalPlayer.playerId) || null
         : null;
       setSelectedGoalPlayer(goalPlayer);
 
       // Find and set assist player
-      const assistPlayer = editGoal.assistPlayer 
-        ? roster.find(item => item.player.playerId === editGoal.assistPlayer.playerId) || null 
+      const assistPlayer = editGoal.assistPlayer
+        ? roster.find(item => item.player.playerId === editGoal.assistPlayer.playerId) || null
         : null;
       setSelectedAssistPlayer(assistPlayer);
 
@@ -60,14 +61,17 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       setIsGWG(false);
     }
     setError(''); // Clear any previous errors when dialog opens
+    setGoalPlayerError(false); // Clear goal player error state
   }, [isOpen, editGoal, roster]);
 
   const handleSubmit = async (values: { matchTime: string }) => {
     setIsSubmitting(true);
     setError('');
+    setGoalPlayerError(false);
 
     if (!selectedGoalPlayer) {
       setError('Torschütze ist erforderlich');
+      setGoalPlayerError(true);
       setIsSubmitting(false);
       return;
     }
@@ -98,7 +102,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       } else {
         // Create new goal
         await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/`, 
+          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/`,
           goalData,
           {
             headers: {
@@ -126,6 +130,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setIsSHG(false);
     setIsGWG(false);
     setError('');
+    setGoalPlayerError(false);
   };
 
   return (
@@ -153,12 +158,6 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   {editGoal ? 'Tor bearbeiten' : 'Tor hinzufügen'}
                 </Dialog.Title>
 
-                {error && (
-                  <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
-                    {error}
-                  </div>
-                )}
-
                 <Formik
                   initialValues={{
                     matchTime: editGoal?.matchTime || '',
@@ -177,18 +176,19 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       <div>
                         <PlayerSelect
                           selectedPlayer={selectedGoalPlayer}
-                          onChange={setSelectedGoalPlayer}
+                          onChange={(player) => {
+                            setSelectedGoalPlayer(player);
+                            if (player) {
+                              setGoalPlayerError(false);
+                              setError('');
+                            }
+                          }}
                           roster={roster}
                           label="Torschütze"
                           required={true}
                           placeholder="Spieler auswählen"
-                          error={!selectedGoalPlayer && error.includes('Torschütze')}
+                          error={goalPlayerError}
                         />
-                        {!selectedGoalPlayer && error.includes('Torschütze') && (
-                          <p className="mt-1 text-sm text-red-600">
-                            Torschütze ist erforderlich
-                          </p>
-                        )}
                       </div>
 
                       <div>
@@ -217,16 +217,14 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmitting ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                              </svg>
-                              Speichern
-                            </>
+
+                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                            </svg>
                           ) : (
                             'Speichern'
                           )}
