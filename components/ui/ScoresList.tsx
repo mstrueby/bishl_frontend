@@ -144,7 +144,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
         }}
         onConfirm={handleDeleteConfirm}
         title="Tor löschen"
-        description={`Sind Sie sicher, dass Sie das Tor von <strong>${goalToDelete?.goalPlayer ? `#${goalToDelete.goalPlayer.jerseyNumber} ${goalToDelete.goalPlayer.firstName} ${goalToDelete.goalPlayer.lastName}` : 'Unbekannt'}</strong> löschen möchten?`}
+        description={`Sind Sie sicher, dass Sie das Tor von <strong>${goalToDelete?.goalPlayer ? `#${goalToDelete.goalPlayer.jerseyNumber} ${goalToDelete.goalPlayer.firstName} ${goalToDelete.goalPlayer.lastName} (Zeit ${goalToDelete.matchTime})` : 'Unbekannt'}</strong> löschen möchten?`}
         descriptionSubText="Diese Aktion kann nicht rückgängig gemacht werden."
       />
     </div>
