@@ -1,33 +1,34 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { ScoresBase } from '../../types/MatchValues';
-import GoalRegisterForm from '../../pages/matches/[id]/[teamFlag]/scores';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface ScoresListProps {
   jwt: string;
   teamName: string;
   matchId: string;
+  teamFlag: string;
   scores: ScoresBase[];
   showEditButton?: boolean;
   editUrl?: string;
   refreshMatchData?: () => void;
-  setIsHomeGoalDialogOpen?: (open: boolean) => void;
-  setEditingHomeGoal?: (goal: ScoresBase | null) => void;
+  setIsGoalDialogOpen?: (open: boolean) => void;
+  setEditingGoal?: (goal: ScoresBase | null) => void;
 }
 
 const ScoresList: React.FC<ScoresListProps> = ({
   jwt,
   teamName,
   matchId,
+  teamFlag,
   scores,
   showEditButton = false,
   editUrl,
   refreshMatchData,
-  setIsHomeGoalDialogOpen,
-  setEditingHomeGoal,
+  setIsGoalDialogOpen,
+  setEditingGoal,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<ScoresBase | null>(null);
@@ -39,10 +40,9 @@ const ScoresList: React.FC<ScoresListProps> = ({
 
   const handleDeleteConfirm = async () => {
     if (!goalToDelete) return;
-
     try {
       const response = await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/home/scores/${goalToDelete._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/${goalToDelete._id}`,
         {
           headers: {
             Authorization: `Bearer ${jwt}`,
@@ -62,6 +62,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
       setGoalToDelete(null);
     }
   };
+  
   return (
     <div className="w-full">
       {/* Header */}
@@ -88,18 +89,18 @@ const ScoresList: React.FC<ScoresListProps> = ({
                 const secondsB = timeB[0] * 60 + timeB[1];
                 return secondsA - secondsB;
               })
-              .map((goal, index) => (
-                <li key={`home-goal-${index}`} className="flex items-center py-3 px-4">
-                    <div className="w-16 flex-shrink-0 text-sm text-gray-900">
-                      {goal.matchTime}
+              .map((score) => (
+                <li key={`${score._id}`} className="flex items-center py-3 px-4">
+                    <div className="w-16 flex-shrink-0 text-xs text-gray-900 text-center w-8 mr-5">
+                      {score.matchTime}
                     </div>
                     <div className="flex-grow">
                       <p className="text-sm text-gray-900">
-                        {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
+                        {score.goalPlayer ? `#${score.goalPlayer.jerseyNumber} ${score.goalPlayer.lastName}, ${score.goalPlayer.firstName}` : 'Unbekannt'}
                       </p>
-                      {goal.assistPlayer ? (
+                      {score.assistPlayer ? (
                         <p className="text-xs text-gray-500">
-                          #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
+                          #{score.assistPlayer.jerseyNumber} {score.assistPlayer.lastName}, {score.assistPlayer.firstName}
                         </p>
                       ) : (
                         <p className="text-xs text-gray-500">keine Vorlage</p>
@@ -109,9 +110,9 @@ const ScoresList: React.FC<ScoresListProps> = ({
                       <div className="flex justify-end space-x-2 flex-shrink-0">
                         <button
                           onClick={() => {
-                            if (setIsHomeGoalDialogOpen && setEditingHomeGoal) {
-                              setIsHomeGoalDialogOpen(true);
-                              setEditingHomeGoal(goal);
+                            if (setIsGoalDialogOpen && setEditingGoal) {
+                              setIsGoalDialogOpen(true);
+                              setEditingGoal(score);
                             }
                           }}
                           className="text-indigo-600 hover:text-indigo-900"
@@ -119,7 +120,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
                           <PencilIcon className="h-5 w-5" aria-hidden="true" />
                         </button>
                         <button
-                          onClick={() => handleDeleteClick(goal)}
+                          onClick={() => handleDeleteClick(score)}
                           className="text-red-600 hover:text-red-900"
                         >
                           <TrashIcon className="h-5 w-5" aria-hidden="true" />
@@ -130,7 +131,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
                 ))}
           </ul>
         ) : (
-          <div className="text-center py-4 text-sm text-gray-500">
+          <div className="text-center py-5 text-sm text-gray-500">
             Keine Tore
           </div>
         )}
