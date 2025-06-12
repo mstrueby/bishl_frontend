@@ -3,11 +3,11 @@ import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
 import PlayerSelect from './PlayerSelect';
 import InputMatchTime from './form/InputMatchTime';
-import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
+import { RosterPlayer, EventPlayer, ScoresBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
-interface AddGoalDialogProps {
+interface GoalDialogProps {
   isOpen: boolean;
   onClose: () => void;
   matchId: string;
@@ -15,7 +15,7 @@ interface AddGoalDialogProps {
   roster: RosterPlayer[];
   jwt: string;
   onSuccess: () => void;
-  editGoal?: any;
+  editGoal?: ScoresBase;
 }
 
 const validationSchema = Yup.object().shape({
@@ -24,7 +24,7 @@ const validationSchema = Yup.object().shape({
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
 });
 
-const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: AddGoalDialogProps) => {
+const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: GoalDialogProps) => {
   const [selectedGoalPlayer, setSelectedGoalPlayer] = useState<RosterPlayer | null>(null);
   const [selectedAssistPlayer, setSelectedAssistPlayer] = useState<RosterPlayer | null>(null);
   const [isPPG, setIsPPG] = useState(false);
@@ -45,7 +45,7 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
       // Find and set assist player
       const assistPlayer = editGoal.assistPlayer
-        ? roster.find(item => item.player.playerId === editGoal.assistPlayer.playerId) || null
+        ? roster.find(item => item.player.playerId === editGoal.assistPlayer?.playerId) || null
         : null;
       setSelectedAssistPlayer(assistPlayer);
 
@@ -85,8 +85,8 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
         isSHG,
         isGWG
       };
-
       console.log('Goal Data:', goalData)
+
       if (editGoal && editGoal._id) {
         // Update existing goal
         await axios.patch(
@@ -154,7 +154,8 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
               <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
+                  className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
+                >
                   {editGoal ? 'Tor bearbeiten' : 'Tor hinzufügen'}
                 </Dialog.Title>
 
@@ -242,4 +243,4 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   );
 };
 
-export default AddGoalDialog;
+export default GoalDialog;

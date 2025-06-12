@@ -16,10 +16,11 @@ import { classNames } from '../../../../tools/utils';
 import MatchStatusBadge from '../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../components/ui/MatchHeader';
 import FinishTypeSelect from '../../../../components/admin/ui/FinishTypeSelect';
-import AddGoalDialog from '../../../../components/ui/AddGoalDialog';
-import AddPenaltyDialog from '../../../../components/ui/AddPenaltyDialog';
+import GoalDialog from '../../../../components/ui/GoalDialog';
+import PenaltyDialog from '../../../../components/ui/PenaltyDialog';
 import RosterList from '../../../../components/ui/RosterList';
-import ScoresList from '../../../../components/ui/ScoresList';
+import ScoreList from '../../../../components/ui/ScoreList';
+import PenaltyList from '../../../../components/ui/PenaltyList'
 
 interface MatchDetailsProps {
   match: Match;
@@ -412,30 +413,32 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
             <div className="flex flex-col md:flex-row md:space-x-8">
               {/* Home team goals */}
               <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <ScoresList
+                <ScoreList
                   jwt={jwt || ''}
                   teamName={match.home.fullName}
                   matchId={match._id}
+                  teamFlag="home"
                   scores={match.home.scores || []}
                   showEditButton={true}
                   editUrl={`/matches/${match._id}/home/scores`}
                   refreshMatchData={refreshMatchData}
-                  setIsHomeGoalDialogOpen={setIsHomeGoalDialogOpen}
-                  setEditingHomeGoal={setEditingHomeGoal}
+                  setIsGoalDialogOpen={setIsHomeGoalDialogOpen}
+                  setEditingGoal={setEditingHomeGoal}
                 />
               </div>
               {/* Away team goals */}
               <div className="w-full md:w-1/2">
-                <ScoresList
+                <ScoreList
                   jwt={jwt || ''}
                   teamName={match.away.fullName}
                   matchId={match._id}
+                  teamFlag="away"
                   scores={match.away.scores || []}
                   showEditButton={true}
                   editUrl={`/matches/${match._id}/away/scores`}
                   refreshMatchData={refreshMatchData}
-                  setIsHomeGoalDialogOpen={setIsAwayGoalDialogOpen}
-                  setEditingHomeGoal={setEditingAwayGoal}
+                  setIsGoalDialogOpen={setIsAwayGoalDialogOpen}
+                  setEditingGoal={setEditingAwayGoal}
                 />
               </div>
             </div>
@@ -445,177 +448,37 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         {activeTab === 'penalties' && (
           <div className="py-4">
             {/* Container for side-by-side or stacked penalties */}
-            <div className="flex flex-col md:flex-row md:space-x-4">
+            <div className="flex flex-col md:flex-row md:space-x-8">
               {/* Home team penalties */}
               <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.home.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.home.penalties && match.home.penalties.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.home.penalties
-                        .sort((a, b) => {
-                          // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTimeStart.split(":").map(Number);
-                          const timeB = b.matchTimeStart.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((penalty, index) => (
-                          <li key={`home-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                            {showButtonEvents && (
-                              <div className="flex justify-end space-x-2 flex-shrink-0">
-                                <button
-                                  onClick={() => {
-                                    setEditingHomePenalty(penalty);
-                                    setIsHomePenaltyDialogOpen(true);
-                                  }}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
-                                      try {
-                                        const response = await axios.delete(
-                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/penalties/${penalty._id}`,
-                                          {
-                                            headers: {
-                                              Authorization: `Bearer ${jwt}`,
-                                              'Content-Type': 'application/json'
-                                            }
-                                          }
-                                        );
-                                        if (response.status === 200 || response.status === 204) {
-                                          refreshMatchData();
-                                        }
-                                      } catch (error) {
-                                        console.error('Error deleting penalty:', error);
-                                      }
-                                    }
-                                  }}
-                                  className="text-red-600 hover:text-red-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Strafen vorhanden
-                    </div>
-                  )}
-                </div>
+                <PenaltyList
+                  jwt={jwt || ''}
+                  teamName={match.home.fullName}
+                  matchId={match._id}
+                  teamFlag="home"
+                  penalties={match.home.penalties || []}
+                  showEditButton={true}
+                  editUrl={`/matches/${match._id}/home/penalties`}
+                  refreshMatchData={refreshMatchData}
+                  setIsPenaltyDialogOpen={setIsHomePenaltyDialogOpen}
+                  setEditingPenalty={setEditingHomePenalty}
+                />
               </div>
 
               {/* Away team penalties */}
               <div className="w-full md:w-1/2">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.away.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.away.penalties && match.away.penalties.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.away.penalties
-                        .sort((a, b) => {
-                          // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTimeStart.split(":").map(Number);
-                          const timeB = b.matchTimeStart.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((penalty, index) => (
-                          <li key={`away-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                            {showButtonEvents && (
-                              <div className="flex justify-end space-x-2 flex-shrink-0">
-                                <button
-                                  onClick={() => {
-                                    setEditingAwayPenalty(penalty);
-                                    setIsAwayPenaltyDialogOpen(true);
-                                  }}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    if (window.confirm("Sind Sie sicher, dass Sie diese Strafe löschen möchten?")) {
-                                      try {
-                                        const response = await axios.delete(
-                                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/penalties/${penalty._id}`,
-                                          {
-                                            headers: {
-                                              Authorization: `Bearer ${jwt}`,
-                                              'Content-Type': 'application/json'
-                                            }
-                                          }
-                                        );
-                                        if (response.status === 200 || response.status === 204) {
-                                          refreshMatchData();
-                                        }
-                                      } catch (error) {
-                                        console.error('Error deleting penalty:', error);
-                                      }
-                                    }
-                                  }}
-                                  className="text-red-600 hover:text-red-900"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Strafen vorhanden
-                    </div>
-                  )}
-                </div>
+                <PenaltyList
+                  jwt={jwt || ''}
+                  teamName={match.away.fullName}
+                  matchId={match._id}
+                  teamFlag="away"
+                  penalties={match.away.penalties || []}
+                  showEditButton={true}
+                  editUrl={`/matches/${match._id}/away/penalties`}
+                  refreshMatchData={refreshMatchData}
+                  setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
+                  setEditingPenalty={setEditingAwayPenalty}
+                />
               </div>
             </div>
           </div>
@@ -735,7 +598,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       </Transition>
 
       {/* Home Team Goal Dialog */}
-      <AddGoalDialog
+      <GoalDialog
         isOpen={isHomeGoalDialogOpen}
         onClose={() => {
           setIsHomeGoalDialogOpen(false);
@@ -750,7 +613,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
       {/* Away Team Goal Dialog */}
-      <AddGoalDialog
+      <GoalDialog
         isOpen={isAwayGoalDialogOpen}
         onClose={() => {
           setIsAwayGoalDialogOpen(false);
@@ -765,7 +628,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
       {/* Home Team Penalty Dialog */}
-      <AddPenaltyDialog
+      <PenaltyDialog
         isOpen={isHomePenaltyDialogOpen}
         onClose={() => {
           setIsHomePenaltyDialogOpen(false);
@@ -780,7 +643,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
       {/* Away Team Penalty Dialog */}
-      <AddPenaltyDialog
+      <PenaltyDialog
         isOpen={isAwayPenaltyDialogOpen}
         onClose={() => {
           setIsAwayPenaltyDialogOpen(false);
