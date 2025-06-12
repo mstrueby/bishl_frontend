@@ -263,7 +263,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   <div>
                     <InputMatchTime
                           name="matchTimeStart"
-                          label="Spielzeit Start (mi: ss)"
+                          label="Start (mi:ss)"
                     />
                   </div>
 
@@ -271,7 +271,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   <div>
                     <InputMatchTime
                       name="matchTimeEnd"
-                      label="Spielzeit Ende (mi: ss)"
+                      label="Ende (mi:ss)"
                     />
                   </div>
 
