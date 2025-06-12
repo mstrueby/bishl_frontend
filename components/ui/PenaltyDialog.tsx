@@ -5,6 +5,7 @@ import PlayerSelect from './PlayerSelect';
 import PenaltyCodeSelect from './PenaltyCodeSelect';
 import InputMatchTime from './form/InputMatchTime';
 import Listbox from './form/Listbox';
+import Toggle from './form/Toggle';
 import { RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
@@ -51,6 +52,7 @@ const validationSchema = Yup.object().shape({
   }).nullable(),
   penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
   isGM: Yup.boolean(),
+  isMP: Yup.boolean(),
 });
 
 const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
@@ -164,8 +166,8 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
           value: selectedPenaltyCode.value
         },
         penaltyMinutes: parseInt(values.penaltyMinutes),
-        isGM,
-        isMP
+        isGM: values.isGM,
+        isMP: values.isMP
       };
 
       if (editPenalty && editPenalty._id) {
@@ -215,8 +217,8 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     penaltyPlayer: selectedPlayer,
     penaltyCode: selectedPenaltyCode,
     penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '2',
-    isGM: isGM,
-    isMP: isMP,
+    isGM: editPenalty?.isGM || false,
+    isMP: editPenalty?.isMP || false,
   };
 
   return (
@@ -318,34 +320,16 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     options={penaltyMinuteOptions}
                   />
 
-                  {/* Penalty Type Checkboxes */}
-                  <div className="flex space-x-6">
-                    <div className="flex items-center">
-                      <input
-                        id="isGM"
-                        name="isGM"
-                        type="checkbox"
-                        checked={isGM}
-                        onChange={(e) => setIsGM(e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <label htmlFor="isGM" className="ml-2 block text-sm text-gray-700">
-                        Spieldauer (GM)
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        id="isMP"
-                        name="isMP"
-                        type="checkbox"
-                        checked={isMP}
-                        onChange={(e) => setIsMP(e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <label htmlFor="isMP" className="ml-2 block text-sm text-gray-700">
-                        Matchstrafe (MP)
-                      </label>
-                    </div>
+                  {/* Penalty Type Toggles */}
+                  <div className="space-y-2">
+                    <Toggle
+                      name="isGM"
+                      label="Spieldauer (GM)"
+                    />
+                    <Toggle
+                      name="isMP"
+                      label="Matchstrafe (MP)"
+                    />
                   </div>
 
                   {error && (
