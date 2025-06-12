@@ -65,7 +65,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [penaltyPlayerError, setPenaltyPlayerError] = useState(false);
-  
+
   const penaltyMinuteOptions = [
     { key: '2', value: '2 Minuten' },
     { key: '5', value: '5 Minuten' },
@@ -211,16 +211,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     }
   };
 
-  const initialValues = {
-    matchTimeStart: editPenalty?.matchTimeStart || '',
-    matchTimeEnd: editPenalty?.matchTimeEnd || '',
-    penaltyPlayer: selectedPlayer,
-    penaltyCode: selectedPenaltyCode,
-    penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '2',
-    isGM: editPenalty?.isGM || false,
-    isMP: editPenalty?.isMP || false,
-  };
-
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
@@ -248,7 +238,16 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                 </Dialog.Title>
 
                 <Formik
-                  initialValues={initialValues}
+                  key={editPenalty?._id || 'new'}
+                  initialValues={{
+                    matchTimeStart: editPenalty?.matchTimeStart || '',
+                    matchTimeEnd: editPenalty?.matchTimeEnd || '',
+                    penaltyPlayer: selectedPlayer,
+                    penaltyCode: selectedPenaltyCode,
+                    penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '2',
+                    isGM: editPenalty?.isGM || false,
+                    isMP: editPenalty?.isMP || false,
+                  }}
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={(values, { setSubmitting }) => {
