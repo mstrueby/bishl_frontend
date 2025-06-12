@@ -35,7 +35,7 @@ const validationSchema = Yup.object().shape({
     .required('Zeit ist erforderlich')
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
   matchTimeEnd: Yup.string()
-    .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein')
+    .matches(/^(\d{1,3}:\d{2})?$/, 'Zeit muss im Format MM:SS sein oder leer bleiben')
     .nullable(),
   penaltyPlayer: Yup.object().shape({
     playerId: Yup.string().required('Spieler ist erforderlich'),
@@ -53,7 +53,6 @@ const validationSchema = Yup.object().shape({
 
 const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
   const [matchTimeStart, setMatchTimeStart] = useState('');
-  const [matchTimeEnd, setMatchTimeEnd] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<PenaltyPlayer | null>(null);
   const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(null);
   const [penaltyMinutes, setPenaltyMinutes] = useState<number>(2);
@@ -67,7 +66,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
   const resetForm = () => {
     setMatchTimeStart('');
-    setMatchTimeEnd('');
     setSelectedPlayer(null);
     setSelectedPenaltyCode(null);
     setPenaltyMinutes(2);
@@ -119,7 +117,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       }
 
       setMatchTimeStart(editPenalty.matchTimeStart || '');
-      setMatchTimeEnd(editPenalty.matchTimeEnd || '');
       setPenaltyMinutes(editPenalty.penaltyMinutes || 2);
       setIsGM(editPenalty.isGM || false);
       setIsMP(editPenalty.isMP || false);
@@ -208,8 +205,8 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   };
 
   const initialValues = {
-    matchTimeStart: matchTimeStart,
-    matchTimeEnd: matchTimeEnd,
+    matchTimeStart: editPenalty?.matchTimeStart || '',
+    matchTimeEnd: editPenalty?.matchTimeEnd || '',
     penaltyPlayer: selectedPlayer,
     penaltyCode: selectedPenaltyCode,
     penaltyMinutes: penaltyMinutes,
@@ -265,18 +262,9 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
                   {/* Match Time - End (Optional) */}
                   <div>
-                    <label htmlFor="matchTimeEnd" className="block text-sm font-medium text-gray-700">
-                      Spielzeit Ende (mi: ss)
-                    </label>
-                    <input
-                      type="text"
-                      id="matchTimeEnd"
+                    <InputMatchTime
                       name="matchTimeEnd"
-                      value={matchTimeEnd}
-                      onChange={(e) => setMatchTimeEnd(e.target.value)}
-                      placeholder="z.B. 16:30"
-                      pattern="[0-9]{1,2}:[0-9]{2}"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      label="Spielzeit Ende (mi: ss)"
                     />
                   </div>
 
