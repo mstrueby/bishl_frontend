@@ -2,6 +2,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
 import PlayerSelect from './PlayerSelect';
+import PenaltyCodeSelect from './PenaltyCodeSelect';
 import InputMatchTime from './form/InputMatchTime';
 import { RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
@@ -293,32 +294,18 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   />
 
                   {/* Penalty Code Selection */}
-                  <div>
-                    <label htmlFor="penaltyCode" className="block text-sm font-medium text-gray-700">
-                      Strafcode
-                    </label>
-                    <select
-                      id="penaltyCode"
-                      name="penaltyCode"
-                      value={selectedPenaltyCode?.key || ''}
-                      onChange={(e) => {
-                        const key = e.target.value;
-                        const code = penaltyCodes.find(code => code.key === key);
-                        if (code) {
-                          setSelectedPenaltyCode(code);
-                        }
-                      }}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      required
-                    >
-                      <option value="">Strafcode auswählen</option>
-                      {Array.isArray(penaltyCodes) && penaltyCodes.map((code) => (
-                        <option key={code.key} value={code.key}>
-                          {code.key} - {code.value}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <PenaltyCodeSelect
+                    selectedPenaltyCode={selectedPenaltyCode}
+                    onChange={(penaltyCode) => {
+                      setSelectedPenaltyCode(penaltyCode);
+                      setError('');
+                    }}
+                    penaltyCodes={penaltyCodes}
+                    label="Strafcode"
+                    required={true}
+                    placeholder="Strafcode auswählen"
+                    error={false}
+                  />
 
                   {/* Penalty Minutes */}
                   <div>
