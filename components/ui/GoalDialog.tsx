@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
 import PlayerSelect from './PlayerSelect';
 import InputMatchTime from './form/InputMatchTime';
-import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
+import { RosterPlayer, EventPlayer, ScoresBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
@@ -15,7 +15,7 @@ interface GoalDialogProps {
   roster: RosterPlayer[];
   jwt: string;
   onSuccess: () => void;
-  editGoal?: any;
+  editGoal?: ScoresBase;
 }
 
 const validationSchema = Yup.object().shape({
@@ -45,7 +45,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
 
       // Find and set assist player
       const assistPlayer = editGoal.assistPlayer
-        ? roster.find(item => item.player.playerId === editGoal.assistPlayer.playerId) || null
+        ? roster.find(item => item.player.playerId === editGoal.assistPlayer?.playerId) || null
         : null;
       setSelectedAssistPlayer(assistPlayer);
 
@@ -85,8 +85,8 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
         isSHG,
         isGWG
       };
-
       console.log('Goal Data:', goalData)
+
       if (editGoal && editGoal._id) {
         // Update existing goal
         await axios.patch(
@@ -154,7 +154,8 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
               <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
+                  className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
+                >
                   {editGoal ? 'Tor bearbeiten' : 'Tor hinzufügen'}
                 </Dialog.Title>
 
