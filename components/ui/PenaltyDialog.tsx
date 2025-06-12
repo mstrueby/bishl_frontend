@@ -1,4 +1,3 @@
-
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
@@ -109,7 +108,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     if (isOpen && editPenalty) {
       // find and set penalty player
       const editPenaltyPlayer = editPenalty.penaltyPlayer ? roster.find(item => item.player.playerId === editPenalty.penaltyPlayer.playerId) || null : null;
-      
+
       if (editPenaltyPlayer) {
         setSelectedPlayer({
           playerId: editPenaltyPlayer.player.playerId,
@@ -136,13 +135,12 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   }, [isOpen, editPenalty, roster]);
 
   // save dialog
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values) => {
     setIsSubmitting(true);
     setError('');
     setPenaltyPlayerError(false);
 
-    if (!selectedPlayer || !selectedPenaltyCode || !matchTimeStart) {
+    if (!selectedPlayer || !selectedPenaltyCode || !values.matchTimeStart) {
       setError('Bitte füllen Sie alle erforderlichen Felder aus.');
       setPenaltyPlayerError(!selectedPlayer);
       setIsSubmitting(false);
@@ -151,8 +149,8 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
     try {
       const penaltyData = {
-        matchTimeStart,
-        matchTimeEnd: matchTimeEnd || undefined,
+        matchTimeStart: values.matchTimeStart,
+        matchTimeEnd: values.matchTimeEnd || undefined,
         penaltyPlayer: {
           playerId: selectedPlayer.playerId,
           firstName: selectedPlayer.firstName,
@@ -244,23 +242,24 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                 >
                   {editPenalty ? 'Strafe bearbeiten' : 'Strafe hinzufügen'}
                 </Dialog.Title>
-                
-                <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+
+                <Formik
+                  initialValues={initialValues}
+                  validationSchema={validationSchema}
+                  enableReinitialize={true}
+                  onSubmit={(values, { setSubmitting }) => {
+                    // Handle form submission with Formik values
+                    handleSubmit(values);
+                    setSubmitting(false);
+                  }}
+                >
+                  {({ handleSubmit }) => (
+                    <Form>
                   {/* Match Time - Start */}
                   <div>
-                    <label htmlFor="matchTimeStart" className="block text-sm font-medium text-gray-700">
-                      Spielzeit Start (mi: ss)
-                    </label>
-                    <input
-                      type="text"
-                      id="matchTimeStart"
-                      name="matchTimeStart"
-                      value={matchTimeStart}
-                      onChange={(e) => setMatchTimeStart(e.target.value)}
-                      placeholder="z.B. 14:30"
-                      pattern="[0-9]{1,2}:[0-9]{2}"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      required
+                    <InputMatchTime
+                          name="matchTimeStart"
+                          label="Spielzeit Start (mi: ss)"
                     />
                   </div>
 
@@ -416,7 +415,9 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       )}
                     </button>
                   </div>
-                </form>
+                </Form>
+                  )}
+                </Formik>
               </Dialog.Panel>
             </Transition.Child>
           </div>
