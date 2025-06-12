@@ -7,7 +7,7 @@ import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
-interface AddGoalDialogProps {
+interface GoalDialogProps {
   isOpen: boolean;
   onClose: () => void;
   matchId: string;
@@ -24,7 +24,7 @@ const validationSchema = Yup.object().shape({
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
 });
 
-const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: AddGoalDialogProps) => {
+const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: GoalDialogProps) => {
   const [selectedGoalPlayer, setSelectedGoalPlayer] = useState<RosterPlayer | null>(null);
   const [selectedAssistPlayer, setSelectedAssistPlayer] = useState<RosterPlayer | null>(null);
   const [isPPG, setIsPPG] = useState(false);
@@ -242,4 +242,4 @@ const AddGoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   );
 };
 
-export default AddGoalDialog;
+export default GoalDialog;

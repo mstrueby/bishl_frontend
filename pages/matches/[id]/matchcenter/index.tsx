@@ -16,8 +16,8 @@ import { classNames } from '../../../../tools/utils';
 import MatchStatusBadge from '../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../components/ui/MatchHeader';
 import FinishTypeSelect from '../../../../components/admin/ui/FinishTypeSelect';
-import AddGoalDialog from '../../../../components/ui/AddGoalDialog';
-import AddPenaltyDialog from '../../../../components/ui/AddPenaltyDialog';
+import GoalDialog from '../../../../components/ui/GoalDialog';
+import PenaltyDialog from '../../../../components/ui/PenaltyDialog';
 import RosterList from '../../../../components/ui/RosterList';
 import ScoreList from '../../../../components/ui/ScoreList';
 import PenaltyList from '../../../../components/ui/PenaltyList'
@@ -598,7 +598,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       </Transition>
 
       {/* Home Team Goal Dialog */}
-      <AddGoalDialog
+      <GoalDialog
         isOpen={isHomeGoalDialogOpen}
         onClose={() => {
           setIsHomeGoalDialogOpen(false);
@@ -613,7 +613,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
       {/* Away Team Goal Dialog */}
-      <AddGoalDialog
+      <GoalDialog
         isOpen={isAwayGoalDialogOpen}
         onClose={() => {
           setIsAwayGoalDialogOpen(false);
@@ -628,7 +628,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
       {/* Home Team Penalty Dialog */}
-      <AddPenaltyDialog
+      <PenaltyDialog
         isOpen={isHomePenaltyDialogOpen}
         onClose={() => {
           setIsHomePenaltyDialogOpen(false);
@@ -643,7 +643,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
       {/* Away Team Penalty Dialog */}
-      <AddPenaltyDialog
+      <PenaltyDialog
         isOpen={isAwayPenaltyDialogOpen}
         onClose={() => {
           setIsAwayPenaltyDialogOpen(false);

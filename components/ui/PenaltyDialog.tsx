@@ -25,7 +25,7 @@ interface PenaltyDialogProps {
   editPenalty?: any; // Penalty object to edit
 }
 
-const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
+const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [matchTimeStart, setMatchTimeStart] = useState('');
   const [matchTimeEnd, setMatchTimeEnd] = useState('');
@@ -422,4 +422,4 @@ const AddPenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onS
   );
 };
 
-export default AddPenaltyDialog;
+export default PenaltyDialog;
