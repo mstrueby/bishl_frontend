@@ -4,6 +4,7 @@ import axios from 'axios';
 import PlayerSelect from './PlayerSelect';
 import PenaltyCodeSelect from './PenaltyCodeSelect';
 import InputMatchTime from './form/InputMatchTime';
+import Listbox from './form/Listbox';
 import { RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
@@ -48,7 +49,7 @@ const validationSchema = Yup.object().shape({
     key: Yup.string().required('Strafcode ist erforderlich'),
     value: Yup.string().required()
   }).nullable(),
-  penaltyMinutes: Yup.number().required('Strafminuten sind erforderlich'),
+  penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
   isGM: Yup.boolean(),
 });
 
@@ -56,20 +57,24 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   const [matchTimeStart, setMatchTimeStart] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<PenaltyPlayer | null>(null);
   const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(null);
-  const [penaltyMinutes, setPenaltyMinutes] = useState<number>(2);
   const [isGM, setIsGM] = useState(false);
   const [isMP, setIsMP] = useState(false);
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [penaltyPlayerError, setPenaltyPlayerError] = useState(false);
-  const penaltyMinuteOptions = [2, 5, 10, 20];
+  
+  const penaltyMinuteOptions = [
+    { key: '2', value: '2 Minuten' },
+    { key: '5', value: '5 Minuten' },
+    { key: '10', value: '10 Minuten' },
+    { key: '20', value: '20 Minuten' }
+  ];
 
   const resetForm = () => {
     setMatchTimeStart('');
     setSelectedPlayer(null);
     setSelectedPenaltyCode(null);
-    setPenaltyMinutes(2);
     setIsGM(false);
     setIsMP(false);
     setPenaltyPlayerError(false);
@@ -118,7 +123,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       }
 
       setMatchTimeStart(editPenalty.matchTimeStart || '');
-      setPenaltyMinutes(editPenalty.penaltyMinutes || 2);
       setIsGM(editPenalty.isGM || false);
       setIsMP(editPenalty.isMP || false);
 
@@ -159,7 +163,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
           key: selectedPenaltyCode.key,
           value: selectedPenaltyCode.value
         },
-        penaltyMinutes,
+        penaltyMinutes: parseInt(values.penaltyMinutes),
         isGM,
         isMP
       };
@@ -210,7 +214,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     matchTimeEnd: editPenalty?.matchTimeEnd || '',
     penaltyPlayer: selectedPlayer,
     penaltyCode: selectedPenaltyCode,
-    penaltyMinutes: penaltyMinutes,
+    penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '2',
     isGM: isGM,
     isMP: isMP,
   };
@@ -308,25 +312,11 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   />
 
                   {/* Penalty Minutes */}
-                  <div>
-                    <label htmlFor="penaltyMinutes" className="block text-sm font-medium text-gray-700">
-                      Strafminuten
-                    </label>
-                    <select
-                      id="penaltyMinutes"
-                      name="penaltyMinutes"
-                      value={penaltyMinutes}
-                      onChange={(e) => setPenaltyMinutes(parseInt(e.target.value))}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      required
-                    >
-                      {penaltyMinuteOptions.map((minutes) => (
-                        <option key={minutes} value={minutes}>
-                          {minutes} Minuten
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <Listbox
+                    name="penaltyMinutes"
+                    label="Strafminuten"
+                    options={penaltyMinuteOptions}
+                  />
 
                   {/* Penalty Type Checkboxes */}
                   <div className="flex space-x-6">
