@@ -50,7 +50,7 @@ const validationSchema = Yup.object().shape({
     key: Yup.string().required('Strafcode ist erforderlich'),
     value: Yup.string().required()
   }).nullable(),
-  penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
+  penaltyMinutes: Yup.number().required('Strafminuten sind erforderlich'),
   isGM: Yup.boolean(),
   isMP: Yup.boolean(),
 });
@@ -65,7 +65,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [penaltyPlayerError, setPenaltyPlayerError] = useState(false);
-  
+
   const penaltyMinuteOptions = [
     { key: '2', value: '2 Minuten' },
     { key: '5', value: '5 Minuten' },
@@ -129,7 +129,11 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       setIsMP(editPenalty.isMP || false);
 
       if (editPenalty.penaltyCode) {
-        setSelectedPenaltyCode(editPenalty.penaltyCode);
+        const correctedPenaltyCode: PenaltyCode = {
+          key: editPenalty.penaltyCode.key,
+          value: editPenalty.penaltyCode.value
+        };
+        setSelectedPenaltyCode(correctedPenaltyCode);
       }
     } else if (isOpen && !editPenalty) {
       resetForm();
@@ -139,7 +143,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   }, [isOpen, editPenalty, roster]);
 
   // save dialog
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: PenaltiesBase) => {
     setIsSubmitting(true);
     setError('');
     setPenaltyPlayerError(false);
@@ -165,7 +169,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
           key: selectedPenaltyCode.key,
           value: selectedPenaltyCode.value
         },
-        penaltyMinutes: parseInt(values.penaltyMinutes),
+        penaltyMinutes: values.penaltyMinutes,
         isGM: values.isGM,
         isMP: values.isMP
       };
@@ -211,16 +215,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     }
   };
 
-  const initialValues = {
-    matchTimeStart: editPenalty?.matchTimeStart || '',
-    matchTimeEnd: editPenalty?.matchTimeEnd || '',
-    penaltyPlayer: selectedPlayer,
-    penaltyCode: selectedPenaltyCode,
-    penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '2',
-    isGM: editPenalty?.isGM || false,
-    isMP: editPenalty?.isMP || false,
-  };
-
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
@@ -248,7 +242,16 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                 </Dialog.Title>
 
                 <Formik
-                  initialValues={initialValues}
+                  key={editPenalty?._id || 'new'}
+                  initialValues={{
+                    matchTimeStart: editPenalty?.matchTimeStart || '',
+                    matchTimeEnd: editPenalty?.matchTimeEnd || '',
+                    penaltyPlayer: selectedPlayer,
+                    penaltyCode: selectedPenaltyCode,
+                    penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '2',
+                    isGM: editPenalty?.isGM || false,
+                    isMP: editPenalty?.isMP || false,
+                  }}
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={(values, { setSubmitting }) => {
