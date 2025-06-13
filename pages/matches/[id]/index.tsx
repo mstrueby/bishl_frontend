@@ -15,8 +15,6 @@ import { tournamentConfigs, allFinishTypes } from '../../../tools/consts';
 import { classNames } from '../../../tools/utils';
 import MatchStatusBadge from '../../../components/ui/MatchStatusBadge';
 import FinishTypeSelect from '../../../components/admin/ui/FinishTypeSelect';
-import AddGoalDialog from '../../../components/ui/AddGoalDialog';
-import AddPenaltyDialog from '../../../components/ui/AddPenaltyDialog';
 
 interface MatchDetailsProps {
   match: Match;
@@ -1090,65 +1088,6 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         </Dialog>
       </Transition>
 
-      {/* Home Team Goal Dialog */}
-      <AddGoalDialog
-        isOpen={isHomeGoalDialogOpen}
-        onClose={() => {
-          setIsHomeGoalDialogOpen(false);
-          setEditingHomeGoal(null);
-        }}
-        matchId={match._id}
-        teamFlag="home"
-        roster={match.home.roster || []}
-        jwt={jwt || ''}
-        onSuccess={refreshMatchData}
-        editGoal={editingHomeGoal}
-      />
-
-      {/* Away Team Goal Dialog */}
-      <AddGoalDialog
-        isOpen={isAwayGoalDialogOpen}
-        onClose={() => {
-          setIsAwayGoalDialogOpen(false);
-          setEditingAwayGoal(null);
-        }}
-        matchId={match._id}
-        teamFlag="away"
-        roster={match.away.roster || []}
-        jwt={jwt || ''}
-        onSuccess={refreshMatchData}
-        editGoal={editingAwayGoal}
-      />
-
-      {/* Home Team Penalty Dialog */}
-      <AddPenaltyDialog
-        isOpen={isHomePenaltyDialogOpen}
-        onClose={() => {
-          setIsHomePenaltyDialogOpen(false);
-          setEditingHomePenalty(null);
-        }}
-        matchId={match._id}
-        teamFlag="home"
-        roster={match.home.roster || []}
-        jwt={jwt || ''}
-        onSuccess={refreshMatchData}
-        editPenalty={editingHomePenalty}
-      />
-
-      {/* Away Team Penalty Dialog */}
-      <AddPenaltyDialog
-        isOpen={isAwayPenaltyDialogOpen}
-        onClose={() => {
-          setIsAwayPenaltyDialogOpen(false);
-          setEditingAwayPenalty(null);
-        }}
-        matchId={match._id}
-        teamFlag="away"
-        roster={match.away.roster || []}
-        jwt={jwt || ''}
-        onSuccess={refreshMatchData}
-        editPenalty={editingAwayPenalty}
-      />
 
       {/* Referees Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-4 border-t border-gray-200">
