@@ -11,9 +11,6 @@ interface InputMatchTimeProps extends ComponentPropsWithoutRef<'input'> {
 
 const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>(({ name, label, description, ...props }, ref) => {
   const [field, meta, helpers] = useField(name);
-  const classInputDef = "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 appearance-none";
-  const classInputErr = "block w-full rounded-md border-0  py-1.5 px-3 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6 appearance-none";
-
   props.id = props.id || name;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +39,7 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
     <>
       {label && (
         <label htmlFor={props.id || name}
-          className="block mt-6 mb-2 text-sm font-medium text-gray-700">
+          className="block mt-6 mb-2 text-sm font-medium text-gray-900">
           {label}
         </label>
       )}
@@ -56,7 +53,7 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
           {...props}
           ref={ref}
           type="text"
-          className={meta.touched && meta.error ? classInputErr : classInputDef}
+          className={`relative w-full cursor-default rounded-md border bg-white py-2 px-3 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
           name={field.name}
           value={field.value}
           onChange={handleChange}
