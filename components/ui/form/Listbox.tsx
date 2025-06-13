@@ -11,10 +11,11 @@ interface ListboxOption {
 interface ListboxProps extends ComponentPropsWithoutRef<'input'> {
   label: string;
   name: string;
+  placeholder?: string;
   options: ListboxOption[];
 }
 
-const MyListbox = ({ label, name, options, ...props }: ListboxProps) => {
+const MyListbox = ({ label, name, placeholder, options, ...props }: ListboxProps) => {
   const [field, meta, helpers] = useField(name);
   const [selected, setSelected] = useState<ListboxOption | null>(null);
 
@@ -37,7 +38,7 @@ const MyListbox = ({ label, name, options, ...props }: ListboxProps) => {
   }, [field.value, options]);
 
   const Placeholder = () => (
-    <span className="block truncate text-gray-400">(auswählen)</span>
+    <span className="block truncate text-gray-400">{placeholder || '(auswählen)'}</span>
   );
 
   props.id = props.id || name;
