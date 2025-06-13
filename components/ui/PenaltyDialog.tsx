@@ -89,10 +89,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       const data = response.data.value;
       if (Array.isArray(data) && data.length > 0) {
         setPenaltyCodes(data);
-
-        if (!editPenalty) {
-          setSelectedPenaltyCode(data[0]);
-        }
       } else {
         console.error('Invalid penalty codes data format:', data);
         setPenaltyCodes([]);
@@ -310,9 +306,9 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       setError('');
                     }}
                     penaltyCodes={penaltyCodes}
-                    label="Strafcode"
+                    label="Strafe"
                     required={true}
-                    placeholder="Strafcode auswählen"
+                    placeholder="Strafe auswählen"
                     error={false}
                   />
 
@@ -321,10 +317,10 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     name="penaltyMinutes"
                     label="Strafminuten"
                     options={penaltyMinuteOptions}
+                    placeholder="Minuten auswählen"
                   />
 
                   {/* Penalty Type Toggles */}
-                  <div className="space-y-2">
                     <Toggle
                       name="isGM"
                       label="Spieldauer (GM)"
@@ -333,7 +329,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       name="isMP"
                       label="Matchstrafe (MP)"
                     />
-                  </div>
 
                   {error && (
                     <div className="text-red-600 text-sm mt-2">

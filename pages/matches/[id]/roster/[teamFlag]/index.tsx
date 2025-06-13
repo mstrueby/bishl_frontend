@@ -1,7 +1,6 @@
-import React, { Fragment, useState, useEffect, useRef } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
-import Link from 'next/link';
 import axios from 'axios';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
@@ -9,21 +8,14 @@ import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
-import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../../../tools/utils';
-import PlayerSelect from '../../../../../components/ui/PlayerSelect';
-import RosterList from '../../../../../components/ui/RosterList';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
 import { CldImage } from 'next-cloudinary';
 import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
-import MatchHeader from '../../../../../components/ui/MatchHeader';
-import SectionHeader from '../../../../../components/admin/SectionHeader';
-
-
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -342,30 +334,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 // Player position options
 const playerPositions = [
-  { key: 'F', value: 'Feldspieler' },
   { key: 'C', value: 'Captain' },
   { key: 'A', value: 'Assistant' },
   { key: 'G', value: 'Goalie' },
+  { key: 'F', value: 'Feldspieler' },
 ];
 
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
-  const playerSelectRef = useRef<any>(null);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
-  const jerseyNumberRef = useRef<HTMLInputElement>(null);
-  const positionSelectRef = useRef<HTMLButtonElement>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
   const [playerNumber, setPlayerNumber] = useState<number>(0);
-  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]); // Default to 'F' (Feldspieler)
+  const [playerPosition, setPlayerPosition] = useState(playerPositions[3]); // Default to 'F' (Feldspieler)
   const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
   const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>(allAvailablePlayers || []);
   const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
   const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
-  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[0]);
+  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[3]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -416,30 +404,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   }, [isCallUpModalOpen, club, team, jwt]);
 
   // Sort roster by position order: C, A, G, F, then by jersey number
-  const sortRoster = React.useMemo(() => {
-    return (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
-      if (!rosterToSort || rosterToSort.length === 0) return [];
+  const sortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
+    return [...rosterToSort].sort((a, b) => {
+      // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+      const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
 
-      return [...rosterToSort].sort((a, b) => {
-        // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+      // Get priorities
+      const posA = positionPriority[a.playerPosition.key] || 99;
+      const posB = positionPriority[b.playerPosition.key] || 99;
 
-        // Get priorities
-        const posA = positionPriority[a.playerPosition.key] || 99;
-        const posB = positionPriority[b.playerPosition.key] || 99;
+      // First sort by position priority
+      if (posA !== posB) {
+        return posA - posB;
+      }
 
-        // First sort by position priority
-        if (posA !== posB) {
-          return posA - posB;
-        }
-
-        // If positions are the same, sort by jersey number
-        const jerseyA = a.player.jerseyNumber || 999;
-        const jerseyB = b.player.jerseyNumber || 999;
-        return jerseyA - jerseyB;
-      });
-    };
-  }, []);
+      // If positions are the same, sort by jersey number
+      return a.player.jerseyNumber - b.player.jerseyNumber;
+    });
+  };
 
   const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
 
@@ -481,7 +463,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       );
       setAvailablePlayersList(filteredPlayers);
     }
-  }, [includeInactivePlayers, rosterList, allAvailablePlayersList, sortRoster]);
+  }, [includeInactivePlayers, rosterList, allAvailablePlayersList]);
   // Auto-set published to true if match is finished
   const isMatchFinished = match.matchStatus.key === 'FINISHED';
   useEffect(() => {
@@ -575,20 +557,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       called: true
     };
 
-    // Add the player to the available players list and sort alphabetically
-    setAvailablePlayersList(prev => {
-      const newList = [...prev, playerWithCalled];
-      return newList.sort((a, b) => {
-        // First sort by lastName
-        const lastNameComparison = a.lastName.localeCompare(b.lastName);
-        // If lastName is the same, sort by firstName
-        return lastNameComparison !== 0 ? lastNameComparison :
-          a.firstName.localeCompare(b.firstName);
-      });
-    });
-
-    // Auto-select the newly called up player
-    setSelectedPlayer(playerWithCalled);
+    // Add the player to the available players list
+    setAvailablePlayersList(prev => [...prev, playerWithCalled]);
 
     // Close the modal and reset selections
     setIsCallUpModalOpen(false);
@@ -605,7 +575,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setEditPlayerNumber(player.player.jerseyNumber);
     // Find the position in playerPositions that matches the player's position
     const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
-    setEditPlayerPosition(position || playerPositions[0]); // Default to 'F' if not found
+    setEditPlayerPosition(position || playerPositions[3]); // Default to 'F' if not found
     setModalError(null); // Clear any modal errors when opening the dialog
     setError(null)
     setIsEditModalOpen(true);
@@ -759,10 +729,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Add player to roster
       const updatedRoster = [...rosterList, newPlayer];
 
-      // Sort roster using the sortRoster function
-      const sortedRoster = sortRoster(updatedRoster);
-      console.log("updatedRoster", updatedRoster);
-      console.log("sortedRoster", sortedRoster);
+      // Sort roster by position order: C, A, G, F, then by jersey number
+      const sortedRoster = updatedRoster.sort((a, b) => {
+        // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+
+        // Get priorities
+        const posA = positionPriority[a.playerPosition.key] || 99;
+        const posB = positionPriority[b.playerPosition.key] || 99;
+
+        // First sort by position priority
+        if (posA !== posB) {
+          return posA - posB;
+        }
+
+        // If positions are the same, sort by jersey number
+        return a.player.jerseyNumber - b.player.jerseyNumber;
+      });
+
       setRosterList(sortedRoster);
 
       // Remove the selected player from the available players list
@@ -775,15 +759,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Reset form
       setSelectedPlayer(null);
       setPlayerNumber(0);
-      setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
+      setPlayerPosition(playerPositions[3]); // Reset to 'F' (Feldspieler)
       setError('');
-
-      // Focus on PlayerSelect after a short delay to ensure it's rendered
-      setTimeout(() => {
-        if (playerSelectRef.current && playerSelectRef.current.focus) {
-          playerSelectRef.current.focus();
-        }
-      }, 100);
 
       // Here you would make the actual API call to update the roster
       /*
@@ -944,475 +921,487 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-0 lg:px-8 py-0 lg:py-4">
-        <Link href={`/matches/${match._id}/matchcenter`}>
-          <a className="flex items-center" aria-label="Back to Match Center">
-            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-            <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-              Match Center
-            </span>
-          </a>
-        </Link>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-2xl font-bold mb-6">Mannschaftsaufstellung: {team.fullName} / {team.name}</h1>
 
-        <MatchHeader
-          match={match}
-          isRefreshing={false}
-          onRefresh={() => { }}
-        />
-        <div className="mt-12">
-          <SectionHeader title="Mannschaftsaufstellung" description={`${team?.fullName} / ${team?.name}`} />
-        </div>
-
-        <div className="sm:px-3 pb-2">
-          {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-          {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
-        </div>
+        {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+        {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
 
         {/* Add Player Form */}
-        <div className="bg-white shadow-md rounded-lg border">
-          <div className="p-4 border-b bg-gray-50">
-            <div className="flex flex-col gap-4">
-              {/* Player Selection */}
-              <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setIsCallUpModalOpen(true)}
-                    className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                    Hochmelden
-                  </button>
-                </div>
-                <div className="flex flex-row items-center justify-between sm:justify-end">
-                  <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
-                  <Switch
-                    checked={includeInactivePlayers}
-                    onChange={setIncludeInactivePlayers}
-                    className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                    />
-                  </Switch>
-                </div>
-                <PlayerSelect
-                  ref={playerSelectRef}
-                  selectedPlayer={selectedPlayer ? {
-                    player: {
-                      playerId: selectedPlayer._id,
-                      firstName: selectedPlayer.firstName,
-                      lastName: selectedPlayer.lastName,
-                      jerseyNumber: selectedPlayer.jerseyNo || 0
-                    },
-                    playerPosition: { key: 'F', value: 'Feldspieler' },
-                    passNumber: selectedPlayer.passNo,
-                    called: selectedPlayer.called
-                  } : null}
-                  onChange={(selectedRosterPlayer) => {
-                    if (selectedRosterPlayer) {
-                      const availablePlayer = availablePlayersList.find(p => p._id === selectedRosterPlayer.player.playerId);
-                      if (availablePlayer) {
-                        setSelectedPlayer(availablePlayer);
-                        if (availablePlayer.jerseyNo) {
-                          setPlayerNumber(availablePlayer.jerseyNo);
-                        }
-                        // Focus the jersey number input after player selection
-                        setTimeout(() => {
-                          if (jerseyNumberRef.current) {
-                            jerseyNumberRef.current.focus();
-                            jerseyNumberRef.current.select(); // Also select the text for easy replacement
-                          }
-                        }, 100);
-                      }
-                    } else {
-                      setSelectedPlayer(null);
-                    }
-                  }}
-                  roster={availablePlayersList.map(player => ({
-                    player: {
-                      playerId: player._id,
-                      firstName: player.firstName,
-                      lastName: player.lastName,
-                      jerseyNumber: player.jerseyNo || 0
-                    },
-                    playerPosition: { key: 'F', value: 'Feldspieler' },
-                    passNumber: player.passNo,
-                    called: player.called
-                  }))}
-                  placeholder="Spieler auswählen"
-                />
+        <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Spieler aufstellen</h2>
+        <div className="bg-white shadow rounded-md border p-4 mb-6">
+          <div className="flex flex-col gap-4">
+            {/* Player Selection */}
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsCallUpModalOpen(true)}
+                  className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  Hochmelden
+                </button>
               </div>
-              {/* Jersey Number and Position */}
-              <div className="flex flex-row justify-between items-center mb-1">
-                <div>
-                  <label htmlFor="player-number" className="block text-sm font-medium text-gray-700 mb-1">
-                    Nr.
-                  </label>
-                  <input
-                    ref={jerseyNumberRef}
-                    type="text"
-                    id="player-number"
-                    value={playerNumber}
-                    onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
-                    className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="##"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === 'Tab') {
-                        e.preventDefault();
-                        // Focus the position select dropdown when Enter or Tab is pressed
-                        if (positionSelectRef.current) {
-                          positionSelectRef.current.focus();
-                        }
-                      }
-                    }}
+              <div className="flex flex-row items-center justify-between sm:justify-end">
+                <span className="ml-2 text-sm font-medium text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
+                <Switch
+                  checked={includeInactivePlayers}
+                  onChange={setIncludeInactivePlayers}
+                  className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                >
+                  <span className="sr-only">Inaktive Spieler anzeigen</span>
+                  <span
+                    aria-hidden="true"
+                    className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
                   />
-                </div>
-                <div className="w-full ml-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Position
-                  </label>
-                  <Listbox value={playerPosition} onChange={(position) => {
-                    setPlayerPosition(position);
-                    // Focus the Add button after position selection
-                    setTimeout(() => {
-                      if (addButtonRef.current) {
-                        addButtonRef.current.focus();
-                      }
-                    }, 100);
-                  }}>
-                    {({ open }) => (
-                      <>
-                        <div className="relative">
-                          <Listbox.Button
-                            ref={positionSelectRef}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !open) {
-                                e.preventDefault();
-                                // Focus the Add button when Enter is pressed and dropdown is closed
-                                if (addButtonRef.current) {
-                                  addButtonRef.current.focus();
-                                }
-                              }
-                              // Handle letter key presses for position selection
-                              const key = e.key.toUpperCase();
-                              if (['C', 'A', 'G', 'F'].includes(key)) {
-                                e.preventDefault();
-                                const position = playerPositions.find(pos => pos.key === key);
-                                if (position) {
-                                  setPlayerPosition(position);
-                                  // Focus the Add button after keyboard selection
-                                  setTimeout(() => {
-                                    if (addButtonRef.current) {
-                                      addButtonRef.current.focus();
-                                    }
-                                  }, 100);
-                                }
-                              }
-                            }}
-                            className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                            <span className="block truncate">
-                              {playerPosition.key} - {playerPosition.value}
-                            </span>
-                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                              <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                            </span>
-                          </Listbox.Button>
+                </Switch>
+              </div>
+              <Listbox value={selectedPlayer} onChange={setSelectedPlayer}>
+                {({ open }) => (
+                  <>
+                    <div className="relative">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <span className={`block truncate ${!selectedPlayer ? 'text-gray-400' : ''}`}>
+                          {selectedPlayer ? `${selectedPlayer.lastName}, ${selectedPlayer.firstName}` : 'Spieler auswählen'}
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        </span>
+                      </Listbox.Button>
 
-                          <Transition
-                            show={open}
-                            as={Fragment}
-                            leave="transition ease-in duration-100"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                          >
-                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                              {playerPositions.map((position) => (
-                                <Listbox.Option
-                                  key={position.key}
-                                  className={({ active }) =>
-                                    classNames(
-                                      active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                      'relative cursor-default select-none py-2 pl-3 pr-9'
-                                    )
+                      <Transition
+                        show={open}
+                        as={React.Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {Array.isArray(availablePlayersList) && availablePlayersList.length > 0 ? (
+                            availablePlayersList.map((player) => (
+                              <Listbox.Option
+                                key={player._id}
+                                className={({ active }) => classNames(
+                                  active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                  'relative cursor-default select-none py-2 pl-3 pr-9'
+                                )
+                                }
+                                value={player}
+                                onClick={() => {
+                                  if (player.jerseyNo) {
+                                    setPlayerNumber(player.jerseyNo);
                                   }
-                                  value={position}
-                                >
-                                  {({ selected, active }) => (
-                                    <>
+                                }}
+                              >
+                                {({ selected, active }) => (
+                                  <>
+                                    <div className="flex flex-col">
                                       <span className={classNames(
                                         selected ? 'font-semibold' : 'font-normal',
                                         'block truncate'
                                       )}>
-                                        {position.key} - {position.value}
+                                        {player.lastName}, {player.firstName}
                                       </span>
 
-                                      {selected ? (
-                                        <span
-                                          className={classNames(
-                                            active ? 'text-white' : 'text-indigo-600',
-                                            'absolute inset-y-0 right-0 flex items-center pr-4'
-                                          )}
-                                        >
-                                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      {player.originalTeam && (
+                                        <span className={classNames(
+                                          active ? 'text-indigo-100' : 'text-gray-500',
+                                          'text-xs'
+                                        )}>
+                                          {player.originalTeam}
                                         </span>
-                                      ) : null}
-                                    </>
-                                  )}
-                                </Listbox.Option>
-                              ))}
-                            </Listbox.Options>
-                          </Transition>
-                        </div>
-                      </>
-                    )}
-                  </Listbox>
-                </div>
-              </div>
-            </div>
-            {/** Button */}
-            <div className="mt-4 flex justify-end">
-              <button
-                ref={addButtonRef}
-                type="button"
-                onClick={handleAddPlayer}
-                disabled={loading}
-                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                Hinzufügen
-              </button>
-            </div>
-          </div>
+                                      )}
+                                    </div>
 
-          {/* Roster List - Editable View */}
-          <div className="">
-            <ul className="divide-y divide-gray-200">
-              {rosterList.length > 0 ? (
-                rosterList.map((player) => (
-                  <li key={player.player.playerId} className={`px-6 py-4 ${player.player.jerseyNumber === 0 ? 'bg-yellow-50' : ''}`}>
-                    <div className="flex items-center">
-                      <div className={`min-w-8 md:min-w-12 text-sm font-semibold ${player.player.jerseyNumber === 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                        {player.player.jerseyNumber}
-                      </div>
-                      <div className="min-w-8 md:min-w-12 text-sm font-medium text-gray-500">
-                        {player.playerPosition.key}
-                      </div>
-                      <div className="flex-1 text-sm text-gray-900">
-                        {player.player.lastName}, {player.player.firstName}
-                      </div>
-                      <div className="flex-1 hidden sm:block flex-1 text-xs">
-                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                          {player.passNumber}
-                        </span>
-                      </div>
-                      <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
-                        {player.called ? (
-                          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                            </svg>
-                            <span className="hidden sm:block">Hochgemeldet</span>
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => handleEditPlayer(player)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          <PencilIcon className="h-5 w-5" aria-hidden="true" />
-                        </button>
-                        {(() => {
-                          // Check if player has any events (goals or penalties)
-                          const hasScored = match[teamFlag as 'home' | 'away'].scores?.some(score =>
-                            score.goalPlayer.playerId === player.player.playerId ||
-                            (score.assistPlayer && score.assistPlayer.playerId === player.player.playerId)
-                          );
-                          const hasPenalty = match[teamFlag as 'home' | 'away'].penalties?.some(penalty =>
-                            penalty.penaltyPlayer.playerId === player.player.playerId
-                          );
-                          const hasEvents = hasScored || hasPenalty;
-
-                          if (hasEvents) {
-                            // Show disabled button with tooltip
-                            return (
-                              <button
-                                type="button"
-                                disabled
-                                title="Spieler kann nicht entfernt werden, da er bereits ein Tor erzielt, einen Assist gegeben oder eine Strafe erhalten hat."
-                                className="text-gray-400 cursor-not-allowed"
-                              >
-                                <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                              </button>
-                            );
-                          } else {
-                            // Show active delete button
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  // Find the player in the complete list of all players
-                                  const playerToAddBack = allAvailablePlayers.find(p => p._id === player.player.playerId);
-
-                                  // Remove from roster
-                                  const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
-                                  setRosterList(updatedRoster);
-
-                                  // Add back to available players list if found and not already there
-                                  if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
-                                    setAvailablePlayersList(prevList => {
-                                      // Add the player back and sort the list by lastName, then firstName
-                                      const newList = [...prevList, playerToAddBack];
-                                      return newList.sort((a, b) => {
-                                        // First sort by lastName
-                                        const lastNameComparison = a.lastName.localeCompare(b.lastName);
-                                        // If lastName is the same, sort by firstName
-                                        return lastNameComparison !== 0 ? lastNameComparison :
-                                          a.firstName.localeCompare(b.firstName);
-                                      });
-                                    });
-                                  }
-                                }}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                              </button>
-                            );
-                          }
-                        })()}
-                      </div>
+                                    {selected ? (
+                                      <span
+                                        className={classNames(
+                                          active ? 'text-white' : 'text-indigo-600',
+                                          'absolute inset-y-0 right-0 flex items-center pr-4'
+                                        )}
+                                      >
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                            ))
+                          ) : (
+                            <div className="py-2 px-3 text-gray-500 italic">
+                              Keine Spieler verfügbar
+                            </div>
+                          )}
+                        </Listbox.Options>
+                      </Transition>
                     </div>
-                  </li>
-                ))
-              ) : (
-                <li className="px-6 py-4 text-center text-gray-500">
-                  Keine Spieler in der Aufstellung
-                </li>
-              )}
-            </ul>
+                  </>
+                )}
+              </Listbox>
+            </div>
+
+            {/* Jersey Number */}
+            <div className="flex flex-row justify-between items-center mb-1">
+              <div>
+                <label htmlFor="player-number" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nr.
+                </label>
+                <input
+                  type="text"
+                  id="player-number"
+                  value={playerNumber}
+                  onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
+                  className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  placeholder="##"
+                />
+              </div>
+
+              {/* Player Position */}
+              <div className="w-full ml-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Position
+                </label>
+                <Listbox value={playerPosition} onChange={setPlayerPosition}>
+                  {({ open }) => (
+                    <>
+                      <div className="relative">
+                        <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                          <span className="block truncate">
+                            {playerPosition.key} - {playerPosition.value}
+                          </span>
+                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          </span>
+                        </Listbox.Button>
+
+                        <Transition
+                          show={open}
+                          as={Fragment}
+                          leave="transition ease-in duration-100"
+                          leaveFrom="opacity-100"
+                          leaveTo="opacity-0"
+                        >
+                          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                            {playerPositions.map((position) => (
+                              <Listbox.Option
+                                key={position.key}
+                                className={({ active }) =>
+                                  classNames(
+                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                    'relative cursor-default select-none py-2 pl-3 pr-9'
+                                  )
+                                }
+                                value={position}
+                              >
+                                {({ selected, active }) => (
+                                  <>
+                                    <span className={classNames(
+                                      selected ? 'font-semibold' : 'font-normal',
+                                      'block truncate'
+                                    )}>
+                                      {position.key} - {position.value}
+                                    </span>
+
+                                    {selected ? (
+                                      <span
+                                        className={classNames(
+                                          active ? 'text-white' : 'text-indigo-600',
+                                          'absolute inset-y-0 right-0 flex items-center pr-4'
+                                        )}
+                                      >
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                            ))}
+                          </Listbox.Options>
+                        </Transition>
+                      </div>
+                    </>
+                  )}
+                </Listbox>
+              </div>
+            </div>
           </div>
 
-          {/* Roster Completeness Check */}
-          <div className="p-6 border-t bg-gray-50">
-            <div className="space-y-3">
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={handleAddPlayer}
+              disabled={loading}
+              className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+              Hinzufügen
+            </button>
+          </div>
+        </div>
 
-              {/* Captain check indicator */}
-              <div className="flex items-center">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'C') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                  {rosterList.some(player => player.playerPosition.key === 'C') ? (
-                    <CheckCircleIcon className="h-6 w-6" />
-                  ) : (
-                    <ExclamationCircleIcon className="h-6 w-6" />
-                  )}
-                </div>
-                <span className="ml-2 text-sm">
-                  {rosterList.some(player => player.playerPosition.key === 'C')
-                    ? 'Captain (C) wurde festgelegt'
-                    : 'Es wurde noch kein Captain (C) festgelegt'}
-                </span>
+        {/* Roster List */}
+        <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Aufstellung</h2>
+        <div className="bg-white shadow rounded-md border mb-6">
+          <ul className="divide-y divide-gray-200">
+            {rosterList.length > 0 ? (
+              rosterList.map((player) => (
+                <li key={player.player.playerId} className={`px-6 py-4 ${player.player.jerseyNumber === 0 ? 'bg-yellow-50' : ''}`}>
+                  <div className="flex items-center">
+                    <div className={`min-w-8 md:min-w-12 text-sm font-semibold ${player.player.jerseyNumber === 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                      {player.player.jerseyNumber}
+                    </div>
+                    <div className="min-w-8 md:min-w-12 text-sm font-medium text-gray-500">
+                      {player.playerPosition.key}
+                    </div>
+                    <div className="flex-1 text-sm text-gray-900">
+                      {player.player.lastName}, {player.player.firstName}
+                    </div>
+                    <div className="flex-1 hidden sm:block flex-1 text-xs">
+                      <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                        {player.passNumber}
+                      </span>
+                    </div>
+                    <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
+                      {player.called ? (
+                        <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <span className="hidden sm:block">Hochgemeldet</span>
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEditPlayer(player)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      {(() => {
+                        // Check if player has any events (goals or penalties)
+                        const hasScored = match[teamFlag as 'home' | 'away'].scores?.some(score =>
+                          score.goalPlayer.playerId === player.player.playerId ||
+                          (score.assistPlayer && score.assistPlayer.playerId === player.player.playerId)
+                        );
+                        const hasPenalty = match[teamFlag as 'home' | 'away'].penalties?.some(penalty =>
+                          penalty.penaltyPlayer.playerId === player.player.playerId
+                        );
+                        const hasEvents = hasScored || hasPenalty;
+
+                        if (hasEvents) {
+                          // Show disabled button with tooltip
+                          return (
+                            <button
+                              type="button"
+                              disabled
+                              title="Spieler kann nicht entfernt werden, da er bereits ein Tor erzielt, einen Assist gegeben oder eine Strafe erhalten hat."
+                              className="text-gray-400 cursor-not-allowed"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          );
+                        } else {
+                          // Show active delete button
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                // Find the player in the complete list of all players
+                                const playerToAddBack = allAvailablePlayers.find(p => p._id === player.player.playerId);
+
+                                // Remove from roster
+                                const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
+                                setRosterList(updatedRoster);
+
+                                // Add back to available players list if found and not already there
+                                if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
+                                  setAvailablePlayersList(prevList => {
+                                    // Add the player back and sort the list by lastName, then firstName
+                                    const newList = [...prevList, playerToAddBack];
+                                    return newList.sort((a, b) => {
+                                      // First sort by lastName
+                                      const lastNameComparison = a.lastName.localeCompare(b.lastName);
+                                      // If lastName is the same, sort by firstName
+                                      return lastNameComparison !== 0 ? lastNameComparison :
+                                        a.firstName.localeCompare(b.firstName);
+                                    });
+                                  });
+                                }
+                              }}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          );
+                        }
+                      })()}
+                    </div>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <li className="px-6 py-4 text-center text-gray-500">
+                Keine Spieler in der Aufstellung
+              </li>
+            )}
+          </ul>
+        </div>
+
+        {/* Roster Completeness Check */}
+        <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Check</h2>
+        <div className="bg-white shadow rounded-md border p-6">
+          <div className="space-y-3">
+
+            {/* Captain check indicator */}
+            <div className="flex items-center">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'C') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                {rosterList.some(player => player.playerPosition.key === 'C') ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
+              <span className="ml-2 text-sm">
+                {rosterList.some(player => player.playerPosition.key === 'C')
+                  ? 'Captain (C) wurde festgelegt'
+                  : 'Es wurde noch kein Captain (C) festgelegt'}
+              </span>
+            </div>
 
-              {/* Assistant check indicator */}
-              <div className="flex items-center">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'A') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                  {rosterList.some(player => player.playerPosition.key === 'A') ? (
-                    <CheckCircleIcon className="h-6 w-6" />
-                  ) : (
-                    <ExclamationCircleIcon className="h-6 w-6" />
-                  )}
-                </div>
-                <span className="ml-2 text-sm">
-                  {rosterList.some(player => player.playerPosition.key === 'A')
-                    ? 'Assistant (A) wurde festgelegt'
-                    : 'Es wurde noch kein Assistant (A) festgelegt'}
-                </span>
+            {/* Assistant check indicator */}
+            <div className="flex items-center">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'A') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                {rosterList.some(player => player.playerPosition.key === 'A') ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
+              <span className="ml-2 text-sm">
+                {rosterList.some(player => player.playerPosition.key === 'A')
+                  ? 'Assistant (A) wurde festgelegt'
+                  : 'Es wurde noch kein Assistant (A) festgelegt'}
+              </span>
+            </div>
 
-              {/* Goalie check indicator */}
-              <div className="flex items-center">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'G') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                  {rosterList.some(player => player.playerPosition.key === 'G') ? (
-                    <CheckCircleIcon className="h-6 w-6" />
-                  ) : (
-                    <ExclamationCircleIcon className="h-6 w-6" />
-                  )}
-                </div>
-                <span className="ml-2 text-sm">
-                  {rosterList.some(player => player.playerPosition.key === 'G')
-                    ? 'Mindestens ein Goalie (G) wurde festgelegt'
-                    : 'Es wurde noch kein Goalie (G) festgelegt'}
-                </span>
+            {/* Goalie check indicator */}
+            <div className="flex items-center">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.playerPosition.key === 'G') ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                {rosterList.some(player => player.playerPosition.key === 'G') ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
+              <span className="ml-2 text-sm">
+                {rosterList.some(player => player.playerPosition.key === 'G')
+                  ? 'Mindestens ein Goalie (G) wurde festgelegt'
+                  : 'Es wurde noch kein Goalie (G) festgelegt'}
+              </span>
+            </div>
 
-              {/* Feldspieler check indicator */}
-              <div className="flex items-center mt-4">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                  {rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? (
-                    <CheckCircleIcon className="h-6 w-6" />
-                  ) : (
-                    <ExclamationCircleIcon className="h-6 w-6" />
-                  )}
-                </div>
-                <span className="ml-2 text-sm">
-                  {rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount
-                    ? `Mindestens ${minSkaterCount} Feldspieler wurden festgelegt`
-                    : `Es müssen mindestens ${minSkaterCount} Feldspieler festgelegt werden`}
-                </span>
+            {/* Feldspieler check indicator */}
+            <div className="flex items-center mt-4">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                {rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
+              <span className="ml-2 text-sm">
+                {rosterList.filter(player => player.playerPosition.key != 'G').length >= minSkaterCount
+                  ? `Mindestens ${minSkaterCount} Feldspieler wurden festgelegt`
+                  : `Es müssen mindestens ${minSkaterCount} Feldspieler festgelegt werden`}
+              </span>
+            </div>
 
-              {/** Jersey No check indicator */}
-              <div className="flex items-center mt-4">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
-                  {rosterList.some(player => player.player.jerseyNumber === 0) ? (
-                    <ExclamationCircleIcon className="h-6 w-6" />
-                  ) : (
-                    <CheckCircleIcon className="h-6 w-6" />
-                  )}
-                </div>
-                <span className="ml-2 text-sm">
-                  {rosterList.some(player => player.player.jerseyNumber === 0) ? 'Es fehlen noch Rückennummern' : 'Alle Spieler müssen Rückennummern haben'}
-                </span>
+            {/** Jersey No check indicator */}
+            <div className="flex items-center mt-4">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some(player => player.player.jerseyNumber === 0) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
+                {rosterList.some(player => player.player.jerseyNumber === 0) ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0L2.707 10.707a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
+              <span className="ml-2 text-sm">
+                {rosterList.some(player => player.player.jerseyNumber === 0) ? 'Es fehlen noch Rückennummern' : 'Alle Spieler müssen Rückennummern haben'}
+              </span>
+            </div>
 
-              {/* Double Jersey No check indicator */}
-              <div className="flex items-center mt-4">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
-                  {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
-                    <ExclamationCircleIcon className="h-6 w-6" />
-                  ) : (
-                    <CheckCircleIcon className="h-6 w-6" />
-                  )}
-                </div>
-                <span className="ml-2 text-sm">
-                  {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
-                    ? 'Doppelte Rückennummern vorhanden'
-                    : 'Keine doppelten Rückennummern'}
-                </span>
+            {/* Double Jersey No check indicator */}
+            <div className="flex items-center mt-4">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
+                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM10 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0L2.707 10.707a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
+              <span className="ml-2 text-sm">
+                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
+                  ? 'Doppelte Rückennummern vorhanden'
+                  : 'Keine doppelten Rückennummern'}
+              </span>
+            </div>
 
 
-              {/* Called players check indicator */}
-              <div className="flex items-center mt-4">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.called).length <= 5 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                  {rosterList.filter(player => player.called).length <= 5 ? (
-                    <CheckCircleIcon className="h-6 w-6" />
-                  ) : (
-                    <ExclamationCircleIcon className="h-6 w-6" />
-                  )}
-                </div>
-                <span className="ml-2 text-sm">
-                  {rosterList.filter(player => player.called).length <= 5
-                    ? `Hochgemeldete Spieler: ${rosterList.filter(player => player.called).length} von 5`
-                    : `Zu viele hochgemeldete Spieler: ${rosterList.filter(player => player.called).length} von max. 5`}
-                </span>
+            {/* Called players check indicator */}
+            <div className="flex items-center mt-4">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter(player => player.called).length <= 5 ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                {rosterList.filter(player => player.called).length <= 5 ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
+              <span className="ml-2 text-sm">
+                {rosterList.filter(player => player.called).length <= 5
+                  ? `Hochgemeldete Spieler: ${rosterList.filter(player => player.called).length} von 5`
+                  : `Zu viele hochgemeldete Spieler: ${rosterList.filter(player => player.called).length} von max. 5`}
+              </span>
             </div>
           </div>
         </div>
@@ -1474,104 +1463,84 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           const otherMatchDate = new Date(m.startDate);
           return matchDate.toDateString() === otherMatchDate.toDateString();
         }).length > 0 && (
-            <>
-              <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-              <div className="bg-white shadow rounded-md border mb-6">
-                {match.matchday && match.round && match.season && match.tournament && (
-                  <ul className="divide-y divide-gray-200">
-                    {matches
-                      .filter(m => {
-                        // Exclude current match
-                        if (m._id === match._id) return false;
+          <>
+            <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
+            <div className="bg-white shadow rounded-md border mb-6">
+              {match.matchday && match.round && match.season && match.tournament && (
+                <ul className="divide-y divide-gray-200">
+              {matches
+                .filter(m => {
+                  // Exclude current match
+                  if (m._id === match._id) return false;
+                  
+                  // Only show matches on the same date
+                  const matchDate = new Date(match.startDate);
+                  const otherMatchDate = new Date(m.startDate);
+                  return matchDate.toDateString() === otherMatchDate.toDateString();
+                })
+                .map((m) => (
+                  <li key={m._id} className="px-6 py-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-4">
+                        <input
+                          id={`match-${m._id}`}
+                          type="checkbox"
+                          value={m._id}
+                          disabled={m.matchStatus.key !== 'SCHEDULED'}
+                          className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+                            m.matchStatus.key === 'SCHEDULED' 
+                            ? 'text-blue-600 bg-gray-100' 
+                            : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                          }`}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedMatches(prev => [...prev, m._id]);
+                            } else {
+                              setSelectedMatches(prev => prev.filter(id => id !== m._id));
+                            }
+                          }}
+                        />
+                        <div className="flex-shrink-0 h-8 w-8">
+                          <CldImage
+                            src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                            alt="Team logo"
+                            width={32}
+                            height={32}
+                            gravity="center"
+                            className="object-contain"
 
-                        // Only show matches on the same date
-                        const matchDate = new Date(match.startDate);
-                        const otherMatchDate = new Date(m.startDate);
-                        return matchDate.toDateString() === otherMatchDate.toDateString();
-                      })
-                      .map((m) => (
-                        <li key={m._id} className="px-6 py-4">
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center space-x-4">
-                              <input
-                                id={`match-${m._id}`}
-                                type="checkbox"
-                                value={m._id}
-                                disabled={m.matchStatus.key !== 'SCHEDULED'}
-                                className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${m.matchStatus.key === 'SCHEDULED'
-                                  ? 'text-blue-600 bg-gray-100'
-                                  : 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                  }`}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedMatches(prev => [...prev, m._id]);
-                                  } else {
-                                    setSelectedMatches(prev => prev.filter(id => id !== m._id));
-                                  }
-                                }}
-                              />
-                              <div className="flex-shrink-0 h-8 w-8">
-                                <CldImage
-                                  src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                                  alt="Team logo"
-                                  width={32}
-                                  height={32}
-                                  gravity="center"
-                                  className="object-contain"
-
-                                />
-                              </div>
-                              <div className="text-sm text-gray-900">
-                                {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
-                              </div>
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {m.matchStatus.key === 'SCHEDULED' ? (
-                                new Date(m.startDate).toLocaleTimeString('de-DE', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                }) + ' Uhr'
-                              ) : (
-                                <MatchStatusBadge
-                                  statusKey={m.matchStatus.key}
-                                  finishTypeKey={m.finishType.key}
-                                  statusValue={m.matchStatus.value}
-                                  finishTypeValue={m.finishType.value}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                  </ul>
-                )}
-              </div>
-            </>
-          )}
+                          />
+                        </div>
+                        <div className="text-sm text-gray-900">
+                          {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {m.matchStatus.key === 'SCHEDULED' ? (
+                          new Date(m.startDate).toLocaleTimeString('de-DE', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) + ' Uhr'
+                        ) : (
+                          <MatchStatusBadge
+                            statusKey={m.matchStatus.key}
+                            finishTypeKey={m.finishType.key}
+                            statusValue={m.matchStatus.value}
+                            finishTypeValue={m.finishType.value}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+            </ul>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Close, Save buttons */}
         <div className="flex space-x-3 mt-6 justify-end">
-
-          {React.useMemo(() => (
-            <PDFDownloadLink
-              document={
-                <RosterPDF
-                  teamName={team.fullName}
-                  matchDate={new Date(match.startDate).toLocaleDateString()}
-                  venue={match.venue.name}
-                  roster={sortRoster(rosterList)}
-                  teamLogo={team.logoUrl}
-                />
-              }
-              fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
-              className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-              {({ loading }) => (
-                <span>{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
-              )}
-            </PDFDownloadLink>
-          ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, rosterList])}
-
           <button
             type="button"
             onClick={() => router.back()}
@@ -1632,19 +1601,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 {({ open }) => (
                   <>
                     <div className="relative">
-                      <Listbox.Button
-                        onKeyDown={(e) => {
-                          // Handle letter key presses for position selection
-                          const key = e.key.toUpperCase();
-                          if (['C', 'A', 'G', 'F'].includes(key)) {
-                            e.preventDefault();
-                            const position = playerPositions.find(pos => pos.key === key);
-                            if (position) {
-                              setEditPlayerPosition(position);
-                            }
-                          }
-                        }}
-                        className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                         <span className="block truncate">
                           {editPlayerPosition.key} - {editPlayerPosition.value}
                         </span>
@@ -1739,7 +1696,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
@@ -1764,20 +1721,23 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             )}
 
             {/* Include Inactive Players Toggle */}
-            <div className="flex flex-row items-center justify-between sm:justify-end">
-              <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
-              <Switch
-                checked={includeInactivePlayers}
-                onChange={setIncludeInactivePlayers}
-                className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                  } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                />
-              </Switch>
+            <div className="flex items-center justify-end mb-4">
+              <div className="flex items-center">
+                <Switch
+                  checked={includeInactivePlayers}
+                  onChange={setIncludeInactivePlayers}
+                  className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                >
+                  <span className="sr-only">Inaktive Spieler anzeigen</span>
+                  <span
+                    aria-hidden="true"
+                    className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                  />
+                </Switch>
+                <span className="ml-2 text-xs text-gray-600">Inaktive Spieler anzeigen</span>
+              </div>
             </div>
 
             {/* Team Selection */}
@@ -1790,7 +1750,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   <>
                     <div className="relative">
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                        <span className={`block truncate ${selectedCallUpTeam ? '' : 'text-gray-400'}`}>
+                        <span className="block truncate">
                           {selectedCallUpTeam ? selectedCallUpTeam.name : 'Mannschaft auswählen'}
                         </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -1856,43 +1816,88 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
             {/* Player Selection */}
             <div className="mb-6">
-              <PlayerSelect
-                selectedPlayer={selectedCallUpPlayer ? {
-                  player: {
-                    playerId: selectedCallUpPlayer._id,
-                    firstName: selectedCallUpPlayer.firstName,
-                    lastName: selectedCallUpPlayer.lastName,
-                    jerseyNumber: selectedCallUpPlayer.jerseyNo || 0
-                  },
-                  playerPosition: { key: 'F', value: 'Feldspieler' },
-                  passNumber: selectedCallUpPlayer.passNo,
-                  called: selectedCallUpPlayer.called
-                } : null}
-                onChange={(selectedRosterPlayer) => {
-                  if (selectedRosterPlayer) {
-                    const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
-                    if (availablePlayer) {
-                      setSelectedCallUpPlayer(availablePlayer);
-                    }
-                  } else {
-                    setSelectedCallUpPlayer(null);
-                  }
-                }}
-                roster={callUpPlayers.map(player => ({
-                  player: {
-                    playerId: player._id,
-                    firstName: player.firstName,
-                    lastName: player.lastName,
-                    jerseyNumber: player.jerseyNo || 0
-                  },
-                  playerPosition: { key: 'F', value: 'Feldspieler' },
-                  passNumber: player.passNo,
-                  called: player.called
-                }))}
-                label="Spieler"
-                placeholder={selectedCallUpTeam ? 'Spieler auswählen' : 'Bitte zuerst eine Mannschaft auswählen'}
-                required={false}
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Spieler
+              </label>
+              <Listbox value={selectedCallUpPlayer} onChange={setSelectedCallUpPlayer}>
+                {({ open }) => (
+                  <>
+                    <div className="relative">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <span className="block truncate">
+                          {selectedCallUpPlayer ? `${selectedCallUpPlayer.lastName}, ${selectedCallUpPlayer.firstName}` : 'Spieler auswählen'}
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        </span>
+                      </Listbox.Button>
+
+                      <Transition
+                        show={open}
+                        as={React.Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {callUpPlayers.length > 0 ? (
+                            callUpPlayers.map((player) => (
+                              <Listbox.Option
+                                key={player._id}
+                                className={({ active }) =>
+                                  classNames(
+                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                    'relative cursor-default select-none py-2 pl-3 pr-9'
+                                  )
+                                }
+                                value={player}
+                              >
+                                {({ selected, active }) => (
+                                  <>
+                                    <div className="flex flex-col">
+                                      <span className={classNames(
+                                        selected ? 'font-semibold' : 'font-normal',
+                                        'block truncate'
+                                      )}>
+                                        {player.lastName}, {player.firstName}
+                                      </span>
+                                      {/**
+                                      {player.active === false && (
+                                        <span className={classNames(
+                                          active ? 'text-indigo-100' : 'text-gray-500',
+                                          'text-xs'
+                                        )}>
+                                          (Inaktiv)
+                                        </span>
+                                      )}
+                                      */}
+                                    </div>
+
+                                    {selected ? (
+                                      <span
+                                        className={classNames(
+                                          active ? 'text-white' : 'text-indigo-600',
+                                          'absolute inset-y-0 right-0 flex items-center pr-4'
+                                        )}
+                                      >
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                            ))
+                          ) : (
+                            <div className="py-2 px-3 text-gray-500 italic">
+                              {selectedCallUpTeam ? 'Keine Spieler verfügbar' : 'Bitte zuerst eine Mannschaft auswählen'}
+                            </div>
+                          )}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </>
+                )}
+              </Listbox>
             </div>
 
             {/* Modal Actions */}
@@ -1905,7 +1910,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setSelectedCallUpPlayer(null);
                   setCallUpModalError(null);
                 }}
-                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 Abbrechen
               </button>
