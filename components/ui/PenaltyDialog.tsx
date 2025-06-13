@@ -144,9 +144,9 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setError('');
     setPenaltyPlayerError(false);
 
-    if (!selectedPlayer || !selectedPenaltyCode || !values.matchTimeStart || !values.penaltyMinutes) {
+    if (!values.penaltyPlayer || !values.penaltyCode || !values.matchTimeStart || !values.penaltyMinutes) {
       setError('Bitte füllen Sie alle erforderlichen Felder aus.');
-      setPenaltyPlayerError(!selectedPlayer);
+      setPenaltyPlayerError(!values.penaltyPlayer);
       setIsSubmitting(false);
       return;
     }
@@ -156,14 +156,14 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
         matchTimeStart: values.matchTimeStart,
         matchTimeEnd: values.matchTimeEnd || undefined,
         penaltyPlayer: {
-          playerId: selectedPlayer.playerId,
-          firstName: selectedPlayer.firstName,
-          lastName: selectedPlayer.lastName,
-          jerseyNumber: selectedPlayer.jerseyNumber
+          playerId: values.penaltyPlayer.playerId,
+          firstName: values.penaltyPlayer.firstName,
+          lastName: values.penaltyPlayer.lastName,
+          jerseyNumber: values.penaltyPlayer.jerseyNumber
         },
         penaltyCode: {
-          key: selectedPenaltyCode.key,
-          value: selectedPenaltyCode.value
+          key: values.penaltyCode.key,
+          value: values.penaltyCode.value
         },
         penaltyMinutes: parseInt(values.penaltyMinutes, 10),
         isGM: values.isGM,
@@ -242,8 +242,16 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   initialValues={{
                     matchTimeStart: editPenalty?.matchTimeStart || '',
                     matchTimeEnd: editPenalty?.matchTimeEnd || '',
-                    penaltyPlayer: selectedPlayer,
-                    penaltyCode: selectedPenaltyCode,
+                    penaltyPlayer: editPenalty?.penaltyPlayer ? {
+                      playerId: editPenalty.penaltyPlayer.playerId,
+                      firstName: editPenalty.penaltyPlayer.firstName,
+                      lastName: editPenalty.penaltyPlayer.lastName,
+                      jerseyNumber: editPenalty.penaltyPlayer.jerseyNumber
+                    } : null,
+                    penaltyCode: editPenalty?.penaltyCode ? {
+                      key: editPenalty.penaltyCode.key,
+                      value: editPenalty.penaltyCode.value
+                    } : null,
                     penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '',
                     isGM: editPenalty?.isGM || false,
                     isMP: editPenalty?.isMP || false,
