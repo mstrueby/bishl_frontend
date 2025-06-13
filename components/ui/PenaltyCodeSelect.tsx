@@ -26,7 +26,7 @@ const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectPr
   penaltyCodes,
   label,
   required = false,
-  placeholder = "Strafcode auswählen",
+  placeholder = "Strafe auswählen",
   error = false,
   tabIndex
 }, ref) => {
