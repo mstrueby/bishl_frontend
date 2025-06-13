@@ -1,5 +1,6 @@
 
 import React, { Fragment, useState, useEffect, useRef } from 'react';
+import { useField } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../tools/utils';
@@ -10,26 +11,29 @@ interface PenaltyCode {
 }
 
 interface PenaltyCodeSelectProps {
+  name: string;
   selectedPenaltyCode: PenaltyCode | null;
   onChange: (selectedPenaltyCode: PenaltyCode | null) => void;
   penaltyCodes: PenaltyCode[];
   label?: string;
   required?: boolean;
   placeholder?: string;
-  error?: boolean;
   tabIndex?: number;
+  showErrorText?: boolean;
 }
 
 const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectProps>(({
+  name,
   selectedPenaltyCode: propSelectedPenaltyCode,
   onChange,
   penaltyCodes,
   label,
   required = false,
   placeholder = "Strafe auswählen",
-  error = false,
-  tabIndex
+  tabIndex,
+  showErrorText = true,
 }, ref) => {
+  const [field, meta, helpers] = useField(name);
   const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(propSelectedPenaltyCode);
   const [query, setQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +132,7 @@ const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectPr
                   }
                 }}
                 tabIndex={tabIndex}
-                className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ${error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
+                className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 shadow-sm ring-1 ring-inset ${meta.touched && meta.error ? 'text-red-900 ring-red-300 focus:ring-red-500 placeholder:text-red-400' : 'text-gray-900 ring-gray-300 focus:ring-indigo-600 placeholder:text-gray-400'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
                 onChange={handleQueryChange}
                 value={selectedPenaltyCode ? displayValue(selectedPenaltyCode) : query}
                 placeholder={placeholder}
@@ -214,6 +218,11 @@ const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectPr
           </>
         )}
       </Combobox>
+      {showErrorText && meta.touched && meta.error ? (
+        <p className="mt-2 text-sm text-red-600">
+          {meta.error}
+        </p>
+      ) : null}
     </div>
   );
 });

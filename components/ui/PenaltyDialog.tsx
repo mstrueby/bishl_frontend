@@ -47,8 +47,8 @@ const validationSchema = Yup.object().shape({
     jerseyNumber: Yup.number().required()
   }).required('Spieler ist erforderlich'),
   penaltyCode: Yup.object().shape({
-    key: Yup.string().required('Strafcode ist erforderlich'),
-    value: Yup.string().required()
+    key: Yup.string().required('Strafe-key ist erforderlich'),
+    value: Yup.string().required('Strafe-value ist erforderlich')
   }).required('Strafcode ist erforderlich'),
   penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
   isGM: Yup.boolean(),
@@ -259,6 +259,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
                       {/* Penalty Code Selection */}
                       <PenaltyCodeSelect
+                        name="penaltyCode"
                         selectedPenaltyCode={values.penaltyCode}
                         onChange={(penaltyCode) => {
                           setFieldValue('penaltyCode', penaltyCode);
@@ -268,7 +269,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         label="Strafe"
                         required={true}
                         placeholder="Strafe auswählen"
-                        error={false}
+                        showErrorText={false}
                       />
 
                       {/* Penalty Minutes */}
