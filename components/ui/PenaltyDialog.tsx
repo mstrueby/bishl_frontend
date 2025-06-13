@@ -321,7 +321,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     name="penaltyMinutes"
                     label="Strafminuten"
                     options={penaltyMinuteOptions}
-                    placeholder="Strafminuten auswählen"
                   />
 
                   {/* Penalty Type Toggles */}
