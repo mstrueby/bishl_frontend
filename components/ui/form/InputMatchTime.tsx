@@ -42,7 +42,7 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
     <>
       {label && (
         <label htmlFor={props.id || name}
-          className="block text-sm font-medium mt-6 mb-2 leading-6 text-gray-900">
+          className="block mt-6 mb-2 text-sm font-medium text-gray-700">
           {label}
         </label>
       )}
