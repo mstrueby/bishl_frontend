@@ -300,7 +300,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
                                   <PlayerSelect
-                                    name="goalPlayer"
+                                    name={`scores.${index}.goalPlayer`}
                                     selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
                                       if (selectedRosterPlayer) {
@@ -317,7 +317,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     roster={roster}
                                     required={true}
                                     placeholder="Torschützen auswählen"
-                                    
                                     tabIndex={index * 3 + 2}
                                   />
                                 </div>
@@ -325,7 +324,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
                                   <PlayerSelect
-                                    name="assistPlayer"
+                                    name={`scores.${index}.assistPlayer`}
                                     selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
                                       if (selectedRosterPlayer) {
