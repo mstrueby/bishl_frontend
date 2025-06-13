@@ -317,6 +317,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     roster={roster}
                                     required={true}
                                     placeholder="Torschützen auswählen"
+                                    showErrorText={false}
                                     tabIndex={index * 3 + 2}
                                   />
                                 </div>
