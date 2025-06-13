@@ -254,7 +254,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         label="Spieler"
                         required={true}
                         placeholder="Spieler auswählen"
-                        showErrorText={true}
+                        showErrorText={false}
                       />
 
                       {/* Penalty Code Selection */}
@@ -277,7 +277,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         label="Strafminuten"
                         options={penaltyMinuteOptions}
                         placeholder="Minuten auswählen"
-                        showErrorText={true}
+                        showErrorText={false}
                       />
 
                       {/* Penalty Type Toggles */}
