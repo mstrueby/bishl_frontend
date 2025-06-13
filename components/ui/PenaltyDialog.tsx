@@ -256,7 +256,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     setSubmitting(false);
                   }}
                 >
-                  {({ handleSubmit }) => (
+                  {({ handleSubmit, setFieldValue, values }) => (
                     <Form>
                   {/* Match Time - Start */}
                   <div>
@@ -276,19 +276,22 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
                   {/* Player Selection */}
                   <PlayerSelect
-                    selectedPlayer={selectedPlayer ? roster.find(p => p.player.playerId === selectedPlayer.playerId) || null : null}
+                    selectedPlayer={values.penaltyPlayer ? roster.find(p => p.player.playerId === values.penaltyPlayer?.playerId) || null : null}
                     onChange={(player) => {
                       if (player) {
-                        setSelectedPlayer({
+                        const penaltyPlayer = {
                           playerId: player.player.playerId,
                           firstName: player.player.firstName,
                           lastName: player.player.lastName,
                           jerseyNumber: player.player.jerseyNumber
-                        });
+                        };
+                        setSelectedPlayer(penaltyPlayer);
+                        setFieldValue('penaltyPlayer', penaltyPlayer);
                         setPenaltyPlayerError(false);
                         setError('');
                       } else {
                         setSelectedPlayer(null);
+                        setFieldValue('penaltyPlayer', null);
                       }
                     }}
                     roster={roster}
@@ -300,9 +303,10 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
                   {/* Penalty Code Selection */}
                   <PenaltyCodeSelect
-                    selectedPenaltyCode={selectedPenaltyCode}
+                    selectedPenaltyCode={values.penaltyCode}
                     onChange={(penaltyCode) => {
                       setSelectedPenaltyCode(penaltyCode);
+                      setFieldValue('penaltyCode', penaltyCode);
                       setError('');
                     }}
                     penaltyCodes={penaltyCodes}
