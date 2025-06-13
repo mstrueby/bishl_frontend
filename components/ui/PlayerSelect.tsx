@@ -1,5 +1,6 @@
 
 import React, { Fragment, useState, useEffect, useRef } from 'react';
+import { useField } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
 import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
@@ -7,29 +8,31 @@ import { MinusCircleIcon} from '@heroicons/react/24/outline'
 import { classNames } from '../../tools/utils';
 
 interface PlayerSelectProps {
+  name: string;
   selectedPlayer: RosterPlayer | null;
   onChange: (selectedPlayer: RosterPlayer | null) => void;
   roster: RosterPlayer[];
   label?: string;
   required?: boolean;
   placeholder?: string;
-  error?: boolean;
   tabIndex?: number;
   removeButton?: boolean;
-
+  showErrorText?: boolean;
 }
 
 const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
+  name,
   selectedPlayer: propSelectedPlayer,
   onChange,
   roster,
   label,
   required = false,
   placeholder = "Spieler auswählen",
-  error = false,
   tabIndex,
-  removeButton = false
+  removeButton = false,
+  showErrorText = true,  
 }, ref) => {
+  const [field, meta, helpers] = useField(name);
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -109,6 +112,9 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
     if (!player) return ''; // Return empty string when no player selected to show placeholder
     return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
+  const Placeholder = () => (
+    <span className={`block truncate ${meta.touched && meta.error ? 'text-red-400' : 'text-gray-400'}`}>{placeholder}</span>
+  )
 
   return (
     <div className="w-full">
@@ -132,7 +138,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
                     }
                   }}
                   tabIndex={tabIndex}
-                  className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ${error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
+                  className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10  shadow-sm ring-1 ring-inset ${meta.touched && meta.error ? 'text-red-900 ring-red-300 focus:ring-red-500' : 'text-gray-900 ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
                   onChange={handleQueryChange}
                   value={selectedPlayer ? displayValue(selectedPlayer) : query}
                   placeholder={placeholder}
@@ -228,6 +234,11 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
           </>
         )}
       </Combobox>
+      {showErrorText && meta.touched && meta.error ? (
+        <p className="mt-2 text-sm text-red-600">
+          {meta.error}
+        </p>
+      ) : null}
     </div>
   );
 });
