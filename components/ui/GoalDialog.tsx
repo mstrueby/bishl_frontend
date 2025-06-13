@@ -1,3 +1,4 @@
+
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
@@ -20,76 +21,48 @@ interface GoalDialogProps {
 
 const validationSchema = Yup.object().shape({
   matchTime: Yup.string()
-    .required()
+    .required('Zeit ist erforderlich')
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
+  goalPlayer: Yup.object().shape({
+    playerId: Yup.string().required('Spieler ist erforderlich'),
+    firstName: Yup.string().required(),
+    lastName: Yup.string().required(),
+    jerseyNumber: Yup.number().required()
+  }).required('Torschütze ist erforderlich'),
+  assistPlayer: Yup.object().nullable(), // Optional
+  isPPG: Yup.boolean(),
+  isSHG: Yup.boolean(),
+  isGWG: Yup.boolean()
 });
 
 const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: GoalDialogProps) => {
-  const [selectedGoalPlayer, setSelectedGoalPlayer] = useState<RosterPlayer | null>(null);
-  const [selectedAssistPlayer, setSelectedAssistPlayer] = useState<RosterPlayer | null>(null);
-  const [isPPG, setIsPPG] = useState(false);
-  const [isSHG, setIsSHG] = useState(false);
-  const [isGWG, setIsGWG] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [goalPlayerError, setGoalPlayerError] = useState(false);
 
-  // Fill the form with the goal data when editing
+  // Clear error when dialog opens
   useEffect(() => {
-    if (isOpen && editGoal) {
-      // Find and set goal player
-      const goalPlayer = editGoal.goalPlayer
-        ? roster.find(item => item.player.playerId === editGoal.goalPlayer.playerId) || null
-        : null;
-      setSelectedGoalPlayer(goalPlayer);
-
-      // Find and set assist player
-      const assistPlayer = editGoal.assistPlayer
-        ? roster.find(item => item.player.playerId === editGoal.assistPlayer?.playerId) || null
-        : null;
-      setSelectedAssistPlayer(assistPlayer);
-
-      setIsPPG(editGoal.isPPG || false);
-      setIsSHG(editGoal.isSHG || false);
-      setIsGWG(editGoal.isGWG || false);
-    } else if (isOpen && !editGoal) {
-      // Reset form when opening for a new goal
-      setSelectedGoalPlayer(null);
-      setSelectedAssistPlayer(null);
-      setIsPPG(false);
-      setIsSHG(false);
-      setIsGWG(false);
+    if (isOpen) {
+      setError('');
     }
-    setError(''); // Clear any previous errors when dialog opens
-    setGoalPlayerError(false); // Clear goal player error state
-  }, [isOpen, editGoal, roster]);
+  }, [isOpen]);
 
-  const handleSubmit = async (values: { matchTime: string }) => {
+  const handleSubmit = async (values: ScoresBase) => {
     setIsSubmitting(true);
     setError('');
-    setGoalPlayerError(false);
-
-    if (!selectedGoalPlayer) {
-      setError('Torschütze ist erforderlich');
-      setGoalPlayerError(true);
-      setIsSubmitting(false);
-      return;
-    }
 
     try {
       const goalData = {
         matchTime: values.matchTime,
-        goalPlayer: selectedGoalPlayer?.player,
-        assistPlayer: selectedAssistPlayer ? selectedAssistPlayer.player : undefined,
-        isPPG,
-        isSHG,
-        isGWG
+        goalPlayer: values.goalPlayer,
+        assistPlayer: values.assistPlayer || undefined,
+        isPPG: values.isPPG || false,
+        isSHG: values.isSHG || false,
+        isGWG: values.isGWG || false
       };
-      console.log('Goal Data:', goalData)
 
       if (editGoal && editGoal._id) {
         // Update existing goal
-        await axios.patch(
+        const response = await axios.patch(
           `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/${editGoal._id}`,
           goalData,
           {
@@ -99,9 +72,12 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
             }
           }
         );
+        if (response.status === 200 || response.status === 304) {
+          console.log('Edit successful, closing dialog and refreshing data');
+        }
       } else {
         // Create new goal
-        await axios.post(
+        const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/`,
           goalData,
           {
@@ -111,34 +87,27 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
             }
           }
         );
+        if (response.status === 201) {
+          console.log('Create goal successful, closing dialog and refreshing data');
+        }
       }
 
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error adding goal:', error);
-      setError('Fehler beim Speichern des Tors');
+      console.error('Error saving goal:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('API error details:', error.response?.data);
+        setError('Fehler beim Speichern des Tors');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const resetForm = () => {
-    setSelectedGoalPlayer(null);
-    setSelectedAssistPlayer(null);
-    setIsPPG(false);
-    setIsSHG(false);
-    setIsGWG(false);
-    setError('');
-    setGoalPlayerError(false);
-  };
-
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
-        resetForm();
-        onClose();
-      }}>
+      <Dialog as="div" className="fixed inset-0 z-10" onClose={onClose}>
         <div className="fixed inset-0 bg-black/30 transition-opacity" />
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-full p-4">
@@ -160,57 +129,102 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                 </Dialog.Title>
 
                 <Formik
+                  key={editGoal?._id || 'new'}
                   initialValues={{
                     matchTime: editGoal?.matchTime || '',
+                    goalPlayer: editGoal?.goalPlayer ? {
+                      playerId: editGoal.goalPlayer.playerId,
+                      firstName: editGoal.goalPlayer.firstName,
+                      lastName: editGoal.goalPlayer.lastName,
+                      jerseyNumber: editGoal.goalPlayer.jerseyNumber
+                    } : null,
+                    assistPlayer: editGoal?.assistPlayer ? {
+                      playerId: editGoal.assistPlayer.playerId,
+                      firstName: editGoal.assistPlayer.firstName,
+                      lastName: editGoal.assistPlayer.lastName,
+                      jerseyNumber: editGoal.assistPlayer.jerseyNumber
+                    } : null,
+                    isPPG: editGoal?.isPPG || false,
+                    isSHG: editGoal?.isSHG || false,
+                    isGWG: editGoal?.isGWG || false,
                   }}
                   validationSchema={validationSchema}
                   enableReinitialize={true}
-                  onSubmit={handleSubmit}
+                  onSubmit={(values, { setSubmitting }) => {
+                    handleSubmit(values);
+                    setSubmitting(false);
+                  }}
                 >
-                  {({ values, setFieldValue, errors, touched, isValid }) => (
-                    <Form className="mt-4">
-                      <InputMatchTime
-                        name="matchTime"
-                        label="Spielzeit (mm:ss)"
+                  {({ setFieldValue, values }) => (
+                    <Form>
+                      {/* Match Time */}
+                      <div>
+                        <InputMatchTime
+                          name="matchTime"
+                          label="Spielzeit (mm:ss)"
+                        />
+                      </div>
+
+                      {/* Goal Player Selection */}
+                      <PlayerSelect
+                        name="goalPlayer"
+                        selectedPlayer={values.goalPlayer ? roster.find(p => p.player.playerId === values.goalPlayer?.playerId) || null : null}
+                        onChange={(player) => {
+                          if (player) {
+                            const goalPlayer = {
+                              playerId: player.player.playerId,
+                              firstName: player.player.firstName,
+                              lastName: player.player.lastName,
+                              jerseyNumber: player.player.jerseyNumber
+                            };
+                            setFieldValue('goalPlayer', goalPlayer);
+                            setError('');
+                          } else {
+                            setFieldValue('goalPlayer', null);
+                          }
+                        }}
+                        roster={roster}
+                        label="Torschütze"
+                        required={true}
+                        placeholder="Spieler auswählen"
+                        showErrorText={false}
                       />
 
-                      <div>
-                        <PlayerSelect
-                          selectedPlayer={selectedGoalPlayer}
-                          onChange={(player) => {
-                            setSelectedGoalPlayer(player);
-                            if (player) {
-                              setGoalPlayerError(false);
-                              setError('');
-                            }
-                          }}
-                          roster={roster}
-                          label="Torschütze"
-                          required={true}
-                          placeholder="Spieler auswählen"
-                          error={goalPlayerError}
-                        />
-                      </div>
+                      {/* Assist Player Selection */}
+                      <PlayerSelect
+                        name="assistPlayer"
+                        selectedPlayer={values.assistPlayer ? roster.find(p => p.player.playerId === values.assistPlayer?.playerId) || null : null}
+                        onChange={(player) => {
+                          if (player) {
+                            const assistPlayer = {
+                              playerId: player.player.playerId,
+                              firstName: player.player.firstName,
+                              lastName: player.player.lastName,
+                              jerseyNumber: player.player.jerseyNumber
+                            };
+                            setFieldValue('assistPlayer', assistPlayer);
+                          } else {
+                            setFieldValue('assistPlayer', null);
+                          }
+                        }}
+                        roster={roster}
+                        label="Vorlage (optional)"
+                        required={false}
+                        placeholder="Spieler auswählen"
+                        removeButton={true}
+                        showErrorText={false}
+                      />
 
-                      <div>
-                        <PlayerSelect
-                          selectedPlayer={selectedAssistPlayer}
-                          onChange={setSelectedAssistPlayer}
-                          roster={roster}
-                          label="Vorlage (optional)"
-                          required={false}
-                          placeholder="Spieler auswählen"
-                          removeButton={true}
-                        />
-                      </div>
+                      {error && (
+                        <div className="text-red-600 text-sm mt-2">
+                          {error}
+                        </div>
+                      )}
 
                       <div className="mt-6 flex justify-end space-x-3">
                         <button
                           type="button"
-                          onClick={() => {
-                            resetForm();
-                            onClose();
-                          }}
+                          onClick={onClose}
                           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
                           Abbrechen
@@ -221,7 +235,6 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                           className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmitting ? (
-
                             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
