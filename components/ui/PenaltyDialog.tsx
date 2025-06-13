@@ -89,10 +89,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       const data = response.data.value;
       if (Array.isArray(data) && data.length > 0) {
         setPenaltyCodes(data);
-
-        if (!editPenalty) {
-          setSelectedPenaltyCode(data[0]);
-        }
       } else {
         console.error('Invalid penalty codes data format:', data);
         setPenaltyCodes([]);
