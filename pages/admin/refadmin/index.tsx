@@ -192,7 +192,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         const assignmentPromises = matches.map((match: Match) =>
           axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
             params: {
-              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE']
+              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED']
             },
             headers: { Authorization: `Bearer ${jwt}` }
           }).then(response => {
@@ -211,7 +211,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
           if (result && Array.isArray(result.data)) {
             // Only include AVAILABLE and REQUESTED assignments
             const filteredAssignments = result.data.filter(assignment =>
-              ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'UNAVAILABLE'].includes(assignment.status)
+              ['AVAILABLE', 'REQUESTED', 'ASSIGNED'].includes(assignment.status)
             );
             if (filteredAssignments.length > 0) {
               acc[matches[index]._id] = filteredAssignments.map(assignment => ({

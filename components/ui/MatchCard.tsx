@@ -59,25 +59,41 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
                 </Menu.Item>
               )}
               {showLinkStatus && (
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => setIsStatusOpen(true)}
-                      className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block w-full text-left px-4 py-2 text-sm'
-                      )}
-                    >
-                      Ergebnis
-                    </button>
-                  )}
-                </Menu.Item>
+                <>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={() => setIsStatusOpen(true)}
+                        className={classNames(
+                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                          'block w-full text-left px-4 py-2 text-sm'
+                        )}
+                      >
+                        Ergebnis
+                      </button>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={() => router.push(`/matches/${match._id}/matchcenter/`)}
+                        className={classNames(
+                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                          'block w-full text-left px-4 py-2 text-sm'
+                        )}
+                      >
+                        Match Center
+                      </button>
+                    )}
+                  </Menu.Item>
+                </>
+
               )}
               {showLinkHome && (
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/roster/home`)}
+                      onClick={() => router.push(`/matches/${match._id}/home/roster`)}
                       className={classNames(
                         active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                         'block w-full text-left px-4 py-2 text-sm'
@@ -92,7 +108,7 @@ const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHom
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/roster/away`)}
+                      onClick={() => router.push(`/matches/${match._id}/away/roster`)}
                       className={classNames(
                         active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                         'block w-full text-left px-4 py-2 text-sm'
@@ -157,7 +173,7 @@ const MatchCard: React.FC<{
 
     const refreshMatch = async () => {
       if (isRefreshing) return;
-      
+
       try {
         setIsRefreshing(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`);

@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form } from 'formik'
-import * as Yup from 'yup'
 import InputText from '../ui/form/InputText'
-import { AutoAlias } from '../../tools/autoAlias'
 import ButtonPrimary from '../ui/form/ButtonPrimary'
 import ButtonLight from '../ui/form/ButtonLight'
 import Toggle from '../ui/form/Toggle'
-import MyListbox from '../ui/form/Listbox'
 import RefLevelSelect from './ui/RefLevelSelect'
 import { UserValues } from '../../types/UserValues'
 import { refereeLevels } from '../../tools/consts'
-import ImageUpload from '../ui/form/ImageUpload';
-import { CldImage } from 'next-cloudinary';
 import ClubSelect from '../ui/ClubSelect';
 
 interface RefereeFormProps {
