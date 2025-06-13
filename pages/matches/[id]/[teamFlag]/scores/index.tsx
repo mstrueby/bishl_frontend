@@ -139,14 +139,12 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           .required()
           .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
         goalPlayer: Yup.object()
-          .nullable()
-          .required('Torschütze ist erforderlich')
           .shape({
             playerId: Yup.string().required(),
             firstName: Yup.string().required(),
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
-          }),
+          }).required('Torschütze ist erforderlich'),
         assistPlayer: Yup.object().nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
@@ -302,6 +300,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
                                   <PlayerSelect
+                                    name={`scores.${index}.goalPlayer`}
                                     selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
                                       if (selectedRosterPlayer) {
@@ -318,7 +317,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     roster={roster}
                                     required={true}
                                     placeholder="Torschützen auswählen"
-                                    error={!!(errors.scores?.[index]?.goalPlayer && touched.scores?.[index]?.goalPlayer)}
+                                    showErrorText={false}
                                     tabIndex={index * 3 + 2}
                                   />
                                 </div>
@@ -326,6 +325,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
                                   <PlayerSelect
+                                    name={`scores.${index}.assistPlayer`}
                                     selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
                                       if (selectedRosterPlayer) {
