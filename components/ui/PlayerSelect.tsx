@@ -112,9 +112,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
     if (!player) return ''; // Return empty string when no player selected to show placeholder
     return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
-  const Placeholder = () => (
-    <span className={`block truncate ${meta.touched && meta.error ? 'text-red-400' : 'text-gray-400'}`}>{placeholder}</span>
-  )
+  
 
   return (
     <div className="w-full">
@@ -138,7 +136,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
                     }
                   }}
                   tabIndex={tabIndex}
-                  className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10  shadow-sm ring-1 ring-inset ${meta.touched && meta.error ? 'text-red-900 ring-red-300 focus:ring-red-500' : 'text-gray-900 ring-gray-300 focus:ring-indigo-600'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
+                  className={`w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10  shadow-sm ring-1 ring-inset ${meta.touched && meta.error ? 'text-red-900 ring-red-300 focus:ring-red-500 placeholder:text-red-400' : 'text-gray-900 ring-gray-300 focus:ring-indigo-600 placeholder:text-gray-400'} focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6`}
                   onChange={handleQueryChange}
                   value={selectedPlayer ? displayValue(selectedPlayer) : query}
                   placeholder={placeholder}
