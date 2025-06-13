@@ -248,6 +248,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     isGM: editPenalty?.isGM || false,
                     isMP: editPenalty?.isMP || false,
                   }}
+                  key={editPenalty?._id || 'new'}
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={(values, { setSubmitting }) => {
