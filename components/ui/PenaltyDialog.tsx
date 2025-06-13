@@ -50,7 +50,7 @@ const validationSchema = Yup.object().shape({
     key: Yup.string().required('Strafcode ist erforderlich'),
     value: Yup.string().required()
   }).nullable(),
-  penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
+  penaltyMinutes: Yup.number().required('Strafminuten sind erforderlich'),
   isGM: Yup.boolean(),
   isMP: Yup.boolean(),
 });
@@ -129,7 +129,11 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       setIsMP(editPenalty.isMP || false);
 
       if (editPenalty.penaltyCode) {
-        setSelectedPenaltyCode(editPenalty.penaltyCode);
+        const correctedPenaltyCode: PenaltyCode = {
+          key: editPenalty.penaltyCode.key,
+          value: editPenalty.penaltyCode.value
+        };
+        setSelectedPenaltyCode(correctedPenaltyCode);
       }
     } else if (isOpen && !editPenalty) {
       resetForm();
@@ -139,7 +143,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   }, [isOpen, editPenalty, roster]);
 
   // save dialog
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: PenaltiesBase) => {
     setIsSubmitting(true);
     setError('');
     setPenaltyPlayerError(false);
@@ -165,7 +169,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
           key: selectedPenaltyCode.key,
           value: selectedPenaltyCode.value
         },
-        penaltyMinutes: parseInt(values.penaltyMinutes),
+        penaltyMinutes: values.penaltyMinutes,
         isGM: values.isGM,
         isMP: values.isMP
       };
