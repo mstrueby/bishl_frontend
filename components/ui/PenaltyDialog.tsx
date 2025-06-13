@@ -49,23 +49,16 @@ const validationSchema = Yup.object().shape({
   penaltyCode: Yup.object().shape({
     key: Yup.string().required('Strafcode ist erforderlich'),
     value: Yup.string().required()
-  }).nullable(),
+  }).required('Strafcode ist erforderlich'),
   penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
   isGM: Yup.boolean(),
   isMP: Yup.boolean(),
 });
 
 const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
-  const [matchTimeStart, setMatchTimeStart] = useState('');
-  const [selectedPlayer, setSelectedPlayer] = useState<PenaltyPlayer | null>(null);
-  const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(null);
-  const [isGM, setIsGM] = useState(false);
-  const [isMP, setIsMP] = useState(false);
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [penaltyPlayerError, setPenaltyPlayerError] = useState(false);
-  const [penaltyMinutesError, setPenaltyMinutesError] = useState(false);
 
   const penaltyMinuteOptions = [
     { key: '2', value: '2' },
@@ -74,15 +67,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     { key: '20', value: '20' }
   ];
 
-  const resetForm = () => {
-    setMatchTimeStart('');
-    setSelectedPlayer(null);
-    setSelectedPenaltyCode(null);
-    setIsGM(false);
-    setIsMP(false);
-    setPenaltyPlayerError(false);
-    setPenaltyMinutesError(false);
-  };
+  
 
   // Fetch penalty codes from API
   const fetchPenaltyCodes = async () => {
@@ -107,53 +92,17 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     }
   }, [isOpen]);
 
-  // fill the form with the penalty data when editing
+  // Clear error when dialog opens
   useEffect(() => {
-    if (isOpen && editPenalty) {
-      // find and set penalty player
-      const editPenaltyPlayer = editPenalty.penaltyPlayer ? roster.find(item => item.player.playerId === editPenalty.penaltyPlayer.playerId) || null : null;
-
-      if (editPenaltyPlayer) {
-        setSelectedPlayer({
-          playerId: editPenaltyPlayer.player.playerId,
-          firstName: editPenaltyPlayer.player.firstName,
-          lastName: editPenaltyPlayer.player.lastName,
-          jerseyNumber: editPenaltyPlayer.player.jerseyNumber
-        });
-      }
-
-      setMatchTimeStart(editPenalty.matchTimeStart || '');
-      setIsGM(editPenalty.isGM || false);
-      setIsMP(editPenalty.isMP || false);
-
-      if (editPenalty.penaltyCode) {
-        const correctedPenaltyCode: PenaltyCode = {
-          key: editPenalty.penaltyCode.key,
-          value: editPenalty.penaltyCode.value
-        };
-        setSelectedPenaltyCode(correctedPenaltyCode);
-      }
-    } else if (isOpen && !editPenalty) {
-      resetForm();
+    if (isOpen) {
+      setError('');
     }
-    setError('');
-    setPenaltyPlayerError(false);
-    setPenaltyMinutesError(false);
-  }, [isOpen, editPenalty, roster]);
+  }, [isOpen]);
 
   // save dialog
   const handleSubmit = async (values: PenaltiesBase) => {
     setIsSubmitting(true);
     setError('');
-    setPenaltyPlayerError(false);
-    setPenaltyMinutesError(false);
-
-    if (!values.penaltyPlayer || !values.penaltyCode || !values.matchTimeStart || !values.penaltyMinutes) {
-      setError('Bitte füllen Sie alle erforderlichen Felder aus.');
-      setPenaltyPlayerError(!values.penaltyPlayer);
-      setIsSubmitting(false);
-      return;
-    }
 
     try {
       const penaltyData = {
@@ -217,10 +166,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
-        resetForm();
-        onClose();
-      }}>
+      <Dialog as="div" className="fixed inset-0 z-10" onClose={onClose}>
         <div className="fixed inset-0 bg-black/30 transition-opacity" />
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-full p-4">
@@ -298,13 +244,9 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                               lastName: player.player.lastName,
                               jerseyNumber: player.player.jerseyNumber
                             };
-                            setSelectedPlayer(penaltyPlayer);
                             setFieldValue('penaltyPlayer', penaltyPlayer);
-                            setPenaltyPlayerError(false);
-                            setPenaltyMinutesError(false);
                             setError('');
                           } else {
-                            setSelectedPlayer(null);
                             setFieldValue('penaltyPlayer', null);
                           }
                         }}
@@ -319,7 +261,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       <PenaltyCodeSelect
                         selectedPenaltyCode={values.penaltyCode}
                         onChange={(penaltyCode) => {
-                          setSelectedPenaltyCode(penaltyCode);
                           setFieldValue('penaltyCode', penaltyCode);
                           setError('');
                         }}
@@ -358,10 +299,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       <div className="mt-6 flex justify-end space-x-3">
                         <button
                           type="button"
-                          onClick={() => {
-                            resetForm();
-                            onClose();
-                          }}
+                          onClick={onClose}
                           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
                           Abbrechen
