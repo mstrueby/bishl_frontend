@@ -113,7 +113,7 @@ const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectPr
         {({ open }) => (
           <>
             {label && (
-              <Combobox.Label className="block text-sm font-medium leading-6 text-gray-900">
+              <Combobox.Label className="block mt-6 mb-2 text-sm font-medium text-gray-700">
                 {label}
               </Combobox.Label>
             )}

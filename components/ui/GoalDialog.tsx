@@ -168,7 +168,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                   onSubmit={handleSubmit}
                 >
                   {({ values, setFieldValue, errors, touched, isValid }) => (
-                    <Form className="mt-4 space-y-4">
+                    <Form className="mt-4">
                       <InputMatchTime
                         name="matchTime"
                         label="Spielzeit (mm:ss)"

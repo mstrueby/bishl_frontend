@@ -294,7 +294,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     roster={roster}
                     label="Spieler"
                     required={true}
-                    placeholder="Spieler auswählen"
+                    placeholder="(auswählen)"
                     error={penaltyPlayerError}
                   />
 
@@ -308,7 +308,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     penaltyCodes={penaltyCodes}
                     label="Strafcode"
                     required={true}
-                    placeholder="Strafcode auswählen"
+                    placeholder="(auswählen)"
                     error={false}
                   />
 
@@ -320,7 +320,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   />
 
                   {/* Penalty Type Toggles */}
-                  <div className="space-y-2">
                     <Toggle
                       name="isGM"
                       label="Spieldauer (GM)"
@@ -329,7 +328,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       name="isMP"
                       label="Matchstrafe (MP)"
                     />
-                  </div>
 
                   {error && (
                     <div className="text-red-600 text-sm mt-2">
