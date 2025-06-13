@@ -50,7 +50,7 @@ const validationSchema = Yup.object().shape({
     key: Yup.string().required('Strafcode ist erforderlich'),
     value: Yup.string().required()
   }).nullable(),
-  penaltyMinutes: Yup.number().required('Strafminuten sind erforderlich'),
+  penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
   isGM: Yup.boolean(),
   isMP: Yup.boolean(),
 });
@@ -148,7 +148,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setError('');
     setPenaltyPlayerError(false);
 
-    if (!selectedPlayer || !selectedPenaltyCode || !values.matchTimeStart) {
+    if (!selectedPlayer || !selectedPenaltyCode || !values.matchTimeStart || !values.penaltyMinutes) {
       setError('Bitte füllen Sie alle erforderlichen Felder aus.');
       setPenaltyPlayerError(!selectedPlayer);
       setIsSubmitting(false);
@@ -169,7 +169,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
           key: selectedPenaltyCode.key,
           value: selectedPenaltyCode.value
         },
-        penaltyMinutes: values.penaltyMinutes,
+        penaltyMinutes: parseInt(values.penaltyMinutes, 10),
         isGM: values.isGM,
         isMP: values.isMP
       };
@@ -248,7 +248,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     matchTimeEnd: editPenalty?.matchTimeEnd || '',
                     penaltyPlayer: selectedPlayer,
                     penaltyCode: selectedPenaltyCode,
-                    penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '2',
+                    penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '',
                     isGM: editPenalty?.isGM || false,
                     isMP: editPenalty?.isMP || false,
                   }}
