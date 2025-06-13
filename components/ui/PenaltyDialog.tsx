@@ -67,10 +67,10 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   const [penaltyPlayerError, setPenaltyPlayerError] = useState(false);
 
   const penaltyMinuteOptions = [
-    { key: '2', value: '2 Minuten' },
-    { key: '5', value: '5 Minuten' },
-    { key: '10', value: '10 Minuten' },
-    { key: '20', value: '20 Minuten' }
+    { key: '2', value: '2' },
+    { key: '5', value: '5' },
+    { key: '10', value: '10' },
+    { key: '20', value: '20' }
   ];
 
   const resetForm = () => {
