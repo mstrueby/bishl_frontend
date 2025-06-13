@@ -65,6 +65,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [penaltyPlayerError, setPenaltyPlayerError] = useState(false);
+  const [penaltyMinutesError, setPenaltyMinutesError] = useState(false);
 
   const penaltyMinuteOptions = [
     { key: '2', value: '2' },
@@ -80,6 +81,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setIsGM(false);
     setIsMP(false);
     setPenaltyPlayerError(false);
+    setPenaltyMinutesError(false);
   };
 
   // Fetch penalty codes from API
@@ -136,6 +138,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     }
     setError('');
     setPenaltyPlayerError(false);
+    setPenaltyMinutesError(false);
   }, [isOpen, editPenalty, roster]);
 
   // save dialog
@@ -143,6 +146,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
     setIsSubmitting(true);
     setError('');
     setPenaltyPlayerError(false);
+    setPenaltyMinutesError(false);
 
     if (!values.penaltyPlayer || !values.penaltyCode || !values.matchTimeStart || !values.penaltyMinutes) {
       setError('Bitte füllen Sie alle erforderlichen Felder aus.');
@@ -296,6 +300,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         setSelectedPlayer(penaltyPlayer);
                         setFieldValue('penaltyPlayer', penaltyPlayer);
                         setPenaltyPlayerError(false);
+                        setPenaltyMinutesError(false);
                         setError('');
                       } else {
                         setSelectedPlayer(null);
@@ -330,6 +335,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     label="Strafminuten"
                     options={penaltyMinuteOptions}
                     placeholder="Minuten auswählen"
+                    error={penaltyMinutesError}
                   />
 
                   {/* Penalty Type Toggles */}

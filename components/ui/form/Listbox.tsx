@@ -13,9 +13,10 @@ interface ListboxProps extends ComponentPropsWithoutRef<'input'> {
   name: string;
   placeholder?: string;
   options: ListboxOption[];
+  error?: boolean;
 }
 
-const MyListbox = ({ label, name, placeholder, options, ...props }: ListboxProps) => {
+const MyListbox = ({ label, name, placeholder, options, error, ...props }: ListboxProps) => {
   const [field, meta, helpers] = useField(name);
   const [selected, setSelected] = useState<ListboxOption | null>(null);
 
@@ -38,7 +39,7 @@ const MyListbox = ({ label, name, placeholder, options, ...props }: ListboxProps
   }, [field.value, options]);
 
   const Placeholder = () => (
-    <span className="block truncate text-gray-400">{placeholder || '(auswählen)'}</span>
+    <span className={`block truncate ${error ? 'text-red-400' : 'text-gray-400'}`}>{placeholder || '(auswählen)'}</span>
   );
 
   props.id = props.id || name;
@@ -53,7 +54,7 @@ const MyListbox = ({ label, name, placeholder, options, ...props }: ListboxProps
           <div>
             <Listbox.Label htmlFor={props.id || name} className="block mt-6 mb-2 text-sm font-medium text-gray-700">{label}</Listbox.Label>
             <div className="relative">
-              <Listbox.Button type="button" className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+              <Listbox.Button type="button" className={`relative w-full cursor-default rounded-md border ${error ? 'border-red-300' : 'border-gray-300'} bg-white py-2 pl-3 pr-10 text-left shadow-sm ${error ? 'focus:border-red-500 focus:ring-red-500' : 'focus:border-indigo-500 focus:ring-indigo-500'} focus:outline-none focus:ring-1 sm:text-sm`}>
                 {selected?.value ? (
                   <span className="block truncate">{selected.value}</span>
                 ) : (
