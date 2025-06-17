@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import useAuth from '../../../../../hooks/useAuth';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
@@ -135,6 +135,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
       setPenaltyCodes([]);
     }
   };
+  
   const penaltyMinuteOptions = [
     { key: '2', value: '2' },
     { key: '5', value: '5' },
