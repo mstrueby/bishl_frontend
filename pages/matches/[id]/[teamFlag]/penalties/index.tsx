@@ -260,20 +260,16 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
         </div>
 
         <Formik
-          initialValues={{ 
+          initialValues={{
             penalties: initialPenalties?.map(penalty => ({
               ...penalty,
               penaltyMinutes: penalty.penaltyMinutes ? String(penalty.penaltyMinutes) : ''
-            })) || [] 
+            })) || []
           }}
           validationSchema={validationSchema}
           onSubmit={(values) => onSubmit(values.penalties)}
         >
           {({ values, errors, touched, setFieldValue }) => {
-            const expectedPenalties = teamFlag === 'home' ? match?.home?.penalties?.length || 0 : match?.away?.penalties?.length || 0;
-            const currentPenaltiesCount = values.penalties.length;
-            const penaltiesMismatch = currentPenaltiesCount !== expectedPenalties;
-
             return (
               <Form>
                 <FieldArray
@@ -287,7 +283,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                           </div>
                         ) : (
                           values.penalties.map((penalty, index) => (
-                            <div key={index} className="p-3 mb-3">
+                            <div key={index} className="px-3 py-6 md:py-6">
                               <div className="flex flex-col md:flex-row gap-4 md:items-center">
                                 {/** mobile header with index and remove button */}
                                 <div className="flex items-center justify-between md:hidden">
@@ -309,9 +305,9 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
 
                                 {/** form fields container */}
                                 {/** Start End Time */}
-                                <div className="flex flex-row gap-4 flex-1">
+                                <div className="flex flex-initial flex-row md:flex-col md:w-28 gap-4">
                                   {/** Time Input - Start */}
-                                  <div className="justify-center md:justify-start">
+                                  <div className="justify-center md:justify-start w-full">
                                     <InputMatchTime
                                       name={`penalties.${index}.matchTimeStart`}
                                       tabIndex={index * 3 + 1}
@@ -321,7 +317,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     />
                                   </div>
                                   {/** Time Input - End (Optional) */}
-                                  <div className="justify-center md:justify-start">
+                                  <div className="justify-center md:justify-start w-full">
                                     <InputMatchTime
                                       name={`penalties.${index}.matchTimeEnd`}
                                       tabIndex={index * 3 + 2}
@@ -329,56 +325,52 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   </div>
                                 </div>
                                 {/** Player, Code */}
-                                <div className="flex flex-col gap-4 flex-1">
+                                <div className="flex flex-auto flex-col gap-4">
                                   {/** Player Selection */}
-                                  <div className="w-full md:flex-auto">
-                                    <PlayerSelect
-                                      name={`penalties.${index}.penaltyPlayer`}
-                                      selectedPlayer={penalty.penaltyPlayer ? roster.find(rp => rp.player.playerId === penalty.penaltyPlayer.playerId) || null : null}
-                                      onChange={(selectedRosterPlayer) => {
-                                        if (selectedRosterPlayer) {
-                                          setFieldValue(`penalties.${index}.penaltyPlayer`, {
-                                            playerId: selectedRosterPlayer.player.playerId,
-                                            firstName: selectedRosterPlayer.player.firstName,
-                                            lastName: selectedRosterPlayer.player.lastName,
-                                            jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                          });
-                                        } else {
-                                          setFieldValue(`penalties.${index}.penaltyPlayer`, null);
-                                        }
-                                      }}
-                                      roster={roster}
-                                      required={true}
-                                      placeholder="Spieler auswählen"
-                                      showErrorText={false}
-                                      tabIndex={index * 3 + 3}
-                                    />
-                                  </div>
-                                  {/** Penalty Code Selection */}
-                                  <div className="w-full md:flex-auto">
-                                    <PenaltyCodeSelect
-                                      name={`penalties.${index}.penaltyCode`}
-                                      selectedPenaltyCode={
-                                        penalty.penaltyCode && 'key' in penalty.penaltyCode && 'value' in penalty.penaltyCode
-                                          ? (penalty.penaltyCode as PenaltyCode)
-                                          : null
+                                  <PlayerSelect
+                                    name={`penalties.${index}.penaltyPlayer`}
+                                    selectedPlayer={penalty.penaltyPlayer ? roster.find(rp => rp.player.playerId === penalty.penaltyPlayer.playerId) || null : null}
+                                    onChange={(selectedRosterPlayer) => {
+                                      if (selectedRosterPlayer) {
+                                        setFieldValue(`penalties.${index}.penaltyPlayer`, {
+                                          playerId: selectedRosterPlayer.player.playerId,
+                                          firstName: selectedRosterPlayer.player.firstName,
+                                          lastName: selectedRosterPlayer.player.lastName,
+                                          jerseyNumber: selectedRosterPlayer.player.jerseyNumber
+                                        });
+                                      } else {
+                                        setFieldValue(`penalties.${index}.penaltyPlayer`, null);
                                       }
-                                      onChange={(selectedPenaltyCode) => {
-                                        setFieldValue(`penalties.${index}.penaltyCode`, selectedPenaltyCode);
-                                        setError('');
-                                      }}
-                                      penaltyCodes={penaltyCodes}
-                                      //label="Strafe"
-                                      required={true}
-                                      placeholder="Strafe auswählen"
-                                      showErrorText={false}
-                                    />
-                                  </div>
+                                    }}
+                                    roster={roster}
+                                    required={true}
+                                    placeholder="Spieler auswählen"
+                                    showErrorText={false}
+                                    tabIndex={index * 3 + 3}
+                                  />
+                                  {/** Penalty Code Selection */}
+                                  <PenaltyCodeSelect
+                                    name={`penalties.${index}.penaltyCode`}
+                                    selectedPenaltyCode={
+                                      penalty.penaltyCode && 'key' in penalty.penaltyCode && 'value' in penalty.penaltyCode
+                                        ? (penalty.penaltyCode as PenaltyCode)
+                                        : null
+                                    }
+                                    onChange={(selectedPenaltyCode) => {
+                                      setFieldValue(`penalties.${index}.penaltyCode`, selectedPenaltyCode);
+                                      setError('');
+                                    }}
+                                    penaltyCodes={penaltyCodes}
+                                    //label="Strafe"
+                                    required={true}
+                                    placeholder="Strafe auswählen"
+                                    showErrorText={false}
+                                  />
                                 </div>
                                 {/** Minutes, GM, MP */}
-                                <div className="flex flex-row items-center justify-between">
+                                <div className=" flex flex-col w-full md:w-48 gap-4">
                                   {/** Penalty Minutes */}
-                                  <div className="flex-none w-1/2 md:flex-auto">
+                                  <div className="w-full md:flex-auto">
                                     <Listbox
                                       name={`penalties.${index}.penaltyMinutes`}
                                       // label="Strafminuten"
@@ -388,14 +380,16 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     />
                                   </div>
                                   {/** Penalty Type Toggles */}
-                                  <Toggle
-                                    name={`penalties.${index}.isGM`}
-                                    label="GM"
-                                  />
-                                  <Toggle
-                                    name={`penalties.${index}.isMP`}
-                                    label="MP"
-                                  />
+                                  <div className="flex flex-row items-center justify-end md:justify-between p-2 gap-6">
+                                    <Toggle
+                                      name={`penalties.${index}.isGM`}
+                                      label="GM"
+                                    />
+                                    <Toggle
+                                      name={`penalties.${index}.isMP`}
+                                      label="MP"
+                                    />
+                                  </div>
                                 </div>
 
                                 {/** Desktop remove button (hidden on mobile) */}
@@ -414,17 +408,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                           ))
                         )}
                       </div>
-
-                      {/** penalty mismatch indicator */}
-                      {penaltiesMismatch && (
-                        <div className="flex items-center p-4 mb-6 text-amber-800 rounded-lg bg-amber-50 border border-amber-200">
-                          <ExclamationTriangleIcon className="flex-shrink-0 w-5 h-5" aria-hidden="true" />
-                          <span className="sr-only">Warnung</span>
-                          <div className="ms-3 text-sm font-medium">
-                            <strong>Achtung:</strong> Die Anzahl der eingetragenen Strafen ({currentPenaltiesCount}) stimmt nicht mit der Gesamtanzahl der Strafen ({expectedPenalties}) überein.
-                          </div>
-                        </div>
-                      )}
 
                       {/** add penalty */}
                       <div className="flex justify-center">
