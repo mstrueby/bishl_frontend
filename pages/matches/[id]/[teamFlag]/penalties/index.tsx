@@ -5,7 +5,7 @@ import { GetServerSideProps } from 'next';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import Link from 'next/link';
-import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
+import { Match, RosterPlayer, EventPlayer, Team, PenaltiesBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -18,28 +18,25 @@ import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
+import PenaltyCodeSelect from '../../../../../components/ui/PenaltyCodeSelect';
+import Listbox from '../../../../../components/ui/form/Listbox';
+import Toggle from '../../../../../components/ui/form/Toggle';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-/*
-interface Goal {
-  player: string;
-  assist: string;
-  time: string;
-}
-
-interface GoalFormValues {
-  goals: Goal[];
-}
-*/
-interface GoalRegisterFormProps {
+interface PenaltyRegisterFormProps {
   jwt: string;
   match: Match;
   teamFlag: string;
   team: Team;
   initialRoster: RosterPlayer[];
-  initialScores: ScoresBase[];
+  initialPenalties: PenaltiesBase[];
+}
+
+interface PenaltyCode {
+  key: string;
+  value: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -56,7 +53,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         'Authorization': `Bearer ${jwt}`
       }
     });
-
     const user = userResponse.data;
     if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
       return {
@@ -78,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // Roster is obtained directly from the match data
     const roster = matchTeam.roster;
-    const scores = matchTeam.scores;
+    const penalties = matchTeam.penalties;
 
     return {
       props: {
@@ -87,7 +83,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamFlag,
         team: matchTeam,
         initialRoster: roster || [],
-        initialScores: scores || []
+        initialPenalties: penalties || []
       }
     };
   } catch (error) {
@@ -99,19 +95,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamFlag,
         team: null,
         initialRoster: [],
-        initialScores: []
+        initialPenalties: []
       }
     };
   }
 };
 
-const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster, initialScores }) => {
+const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster, initialPenalties }) => {
   const [roster, setRoster] = useState<RosterPlayer[]>(initialRoster);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<Match>(initialMatch);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
 
   const router = useRouter();
   const { user } = useAuth();
@@ -123,60 +120,83 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const handleCloseErrorMessage = () => {
     setError(null);
   };
-
-  // Initial form values
-  ///const initialValues: ScoresBase[] = {
-  //  goals: [{ player: '', assist: '', time: '' }]
-  //};
+  const fetchPenaltyCodes = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/configs/penaltycode`);
+      const data = response.data.value;
+      if (Array.isArray(data) && data.length > 0) {
+        setPenaltyCodes(data);
+      } else {
+        console.error('Invalid penalty codes data format:', data);
+        setPenaltyCodes([]);
+      }
+    } catch (error) {
+      console.error('Error fetching penalty codes:', error);
+      setPenaltyCodes([]);
+    }
+  };
+  const penaltyMinuteOptions = [
+    { key: '2', value: '2' },
+    { key: '5', value: '5' },
+    { key: '10', value: '10' },
+    { key: '20', value: '20' }
+  ];
 
   // Validation schema
   const validationSchema = Yup.object({
-    scores: Yup.array().of(
+    penalties: Yup.array().of(
       Yup.object().shape({
-        matchTime: Yup.string()
+        matchTimeStart: Yup.string()
           .required()
           .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
-        goalPlayer: Yup.object()
+        matchTimeEnd: Yup.string()
+          .matches(/^(\d{1,3}:\d{2})?$/, 'Zeit muss im Format MM:SS sein oder leer bleiben')
+          .nullable(),
+        penaltyPlayer: Yup.object()
           .shape({
             playerId: Yup.string().required(),
             firstName: Yup.string().required(),
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
-          }).required('Torschütze ist erforderlich'),
-        assistPlayer: Yup.object().nullable(), // Optional
-        isPPG: Yup.boolean(),
-        isSHG: Yup.boolean(),
-        isGWG: Yup.boolean()
+          }).required('Spieler ist erforderlich'),
+        penaltyCode: Yup.object()
+          .shape({
+            key: Yup.string().required(),
+            value: Yup.string().required()
+          }).required('Strafcode ist erforderlich'),
+        penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
+        isGM: Yup.boolean(),
+        isMP: Yup.boolean(),
       })
     )
   });
 
   // Form submission
-  const onSubmit = async (values: ScoresBase[]) => {
+  const onSubmit = async (values: PenaltiesBase[]) => {
     if (!match._id) return;
 
     setLoading(true);
     setError(null);
 
-    // Sort scores by matchTime before submitting
-    const sortedScores = [...values].sort((a, b) => {
+    // Sort penalties by matchTimeStart before submitting
+    const sortedPenalties = [...values].sort((a, b) => {
       // Convert time strings to comparable format (mm:ss -> minutes * 60 + seconds)
       const timeToSeconds = (timeStr: string) => {
         if (!timeStr) return 0;
         const [minutes, seconds] = timeStr.split(':').map(Number);
         return (minutes || 0) * 60 + (seconds || 0);
       };
-      return timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime);
+      return timeToSeconds(a.matchTimeStart) - timeToSeconds(b.matchTimeStart);
     });
 
     // Structure the payload with teamFlag
     const payload = {
       [teamFlag]: {
-        scores: sortedScores
+        penalties: sortedPenalties
       }
     };
 
-    console.log("submitted payload", payload);
+    console.log("submitted payload", payload)
 
     try {
       const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
@@ -197,17 +217,17 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
       }
 
       if (!response.ok) {
-        throw new Error('Failed to save the goal sheet');
+        throw new Error('Failed to save the penalty sheet');
       }
 
-      setSuccessMessage('Tore wurden erfolgreich gespeichert');
-      console.log('Goal sheet saved successfully');
+      setSuccessMessage('Strafen wurden erfolgreich gespeichert');
+      console.log('Penalty sheet saved successfully');
 
       // Scroll to top of page
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('An error occurred:', error);
-      setError('Fehler beim Speichern der Tore');
+      setError('Fehler beim Speichern der Strafen');
     } finally {
       setLoading(false);
     }
@@ -216,7 +236,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-0 lg:px-8 py-0 lg:py-4">
-        <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+        <Link href={`/matches/${match._id}/matchcenter?tab=penalties`}>
           <a className="flex items-center" aria-label="Back to Match Center">
             <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
             <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
@@ -231,7 +251,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
           onRefresh={() => { }}
         />
         <div className="mt-12">
-          <SectionHeader title="Tore" description={`${team?.fullName} / ${team?.name}`} />
+          <SectionHeader title="Strafen" description={`${team?.fullName} / ${team?.name}`} />
         </div>
 
         <div className="sm:px-3 pb-2">
@@ -240,119 +260,146 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         </div>
 
         <Formik
-          initialValues={{ scores: initialScores || [] }}
+          initialValues={{ penalties: initialPenalties || [] }}
           validationSchema={validationSchema}
-          onSubmit={(values) => onSubmit(values.scores)}
+          onSubmit={(values) => onSubmit(values.penalties)}
         >
           {({ values, errors, touched, setFieldValue }) => {
-            const expectedGoals = teamFlag === 'home' ? match?.home?.stats?.goalsFor || 0 : match?.away?.stats?.goalsFor || 0;
-            const currentGoalsCount = values.scores.length;
-            const scoresMismatch = currentGoalsCount !== expectedGoals;
+            const expectedPenalties = teamFlag === 'home' ? match?.home?.penalties?.length || 0 : match?.away?.penalties?.length || 0;
+            const currentPenaltiesCount = values.penalties.length;
+            const penaltiesMismatch = currentPenaltiesCount !== expectedPenalties;
 
             return (
               <Form>
                 <FieldArray
-                  name="scores"
+                  name="penalties"
                   render={({ remove, push }: FieldArrayRenderProps) => (
                     <div className="space-y-6 sm:px-0">
                       <div className="divide-y divide-gray-200 shadow rounded-md border">
-                        {values.scores.length === 0 ? (
+                        {values.penalties.length === 0 ? (
                           <div className="p-4 text-center text-gray-500">
-                            <p className="text-sm">Keine Tore vorhanden.</p>
+                            <p className="text-sm">Keine Strafen vorhanden.</p>
                           </div>
                         ) : (
-                          values.scores.map((score, index) => (
-                            <div key={index} className="p-3">
+                          values.penalties.map((penalty, index) => (
+                            <div key={index} className="p-3 mb-3">
                               <div className="flex flex-col md:flex-row gap-4 md:items-center">
-                                {/* Mobile header with index and remove button */}
+                                {/** mobile header with index and remove button */}
                                 <div className="flex items-center justify-between md:hidden">
-                                  <span className="font-medium text-gray-700">Tor #{index + 1}</span>
+                                  <span className="font-medium text-gray-700">Strafe #{index + 1}</span>
                                   <button
                                     type="button"
                                     onClick={() => remove(index)}
                                     className="text-red-600 hover:text-red-800 p-1"
-                                    title="Tor entfernen"
+                                    title="Strafe entfernen"
                                   >
                                     <TrashIcon className="h-5 w-5" aria-hidden="true" />
                                   </button>
                                 </div>
 
-                                {/* Desktop index (hidden on mobile) */}
+                                {/** desktop index (hidden on mobile) */}
                                 <div className="hidden md:block w-8 text-center">
                                   <span className="text-gray-500">{index + 1}</span>
                                 </div>
 
-                                {/* Form fields container */}
-                                <div className="flex flex-col md:flex-row gap-4 flex-1">
-                                  {/* Time Input */}
+                                {/** form fields container */}
+                                {/** Start End Time */}
+                                <div className="flex flex-row gap-4 flex-1">
+                                  {/** Time Input - Start */}
                                   <div className="justify-center md:justify-start">
                                     <InputMatchTime
-                                      name={`scores.${index}.matchTime`}
+                                      name={`penalties.${index}.matchTimeStart`}
                                       tabIndex={index * 3 + 1}
                                       ref={(el: HTMLInputElement | null) => {
                                         inputRefs.current[index] = el;
                                       }}
                                     />
                                   </div>
-
-                                  {/* Scores Selection */}
+                                  {/** Time Input - End (Optional) */}
+                                  <div className="justify-center md:justify-start">
+                                    <InputMatchTime
+                                      name={`penalties.${index}.matchTimeEnd`}
+                                      tabIndex={index * 3 + 2}
+                                    />
+                                  </div>
+                                </div>
+                                {/** Player, Code */}
+                                <div className="flex flex-col gap-4 flex-1">
+                                  {/** Player Selection */}
                                   <div className="w-full md:flex-auto">
                                     <PlayerSelect
-                                      name={`scores.${index}.goalPlayer`}
-                                      selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
+                                      name={`penalties.${index}.penaltyPlayer`}
+                                      selectedPlayer={penalty.penaltyPlayer ? roster.find(rp => rp.player.playerId === penalty.penaltyPlayer.playerId) || null : null}
                                       onChange={(selectedRosterPlayer) => {
                                         if (selectedRosterPlayer) {
-                                          setFieldValue(`scores.${index}.goalPlayer`, {
+                                          setFieldValue(`penalties.${index}.penaltyPlayer`, {
                                             playerId: selectedRosterPlayer.player.playerId,
                                             firstName: selectedRosterPlayer.player.firstName,
                                             lastName: selectedRosterPlayer.player.lastName,
                                             jerseyNumber: selectedRosterPlayer.player.jerseyNumber
                                           });
                                         } else {
-                                          setFieldValue(`scores.${index}.goalPlayer`, null);
+                                          setFieldValue(`penalties.${index}.penaltyPlayer`, null);
                                         }
                                       }}
                                       roster={roster}
                                       required={true}
-                                      placeholder="Torschützen auswählen"
+                                      placeholder="Spieler auswählen"
                                       showErrorText={false}
-                                      tabIndex={index * 3 + 2}
+                                      tabIndex={index * 3 + 3}
                                     />
                                   </div>
-
-                                  {/* Assist Selection */}
+                                  {/** Penalty Code Selection */}
                                   <div className="w-full md:flex-auto">
-                                    <PlayerSelect
-                                      name={`scores.${index}.assistPlayer`}
-                                      selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
-                                      onChange={(selectedRosterPlayer) => {
-                                        if (selectedRosterPlayer) {
-                                          setFieldValue(`scores.${index}.assistPlayer`, {
-                                            playerId: selectedRosterPlayer.player.playerId,
-                                            firstName: selectedRosterPlayer.player.firstName,
-                                            lastName: selectedRosterPlayer.player.lastName,
-                                            jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                          });
-                                        } else {
-                                          setFieldValue(`scores.${index}.assistPlayer`, null);
-                                        }
+                                    <PenaltyCodeSelect
+                                      name={`penalties.${index}.penaltyCode`}
+                                      selectedPenaltyCode={
+                                        penalty.penaltyCode && 'key' in penalty.penaltyCode && 'value' in penalty.penaltyCode
+                                          ? (penalty.penaltyCode as PenaltyCode)
+                                          : null
+                                      }
+                                      onChange={(selectedPenaltyCode) => {
+                                        setFieldValue(`penalties.${index}.penaltyCode`, selectedPenaltyCode);
+                                        setError('');
                                       }}
-                                      roster={roster}
-                                      required={false}
-                                      placeholder="Keine Vorlage"
-                                      tabIndex={index * 3 + 3}
-                                      removeButton={true}
+                                      penaltyCodes={penaltyCodes}
+                                      //label="Strafe"
+                                      required={true}
+                                      placeholder="Strafe auswählen"
+                                      showErrorText={false}
                                     />
                                   </div>
                                 </div>
+                                {/** Minutes, GM, MP */}
+                                <div className="flex flex-row items-center justify-between">
+                                  {/** Penalty Minutes */}
+                                  <div className="flex-none w-1/2 md:flex-auto">
+                                    <Listbox
+                                      name={`penalties.${index}.penaltyMinutes`}
+                                      // label="Strafminuten"
+                                      options={penaltyMinuteOptions}
+                                      placeholder="Strafminuten"
+                                      showErrorText={false}
+                                    />
+                                  </div>
+                                  {/** Penalty Type Toggles */}
+                                  <Toggle
+                                    name={`penalties.${index}.isGM`}
+                                    label="GM"
+                                  />
+                                  <Toggle
+                                    name={`penalties.${index}.isMP`}
+                                    label="MP"
+                                  />
+                                </div>
 
-                                {/* Desktop remove button (hidden on mobile) */}
+                                {/** Desktop remove button (hidden on mobile) */}
                                 <div className="hidden md:flex flex-none">
                                   <button
                                     type="button"
                                     onClick={() => remove(index)}
                                     className="text-red-600 hover:text-red-800 p-1"
-                                    title="Tor entfernen"
+                                    title="Strafe entfernen"
                                   >
                                     <TrashIcon className="h-5 w-5" aria-hidden="true" />
                                   </button>
@@ -363,31 +410,32 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         )}
                       </div>
 
-                      {/* Score mismatch indicator */}
-                      {scoresMismatch && (
+                      {/** penalty mismatch indicator */}
+                      {penaltiesMismatch && (
                         <div className="flex items-center p-4 mb-6 text-amber-800 rounded-lg bg-amber-50 border border-amber-200">
                           <ExclamationTriangleIcon className="flex-shrink-0 w-5 h-5" aria-hidden="true" />
                           <span className="sr-only">Warnung</span>
                           <div className="ms-3 text-sm font-medium">
-                            <strong>Achtung:</strong> Die Anzahl der eingetragenen Tore ({currentGoalsCount}) stimmt nicht mit dem Spielstand ({expectedGoals}) überein.
+                            <strong>Achtung:</strong> Die Anzahl der eingetragenen Strafen ({currentPenaltiesCount}) stimmt nicht mit der Gesamtanzahl der Strafen ({expectedPenalties}) überein.
                           </div>
                         </div>
                       )}
 
-                      {/* add score */}
+                      {/** add penalty */}
                       <div className="flex justify-center">
                         <button
                           type="button"
-                          tabIndex={values.scores.length * 3 + 1}
+                          tabIndex={values.penalties.length * 3 + 1}
                           onClick={() => {
-                            const newIndex = values.scores.length;
+                            const newIndex = values.penalties.length;
                             push({
-                              matchTime: '',
-                              goalPlayer: null,
-                              assistPlayer: null,
-                              isPPG: false,
-                              isSHG: false,
-                              isGWG: false
+                              matchTimeStart: '',
+                              matchTimeEnd: '',
+                              penaltyPlayer: null,
+                              penaltyCode: null,
+                              penaltyMinutes: '',
+                              isGM: false,
+                              isMP: false
                             });
                             // Focus on the new input after a short delay to ensure it's rendered
                             setTimeout(() => {
@@ -400,13 +448,13 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                           <PlusCircleIcon className="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
-                          Tor hinzufügen
+                          Strafe hinzufügen
                         </button>
                       </div>
 
-                      {/* buttons */}
+                      {/** buttons */}
                       <div className="flex justify-end space-x-3 pt-8">
-                        <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
+                        <Link href={`/matches/${match._id}/matchcenter?tab=penalties`}>
                           <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                             Schließen
                           </a>
@@ -416,7 +464,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                           type="submit"
                           label="Speichern"
                           isLoading={loading}
-                          tabIndex={values.scores.length * 3 + 2}
+                          tabIndex={values.penalties.length * 3 + 2}
                         />
                       </div>
                     </div>
@@ -431,4 +479,4 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   );
 };
 
-export default GoalRegisterForm;
+export default PenaltyRegisterForm
