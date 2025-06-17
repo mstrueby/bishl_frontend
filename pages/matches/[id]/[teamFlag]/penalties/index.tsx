@@ -143,6 +143,11 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
     { key: '20', value: '20' }
   ];
 
+  // Fetch penalty codes on component mount
+  useEffect(() => {
+    fetchPenaltyCodes();
+  }, []);
+
   // Validation schema
   const validationSchema = Yup.object({
     penalties: Yup.array().of(
