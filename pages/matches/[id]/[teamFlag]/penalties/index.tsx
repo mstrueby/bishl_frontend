@@ -260,12 +260,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
         </div>
 
         <Formik
-          initialValues={{ 
-            penalties: initialPenalties?.map(penalty => ({
-              ...penalty,
-              penaltyMinutes: penalty.penaltyMinutes || ''
-            })) || [] 
-          }}
+          initialValues={{ penalties: initialPenalties || [] }}
           validationSchema={validationSchema}
           onSubmit={(values) => onSubmit(values.penalties)}
         >
