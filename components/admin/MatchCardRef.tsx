@@ -14,6 +14,7 @@ let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
   const { home, away, startDate, venue } = match;
   const [matchdayMatches, setMatchdayMatches] = useState<Match[]>([]);
+  const [roundData, setRoundData] = useState<any>(null);
 
 
 
@@ -30,9 +31,33 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
     setLocalAssignment(assignment);
   }, [assignment]);
 
-  // Fetch all matches for current matchday
+  // Fetch round data to check matchdaysType
+  useEffect(() => {
+    const fetchRoundData = async () => {
+      try {
+        const response = await fetch(
+          `${BASE_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}`
+        );
+        if (response.ok) {
+          const round = await response.json();
+          setRoundData(round);
+        }
+      } catch (error) {
+        console.error('Error fetching round data:', error);
+      }
+    };
+
+    fetchRoundData();
+  }, [match.tournament.alias, match.season.alias, match.round.alias]);
+
+  // Fetch all matches for current matchday only if matchdaysType is TOURNAMENT
   useEffect(() => {
     const fetchMatchdayMatches = async () => {
+      if (!roundData || roundData.matchdaysType?.key !== 'TOURNAMENT') {
+        setMatchdayMatches([]);
+        return;
+      }
+
       try {
         const response = await fetch(
           `${BASE_URL}/matches/?tournament=${match.tournament.alias}&season=${match.season.alias}&round=${match.round.alias}&matchday=${match.matchday.alias}`
@@ -46,8 +71,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       }
     };
 
-    fetchMatchdayMatches();
-  }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
+    if (roundData) {
+      fetchMatchdayMatches();
+    }
+  }, [roundData, match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
 
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
     try {
@@ -115,13 +142,15 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   const refereesClubIsNotHomeOrAwayClub = (user?.referee?.club?.clubId !== home.clubId) && (user?.referee?.club?.clubId !== away.clubId);
   const isBambiniOrMini = ['bambini', 'mini'].includes(match.tournament.alias);
   
-  // Check if referee's club participates in any match of this matchday
-  const refereeClubParticipatesInMatchday = matchdayMatches.some(m => 
+  // Check if referee's club participates in any match of this matchday (only for TOURNAMENT type)
+  const isTournamentType = roundData?.matchdaysType?.key === 'TOURNAMENT';
+  const refereeClubParticipatesInMatchday = isTournamentType && matchdayMatches.some(m => 
     m.home.clubId === user?.referee?.club?.clubId || 
     m.away.clubId === user?.referee?.club?.clubId
   );
   
-  const isDisabled = !isBambiniOrMini && (daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub) && !refereeClubParticipatesInMatchday;
+  const isDisabled = !isBambiniOrMini && (daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub) && 
+    (!isTournamentType || !refereeClubParticipatesInMatchday);
 
 
   const WorkflowListbox: React.FC<{ selected: any, handleStatusChange: (value: any) => void, validStatuses: any[], isDisabled: boolean }> = ({ selected, handleStatusChange, validStatuses, isDisabled }) => (
