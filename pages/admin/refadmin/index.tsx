@@ -93,7 +93,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const assignmentPromises = matches.map((match: Match) =>
       axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
         params: {
-          assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED']
+          assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE']
         },
         headers: { Authorization: `Bearer ${jwt}` }
       })
@@ -103,7 +103,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       if (result && Array.isArray((result as any).data)) {
         // Only include AVAILABLE and REQUESTED assignments
         const filteredAssignments = result.data.filter((assignment: AssignmentValues) =>
-          ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED'].includes(assignment.status)
+          ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE'].includes(assignment.status)
         );
         if (filteredAssignments.length > 0) {
           acc[matches[index]._id] = filteredAssignments.map((assignment: AssignmentValues) => ({
@@ -192,7 +192,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
         const assignmentPromises = matches.map((match: Match) =>
           axios.get(`${BASE_URL}/assignments/matches/${match._id}`, {
             params: {
-              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED']
+              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE']
             },
             headers: { Authorization: `Bearer ${jwt}` }
           }).then(response => {
@@ -211,7 +211,7 @@ const RefAdmin: React.FC<RefAdminProps> = ({ jwt, initialMatches, initialAssignm
           if (result && Array.isArray(result.data)) {
             // Only include AVAILABLE and REQUESTED assignments
             const filteredAssignments = result.data.filter(assignment =>
-              ['AVAILABLE', 'REQUESTED', 'ASSIGNED'].includes(assignment.status)
+              ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'UNAVAILABLE'].includes(assignment.status)
             );
             if (filteredAssignments.length > 0) {
               acc[matches[index]._id] = filteredAssignments.map(assignment => ({
