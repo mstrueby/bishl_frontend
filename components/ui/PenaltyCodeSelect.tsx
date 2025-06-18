@@ -192,7 +192,7 @@ const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectPr
                           {({ active }) => (
                             <>
                               <div className={classNames('flex items-center', isSelected ? 'font-semibold' : 'font-normal')}>
-                                <span className="w-12 text-center mr-3 font-mono text-sm">{penaltyCode.key}</span>
+                                <span className="w-6 text-center mr-3 font-mono text-sm">{penaltyCode.key}</span>
                                 <span className="truncate">{penaltyCode.value}</span>
                               </div>
 
