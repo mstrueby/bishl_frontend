@@ -9,14 +9,12 @@ interface ListboxOption {
 }
 
 interface ListboxProps extends ComponentPropsWithoutRef<'input'> {
-  label?: string;
+  label: string;
   name: string;
-  placeholder?: string;
-  showErrorText?: boolean;
   options: ListboxOption[];
 }
 
-const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ...props }: ListboxProps) => {
+const MyListbox = ({ label, name, options, ...props }: ListboxProps) => {
   const [field, meta, helpers] = useField(name);
   const [selected, setSelected] = useState<ListboxOption | null>(null);
 
@@ -39,7 +37,7 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ..
   }, [field.value, options]);
 
   const Placeholder = () => (
-    <span className={`block truncate ${meta.touched && meta.error ? 'text-red-300' : 'text-gray-400'}`}>{placeholder || '(auswählen)'}</span>
+    <span className="block truncate text-gray-400">(auswählen)</span>
   );
 
   props.id = props.id || name;
@@ -52,16 +50,9 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ..
       >
         {({ open }) => (
           <div>
-            {label && (
-              <Listbox.Label 
-                htmlFor={props.id || name} 
-                className="block mt-6 mb-2 text-sm font-medium text-gray-900"
-              >
-                {label}
-              </Listbox.Label>
-            )}
+            <Listbox.Label htmlFor={props.id || name} className="block mt-6 mb-2 text-sm font-medium text-gray-700">{label}</Listbox.Label>
             <div className="relative">
-              <Listbox.Button type="button" className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}>
+              <Listbox.Button type="button" className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
                 {selected?.value ? (
                   <span className="block truncate">{selected.value}</span>
                 ) : (
@@ -117,7 +108,7 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ..
           </div>
         )}
       </Listbox>
-      {showErrorText && meta.touched && meta.error ? (
+      {meta.touched && meta.error ? (
         <p className="mt-2 text-sm text-red-600">
           {meta.error}
         </p>
