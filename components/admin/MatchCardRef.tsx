@@ -93,7 +93,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   const daysDiff = Math.ceil((matchStart.setHours(0, 0, 0, 0) - now.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
   const { user } = useAuth();
   const refereesClubIsNotHomeOrAwayClub = (user?.referee?.club?.clubId !== home.clubId) && (user?.referee?.club?.clubId !== away.clubId);
-  const isBambiniOrMini = ['bambini', 'mini'].includes(match.tournament.alias);
+  const isBambiniOrMini = ['mini'].includes(match.tournament.alias);
   const isDisabled = !isBambiniOrMini && (daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub);
 
 
