@@ -16,6 +16,7 @@ import { classNames } from '../../../../tools/utils';
 import MatchStatusBadge from '../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../components/ui/MatchHeader';
 import FinishTypeSelect from '../../../../components/admin/ui/FinishTypeSelect';
+import MatchStatus from '../../../../components/admin/ui/MatchStatus';
 import GoalDialog from '../../../../components/ui/GoalDialog';
 import PenaltyDialog from '../../../../components/ui/PenaltyDialog';
 import RosterList from '../../../../components/ui/RosterList';
@@ -48,6 +49,7 @@ const tabs = [
 export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('roster');
   const [match, setMatch] = useState<Match>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -278,21 +280,37 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               )}
 
               {match.matchStatus.key === 'INPROGRESS' && showButtonStatus && (
-                <button
-                  onClick={() => setIsFinishDialogOpen(true)}
-                  className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                >
-                  {isRefreshing ? (
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                    </svg>
-                  ) : (
-                    'Beenden'
-                  )}
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setIsStatusDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Status
+                  </button>
+                  <button
+                    onClick={() => setIsFinishDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    {isRefreshing ? (
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                      </svg>
+                    ) : (
+                      'Beenden'
+                    )}
+                  </button>
+                </div>
               )}
             </>
+          )}
+          {showButtonStatus && (match.matchStatus.key === 'FINISHED' || match.matchStatus.key === 'FORFEITED') && (
+            <button
+              onClick={() => setIsStatusDialogOpen(true)}
+              className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Status
+            </button>
           )}
         </div>
 
@@ -655,6 +673,20 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
         editPenalty={editingAwayPenalty}
+      />
+
+      {/* Status Dialog */}
+      <MatchStatus
+        isOpen={isStatusDialogOpen}
+        onClose={() => setIsStatusDialogOpen(false)}
+        match={match}
+        jwt={jwt || ''}
+        onSuccess={(updatedMatch) => {
+          setMatch(updatedMatch);
+        }}
+        onMatchUpdate={async (updatedMatch) => {
+          setMatch(updatedMatch);
+        }}
       />
 
       {/* Referees Section */}
