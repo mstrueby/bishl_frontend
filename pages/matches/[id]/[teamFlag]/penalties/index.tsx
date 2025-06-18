@@ -125,7 +125,9 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
       const response = await axios.get(`${BASE_URL}/configs/penaltycode`);
       const data = response.data.value;
       if (Array.isArray(data) && data.length > 0) {
-        setPenaltyCodes(data);
+        // Ensure each item has key and value properties and remove sortOrder attribute
+        const filteredData = data.map(({ key, value }) => ({ key, value }));
+        setPenaltyCodes(filteredData);
       } else {
         console.error('Invalid penalty codes data format:', data);
         setPenaltyCodes([]);
@@ -135,7 +137,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
       setPenaltyCodes([]);
     }
   };
-  
+
   const penaltyMinuteOptions = [
     { key: '2', value: '2' },
     { key: '5', value: '5' },
@@ -358,9 +360,9 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   <PenaltyCodeSelect
                                     name={`penalties.${index}.penaltyCode`}
                                     selectedPenaltyCode={
-                                      penalty.penaltyCode && 'key' in penalty.penaltyCode && 'value' in penalty.penaltyCode
-                                        ? (penalty.penaltyCode as PenaltyCode)
-                                        : null
+                                      (penalty.penaltyCode && 'key' in penalty.penaltyCode && 'value' in penalty.penaltyCode
+                                        ? penalty.penaltyCode as PenaltyCode
+                                        : null)
                                     }
                                     onChange={(selectedPenaltyCode) => {
                                       setFieldValue(`penalties.${index}.penaltyCode`, selectedPenaltyCode);
