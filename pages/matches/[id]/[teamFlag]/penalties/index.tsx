@@ -454,6 +454,11 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
 
                       {/** buttons */}
                       <div className="flex justify-end space-x-3 pt-8">
+                        <Link href={`/matches/${match._id}/matchcenter?tab=penalties`}>
+                          <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabIndex={values.penalties.length * 6 + 10}>
+                            Schließen
+                          </a>
+                        </Link>
                         <ButtonPrimary
                           name="btnSubmit"
                           type="submit"
@@ -461,11 +466,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                           isLoading={loading}
                           tabIndex={values.penalties.length * 6 + 9}
                         />
-                        <Link href={`/matches/${match._id}/matchcenter?tab=penalties`}>
-                          <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabIndex={values.penalties.length * 6 + 10}>
-                            Schließen
-                          </a>
-                        </Link>
                       </div>
                     </div>
                   )}
