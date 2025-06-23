@@ -14,9 +14,10 @@ interface ListboxProps extends ComponentPropsWithoutRef<'input'> {
   placeholder?: string;
   showErrorText?: boolean;
   options: ListboxOption[];
+  tabIndex?: number;
 }
 
-const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ...props }: ListboxProps) => {
+const MyListbox = ({ label, name, placeholder, showErrorText = true, options, tabIndex, ...props }: ListboxProps) => {
   const [field, meta, helpers] = useField(name);
   const [selected, setSelected] = useState<ListboxOption | null>(null);
 
@@ -61,7 +62,7 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ..
               </Listbox.Label>
             )}
             <div className="relative">
-              <Listbox.Button type="button" className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}>
+              <Listbox.Button type="button" tabIndex={tabIndex} className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}>
                 {selected?.value ? (
                   <span className="block truncate">{selected.value}</span>
                 ) : (
