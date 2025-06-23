@@ -88,7 +88,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
                 return secondsA - secondsB;
               })
               .map((penalty, index) => (
-                <li key={penalty._id} className="flex items-center justify-between py-3 px-4">      
+                <li key={penalty._id} className="flex items-center justify-between py-3 px-4">
                   <div className="w-16 flex-shrink-0 text-xs text-gray-900 space-y-1 text-center w-8 mr-5">
                     <p>{penalty.matchTimeStart}</p>
                     <p>{penalty.matchTimeEnd || '-'}</p>
@@ -128,9 +128,21 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
         ) : (
           <div className="text-center py-5 text-sm text-gray-500">
             Keine Strafen
-          </div>      
+          </div>
         )}
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setPenaltyToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Strafe löschen"
+        description={`Bist du sicher, dass du die Strafe von <strong>${penaltyToDelete?.penaltyPlayer ? `#${penaltyToDelete.penaltyPlayer.jerseyNumber} ${penaltyToDelete?.penaltyPlayer?.firstName} ${penaltyToDelete?.penaltyPlayer?.lastName} (Zeit ${penaltyToDelete?.matchTimeStart})` : 'Unbekannt'}</strong> löschen möchtest?`}
+        descriptionSubText="Diese Aktion kann nicht rückgängig gemacht werden."
+      />
     </div>
   )
 };
