@@ -32,7 +32,17 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   removeButton = false,
   showErrorText = true,  
 }, ref) => {
-  const [field, meta, helpers] = useField(name);
+  // Try to use Formik field if available, otherwise use null values
+  let field, meta, helpers;
+  try {
+    [field, meta, helpers] = useField(name);
+  } catch (error) {
+    // Not inside Formik context, use default values
+    field = { name, value: null };
+    meta = { touched: false, error: undefined };
+    helpers = { setValue: () => {}, setTouched: () => {} };
+  }
+  
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
