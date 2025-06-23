@@ -390,7 +390,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     />
                                   </div>
                                   {/** Penalty Type Toggles */}
-                                  <div className="flex flex-row items-center justify-end md:justify-between p-2 gap-6">
+                                  <div className="flex flex-row items-center justify-end md:justify-between p-2 gap-6 -mt-6 -mb-2">
                                     <Toggle
                                       name={`penalties.${index}.isGM`}
                                       label="GM"
