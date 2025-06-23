@@ -32,7 +32,7 @@ const Toggle = ({ name, label, description, disabled, tabIndex }: ToggleProps) =
   }, [field.value])
 
   return (
-    <li className="flex items-center justify-between">
+    <li className="flex items-center justify-between mt-6 mb-2">
       <div className="flex flex-col">
         <span className="text-sm font-medium text-gray-900">
           {label}
