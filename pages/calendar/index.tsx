@@ -265,24 +265,24 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
               </time>
             </h1>
             {/** Button to match list */}
-            <button
-              type="button"
-              className="mt-1 text-sm text-gray-500 hover:text-gray-700 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-              {selectedDate && matchesByDate(selectedDate).length > 0 ? (
-                <button 
-                  onClick={() => {
-                    document.getElementById('match-list')?.scrollIntoView({ 
-                      behavior: 'smooth',
-                      block: 'start'
-                    });
-                  }}
-                  className="hover:text-gray-700 cursor-pointer"
-                >
-                  {matchesByDate(selectedDate).length} {matchesByDate(selectedDate).length === 1 ? 'Spiel' : 'Spiele'}
-                </button>
-              ) : 'Keine Spiele'}
-            </button>
+            {selectedDate && matchesByDate(selectedDate).length > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById('match-list')?.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }}
+                className="mt-1 text-sm text-gray-500 hover:text-gray-700 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer"
+              >
+                {matchesByDate(selectedDate).length} {matchesByDate(selectedDate).length === 1 ? 'Spiel' : 'Spiele'}
+              </button>
+            ) : (
+              <div className="mt-1 text-sm text-gray-500 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300">
+                Keine Spiele
+              </div>
+            )}
           </div>
           <div className="flex items-center">
             <button
