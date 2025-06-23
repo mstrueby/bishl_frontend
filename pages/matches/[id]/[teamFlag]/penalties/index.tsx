@@ -318,7 +318,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   <div className="justify-center md:justify-start w-full">
                                     <InputMatchTime
                                       name={`penalties.${index}.matchTimeStart`}
-                                      tabIndex={index * 3 + 1}
+                                      tabIndex={index * 6 + 1}
                                       ref={(el: HTMLInputElement | null) => {
                                         inputRefs.current[index] = el;
                                       }}
@@ -328,7 +328,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   <div className="justify-center md:justify-start w-full">
                                     <InputMatchTime
                                       name={`penalties.${index}.matchTimeEnd`}
-                                      tabIndex={index * 3 + 2}
+                                      tabIndex={index * 6 + 2}
                                     />
                                   </div>
                                 </div>
@@ -354,7 +354,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     required={true}
                                     placeholder="Spieler auswählen"
                                     showErrorText={false}
-                                    tabIndex={index * 3 + 3}
+                                    tabIndex={index * 6 + 3}
                                   />
                                   {/** Penalty Code Selection */}
                                   <PenaltyCodeSelect
@@ -373,6 +373,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     required={true}
                                     placeholder="Strafe auswählen"
                                     showErrorText={false}
+                                    tabIndex={index * 6 + 4}
                                   />
                                 </div>
                                 {/** Minutes, GM, MP */}
@@ -385,6 +386,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                       options={penaltyMinuteOptions}
                                       placeholder="Strafminuten"
                                       showErrorText={false}
+                                      tabIndex={index * 6 + 5}
                                     />
                                   </div>
                                   {/** Penalty Type Toggles */}
@@ -392,10 +394,12 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     <Toggle
                                       name={`penalties.${index}.isGM`}
                                       label="GM"
+                                      tabIndex={index * 6 + 6}
                                     />
                                     <Toggle
                                       name={`penalties.${index}.isMP`}
                                       label="MP"
+                                      tabIndex={index * 6 + 7}
                                     />
                                   </div>
                                 </div>
@@ -421,7 +425,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                       <div className="flex justify-center">
                         <button
                           type="button"
-                          tabIndex={values.penalties.length * 3 + 1}
+                          tabIndex={values.penalties.length * 6 + 8}
                           onClick={() => {
                             const newIndex = values.penalties.length;
                             push({
@@ -451,7 +455,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                       {/** buttons */}
                       <div className="flex justify-end space-x-3 pt-8">
                         <Link href={`/matches/${match._id}/matchcenter?tab=penalties`}>
-                          <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                          <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabIndex={values.penalties.length * 6 + 10}>
                             Schließen
                           </a>
                         </Link>
@@ -460,7 +464,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                           type="submit"
                           label="Speichern"
                           isLoading={loading}
-                          tabIndex={values.penalties.length * 3 + 2}
+                          tabIndex={values.penalties.length * 6 + 9}
                         />
                       </div>
                     </div>
