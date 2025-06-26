@@ -827,6 +827,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
     };
 
+    console.log('Roster data to be saved:', rosterData)
+
     try {
       // Make the API call to save the roster for the main match
       const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
