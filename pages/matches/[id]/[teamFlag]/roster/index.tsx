@@ -502,6 +502,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             },
             params: {
               sortby: 'lastName',
+              all: true,
               // If includeInactivePlayers is true, don't specify active param to get all players
               // Otherwise, only get active players
               ...(includeInactivePlayers ? { all: true } : { active: 'true' })
