@@ -590,6 +590,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     // Auto-select the newly called up player
     setSelectedPlayer(playerWithCalled);
 
+    // Set the jersey number if the called up player has one
+    if (selectedCallUpPlayer.jerseyNo) {
+      setPlayerNumber(selectedCallUpPlayer.jerseyNo);
+    }
+
     // Close the modal and reset selections
     setIsCallUpModalOpen(false);
     setSelectedCallUpTeam(null);
