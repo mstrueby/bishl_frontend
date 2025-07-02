@@ -377,6 +377,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [selectedCallUpPlayer, setSelectedCallUpPlayer] = useState<AvailablePlayer | null>(null);
   const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
+  const [playerStats, setPlayerStats] = useState<{[playerId: string]: number}>({});
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
@@ -489,6 +490,60 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setRosterPublished(true);
     }
   }, [isMatchFinished]);
+
+  // Fetch player stats for called players
+  useEffect(() => {
+    const fetchPlayerStats = async () => {
+      const calledPlayers = rosterList.filter(player => player.called);
+      const statsPromises = calledPlayers.map(async (player) => {
+        try {
+          const response = await axios.get(`${BASE_URL}/players/${player.player.playerId}`, {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            }
+          });
+          
+          const playerData = response.data;
+          if (playerData.stats && Array.isArray(playerData.stats)) {
+            // Find stats that match the current match context
+            const matchingStats = playerData.stats.find((stat: any) => 
+              stat.season?.alias === match.season.alias &&
+              stat.tournament?.alias === match.tournament.alias &&
+              stat.team?.name === matchTeam.name
+            );
+            
+            return {
+              playerId: player.player.playerId,
+              calledMatches: matchingStats?.calledMatches || 0
+            };
+          }
+          
+          return {
+            playerId: player.player.playerId,
+            calledMatches: 0
+          };
+        } catch (error) {
+          console.error(`Error fetching stats for player ${player.player.playerId}:`, error);
+          return {
+            playerId: player.player.playerId,
+            calledMatches: 0
+          };
+        }
+      });
+
+      const statsResults = await Promise.all(statsPromises);
+      const statsMap = statsResults.reduce((acc, stat) => {
+        acc[stat.playerId] = stat.calledMatches;
+        return acc;
+      }, {} as {[playerId: string]: number});
+      
+      setPlayerStats(statsMap);
+    };
+
+    if (rosterList.some(player => player.called)) {
+      fetchPlayerStats();
+    }
+  }, [rosterList, jwt, match.season.alias, match.tournament.alias, matchTeam.name]);
 
   // Fetch players when a team is selected
   useEffect(() => {
@@ -1221,12 +1276,19 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       </div>
                       <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
                         {player.called ? (
-                          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                            </svg>
-                            <span className="hidden sm:block">Hochgemeldet</span>
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                              </svg>
+                              <span className="hidden sm:block">Hochgemeldet</span>
+                            </span>
+                            {playerStats[player.player.playerId] !== undefined && (
+                              <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                {playerStats[player.player.playerId]}
+                              </span>
+                            )}
+                          </div>
                         ) : null}
                       </div>
                       <div className="flex space-x-2">
