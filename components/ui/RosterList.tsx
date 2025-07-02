@@ -105,7 +105,7 @@ const RosterList: React.FC<RosterListProps> = ({
             </tbody>
           </table>
         ) : (
-          <div className="text-center py-4 text-sm text-gray-500">
+          <div className="text-center py-5 text-sm text-gray-500">
             {!isPublished ? 'Aufstellung nicht veröffentlicht' : 'Keine Spieler eingetragen'}
           </div>
         )}
