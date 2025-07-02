@@ -9,6 +9,7 @@ interface RosterListProps {
   showEditButton?: boolean;
   editUrl?: string;
   sortRoster?: (roster: RosterPlayer[]) => RosterPlayer[];
+  playerStats?: {[playerId: string]: number};
 }
 
 const RosterList: React.FC<RosterListProps> = ({
@@ -17,7 +18,8 @@ const RosterList: React.FC<RosterListProps> = ({
   isPublished,
   showEditButton = false,
   editUrl,
-  sortRoster
+  sortRoster,
+  playerStats
 }) => {
   // Default sort function if none provided
   const defaultSortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -83,12 +85,19 @@ const RosterList: React.FC<RosterListProps> = ({
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
                     {player.called && (
-                      <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <span className="hidden sm:inline">Hochgemeldet</span>
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <span className="hidden sm:inline">Hochgemeldet</span>
+                        </span>
+                        {playerStats && playerStats[player.player.playerId] !== undefined && (
+                          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                            {playerStats[player.player.playerId]}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </td>
                 </tr>
