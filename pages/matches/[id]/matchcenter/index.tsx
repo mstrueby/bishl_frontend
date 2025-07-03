@@ -441,7 +441,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="home"
                   scores={match.home.scores || []}
-                  showEditButton={true}
+                  showEditButton={showButtonScoresHome}
                   editUrl={`/matches/${match._id}/home/scores`}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsHomeGoalDialogOpen}
@@ -456,7 +456,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="away"
                   scores={match.away.scores || []}
-                  showEditButton={true}
+                  showEditButton={showButtonScoresAway}
                   editUrl={`/matches/${match._id}/away/scores`}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsAwayGoalDialogOpen}
@@ -479,7 +479,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="home"
                   penalties={match.home.penalties || []}
-                  showEditButton={true}
+                  showEditButton={showButtonPenaltiesHome}
                   editUrl={`/matches/${match._id}/home/penalties`}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsHomePenaltyDialogOpen}
@@ -495,7 +495,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="away"
                   penalties={match.away.penalties || []}
-                  showEditButton={true}
+                  showEditButton={showButtonPenaltiesAway}
                   editUrl={`/matches/${match._id}/away/penalties`}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}

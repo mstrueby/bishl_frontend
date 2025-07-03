@@ -152,6 +152,8 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonStatus = true;
     
     if (isMatchCenter) {
+      permissions.showButtonRosterHome = true;
+      permissions.showButtonRosterAway = true;
       permissions.showButtonScoresHome = true;
       permissions.showButtonScoresAway = true;
       permissions.showButtonPenaltiesHome = true;
