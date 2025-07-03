@@ -7,7 +7,7 @@ import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react
 import useAuth from '../../hooks/useAuth';
 import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
-import { classNames } from '../../tools/utils';
+import { classNames, calculateMatchButtonPermissions } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
 import { useRouter } from 'next/router';
@@ -198,73 +198,13 @@ const MatchCard: React.FC<{
     };
   }, [match._id, match.matchStatus.key, onMatchUpdate, isRefreshing]);
 
-  let showButtonEdit = false;
-  let showButtonStatus = false;
-  let showButtonRosterHome = false;
-  let showButtonRosterAway = false;
-  let showMatchCenter = true;
-
-  {/**  LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
-    showButtonEdit = true;
-    showButtonStatus = true;
-  }
-  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-  }
-  {/** LEAGE_ADMIN && Spiel läuft */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-  }
-  {/** Home-Account */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
-    showButtonRosterHome = true;
-  }
-  {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-  }
-  {/** Matchday-Owner and match is at the same day */ }
-  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-  }
-  {/** Away-Club && Spiel ist weiter als 30 Minuten in der Zukunft */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-  }
-  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-  }
-  {/** Away-Account && Spiel läuft */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterAway = false;
-  }
-  {/** Spiel ist beendet */ }
-  if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
-    showButtonEdit = false;
-    showButtonRosterHome = false;
-    showButtonRosterAway = false;
-    showButtonStatus = false;
-  }
-  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
-    showButtonEdit = true;
-    showButtonStatus = true;
-  }
-
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
-    showButtonEdit = false;
-    showButtonStatus = false;
-    showButtonRosterHome = false;
-    showButtonRosterAway = false;
-  }
+  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, false);
+  
+  const showButtonEdit = permissions.showButtonEdit;
+  const showButtonStatus = permissions.showButtonStatus;
+  const showButtonRosterHome = permissions.showButtonRosterHome;
+  const showButtonRosterAway = permissions.showButtonRosterAway;
+  const showMatchCenter = permissions.showMatchCenter;
 
   // Feature-Switch
   //if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {

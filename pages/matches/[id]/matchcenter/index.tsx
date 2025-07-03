@@ -14,7 +14,7 @@ import axios from 'axios';
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs, allFinishTypes } from '../../../../tools/consts';
-import { classNames } from '../../../../tools/utils';
+import { classNames, calculateMatchButtonPermissions } from '../../../../tools/utils';
 import MatchStatusBadge from '../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../components/ui/MatchHeader';
 import FinishTypeSelect from '../../../../components/admin/ui/FinishTypeSelect';
@@ -179,97 +179,16 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     }
   }, [id, isRefreshing]);
 
-  let showButtonRosterHome = false;
-  let showButtonRosterAway = false;
-  let showButtonScoresHome = false;
-  let showButtonScoresAway = false;
-  let showButtonPenaltiesHome = false;
-  let showButtonPenaltiesAway = false;
-  let showButtonStatus = false;
-  let showButtonEvents = false;
-
-  {/** LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
-    showButtonStatus = true;
-    showButtonEvents = true;
-  }
-  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-  }
-  {/** LEAGE_ADMIN && Spiel läuft */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-  }
-  {/** Home-Account */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
-    showButtonRosterHome = true;
-  }
-  {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-    showButtonEvents = true;
-  }
-  {/** Matchday-Owner and match is at the same day */ }
-  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-    showButtonEvents = true;
-  }
-  {/** Home-Account && Spiel läuft */ }
-  {/**
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-    showButtonEvents = true;
-  }
-  */}
-  {/** Away-Account && Spiel weiter als 30 Minuten in der Zukunft  */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-  }
-  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-  }
-  {/** Away-Account && Spiel läuft */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterAway = false;
-  }
-  {/** Away-Account && Spiel läuft */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterAway = false;
-  }
-  {/** Spiel ist beendet */ }
-  if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
-    showButtonRosterHome = false;
-    showButtonRosterAway = false;
-    showButtonStatus = false;
-    showButtonEvents = false;
-  }
-  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
-    showButtonStatus = true;
-    showButtonScoresHome = true;
-    showButtonScoresAway = true;
-    showButtonPenaltiesHome = true;
-    showButtonPenaltiesAway = true;
-  }
-
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
-    showButtonRosterHome = false;
-    showButtonRosterAway = false;
-    showButtonScoresHome = false;
-    showButtonScoresAway = false;
-    showButtonPenaltiesHome = false;
-    showButtonPenaltiesAway = false;
-    showButtonStatus = false;
-    showButtonEvents = false;
-  }
+  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, true);
+  
+  const showButtonRosterHome = permissions.showButtonRosterHome;
+  const showButtonRosterAway = permissions.showButtonRosterAway;
+  const showButtonScoresHome = permissions.showButtonScoresHome;
+  const showButtonScoresAway = permissions.showButtonScoresAway;
+  const showButtonPenaltiesHome = permissions.showButtonPenaltiesHome;
+  const showButtonPenaltiesAway = permissions.showButtonPenaltiesAway;
+  const showButtonStatus = permissions.showButtonStatus;
+  const showButtonEvents = permissions.showButtonEvents;
 
 
   return (
