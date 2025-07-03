@@ -64,8 +64,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
   const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | null>(null);
   const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | null>(null);
-  const [homePlayerStats, setHomePlayerStats] = useState<{[playerId: string]: number}>({});
-  const [awayPlayerStats, setAwayPlayerStats] = useState<{[playerId: string]: number}>({});
+  const [homePlayerStats, setHomePlayerStats] = useState<{ [playerId: string]: number }>({});
+  const [awayPlayerStats, setAwayPlayerStats] = useState<{ [playerId: string]: number }>({});
   {/** 
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
@@ -110,22 +110,22 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               Authorization: `Bearer ${jwt}`,
             }
           });
-          
+
           const playerData = response.data;
           if (playerData.stats && Array.isArray(playerData.stats)) {
             // Find stats that match the current match context
-            const matchingStats = playerData.stats.find((stat: any) => 
+            const matchingStats = playerData.stats.find((stat: any) =>
               stat.season?.alias === match.season.alias &&
               stat.tournament?.alias === match.tournament.alias &&
               stat.team?.name === team.name
             );
-            
+
             return {
               playerId: player.player.playerId,
               calledMatches: matchingStats?.calledMatches || 0
             };
           }
-          
+
           return {
             playerId: player.player.playerId,
             calledMatches: 0
@@ -143,7 +143,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       return statsResults.reduce((acc, stat) => {
         acc[stat.playerId] = stat.calledMatches;
         return acc;
-      }, {} as {[playerId: string]: number});
+      }, {} as { [playerId: string]: number });
     };
 
     const fetchAllPlayerStats = async () => {
@@ -179,13 +179,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     }
   }, [id, isRefreshing]);
 
-  
-
-  let showLinkEdit = false;
-  let showLinkStatus = false;
   let showButtonRosterHome = false;
   let showButtonRosterAway = false;
-  let showMatchSheet = true;
+  let showButtonScoresHome = false;
+  let showButtonScoresAway = false;
+  let showButtonPenaltiesHome = false;
+  let showButtonPenaltiesAway = false;
   let showButtonStatus = false;
   let showButtonEvents = false;
 
@@ -198,37 +197,37 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
-    //showButtonStatus = true;
   }
   {/** LEAGE_ADMIN && Spiel läuft */ }
   if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showButtonRosterHome = true;
     showButtonRosterAway = true;
   }
-  {/** Heim Vereins-Account */ }
+  {/** Home-Account */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
     showButtonRosterHome = true;
-    //showButtonEvents = true;
   }
   {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
   if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-  }
-  {/** Home-Account && Spiel läuft */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showButtonRosterAway = true;
     showButtonStatus = true;
     showButtonEvents = true;
   }
   {/** Matchday-Owner and match is at the same day */ }
   if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-    //showLinkStatus = true;
     showButtonRosterHome = true;
     showButtonRosterAway = true;
     showButtonStatus = true;
     showButtonEvents = true;
   }
+  {/** Home-Account && Spiel läuft */ }
+  {/**
+  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showButtonRosterAway = true;
+    showButtonStatus = true;
+    showButtonEvents = true;
+  }
+  */}
   {/** Away-Account && Spiel weiter als 30 Minuten in der Zukunft  */ }
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
     showButtonRosterAway = true;
@@ -241,23 +240,35 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
     showButtonRosterAway = false;
   }
-  {/**
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN'))) {
-    showButtonRosterAway = true;
+  {/** Away-Account && Spiel läuft */ }
+  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
+    showButtonRosterAway = false;
   }
-  */}
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
-    showButtonStatus = false;
+  {/** Spiel ist beendet */ }
+  if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
     showButtonRosterHome = false;
     showButtonRosterAway = false;
+    showButtonStatus = false;
     showButtonEvents = false;
   }
-  {/** ADMIN  */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
-    //showButtonStatus = true;
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    //showButtonEvents = true;
+  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
+  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
+    showButtonStatus = true;
+    showButtonScoresHome = true;
+    showButtonScoresAway = true;
+    showButtonPenaltiesHome = true;
+    showButtonPenaltiesAway = true;
+  }
+
+  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
+    showButtonRosterHome = false;
+    showButtonRosterAway = false;
+    showButtonScoresHome = false;
+    showButtonScoresAway = false;
+    showButtonPenaltiesHome = false;
+    showButtonPenaltiesAway = false;
+    showButtonStatus = false;
+    showButtonEvents = false;
   }
 
 
