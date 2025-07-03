@@ -7,7 +7,7 @@ import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react
 import useAuth from '../../hooks/useAuth';
 import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
-import { classNames } from '../../tools/utils';
+import { classNames, calculateMatchButtonPermissions } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
 import { useRouter } from 'next/router';
@@ -198,69 +198,13 @@ const MatchCard: React.FC<{
     };
   }, [match._id, match.matchStatus.key, onMatchUpdate, isRefreshing]);
 
-  let showLinkEdit = false;
-  let showLinkStatus = false;
-  let showLinkHome = false;
-  let showLinkAway = false;
-  let showMatchSheet = true;
-
-  {/**  LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN'))) {
-    showLinkEdit = true;
-    showLinkStatus = true;
-  }
-  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    //showLinkHome = true;
-    //showLinkAway = true;
-    //showButtonStatus = true;
-  }
-  {/** Home-Account */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
-    showLinkHome = true;
-  }
-  {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showLinkStatus = true;
-    showLinkAway = true;
-  }
-  {/** Matchday-Owner and match is at the same day */ }
-  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-    showLinkStatus = true;
-    showLinkHome = true;
-    showLinkAway = true;
-  }
-  {/** Away-Club && Spiel ist weiter als 30 Minuten in der Zukunft */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
-    showLinkAway = true;
-  }
-  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showLinkAway = true;
-  }
-  {/** Away-Account && Spiel läuft */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showLinkAway = false;
-  }
-  {/** Spiel ist beendet */ }
-  if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
-    showLinkEdit = false;
-    showLinkHome = false;
-    showLinkAway = false;
-    showLinkStatus = false;
-  }
-  {/** ADMIN, LEAGE_ADMIN && Spiel beendet */ }
-  if (user && (user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
-    showLinkEdit = true;
-    showLinkStatus = true;
-  }
-
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
-    showLinkEdit = false;
-    showLinkStatus = false;
-    showLinkHome = false;
-    showLinkAway = false;
-  }
+  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, false);
+  
+  const showButtonEdit = permissions.showButtonEdit;
+  const showButtonStatus = permissions.showButtonStatus;
+  const showButtonRosterHome = permissions.showButtonRosterHome;
+  const showButtonRosterAway = permissions.showButtonRosterAway;
+  const showMatchCenter = permissions.showMatchCenter;
 
   // Feature-Switch
   //if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
@@ -292,14 +236,14 @@ const MatchCard: React.FC<{
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
+              {(showButtonEdit || showButtonStatus || showButtonRosterHome || showButtonRosterAway) && (
                 <StatusMenu
                   match={match}
                   setMatch={setMatch}
-                  showLinkEdit={showLinkEdit}
-                  showLinkStatus={showLinkStatus}
-                  showLinkHome={showLinkHome}
-                  showLinkAway={showLinkAway}
+                  showLinkEdit={showButtonEdit}
+                  showLinkStatus={showButtonStatus}
+                  showLinkHome={showButtonRosterHome}
+                  showLinkAway={showButtonRosterAway}
                   onMatchUpdate={onMatchUpdate}
                 />
               )}
@@ -416,14 +360,14 @@ const MatchCard: React.FC<{
       {/* 3 button Spielberich, status (tablet) */}
       <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
-          {(showLinkEdit || showLinkStatus || showLinkHome || showLinkAway) && (
+          {(showButtonEdit || showButtonStatus || showButtonRosterHome || showButtonRosterAway) && (
             <StatusMenu
               match={match}
               setMatch={setMatch}
-              showLinkEdit={showLinkEdit}
-              showLinkStatus={showLinkStatus}
-              showLinkHome={showLinkHome}
-              showLinkAway={showLinkAway}
+              showLinkEdit={showButtonEdit}
+              showLinkStatus={showButtonStatus}
+              showLinkHome={showButtonRosterHome}
+              showLinkAway={showButtonRosterAway}
               onMatchUpdate={onMatchUpdate}
             />
           )}
@@ -435,7 +379,7 @@ const MatchCard: React.FC<{
           />
         </div>
 
-        {showMatchSheet && (
+        {showMatchCenter && (
           <div className="flex flex-col sm:flex-none justify-center sm:items-end">
             <Link href={`/matches/${match._id}`}>
               <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">

@@ -274,12 +274,12 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                     block: 'start'
                   });
                 }}
-                className="mt-1 text-sm text-gray-500 hover:text-gray-700 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer"
+                className="mt-1 text-gray-500 hover:text-gray-700 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer"
               >
                 {matchesByDate(selectedDate).length} {matchesByDate(selectedDate).length === 1 ? 'Spiel' : 'Spiele'}
               </button>
             ) : (
-              <div className="mt-1 text-sm text-gray-500 rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300">
+              <div className="mt-1 text-xs text-gray-500 py-1 font-light text-gray-900">
                 Keine Spiele
               </div>
             )}

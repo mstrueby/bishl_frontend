@@ -10,9 +10,11 @@ import { MatchdayOwner } from '../../../../types/TournamentValues'
 import Layout from '../../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
+
+let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs, allFinishTypes } from '../../../../tools/consts';
-import { classNames } from '../../../../tools/utils';
+import { classNames, calculateMatchButtonPermissions } from '../../../../tools/utils';
 import MatchStatusBadge from '../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../components/ui/MatchHeader';
 import FinishTypeSelect from '../../../../components/admin/ui/FinishTypeSelect';
@@ -62,6 +64,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
   const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | null>(null);
   const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | null>(null);
+  const [homePlayerStats, setHomePlayerStats] = useState<{ [playerId: string]: number }>({});
+  const [awayPlayerStats, setAwayPlayerStats] = useState<{ [playerId: string]: number }>({});
   {/** 
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
@@ -91,6 +95,74 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     }
   }, [router.query.tab, activeTab]);
 
+  // Fetch player stats for called players
+  useEffect(() => {
+    const fetchPlayerStats = async (roster: RosterPlayer[], team: { name: string }) => {
+      if (!jwt) return {};
+
+      const calledPlayers = roster.filter(player => player.called);
+      if (calledPlayers.length === 0) return {};
+
+      const statsPromises = calledPlayers.map(async (player) => {
+        try {
+          const response = await axios.get(`${BASE_URL}/players/${player.player.playerId}`, {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            }
+          });
+
+          const playerData = response.data;
+          if (playerData.stats && Array.isArray(playerData.stats)) {
+            // Find stats that match the current match context
+            const matchingStats = playerData.stats.find((stat: any) =>
+              stat.season?.alias === match.season.alias &&
+              stat.tournament?.alias === match.tournament.alias &&
+              stat.team?.name === team.name
+            );
+
+            return {
+              playerId: player.player.playerId,
+              calledMatches: matchingStats?.calledMatches || 0
+            };
+          }
+
+          return {
+            playerId: player.player.playerId,
+            calledMatches: 0
+          };
+        } catch (error) {
+          console.error(`Error fetching stats for player ${player.player.playerId}:`, error);
+          return {
+            playerId: player.player.playerId,
+            calledMatches: 0
+          };
+        }
+      });
+
+      const statsResults = await Promise.all(statsPromises);
+      return statsResults.reduce((acc, stat) => {
+        acc[stat.playerId] = stat.calledMatches;
+        return acc;
+      }, {} as { [playerId: string]: number });
+    };
+
+    const fetchAllPlayerStats = async () => {
+      // Fetch home team stats
+      if (match.home.roster && match.home.roster.some(player => player.called)) {
+        const homeStats = await fetchPlayerStats(match.home.roster, { name: match.home.name });
+        setHomePlayerStats(homeStats);
+      }
+
+      // Fetch away team stats
+      if (match.away.roster && match.away.roster.some(player => player.called)) {
+        const awayStats = await fetchPlayerStats(match.away.roster, { name: match.away.name });
+        setAwayPlayerStats(awayStats);
+      }
+    };
+
+    fetchAllPlayerStats();
+  }, [match, jwt]);
+
   // Refresh match data function
   const refreshMatchData = useCallback(async () => {
     if (!id || isRefreshing) return;
@@ -107,86 +179,16 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     }
   }, [id, isRefreshing]);
 
+  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, true);
   
-
-  let showLinkEdit = false;
-  let showLinkStatus = false;
-  let showButtonRosterHome = false;
-  let showButtonRosterAway = false;
-  let showMatchSheet = true;
-  let showButtonStatus = false;
-  let showButtonEvents = false;
-
-  {/** LEAGE_ADMIN */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
-    showButtonStatus = true;
-    showButtonEvents = true;
-  }
-  {/** LEAGUE-ADMIN && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    //showButtonStatus = true;
-  }
-  {/** LEAGE_ADMIN && Spiel läuft */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-  }
-  {/** Heim Vereins-Account */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN'))) {
-    showButtonRosterHome = true;
-    //showButtonEvents = true;
-  }
-  {/** Home-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-  }
-  {/** Home-Account && Spiel läuft */ }
-  if (user && (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-    showButtonEvents = true;
-  }
-  {/** Matchday-Owner and match is at the same day */ }
-  if (user && (user.club && user.club.clubId === matchdayOwner?.clubId) && new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-    //showLinkStatus = true;
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    showButtonStatus = true;
-    showButtonEvents = true;
-  }
-  {/** Away-Account && Spiel weiter als 30 Minuten in der Zukunft  */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() > Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-  }
-  {/** Away-Account && Spiel startet in den nächsten 30 Minuten */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000) {
-    showButtonRosterAway = true;
-  }
-  {/** Away-Account && Spiel läuft */ }
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) && match.matchStatus.key === 'INPROGRESS') {
-    showButtonRosterAway = false;
-  }
-  {/**
-  if (user && (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN'))) {
-    showButtonRosterAway = true;
-  }
-  */}
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON'] || (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
-    showButtonStatus = false;
-    showButtonRosterHome = false;
-    showButtonRosterAway = false;
-    showButtonEvents = false;
-  }
-  {/** ADMIN  */ }
-  if (user && (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN'))) {
-    //showButtonStatus = true;
-    showButtonRosterHome = true;
-    showButtonRosterAway = true;
-    //showButtonEvents = true;
-  }
+  const showButtonRosterHome = permissions.showButtonRosterHome;
+  const showButtonRosterAway = permissions.showButtonRosterAway;
+  const showButtonScoresHome = permissions.showButtonScoresHome;
+  const showButtonScoresAway = permissions.showButtonScoresAway;
+  const showButtonPenaltiesHome = permissions.showButtonPenaltiesHome;
+  const showButtonPenaltiesAway = permissions.showButtonPenaltiesAway;
+  const showButtonStatus = permissions.showButtonStatus;
+  const showButtonEvents = permissions.showButtonEvents;
 
 
   return (
@@ -406,6 +408,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       showEditButton={showButtonRosterHome}
                       editUrl={`/matches/${match._id}/home/roster`}
                       sortRoster={sortRoster}
+                      playerStats={homePlayerStats}
                     />
                   </div>
                   {/* Away team roster */}
@@ -417,6 +420,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       showEditButton={showButtonRosterAway}
                       editUrl={`/matches/${match._id}/away/roster`}
                       sortRoster={sortRoster}
+                      playerStats={awayPlayerStats}
                     />
                   </div>
                 </div>
@@ -437,7 +441,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="home"
                   scores={match.home.scores || []}
-                  showEditButton={true}
+                  showEditButton={showButtonScoresHome}
                   editUrl={`/matches/${match._id}/home/scores`}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsHomeGoalDialogOpen}
@@ -452,7 +456,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="away"
                   scores={match.away.scores || []}
-                  showEditButton={true}
+                  showEditButton={showButtonScoresAway}
                   editUrl={`/matches/${match._id}/away/scores`}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsAwayGoalDialogOpen}
@@ -475,7 +479,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="home"
                   penalties={match.home.penalties || []}
-                  showEditButton={true}
+                  showEditButton={showButtonPenaltiesHome}
                   editUrl={`/matches/${match._id}/home/penalties`}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsHomePenaltyDialogOpen}
@@ -491,7 +495,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="away"
                   penalties={match.away.penalties || []}
-                  showEditButton={true}
+                  showEditButton={showButtonPenaltiesAway}
                   editUrl={`/matches/${match._id}/away/penalties`}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
