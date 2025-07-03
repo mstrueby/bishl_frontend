@@ -50,15 +50,17 @@ const RosterList: React.FC<RosterListProps> = ({
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3">
+      <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
         <h3 className="text-md font-semibold text-gray-900 truncate">{teamName}</h3>
-        {showEditButton && editUrl && (
-          <Link href={editUrl}>
-            <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              Bearbeiten
-            </a>
-          </Link>
-        )}
+        <div className="flex items-center">
+          {showEditButton && editUrl && (
+            <Link href={editUrl}>
+              <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                Bearbeiten
+              </a>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Roster Table */}
