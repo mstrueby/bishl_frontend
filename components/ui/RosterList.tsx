@@ -51,7 +51,7 @@ const RosterList: React.FC<RosterListProps> = ({
     <div className="w-full">
       {/* Header */}
       <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
-        <h3 className="text-md font-semibold text-gray-900 truncate">{teamName}</h3>
+        <h3 className="text-md font-semibold text-gray-900 py-1.5 truncate">{teamName}</h3>
         <div className="flex items-center">
           {showEditButton && editUrl && (
             <Link href={editUrl}>

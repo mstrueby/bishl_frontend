@@ -13,6 +13,7 @@ interface PenaltyListProps {
   penalties: PenaltiesBase[];
   showEditButton?: boolean;
   editUrl?: string;
+  showEventButtons?: boolean;
   refreshMatchData: () => void;
   setIsPenaltyDialogOpen: (isOpen: boolean) => void;
   setEditingPenalty: (penalty: PenaltiesBase | null) => void;
@@ -24,8 +25,9 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
   matchId,
   teamFlag,
   penalties,
-  showEditButton = false,
+  showEditButton,
   editUrl,
+  showEventButtons,
   refreshMatchData,
   setIsPenaltyDialogOpen,
   setEditingPenalty
@@ -65,15 +67,17 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3">
-        <h3 className="text-md font-semibold text-gray-900 truncate">{teamName}</h3>
-        {showEditButton && editUrl && (
-          <Link href={editUrl}>
-            <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              Bearbeiten
-            </a>
-          </Link>
-        )}
+      <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
+        <h3 className="text-md font-semibold text-gray-900 py-1.5 truncate">{teamName}</h3>
+        <div className="flex items-center">
+          {showEditButton && editUrl && (
+            <Link href={editUrl}>
+              <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                Bearbeiten
+              </a>
+            </Link>
+          )}
+        </div>
       </div>
       {/* Penalty Table */}
       <div className="overflow-auto bg-white shadow-md rounded-md border">
@@ -101,7 +105,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
                       {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
                     </p>
                   </div>
-                  {showEditButton && (
+                  {showEventButtons && (
                     <div className="flex justify-end space-x-2 flex-shrink-0">
                       <button
                         onClick={() => {
