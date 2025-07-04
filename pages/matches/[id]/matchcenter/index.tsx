@@ -443,6 +443,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   scores={match.home.scores || []}
                   showEditButton={showButtonScoresHome}
                   editUrl={`/matches/${match._id}/home/scores`}
+                  showEventButtons={showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsHomeGoalDialogOpen}
                   setEditingGoal={setEditingHomeGoal}
@@ -458,6 +459,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   scores={match.away.scores || []}
                   showEditButton={showButtonScoresAway}
                   editUrl={`/matches/${match._id}/away/scores`}
+                  showEventButtons={showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsAwayGoalDialogOpen}
                   setEditingGoal={setEditingAwayGoal}
@@ -481,6 +483,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   penalties={match.home.penalties || []}
                   showEditButton={showButtonPenaltiesHome}
                   editUrl={`/matches/${match._id}/home/penalties`}
+                  showEventButtons={showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsHomePenaltyDialogOpen}
                   setEditingPenalty={setEditingHomePenalty}
@@ -497,6 +500,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   penalties={match.away.penalties || []}
                   showEditButton={showButtonPenaltiesAway}
                   editUrl={`/matches/${match._id}/away/penalties`}
+                  showEventButtons={showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
                   setEditingPenalty={setEditingAwayPenalty}
@@ -539,14 +543,14 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
                   <Dialog.Title
                     as="h3"
                     className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
                     Spiel beenden
                   </Dialog.Title>
 
-                  <div className="mt-4 mb-24">
+                  <div className="mt-4">
                     <FinishTypeSelect
                       selectedType={selectedFinishType}
                       types={allFinishTypes}
