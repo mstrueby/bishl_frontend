@@ -632,7 +632,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         }}
         matchId={match._id}
         teamFlag="home"
-        roster={match.home.roster || []}
+        roster={[...(match.home.roster || [])].sort((a, b) => a.player.jerseyNumber - b.player.jerseyNumber)}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
         editGoal={editingHomeGoal}
@@ -647,7 +647,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         }}
         matchId={match._id}
         teamFlag="away"
-        roster={match.away.roster || []}
+        roster={[...(match.away.roster || [])].sort((a, b) => a.player.jerseyNumber - b.player.jerseyNumber)}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
         editGoal={editingAwayGoal}
@@ -662,7 +662,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         }}
         matchId={match._id}
         teamFlag="home"
-        roster={match.home.roster || []}
+        roster={[...(match.home.roster || [])].sort((a, b) => a.player.jerseyNumber - b.player.jerseyNumber)}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
         editPenalty={editingHomePenalty}
@@ -677,7 +677,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         }}
         matchId={match._id}
         teamFlag="away"
-        roster={match.away.roster || []}
+        roster={[...(match.away.roster || [])].sort((a, b) => a.player.jerseyNumber - b.player.jerseyNumber)}
         jwt={jwt || ''}
         onSuccess={refreshMatchData}
         editPenalty={editingAwayPenalty}
