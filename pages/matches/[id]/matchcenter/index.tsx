@@ -193,15 +193,16 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
   return (
     <Layout>
-      <button
-        aria-label="Back button"
+      <a
+        href={`/tournaments/${match.tournament.alias}`}
+        aria-label="Back to tournament"
         className="flex items-center"
-        onClick={() => router.back()}>
+      >
         <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
         <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-          Zurück
+          Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
         </span>
-      </button>
+      </a>
 
       <MatchHeader
         match={match}
@@ -287,7 +288,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     onClick={() => setIsStatusDialogOpen(true)}
                     className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    Status
+                    Ergebnis
                   </button>
                   {match.matchStatus.key === 'INPROGRESS' && (
                     <button

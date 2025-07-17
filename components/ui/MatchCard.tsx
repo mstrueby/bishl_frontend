@@ -204,7 +204,7 @@ const MatchCard: React.FC<{
   const showButtonStatus = permissions.showButtonStatus;
   const showButtonRosterHome = permissions.showButtonRosterHome;
   const showButtonRosterAway = permissions.showButtonRosterAway;
-  const showMatchCenter = permissions.showMatchCenter;
+  const showButtonMatchCenter = permissions.showButtonMatchCenter;
 
   // Feature-Switch
   //if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
@@ -212,7 +212,7 @@ const MatchCard: React.FC<{
   //}
 
   return (
-    <div className="flex flex-col sm:flex-row gap-y-2 p-4 border-2 rounded-xl shadow-md">
+    <div id={`match-${match._id}`} className="flex flex-col sm:flex-row gap-y-2 p-4 border-2 rounded-xl shadow-md">
       {/* 1 tournament, status (mobile), date, venue */}
       <div className="flex flex-col sm:flex-none sm:w-1/3">
         {/* 1-1 tournament, status (mobile) */}
