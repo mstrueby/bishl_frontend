@@ -227,7 +227,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
         {/* Middle Section with Start/Finish Button */}
         <div className="w-1/3 flex justify-center items-center space-x-2">
-          {permissions.showButtonStatus && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000 && (
+          {permissions.showButtonStatus && (
             <>
               {match.matchStatus.key === 'SCHEDULED' && (
                 <button

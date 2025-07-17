@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { RosterPlayer } from '../../types/MatchValues';
+import { ArrowUpIcon } from '@heroicons/react/24/outline';
 
 interface RosterListProps {
   teamName: string;
@@ -86,21 +87,27 @@ const RosterList: React.FC<RosterListProps> = ({
                     </span>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    {player.called && (
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                          </svg>
-                          <span className="hidden sm:inline">Hochgemeldet</span>
-                        </span>
-                        {playerStats && playerStats[player.player.playerId] !== undefined && (
-                          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                            {playerStats[player.player.playerId]}
+                    {player.called && playerStats !== undefined? (
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
+                       ${playerStats[player.player.playerId] >= 0 && playerStats[player.player.playerId] <= 3
+                          ? 'bg-green-50 text-green-800 ring-green-600/20'
+                          : playerStats[player.player.playerId] === 4
+                          ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
+                          : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
+                        <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                        <span className="hidden lg:block">Hochgemeldet</span>
+                        {playerStats[player.player.playerId] !== undefined && (
+                          <span className="ml-1 sm:ml-2 inline-flex items-center gap-x-2 mr-1">
+                            <svg viewBox="0 0 2 2" className="hidden lg:block h-0.5 w-0.5 fill-current">
+                              <circle r={1} cx={1} cy={1} />
+                            </svg>
+                            <span className="text-xs font-medium">
+                              {playerStats[player.player.playerId]}
+                            </span>
                           </span>
                         )}
-                      </div>
-                    )}
+                      </span>
+                    ) : null}
                   </td>
                 </tr>
               ))}
