@@ -13,6 +13,7 @@ interface ScoresListProps {
   scores: ScoresBase[];
   showEditButton?: boolean;
   editUrl?: string;
+  showEventButtons?: boolean;
   refreshMatchData?: () => void;
   setIsGoalDialogOpen?: (open: boolean) => void;
   setEditingGoal?: (goal: ScoresBase | null) => void;
@@ -24,8 +25,9 @@ const ScoresList: React.FC<ScoresListProps> = ({
   matchId,
   teamFlag,
   scores,
-  showEditButton = false,
+  showEditButton,
   editUrl,
+  showEventButtons,
   refreshMatchData,
   setIsGoalDialogOpen,
   setEditingGoal,
@@ -62,19 +64,21 @@ const ScoresList: React.FC<ScoresListProps> = ({
       setGoalToDelete(null);
     }
   };
-  
+
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3">
-        <h3 className="text-md font-semibold text-gray-900 truncate">{teamName}</h3>
-        {showEditButton && editUrl && (
-          <Link href={editUrl}>
-            <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              Bearbeiten
-            </a>
-          </Link>
-        )}
+      <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
+        <h3 className="text-md font-semibold text-gray-900 py-1.5 truncate">{teamName}</h3>
+        <div className="flex items-center">
+          {showEditButton && editUrl && (
+            <Link href={editUrl}>
+              <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                Bearbeiten
+              </a>
+            </Link>
+          )}
+        </div>
       </div>
       {/* Scores Table */}
       <div className="overflow-auto bg-white shadow-md rounded-md border">
@@ -91,44 +95,44 @@ const ScoresList: React.FC<ScoresListProps> = ({
               })
               .map((score) => (
                 <li key={`${score._id}`} className="flex items-center py-3 px-4">
-                    <div className="w-16 flex-shrink-0 text-xs text-gray-900 text-center w-8 mr-5">
-                      {score.matchTime}
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-sm text-gray-900">
-                        {score.goalPlayer ? `#${score.goalPlayer.jerseyNumber} ${score.goalPlayer.lastName}, ${score.goalPlayer.firstName}` : 'Unbekannt'}
+                  <div className="w-16 flex-shrink-0 text-xs text-gray-900 text-center w-8 mr-5">
+                    {score.matchTime}
+                  </div>
+                  <div className="flex-grow">
+                    <p className="text-sm text-gray-900">
+                      {score.goalPlayer ? `#${score.goalPlayer.jerseyNumber} ${score.goalPlayer.lastName}, ${score.goalPlayer.firstName}` : 'Unbekannt'}
+                    </p>
+                    {score.assistPlayer ? (
+                      <p className="text-xs text-gray-500">
+                        #{score.assistPlayer.jerseyNumber} {score.assistPlayer.lastName}, {score.assistPlayer.firstName}
                       </p>
-                      {score.assistPlayer ? (
-                        <p className="text-xs text-gray-500">
-                          #{score.assistPlayer.jerseyNumber} {score.assistPlayer.lastName}, {score.assistPlayer.firstName}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-gray-500">keine Vorlage</p>
-                      )}
-                    </div>
-                    {showEditButton && (
-                      <div className="flex justify-end space-x-2 flex-shrink-0">
-                        <button
-                          onClick={() => {
-                            if (setIsGoalDialogOpen && setEditingGoal) {
-                              setIsGoalDialogOpen(true);
-                              setEditingGoal(score);
-                            }
-                          }}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          <PencilIcon className="h-5 w-5" aria-hidden="true" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(score)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                        </button>
-                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500">keine Vorlage</p>
                     )}
-                  </li>
-                ))}
+                  </div>
+                  {showEventButtons && (
+                    <div className="flex justify-end space-x-2 flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          if (setIsGoalDialogOpen && setEditingGoal) {
+                            setIsGoalDialogOpen(true);
+                            setEditingGoal(score);
+                          }
+                        }}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        <PencilIcon className="h-5 w-5" aria-hidden="true" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(score)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                      </button>
+                    </div>
+                  )}
+                </li>
+              ))}
           </ul>
         ) : (
           <div className="text-center py-5 text-sm text-gray-500">
