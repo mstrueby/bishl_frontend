@@ -141,15 +141,15 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   const { user } = useAuth();
   const refereesClubIsNotHomeOrAwayClub = (user?.referee?.club?.clubId !== home.clubId) && (user?.referee?.club?.clubId !== away.clubId);
   const isBambiniOrMini = ['bambini', 'mini'].includes(match.tournament.alias);
-  
+
   // Check if referee's club participates in any match of this matchday (only for TOURNAMENT type)
   const isTournamentType = roundData?.matchdaysType?.key === 'TOURNAMENT';
-  const refereeClubParticipatesInMatchday = isTournamentType && matchdayMatches.some(m => 
-    m.home.clubId === user?.referee?.club?.clubId || 
+  const refereeClubParticipatesInMatchday = isTournamentType && matchdayMatches.some(m =>
+    m.home.clubId === user?.referee?.club?.clubId ||
     m.away.clubId === user?.referee?.club?.clubId
   );
-  
-  const isDisabled = !isBambiniOrMini && (daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub) && 
+
+  const isDisabled = !isBambiniOrMini && (daysDiff <= 14 && daysDiff > 7 && refereesClubIsNotHomeOrAwayClub) &&
     (!isTournamentType || !refereeClubParticipatesInMatchday);
 
 
@@ -201,7 +201,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
 
 
   return (
-    <div className={classNames('my-10 px-4 pt-4 border-2 rounded-xl shadow-md', isDisabled ? '' : 'pb-4')}>
+    <div id={`match-${match._id}`} className={classNames('my-10 px-4 pt-4 border-2 rounded-xl shadow-md', isDisabled ? '' : 'pb-4')}>
       <div className="flex flex-col sm:flex-row gap-y-2">
         {/* 1 tournament, workflow drop-down (mobile), date, venue */}
         <div className="flex flex-col sm:w-1/3">

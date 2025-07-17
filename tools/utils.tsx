@@ -58,7 +58,7 @@ export function calculateMatchButtonPermissions(
     showButtonPenaltiesHome: false,
     showButtonPenaltiesAway: false,
     showButtonEvents: false,
-    showMatchCenter: true,
+    showButtonMatchCenter: true,
   };
 
   if (!user) return permissions;
