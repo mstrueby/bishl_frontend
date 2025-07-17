@@ -1277,19 +1277,28 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     </div>
                     <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
                       {player.called ? (
-                        <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
+                         ${playerStats[player.player.playerId] >= 0 && playerStats[player.player.playerId] <= 3
+                            ? 'bg-green-50 text-green-800 ring-green-600/20'
+                            : playerStats[player.player.playerId] === 4
+                            ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
+                            : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
                           <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
                           <span className="hidden sm:block">Hochgemeldet</span>
                           {playerStats[player.player.playerId] !== undefined && (
-                            <span className="ml-1 sm:ml-2 inline-flex items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
-                              {playerStats[player.player.playerId]}
+                            <span className="ml-1 sm:ml-2 inline-flex items-center gap-x-2 mr-1">
+                              <svg viewBox="0 0 2 2" className="hidden sm:block h-0.5 w-0.5 fill-current">
+                                <circle r={1} cx={1} cy={1} />
+                              </svg>
+                              <span className="text-xs font-medium">
+                                {playerStats[player.player.playerId]}
+                              </span>
                             </span>
                           )}
                         </span>
-
                       ) : null}
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 sm:ml-4">
                       <button
                         type="button"
                         onClick={() => handleEditPlayer(player)}
@@ -1636,7 +1645,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
           >
             {({ loading }) => (
-              <span>{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
+              <>
+                <span className="block sm:hidden">PDF</span>
+                <span className="hidden sm:block">{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
+              </>
             )}
           </PDFDownloadLink>
         ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, rosterList])}
