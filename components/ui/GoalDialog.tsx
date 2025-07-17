@@ -161,7 +161,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                       <div>
                         <InputMatchTime
                           name="matchTime"
-                          label="Spielzeit (mm:ss)"
+                          label="Spielzeit"
                         />
                       </div>
 

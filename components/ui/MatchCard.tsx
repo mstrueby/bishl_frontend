@@ -7,26 +7,19 @@ import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react
 import useAuth from '../../hooks/useAuth';
 import { Menu, Transition } from '@headlessui/react';
 import { tournamentConfigs } from '../../tools/consts';
-import { classNames, calculateMatchButtonPermissions } from '../../tools/utils';
+import { classNames, calculateMatchButtonPermissions, MatchButtonPermissions } from '../../tools/utils';
 import MatchEdit from '../admin/ui/MatchEdit';
 import MatchStatus from '../admin/ui/MatchStatus';
 import { useRouter } from 'next/router';
 import MatchStatusBadge from './MatchStatusBadge';
 
-interface StatusMenuPermissions {
-  showLinkEdit: boolean;
-  showLinkStatus: boolean;
-  showLinkHome: boolean;
-  showLinkAway: boolean;
-}
-
-const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, permissions: StatusMenuPermissions, onMatchUpdate?: () => Promise<void> }) => {
+const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, permissions: MatchButtonPermissions, onMatchUpdate?: () => Promise<void> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
-  const { showLinkEdit, showLinkStatus, showLinkHome, showLinkAway } = permissions;
+  //const { showLinkEdit, showLinkStatus, showLinkHome, showLinkAway } = permissions;
 
   return (
     <>
@@ -45,7 +38,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Ma
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
-              {showLinkEdit && (
+              {permissions.showButtonEdit && (
                 <Menu.Item>
                   {({ active }) => (
                     <button
@@ -60,38 +53,37 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Ma
                   )}
                 </Menu.Item>
               )}
-              {showLinkStatus && (
-                <>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        onClick={() => setIsStatusOpen(true)}
-                        className={classNames(
-                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                          'block w-full text-left px-4 py-2 text-sm'
-                        )}
-                      >
-                        Ergebnis
-                      </button>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        onClick={() => router.push(`/matches/${match._id}/matchcenter/`)}
-                        className={classNames(
-                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                          'block w-full text-left px-4 py-2 text-sm'
-                        )}
-                      >
-                        Match Center
-                      </button>
-                    )}
-                  </Menu.Item>
-                </>
-
+              {permissions.showButtonStatus && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => setIsStatusOpen(true)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Ergebnis
+                    </button>
+                  )}
+                </Menu.Item>
               )}
-              {showLinkHome && (
+              {permissions.showButtonMatchCenter && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => router.push(`/matches/${match._id}/matchcenter/`)}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Match Center
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
+              {permissions.showButtonRosterHome && (
                 <Menu.Item>
                   {({ active }) => (
                     <button
@@ -106,7 +98,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Ma
                   )}
                 </Menu.Item>
               )}
-              {showLinkAway && (
+              {permissions.showButtonRosterAway && (
                 <Menu.Item>
                   {({ active }) => (
                     <button
@@ -125,6 +117,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Ma
           </Menu.Items>
         </Transition>
       </Menu>
+
       <MatchEdit
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
@@ -138,6 +131,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Ma
         }}
         onMatchUpdate={onMatchUpdate}
       />
+
       <MatchStatus
         isOpen={isStatusOpen}
         onClose={() => setIsStatusOpen(false)}
@@ -201,12 +195,14 @@ const MatchCard: React.FC<{
   }, [match._id, match.matchStatus.key, onMatchUpdate, isRefreshing]);
 
   const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, false);
-  
+
+  {/**
   const showButtonEdit = permissions.showButtonEdit;
   const showButtonStatus = permissions.showButtonStatus;
   const showButtonRosterHome = permissions.showButtonRosterHome;
   const showButtonRosterAway = permissions.showButtonRosterAway;
   const showButtonMatchCenter = permissions.showButtonMatchCenter;
+  */}
 
   // Feature-Switch
   //if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
@@ -238,16 +234,11 @@ const MatchCard: React.FC<{
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              {(showButtonEdit || showButtonStatus || showButtonRosterHome || showButtonRosterAway) && (
+              {(permissions.showButtonEdit || permissions.showButtonStatus || permissions.showButtonMatchCenter || permissions.showButtonRosterHome || permissions.showButtonRosterAway) && (
                 <StatusMenu
                   match={match}
                   setMatch={setMatch}
-                  permissions={{
-                    showLinkEdit: showButtonEdit,
-                    showLinkStatus: showButtonStatus,
-                    showLinkHome: showButtonRosterHome,
-                    showLinkAway: showButtonRosterAway
-                  }}
+                  permissions={permissions}
                   onMatchUpdate={onMatchUpdate}
                 />
               )}
@@ -361,19 +352,14 @@ const MatchCard: React.FC<{
           </div>
         )}
       </div>
-      {/* 3 button Spielberich, status (tablet) */}
+      {/* 3 button Spielbericht, status (tablet) */}
       <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
-          {(showButtonEdit || showButtonStatus || showButtonRosterHome || showButtonRosterAway) && (
+          {(permissions.showButtonEdit || permissions.showButtonStatus || permissions.showButtonMatchCenter || permissions.showButtonRosterHome || permissions.showButtonRosterAway) && (
             <StatusMenu
               match={match}
               setMatch={setMatch}
-              permissions={{
-                showLinkEdit: showButtonEdit,
-                showLinkStatus: showButtonStatus,
-                showLinkHome: showButtonRosterHome,
-                showLinkAway: showButtonRosterAway
-              }}
+              permissions={permissions}
               onMatchUpdate={onMatchUpdate}
             />
           )}
@@ -384,17 +370,14 @@ const MatchCard: React.FC<{
             finishTypeValue={match.finishType.value}
           />
         </div>
-
-        {showButtonMatchCenter && (
-          <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-            <Link href={`/matches/${match._id}`}>
-              <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                <span className="block sm:hidden md:block">Spielbericht</span>
-                <span className="hidden sm:block md:hidden">Bericht</span>
-              </a>
-            </Link>
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-none justify-center sm:items-end">
+          <Link href={`/matches/${match._id}`}>
+            <a className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+              <span className="block sm:hidden md:block">Spielbericht</span>
+              <span className="hidden sm:block md:hidden">Bericht</span>
+            </a>
+          </Link>
+        </div>
 
       </div>
     </div>
