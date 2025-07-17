@@ -181,15 +181,6 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
   const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, true);
 
-  const showButtonRosterHome = permissions.showButtonRosterHome;
-  const showButtonRosterAway = permissions.showButtonRosterAway;
-  const showButtonScoresHome = permissions.showButtonScoresHome;
-  const showButtonScoresAway = permissions.showButtonScoresAway;
-  const showButtonPenaltiesHome = permissions.showButtonPenaltiesHome;
-  const showButtonPenaltiesAway = permissions.showButtonPenaltiesAway;
-  const showButtonStatus = permissions.showButtonStatus;
-  const showButtonEvents = permissions.showButtonEvents;
-
 
   return (
     <Layout>
@@ -215,7 +206,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         {/* Home Team Buttons */}
         <div className="w-1/3 flex justify-center">
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-            {showButtonEvents && match.matchStatus.key === "INPROGRESS" && (
+            {permissions.showButtonEvents && match.matchStatus.key === "INPROGRESS" && (
               <>
                 <button
                   onClick={() => setIsHomeGoalDialogOpen(true)}
@@ -236,7 +227,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
         {/* Middle Section with Start/Finish Button */}
         <div className="w-1/3 flex justify-center items-center space-x-2">
-          {showButtonStatus && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000 && (
+          {permissions.showButtonStatus && new Date(match.startDate).getTime() < Date.now() + 30 * 60 * 1000 && (
             <>
               {match.matchStatus.key === 'SCHEDULED' && (
                 <button
@@ -282,30 +273,26 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                 </button>
               )}
 
-              {showButtonStatus && (
-                <>
-                  <button
-                    onClick={() => setIsStatusDialogOpen(true)}
-                    className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Ergebnis
-                  </button>
-                  {match.matchStatus.key === 'INPROGRESS' && (
-                    <button
-                      onClick={() => setIsFinishDialogOpen(true)}
-                      className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                    >
-                      {isRefreshing ? (
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
-                        </svg>
-                      ) : (
-                        'Beenden'
-                      )}
-                    </button>
+              <button
+                onClick={() => setIsStatusDialogOpen(true)}
+                className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Ergebnis
+              </button>
+              {match.matchStatus.key === 'INPROGRESS' && (
+                <button
+                  onClick={() => setIsFinishDialogOpen(true)}
+                  className="inline-flex items-center justify-center px-4 py-1.5 border border-transparent shadow-md text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  {isRefreshing ? (
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                    </svg>
+                  ) : (
+                    'Beenden'
                   )}
-                </>
+                </button>
               )}
             </>
           )}
@@ -314,7 +301,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         {/* Away Team Buttons */}
         <div className="w-1/3 flex justify-center">
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-            {showButtonEvents && match.matchStatus.key === "INPROGRESS" && (
+            {permissions.showButtonEvents && match.matchStatus.key === "INPROGRESS" && (
               <>
                 <button
                   onClick={() => setIsAwayGoalDialogOpen(true)}
@@ -400,7 +387,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       teamName={match.home.fullName}
                       roster={sortedHomeRoster}
                       isPublished={match.home.rosterPublished || false}
-                      showEditButton={showButtonRosterHome}
+                      showEditButton={permissions.showButtonRosterHome}
                       editUrl={`/matches/${match._id}/home/roster`}
                       sortRoster={sortRoster}
                       playerStats={homePlayerStats}
@@ -412,7 +399,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       teamName={match.away.fullName}
                       roster={sortedAwayRoster}
                       isPublished={match.away.rosterPublished || false}
-                      showEditButton={showButtonRosterAway}
+                      showEditButton={permissions.showButtonRosterAway}
                       editUrl={`/matches/${match._id}/away/roster`}
                       sortRoster={sortRoster}
                       playerStats={awayPlayerStats}
@@ -436,9 +423,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="home"
                   scores={match.home.scores || []}
-                  showEditButton={showButtonScoresHome}
+                  showEditButton={permissions.showButtonScoresHome}
                   editUrl={`/matches/${match._id}/home/scores`}
-                  showEventButtons={showButtonEvents}
+                  showEventButtons={permissions.showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsHomeGoalDialogOpen}
                   setEditingGoal={setEditingHomeGoal}
@@ -452,9 +439,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="away"
                   scores={match.away.scores || []}
-                  showEditButton={showButtonScoresAway}
+                  showEditButton={permissions.showButtonScoresAway}
                   editUrl={`/matches/${match._id}/away/scores`}
-                  showEventButtons={showButtonEvents}
+                  showEventButtons={permissions.showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsGoalDialogOpen={setIsAwayGoalDialogOpen}
                   setEditingGoal={setEditingAwayGoal}
@@ -476,9 +463,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="home"
                   penalties={match.home.penalties || []}
-                  showEditButton={showButtonPenaltiesHome}
+                  showEditButton={permissions.showButtonPenaltiesHome}
                   editUrl={`/matches/${match._id}/home/penalties`}
-                  showEventButtons={showButtonEvents}
+                  showEventButtons={permissions.showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsHomePenaltyDialogOpen}
                   setEditingPenalty={setEditingHomePenalty}
@@ -493,9 +480,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                   matchId={match._id}
                   teamFlag="away"
                   penalties={match.away.penalties || []}
-                  showEditButton={showButtonPenaltiesAway}
+                  showEditButton={permissions.showButtonPenaltiesAway}
                   editUrl={`/matches/${match._id}/away/penalties`}
-                  showEventButtons={showButtonEvents}
+                  showEventButtons={permissions.showButtonEvents}
                   refreshMatchData={refreshMatchData}
                   setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
                   setEditingPenalty={setEditingAwayPenalty}
