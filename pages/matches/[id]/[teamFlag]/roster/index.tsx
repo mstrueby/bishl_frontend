@@ -9,7 +9,7 @@ import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch } from '@headlessui/react';
-import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames } from '../../../../../tools/utils';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
@@ -1030,8 +1030,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         {error && <ErrorMessage error={error} onClose={handleCloseErrorMesssage} />}
       </div>
 
-      {/* Add Player Form */}
+      {/* Main Form */}
       <div className="bg-white shadow-md rounded-lg border">
+
+        {/* Add Player Form */}
         <div className="p-4 border-b bg-gray-50">
           <div className="flex flex-col gap-4">
             {/* Player Selection */}
@@ -1275,19 +1277,16 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     </div>
                     <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
                       {player.called ? (
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                            </svg>
-                            <span className="hidden sm:block">Hochgemeldet</span>
-                          </span>
+                        <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset">
+                          <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                          <span className="hidden sm:block">Hochgemeldet</span>
                           {playerStats[player.player.playerId] !== undefined && (
-                            <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                            <span className="ml-1 sm:ml-2 inline-flex items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
                               {playerStats[player.player.playerId]}
                             </span>
                           )}
-                        </div>
+                        </span>
+
                       ) : null}
                     </div>
                     <div className="flex space-x-2">
@@ -1484,6 +1483,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             </div>
           </div>
         </div>
+
       </div>
 
       {/* Publish Roster Checkbox */}
