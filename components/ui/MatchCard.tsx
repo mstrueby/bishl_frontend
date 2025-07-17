@@ -13,18 +13,20 @@ import MatchStatus from '../admin/ui/MatchStatus';
 import { useRouter } from 'next/router';
 import MatchStatusBadge from './MatchStatusBadge';
 
-const StatusMenu = ({ match, setMatch, showLinkEdit, showLinkStatus, showLinkHome, showLinkAway, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, showLinkEdit: boolean, showLinkStatus: boolean, showLinkHome: boolean, showLinkAway: boolean, onMatchUpdate?: () => Promise<void> }) => {
+interface StatusMenuPermissions {
+  showLinkEdit: boolean;
+  showLinkStatus: boolean;
+  showLinkHome: boolean;
+  showLinkAway: boolean;
+}
+
+const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, permissions: StatusMenuPermissions, onMatchUpdate?: () => Promise<void> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
-  // deactivate new features for PROD
-  // Feature-Switch
-  //if (!user?.roles.includes('ADMIN')) {
-  //  showLinkHome = false;
-  //  showLinkAway = false;
-  //}
+  const { showLinkEdit, showLinkStatus, showLinkHome, showLinkAway } = permissions;
 
   return (
     <>
@@ -240,10 +242,12 @@ const MatchCard: React.FC<{
                 <StatusMenu
                   match={match}
                   setMatch={setMatch}
-                  showLinkEdit={showButtonEdit}
-                  showLinkStatus={showButtonStatus}
-                  showLinkHome={showButtonRosterHome}
-                  showLinkAway={showButtonRosterAway}
+                  permissions={{
+                    showLinkEdit: showButtonEdit,
+                    showLinkStatus: showButtonStatus,
+                    showLinkHome: showButtonRosterHome,
+                    showLinkAway: showButtonRosterAway
+                  }}
                   onMatchUpdate={onMatchUpdate}
                 />
               )}
@@ -364,10 +368,12 @@ const MatchCard: React.FC<{
             <StatusMenu
               match={match}
               setMatch={setMatch}
-              showLinkEdit={showButtonEdit}
-              showLinkStatus={showButtonStatus}
-              showLinkHome={showButtonRosterHome}
-              showLinkAway={showButtonRosterAway}
+              permissions={{
+                showLinkEdit: showButtonEdit,
+                showLinkStatus: showButtonStatus,
+                showLinkHome: showButtonRosterHome,
+                showLinkAway: showButtonRosterAway
+              }}
               onMatchUpdate={onMatchUpdate}
             />
           )}
