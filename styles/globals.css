@@ -1,14 +1,14 @@
 
 /* Add styles for the listbox options to appear above the dialog and be larger */
 .headlessui-listbox-options {
-  z-index: 60 !important;
+  z-index: 50 !important;
   max-height: 16rem !important;
   overflow-y: auto !important;
 }
 
 /* Ensure that the Finish Match Dialog has proper z-index but allows listbox to appear above */
 .headlessui-portal {
-  z-index: 40 !important;
+  /*z-index: 40 !important;*/
 }
 
 /* Make listbox option text easier to read */
