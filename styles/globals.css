@@ -1,7 +1,7 @@
 
 /* Add styles for the listbox options to appear above the dialog and be larger */
 .headlessui-listbox-options {
-  z-index: 50 !important;
+  z-index: 60 !important;
   max-height: 16rem !important;
   overflow-y: auto !important;
 }
