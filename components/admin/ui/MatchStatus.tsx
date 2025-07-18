@@ -7,6 +7,7 @@ import MatchStatusSelect from './MatchStatusSelect';
 import FinishTypeSelect from './FinishTypeSelect';
 import { allMatchStatuses, allFinishTypes } from '../../../tools/consts';
 import Image from 'next/image';
+import { CldImage } from 'next-cloudinary';
 
 interface EditData {
   matchStatus: { key: string; value: string };
@@ -130,7 +131,7 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
                 <Dialog.Title
                   as="h3"
                   className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
@@ -177,16 +178,17 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
                     {(editData.matchStatus.key === 'INPROGRESS' ||
                       editData.matchStatus.key === 'FINISHED' ||
                       editData.matchStatus.key === 'FORFEITED') && (
-                        <div className="flex flex-col gap-2 mt-4">
-                          <label className="flex-initial block text-sm font-medium text-gray-700">
+                        <div className="flex flex-col gap-2 mt-4 z-1">
+                          <p className="flex-initial block text-sm font-medium text-gray-900">
                             Tore
-                          </label>
+                          </p>
                           <div className="flex flex-row gap-2 justify-between items-center">
-                            <Image className="h-10 w-10 flex-none" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={40} width={40} />
+                            <CldImage className="h-10 w-10 z-200" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={40} width={40} />
                             <span className="flex-auto">
                               {match.home.fullName}
                             </span>
                             <input
+                              name="homeGoals"
                               type="number"
                               value={editData.home.stats.goalsFor}
                               onChange={(e) => {
@@ -207,11 +209,12 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
                             />
                           </div>
                           <div className="flex flex-row gap-2 justify-between items-center">
-                            <Image className="h-10 w-10 flex-none" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={40} width={40} />
+                            <CldImage className="h-10 w-10" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={40} width={40} />
                             <span className="flex-auto">
                               {match.away.fullName}
                             </span>
                             <input
+                              name="awayGoals"
                               type="number"
                               value={editData.away.stats.goalsFor}
                               onChange={(e) => {
