@@ -17,6 +17,12 @@
   font-size: 1rem !important;
 }
 
+/* Ensure images in dialogs don't interfere with dropdowns */
+[role="dialog"] img {
+  z-index: 1 !important;
+  position: relative;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
