@@ -102,6 +102,8 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
                       {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.lastName}, ${penalty.penaltyPlayer.firstName}` : 'unbekannt'}
                     </p>
                     <p className="text-xs text-gray-500">
+                      {penalty.isGM && 'GM · '}
+                      {penalty.isMP && 'MP · '}
                       {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
                     </p>
                   </div>

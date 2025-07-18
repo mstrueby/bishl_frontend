@@ -9,7 +9,7 @@ export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-interface MatchButtonPermissions {
+export interface MatchButtonPermissions {
   showButtonEdit?: boolean;
   showButtonStatus?: boolean;
   showButtonRosterHome?: boolean;
@@ -19,7 +19,7 @@ interface MatchButtonPermissions {
   showButtonPenaltiesHome?: boolean;
   showButtonPenaltiesAway?: boolean;
   showButtonEvents?: boolean;
-  showMatchCenter?: boolean;
+  showButtonMatchCenter?: boolean;
 }
 
 interface User {
@@ -58,7 +58,7 @@ export function calculateMatchButtonPermissions(
     showButtonPenaltiesHome: false,
     showButtonPenaltiesAway: false,
     showButtonEvents: false,
-    showButtonMatchCenter: true,
+    showButtonMatchCenter: false,
   };
 
   if (!user) return permissions;
@@ -81,6 +81,7 @@ export function calculateMatchButtonPermissions(
     if (matchStartTime < thirtyMinutesFromNow) {
       permissions.showButtonRosterHome = true;
       permissions.showButtonRosterAway = true;
+      permissions.showButtonMatchCenter = true;
     }
 
     if (match.matchStatus.key === 'INPROGRESS') {
@@ -97,6 +98,7 @@ export function calculateMatchButtonPermissions(
     if (matchStartTime < thirtyMinutesFromNow) {
       permissions.showButtonRosterAway = true;
       permissions.showButtonStatus = true;
+      permissions.showButtonMatchCenter = true;
       
       if (isMatchCenter) {
         permissions.showButtonEvents = true;
