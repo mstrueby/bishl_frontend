@@ -34,11 +34,114 @@ interface EditMatchData {
   awayScore: number;
 }
 
+interface RosterTableProps {
+  teamName: string;
+  roster: RosterPlayer[];
+  isPublished: boolean;
+}
+
 const tabs = [
   { id: 'roster', name: 'Aufstellung' },
   { id: 'goals', name: 'Tore' },
   { id: 'penalties', name: 'Strafen' },
 ]
+
+// Reusable RosterTable component
+const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished }) => {
+  // Sort roster by position order: C, A, G, F, then by jersey number
+  const sortRoster = (rosterToSort: RosterPlayer[]) => {
+    if (!rosterToSort || rosterToSort.length === 0) return [];
+
+    return [...rosterToSort].sort((a, b) => {
+      // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+      const positionPriority = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+
+      // Get priorities
+      const posA = positionPriority[a.playerPosition.key as keyof typeof positionPriority] || 99;
+      const posB = positionPriority[b.playerPosition.key as keyof typeof positionPriority] || 99;
+
+      // First sort by position priority
+      if (posA !== posB) {
+        return posA - posB;
+      }
+
+      // If positions are the same, sort by jersey number
+      return a.player.jerseyNumber - b.player.jerseyNumber;
+    });
+  };
+
+  const sortedRoster = sortRoster(roster || []);
+
+  return (
+    <div className="w-full">
+      <div className="text-center mb-3">
+        <h4 className="text-md font-semibold">{teamName}</h4>
+      </div>
+      <div className="overflow-hidden bg-white shadow-md rounded-md border">
+        {isPublished && sortedRoster && sortedRoster.length > 0 ? (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nr.
+                </th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Pos.
+                </th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  T
+                </th>
+                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  V
+                </th>
+                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  P
+                </th>
+                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  SM
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {sortedRoster.map((player) => (
+                <tr key={player.player.playerId}>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">
+                    {player.player.jerseyNumber}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">
+                    {player.playerPosition.key}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                    <span>{player.player.displayFirstname} {player.player.lastName}</span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
+                    {player.player.stats?.goals || 0}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
+                    {player.player.stats?.assists || 0}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
+                    {(player.player.stats?.goals || 0) + (player.player.stats?.assists || 0)}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
+                    {player.player.stats?.penaltyMinutes || 0}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center py-4 text-sm text-gray-500">
+            {!isPublished ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, userRoles, userClubId }: MatchDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -125,126 +228,25 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       <div className="py-6">
         {activeTab === 'roster' && (
           <div className="py-4">
-            {/* Sort function for roster */}
-            {(() => {
-              // Sort roster by position order: C, A, G, F, then by jersey number
-              const sortRoster = (rosterToSort: RosterPlayer[]) => {
-                if (!rosterToSort || rosterToSort.length === 0) return [];
+            <div className="flex flex-col md:flex-row md:space-x-4">
+              {/* Home team roster */}
+              <div className="w-full md:w-1/2 mb-6 md:mb-0">
+                <RosterTable
+                  teamName={match.home.fullName}
+                  roster={match.home.roster || []}
+                  isPublished={match.home.rosterPublished || false}
+                />
+              </div>
 
-                return [...rosterToSort].sort((a, b) => {
-                  // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-                  const positionPriority = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-                  // Get priorities
-                  const posA = positionPriority[a.playerPosition.key as keyof typeof positionPriority] || 99;
-                  const posB = positionPriority[b.playerPosition.key as keyof typeof positionPriority] || 99;
-
-                  // First sort by position priority
-                  if (posA !== posB) {
-                    return posA - posB;
-                  }
-
-                  // If positions are the same, sort by jersey number
-                  return a.player.jerseyNumber - b.player.jerseyNumber;
-                });
-              };
-
-              // Sort rosters
-              const sortedHomeRoster = sortRoster(match.home.roster || []);
-              const sortedAwayRoster = sortRoster(match.away.roster || []);
-
-              return (
-                <div className="flex flex-col md:flex-row md:space-x-4">
-                  {/* Home team roster */}
-                  <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                    <div className="text-center mb-3">
-                      <h4 className="text-md font-semibold">{match.home.fullName}</h4>
-                    </div>
-                    <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                      {match.home.rosterPublished && sortedHomeRoster && sortedHomeRoster.length > 0 ? (
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {sortedHomeRoster.map((player) => (
-                              <tr key={player.player.playerId}>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">{player.player.jerseyNumber}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">{player.playerPosition.key}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  <span>{player.player.displayFirstname} {player.player.lastName}</span>
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-
-                                  <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                    {player.passNumber}
-                                  </span>
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  {player.called && (
-                                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                      </svg>
-                                      <span className="hidden sm:inline">Hochgemeldet</span>
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      ) : (
-                        <div className="text-center py-4 text-sm text-gray-500">
-                          {match.home.rosterPublished === false ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Away team roster */}
-                  <div className="w-full md:w-1/2">
-                    <div className="text-center mb-3">
-                      <h4 className="text-md font-semibold">{match.away.fullName}</h4>
-                    </div>
-                    <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                      {match.away.rosterPublished && sortedAwayRoster && sortedAwayRoster.length > 0 ? (
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {sortedAwayRoster.map((player) => (
-                              <tr key={player.player.playerId}>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">{player.player.jerseyNumber}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">{player.playerPosition.key}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  <span>{player.player.firstName} {player.player.lastName}</span>
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-
-                                  <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                    {player.passNumber}
-                                  </span>
-                                </td>
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                  {player.called && (
-                                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                      </svg>
-                                      <span className="hidden sm:inline">Hochgemeldet</span>
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      ) : (
-                        <div className="text-center py-4 text-sm text-gray-500">
-                          {match.away.rosterPublished === false ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
+              {/* Away team roster */}
+              <div className="w-full md:w-1/2">
+                <RosterTable
+                  teamName={match.away.fullName}
+                  roster={match.away.roster || []}
+                  isPublished={match.away.rosterPublished || false}
+                />
+              </div>
+            </div>
           </div>
         )}
 
