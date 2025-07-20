@@ -8,13 +8,19 @@
 
 /* Ensure that the Finish Match Dialog has proper z-index but allows listbox to appear above */
 .headlessui-portal {
-  z-index: 40 !important;
+  /*z-index: 40 !important;*/
 }
 
 /* Make listbox option text easier to read */
 .headlessui-listbox-option {
   padding: 0.75rem 1rem !important;
   font-size: 1rem !important;
+}
+
+/* Ensure images in dialogs don't interfere with dropdowns */
+[role="dialog"] img {
+  z-index: 1 !important;
+  position: relative;
 }
 
 @tailwind base;
