@@ -226,7 +226,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
       {/* Tab content */}
       <div className="py-6">
-        {activeTab === 'roster' && (
+       
           <div className="py-4">
             <div className="flex flex-col md:flex-row md:space-x-4">
               {/* Home team roster */}
@@ -248,9 +248,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               </div>
             </div>
           </div>
-        )}
 
-        {activeTab === 'goals' && (
+        
           <div className="py-4">
             {/* Container for side-by-side or stacked goals */}
             <div className="flex flex-col md:flex-row md:space-x-4">
@@ -341,9 +340,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               </div>
             </div>
           </div>
-        )}
 
-        {activeTab === 'penalties' && (
+        
           <div className="py-4">
             {/* Container for side-by-side or stacked penalties */}
             <div className="flex flex-col md:flex-row md:space-x-4">
@@ -436,7 +434,6 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               </div>
             </div>
           </div>
-        )}
       </div>
 
       {/* Referees Section */}
