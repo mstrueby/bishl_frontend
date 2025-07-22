@@ -323,7 +323,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    <div className="w-16 flex-shrink-0">
+                    <div className="w-16 flex-shrink-0 text-center">
                       <div className="text-sm font-medium text-gray-900 mb-1">
                         {goal.currentScore}
                       </div>
