@@ -279,6 +279,16 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               <ul className="divide-y divide-gray-200">
                 {sortedGoals.map((goal, index) => (
                   <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                    <div className="flex-shrink-0 mr-3">
+                      <CldImage
+                        src={goal.teamFlag === 'home' ? match.home.logo : match.away.logo}
+                        alt="Team logo"
+                        width={24}
+                        height={24}
+                        gravity="center"
+                        className="rounded"
+                      />
+                    </div>
                     <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
                       {goal.matchTime}
                     </div>
@@ -343,6 +353,16 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               <ul className="divide-y divide-gray-200">
                 {sortedPenalties.map((penalty, index) => (
                   <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                    <div className="flex-shrink-0 mr-3">
+                      <CldImage
+                        src={penalty.teamFlag === 'home' ? match.home.logo : match.away.logo}
+                        alt="Team logo"
+                        width={24}
+                        height={24}
+                        gravity="center"
+                        className="rounded"
+                      />
+                    </div>
                     <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
                       <div>{penalty.matchTimeStart}</div>
                       {/**
