@@ -294,9 +294,24 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               return secondsA - secondsB;
             });
 
-            return sortedGoals.length > 0 ? (
+            // Calculate cumulative scores
+            let homeScore = 0;
+            let awayScore = 0;
+            const goalsWithScore = sortedGoals.map(goal => {
+              if (goal.teamFlag === 'home') {
+                homeScore++;
+              } else {
+                awayScore++;
+              }
+              return {
+                ...goal,
+                currentScore: `${homeScore}-${awayScore}`
+              };
+            });
+
+            return goalsWithScore.length > 0 ? (
               <ul className="divide-y divide-gray-200">
-                {sortedGoals.map((goal, index) => (
+                {goalsWithScore.map((goal, index) => (
                   <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-6">
                     <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                       <CldImage
@@ -308,8 +323,13 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
-                      {goal.matchTime}
+                    <div className="w-16 flex-shrink-0">
+                      <div className="text-sm font-medium text-gray-900 mb-1">
+                        {goal.currentScore}
+                      </div>
+                      <div className="text-xs font-medium text-gray-600">
+                        {goal.matchTime}
+                      </div>
                     </div>
                     <div className="flex-grow ml-4">
                       <div className="flex items-center">
