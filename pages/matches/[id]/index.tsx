@@ -115,19 +115,19 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                     {player.playerPosition.key}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                    <span>{player.player.displayFirstname} {player.player.lastName}</span>
+                    <span>{player.player.firstName} {player.player.lastName}</span>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                    {player.player.stats?.goals || 0}
+                    {player.goals || 0}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                    {player.player.stats?.assists || 0}
+                    {player.assists || 0}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                    {(player.player.stats?.goals || 0) + (player.player.stats?.assists || 0)}
+                    {(player.points || 0)}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                    {player.player.stats?.penaltyMinutes || 0}
+                    {player.penaltyMinutes || 0}
                   </td>
                 </tr>
               ))}
