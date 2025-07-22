@@ -436,6 +436,68 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
           </div>
       </div>
 
+      {/* All Goals Section */}
+      <div className="py-6 mt-4 border-t border-gray-200">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Alle Tore</h3>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          {(() => {
+            // Merge goals from both teams with team information
+            const allGoals = [
+              ...(match.home.scores || []).map(goal => ({
+                ...goal,
+                teamName: match.home.fullName,
+                teamFlag: 'home'
+              })),
+              ...(match.away.scores || []).map(goal => ({
+                ...goal,
+                teamName: match.away.fullName,
+                teamFlag: 'away'
+              }))
+            ];
+
+            // Sort by match time (convert mm:ss to seconds for proper sorting)
+            const sortedGoals = allGoals.sort((a, b) => {
+              const timeA = a.matchTime.split(":").map(Number);
+              const timeB = b.matchTime.split(":").map(Number);
+              const secondsA = timeA[0] * 60 + timeA[1];
+              const secondsB = timeB[0] * 60 + timeB[1];
+              return secondsA - secondsB;
+            });
+
+            return sortedGoals.length > 0 ? (
+              <ul className="divide-y divide-gray-200">
+                {sortedGoals.map((goal, index) => (
+                  <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                    <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
+                      {goal.matchTime}
+                    </div>
+                    <div className="flex-grow ml-4">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-900">
+                          {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
+                        </span>
+                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {goal.teamName}
+                        </span>
+                      </div>
+                      {goal.assistPlayer && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Vorlage: #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8 text-sm text-gray-500">
+                Keine Tore vorhanden
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
       {/* Referees Section */}
       <div className="py-6 mt-4 border-t border-gray-200">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
