@@ -77,7 +77,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
       <div className="text-left mb-3 block md:hidden">
         <h4 className="text-md font-semibold">{teamName}</h4>
       </div>
-      <div className="overflow-hidden bg-white shadow-md rounded-md border">
+      <div className="overflow-x-auto bg-white shadow-md rounded-md border">
         {isPublished && sortedRoster && sortedRoster.length > 0 ? (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -111,7 +111,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">
                     {player.player.jerseyNumber}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4 text-center">
                     {player.playerPosition.key}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
@@ -212,7 +212,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
           </svg>
         )}
       </div>
-      <div className="ml-3">
+      <div className="ml-4">
         <p className={`text-sm font-medium ${assigned ? 'text-gray-900' : 'text-gray-400'}`}>
           {assigned ? `${referee?.firstName || ''} ${referee?.lastName || ''}` : 'Nicht zugewiesen'}
         </p>
@@ -412,7 +412,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       {/* Referees Section */}
       <div className="py-6 mt-4">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
-        <div className="bg-white rounded-md shadow-md border divide-y divide-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border divide-y divide-gray-200">
           {match.referee1 ? (
             <RefereeInfo assigned={true} referee={match.referee1} position={1} />
           ) : (
