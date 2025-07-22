@@ -74,7 +74,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
 
   return (
     <div className="w-full">
-      <div className="text-center mb-3">
+      <div className="text-left mb-3 block md:hidden">
         <h4 className="text-md font-semibold">{teamName}</h4>
       </div>
       <div className="overflow-hidden bg-white shadow-md rounded-md border">
@@ -224,222 +224,33 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
 
-      {/* Tab content */}
-      <div className="py-6">
-       
-          <div className="py-4">
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              {/* Home team roster */}
-              <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <RosterTable
-                  teamName={match.home.fullName}
-                  roster={match.home.roster || []}
-                  isPublished={match.home.rosterPublished || false}
-                />
-              </div>
-
-              {/* Away team roster */}
-              <div className="w-full md:w-1/2">
-                <RosterTable
-                  teamName={match.away.fullName}
-                  roster={match.away.roster || []}
-                  isPublished={match.away.rosterPublished || false}
-                />
-              </div>
-            </div>
+      {/* Roster */}
+      <div className="mt-14 mb-10">
+        <div className="flex flex-col md:flex-row md:space-x-4">
+          {/* Home team roster */}
+          <div className="w-full md:w-1/2 mb-6 md:mb-0">
+            <RosterTable
+              teamName={match.home.fullName}
+              roster={match.home.roster || []}
+              isPublished={match.home.rosterPublished || false}
+            />
           </div>
 
-        
-          <div className="py-4">
-            {/* Container for side-by-side or stacked goals */}
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              {/* Home team goals */}
-              <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.home.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.home.scores && match.home.scores.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.home.scores
-                        .sort((a, b) => {
-                          // Convert matchTime (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTime.split(":").map(Number);
-                          const timeB = b.matchTime.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((goal, index) => (
-                          <li key={`home-goal-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-16 flex-shrink-0 text-sm text-gray-900">
-                              {goal.matchTime}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
-                              </p>
-                              {goal.assistPlayer && (
-                                <p className="text-xs text-gray-500">
-                                  #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
-                                </p>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Tore vorhanden
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Away team goals */}
-              <div className="w-full md:w-1/2">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.away.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.away.scores && match.away.scores.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.away.scores
-                        .sort((a, b) => {
-                          // Convert matchTime (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTime.split(":").map(Number);
-                          const timeB = b.matchTime.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((goal, index) => (
-                          <li key={`away-goal-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-16 flex-shrink-0 text-sm text-gray-900">
-                              {goal.matchTime}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
-                              </p>
-                              {goal.assistPlayer && (
-                                <p className="text-xs text-gray-500">
-                                  #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
-                                </p>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Tore vorhanden
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+          {/* Away team roster */}
+          <div className="w-full md:w-1/2">
+            <RosterTable
+              teamName={match.away.fullName}
+              roster={match.away.roster || []}
+              isPublished={match.away.rosterPublished || false}
+            />
           </div>
-
-        
-          <div className="py-4">
-            {/* Container for side-by-side or stacked penalties */}
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              {/* Home team penalties */}
-              <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.home.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.home.penalties && match.home.penalties.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.home.penalties
-                        .sort((a, b) => {
-                          // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTimeStart.split(":").map(Number);
-                          const timeB = b.matchTimeStart.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((penalty, index) => (
-                          <li key={`home-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Strafen vorhanden
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Away team penalties */}
-              <div className="w-full md:w-1/2">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.away.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.away.penalties && match.away.penalties.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.away.penalties
-                        .sort((a, b) => {
-                          // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTimeStart.split(":").map(Number);
-                          const timeB = b.matchTimeStart.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((penalty, index) => (
-                          <li key={`away-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Strafen vorhanden
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+        </div>
       </div>
 
       {/* All Goals Section */}
-      <div className="py-6 mt-4 border-t border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Alle Tore</h3>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="py-6 mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Tore</h3>
+        <div className="bg-white rounded-md shadow-md overflow-hidden border">
           {(() => {
             // Merge goals from both teams with team information
             const allGoals = [
@@ -480,10 +291,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                           {goal.teamName}
                         </span>
                       </div>
-                      {goal.assistPlayer && (
+                      {goal.assistPlayer ? (
                         <p className="text-xs text-gray-500 mt-1">
-                          Vorlage: #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
+                          #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
                         </p>
+                      ) : (
+                        <p className="text-xs text-gray-500 mt-1">Keine Vorlage</p>
                       )}
                     </div>
                   </li>
@@ -499,9 +312,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       </div>
 
       {/* All Penalties Section */}
-      <div className="py-6 mt-4 border-t border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Alle Strafen</h3>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="py-6 mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Strafen</h3>
+        <div className="bg-white rounded-md shadow-md overflow-hidden border">
           {(() => {
             // Merge penalties from both teams with team information
             const allPenalties = [
@@ -530,25 +343,22 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               <ul className="divide-y divide-gray-200">
                 {sortedPenalties.map((penalty, index) => (
                   <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-6">
-                    <div className="w-20 flex-shrink-0 text-sm font-medium text-gray-900">
+                    <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
                       <div>{penalty.matchTimeStart}</div>
+                      {/**
                       {penalty.matchTimeEnd && (
-                        <div className="text-xs text-gray-500">bis {penalty.matchTimeEnd}</div>
+                        <div className="text-xs text-gray-500">{penalty.matchTimeEnd}</div>
                       )}
+                      */}
                     </div>
                     <div className="flex-grow ml-4">
-                      <div className="flex items-center">
-                        <span className="text-sm font-medium text-gray-900">
-                          {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                          {penalty.isGM && ' (GM)'}
-                          {penalty.isMP && ' (MP)'}
-                        </span>
-                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          {penalty.teamName}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                      <p className="text-sm font-medium text-gray-900">
+                        {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {penalty.isGM && 'GM · '}
+                        {penalty.isMP && 'MP · '}
+                        {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
                       </p>
                     </div>
                   </li>
@@ -564,9 +374,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       </div>
 
       {/* Referees Section */}
-      <div className="py-6 mt-4 border-t border-gray-200">
+      <div className="py-8 mt-8 border-t border-gray-200">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
-        <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
+        <div className="bg-white rounded-md shadow-md border px-4 py-5 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
             {match.referee1 ? (
               <div className="flex items-center mb-3 sm:mb-0">
