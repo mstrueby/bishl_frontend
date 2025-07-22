@@ -498,6 +498,71 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         </div>
       </div>
 
+      {/* All Penalties Section */}
+      <div className="py-6 mt-4 border-t border-gray-200">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Alle Strafen</h3>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          {(() => {
+            // Merge penalties from both teams with team information
+            const allPenalties = [
+              ...(match.home.penalties || []).map(penalty => ({
+                ...penalty,
+                teamName: match.home.fullName,
+                teamFlag: 'home'
+              })),
+              ...(match.away.penalties || []).map(penalty => ({
+                ...penalty,
+                teamName: match.away.fullName,
+                teamFlag: 'away'
+              }))
+            ];
+
+            // Sort by match time start (convert mm:ss to seconds for proper sorting)
+            const sortedPenalties = allPenalties.sort((a, b) => {
+              const timeA = a.matchTimeStart.split(":").map(Number);
+              const timeB = b.matchTimeStart.split(":").map(Number);
+              const secondsA = timeA[0] * 60 + timeA[1];
+              const secondsB = timeB[0] * 60 + timeB[1];
+              return secondsA - secondsB;
+            });
+
+            return sortedPenalties.length > 0 ? (
+              <ul className="divide-y divide-gray-200">
+                {sortedPenalties.map((penalty, index) => (
+                  <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                    <div className="w-20 flex-shrink-0 text-sm font-medium text-gray-900">
+                      <div>{penalty.matchTimeStart}</div>
+                      {penalty.matchTimeEnd && (
+                        <div className="text-xs text-gray-500">bis {penalty.matchTimeEnd}</div>
+                      )}
+                    </div>
+                    <div className="flex-grow ml-4">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-900">
+                          {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                          {penalty.isGM && ' (GM)'}
+                          {penalty.isMP && ' (MP)'}
+                        </span>
+                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          {penalty.teamName}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8 text-sm text-gray-500">
+                Keine Strafen vorhanden
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
       {/* Referees Section */}
       <div className="py-6 mt-4 border-t border-gray-200">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
