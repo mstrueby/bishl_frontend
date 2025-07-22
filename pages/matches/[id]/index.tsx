@@ -203,6 +203,25 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     };
   }, [match.matchStatus.key, id, refreshMatchData]);
 
+  const RefereeInfo = ({ assigned, referee = {} }: { assigned: boolean, referee?: any }) => (
+    <div className="flex items-center px-4">
+      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+        {assigned ? `${referee.firstName.charAt(0)}${referee.lastName.charAt(0)}` : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        )}
+      </div>
+      <div className="ml-3">
+        <p className={`text-sm font-medium ${assigned ? 'text-gray-900' : 'text-gray-400'}`}>
+          {assigned ? `${referee.firstName} ${referee.lastName}` : 'Nicht zugewiesen'}
+        </p>
+        <p className="text-xs text-gray-500">
+          {assigned && referee.clubName ? referee.clubName : (assigned ? '' : 'Schiedsrichter 1')}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <Layout>
@@ -237,7 +256,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
           </div>
 
           {/* Away team roster */}
-          <div className="w-full md:w-1/2">
+          <div className="w-full md:w-1/2 mt-4 md:mt-0">
             <RosterTable
               teamName={match.away.fullName}
               roster={match.away.roster || []}
@@ -279,14 +298,14 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               <ul className="divide-y divide-gray-200">
                 {sortedGoals.map((goal, index) => (
                   <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-6">
-                    <div className="flex-shrink-0 mr-3">
+                    <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                       <CldImage
                         src={goal.teamFlag === 'home' ? match.home.logo : match.away.logo}
-                        alt="Team logo"
-                        width={24}
-                        height={24}
+                        alt={goal.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
+                        width={32}
+                        height={32}
                         gravity="center"
-                        className="rounded"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                     <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
@@ -294,12 +313,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     </div>
                     <div className="flex-grow ml-4">
                       <div className="flex items-center">
-                        <span className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900">
                           {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
-                        </span>
-                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {goal.teamName}
-                        </span>
+                        </p>
                       </div>
                       {goal.assistPlayer ? (
                         <p className="text-xs text-gray-500 mt-1">
@@ -353,14 +369,14 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               <ul className="divide-y divide-gray-200">
                 {sortedPenalties.map((penalty, index) => (
                   <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-6">
-                    <div className="flex-shrink-0 mr-3">
+                    <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                       <CldImage
                         src={penalty.teamFlag === 'home' ? match.home.logo : match.away.logo}
-                        alt="Team logo"
-                        width={24}
-                        height={24}
+                        alt={penalty.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
+                        width={32}
+                        height={32}
                         gravity="center"
-                        className="rounded"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                     <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
@@ -375,7 +391,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       <p className="text-sm font-medium text-gray-900">
                         {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 truncate">
                         {penalty.isGM && 'GM · '}
                         {penalty.isMP && 'MP · '}
                         {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
@@ -394,58 +410,19 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       </div>
 
       {/* Referees Section */}
-      <div className="py-8 mt-8 border-t border-gray-200">
+      <div className="py-6 mt-4">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
-        <div className="bg-white rounded-md shadow-md border px-4 py-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
-            {match.referee1 ? (
-              <div className="flex items-center mb-3 sm:mb-0">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                  {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">{match.referee1.firstName} {match.referee1.lastName}</p>
-                  <p className="text-xs text-gray-500">{match.referee1.clubName && `${match.referee1.clubName}`}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center mb-3 sm:mb-0">
-                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 1</p>
-                </div>
-              </div>
-            )}
-
-            {match.referee2 ? (
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                  {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">{match.referee2.firstName} {match.referee2.lastName}</p>
-                  <p className="text-xs text-gray-500">{match.referee2.clubName && `${match.referee2.clubName}`}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 2</p>
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border gap-y-8 sm:space-x-12 divide-y divide-gray-200">
+          {match.referee1 ? (
+            <RefereeInfo assigned={true} referee={match.referee1} />
+          ) : (
+            <RefereeInfo assigned={false} />
+          )}
+          {match.referee2 ? (
+            <RefereeInfo assigned={true} referee={match.referee2} />
+          ) : (
+            <RefereeInfo assigned={false} />
+          )}
         </div>
       </div>
     </Layout >
