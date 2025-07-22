@@ -74,7 +74,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
 
   return (
     <div className="w-full">
-      <div className="text-center mb-3">
+      <div className="text-left mb-3 block md:hidden">
         <h4 className="text-md font-semibold">{teamName}</h4>
       </div>
       <div className="overflow-hidden bg-white shadow-md rounded-md border">
@@ -203,6 +203,25 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     };
   }, [match.matchStatus.key, id, refreshMatchData]);
 
+  const RefereeInfo = ({ assigned, referee = {} }: { assigned: boolean, referee?: any }) => (
+    <div className="flex items-center px-4">
+      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+        {assigned ? `${referee.firstName.charAt(0)}${referee.lastName.charAt(0)}` : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        )}
+      </div>
+      <div className="ml-3">
+        <p className={`text-sm font-medium ${assigned ? 'text-gray-900' : 'text-gray-400'}`}>
+          {assigned ? `${referee.firstName} ${referee.lastName}` : 'Nicht zugewiesen'}
+        </p>
+        <p className="text-xs text-gray-500">
+          {assigned && referee.clubName ? referee.clubName : (assigned ? '' : 'Schiedsrichter 1')}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <Layout>
@@ -224,271 +243,186 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       />
 
 
-      {/* Tab content */}
-      <div className="py-6">
-       
-          <div className="py-4">
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              {/* Home team roster */}
-              <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <RosterTable
-                  teamName={match.home.fullName}
-                  roster={match.home.roster || []}
-                  isPublished={match.home.rosterPublished || false}
-                />
-              </div>
-
-              {/* Away team roster */}
-              <div className="w-full md:w-1/2">
-                <RosterTable
-                  teamName={match.away.fullName}
-                  roster={match.away.roster || []}
-                  isPublished={match.away.rosterPublished || false}
-                />
-              </div>
-            </div>
+      {/* Roster */}
+      <div className="mt-14 mb-10">
+        <div className="flex flex-col md:flex-row md:space-x-4">
+          {/* Home team roster */}
+          <div className="w-full md:w-1/2 mb-6 md:mb-0">
+            <RosterTable
+              teamName={match.home.fullName}
+              roster={match.home.roster || []}
+              isPublished={match.home.rosterPublished || false}
+            />
           </div>
 
-        
-          <div className="py-4">
-            {/* Container for side-by-side or stacked goals */}
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              {/* Home team goals */}
-              <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.home.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.home.scores && match.home.scores.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.home.scores
-                        .sort((a, b) => {
-                          // Convert matchTime (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTime.split(":").map(Number);
-                          const timeB = b.matchTime.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((goal, index) => (
-                          <li key={`home-goal-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-16 flex-shrink-0 text-sm text-gray-900">
-                              {goal.matchTime}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
-                              </p>
-                              {goal.assistPlayer && (
-                                <p className="text-xs text-gray-500">
-                                  #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
-                                </p>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Tore vorhanden
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Away team goals */}
-              <div className="w-full md:w-1/2">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.away.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.away.scores && match.away.scores.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.away.scores
-                        .sort((a, b) => {
-                          // Convert matchTime (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTime.split(":").map(Number);
-                          const timeB = b.matchTime.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((goal, index) => (
-                          <li key={`away-goal-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-16 flex-shrink-0 text-sm text-gray-900">
-                              {goal.matchTime}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
-                              </p>
-                              {goal.assistPlayer && (
-                                <p className="text-xs text-gray-500">
-                                  #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
-                                </p>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Tore vorhanden
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+          {/* Away team roster */}
+          <div className="w-full md:w-1/2 mt-4 md:mt-0">
+            <RosterTable
+              teamName={match.away.fullName}
+              roster={match.away.roster || []}
+              isPublished={match.away.rosterPublished || false}
+            />
           </div>
+        </div>
+      </div>
 
-        
-          <div className="py-4">
-            {/* Container for side-by-side or stacked penalties */}
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              {/* Home team penalties */}
-              <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.home.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.home.penalties && match.home.penalties.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.home.penalties
-                        .sort((a, b) => {
-                          // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTimeStart.split(":").map(Number);
-                          const timeB = b.matchTimeStart.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((penalty, index) => (
-                          <li key={`home-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Strafen vorhanden
-                    </div>
-                  )}
-                </div>
-              </div>
+      {/* All Goals Section */}
+      <div className="py-6 mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Tore</h3>
+        <div className="bg-white rounded-md shadow-md overflow-hidden border">
+          {(() => {
+            // Merge goals from both teams with team information
+            const allGoals = [
+              ...(match.home.scores || []).map(goal => ({
+                ...goal,
+                teamName: match.home.fullName,
+                teamFlag: 'home'
+              })),
+              ...(match.away.scores || []).map(goal => ({
+                ...goal,
+                teamName: match.away.fullName,
+                teamFlag: 'away'
+              }))
+            ];
 
-              {/* Away team penalties */}
-              <div className="w-full md:w-1/2">
-                <div className="text-center mb-3">
-                  <h4 className="text-md font-semibold">{match.away.fullName}</h4>
-                </div>
-                <div className="overflow-hidden bg-white shadow-md rounded-md border">
-                  {match.away.penalties && match.away.penalties.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {match.away.penalties
-                        .sort((a, b) => {
-                          // Convert matchTimeStart (format: "mm:ss") to seconds for comparison
-                          const timeA = a.matchTimeStart.split(":").map(Number);
-                          const timeB = b.matchTimeStart.split(":").map(Number);
-                          const secondsA = timeA[0] * 60 + timeA[1];
-                          const secondsB = timeB[0] * 60 + timeB[1];
-                          return secondsA - secondsB;
-                        })
-                        .map((penalty, index) => (
-                          <li key={`away-penalty-${index}`} className="flex items-center py-3 px-4">
-                            <div className="w-20 flex-shrink-0 text-sm text-gray-900">
-                              {penalty.matchTimeStart}
-                              {penalty.matchTimeEnd && ` - ${penalty.matchTimeEnd}`}
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-sm text-gray-900">
-                                {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
-                                {penalty.isGM && ' (GM)'}
-                                {penalty.isMP && ' (MP)'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Object.values(penalty.penaltyCode).join(', ')} - {penalty.penaltyMinutes} Min.
-                              </p>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div className="text-center py-4 text-sm text-gray-500">
-                      Keine Strafen vorhanden
+            // Sort by match time (convert mm:ss to seconds for proper sorting)
+            const sortedGoals = allGoals.sort((a, b) => {
+              const timeA = a.matchTime.split(":").map(Number);
+              const timeB = b.matchTime.split(":").map(Number);
+              const secondsA = timeA[0] * 60 + timeA[1];
+              const secondsB = timeB[0] * 60 + timeB[1];
+              return secondsA - secondsB;
+            });
+
+            return sortedGoals.length > 0 ? (
+              <ul className="divide-y divide-gray-200">
+                {sortedGoals.map((goal, index) => (
+                  <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                    <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
+                      <CldImage
+                        src={goal.teamFlag === 'home' ? match.home.logo : match.away.logo}
+                        alt={goal.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
+                        width={32}
+                        height={32}
+                        gravity="center"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
-                  )}
-                </div>
+                    <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
+                      {goal.matchTime}
+                    </div>
+                    <div className="flex-grow ml-4">
+                      <div className="flex items-center">
+                        <p className="text-sm font-medium text-gray-900">
+                          {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
+                        </p>
+                      </div>
+                      {goal.assistPlayer ? (
+                        <p className="text-xs text-gray-500 mt-1">
+                          #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-gray-500 mt-1">Keine Vorlage</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8 text-sm text-gray-500">
+                Keine Tore vorhanden
               </div>
-            </div>
-          </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* All Penalties Section */}
+      <div className="py-6 mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Strafen</h3>
+        <div className="bg-white rounded-md shadow-md overflow-hidden border">
+          {(() => {
+            // Merge penalties from both teams with team information
+            const allPenalties = [
+              ...(match.home.penalties || []).map(penalty => ({
+                ...penalty,
+                teamName: match.home.fullName,
+                teamFlag: 'home'
+              })),
+              ...(match.away.penalties || []).map(penalty => ({
+                ...penalty,
+                teamName: match.away.fullName,
+                teamFlag: 'away'
+              }))
+            ];
+
+            // Sort by match time start (convert mm:ss to seconds for proper sorting)
+            const sortedPenalties = allPenalties.sort((a, b) => {
+              const timeA = a.matchTimeStart.split(":").map(Number);
+              const timeB = b.matchTimeStart.split(":").map(Number);
+              const secondsA = timeA[0] * 60 + timeA[1];
+              const secondsB = timeB[0] * 60 + timeB[1];
+              return secondsA - secondsB;
+            });
+
+            return sortedPenalties.length > 0 ? (
+              <ul className="divide-y divide-gray-200">
+                {sortedPenalties.map((penalty, index) => (
+                  <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                    <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
+                      <CldImage
+                        src={penalty.teamFlag === 'home' ? match.home.logo : match.away.logo}
+                        alt={penalty.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
+                        width={32}
+                        height={32}
+                        gravity="center"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
+                      <div>{penalty.matchTimeStart}</div>
+                      {/**
+                      {penalty.matchTimeEnd && (
+                        <div className="text-xs text-gray-500">{penalty.matchTimeEnd}</div>
+                      )}
+                      */}
+                    </div>
+                    <div className="flex-grow ml-4">
+                      <p className="text-sm font-medium text-gray-900">
+                        {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {penalty.isGM && 'GM · '}
+                        {penalty.isMP && 'MP · '}
+                        {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8 text-sm text-gray-500">
+                Keine Strafen vorhanden
+              </div>
+            );
+          })()}
+        </div>
       </div>
 
       {/* Referees Section */}
-      <div className="py-6 mt-4 border-t border-gray-200">
+      <div className="py-6 mt-4">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
-        <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
-            {match.referee1 ? (
-              <div className="flex items-center mb-3 sm:mb-0">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                  {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">{match.referee1.firstName} {match.referee1.lastName}</p>
-                  <p className="text-xs text-gray-500">{match.referee1.clubName && `${match.referee1.clubName}`}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center mb-3 sm:mb-0">
-                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 1</p>
-                </div>
-              </div>
-            )}
-
-            {match.referee2 ? (
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                  {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">{match.referee2.firstName} {match.referee2.lastName}</p>
-                  <p className="text-xs text-gray-500">{match.referee2.clubName && `${match.referee2.clubName}`}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-400">Nicht zugewiesen</p>
-                  <p className="text-xs text-gray-500">Schiedsrichter 2</p>
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border gap-y-8 sm:space-x-12 divide-y divide-gray-200">
+          {match.referee1 ? (
+            <RefereeInfo assigned={true} referee={match.referee1} />
+          ) : (
+            <RefereeInfo assigned={false} />
+          )}
+          {match.referee2 ? (
+            <RefereeInfo assigned={true} referee={match.referee2} />
+          ) : (
+            <RefereeInfo assigned={false} />
+          )}
         </div>
       </div>
     </Layout >
