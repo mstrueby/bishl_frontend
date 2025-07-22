@@ -77,7 +77,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
       <div className="text-left mb-3 block md:hidden">
         <h4 className="text-md font-semibold">{teamName}</h4>
       </div>
-      <div className="overflow-hidden bg-white shadow-md rounded-md border">
+      <div className="overflow-x-auto bg-white shadow-md rounded-md border">
         {isPublished && sortedRoster && sortedRoster.length > 0 ? (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -111,7 +111,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">
                     {player.player.jerseyNumber}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4">
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4 text-center">
                     {player.playerPosition.key}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
@@ -203,21 +203,21 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     };
   }, [match.matchStatus.key, id, refreshMatchData]);
 
-  const RefereeInfo = ({ assigned, referee = {} }: { assigned: boolean, referee?: any }) => (
-    <div className="flex items-center px-4">
+  const RefereeInfo = ({ assigned, referee = {}, position }: { assigned: boolean, referee?: any, position: number }) => (
+    <div className="flex items-center px-6 py-4">
       <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-        {assigned ? `${referee.firstName.charAt(0)}${referee.lastName.charAt(0)}` : (
+        {assigned ? `${referee?.firstName?.charAt(0) || ''}${referee?.lastName?.charAt(0) || ''}` : (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         )}
       </div>
-      <div className="ml-3">
+      <div className="ml-4">
         <p className={`text-sm font-medium ${assigned ? 'text-gray-900' : 'text-gray-400'}`}>
-          {assigned ? `${referee.firstName} ${referee.lastName}` : 'Nicht zugewiesen'}
+          {assigned ? `${referee?.firstName || ''} ${referee?.lastName || ''}` : 'Nicht zugewiesen'}
         </p>
         <p className="text-xs text-gray-500">
-          {assigned && referee.clubName ? referee.clubName : (assigned ? '' : 'Schiedsrichter 1')}
+          {assigned && referee?.clubName ? referee.clubName : `Schiedsrichter ${position}`}
         </p>
       </div>
     </div>
@@ -412,16 +412,16 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
       {/* Referees Section */}
       <div className="py-6 mt-4">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
-        <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border gap-y-8 sm:space-x-12 divide-y divide-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border divide-y divide-gray-200">
           {match.referee1 ? (
-            <RefereeInfo assigned={true} referee={match.referee1} />
+            <RefereeInfo assigned={true} referee={match.referee1} position={1} />
           ) : (
-            <RefereeInfo assigned={false} />
+            <RefereeInfo assigned={false} position={1} />
           )}
           {match.referee2 ? (
-            <RefereeInfo assigned={true} referee={match.referee2} />
+            <RefereeInfo assigned={true} referee={match.referee2} position={2} />
           ) : (
-            <RefereeInfo assigned={false} />
+            <RefereeInfo assigned={false} position={2} />
           )}
         </div>
       </div>
