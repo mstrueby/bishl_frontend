@@ -324,10 +324,10 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       />
                     </div>
                     <div className="w-16 flex-shrink-0">
-                      <div className="text-xs font-medium text-gray-600 mb-1">
+                      <div className="text-sm font-medium text-gray-900 mb-1">
                         {goal.currentScore}
                       </div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-xs font-medium text-gray-600">
                         {goal.matchTime}
                       </div>
                     </div>
