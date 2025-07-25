@@ -83,6 +83,9 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  
+                </th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Nr.
                 </th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -108,6 +111,25 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
             <tbody className="bg-white divide-y divide-gray-200">
               {sortedRoster.map((player) => (
                 <tr key={player.player.playerId}>
+                  <td className="px-3 py-2 whitespace-nowrap w-12">
+                    {player.player.imageUrl && player.player.imageVisible ? (
+                      <CldImage
+                        src={player.player.imageUrl}
+                        alt={`${player.player.displayFirstName} ${player.player.displayLastName}`}
+                        width={32}
+                        height={32}
+                        gravity="center"
+                        radius="max"
+                        className="w-8 h-8 object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-xs font-medium text-gray-500">
+                          {player.player.displayFirstName?.charAt(0)}{player.player.displayLastName?.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                  </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">
                     {player.player.jerseyNumber}
                   </td>
@@ -333,6 +355,23 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     </div>
                     <div className="flex-grow ml-4">
                       <div className="flex items-center">
+                        {goal.goalPlayer && goal.goalPlayer.imageUrl && goal.goalPlayer.imageVisible ? (
+                          <CldImage
+                            src={goal.goalPlayer.imageUrl}
+                            alt={`${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}`}
+                            width={32}
+                            height={32}
+                            gravity="center"
+                            radius="max"
+                            className="w-8 h-8 object-cover mr-3"
+                          />
+                        ) : goal.goalPlayer ? (
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                            <span className="text-xs font-medium text-gray-500">
+                              {goal.goalPlayer.displayFirstName?.charAt(0)}{goal.goalPlayer.displayLastName?.charAt(0)}
+                            </span>
+                          </div>
+                        ) : null}
                         <p className="text-sm font-medium text-gray-900">
                           {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
                         </p>
