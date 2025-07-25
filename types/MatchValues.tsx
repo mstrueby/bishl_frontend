@@ -1,10 +1,12 @@
-import { boolean } from "yup";
-
 export interface EventPlayer {
   playerId: string;
   firstName: string;
   lastName: string
   jerseyNumber: number;
+  displayFirstName?: string;
+  displayLastName?: string
+  imageUrl?: string;
+  imageVisible?: boolean;
 }
 
 
@@ -15,6 +17,10 @@ export interface RosterPlayer {
     value: string;
   },
   passNumber: string;
+  goals: number;
+  assists: number;
+  points: number;
+  penaltyMinutes: number;
   called: boolean;
 }
 
