@@ -12,7 +12,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs, allFinishTypes } from '../../../tools/consts';
-import { classNames } from '../../../tools/utils';
+import { classNames, calculateMatchButtonPermissions } from '../../../tools/utils';
 import MatchStatusBadge from '../../../components/ui/MatchStatusBadge';
 import FinishTypeSelect from '../../../components/admin/ui/FinishTypeSelect';
 import MatchHeader from '../../../components/ui/MatchHeader';
@@ -245,16 +245,33 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
   return (
     <Layout>
-      <a
-        href={`/tournaments/${match.tournament.alias}`}
-        aria-label="Back to tournament"
-        className="flex items-center"
-      >
-        <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-        <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-          Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
-        </span>
-      </a>
+      <div className="flex items-center justify-between">
+        <a
+          href={`/tournaments/${match.tournament.alias}`}
+          aria-label="Back to tournament"
+          className="flex items-center"
+        >
+          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+            Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
+          </span>
+        </a>
+        
+        {(() => {
+          const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, false);
+          return permissions.showButtonMatchCenter && (
+            <a
+              href={`/matches/${match._id}/matchcenter/`}
+              className="flex items-center text-sm font-base text-indigo-600 hover:text-indigo-800"
+            >
+              <span className="mr-2">Match Center</span>
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          );
+        })()}
+      </div>
 
       <MatchHeader
         match={match}
