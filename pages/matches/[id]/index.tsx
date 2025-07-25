@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
+import Link from 'next/link';
 import useAuth from '../../../hooks/useAuth';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
@@ -10,7 +11,7 @@ import { MatchdayOwner } from '../../../types/TournamentValues'
 import Layout from '../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import axios from 'axios';
-import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs, allFinishTypes } from '../../../tools/consts';
 import { classNames, calculateMatchButtonPermissions } from '../../../tools/utils';
 import MatchStatusBadge from '../../../components/ui/MatchStatusBadge';
@@ -245,30 +246,30 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
   return (
     <Layout>
-      <div className="flex items-center justify-between">
-        <a
+      <div className="flex items-center justify-between text-gray-500 hover:text-gray-700 text-sm font-base">
+        <Link
           href={`/tournaments/${match.tournament.alias}`}
           aria-label="Back to tournament"
-          className="flex items-center"
         >
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
-          </span>
-        </a>
-        
+          <a className="flex items-center">
+            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+            <span className="ml-2">
+              Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
+            </span>
+          </a>
+        </Link>
+
         {(() => {
           const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, false);
           return permissions.showButtonMatchCenter && (
-            <a
+            <Link
               href={`/matches/${match._id}/matchcenter/`}
-              className="flex items-center text-sm font-base text-indigo-600 hover:text-indigo-800"
             >
-              <span className="mr-2">Match Center</span>
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
+              <a className="flex items-center">
+                <span className="mr-2">Match Center</span>
+                <ChevronRightIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+              </a>
+            </Link>
           );
         })()}
       </div>
@@ -389,7 +390,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     </div>
                     <div className="flex-grow">
                       <div className="flex items-center">
-                        
+
                         <p className="text-sm font-medium text-gray-900">
                           {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
                         </p>

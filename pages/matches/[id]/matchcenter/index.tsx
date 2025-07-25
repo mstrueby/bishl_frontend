@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
+import Link from 'next/link';
 import useAuth from '../../../../hooks/useAuth';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
@@ -12,7 +13,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { tournamentConfigs, allFinishTypes } from '../../../../tools/consts';
 import { classNames, calculateMatchButtonPermissions } from '../../../../tools/utils';
 import MatchStatusBadge from '../../../../components/ui/MatchStatusBadge';
@@ -184,27 +185,22 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
   return (
     <Layout>
-      <div className="flex items-center justify-between">
-        <a
-          href={`/tournaments/${match.tournament.alias}`}
-          aria-label="Back to tournament"
-          className="flex items-center"
-        >
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
-          </span>
-        </a>
+      <div className="flex items-center justify-between text-gray-500 hover:text-gray-700 text-sm font-base">
+        <Link href={`/tournaments/${match.tournament.alias}`} aria-label="Back to tournament">
+          <a className="flex items-center">
+            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+            <span className="ml-2">
+              Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
+            </span>
+          </a>
+        </Link>
         
-        <a
-          href={`/matches/${match._id}`}
-          className="flex items-center text-sm font-base text-indigo-600 hover:text-indigo-800"
-        >
-          <span className="mr-2">Spieldetails</span>
-          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
+        <Link href={`/matches/${match._id}`}>
+          <a className="flex items-center">
+            <span className="mr-2">Spielbericht</span>
+            <ChevronRightIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+          </a>
+        </Link>
       </div>
 
       <MatchHeader
