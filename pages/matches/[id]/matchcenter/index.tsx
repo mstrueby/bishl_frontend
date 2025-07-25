@@ -184,16 +184,28 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
   return (
     <Layout>
-      <a
-        href={`/tournaments/${match.tournament.alias}`}
-        aria-label="Back to tournament"
-        className="flex items-center"
-      >
-        <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-        <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-          Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
-        </span>
-      </a>
+      <div className="flex items-center justify-between">
+        <a
+          href={`/tournaments/${match.tournament.alias}`}
+          aria-label="Back to tournament"
+          className="flex items-center"
+        >
+          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+            Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
+          </span>
+        </a>
+        
+        <a
+          href={`/matches/${match._id}`}
+          className="flex items-center text-sm font-base text-indigo-600 hover:text-indigo-800"
+        >
+          <span className="mr-2">Spieldetails</span>
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
 
       <MatchHeader
         match={match}
