@@ -89,7 +89,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                   Pos.
                 </th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  Spieler
                 </th>
                 <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   T
@@ -108,6 +108,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
             <tbody className="bg-white divide-y divide-gray-200">
               {sortedRoster.map((player) => (
                 <tr key={player.player.playerId}>
+
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">
                     {player.player.jerseyNumber}
                   </td>
@@ -115,7 +116,26 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                     {player.playerPosition.key}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                    <span>{player.player.displayFirstName} {player.player.displayLastName}</span>
+                    <div className="flex items-center gap-x-3">
+                      {player.player.imageUrl && player.player.imageVisible ? (
+                        <CldImage
+                          src={player.player.imageUrl}
+                          alt={`${player.player.displayFirstName} ${player.player.displayLastName}`}
+                          width={32}
+                          height={32}
+                          gravity="center"
+                          radius="max"
+                          className="w-8 h-8 object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-xs font-medium text-gray-500">
+                            {player.player.displayFirstName?.charAt(0)}{player.player.displayLastName?.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <span>{player.player.displayFirstName} {player.player.displayLastName}</span>
+                    </div>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
                     {player.goals || 0}
@@ -312,7 +332,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
             return goalsWithScore.length > 0 ? (
               <ul className="divide-y divide-gray-200">
                 {goalsWithScore.map((goal, index) => (
-                  <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                  <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
                     <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                       <CldImage
                         src={goal.teamFlag === 'home' ? match.home.logo : match.away.logo}
@@ -323,7 +343,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    <div className="w-16 flex-shrink-0 text-center">
+                    <div className="w-10 sm:w-16 flex-shrink-0 text-center">
                       <div className="text-sm font-medium text-gray-900 mb-1">
                         {goal.currentScore}
                       </div>
@@ -331,8 +351,28 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                         {goal.matchTime}
                       </div>
                     </div>
-                    <div className="flex-grow ml-4">
+                    <div className="flex-shrink-0 text-center ml-6">
+                      {goal.goalPlayer && goal.goalPlayer.imageUrl && goal.goalPlayer.imageVisible ? (
+                        <CldImage
+                          src={goal.goalPlayer.imageUrl}
+                          alt={`${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}`}
+                          width={32}
+                          height={32}
+                          gravity="center"
+                          radius="max"
+                          className="w-8 h-8 object-cover mr-3"
+                        />
+                      ) : goal.goalPlayer ? (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                          <span className="text-xs font-medium text-gray-500">
+                            {goal.goalPlayer.displayFirstName?.charAt(0)}{goal.goalPlayer.displayLastName?.charAt(0)}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="flex-grow">
                       <div className="flex items-center">
+                        
                         <p className="text-sm font-medium text-gray-900">
                           {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
                         </p>
@@ -388,7 +428,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
             return sortedPenalties.length > 0 ? (
               <ul className="divide-y divide-gray-200">
                 {sortedPenalties.map((penalty, index) => (
-                  <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-6">
+                  <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
                     <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                       <CldImage
                         src={penalty.teamFlag === 'home' ? match.home.logo : match.away.logo}
@@ -399,7 +439,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-900">
+                    <div className="w-10 sm:w-16 flex-shrink-0 text-sm font-medium text-gray-900 text-center">
                       <div>{penalty.matchTimeStart}</div>
                       {/**
                       {penalty.matchTimeEnd && (
@@ -407,7 +447,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       )}
                       */}
                     </div>
-                    <div className="flex-grow ml-4">
+                    <div className="flex-grow ml-6">
                       <p className="text-sm font-medium text-gray-900">
                         {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.displayFirstName} ${penalty.penaltyPlayer.displayLastName}` : 'Unbekannt'}
                       </p>
