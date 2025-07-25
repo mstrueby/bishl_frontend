@@ -115,7 +115,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                     {player.playerPosition.key}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                    <span>{player.player.firstName} {player.player.lastName}</span>
+                    <span>{player.player.displayFirstName} {player.player.displayLastName}</span>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
                     {player.goals || 0}
@@ -334,12 +334,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     <div className="flex-grow ml-4">
                       <div className="flex items-center">
                         <p className="text-sm font-medium text-gray-900">
-                          {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.firstName} ${goal.goalPlayer.lastName}` : 'Unbekannt'}
+                          {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
                         </p>
                       </div>
                       {goal.assistPlayer ? (
                         <p className="text-xs text-gray-500 mt-1">
-                          #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.firstName} {goal.assistPlayer.lastName}
+                          #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.displayFirstName} {goal.assistPlayer.displayLastName}
                         </p>
                       ) : (
                         <p className="text-xs text-gray-500 mt-1">Keine Vorlage</p>
@@ -409,7 +409,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     </div>
                     <div className="flex-grow ml-4">
                       <p className="text-sm font-medium text-gray-900">
-                        {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.firstName} ${penalty.penaltyPlayer.lastName}` : 'Unbekannt'}
+                        {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.displayFirstName} ${penalty.penaltyPlayer.displayLastName}` : 'Unbekannt'}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {penalty.isGM && 'GM · '}
