@@ -151,7 +151,11 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={(values, { setSubmitting }) => {
-                    handleSubmit(values);
+                    if (values.goalPlayer) {
+                      handleSubmit(values as ScoresBase);
+                    } else {
+                      setError('Torschütze ist erforderlich');
+                    }
                     setSubmitting(false);
                   }}
                 >
