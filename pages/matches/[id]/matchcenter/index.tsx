@@ -94,7 +94,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     if (newActiveTab !== activeTab) {
       setActiveTab(newActiveTab);
     }
-  }, [router.query.tab, activeTab]);
+  }, [router.query.tab, activeTab, getActiveTabFromQuery]);
 
   // Fetch player stats for called players
   useEffect(() => {
