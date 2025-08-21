@@ -82,11 +82,11 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const { id } = router.query;
 
   // Get active tab from query parameter, default to 'roster'
-  const getActiveTabFromQuery = () => {
+  const getActiveTabFromQuery = useCallback(() => {
     const { tab } = router.query;
     const validTabs = ['roster', 'goals', 'penalties'];
     return validTabs.includes(tab as string) ? (tab as string) : 'roster';
-  };
+  }, [router.query]);
 
   // Update active tab when query parameter changes
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     if (newActiveTab !== activeTab) {
       setActiveTab(newActiveTab);
     }
-  }, [router.query.tab, activeTab]);
+  }, [router.query.tab, activeTab, getActiveTabFromQuery]);
 
   // Fetch player stats for called players
   useEffect(() => {
