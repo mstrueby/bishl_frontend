@@ -463,8 +463,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           <span className="hidden sm:block">{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
         </>
       )}
-    </PDFDownloadLink>
-  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, rosterList, sortRoster]);
+    </PDFDownloadLink>  
+  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
 
   const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
 
