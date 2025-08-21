@@ -95,7 +95,7 @@ build = ["sh", "-c", "NODE_ENV=production npm run build"]
 run = ["sh", "-c", "npm start"]
 
 [workflows]
-runButton = "Dev"
+runButton = "Build"
 
 [[workflows.workflow]]
 name = "Dev"

@@ -442,6 +442,30 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     };
   }, []);
 
+  // Memoized PDF download link to avoid recreating on every render
+  const pdfDownloadLink = React.useMemo(() => (
+    <PDFDownloadLink
+      document={
+        <RosterPDF
+          teamName={team.fullName}
+          matchDate={new Date(match.startDate).toLocaleDateString()}
+          venue={match.venue.name}
+          roster={sortRoster(rosterList)}
+          teamLogo={team.logoUrl}
+        />
+      }
+      fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
+      className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+    >
+      {({ loading }) => (
+        <>
+          <span className="block sm:hidden">PDF</span>
+          <span className="hidden sm:block">{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
+        </>
+      )}
+    </PDFDownloadLink>  
+  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
+
   const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
 
   // Check if all requirements are met for publishing the roster
@@ -1630,28 +1654,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       {/* Close, Save buttons */}
       <div className="flex space-x-3 mt-6 justify-end">
 
-        {React.useMemo(() => (
-          <PDFDownloadLink
-            document={
-              <RosterPDF
-                teamName={team.fullName}
-                matchDate={new Date(match.startDate).toLocaleDateString()}
-                venue={match.venue.name}
-                roster={sortRoster(rosterList)}
-                teamLogo={team.logoUrl}
-              />
-            }
-            fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
-            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-          >
-            {({ loading }) => (
-              <>
-                <span className="block sm:hidden">PDF</span>
-                <span className="hidden sm:block">{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
-              </>
-            )}
-          </PDFDownloadLink>
-        ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, rosterList])}
+        {pdfDownloadLink}
 
         <button
           type="button"
