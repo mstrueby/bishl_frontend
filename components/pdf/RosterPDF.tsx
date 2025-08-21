@@ -115,6 +115,7 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
         <Image
           style={styles.bishlLogo}
           src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.png"
+          alt="BISHL Logo"
         />
         <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
       </View>
@@ -125,6 +126,7 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
               <Image
                 style={styles.logo}
                 src={teamLogo}
+                alt={`${teamName} Logo`}
               />
             </View>
           )}
