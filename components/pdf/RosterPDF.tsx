@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
 import { RosterPlayer } from '../../types/MatchValues';
 
 const styles = StyleSheet.create({
@@ -112,10 +112,9 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Image
+        <PDFImage
           style={styles.bishlLogo}
           src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.png"
-          alt="BISHL Logo"
         />
         <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
       </View>
@@ -123,10 +122,9 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
         <View style={[styles.headerContent, { flexDirection: 'row', alignItems: 'center' }]}>
           {teamLogo && (
             <View style={{ width: 80, marginRight: 20 }}>
-              <Image
+              <PDFImage
                 style={styles.logo}
                 src={teamLogo}
-                alt={`${teamName} Logo`}
               />
             </View>
           )}
