@@ -82,11 +82,11 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const { id } = router.query;
 
   // Get active tab from query parameter, default to 'roster'
-  const getActiveTabFromQuery = () => {
+  const getActiveTabFromQuery = useCallback(() => {
     const { tab } = router.query;
     const validTabs = ['roster', 'goals', 'penalties'];
     return validTabs.includes(tab as string) ? (tab as string) : 'roster';
-  };
+  }, [router.query]);
 
   // Update active tab when query parameter changes
   useEffect(() => {
