@@ -129,11 +129,16 @@ const PenaltyCodeSelect = forwardRef<PenaltyCodeSelectHandle, PenaltyCodeSelectP
             <div className="relative">
               <Combobox.Input
                 ref={(el) => {
-                  inputRef.current = el; // Ensure that the el is safely assigned.
+                  // Safely assign to inputRef
+                  if (inputRef) {
+                    inputRef.current = el;
+                  }
+                  
+                  // Forward ref properly
                   if (typeof ref === 'function') {
-                    ref(el); // Forward to ref callback if function type
-                  } else if (ref) {
-                    (ref as React.MutableRefObject<HTMLInputElement | null>).current = el; // Ensure ref is mutable.
+                    ref(el);
+                  } else if (ref && 'current' in ref) {
+                    ref.current = el;
                   }
                 }}
                 tabIndex={tabIndex}
