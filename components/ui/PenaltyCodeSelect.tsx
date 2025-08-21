@@ -1,5 +1,5 @@
 
-import React, { Fragment, useState, useEffect, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useField } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
@@ -22,7 +22,12 @@ interface PenaltyCodeSelectProps {
   showErrorText?: boolean;
 }
 
-const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectProps>(({
+// Create a custom type that includes only the methods you want to expose.
+interface PenaltyCodeSelectHandle {
+  focus: () => void;
+}
+
+const PenaltyCodeSelect = forwardRef<PenaltyCodeSelectHandle, PenaltyCodeSelectProps>(({
   name,
   selectedPenaltyCode: propSelectedPenaltyCode,
   onChange,
@@ -83,13 +88,13 @@ const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectPr
   };
 
   // Add focus method to ref
-  React.useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     focus: () => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }
-  } as Partial<HTMLInputElement>), []);
+  }), []);
 
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -124,11 +129,11 @@ const PenaltyCodeSelect = React.forwardRef<HTMLInputElement, PenaltyCodeSelectPr
             <div className="relative">
               <Combobox.Input
                 ref={(el) => {
-                  inputRef.current = el;
+                  inputRef.current = el; // Ensure that the el is safely assigned.
                   if (typeof ref === 'function') {
-                    ref(el);
+                    ref(el); // Forward to ref callback if function type
                   } else if (ref) {
-                    ref.current = el;
+                    (ref as React.MutableRefObject<HTMLInputElement | null>).current = el; // Ensure ref is mutable.
                   }
                 }}
                 tabIndex={tabIndex}

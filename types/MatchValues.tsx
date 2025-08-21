@@ -28,7 +28,7 @@ export interface ScoresBase {
   _id?: string;
   matchTime: string;
   goalPlayer: EventPlayer;
-  assistPlayer?: EventPlayer;
+  assistPlayer?: EventPlayer | null;
   isPPG?: boolean;
   isSHG?: boolean;
   isGWG?: boolean;
