@@ -130,10 +130,7 @@ const PenaltyCodeSelect = forwardRef<PenaltyCodeSelectHandle, PenaltyCodeSelectP
               <Combobox.Input
                 ref={(el) => {
                   // Safely assign to inputRef
-                  if (inputRef) {
-                    inputRef.current = el;
-                  }
-                  
+                  inputRef.current = el;                  
                   // Forward ref properly
                   if (typeof ref === 'function') {
                     ref(el);
