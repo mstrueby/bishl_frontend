@@ -209,11 +209,25 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={(values, { setSubmitting }) => {
-                    const updatedValues = {
-                      ...values,
-                      penaltyPlayer: values.penaltyPlayer || { playerId: '', firstName: '', lastName: '', jerseyNumber: 0 }, // Default value to avoid null
+                    // Validate that required fields are not null
+                    if (!values.penaltyPlayer) {
+                      setError('Spieler ist erforderlich');
+                      setSubmitting(false);
+                      return;
+                    }
+                    if (!values.penaltyCode) {
+                      setError('Strafcode ist erforderlich');
+                      setSubmitting(false);
+                      return;
+                    }
+                    
+                    // Type assertion since we've validated these are not null
+                    const validatedValues = values as PenaltiesBase & {
+                      penaltyPlayer: NonNullable<typeof values.penaltyPlayer>;
+                      penaltyCode: NonNullable<typeof values.penaltyCode>;
                     };
-                    handleSubmit(updatedValues);
+                    
+                    handleSubmit(validatedValues);
                     setSubmitting(false);
                   }}
                 >
