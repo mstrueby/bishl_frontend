@@ -1,5 +1,5 @@
 
-import React, { Fragment, useState, useEffect, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useField } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
 import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
@@ -20,7 +20,11 @@ interface PlayerSelectProps {
   showErrorText?: boolean;
 }
 
-const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
+interface PlayerSelectHandle {
+  focus: () => void;
+}
+
+const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
   name,
   selectedPlayer: propSelectedPlayer,
   onChange,
@@ -33,16 +37,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   showErrorText = true,  
 }, ref) => {
   // Try to use Formik field if available, otherwise use null values
-  let field, meta, helpers;
-  try {
-    [field, meta, helpers] = useField(name);
-  } catch (error) {
-    // Not inside Formik context, use default values
-    field = { name, value: null };
-    meta = { touched: false, error: undefined };
-    helpers = { setValue: () => {}, setTouched: () => {} };
-  }
-  
+  const [field, meta, helpers] = useField(name);  
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -94,13 +89,13 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
   };
 
   // Add focus method to ref
-  React.useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     focus: () => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }
-  } as Partial<HTMLInputElement>), []);
+  }), []);
 
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -137,14 +132,7 @@ const PlayerSelect = React.forwardRef<HTMLInputElement, PlayerSelectProps>(({
             <div className="flex items-center gap-2">
               <div className="flex-1 relative">
                 <Combobox.Input
-                  ref={(el) => {
-                    inputRef.current = el;
-                    if (typeof ref === 'function') {
-                      ref(el);
-                    } else if (ref) {
-                      ref.current = el;
-                    }
-                  }}
+                  ref={inputRef}
                   tabIndex={tabIndex}
                   className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
                   onChange={handleQueryChange}
