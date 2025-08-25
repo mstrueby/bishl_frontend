@@ -118,7 +118,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
           key: values.penaltyCode.key,
           value: values.penaltyCode.value
         },
-        penaltyMinutes: parseInt(values.penaltyMinutes, 10),
+        penaltyMinutes: values.penaltyMinutes,
         isGM: values.isGM,
         isMP: values.isMP
       };
@@ -209,8 +209,11 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={(values, { setSubmitting }) => {
-                    // Handle form submission with Formik values
-                    handleSubmit(values);
+                    const updatedValues = {
+                      ...values,
+                      penaltyPlayer: values.penaltyPlayer || { playerId: '', firstName: '', lastName: '', jerseyNumber: 0 }, // Default value to avoid null
+                    };
+                    handleSubmit(updatedValues);
                     setSubmitting(false);
                   }}
                 >

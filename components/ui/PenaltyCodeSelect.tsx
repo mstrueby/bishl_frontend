@@ -128,16 +128,7 @@ const PenaltyCodeSelect = forwardRef<PenaltyCodeSelectHandle, PenaltyCodeSelectP
             )}
             <div className="relative">
               <Combobox.Input
-                ref={(el) => {
-                  // Safely assign to inputRef
-                  inputRef.current = el;                  
-                  // Forward ref properly
-                  if (typeof ref === 'function') {
-                    ref(el);
-                  } else if (ref && 'current' in ref) {
-                    ref.current = el;
-                  }
-                }}
+                ref={inputRef}
                 tabIndex={tabIndex}
                 className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
                 onChange={handleQueryChange}
