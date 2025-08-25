@@ -222,7 +222,10 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                     }
                     
                     // Type assertion since we've validated these are not null
-                    const validatedValues = values as PenaltiesBase & {
+                    const validatedValues = {
+                      ...values,
+                      penaltyMinutes: Number(values.penaltyMinutes), // Convert to number
+                    } as PenaltiesBase & {
                       penaltyPlayer: NonNullable<typeof values.penaltyPlayer>;
                       penaltyCode: NonNullable<typeof values.penaltyCode>;
                     };
