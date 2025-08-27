@@ -581,7 +581,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             },
             params: {
               sortby: 'lastName',
-              all: true,
               // If includeInactivePlayers is true, don't specify active param to get all players
               // Otherwise, only get active players
               ...(includeInactivePlayers ? { all: true } : { active: 'true' })
@@ -838,7 +837,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           value: playerPosition.value,
         },
         passNumber: selectedPlayer.passNo,
-        called: selectedPlayer.called || false
+        called: selectedPlayer.called || false,
+        goals: 0,
+        assists: 0,
+        points: 0,
+        penaltyMinutes: 0
       };
 
       // Add player to roster
@@ -1091,6 +1094,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               </div>
               <PlayerSelect
                 ref={playerSelectRef}
+                name="player-select"
                 selectedPlayer={selectedPlayer ? {
                   player: {
                     playerId: selectedPlayer._id,
@@ -1100,7 +1104,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   },
                   playerPosition: { key: 'F', value: 'Feldspieler' },
                   passNumber: selectedPlayer.passNo,
-                  called: selectedPlayer.called
+                  called: selectedPlayer.called,
+                  goals: 0,
+                  assists: 0,
+                  points: 0,
+                  penaltyMinutes: 0
                 } : null}
                 onChange={(selectedRosterPlayer) => {
                   if (selectedRosterPlayer) {
@@ -1131,7 +1139,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   },
                   playerPosition: { key: 'F', value: 'Feldspieler' },
                   passNumber: player.passNo,
-                  called: player.called
+                  called: player.called,
+                  goals: 0,
+                  assists: 0,
+                  points: 0,
+                  penaltyMinutes: 0                  
                 }))}
                 placeholder="Spieler auswählen"
               />
@@ -1179,7 +1191,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       <div className="relative">
                         <Listbox.Button
                           ref={positionSelectRef}
-                          onKeyDown={(e) => {
+                          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                             if (e.key === 'Enter' && !open) {
                               e.preventDefault();
                               // Focus the Add button when Enter is pressed and dropdown is closed
@@ -1716,7 +1728,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   <>
                     <div className="relative">
                       <Listbox.Button
-                        onKeyDown={(e) => {
+                        onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                           // Handle letter key presses for position selection
                           const key = e.key.toUpperCase();
                           if (['C', 'A', 'G', 'F'].includes(key)) {
@@ -1940,6 +1952,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/* Player Selection */}
             <div className="mb-6">
               <PlayerSelect
+                name="call-up-player-select"
                 selectedPlayer={selectedCallUpPlayer ? {
                   player: {
                     playerId: selectedCallUpPlayer._id,
@@ -1949,7 +1962,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   },
                   playerPosition: { key: 'F', value: 'Feldspieler' },
                   passNumber: selectedCallUpPlayer.passNo,
-                  called: selectedCallUpPlayer.called
+                  called: selectedCallUpPlayer.called,
+                  goals: 0,
+                  assists: 0,
+                  points: 0,
+                  penaltyMinutes: 0
                 } : null}
                 onChange={(selectedRosterPlayer) => {
                   if (selectedRosterPlayer) {
@@ -1970,7 +1987,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   },
                   playerPosition: { key: 'F', value: 'Feldspieler' },
                   passNumber: player.passNo,
-                  called: player.called
+                  called: player.called,
+                  goals: 0,
+                  assists: 0,
+                  points: 0,
+                  penaltyMinutes: 0
                 }))}
                 label="Spieler"
                 placeholder={selectedCallUpTeam ? 'Spieler auswählen' : 'Bitte zuerst eine Mannschaft auswählen'}
