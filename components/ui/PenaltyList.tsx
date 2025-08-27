@@ -16,7 +16,7 @@ interface PenaltyListProps {
   showEventButtons?: boolean;
   refreshMatchData: () => void;
   setIsPenaltyDialogOpen: (isOpen: boolean) => void;
-  setEditingPenalty: (penalty: PenaltiesBase | null) => void;
+  setEditingPenalty: (penalty: PenaltiesBase | undefined) => void;
 }
 
 const PenaltyList: React.FC<PenaltyListProps> = ({
@@ -33,7 +33,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
   setEditingPenalty
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [penaltyToDelete, setPenaltyToDelete] = useState<PenaltiesBase | null>(null);
+  const [penaltyToDelete, setPenaltyToDelete] = useState<PenaltiesBase | undefined>(undefined);
 
   const handleDeleteClick = (penalty: PenaltiesBase) => {
     setPenaltyToDelete(penalty);
@@ -60,7 +60,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
       console.error('Error deleting penalty:', error);
     } finally {
       setIsDeleteModalOpen(false);
-      setPenaltyToDelete(null);
+      setPenaltyToDelete(undefined);
     }
   };
 
@@ -142,7 +142,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
-          setPenaltyToDelete(null);
+          setPenaltyToDelete(undefined);
         }}
         onConfirm={handleDeleteConfirm}
         title="Strafe löschen"
