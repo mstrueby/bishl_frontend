@@ -648,7 +648,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         isOpen={isHomePenaltyDialogOpen}
         onClose={() => {
           setIsHomePenaltyDialogOpen(false);
-          setEditingHomePenalty(null);
+          setEditingHomePenalty(undefined);
         }}
         matchId={match._id}
         teamFlag="home"
@@ -663,7 +663,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         isOpen={isAwayPenaltyDialogOpen}
         onClose={() => {
           setIsAwayPenaltyDialogOpen(false);
-          setEditingAwayPenalty(null);
+          setEditingAwayPenalty(undefined);
         }}
         matchId={match._id}
         teamFlag="away"
