@@ -442,6 +442,28 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     };
   }, []);
 
+  const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
+
+  // Check if all requirements are met for publishing the roster
+  const isRosterValid = () => {
+    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
+    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
+    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
+    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
+    const skaterCount = rosterList.filter(player => player.playerPosition.key != 'G').length;
+    const hasMinSkater = skaterCount >= minSkaterCount;
+    const calledPlayersCount = rosterList.filter(player => player.called).length;
+    const hasMaxCalledPlayers = calledPlayersCount <= 5;
+    const hasDoubleJerseyNumbers = rosterList.some((player, index) =>
+      rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index
+    );
+
+    return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinSkater && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
+  };
+
+  // Fetch players when a team is selected
+  const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
+
   // Memoized PDF download link to avoid recreating on every render
   const pdfDownloadLink = React.useMemo(() => (
     <PDFDownloadLink
@@ -465,28 +487,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       )}
     </PDFDownloadLink>  
   ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
-
-  const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
-
-  // Check if all requirements are met for publishing the roster
-  const isRosterValid = () => {
-    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
-    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
-    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
-    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-    const skaterCount = rosterList.filter(player => player.playerPosition.key != 'G').length;
-    const hasMinSkater = skaterCount >= minSkaterCount;
-    const calledPlayersCount = rosterList.filter(player => player.called).length;
-    const hasMaxCalledPlayers = calledPlayersCount <= 5;
-    const hasDoubleJerseyNumbers = rosterList.some((player, index) =>
-      rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index
-    );
-
-    return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinSkater && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
-  };
-
-  // Fetch players when a team is selected
-  const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
 
   // Update available players list when the toggle changes
   useEffect(() => {
