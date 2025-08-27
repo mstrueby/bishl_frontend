@@ -680,10 +680,14 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         match={match}
         jwt={jwt || ''}
         onSuccess={(updatedMatch) => {
-          setMatch(updatedMatch);
+          if (updatedMatch && updatedMatch._id) {
+            setMatch({ ...match, ...updatedMatch });
+          }
         }}
         onMatchUpdate={async (updatedMatch) => {
-          setMatch(updatedMatch);
+          if (updatedMatch && updatedMatch._id) {
+            setMatch({ ...match, ...updatedMatch });
+          }
         }}
       />
 
