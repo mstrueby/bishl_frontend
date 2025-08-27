@@ -30,7 +30,7 @@ interface PenaltyDialogProps {
   roster: RosterPlayer[];
   jwt: string;
   onSuccess: () => void;
-  editPenalty?: PenaltiesBase;
+  editPenalty: PenaltiesBase | undefined;
 }
 
 const validationSchema = Yup.object().shape({

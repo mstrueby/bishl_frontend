@@ -61,8 +61,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const [isAwayGoalDialogOpen, setIsAwayGoalDialogOpen] = useState(false);
   const [isHomePenaltyDialogOpen, setIsHomePenaltyDialogOpen] = useState(false);
   const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
-  const [editingHomePenalty, setEditingHomePenalty] = useState<PenaltiesBase | null>(null);
-  const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
+  const [editingHomePenalty, setEditingHomePenalty] = useState<PenaltiesBase | undefined>(undefined);
+  const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | undefined>(undefined);
   const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | undefined>(undefined);
   const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | undefined>(undefined);
   const [homePlayerStats, setHomePlayerStats] = useState<{ [playerId: string]: number }>({});
