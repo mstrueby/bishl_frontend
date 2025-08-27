@@ -34,7 +34,7 @@ interface PenaltyRegisterFormProps {
   initialPenalties: PenaltiesBase[];
 }
 
-interface PenaltyCode {
+type PenaltyCode = {
   key: string;
   value: string;
 }
