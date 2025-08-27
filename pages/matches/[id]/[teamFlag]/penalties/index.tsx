@@ -34,7 +34,7 @@ interface PenaltyRegisterFormProps {
   initialPenalties: PenaltiesBase[];
 }
 
-interface PenaltyCode {
+type PenaltyCode = {
   key: string;
   value: string;
 }
@@ -180,14 +180,19 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
   });
 
   // Form submission
-  const onSubmit = async (values: PenaltiesBase[]) => {
+  const onSubmit = async (penalties: any[]) => {
     if (!match._id) return;
 
     setLoading(true);
     setError(null);
 
-    // Sort penalties by matchTimeStart before submitting
-    const sortedPenalties = [...values].sort((a, b) => {
+    // Convert penaltyMinutes to number and sort penalties by matchTimeStart before submitting
+    const processedPenalties: PenaltiesBase[] = penalties.map(penalty => ({
+      ...penalty,
+      penaltyMinutes: Number(penalty.penaltyMinutes)
+    }));
+
+    const sortedPenalties = [...processedPenalties].sort((a, b) => {
       // Convert time strings to comparable format (mm:ss -> minutes * 60 + seconds)
       const timeToSeconds = (timeStr: string) => {
         if (!timeStr) return 0;
