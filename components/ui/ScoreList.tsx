@@ -16,7 +16,7 @@ interface ScoresListProps {
   showEventButtons?: boolean;
   refreshMatchData?: () => void;
   setIsGoalDialogOpen?: (open: boolean) => void;
-  setEditingGoal?: (goal: ScoresBase | null) => void;
+  setEditingGoal?: (goal: ScoresBase | undefined) => void;
 }
 
 const ScoresList: React.FC<ScoresListProps> = ({
@@ -33,7 +33,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
   setEditingGoal,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [goalToDelete, setGoalToDelete] = useState<ScoresBase | null>(null);
+  const [goalToDelete, setGoalToDelete] = useState<ScoresBase | undefined>(undefined);
 
   const handleDeleteClick = (goal: ScoresBase) => {
     setGoalToDelete(goal);
@@ -61,7 +61,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
       console.error('Error deleting goal:', error);
     } finally {
       setIsDeleteModalOpen(false);
-      setGoalToDelete(null);
+      setGoalToDelete(undefined);
     }
   };
 
@@ -145,7 +145,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
-          setGoalToDelete(null);
+          setGoalToDelete(undefined);
         }}
         onConfirm={handleDeleteConfirm}
         title="Tor löschen"
