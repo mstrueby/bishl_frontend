@@ -63,8 +63,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const [isAwayPenaltyDialogOpen, setIsAwayPenaltyDialogOpen] = useState(false);
   const [editingHomePenalty, setEditingHomePenalty] = useState<PenaltiesBase | null>(null);
   const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
-  const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | null>(null);
-  const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | null>(null);
+  const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | undefined>(undefined);
+  const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | undefined>(undefined);
   const [homePlayerStats, setHomePlayerStats] = useState<{ [playerId: string]: number }>({});
   const [awayPlayerStats, setAwayPlayerStats] = useState<{ [playerId: string]: number }>({});
   {/** 
@@ -618,7 +618,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         isOpen={isHomeGoalDialogOpen}
         onClose={() => {
           setIsHomeGoalDialogOpen(false);
-          setEditingHomeGoal(null);
+          setEditingHomeGoal(undefined);
         }}
         matchId={match._id}
         teamFlag="home"
@@ -633,7 +633,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         isOpen={isAwayGoalDialogOpen}
         onClose={() => {
           setIsAwayGoalDialogOpen(false);
-          setEditingAwayGoal(null);
+          setEditingAwayGoal(undefined);
         }}
         matchId={match._id}
         teamFlag="away"
