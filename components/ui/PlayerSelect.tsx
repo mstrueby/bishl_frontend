@@ -51,6 +51,7 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
 
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // When the 'propSelectedPlayer' changes, update the local state
@@ -159,21 +160,36 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
                   value={selectedPlayer ? displayValue(selectedPlayer) : query}
                   placeholder={placeholder}
                   autoComplete="off"
-                  onFocus={() => setShowAllOptions(true)} // Set showAllOptions to true on focus
+                  onFocus={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(true);
+                  }}
+                  onBlur={() => {
+                    // Delay closing to allow for option selection
+                    setTimeout(() => setIsOpen(false), 200);
+                  }}
                 />
                 <Combobox.Button
                   className="absolute inset-y-0 right-0 flex items-center pr-2"
-                  onClick={() => setShowAllOptions(true)}
+                  onClick={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(!isOpen);
+                  }}
                 >
                   <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </Combobox.Button>
 
               <Transition
+                  show={isOpen}
                   as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                   afterLeave={() => {
+                    setIsOpen(false);
                     // Only clear query if no player is selected and query doesn't match any player
                     if (!selectedPlayer && query) {
                       const hasMatchingPlayer = roster.some(player => {
