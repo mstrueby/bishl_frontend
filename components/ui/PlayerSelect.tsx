@@ -154,11 +154,12 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
                 <Combobox.Input
                   ref={inputRef}
                   tabIndex={tabIndex}
-                  className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
+                  className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
                   onChange={handleQueryChange}
                   value={selectedPlayer ? displayValue(selectedPlayer) : query}
                   placeholder={placeholder}
                   autoComplete="off"
+                  onFocus={() => setShowAllOptions(true)} // Set showAllOptions to true on focus
                 />
                 <Combobox.Button
                   className="absolute inset-y-0 right-0 flex items-center pr-2"
@@ -186,7 +187,9 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
                     }
                   }}
                 >
-                  <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  <Combobox.Options 
+                    className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                  >
                     {filteredRoster.length === 0 && query !== '' ? (
                       <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                         Kein Spieler gefunden.
