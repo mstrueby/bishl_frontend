@@ -1,6 +1,5 @@
-
 import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
 import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
@@ -36,8 +35,20 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
   removeButton = false,
   showErrorText = true,  
 }, ref) => {
-  // Try to use Formik field if available, otherwise use null values
-  const [field, meta, helpers] = useField(name);  
+  // Check if we're in a Formik context
+  const formikContext = useFormikContext();
+  const isInFormikContext = !!formikContext;
+
+  // Use Formik field if available, otherwise use default values
+  let field, meta, helpers;
+  if (isInFormikContext) {
+    [field, meta, helpers] = useField(name);
+  } else {
+    field = { name, value: null, onChange: () => {}, onBlur: () => {} };
+    meta = { touched: false, error: undefined };
+    helpers = { setValue: () => {}, setTouched: () => {} };
+  }
+
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +91,12 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
   const handlePlayerChange = (player: RosterPlayer | null) => {
     setSelectedPlayer(player);
     onChange(player);
+    if (helpers && helpers.setValue) {
+      helpers.setValue(player);
+    }
+    if (helpers && helpers.setTouched) {
+      helpers.setTouched(true);
+    }
 
     if (player) {
       setQuery(`${player.player.lastName}, ${player.player.firstName}`);
@@ -109,6 +126,9 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
         !selectedPlayer.player.jerseyNumber?.toString().includes(value)) {
         setSelectedPlayer(null);
         onChange(null);
+        if (helpers && helpers.setValue) {
+          helpers.setValue(null);
+        }
       }
     }
   };
@@ -117,7 +137,7 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
     if (!player) return ''; // Return empty string when no player selected to show placeholder
     return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
-  
+
 
   return (
     <div className="w-full">
