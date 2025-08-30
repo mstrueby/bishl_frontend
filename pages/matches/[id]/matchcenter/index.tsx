@@ -182,6 +182,26 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
 
   const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, true);
 
+  // Check if user has permission to access match center
+  useEffect(() => {
+    if (!permissions.showButtonMatchCenter) {
+      router.push(`/matches/${match._id}`);
+    }
+  }, [permissions.showButtonMatchCenter, router, match._id]);
+
+  // Don't render the page if user doesn't have permission
+  if (!permissions.showButtonMatchCenter) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p className="text-gray-500">Sie haben keine Berechtigung für das Match Center.</p>
+            <p className="text-sm text-gray-400 mt-2">Sie werden weitergeleitet...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
