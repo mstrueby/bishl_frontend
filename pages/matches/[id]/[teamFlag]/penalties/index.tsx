@@ -69,18 +69,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const roster = matchTeam.roster;
     const penalties = matchTeam.penalties;
 
-    // Check permissions for penalties access
-    const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
-    const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
-
-    if (!hasPenaltiesPermission) {
-      return {
-        redirect: {
-          destination: `/matches/${id}`,
-          permanent: false,
-        },
-      };
-    }
+    
 
     return {
       props: {
