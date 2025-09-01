@@ -22,6 +22,7 @@ import PenaltyCodeSelect from '../../../../../components/ui/PenaltyCodeSelect';
 import Listbox from '../../../../../components/ui/form/Listbox';
 import Toggle from '../../../../../components/ui/form/Toggle';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
+import { calculateMatchButtonPermissions } from '../../../../../tools/utils';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -54,14 +55,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     });
     const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
 
     // Fetch match data
     const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
@@ -75,6 +68,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Roster is obtained directly from the match data
     const roster = matchTeam.roster;
     const penalties = matchTeam.penalties;
+
+    // Check permissions for penalties access
+    const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
+    const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
+    
+    if (!hasPenaltiesPermission) {
+      return {
+        redirect: {
+          destination: `/matches/${id}`,
+          permanent: false,
+        },
+      };
+    }
 
     return {
       props: {
