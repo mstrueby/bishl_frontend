@@ -60,7 +60,6 @@ export function calculateMatchButtonPermissions(
     showButtonEvents: false,
     showButtonMatchCenter: false,
   };
-
   if (!user) return permissions;
 
   const now = Date.now();
