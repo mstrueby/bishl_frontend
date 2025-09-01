@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import axios from 'axios';
+import useAuth from '../../../../../hooks/useAuth';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
