@@ -69,6 +69,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const roster = matchTeam.roster;
     const penalties = matchTeam.penalties;
 
+    // Check permissions for penalties access
+    const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
+    const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
+
+    if (!hasPenaltiesPermission) {
+      return {
+        redirect: {
+          destination: `/matches/${id}`,
+          permanent: false,
+        },
+      };
+    }
+
     return {
       props: {
         jwt,
@@ -102,46 +115,17 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null); // State to track authorization
 
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
 
-  // Fetch penalty codes on component mount
-  useEffect(() => {
-    const fetchPenaltyCodes = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/configs/penaltycode`);
-        const data = response.data.value;
-        if (Array.isArray(data) && data.length > 0) {
-          // Ensure each item has key and value properties and remove sortOrder attribute
-          const filteredData = data.map(({ key, value }) => ({ key, value }));
-          setPenaltyCodes(filteredData);
-        } else {
-          console.error('Invalid penalty codes data format:', data);
-          setPenaltyCodes([]);
-        }
-      } catch (error) {
-        console.error('Error fetching penalty codes:', error);
-        setPenaltyCodes([]);
-      }
-    };
-    fetchPenaltyCodes();
-  }, []);
+  // Calculate permissions
+  const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
+  const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
 
-  // Check authorization on component mount
-  useEffect(() => {
-    if (user && match) {
-      // Calculate permissions
-      const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
-      const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
-      setIsAuthorized(hasPenaltiesPermission);
-    }
-  }, [user, match, teamFlag]);
-
-  // If not authorized, show the unauthorized message
-  if (isAuthorized === false) {
+  // Check if user has permission to access penalties
+  if (!hasPenaltiesPermission) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
@@ -159,22 +143,28 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
     );
   }
 
-  // If authorization status is still null (loading), show nothing or a loading indicator
-  if (isAuthorized === null) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <p>Loading authorization...</p>
-        </div>
-      </Layout>
-    );
-  }
-
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
   const handleCloseErrorMessage = () => {
     setError(null);
+  };
+  const fetchPenaltyCodes = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/configs/penaltycode`);
+      const data = response.data.value;
+      if (Array.isArray(data) && data.length > 0) {
+        // Ensure each item has key and value properties and remove sortOrder attribute
+        const filteredData = data.map(({ key, value }) => ({ key, value }));
+        setPenaltyCodes(filteredData);
+      } else {
+        console.error('Invalid penalty codes data format:', data);
+        setPenaltyCodes([]);
+      }
+    } catch (error) {
+      console.error('Error fetching penalty codes:', error);
+      setPenaltyCodes([]);
+    }
   };
 
   const penaltyMinuteOptions = [
@@ -183,6 +173,11 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
     { key: '10', value: '10' },
     { key: '20', value: '20' }
   ];
+
+  // Fetch penalty codes on component mount
+  useEffect(() => {
+    fetchPenaltyCodes();
+  }, []);
 
   // Validation schema
   const validationSchema = Yup.object({
