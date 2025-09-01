@@ -80,7 +80,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
-      }
+      },
     });
     //console.log("match", matchResponse.data)
     const match: Match = await matchResponse.data;
@@ -491,7 +491,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           <span className="hidden sm:block">{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
         </>
       )}
-    </PDFDownloadLink>  
+    </PDFDownloadLink>
   ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
 
   // Update available players list when the toggle changes
@@ -777,7 +777,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   }
 
   // Filter out players that are already in the roster
-  //const availablePlayers = allPlayers.filter(player => 
+  //const availablePlayers = allPlayers.filter(player =>
   //    !rosterList.some(rp => rp.id === player._id)
   //);
 
@@ -1149,7 +1149,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   goals: 0,
                   assists: 0,
                   points: 0,
-                  penaltyMinutes: 0                  
+                  penaltyMinutes: 0
                 }))}
                 placeholder="Spieler auswählen"
               />

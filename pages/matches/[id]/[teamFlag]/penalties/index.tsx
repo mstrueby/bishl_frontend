@@ -72,7 +72,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Check permissions for penalties access
     const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
     const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
-    
+
     if (!hasPenaltiesPermission) {
       return {
         redirect: {
@@ -119,6 +119,29 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
+
+  // Calculate permissions
+  const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
+  const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
+
+  // Check if user has permission to access penalties
+  if (!hasPenaltiesPermission) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
+            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Strafen für diese Mannschaft zu bearbeiten.</p>
+            <Link href={`/matches/${match._id}`}>
+              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Zurück zum Spiel
+              </a>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
