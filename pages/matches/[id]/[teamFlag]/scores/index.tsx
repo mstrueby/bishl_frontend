@@ -19,6 +19,7 @@ import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
+import { calculateMatchButtonPermissions } from '../../../../../tools/utils';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -58,14 +59,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
 
     const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
 
     // Fetch match data
     const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
@@ -79,6 +72,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Roster is obtained directly from the match data
     const roster = matchTeam.roster;
     const scores = matchTeam.scores;
+
+    // Check permissions for scores access
+    const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
+    const hasScoresPermission = teamFlag === 'home' ? permissions.showButtonScoresHome : permissions.showButtonScoresAway;
+    
+    if (!hasScoresPermission) {
+      return {
+        redirect: {
+          destination: `/matches/${id}`,
+          permanent: false,
+        },
+      };
+    }
 
     return {
       props: {
