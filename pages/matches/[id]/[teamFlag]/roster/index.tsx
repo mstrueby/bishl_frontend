@@ -387,33 +387,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
-  // Calculate permissions for this user and match
-  const permissions = calculateMatchButtonPermissions(
-    { roles: [], club: undefined }, // We'll get actual user data from context/auth
-    match
-  );
-  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
-
-  // Check permission and redirect if needed
-  useEffect(() => {
-    if (!hasRosterPermission) {
-      router.push(`/matches/${match._id}`);
-    }
-  }, [hasRosterPermission, router, match._id]);
-
-  // Don't render the page if user doesn't have permission
-  if (!hasRosterPermission) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <p className="text-gray-500">Sie haben keine Berechtigung für diese Aufstellung.</p>
-            <p className="text-sm text-gray-400 mt-2">Sie werden weitergeleitet...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  // Permission check is already handled in getServerSideProps
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
