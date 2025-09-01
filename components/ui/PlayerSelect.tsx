@@ -1,6 +1,5 @@
-
 import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
 import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
@@ -36,10 +35,23 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
   removeButton = false,
   showErrorText = true,  
 }, ref) => {
-  // Try to use Formik field if available, otherwise use null values
-  const [field, meta, helpers] = useField(name);  
+  // Check if we're in a Formik context
+  const formikContext = useFormikContext();
+  const isInFormikContext = !!formikContext;
+
+  // Use Formik field if available, otherwise use default values
+  let field, meta, helpers;
+  if (isInFormikContext) {
+    [field, meta, helpers] = useField(name);
+  } else {
+    field = { name, value: null, onChange: () => {}, onBlur: () => {} };
+    meta = { touched: false, error: undefined };
+    helpers = { setValue: () => {}, setTouched: () => {} };
+  }
+
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // When the 'propSelectedPlayer' changes, update the local state
@@ -80,6 +92,12 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
   const handlePlayerChange = (player: RosterPlayer | null) => {
     setSelectedPlayer(player);
     onChange(player);
+    if (helpers && helpers.setValue) {
+      helpers.setValue(player);
+    }
+    if (helpers && helpers.setTouched) {
+      helpers.setTouched(true);
+    }
 
     if (player) {
       setQuery(`${player.player.lastName}, ${player.player.firstName}`);
@@ -109,6 +127,9 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
         !selectedPlayer.player.jerseyNumber?.toString().includes(value)) {
         setSelectedPlayer(null);
         onChange(null);
+        if (helpers && helpers.setValue) {
+          helpers.setValue(null);
+        }
       }
     }
   };
@@ -117,7 +138,7 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
     if (!player) return ''; // Return empty string when no player selected to show placeholder
     return `${player.player.jerseyNumber} - ${player.player.lastName}, ${player.player.firstName}`;
   };
-  
+
 
   return (
     <div className="w-full">
@@ -134,25 +155,41 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
                 <Combobox.Input
                   ref={inputRef}
                   tabIndex={tabIndex}
-                  className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 placeholder:text-gray-400 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
+                  className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
                   onChange={handleQueryChange}
                   value={selectedPlayer ? displayValue(selectedPlayer) : query}
                   placeholder={placeholder}
                   autoComplete="off"
+                  onFocus={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(true);
+                  }}
+                  onBlur={() => {
+                    // Delay closing to allow for option selection
+                    setTimeout(() => setIsOpen(false), 200);
+                  }}
                 />
                 <Combobox.Button
                   className="absolute inset-y-0 right-0 flex items-center pr-2"
-                  onClick={() => setShowAllOptions(true)}
+                  onClick={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(!isOpen);
+                  }}
                 >
                   <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </Combobox.Button>
 
               <Transition
+                  show={isOpen}
                   as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                   afterLeave={() => {
+                    setIsOpen(false);
                     // Only clear query if no player is selected and query doesn't match any player
                     if (!selectedPlayer && query) {
                       const hasMatchingPlayer = roster.some(player => {
@@ -166,7 +203,9 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
                     }
                   }}
                 >
-                  <Combobox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  <Combobox.Options 
+                    className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                  >
                     {filteredRoster.length === 0 && query !== '' ? (
                       <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                         Kein Spieler gefunden.
