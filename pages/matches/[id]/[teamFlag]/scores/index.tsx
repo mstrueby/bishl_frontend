@@ -73,7 +73,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const roster = matchTeam.roster;
     const scores = matchTeam.scores;
 
-
+    
 
     return {
       props: {
