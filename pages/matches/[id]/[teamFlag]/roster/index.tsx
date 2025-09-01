@@ -11,7 +11,7 @@ import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/P
 import { Listbox, Transition, Switch } from '@headlessui/react';
 import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
-import { classNames } from '../../../../../tools/utils';
+import { classNames, calculateMatchButtonPermissions } from '../../../../../tools/utils';
 import PlayerSelect from '../../../../../components/ui/PlayerSelect';
 import RosterList from '../../../../../components/ui/RosterList';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -75,14 +75,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const user = userResponse.data;
     // console.log("user:", user)
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
 
     // Fetch match data
     const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
@@ -314,6 +306,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
     const matches: Match[] = matchesResponse.data;
 
+    // Check permissions for roster access
+    const permissions = calculateMatchButtonPermissions(user, match);
+    const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+    
+    if (!hasRosterPermission) {
+      return {
+        redirect: {
+          destination: `/matches/${id}`,
+          permanent: false,
+        },
+      };
+    }
+
     return {
       props: {
         jwt,
@@ -378,6 +383,34 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
+
+  // Calculate permissions for this user and match
+  const permissions = calculateMatchButtonPermissions(
+    { roles: [], club: undefined }, // We'll get actual user data from context/auth
+    match
+  );
+  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+
+  // Check permission and redirect if needed
+  useEffect(() => {
+    if (!hasRosterPermission) {
+      router.push(`/matches/${match._id}`);
+    }
+  }, [hasRosterPermission, router, match._id]);
+
+  // Don't render the page if user doesn't have permission
+  if (!hasRosterPermission) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p className="text-gray-500">Sie haben keine Berechtigung für diese Aufstellung.</p>
+            <p className="text-sm text-gray-400 mt-2">Sie werden weitergeleitet...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
