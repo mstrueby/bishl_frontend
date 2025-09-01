@@ -307,12 +307,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const matches: Match[] = matchesResponse.data;
 
     // Check permissions for roster access
-    console.log("user", user)
     const permissions = calculateMatchButtonPermissions(user, match);
-    console.log("permissions", permissions)
     const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
-    console.log("hasRosterPermission", hasRosterPermission)
-    
     if (!hasRosterPermission) {
       return {
         redirect: {
