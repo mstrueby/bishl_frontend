@@ -306,17 +306,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
     const matches: Match[] = matchesResponse.data;
 
-    // Check permissions for roster access
-    const permissions = calculateMatchButtonPermissions(user, match);
-    const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
-    if (!hasRosterPermission) {
-      return {
-        redirect: {
-          destination: `/matches/${id}`,
-          permanent: false,
-        },
-      };
-    }
+    
 
     return {
       props: {
@@ -354,6 +344,7 @@ const playerPositions = [
 
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
+  const { user } = useAuth();
   const playerSelectRef = useRef<any>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
@@ -383,7 +374,28 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
-  // Permission check is already handled in getServerSideProps
+  // Calculate permissions
+  const permissions = calculateMatchButtonPermissions(user, match);
+  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+
+  // Check if user has permission to access roster
+  if (!hasRosterPermission) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
+            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Aufstellung für diese Mannschaft zu bearbeiten.</p>
+            <Link href={`/matches/${match._id}`}>
+              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Zurück zum Spiel
+              </a>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
