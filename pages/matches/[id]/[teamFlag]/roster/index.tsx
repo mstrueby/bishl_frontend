@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect, useRef } from 'react';
+import useAuth from '../../../../../hooks/useAuth';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
@@ -344,6 +345,7 @@ const playerPositions = [
 
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
+  const { user } = useAuth();
   const playerSelectRef = useRef<any>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
