@@ -72,7 +72,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/matchcenter/`)}
+                      onClick={() => router.push(`/matches/${match._id}/matchcenter?from=${from}`)}
                       className={classNames(
                         active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                         'block w-full text-left px-4 py-2 text-sm'
