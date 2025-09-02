@@ -140,6 +140,7 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonRosterHome = false;
     permissions.showButtonRosterAway = false;
     permissions.showButtonStatus = false;
+    permissions.showButtonMatchCenter = false;
     
     if (isMatchCenter) {
       permissions.showButtonEvents = false;
@@ -151,6 +152,7 @@ export function calculateMatchButtonPermissions(
       (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
+    permissions.showButtonMatchCenter = true;
     
     if (isMatchCenter) {
       permissions.showButtonRosterHome = true;
