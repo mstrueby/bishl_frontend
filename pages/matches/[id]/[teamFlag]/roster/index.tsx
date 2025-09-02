@@ -356,12 +356,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     if (referrer && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
       return `/tournaments/${match.tournament.alias}`;
     }
+    // Check if there's a query parameter indicating source
+    else if (router.query.from === 'tournament') {
+      return `/tournaments/${match.tournament.alias}`;
+    }
     else if (router.query.from === 'calendar') {
       return `/calendar`;
-    }
-    // Check if there's a query parameter indicating source
-    else if (router.query.from === 'matchcard') {
-      return `/tournaments/${match.tournament.alias}`;
     }
     else if (router.query.from === 'matchcenter') {
       return `/matches/${match._id}/matchcenter`;
