@@ -347,6 +347,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const router = useRouter();
   const { user } = useAuth();
   const playerSelectRef = useRef<any>(null);
+  const [backLink, setBackLink] = useState(`/matches/${match._id}/matchcenter`);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
   const positionSelectRef = useRef<HTMLButtonElement>(null);
@@ -397,6 +398,25 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       </Layout>
     );
   }
+
+  // Determine back link based on referrer or query parameter
+  useEffect(() => {
+    const { from } = router.query;
+    
+    if (from === 'tournament') {
+      setBackLink(`/tournaments/${match.tournament.alias}`);
+    } else if (from === 'matchcenter') {
+      setBackLink(`/matches/${match._id}/matchcenter`);
+    } else {
+      // Check referrer if no explicit 'from' parameter
+      const referrer = document.referrer;
+      if (referrer.includes(`/tournaments/${match.tournament.alias}`)) {
+        setBackLink(`/tournaments/${match.tournament.alias}`);
+      } else {
+        setBackLink(`/matches/${match._id}/matchcenter`);
+      }
+    }
+  }, [router.query, match._id, match.tournament.alias]);
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
@@ -1053,11 +1073,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   return (
     <Layout>
-      <Link href={`/matches/${match._id}/matchcenter`}>
-        <a className="flex items-center" aria-label="Back to Match Center">
+      <Link href={backLink}>
+        <a className="flex items-center" aria-label="Back">
           <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
           <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Match Center
+            {backLink.includes('/matchcenter') ? 'Match Center' : 'Turnier'}
           </span>
         </a>
       </Link>
