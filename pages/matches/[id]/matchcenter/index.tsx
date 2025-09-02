@@ -416,7 +416,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       roster={sortedHomeRoster}
                       isPublished={match.home.rosterPublished || false}
                       showEditButton={permissions.showButtonRosterHome}
-                      editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
+                      editUrl={`/matches/${match._id}/home/roster`}
                       sortRoster={sortRoster}
                       playerStats={homePlayerStats}
                     />
@@ -428,7 +428,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       roster={sortedAwayRoster}
                       isPublished={match.away.rosterPublished || false}
                       showEditButton={permissions.showButtonRosterAway}
-                      editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
+                      editUrl={`/matches/${match._id}/away/roster`}
                       sortRoster={sortRoster}
                       playerStats={awayPlayerStats}
                     />

@@ -23,6 +23,7 @@ import { CldImage } from 'next-cloudinary';
 import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
+import { tournamentConfigs } from '../../../../../tools/consts';
 
 
 
@@ -376,10 +377,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
-  // Calculate permissions for this user and match
-  const permissions = calculateMatchButtonPermissions(user, match);
-  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+  // Determine back link based only on referrer
+  useEffect(() => {
+    const referrer = document.referrer;
+    console.log("referrer", referrer)
+    if (referrer.includes(`/tournaments/${match.tournament.alias}`)) {
+      setBackLink(`/tournaments/${match.tournament.alias}`);
+    } else {
+      setBackLink(`/matches/${match._id}/matchcenter`);
+    }
+  }, [match._id, match.tournament.alias]);
 
+  // Calculate permissions for this user and match
+  const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
+  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+  console.log("backlink", backLink)
+  console.log("backlink include check", backLink.includes('matchcenter'))
+  console.log("permissions", permissions)
+ 
   // Check if user has permission to access roster
   if (!hasRosterPermission) {
     return (
@@ -398,25 +413,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       </Layout>
     );
   }
-
-  // Determine back link based on referrer or query parameter
-  useEffect(() => {
-    const { from } = router.query;
-    
-    if (from === 'tournament') {
-      setBackLink(`/tournaments/${match.tournament.alias}`);
-    } else if (from === 'matchcenter') {
-      setBackLink(`/matches/${match._id}/matchcenter`);
-    } else {
-      // Check referrer if no explicit 'from' parameter
-      const referrer = document.referrer;
-      if (referrer.includes(`/tournaments/${match.tournament.alias}`)) {
-        setBackLink(`/tournaments/${match.tournament.alias}`);
-      } else {
-        setBackLink(`/matches/${match._id}/matchcenter`);
-      }
-    }
-  }, [router.query, match._id, match.tournament.alias]);
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
@@ -1077,7 +1073,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         <a className="flex items-center" aria-label="Back">
           <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
           <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            {backLink.includes('/matchcenter') ? 'Match Center' : 'Turnier'}
+            {backLink.includes('/matchcenter') ? 'Match Center' : tournamentConfigs[match.tournament.alias]?.name}
           </span>
         </a>
       </Link>
