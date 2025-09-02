@@ -672,6 +672,7 @@ export default function Tournament({
                             setMatches(matchesData);
                           }}
                           matchdayOwner={selectedMatchday.owner}
+                          from="tournament"
                         />
                       ))
                     ) : (

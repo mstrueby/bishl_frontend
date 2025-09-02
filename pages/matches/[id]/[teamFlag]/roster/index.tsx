@@ -350,16 +350,21 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   // ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL LOGIC
   // Calculate back link once during initialization
-  const getInitialBackLink = () => {
+  const getBackLink = () => {
     const referrer = typeof window !== 'undefined' ? document.referrer : '';
-    
     // Check referrer if it exists
     if (referrer && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
       return `/tournaments/${match.tournament.alias}`;
     }
+    else if (router.query.from === 'calendar') {
+      return `/calendar`;
+    }
     // Check if there's a query parameter indicating source
-    else if (router.query.from === 'tournament') {
+    else if (router.query.from === 'matchcard') {
       return `/tournaments/${match.tournament.alias}`;
+    }
+    else if (router.query.from === 'matchcenter') {
+      return `/matches/${match._id}/matchcenter`;
     }
     // Default to match sheet
     else {
@@ -367,7 +372,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     }
   };
 
-  const [backLink] = useState(() => getInitialBackLink());
+  const [backLink] = useState(() => getBackLink());
   const playerSelectRef = useRef<any>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
@@ -1082,7 +1087,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         <a className="flex items-center" aria-label="Back">
           <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
           <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            {backLink.includes('/matchcenter') ? 'Match Center' : tournamentConfigs[match.tournament.alias]?.name}
+            {backLink.includes('/matchcenter') ? 'Match Center' : backLink.includes('/calendar') ? 'Kalender' : tournamentConfigs[match.tournament.alias]?.name}
           </span>
         </a>
       </Link>
