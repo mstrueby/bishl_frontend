@@ -42,6 +42,15 @@ interface MatchdayOwner {
   clubId?: string;
 }
 
+// Helper function to check if matchdayOwner is valid
+function isValidMatchdayOwner(matchdayOwner?: MatchdayOwner): boolean {
+  return matchdayOwner != null && 
+         typeof matchdayOwner === 'object' && 
+         'clubId' in matchdayOwner && 
+         matchdayOwner.clubId != null && 
+         matchdayOwner.clubId !== '';
+}
+
 export function calculateMatchButtonPermissions(
   user: User | null,
   match: Match,
@@ -99,7 +108,7 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonRosterHome = true;
 
     // Additional permissions when match starts soon
-    if (matchStartTime < thirtyMinutesFromNow && matchdayOwner === undefined) {
+    if (matchStartTime < thirtyMinutesFromNow && !isValidMatchdayOwner(matchdayOwner)) {
       permissions.showButtonRosterAway = true;
       permissions.showButtonStatus = true;
       permissions.showButtonMatchCenter = true;
@@ -130,7 +139,8 @@ export function calculateMatchButtonPermissions(
 
   // Matchday owner permissions
   if (user.club && 
-      user.club.clubId === matchdayOwner?.clubId && 
+      isValidMatchdayOwner(matchdayOwner) &&
+      user.club.clubId === matchdayOwner.clubId && 
       user.roles.includes('CLUB_ADMIN') && 
       isMatchToday) {
     permissions.showButtonRosterHome = true;
