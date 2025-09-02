@@ -89,7 +89,8 @@ export function calculateMatchButtonPermissions(
     }
   }
 
-  // Home team club admin permissions and no matchday owner
+  // Home team club admin permissions
+  console.log('matchdayOwner', matchdayOwner)
   if (
     user.club &&
     user.club.clubId === match.home.clubId &&
