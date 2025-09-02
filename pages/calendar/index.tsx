@@ -886,7 +886,6 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                 match={match}
                 // Wrapping handleMatchUpdate to ignore the `event` parameter
                 onMatchUpdate={() => handleMatchUpdate(match)}
-                matchdayOwner={match.matchdayOwner}
                 from="calendar"
               />
             ))}

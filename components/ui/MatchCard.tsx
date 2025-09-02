@@ -152,17 +152,40 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
 const MatchCard: React.FC<{
   match: Match,
   onMatchUpdate?: () => Promise<void>,
-  matchdayOwner?: {
+  from?: string
+}> = ({ match: initialMatch, onMatchUpdate, from }) => {
+  const [match, setMatch] = useState(initialMatch);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [matchdayOwner, setMatchdayOwner] = useState<{
     clubId: string;
     clubName: string;
     clubAlias: string;
-  },
-  from?: string
-}> = ({ match: initialMatch, onMatchUpdate, matchdayOwner, from }) => {
-  const [match, setMatch] = useState(initialMatch);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  } | null>(null);
+  const [isLoadingOwner, setIsLoadingOwner] = useState(true);
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
+
+  // Fetch matchday owner
+  useEffect(() => {
+    const fetchMatchdayOwner = async () => {
+      try {
+        setIsLoadingOwner(true);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
+        );
+        if (response.ok) {
+          const matchdayData = await response.json();
+          setMatchdayOwner(matchdayData.owner || null);
+        }
+      } catch (error) {
+        console.error('Error fetching matchday owner:', error);
+      } finally {
+        setIsLoadingOwner(false);
+      }
+    };
+
+    fetchMatchdayOwner();
+  }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
 
   // Auto-refresh for in-progress matches
   useEffect(() => {
