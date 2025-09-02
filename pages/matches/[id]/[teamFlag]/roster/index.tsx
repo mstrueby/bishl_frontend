@@ -348,8 +348,36 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const router = useRouter();
   const { user } = useAuth();
 
-  // Calculate permissions early to check access before initializing hooks
+  // ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL LOGIC
   const [backLink, setBackLink] = useState(`/matches/${match._id}/matchcenter`);
+  const playerSelectRef = useRef<any>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const jerseyNumberRef = useRef<HTMLInputElement>(null);
+  const positionSelectRef = useRef<HTMLButtonElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [savingRoster, setSavingRoster] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
+  const [playerNumber, setPlayerNumber] = useState<number>(0);
+  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]); // Default to 'F' (Feldspieler)
+  const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
+  const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>(allAvailablePlayers || []);
+  const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
+  const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
+  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[0]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [isCallUpModalOpen, setIsCallUpModalOpen] = useState(false);
+  const [includeInactivePlayers, setIncludeInactivePlayers] = useState(false);
+  const [callUpTeams, setCallUpTeams] = useState<TeamValues[]>([]);
+  const [selectedCallUpTeam, setSelectedCallUpTeam] = useState<TeamValues | null>(null);
+  const [callUpPlayers, setCallUpPlayers] = useState<AvailablePlayer[]>([]);
+  const [selectedCallUpPlayer, setSelectedCallUpPlayer] = useState<AvailablePlayer | null>(null);
+  const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
+  const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
+  const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
   // Determine back link based on router history and referrer
   useEffect(() => {
@@ -380,35 +408,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   console.log("backlink", backLink)
   console.log("backlink include check", backLink.includes('matchcenter'))
   console.log("permissions", permissions)
-
-  const playerSelectRef = useRef<any>(null);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
-  const jerseyNumberRef = useRef<HTMLInputElement>(null);
-  const positionSelectRef = useRef<HTMLButtonElement>(null);
-  const [loading, setLoading] = useState(false);
-  const [savingRoster, setSavingRoster] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
-  const [playerNumber, setPlayerNumber] = useState<number>(0);
-  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]); // Default to 'F' (Feldspieler)
-  const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
-  const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>(allAvailablePlayers || []);
-  const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
-  const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
-  const [editPlayerPosition, setEditPlayerPosition] = useState(playerPositions[0]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [modalError, setModalError] = useState<string | null>(null);
-  const [isCallUpModalOpen, setIsCallUpModalOpen] = useState(false);
-  const [includeInactivePlayers, setIncludeInactivePlayers] = useState(false);
-  const [callUpTeams, setCallUpTeams] = useState<TeamValues[]>([]);
-  const [selectedCallUpTeam, setSelectedCallUpTeam] = useState<TeamValues | null>(null);
-  const [callUpPlayers, setCallUpPlayers] = useState<AvailablePlayer[]>([]);
-  const [selectedCallUpPlayer, setSelectedCallUpPlayer] = useState<AvailablePlayer | null>(null);
-  const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
-  const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
-  const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
   // Check if user has permission to access roster
   if (!hasRosterPermission) {
