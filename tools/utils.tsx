@@ -89,12 +89,16 @@ export function calculateMatchButtonPermissions(
     }
   }
 
-  // Home team club admin permissions
-  if (user.club && user.club.clubId === match.home.clubId && user.roles.includes('CLUB_ADMIN')) {
+  // Home team club admin permissions and no matchday owner
+  if (
+    user.club &&
+    user.club.clubId === match.home.clubId &&
+    user.roles.includes('CLUB_ADMIN')
+  ) {
     permissions.showButtonRosterHome = true;
 
     // Additional permissions when match starts soon
-    if (matchStartTime < thirtyMinutesFromNow) {
+    if (matchStartTime < thirtyMinutesFromNow && matchdayOwner === undefined) {
       permissions.showButtonRosterAway = true;
       permissions.showButtonStatus = true;
       permissions.showButtonMatchCenter = true;
@@ -124,10 +128,14 @@ export function calculateMatchButtonPermissions(
   }
 
   // Matchday owner permissions
-  if (user.club && user.club.clubId === matchdayOwner?.clubId && isMatchToday) {
+  if (user.club && 
+      user.club.clubId === matchdayOwner?.clubId && 
+      user.roles.includes('CLUB_ADMIN') && 
+      isMatchToday) {
     permissions.showButtonRosterHome = true;
     permissions.showButtonRosterAway = true;
     permissions.showButtonStatus = true;
+    permissions.showButtonMatchCenter = true;
     
     if (isMatchCenter) {
       permissions.showButtonEvents = true;
