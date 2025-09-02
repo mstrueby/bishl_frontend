@@ -23,6 +23,7 @@ import { CldImage } from 'next-cloudinary';
 import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
+import { tournamentConfigs } from '../../../../../tools/consts';
 
 
 
@@ -347,6 +348,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const router = useRouter();
   const { user } = useAuth();
   const playerSelectRef = useRef<any>(null);
+  const [backLink, setBackLink] = useState(`/matches/${match._id}/matchcenter`);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
   const positionSelectRef = useRef<HTMLButtonElement>(null);
@@ -375,10 +377,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
-  // Calculate permissions for this user and match
-  const permissions = calculateMatchButtonPermissions(user, match);
-  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+  // Determine back link based only on referrer
+  useEffect(() => {
+    const referrer = document.referrer;
+    console.log("referrer", referrer)
+    if (referrer.includes(`/tournaments/${match.tournament.alias}`)) {
+      setBackLink(`/tournaments/${match.tournament.alias}`);
+    } else {
+      setBackLink(`/matches/${match._id}/matchcenter`);
+    }
+  }, [match._id, match.tournament.alias]);
 
+  // Calculate permissions for this user and match
+  const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
+  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+  console.log("backlink", backLink)
+  console.log("backlink include check", backLink.includes('matchcenter'))
+  console.log("permissions", permissions)
+ 
   // Check if user has permission to access roster
   if (!hasRosterPermission) {
     return (
@@ -1053,11 +1069,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   return (
     <Layout>
-      <Link href={`/matches/${match._id}/matchcenter`}>
-        <a className="flex items-center" aria-label="Back to Match Center">
+      <Link href={backLink}>
+        <a className="flex items-center" aria-label="Back">
           <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
           <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Match Center
+            {backLink.includes('/matchcenter') ? 'Match Center' : tournamentConfigs[match.tournament.alias]?.name}
           </span>
         </a>
       </Link>
