@@ -50,11 +50,35 @@ const tabs = [
 ]
 
 export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, userRoles, userClubId }: MatchDetailsProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { id } = router.query;
+  const [match, setMatch] = useState<Match>(initialMatch);
+
+  const getBackLink = () => {
+    const referrer = typeof window !== 'undefined' ? document.referrer : '';
+    // Check referrer if it exists
+    if (referrer && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
+      return `/tournaments/${match.tournament.alias}`;
+    }
+    // Check if there's a query parameter indicating source
+    else if (router.query.from === 'tournament') {
+      return `/tournaments/${match.tournament.alias}`;
+    }
+    else if (router.query.from === 'calendar') {
+      return `/calendar`;
+    }
+    // Default to match sheet
+    else {
+      return `/matches/${match._id}`;
+    }
+  };
+  const [backLink] = useState(() => getBackLink());
+  
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('roster');
-  const [match, setMatch] = useState<Match>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedFinishType, setSelectedFinishType] = useState({ key: "REGULAR", value: "Regulär" });
   const [isHomeGoalDialogOpen, setIsHomeGoalDialogOpen] = useState(false);
@@ -77,10 +101,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
     awayScore: match.away.stats.goalsFor
   });
   */}
-  const router = useRouter();
-  const { user } = useAuth();
-  const { id } = router.query;
-
+  
   // Get active tab from query parameter, default to 'roster'
   const getActiveTabFromQuery = useCallback(() => {
     const { tab } = router.query;
@@ -206,11 +227,11 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   return (
     <Layout>
       <div className="flex items-center justify-between text-gray-500 hover:text-gray-700 text-sm font-base">
-        <Link href={`/tournaments/${match.tournament.alias}`} aria-label="Back to tournament">
+        <Link href={backLink}>
           <a className="flex items-center">
             <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
             <span className="ml-2">
-              {tournamentConfigs[match.tournament.alias]?.name}
+              {backLink.includes('/matchcenter') ? 'Match Center' : backLink.includes('/calendar') ? 'Kalender' : tournamentConfigs[match.tournament.alias]?.name}
             </span>
           </a>
         </Link>
