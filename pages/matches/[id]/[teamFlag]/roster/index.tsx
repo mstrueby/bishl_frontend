@@ -308,7 +308,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     });
     const matches: Match[] = matchesResponse.data;
 
-    
+
 
     return {
       props: {
@@ -347,8 +347,33 @@ const playerPositions = [
 const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
   const { user } = useAuth();
+
+  // ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL LOGIC
+  // Calculate back link once during initialization
+  const getBackLink = () => {
+    const referrer = typeof window !== 'undefined' ? document.referrer : '';
+    // Check referrer if it exists
+    if (referrer && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
+      return `/tournaments/${match.tournament.alias}`;
+    }
+    // Check if there's a query parameter indicating source
+    else if (router.query.from === 'tournament') {
+      return `/tournaments/${match.tournament.alias}`;
+    }
+    else if (router.query.from === 'calendar') {
+      return `/calendar`;
+    }
+    else if (router.query.from === 'matchcenter') {
+      return `/matches/${match._id}/matchcenter`;
+    }
+    // Default to match sheet
+    else {
+      return `/matches/${match._id}`;
+    }
+  };
+
+  const [backLink] = useState(() => getBackLink());
   const playerSelectRef = useRef<any>(null);
-  const [backLink, setBackLink] = useState(`/matches/${match._id}/matchcenter`);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
   const positionSelectRef = useRef<HTMLButtonElement>(null);
@@ -377,36 +402,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
-  // Determine back link based on router history and referrer
-  useEffect(() => {
-    // Check if we came from a tournament page via router history
-    const previousPath = router.asPath;
-    const referrer = document.referrer;
-    
-    console.log("referrer", referrer);
-    console.log("router.asPath", router.asPath);
-    
-    // First try to use referrer if it exists
-    if (referrer && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
-      setBackLink(`/tournaments/${match.tournament.alias}`);
-    }
-    // If referrer is empty, check if there's a query parameter indicating source
-    else if (router.query.from === 'tournament') {
-      setBackLink(`/tournaments/${match.tournament.alias}`);
-    }
-    // Default to match sheet
-    else {
-      setBackLink(`/matches/${match._id}`);
-    }
-  }, [match._id, match.tournament.alias, router.asPath, router.query.from]);
-
   // Calculate permissions for this user and match
   const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
   const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
   console.log("backlink", backLink)
   console.log("backlink include check", backLink.includes('matchcenter'))
   console.log("permissions", permissions)
- 
+
   // Check if user has permission to access roster
   if (!hasRosterPermission) {
     return (
@@ -913,13 +915,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
 
-      // Focus on PlayerSelect after a short delay to ensure it's rendered
-      setTimeout(() => {
-        if (playerSelectRef.current && playerSelectRef.current.focus) {
-          playerSelectRef.current.focus();
-        }
-      }, 100);
-
       // Here you would make the actual API call to update the roster
       /*
       await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
@@ -1085,7 +1080,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         <a className="flex items-center" aria-label="Back">
           <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
           <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            {backLink.includes('/matchcenter') ? 'Match Center' : tournamentConfigs[match.tournament.alias]?.name}
+            {backLink.includes('/matchcenter') ? 'Match Center' : backLink.includes('/calendar') ? 'Kalender' : tournamentConfigs[match.tournament.alias]?.name}
           </span>
         </a>
       </Link>
@@ -1328,6 +1323,16 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               ref={addButtonRef}
               type="button"
               onClick={handleAddPlayer}
+              onKeyDown={(e) => {
+                if (e.key === 'Tab' && !e.shiftKey) {
+                  // Focus PlayerSelect after TAB key press
+                  setTimeout(() => {
+                    if (playerSelectRef.current && playerSelectRef.current.focus) {
+                      playerSelectRef.current.focus();
+                    }
+                  }, 100);
+                }
+              }}
               disabled={loading}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >

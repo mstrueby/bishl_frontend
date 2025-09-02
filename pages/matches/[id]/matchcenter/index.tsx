@@ -210,7 +210,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
           <a className="flex items-center">
             <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
             <span className="ml-2">
-              Alle Spiele der {tournamentConfigs[match.tournament.alias]?.tinyName}
+              {tournamentConfigs[match.tournament.alias]?.name}
             </span>
           </a>
         </Link>
