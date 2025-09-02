@@ -13,7 +13,7 @@ import MatchStatus from '../admin/ui/MatchStatus';
 import { useRouter } from 'next/router';
 import MatchStatusBadge from './MatchStatusBadge';
 
-const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, permissions: MatchButtonPermissions, onMatchUpdate?: () => Promise<void> }) => {
+const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, permissions: MatchButtonPermissions, onMatchUpdate?: () => Promise<void>, from: string }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
@@ -87,7 +87,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Ma
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/home/roster`)}
+                      onClick={() => router.push(`/matches/${match._id}/home/roster?from=${from}`)}
                       className={classNames(
                         active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                         'block w-full text-left px-4 py-2 text-sm'
@@ -102,7 +102,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate }: { match: Ma
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/away/roster`)}
+                      onClick={() => router.push(`/matches/${match._id}/away/roster?from=${from}`)}
                       className={classNames(
                         active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                         'block w-full text-left px-4 py-2 text-sm'
@@ -156,8 +156,9 @@ const MatchCard: React.FC<{
     clubId: string;
     clubName: string;
     clubAlias: string;
-  }
-}> = ({ match: initialMatch, onMatchUpdate, matchdayOwner }) => {
+  },
+  from?: string
+}> = ({ match: initialMatch, onMatchUpdate, matchdayOwner, from }) => {
   const [match, setMatch] = useState(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { home, away, venue, startDate } = match;
@@ -239,6 +240,7 @@ const MatchCard: React.FC<{
                   setMatch={setMatch}
                   permissions={permissions}
                   onMatchUpdate={onMatchUpdate}
+                  from={from ?? ''}
                 />
               )}
               <MatchStatusBadge
@@ -360,6 +362,7 @@ const MatchCard: React.FC<{
               setMatch={setMatch}
               permissions={permissions}
               onMatchUpdate={onMatchUpdate}
+              from={from ?? ''}
             />
           )}
           <MatchStatusBadge
