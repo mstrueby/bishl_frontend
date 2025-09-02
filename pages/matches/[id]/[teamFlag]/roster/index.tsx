@@ -394,9 +394,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     else if (router.query.from === 'tournament') {
       setBackLink(`/tournaments/${match.tournament.alias}`);
     }
-    // Default to matchcenter
+    // Default to match sheet
     else {
-      setBackLink(`/matches/${match._id}/matchcenter`);
+      setBackLink(`/matches/${match._id}`);
     }
   }, [match._id, match.tournament.alias, router.asPath, router.query.from]);
 
