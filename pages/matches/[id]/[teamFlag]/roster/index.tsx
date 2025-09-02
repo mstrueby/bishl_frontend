@@ -377,16 +377,28 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
 
-  // Determine back link based only on referrer
+  // Determine back link based on router history and referrer
   useEffect(() => {
+    // Check if we came from a tournament page via router history
+    const previousPath = router.asPath;
     const referrer = document.referrer;
-    console.log("referrer", referrer)
-    if (referrer.includes(`/tournaments/${match.tournament.alias}`)) {
+    
+    console.log("referrer", referrer);
+    console.log("router.asPath", router.asPath);
+    
+    // First try to use referrer if it exists
+    if (referrer && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
       setBackLink(`/tournaments/${match.tournament.alias}`);
-    } else {
-      setBackLink(`/matches/${match._id}/matchcenter`);
     }
-  }, [match._id, match.tournament.alias]);
+    // If referrer is empty, check if there's a query parameter indicating source
+    else if (router.query.from === 'tournament') {
+      setBackLink(`/tournaments/${match.tournament.alias}`);
+    }
+    // Default to match sheet
+    else {
+      setBackLink(`/matches/${match._id}`);
+    }
+  }, [match._id, match.tournament.alias, router.asPath, router.query.from]);
 
   // Calculate permissions for this user and match
   const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
