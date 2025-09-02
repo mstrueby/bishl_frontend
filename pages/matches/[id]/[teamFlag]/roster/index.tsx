@@ -915,13 +915,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
 
-      // Focus on PlayerSelect after a short delay to ensure it's rendered
-      setTimeout(() => {
-        if (playerSelectRef.current && playerSelectRef.current.focus) {
-          playerSelectRef.current.focus();
-        }
-      }, 100);
-
       // Here you would make the actual API call to update the roster
       /*
       await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
