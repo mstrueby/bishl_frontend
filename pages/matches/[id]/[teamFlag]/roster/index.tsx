@@ -405,9 +405,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   // Calculate permissions for this user and match
   const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
   const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
-  console.log("backlink", backLink)
-  console.log("backlink include check", backLink.includes('matchcenter'))
-  console.log("permissions", permissions)
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {

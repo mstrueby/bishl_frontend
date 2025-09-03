@@ -202,22 +202,21 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   }, [id, isRefreshing]);
 
   const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, true);
-
-  // Check if user has permission to access match center
-  useEffect(() => {
-    if (!permissions.showButtonMatchCenter) {
-      router.push(`/matches/${match._id}`);
-    }
-  }, [permissions.showButtonMatchCenter, router, match._id]);
+  const hasMatchCenterPermission = permissions.showButtonMatchCenter;
 
   // Don't render the page if user doesn't have permission
-  if (!permissions.showButtonMatchCenter) {
+  if (!hasMatchCenterPermission) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <p className="text-gray-500">Sie haben keine Berechtigung für das Match Center.</p>
-            <p className="text-sm text-gray-400 mt-2">Sie werden weitergeleitet...</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
+            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Match Center für dieses Spiel aufzurufen.</p>
+            <Link href={`/matches/${match._id}`}>
+              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Zurück zum Spiel
+              </a>
+            </Link>
           </div>
         </div>
       </Layout>
