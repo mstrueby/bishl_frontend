@@ -139,6 +139,7 @@ export function calculateMatchButtonPermissions(
   // Matchday owner permissions
   if (user.club && 
       isValidMatchdayOwner(matchdayOwner) &&
+      matchdayOwner &&
       user.club.clubId === matchdayOwner.clubId && 
       user.roles.includes('CLUB_ADMIN') && 
       isMatchToday) {
