@@ -162,6 +162,9 @@ const MatchCard: React.FC<{
     clubAlias: string;
   } | null>(null);
   const [isLoadingOwner, setIsLoadingOwner] = useState(true);
+  const [homeRosterLength, setHomeRosterLength] = useState<number>(0);
+  const [awayRosterLength, setAwayRosterLength] = useState<number>(0);
+  const [isLoadingRosters, setIsLoadingRosters] = useState(true);
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
 
@@ -186,6 +189,35 @@ const MatchCard: React.FC<{
 
     fetchMatchdayOwner();
   }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
+
+  // Fetch roster data for both teams
+  useEffect(() => {
+    const fetchRosterData = async () => {
+      try {
+        setIsLoadingRosters(true);
+        
+        // Fetch home roster
+        const homeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/roster/`);
+        if (homeResponse.ok) {
+          const homeRoster = await homeResponse.json();
+          setHomeRosterLength(Array.isArray(homeRoster) ? homeRoster.length : 0);
+        }
+
+        // Fetch away roster
+        const awayResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/roster/`);
+        if (awayResponse.ok) {
+          const awayRoster = await awayResponse.json();
+          setAwayRosterLength(Array.isArray(awayRoster) ? awayRoster.length : 0);
+        }
+      } catch (error) {
+        console.error('Error fetching roster data:', error);
+      } finally {
+        setIsLoadingRosters(false);
+      }
+    };
+
+    fetchRosterData();
+  }, [match._id]);
 
   // Auto-refresh for in-progress matches
   useEffect(() => {
@@ -397,16 +429,8 @@ const MatchCard: React.FC<{
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED' || match.matchStatus.key === 'FORFEITED') && (() => {
-            // Debug roster data
-            console.log('Match ID:', match._id);
-            console.log('Home roster:', match.home.roster);
-            console.log('Home roster length:', match.home.roster?.length || 0);
-            console.log('Away roster:', match.away.roster);
-            console.log('Away roster length:', match.away.roster?.length || 0);
-            console.log('Home rosterPublished:', match.home.rosterPublished);
-            console.log('Away rosterPublished:', match.away.rosterPublished);
-            
-            const isRosterEmpty = !match.home.roster || match.home.roster.length === 0 || !match.away.roster || match.away.roster.length === 0;
+            // Use fetched roster data to determine if rosters are empty
+            const isRosterEmpty = homeRosterLength === 0 || awayRosterLength === 0;
             const buttonClass = isRosterEmpty 
               ? "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               : "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2";
