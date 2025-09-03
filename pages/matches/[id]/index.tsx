@@ -392,12 +392,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                       <div className="flex items-center">
 
                         <p className="text-sm font-medium text-gray-900">
-                          {goal.goalPlayer ? `#${goal.goalPlayer.jerseyNumber} ${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
+                          {goal.goalPlayer ? `${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
                         </p>
                       </div>
                       {goal.assistPlayer ? (
                         <p className="text-xs text-gray-500 mt-1">
-                          #{goal.assistPlayer.jerseyNumber} {goal.assistPlayer.displayFirstName} {goal.assistPlayer.displayLastName}
+                          {goal.assistPlayer.displayFirstName} {goal.assistPlayer.displayLastName}
                         </p>
                       ) : (
                         <p className="text-xs text-gray-500 mt-1">Keine Vorlage</p>
@@ -467,7 +467,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     </div>
                     <div className="flex-grow ml-6">
                       <p className="text-sm font-medium text-gray-900">
-                        {penalty.penaltyPlayer ? `#${penalty.penaltyPlayer.jerseyNumber} ${penalty.penaltyPlayer.displayFirstName} ${penalty.penaltyPlayer.displayLastName}` : 'Unbekannt'}
+                        {penalty.penaltyPlayer ? `${penalty.penaltyPlayer.displayFirstName} ${penalty.penaltyPlayer.displayLastName}` : 'Unbekannt'}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {penalty.isGM && 'GM · '}
