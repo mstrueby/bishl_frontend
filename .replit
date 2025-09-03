@@ -112,3 +112,6 @@ author = 19449957
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "NODE_ENV=production npm run build"
+
+[agent]
+expertMode = true
