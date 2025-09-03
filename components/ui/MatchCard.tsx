@@ -405,7 +405,11 @@ const MatchCard: React.FC<{
             return (
               <Link href={`/matches/${match._id}`}>
                 <a className={buttonClass}>
-                  <span className="block sm:hidden md:block">Spielbericht</span>
+                  {match.home.roster && match.home.roster.length > 0 ? (
+                    <span className="block sm:hidden md:block">{match.home.roster[0].passNumber}</span>
+                  ) : (
+                      <span className="block sm:hidden md:block">No Pass Number</span>
+                  )}
                   <span className="hidden sm:block md:hidden">Bericht</span>
                 </a>
               </Link>
