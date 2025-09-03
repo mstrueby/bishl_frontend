@@ -397,6 +397,15 @@ const MatchCard: React.FC<{
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED' || match.matchStatus.key === 'FORFEITED') && (() => {
+            // Debug roster data
+            console.log('Match ID:', match._id);
+            console.log('Home roster:', match.home.roster);
+            console.log('Home roster length:', match.home.roster?.length || 0);
+            console.log('Away roster:', match.away.roster);
+            console.log('Away roster length:', match.away.roster?.length || 0);
+            console.log('Home rosterPublished:', match.home.rosterPublished);
+            console.log('Away rosterPublished:', match.away.rosterPublished);
+            
             const isRosterEmpty = !match.home.roster || match.home.roster.length === 0 || !match.away.roster || match.away.roster.length === 0;
             const buttonClass = isRosterEmpty 
               ? "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
@@ -405,11 +414,7 @@ const MatchCard: React.FC<{
             return (
               <Link href={`/matches/${match._id}`}>
                 <a className={buttonClass}>
-                  {match.home.roster && match.home.roster.length > 0 ? (
-                    <span className="block sm:hidden md:block">{match.home.roster[0].passNumber}</span>
-                  ) : (
-                      <span className="block sm:hidden md:block">No Pass Number</span>
-                  )}
+                  <span className="block sm:hidden md:block">Spielbericht</span>
                   <span className="hidden sm:block md:hidden">Bericht</span>
                 </a>
               </Link>
