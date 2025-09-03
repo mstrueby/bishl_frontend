@@ -40,7 +40,7 @@ const PlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
   const isInFormikContext = !!formikContext;
 
   // Use Formik field if available, otherwise use default values
-  let field, meta, helpers;
+  let field: any, meta: any, helpers: any;
   if (isInFormikContext) {
     [field, meta, helpers] = useField(name);
   } else {
