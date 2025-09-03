@@ -2,10 +2,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: false,
-  experimental: {
-    esmExternals: false
-  },
   images: {
     domains: ['res.cloudinary.com'],
   },
