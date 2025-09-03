@@ -3,7 +3,6 @@ entrypoint = "index.js"
 hidden = [".config", ".next", ".swc"]
 
 run = "npm run dev"
-modules = ["nodejs-20"]
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
@@ -92,7 +91,7 @@ externalPort = 3003
 
 [[ports]]
 localPort = 5000
-externalPort = 80
+externalPort = 5000
 
 [deployment]
 deploymentTarget = "cloudrun"
@@ -100,7 +99,7 @@ build = ["sh", "-c", "NODE_ENV=production npm run build"]
 run = ["sh", "-c", "npm start"]
 
 [workflows]
-runButton = "Project"
+runButton = "Dev"
 
 [[workflows.workflow]]
 name = "Dev"
@@ -117,27 +116,3 @@ author = 19449957
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "NODE_ENV=production npm run build"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Next.js Server"
-
-[[workflows.workflow]]
-name = "Next.js Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
-
-[agent]
-expertMode = true
