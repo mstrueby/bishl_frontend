@@ -250,7 +250,7 @@ const MatchCard: React.FC<{
     };
   }, [match._id, match.matchStatus.key, onMatchUpdate, isRefreshing]);
 
-  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, false);
+  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner || undefined, false);
   {/**
   const showButtonEdit = permissions.showButtonEdit;
   const showButtonStatus = permissions.showButtonStatus;
