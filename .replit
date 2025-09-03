@@ -75,6 +75,7 @@ support = true
 
 [[ports]]
 localPort = 3000
+externalPort = 80
 
 [[ports]]
 localPort = 3001
@@ -87,10 +88,6 @@ externalPort = 3002
 [[ports]]
 localPort = 3003
 externalPort = 3003
-
-[[ports]]
-localPort = 5000
-externalPort = 80
 
 [deployment]
 deploymentTarget = "cloudrun"
@@ -115,27 +112,3 @@ author = 19449957
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "NODE_ENV=production npm run build"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "BISHL Dev Server"
-
-[[workflows.workflow]]
-name = "BISHL Dev Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[agent]
-expertMode = true
