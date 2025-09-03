@@ -3,7 +3,7 @@ entrypoint = "index.js"
 hidden = [".config", ".next", ".swc"]
 
 run = "npm run dev"
-modules = ["nodejs-18"]
+modules = ["nodejs-20"]
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
@@ -100,7 +100,7 @@ build = ["sh", "-c", "NODE_ENV=production npm run build"]
 run = ["sh", "-c", "npm start"]
 
 [workflows]
-runButton = "Dev"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Dev"
@@ -131,13 +131,13 @@ args = "Next.js Server"
 name = "Next.js Server"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [agent]
 expertMode = true
