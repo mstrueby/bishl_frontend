@@ -162,9 +162,9 @@ const MatchCard: React.FC<{
     clubAlias: string;
   } | null>(null);
   const [isLoadingOwner, setIsLoadingOwner] = useState(true);
-  const [homeRosterLength, setHomeRosterLength] = useState<number>(0);
-  const [awayRosterLength, setAwayRosterLength] = useState<number>(0);
-  const [isLoadingRosters, setIsLoadingRosters] = useState(true);
+  const [homeScoresLength, setHomeScoresLength] = useState<number>(0);
+  const [awayScoresLength, setAwayScoresLength] = useState<number>(0);
+  const [isLoadingScores, setIsLoadingScores] = useState(true);
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
 
@@ -190,33 +190,33 @@ const MatchCard: React.FC<{
     fetchMatchdayOwner();
   }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
 
-  // Fetch roster data for both teams
+  // Fetch scores data for both teams
   useEffect(() => {
-    const fetchRosterData = async () => {
+    const fetchScoresData = async () => {
       try {
-        setIsLoadingRosters(true);
+        setIsLoadingScores(true);
         
-        // Fetch home roster
-        const homeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/roster/`);
+        // Fetch home scores
+        const homeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/scores/`);
         if (homeResponse.ok) {
-          const homeRoster = await homeResponse.json();
-          setHomeRosterLength(Array.isArray(homeRoster) ? homeRoster.length : 0);
+          const homeScores = await homeResponse.json();
+          setHomeScoresLength(Array.isArray(homeScores) ? homeScores.length : 0);
         }
 
-        // Fetch away roster
-        const awayResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/roster/`);
+        // Fetch away scores
+        const awayResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/scores/`);
         if (awayResponse.ok) {
-          const awayRoster = await awayResponse.json();
-          setAwayRosterLength(Array.isArray(awayRoster) ? awayRoster.length : 0);
+          const awayScores = await awayResponse.json();
+          setAwayScoresLength(Array.isArray(awayScores) ? awayScores.length : 0);
         }
       } catch (error) {
-        console.error('Error fetching roster data:', error);
+        console.error('Error fetching scores data:', error);
       } finally {
-        setIsLoadingRosters(false);
+        setIsLoadingScores(false);
       }
     };
 
-    fetchRosterData();
+    fetchScoresData();
   }, [match._id]);
 
   // Auto-refresh for in-progress matches
@@ -429,9 +429,12 @@ const MatchCard: React.FC<{
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED' || match.matchStatus.key === 'FORFEITED') && (() => {
-            // Use fetched roster data to determine if rosters are empty
-            const isRosterEmpty = homeRosterLength === 0 || awayRosterLength === 0;
-            const buttonClass = isRosterEmpty 
+            // Compare goals with scores array lengths to determine if scores match
+            const homeGoalsMatch = match.home.stats.goalsFor === homeScoresLength;
+            const awayGoalsMatch = match.away.stats.goalsFor === awayScoresLength;
+            const scoresMatch = homeGoalsMatch && awayGoalsMatch;
+            
+            const buttonClass = !scoresMatch 
               ? "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               : "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2";
             
