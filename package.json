@@ -12,6 +12,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.5",
     "@react-pdf/renderer": "^4.3.0",
+    "@swc/helpers": "^0.5.17",
     "@types/react-datepicker": "^7.0.0",
     "axios": "^1.6.1",
     "cloudinary": "^2.5.1",
@@ -58,5 +59,4 @@
     "url": "https://github.com/mstrueby/bishl_frontend/issues"
   },
   "homepage": "https://github.com/mstrueby/bishl_frontend#readme"
-}adme"
 }
