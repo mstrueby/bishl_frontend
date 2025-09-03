@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 -p 5000",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -12,7 +12,6 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.5",
     "@react-pdf/renderer": "^4.3.0",
-    "@swc/helpers": "^0.5.17",
     "@types/react-datepicker": "^7.0.0",
     "axios": "^1.6.1",
     "cloudinary": "^2.5.1",
@@ -22,12 +21,12 @@
     "cookies-next": "^4.0.0",
     "date-fns": "^2.30.0",
     "formik": "^2.4.2",
-    "next": "^12.2.0",
+    "next": "12.2.0",
     "next-cloudinary": "^6.16.0",
     "prismjs": "^1.29.0",
-    "react": "^18.2.0",
+    "react": "18.2.0",
     "react-datepicker": "^7.5.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "18.2.0",
     "react-quill": "^2.0.0",
     "react-spinners": "^0.14.1",
     "yup": "^1.2.0"
@@ -40,7 +39,8 @@
     "@types/react-dom": "18.0.5",
     "autoprefixer": "^10.4.13",
     "eslint": "8.19.0",
-    "eslint-config-next": "12.3.4",
+    "eslint-config-next": "12.2.0",
+    "node": "^18.20.4",
     "postcss": "^8.4.19",
     "tailwindcss": "^3.4.14",
     "typescript": "4.7.4"
@@ -58,4 +58,5 @@
     "url": "https://github.com/mstrueby/bishl_frontend/issues"
   },
   "homepage": "https://github.com/mstrueby/bishl_frontend#readme"
+}adme"
 }
