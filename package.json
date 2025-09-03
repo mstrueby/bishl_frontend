@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 5000",
+    "dev": "next dev -H 0.0.0.0 -p 5000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -12,6 +12,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.5",
     "@react-pdf/renderer": "^4.3.0",
+    "@swc/helpers": "^0.5.17",
     "@types/react-datepicker": "^7.0.0",
     "axios": "^1.6.1",
     "cloudinary": "^2.5.1",
@@ -21,7 +22,7 @@
     "cookies-next": "^4.0.0",
     "date-fns": "^2.30.0",
     "formik": "^2.4.2",
-    "next": "^12.2.5",
+    "next": "^12.2.0",
     "next-cloudinary": "^6.16.0",
     "prismjs": "^1.29.0",
     "react": "^18.2.0",
