@@ -107,6 +107,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const [match, setMatch] = useState<Match>(initialMatch);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const goalPlayerRefs = useRef<{ [key: number]: any }>({});
+  const assistPlayerRefs = useRef<{ [key: number]: any }>({});
+  const addGoalButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const router = useRouter();
   const { user } = useAuth();
@@ -161,8 +164,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
           })
-          .required('Torschütze ist erforderlich')
-          .nullable(),
+          .required('Torschütze ist erforderlich'),
         assistPlayer: Yup.object().nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
@@ -311,16 +313,34 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     ref={(el: HTMLInputElement | null) => {
                                       inputRefs.current[index] = el;
                                     }}
+                                    onKeyDown={(e: React.KeyboardEvent) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        // Move focus to goal player select
+                                        if (goalPlayerRefs.current[index]) {
+                                          goalPlayerRefs.current[index].focus();
+                                        }
+                                      }
+                                    }}
                                   />
                                 </div>
 
                                 {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
                                   <EventPlayerSelect
+                                    ref={(el: any) => {
+                                      goalPlayerRefs.current[index] = el;
+                                    }}
                                     name={`scores.${index}.goalPlayer`}
                                     selectedPlayer={score.goalPlayer || null}
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.goalPlayer`, selectedEventPlayer);
+                                      // Move focus to assist player select when goal player is selected
+                                      if (selectedEventPlayer && assistPlayerRefs.current[index]) {
+                                        setTimeout(() => {
+                                          assistPlayerRefs.current[index]?.focus();
+                                        }, 100);
+                                      }
                                     }}
                                     roster={roster}
                                     required={true}
@@ -333,10 +353,19 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
                                   <EventPlayerSelect
+                                    ref={(el: any) => {
+                                      assistPlayerRefs.current[index] = el;
+                                    }}
                                     name={`scores.${index}.assistPlayer`}
                                     selectedPlayer={score.assistPlayer || null}
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.assistPlayer`, selectedEventPlayer);
+                                      // Move focus to add goal button when assist player is selected
+                                      if (selectedEventPlayer && addGoalButtonRef.current) {
+                                        setTimeout(() => {
+                                          addGoalButtonRef.current?.focus();
+                                        }, 100);
+                                      }
                                     }}
                                     roster={roster}
                                     required={false}
@@ -379,6 +408,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                     <div className="flex justify-center">
                       <button
                         type="button"
+                        ref={addGoalButtonRef}
                         tabIndex={values.scores.length * 3 + 1}
                         onClick={() => {
                           const newIndex = values.scores.length;

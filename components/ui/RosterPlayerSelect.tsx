@@ -108,16 +108,12 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
     setQuery(value);
     setShowAllOptions(false); // Reset to filtered mode when typing
 
-    // If query doesn't match current selection, clear selection
-    if (selectedPlayer) {
-      const currentPlayerName = `${selectedPlayer.player.lastName}, ${selectedPlayer.player.firstName}`;
-      if (!currentPlayerName.toLowerCase().includes(value.toLowerCase()) &&
-        !selectedPlayer.player.jerseyNumber?.toString().includes(value)) {
-        setSelectedPlayer(null);
-        onChange(null);
-        if (helpers && helpers.setValue) {
-          helpers.setValue(null);
-        }
+    // Only clear selection if the input is completely empty
+    if (value === '' && selectedPlayer) {
+      setSelectedPlayer(null);
+      onChange(null);
+      if (helpers && helpers.setValue) {
+        helpers.setValue(null);
       }
     }
   };
@@ -176,7 +172,6 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                   afterLeave={() => {
-                    setIsOpen(false);
                     // Only clear query if no player is selected and query doesn't match any player
                     if (!selectedPlayer && query) {
                       const hasMatchingPlayer = roster.some(player => {
@@ -218,6 +213,8 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
                             onClick={() => setIsOpen(false)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handlePlayerChange(player);
                                 setIsOpen(false);
                               }
                             }}
@@ -349,14 +346,10 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
     setQuery(value);
     setShowAllOptions(false); // Reset to filtered mode when typing
 
-    // If query doesn't match current selection, clear selection
-    if (selectedPlayer) {
-      const currentPlayerName = `${selectedPlayer.player.lastName}, ${selectedPlayer.player.firstName}`;
-      if (!currentPlayerName.toLowerCase().includes(value.toLowerCase()) &&
-        !selectedPlayer.player.jerseyNumber?.toString().includes(value)) {
-        setSelectedPlayer(null);
-        onChange(null);
-      }
+    // Only clear selection if the input is completely empty
+    if (value === '' && selectedPlayer) {
+      setSelectedPlayer(null);
+      onChange(null);
     }
   };
 
@@ -414,7 +407,6 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                   afterLeave={() => {
-                    setIsOpen(false);
                     // Only clear query if no player is selected and query doesn't match any player
                     if (!selectedPlayer && query) {
                       const hasMatchingPlayer = roster.some(player => {
@@ -456,6 +448,8 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
                             onClick={() => setIsOpen(false)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handlePlayerChange(player);
                                 setIsOpen(false);
                               }
                             }}
