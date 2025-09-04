@@ -103,6 +103,13 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
   const [match, setMatch] = useState<Match>(initialMatch);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const inputEndRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const playerSelectRefs = useRef<{ [key: number]: any }>({});
+  const penaltyCodeSelectRefs = useRef<{ [key: number]: any }>({});
+  const penaltyMinutesRefs = useRef<{ [key: number]: any }>({});
+  const isGMRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const isMPRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const addPenaltyButtonRef = useRef<HTMLButtonElement | null>(null);
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
 
   const router = useRouter();
@@ -345,6 +352,15 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     ref={(el: HTMLInputElement | null) => {
                                       inputRefs.current[index] = el;
                                     }}
+                                    onKeyDown={(e: React.KeyboardEvent) => {
+                                      if (e.key === 'Enter' || e.key === 'Tab') {
+                                        e.preventDefault();
+                                        // Move focus to end time input
+                                        if (inputEndRefs.current[index]) {
+                                          inputEndRefs.current[index]?.focus();
+                                        }
+                                      }
+                                    }}
                                   />
                                 </div>
                                 {/** Time Input - End (Optional) */}
@@ -352,6 +368,18 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   <InputMatchTime
                                     name={`penalties.${index}.matchTimeEnd`}
                                     tabIndex={index * 6 + 2}
+                                    ref={(el: HTMLInputElement | null) => {
+                                      inputEndRefs.current[index] = el;
+                                    }}
+                                    onKeyDown={(e: React.KeyboardEvent) => {
+                                      if (e.key === 'Enter' || e.key === 'Tab') {
+                                        e.preventDefault();
+                                        // Move focus to player select
+                                        if (playerSelectRefs.current[index]) {
+                                          playerSelectRefs.current[index].focus();
+                                        }
+                                      }
+                                    }}
                                   />
                                 </div>
                               </div>
@@ -359,10 +387,19 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                               <div className="flex flex-auto flex-col gap-4">
                                 {/** Player Selection */}
                                 <EventPlayerSelect
+                                  ref={(el: any) => {
+                                    playerSelectRefs.current[index] = el;
+                                  }}
                                   name={`penalties.${index}.penaltyPlayer`}
                                   selectedPlayer={penalty.penaltyPlayer || null}
                                   onChange={(eventPlayer) => {
                                     setFieldValue(`penalties.${index}.penaltyPlayer`, eventPlayer);
+                                    // Move focus to penalty code select when player is selected
+                                    if (eventPlayer && penaltyCodeSelectRefs.current[index]) {
+                                      setTimeout(() => {
+                                        penaltyCodeSelectRefs.current[index]?.focus();
+                                      }, 100);
+                                    }
                                   }}
                                   roster={roster}
                                   required={true}
@@ -372,6 +409,9 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                 />
                                 {/** Penalty Code Selection */}
                                 <PenaltyCodeSelect
+                                  ref={(el: any) => {
+                                    penaltyCodeSelectRefs.current[index] = el;
+                                  }}
                                   name={`penalties.${index}.penaltyCode`}
                                   selectedPenaltyCode={
                                     (penalty.penaltyCode && 'key' in penalty.penaltyCode && 'value' in penalty.penaltyCode
@@ -381,6 +421,12 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   onChange={(selectedPenaltyCode) => {
                                     setFieldValue(`penalties.${index}.penaltyCode`, selectedPenaltyCode);
                                     setError('');
+                                    // Move focus to penalty minutes when penalty code is selected
+                                    if (selectedPenaltyCode && penaltyMinutesRefs.current[index]) {
+                                      setTimeout(() => {
+                                        penaltyMinutesRefs.current[index]?.focus();
+                                      }, 100);
+                                    }
                                   }}
                                   penaltyCodes={penaltyCodes}
                                   //label="Strafe"
@@ -395,6 +441,9 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                 {/** Penalty Minutes */}
                                 <div className="w-full md:flex-auto">
                                   <Listbox
+                                    ref={(el: any) => {
+                                      penaltyMinutesRefs.current[index] = el;
+                                    }}
                                     name={`penalties.${index}.penaltyMinutes`}
                                     // label="Strafminuten"
                                     options={penaltyMinuteOptions}
@@ -406,14 +455,38 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                 {/** Penalty Type Toggles */}
                                 <div className="flex flex-row items-center justify-end md:justify-between p-2 gap-6 -mt-6 -mb-2">
                                   <Toggle
+                                    ref={(el: HTMLInputElement | null) => {
+                                      isGMRefs.current[index] = el;
+                                    }}
                                     name={`penalties.${index}.isGM`}
                                     label="GM"
                                     tabIndex={index * 6 + 6}
+                                    onKeyDown={(e: React.KeyboardEvent) => {
+                                      if (e.key === 'Enter' || e.key === 'Tab') {
+                                        e.preventDefault();
+                                        // Move focus to isMP toggle
+                                        if (isMPRefs.current[index]) {
+                                          isMPRefs.current[index]?.focus();
+                                        }
+                                      }
+                                    }}
                                   />
                                   <Toggle
+                                    ref={(el: HTMLInputElement | null) => {
+                                      isMPRefs.current[index] = el;
+                                    }}
                                     name={`penalties.${index}.isMP`}
                                     label="MP"
                                     tabIndex={index * 6 + 7}
+                                    onKeyDown={(e: React.KeyboardEvent) => {
+                                      if (e.key === 'Enter' || e.key === 'Tab') {
+                                        e.preventDefault();
+                                        // Move focus to add penalty button
+                                        if (addPenaltyButtonRef.current) {
+                                          addPenaltyButtonRef.current.focus();
+                                        }
+                                      }
+                                    }}
                                   />
                                 </div>
                               </div>
@@ -439,6 +512,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                     <div className="flex justify-center">
                       <button
                         type="button"
+                        ref={addPenaltyButtonRef}
                         tabIndex={values.penalties.length * 6 + 8}
                         onClick={() => {
                           const newIndex = values.penalties.length;
