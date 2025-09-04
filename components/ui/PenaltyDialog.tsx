@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
-import PlayerSelect from './PlayerSelect';
+import EventPlayerSelect from './EventPlayerSelect';
 import PenaltyCodeSelect from './PenaltyCodeSelect';
 import InputMatchTime from './form/InputMatchTime';
 import Listbox from './form/Listbox';
@@ -253,21 +253,13 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                       </div>
 
                       {/* Player Selection */}
-                      <PlayerSelect
+                      <EventPlayerSelect
                         name="penaltyPlayer"
-                        selectedPlayer={values.penaltyPlayer ? roster.find(p => p.player.playerId === values.penaltyPlayer?.playerId) || null : null}
-                        onChange={(player) => {
-                          if (player) {
-                            const penaltyPlayer = {
-                              playerId: player.player.playerId,
-                              firstName: player.player.firstName,
-                              lastName: player.player.lastName,
-                              jerseyNumber: player.player.jerseyNumber
-                            };
-                            setFieldValue('penaltyPlayer', penaltyPlayer);
+                        selectedPlayer={values.penaltyPlayer || null}
+                        onChange={(eventPlayer) => {
+                          setFieldValue('penaltyPlayer', eventPlayer);
+                          if (eventPlayer) {
                             setError('');
-                          } else {
-                            setFieldValue('penaltyPlayer', null);
                           }
                         }}
                         roster={roster}

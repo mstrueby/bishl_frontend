@@ -2,7 +2,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
-import RosterPlayerSelect from './RosterPlayerSelect';
+import EventPlayerSelect from './EventPlayerSelect';
 import InputMatchTime from './form/InputMatchTime';
 import { RosterPlayer, EventPlayer, ScoresBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
@@ -170,21 +170,13 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                       </div>
 
                       {/* Goal Player Selection */}
-                      <RosterPlayerSelect
+                      <EventPlayerSelect
                         name="goalPlayer"
-                        selectedPlayer={values.goalPlayer ? roster.find(p => p.player.playerId === values.goalPlayer?.playerId) || null : null}
-                        onChange={(player) => {
-                          if (player) {
-                            const goalPlayer = {
-                              playerId: player.player.playerId,
-                              firstName: player.player.firstName,
-                              lastName: player.player.lastName,
-                              jerseyNumber: player.player.jerseyNumber
-                            };
-                            setFieldValue('goalPlayer', goalPlayer);
+                        selectedPlayer={values.goalPlayer || null}
+                        onChange={(eventPlayer) => {
+                          setFieldValue('goalPlayer', eventPlayer);
+                          if (eventPlayer) {
                             setError('');
-                          } else {
-                            setFieldValue('goalPlayer', null);
                           }
                         }}
                         roster={roster}
@@ -195,21 +187,11 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                       />
 
                       {/* Assist Player Selection */}
-                      <RosterPlayerSelect
+                      <EventPlayerSelect
                         name="assistPlayer"
-                        selectedPlayer={values.assistPlayer ? roster.find(p => p.player.playerId === values.assistPlayer?.playerId) || null : null}
-                        onChange={(player) => {
-                          if (player) {
-                            const assistPlayer = {
-                              playerId: player.player.playerId,
-                              firstName: player.player.firstName,
-                              lastName: player.player.lastName,
-                              jerseyNumber: player.player.jerseyNumber
-                            };
-                            setFieldValue('assistPlayer', assistPlayer);
-                          } else {
-                            setFieldValue('assistPlayer', null);
-                          }
+                        selectedPlayer={values.assistPlayer || null}
+                        onChange={(eventPlayer) => {
+                          setFieldValue('assistPlayer', eventPlayer);
                         }}
                         roster={roster}
                         label="Vorlage (optional)"
