@@ -727,6 +727,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
+    // Focus jersey number input after modal closes
+    setTimeout(() => {
+      if (jerseyNumberRef.current) {
+        jerseyNumberRef.current.focus();
+      }
+    }, 100);
+
     // Optional: Show a success message
     setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
   };
@@ -2069,6 +2076,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setSelectedCallUpTeam(null);
                   setSelectedCallUpPlayer(null);
                   setCallUpModalError(null);
+                  // Focus jersey number input after modal closes
+                  setTimeout(() => {
+                    if (jerseyNumberRef.current) {
+                      jerseyNumberRef.current.focus();
+                    }
+                  }, 100);
                 }}
                 className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
