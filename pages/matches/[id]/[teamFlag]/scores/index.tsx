@@ -107,6 +107,8 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const [match, setMatch] = useState<Match>(initialMatch);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const goalPlayerRefs = useRef<{ [key: number]: any }>({});
+  const assistPlayerRefs = useRef<{ [key: number]: any }>({});
 
   const router = useRouter();
   const { user } = useAuth();
@@ -317,10 +319,19 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
                                   <EventPlayerSelect
+                                    ref={(el: any) => {
+                                      goalPlayerRefs.current[index] = el;
+                                    }}
                                     name={`scores.${index}.goalPlayer`}
                                     selectedPlayer={score.goalPlayer || null}
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.goalPlayer`, selectedEventPlayer);
+                                      // Move focus to assist player select when goal player is selected
+                                      if (selectedEventPlayer && assistPlayerRefs.current[index]) {
+                                        setTimeout(() => {
+                                          assistPlayerRefs.current[index]?.focus();
+                                        }, 100);
+                                      }
                                     }}
                                     roster={roster}
                                     required={true}
@@ -333,6 +344,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
                                   <EventPlayerSelect
+                                    ref={(el: any) => {
+                                      assistPlayerRefs.current[index] = el;
+                                    }}
                                     name={`scores.${index}.assistPlayer`}
                                     selectedPlayer={score.assistPlayer || null}
                                     onChange={(selectedEventPlayer) => {
