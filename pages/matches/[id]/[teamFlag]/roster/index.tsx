@@ -1371,6 +1371,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                             : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
                           <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
                           <span className="hidden sm:block">Hochgemeldet</span>
+                          {/** Feasture -Switch */}
+                          {/**
                           {playerStats[player.player.playerId] !== undefined && (
                             <span className="ml-1 sm:ml-2 inline-flex items-center gap-x-2 mr-1">
                               <svg viewBox="0 0 2 2" className="hidden sm:block h-0.5 w-0.5 fill-current">
@@ -1381,6 +1383,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                               </span>
                             </span>
                           )}
+                          */}
                         </span>
                       ) : null}
                     </div>
@@ -1999,7 +2002,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               </Listbox>
             </div>
 
-            {/* Player Selection */}
+            {/* Player Selection - Call Up */}
             <div className="mb-6">
               <PlayerSelect
                 name="call-up-player-select"
