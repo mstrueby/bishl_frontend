@@ -1345,7 +1345,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   e.preventDefault();
                   // Focus PlayerSelect after TAB key press
                   setTimeout(() => {
-                    if (playerSelectRef.current && playerSelectRef.current.focus) {
+                    if (playerSelectRef.current) {
                       playerSelectRef.current.focus();
                     }
                   }, 100);
