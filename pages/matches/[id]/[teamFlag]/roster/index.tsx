@@ -727,22 +727,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Focus jersey number input after modal closes and ensure TAB navigation works
+    // Focus jersey number input after modal closes
     setTimeout(() => {
       if (jerseyNumberRef.current) {
         jerseyNumberRef.current.focus();
-        // Ensure the main form elements are properly in the tab order by setting tabIndex on DOM elements
-        const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-        const addButton = addButtonRef.current;
-        
-        if (playerSelectInput) {
-          playerSelectInput.tabIndex = 1;
-        }
-        if (addButton) {
-          addButton.tabIndex = 4;
-        }
       }
-    }, 150);
+    }, 100);
 
     // Optional: Show a success message
     setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
@@ -1355,7 +1345,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   e.preventDefault();
                   // Focus PlayerSelect after TAB key press
                   setTimeout(() => {
-                    if (playerSelectRef.current) {
+                    if (playerSelectRef.current && playerSelectRef.current.focus) {
                       playerSelectRef.current.focus();
                     }
                   }, 100);
@@ -2056,11 +2046,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
                     if (availablePlayer) {
                       setSelectedCallUpPlayer(availablePlayer);
-                      // Focus the modal's "Hinzufügen" button after player selection
+                      // Focus the "Hinzufügen" button after player selection
                       setTimeout(() => {
-                        const modalAddButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
-                        if (modalAddButton && modalAddButton.offsetParent !== null) {
-                          modalAddButton.focus();
+                        const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
+                        if (hinzufuegenButton) {
+                          hinzufuegenButton.focus();
                         }
                       }, 100);
                     }
@@ -2098,22 +2088,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setSelectedCallUpTeam(null);
                   setSelectedCallUpPlayer(null);
                   setCallUpModalError(null);
-                  // Focus jersey number input after modal closes and reset tab order
+                  // Focus jersey number input after modal closes
                   setTimeout(() => {
                     if (jerseyNumberRef.current) {
                       jerseyNumberRef.current.focus();
-                      // Ensure the main form elements maintain proper tab order by setting tabIndex on DOM elements
-                      const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-                      const addButton = addButtonRef.current;
-                      
-                      if (playerSelectInput) {
-                        playerSelectInput.tabIndex = 1;
-                      }
-                      if (addButton) {
-                        addButton.tabIndex = 4;
-                      }
                     }
-                  }, 150);
+                  }, 100);
                 }}
                 className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
