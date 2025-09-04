@@ -2005,6 +2005,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/* Player Selection - Call Up */}
             <div className="mb-6">
               <PlayerSelect
+                ref={playerSelectRef}
                 name="call-up-player-select"
                 selectedPlayer={selectedCallUpPlayer ? {
                   player: {
@@ -2026,6 +2027,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
                     if (availablePlayer) {
                       setSelectedCallUpPlayer(availablePlayer);
+                      // Focus the "Hinzufügen" button after player selection
+                      setTimeout(() => {
+                        const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
+                        if (hinzufuegenButton) {
+                          hinzufuegenButton.focus();
+                        }
+                      }, 100);
                     }
                   } else {
                     setSelectedCallUpPlayer(null);
@@ -2070,6 +2078,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 type="button"
                 onClick={handleConfirmCallUp}
                 disabled={!selectedCallUpPlayer}
+                data-callup-add-button
                 className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
                   ? 'bg-indigo-600 hover:bg-indigo-500'
                   : 'bg-indigo-300 cursor-not-allowed'
