@@ -553,6 +553,20 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     }
   }, [isMatchFinished]);
 
+  // Handle focus after call-up modal closes
+  useEffect(() => {
+    if (!isCallUpModalOpen) {
+      // Use a longer timeout to ensure HeadlessUI's focus restoration has completed
+      const timer = setTimeout(() => {
+        if (playerSelectRef.current && playerSelectRef.current.focus) {
+          playerSelectRef.current.focus();
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isCallUpModalOpen]);
+
   // Fetch player stats for called players
   useEffect(() => {
     const fetchPlayerStats = async () => {
@@ -1911,12 +1925,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           setSelectedCallUpTeam(null);
           setSelectedCallUpPlayer(null);
           setCallUpModalError(null);
-          // Focus PlayerSelect after modal closes
-          setTimeout(() => {
-            if (playerSelectRef.current && playerSelectRef.current.focus) {
-              playerSelectRef.current.focus();
-            }
-          }, 100);
         }}>
           <div className="fixed inset-0 bg-black/30 transition-opacity" />
           <div className="fixed inset-0 overflow-y-auto">
@@ -2095,12 +2103,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                         setSelectedCallUpTeam(null);
                         setSelectedCallUpPlayer(null);
                         setCallUpModalError(null);
-                        // Focus PlayerSelect after modal closes
-                        setTimeout(() => {
-                          if (playerSelectRef.current && playerSelectRef.current.focus) {
-                            playerSelectRef.current.focus();
-                          }
-                        }, 100);
                       }}
                       className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
