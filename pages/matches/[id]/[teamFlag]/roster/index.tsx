@@ -920,6 +920,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
 
+      // Keep focus on the "Hinzufügen" button after adding player
+      setTimeout(() => {
+        if (addButtonRef.current) {
+          addButtonRef.current.focus();
+        }
+      }, 100);
+
       // Here you would make the actual API call to update the roster
       /*
       await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
@@ -1330,6 +1337,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               onClick={handleAddPlayer}
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
+                  e.preventDefault();
                   // Focus PlayerSelect after TAB key press
                   setTimeout(() => {
                     if (playerSelectRef.current && playerSelectRef.current.focus) {
