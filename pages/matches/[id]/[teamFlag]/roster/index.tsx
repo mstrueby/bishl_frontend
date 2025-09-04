@@ -731,11 +731,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setTimeout(() => {
       if (jerseyNumberRef.current) {
         jerseyNumberRef.current.focus();
-        // Ensure the main form elements are properly in the tab order
-        if (playerSelectRef.current && addButtonRef.current) {
-          // Reset any potential tab index conflicts
-          playerSelectRef.current.tabIndex = 1;
-          addButtonRef.current.tabIndex = 4;
+        // Ensure the main form elements are properly in the tab order by setting tabIndex on DOM elements
+        const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
+        const addButton = addButtonRef.current;
+        
+        if (playerSelectInput) {
+          playerSelectInput.tabIndex = 1;
+        }
+        if (addButton) {
+          addButton.tabIndex = 4;
         }
       }
     }, 150);
@@ -2098,10 +2102,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setTimeout(() => {
                     if (jerseyNumberRef.current) {
                       jerseyNumberRef.current.focus();
-                      // Ensure the main form elements maintain proper tab order
-                      if (playerSelectRef.current && addButtonRef.current) {
-                        playerSelectRef.current.tabIndex = 1;
-                        addButtonRef.current.tabIndex = 4;
+                      // Ensure the main form elements maintain proper tab order by setting tabIndex on DOM elements
+                      const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
+                      const addButton = addButtonRef.current;
+                      
+                      if (playerSelectInput) {
+                        playerSelectInput.tabIndex = 1;
+                      }
+                      if (addButton) {
+                        addButton.tabIndex = 4;
                       }
                     }
                   }, 150);
