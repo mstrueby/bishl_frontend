@@ -737,12 +737,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    setIsCallUpModalOpen(false);
-
-    // Focus PlayerSelect after modal closes
+    // Focus jersey number input after modal closes
     setTimeout(() => {
-      if (playerSelectRef.current && playerSelectRef.current.focus) {
-        playerSelectRef.current.focus();
+      if (jerseyNumberRef.current) {
+        jerseyNumberRef.current.focus();
+        jerseyNumberRef.current.select(); // Also select the text for easy replacement
       }
     }, 100);
 
