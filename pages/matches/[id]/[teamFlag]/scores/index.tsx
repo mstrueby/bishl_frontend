@@ -314,6 +314,15 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     ref={(el: HTMLInputElement | null) => {
                                       inputRefs.current[index] = el;
                                     }}
+                                    onKeyDown={(e: React.KeyboardEvent) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        // Move focus to goal player select
+                                        if (goalPlayerRefs.current[index]) {
+                                          goalPlayerRefs.current[index].focus();
+                                        }
+                                      }
+                                    }}
                                   />
                                 </div>
 
