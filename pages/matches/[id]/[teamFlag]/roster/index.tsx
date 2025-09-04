@@ -515,6 +515,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     </PDFDownloadLink>
   ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
 
+  {/** Debugging focus events
   useEffect(() => {
     const logFocus = (e: FocusEvent) => {
       console.log('Focused:', document.activeElement);
@@ -524,6 +525,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       window.removeEventListener('focusin', logFocus);
     };
   }, []);
+  */}
 
   // Update available players list when the toggle changes
   useEffect(() => {
