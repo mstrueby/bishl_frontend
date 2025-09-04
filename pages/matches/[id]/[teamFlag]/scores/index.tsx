@@ -152,28 +152,16 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     scores: Yup.array().of(
       Yup.object().shape({
         matchTime: Yup.string()
-          .required('Zeit ist erforderlich')
+          .required()
           .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
         goalPlayer: Yup.object()
-          .shape({
-            playerId: Yup.string().required('Spieler ID ist erforderlich'),
-            firstName: Yup.string().required('Vorname ist erforderlich'),
-            lastName: Yup.string().required('Nachname ist erforderlich'),
-            jerseyNumber: Yup.number().required('Trikotnummer ist erforderlich')
-          })
-          .required('Torschütze ist erforderlich')
-          .nullable()
-          .test('is-selected', 'Torschütze ist erforderlich', (value) => {
-            return value !== null && value !== undefined;
-          }),
-        assistPlayer: Yup.object()
           .shape({
             playerId: Yup.string().required(),
             firstName: Yup.string().required(),
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
-          })
-          .nullable(), // Optional
+          }).required('Torschütze ist erforderlich'),
+        assistPlayer: Yup.object().nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
         isGWG: Yup.boolean()
@@ -331,15 +319,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
                                       if (selectedRosterPlayer) {
-                                        const goalPlayer = {
+                                        setFieldValue(`scores.${index}.goalPlayer`, {
                                           playerId: selectedRosterPlayer.player.playerId,
                                           firstName: selectedRosterPlayer.player.firstName,
                                           lastName: selectedRosterPlayer.player.lastName,
                                           jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                        };
-                                        setFieldValue(`scores.${index}.goalPlayer`, goalPlayer, true);
+                                        });
                                       } else {
-                                        setFieldValue(`scores.${index}.goalPlayer`, null, true);
+                                        setFieldValue(`scores.${index}.goalPlayer`, null);
                                       }
                                     }}
                                     roster={roster}
@@ -348,17 +335,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     showErrorText={false}
                                     tabIndex={index * 3 + 2}
                                   />
-                                  {/* Custom error display */}
-                                  {errors.scores && 
-                                   touched.scores && 
-                                   errors.scores[index] && 
-                                   touched.scores[index] && 
-                                   typeof errors.scores[index] === 'object' && 
-                                   'goalPlayer' in errors.scores[index] && (
-                                    <p className="mt-1 text-sm text-red-600">
-                                      Torschütze ist erforderlich
-                                    </p>
-                                  )}
                                 </div>
 
                                 {/* Assist Selection */}
