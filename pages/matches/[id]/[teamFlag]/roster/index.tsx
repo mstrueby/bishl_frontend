@@ -1218,6 +1218,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === 'Tab') {
                       e.preventDefault();
+                      // Focus the position select dropdown when Enter or Tab is pressed
+                      if (positionSelectRef.current) {
+                        positionSelectRef.current.focus();
+                      }
                     }
                   }}
                 />
