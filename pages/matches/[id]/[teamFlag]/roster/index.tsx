@@ -737,11 +737,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    setIsCallUpModalOpen(false);
-
+    // Focus jersey number input after modal closes
     setTimeout(() => {
-      if (playerSelectRef.current) {
-        playerSelectRef.current.focus();
+      if (jerseyNumberRef.current) {
+        jerseyNumberRef.current.focus();
+        jerseyNumberRef.current.select(); // Also select the text for easy replacement
       }
     }, 100);
 
@@ -1906,15 +1906,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
       {/* Call-Up Player Modal */}
       <Transition appear show={isCallUpModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => {
+        <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
           setIsCallUpModalOpen(false);
           setSelectedCallUpTeam(null);
           setSelectedCallUpPlayer(null);
           setCallUpModalError(null);
-          // Focus jersey number input after modal closes
+          // Focus PlayerSelect after modal closes
           setTimeout(() => {
-            if (jerseyNumberRef.current) {
-              jerseyNumberRef.current.focus();
+            if (playerSelectRef.current && playerSelectRef.current.focus) {
+              playerSelectRef.current.focus();
             }
           }, 100);
         }}>
@@ -2150,10 +2150,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                         setSelectedCallUpTeam(null);
                         setSelectedCallUpPlayer(null);
                         setCallUpModalError(null);
-                        // Focus jersey number input after modal closes
+                        // Focus PlayerSelect after modal closes
                         setTimeout(() => {
-                          if (jerseyNumberRef.current) {
-                            jerseyNumberRef.current.focus();
+                          if (playerSelectRef.current && playerSelectRef.current.focus) {
+                            playerSelectRef.current.focus();
                           }
                         }, 100);
                       }}
