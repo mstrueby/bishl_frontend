@@ -555,19 +555,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     }
   }, [isMatchFinished]);
 
-  // Handle focus after call-up modal closes
-  useEffect(() => {
-    if (!isCallUpModalOpen) {
-      // Use a longer timeout to ensure HeadlessUI's focus restoration has completed
-      const timer = setTimeout(() => {
-        if (playerSelectRef.current && playerSelectRef.current.focus) {
-          playerSelectRef.current.focus();
-        }
-      }, 300);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isCallUpModalOpen]);
+  // Handle focus after call-up modal closes - removed automatic focus
 
   // Fetch player stats for called players
   useEffect(() => {
@@ -753,13 +741,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Focus jersey number input after modal closes
-    setTimeout(() => {
-      if (jerseyNumberRef.current) {
-        jerseyNumberRef.current.focus();
-        jerseyNumberRef.current.select(); // Also select the text for easy replacement
-      }
-    }, 100);
+    // Modal closed successfully
 
     // Optional: Show a success message
     setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
@@ -947,12 +929,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
 
-      // Keep focus on the "Hinzufügen" button after adding player
-      setTimeout(() => {
-        if (addButtonRef.current) {
-          addButtonRef.current.focus();
-        }
-      }, 100);
+      // Player added successfully
 
       // Here you would make the actual API call to update the roster
       /*
@@ -1200,13 +1177,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       if (availablePlayer.jerseyNo) {
                         setPlayerNumber(availablePlayer.jerseyNo);
                       }
-                      // Focus the jersey number input after player selection
-                      setTimeout(() => {
-                        if (jerseyNumberRef.current) {
-                          jerseyNumberRef.current.focus();
-                          jerseyNumberRef.current.select(); // Also select the text for easy replacement
-                        }
-                      }, 100);
                     }
                   } else {
                     setSelectedPlayer(null);
@@ -1248,10 +1218,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === 'Tab') {
                       e.preventDefault();
-                      // Focus the position select dropdown when Enter or Tab is pressed
-                      if (positionSelectRef.current) {
-                        positionSelectRef.current.focus();
-                      }
                     }
                   }}
                 />
@@ -1260,15 +1226,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Position
                 </label>
-                <Listbox value={playerPosition} onChange={(position) => {
-                  setPlayerPosition(position);
-                  // Focus the Add button after position selection
-                  setTimeout(() => {
-                    if (addButtonRef.current) {
-                      addButtonRef.current.focus();
-                    }
-                  }, 100);
-                }}>
+                <Listbox value={playerPosition} onChange={setPlayerPosition}>
                   {({ open }) => (
                     <>
                       <div className="relative">
@@ -1278,10 +1236,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                             if (e.key === 'Enter' && !open) {
                               e.preventDefault();
-                              // Focus the Add button when Enter is pressed and dropdown is closed
-                              if (addButtonRef.current) {
-                                addButtonRef.current.focus();
-                              }
                             }
                             // Handle letter key presses for position selection
                             const key = e.key.toUpperCase();
@@ -1290,12 +1244,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                               const position = playerPositions.find(pos => pos.key === key);
                               if (position) {
                                 setPlayerPosition(position);
-                                // Focus the Add button after keyboard selection
-                                setTimeout(() => {
-                                  if (addButtonRef.current) {
-                                    addButtonRef.current.focus();
-                                  }
-                                }, 100);
                               }
                             }
                           }}
@@ -1370,12 +1318,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault();
-                  // Focus PlayerSelect after TAB key press
-                  setTimeout(() => {
-                    if (playerSelectRef.current && playerSelectRef.current.focus) {
-                      playerSelectRef.current.focus();
-                    }
-                  }, 100);
                 }
               }}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
