@@ -1,4 +1,3 @@
-
 import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
@@ -217,6 +216,11 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
                             }
                             value={player}
                             onClick={() => setIsOpen(false)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                setIsOpen(false);
+                              }
+                            }}
                           >
                             {({ active }) => (
                               <>
@@ -450,6 +454,11 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
                             }
                             value={player}
                             onClick={() => setIsOpen(false)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                setIsOpen(false);
+                              }
+                            }}
                           >
                             {({ active }) => (
                               <>
