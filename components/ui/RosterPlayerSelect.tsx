@@ -213,6 +213,8 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
                             onClick={() => setIsOpen(false)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handlePlayerChange(player);
                                 setIsOpen(false);
                               }
                             }}
@@ -446,6 +448,8 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
                             onClick={() => setIsOpen(false)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handlePlayerChange(player);
                                 setIsOpen(false);
                               }
                             }}
