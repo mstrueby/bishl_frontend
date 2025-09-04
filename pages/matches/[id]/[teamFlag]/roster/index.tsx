@@ -1322,6 +1322,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault();
+                  // Focus the position select dropdown when Enter or Tab is pressed
+                  if (playerSelectRef.current) {
+                    playerSelectRef.current.focus();
+                  }
                 }
               }}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
@@ -1359,8 +1363,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                          ${playerStats[player.player.playerId] >= 0 && playerStats[player.player.playerId] <= 3
                             ? 'bg-green-50 text-green-800 ring-green-600/20'
                             : playerStats[player.player.playerId] === 4
-                            ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
-                            : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
+                              ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
+                              : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
                           <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
                           <span className="hidden sm:block">Hochgemeldet</span>
                           {/** Feasture -Switch */}
