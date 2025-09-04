@@ -1906,7 +1906,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
       {/* Call-Up Player Modal */}
       <Transition appear show={isCallUpModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => {
+        <Dialog as="div" className="fixed inset-0 z-10" onClose={() => {
           setIsCallUpModalOpen(false);
           setSelectedCallUpTeam(null);
           setSelectedCallUpPlayer(null);
