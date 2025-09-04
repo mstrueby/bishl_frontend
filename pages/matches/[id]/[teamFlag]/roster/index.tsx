@@ -546,7 +546,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setAvailablePlayersList(filteredPlayers);
     }
   }, [includeInactivePlayers, rosterList, allAvailablePlayersList, sortRoster]);
-  
+
   // Auto-set published to true if match is finished
   const isMatchFinished = match.matchStatus.key === 'FINISHED';
   useEffect(() => {
@@ -564,7 +564,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           playerSelectRef.current.focus();
         }
       }, 300);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isCallUpModalOpen]);
