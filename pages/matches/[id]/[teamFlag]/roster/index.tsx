@@ -515,6 +515,16 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     </PDFDownloadLink>
   ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
 
+  useEffect(() => {
+    const logFocus = (e: FocusEvent) => {
+      console.log('Focused:', document.activeElement);
+    };
+    window.addEventListener('focusin', logFocus);
+    return () => {
+      window.removeEventListener('focusin', logFocus);
+    };
+  }, []);
+
   // Update available players list when the toggle changes
   useEffect(() => {
     if (includeInactivePlayers) {
@@ -727,10 +737,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Focus jersey number input after modal closes
+    setIsCallUpModalOpen(false);
+
     setTimeout(() => {
-      if (jerseyNumberRef.current) {
-        jerseyNumberRef.current.focus();
+      if (playerSelectRef.current) {
+        playerSelectRef.current.focus();
       }
     }, 100);
 
