@@ -1149,6 +1149,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <PlayerSelect
                 ref={playerSelectRef}
                 name="player-select"
+                tabIndex={1}
                 selectedPlayer={selectedPlayer ? {
                   player: {
                     playerId: selectedPlayer._id,
@@ -1216,6 +1217,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
                   className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   placeholder="##"
+                  tabIndex={2}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === 'Tab') {
                       e.preventDefault();
@@ -1245,6 +1247,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       <div className="relative">
                         <Listbox.Button
                           ref={positionSelectRef}
+                          tabIndex={3}
                           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                             if (e.key === 'Enter' && !open) {
                               e.preventDefault();
@@ -1335,6 +1338,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               ref={addButtonRef}
               type="button"
               onClick={handleAddPlayer}
+              disabled={loading}
+              tabIndex={4}
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault();
@@ -1346,7 +1351,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   }, 100);
                 }
               }}
-              disabled={loading}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
