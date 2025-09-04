@@ -152,16 +152,28 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     scores: Yup.array().of(
       Yup.object().shape({
         matchTime: Yup.string()
-          .required()
+          .required('Zeit ist erforderlich')
           .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
         goalPlayer: Yup.object()
+          .shape({
+            playerId: Yup.string().required('Spieler ID ist erforderlich'),
+            firstName: Yup.string().required('Vorname ist erforderlich'),
+            lastName: Yup.string().required('Nachname ist erforderlich'),
+            jerseyNumber: Yup.number().required('Trikotnummer ist erforderlich')
+          })
+          .required('Torschütze ist erforderlich')
+          .nullable()
+          .test('is-selected', 'Torschütze ist erforderlich', (value) => {
+            return value !== null && value !== undefined;
+          }),
+        assistPlayer: Yup.object()
           .shape({
             playerId: Yup.string().required(),
             firstName: Yup.string().required(),
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
-          }).required('Torschütze ist erforderlich'),
-        assistPlayer: Yup.object().nullable(), // Optional
+          })
+          .nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
         isGWG: Yup.boolean()
@@ -325,19 +337,28 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                           lastName: selectedRosterPlayer.player.lastName,
                                           jerseyNumber: selectedRosterPlayer.player.jerseyNumber
                                         };
-                                        setFieldValue(`scores.${index}.goalPlayer`, goalPlayer);
-                                        // Clear any validation errors for this field
                                         setFieldValue(`scores.${index}.goalPlayer`, goalPlayer, true);
                                       } else {
-                                        setFieldValue(`scores.${index}.goalPlayer`, null);
+                                        setFieldValue(`scores.${index}.goalPlayer`, null, true);
                                       }
                                     }}
                                     roster={roster}
                                     required={true}
                                     placeholder="Torschützen auswählen"
-                                    showErrorText={true}
+                                    showErrorText={false}
                                     tabIndex={index * 3 + 2}
                                   />
+                                  {/* Custom error display */}
+                                  {errors.scores && 
+                                   touched.scores && 
+                                   errors.scores[index] && 
+                                   touched.scores[index] && 
+                                   typeof errors.scores[index] === 'object' && 
+                                   'goalPlayer' in errors.scores[index] && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                      Torschütze ist erforderlich
+                                    </p>
+                                  )}
                                 </div>
 
                                 {/* Assist Selection */}
