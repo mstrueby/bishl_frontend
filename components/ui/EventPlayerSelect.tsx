@@ -224,6 +224,8 @@ const FormikEventPlayerSelect = forwardRef<EventPlayerSelectHandle, EventPlayerS
                             onClick={() => setIsOpen(false)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handlePlayerChange(rosterPlayer);
                                 setIsOpen(false);
                               }
                             }}
@@ -468,6 +470,8 @@ const StandaloneEventPlayerSelect = forwardRef<EventPlayerSelectHandle, EventPla
                             onClick={() => setIsOpen(false)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handlePlayerChange(rosterPlayer);
                                 setIsOpen(false);
                               }
                             }}
