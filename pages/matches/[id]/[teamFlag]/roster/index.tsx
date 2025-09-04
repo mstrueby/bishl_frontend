@@ -9,7 +9,7 @@ import { getCookie } from 'cookies-next';
 import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
-import { Listbox, Transition, Switch } from '@headlessui/react';
+import { Listbox, Transition, Switch, Dialog } from '@headlessui/react';
 import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames, calculateMatchButtonPermissions } from '../../../../../tools/utils';
@@ -515,6 +515,16 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     </PDFDownloadLink>
   ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
 
+  useEffect(() => {
+    const logFocus = (e: FocusEvent) => {
+      console.log('Focused:', document.activeElement);
+    };
+    window.addEventListener('focusin', logFocus);
+    return () => {
+      window.removeEventListener('focusin', logFocus);
+    };
+  }, []);
+
   // Update available players list when the toggle changes
   useEffect(() => {
     if (includeInactivePlayers) {
@@ -727,10 +737,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Focus jersey number input after modal closes
+    setIsCallUpModalOpen(false);
+
     setTimeout(() => {
-      if (jerseyNumberRef.current) {
-        jerseyNumberRef.current.focus();
+      if (playerSelectRef.current) {
+        playerSelectRef.current.focus();
       }
     }, 100);
 
@@ -1894,227 +1905,282 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       )}
 
       {/* Call-Up Player Modal */}
-      {isCallUpModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Spieler aus anderer Mannschaft hinzufügen
-            </h3>
+      <Transition appear show={isCallUpModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => {
+          setIsCallUpModalOpen(false);
+          setSelectedCallUpTeam(null);
+          setSelectedCallUpPlayer(null);
+          setCallUpModalError(null);
+          // Focus jersey number input after modal closes
+          setTimeout(() => {
+            if (jerseyNumberRef.current) {
+              jerseyNumberRef.current.focus();
+            }
+          }, 100);
+        }}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
 
-            {callUpModalError && (
-              <div className="rounded-md bg-red-50 p-4 mb-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">{callUpModalError}</h3>
-                  </div>
-                  <div className="ml-auto pl-3">
-                    <div className="-mx-1.5 -my-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setCallUpModalError(null)}
-                        className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outlinenone focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
-                      >
-                        <span className="sr-only">Dismiss</span>
-                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Include Inactive Players Toggle */}
-            <div className="flex flex-row items-center justify-between sm:justify-end">
-              <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
-              <Switch
-                checked={includeInactivePlayers}
-                onChange={setIncludeInactivePlayers}
-                className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                  } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                <span
-                  aria-hidden="true"
-                  className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                />
-              </Switch>
-            </div>
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                  >
+                    Spieler aus anderer Mannschaft hinzufügen
+                  </Dialog.Title>
 
-            {/* Team Selection */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Team
-              </label>
-              <Listbox value={selectedCallUpTeam} onChange={setSelectedCallUpTeam}>
-                {({ open }) => (
-                  <>
-                    <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                        <span className={`block truncate ${selectedCallUpTeam ? '' : 'text-gray-400'}`}>
-                          {selectedCallUpTeam ? selectedCallUpTeam.name : 'Mannschaft auswählen'}
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        </span>
-                      </Listbox.Button>
+                  {callUpModalError && (
+                    <div className="rounded-md bg-red-50 p-4 mb-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">{callUpModalError}</h3>
+                        </div>
+                        <div className="ml-auto pl-3">
+                          <div className="-mx-1.5 -my-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setCallUpModalError(null)}
+                              className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                            >
+                              <span className="sr-only">Dismiss</span>
+                              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-                      <Transition
-                        show={open}
-                        as={React.Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {callUpTeams.length > 0 ? (
-                            callUpTeams.map((teamItem) => (
-                              <Listbox.Option
-                                key={teamItem._id}
-                                className={({ active }) =>
-                                  classNames(
-                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                    'relative cursor-default select-none py-2 pl-3 pr-9'
-                                  )
-                                }
-                                value={teamItem}
-                              >
-                                {({ selected, active }) => (
-                                  <>
-                                    <span className={classNames(
-                                      selected ? 'font-semibold' : 'font-normal',
-                                      'block truncate'
-                                    )}>
-                                      {teamItem.name}
-                                    </span>
+                  {/* Include Inactive Players Toggle */}
+                  <div className="flex flex-row items-center justify-between sm:justify-end mb-4">
+                    <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
+                    <Switch
+                      checked={includeInactivePlayers}
+                      onChange={setIncludeInactivePlayers}
+                      className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
+                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
+                          } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                      />
+                    </Switch>
+                  </div>
 
-                                    {selected ? (
-                                      <span
-                                        className={classNames(
-                                          active ? 'text-white' : 'text-indigo-600',
-                                          'absolute inset-y-0 right-0 flex items-center pr-4'
-                                        )}
-                                      >
-                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                      </span>
-                                    ) : null}
-                                  </>
+                  {/* Team Selection */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Team
+                    </label>
+                    <Listbox value={selectedCallUpTeam} onChange={setSelectedCallUpTeam}>
+                      {({ open }) => (
+                        <>
+                          <div className="relative">
+                            <Listbox.Button tabIndex={1} className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                              <span className={`block truncate ${selectedCallUpTeam ? '' : 'text-gray-400'}`}>
+                                {selectedCallUpTeam ? selectedCallUpTeam.name : 'Mannschaft auswählen'}
+                              </span>
+                              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                              </span>
+                            </Listbox.Button>
+
+                            <Transition
+                              show={open}
+                              as={React.Fragment}
+                              leave="transition ease-in duration-100"
+                              leaveFrom="opacity-100"
+                              leaveTo="opacity-0"
+                            >
+                              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                {callUpTeams.length > 0 ? (
+                                  callUpTeams.map((teamItem) => (
+                                    <Listbox.Option
+                                      key={teamItem._id}
+                                      className={({ active }) =>
+                                        classNames(
+                                          active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                          'relative cursor-default select-none py-2 pl-3 pr-9'
+                                        )
+                                      }
+                                      value={teamItem}
+                                    >
+                                      {({ selected, active }) => (
+                                        <>
+                                          <span className={classNames(
+                                            selected ? 'font-semibold' : 'font-normal',
+                                            'block truncate'
+                                          )}>
+                                            {teamItem.name}
+                                          </span>
+
+                                          {selected ? (
+                                            <span
+                                              className={classNames(
+                                                active ? 'text-white' : 'text-indigo-600',
+                                                'absolute inset-y-0 right-0 flex items-center pr-4'
+                                              )}
+                                            >
+                                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                            </span>
+                                          ) : null}
+                                        </>
+                                      )}
+                                    </Listbox.Option>
+                                  ))
+                                ) : (
+                                  <div className="py-2 px-3 text-gray-500 italic">
+                                    Keine Mannschaften verfügbar
+                                  </div>
                                 )}
-                              </Listbox.Option>
-                            ))
-                          ) : (
-                            <div className="py-2 px-3 text-gray-500 italic">
-                              Keine Mannschaften verfügbar
-                            </div>
-                          )}
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  </>
-                )}
-              </Listbox>
-            </div>
+                              </Listbox.Options>
+                            </Transition>
+                          </div>
+                        </>
+                      )}
+                    </Listbox>
+                  </div>
 
-            {/* Player Selection - Call Up */}
-            <div className="mb-6">
-              <PlayerSelect
-                ref={playerSelectRef}
-                name="call-up-player-select"
-                selectedPlayer={selectedCallUpPlayer ? {
-                  player: {
-                    playerId: selectedCallUpPlayer._id,
-                    firstName: selectedCallUpPlayer.firstName,
-                    lastName: selectedCallUpPlayer.lastName,
-                    jerseyNumber: selectedCallUpPlayer.jerseyNo || 0
-                  },
-                  playerPosition: { key: 'F', value: 'Feldspieler' },
-                  passNumber: selectedCallUpPlayer.passNo,
-                  called: selectedCallUpPlayer.called,
-                  goals: 0,
-                  assists: 0,
-                  points: 0,
-                  penaltyMinutes: 0
-                } : null}
-                onChange={(selectedRosterPlayer) => {
-                  if (selectedRosterPlayer) {
-                    const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
-                    if (availablePlayer) {
-                      setSelectedCallUpPlayer(availablePlayer);
-                      // Focus the "Hinzufügen" button after player selection
-                      setTimeout(() => {
-                        const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
-                        if (hinzufuegenButton) {
-                          hinzufuegenButton.focus();
+                  {/* Player Selection - Call Up */}
+                  <div className="mb-6">
+                    <PlayerSelect
+                      ref={playerSelectRef}
+                      name="call-up-player-select"
+                      tabIndex={2}
+                      selectedPlayer={selectedCallUpPlayer ? {
+                        player: {
+                          playerId: selectedCallUpPlayer._id,
+                          firstName: selectedCallUpPlayer.firstName,
+                          lastName: selectedCallUpPlayer.lastName,
+                          jerseyNumber: selectedCallUpPlayer.jerseyNo || 0
+                        },
+                        playerPosition: { key: 'F', value: 'Feldspieler' },
+                        passNumber: selectedCallUpPlayer.passNo,
+                        called: selectedCallUpPlayer.called,
+                        goals: 0,
+                        assists: 0,
+                        points: 0,
+                        penaltyMinutes: 0
+                      } : null}
+                      onChange={(selectedRosterPlayer) => {
+                        if (selectedRosterPlayer) {
+                          const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
+                          if (availablePlayer) {
+                            setSelectedCallUpPlayer(availablePlayer);
+                            // Focus the "Hinzufügen" button after player selection
+                            setTimeout(() => {
+                              const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
+                              if (hinzufuegenButton) {
+                                hinzufuegenButton.focus();
+                              }
+                            }, 100);
+                          }
+                        } else {
+                          setSelectedCallUpPlayer(null);
                         }
-                      }, 100);
-                    }
-                  } else {
-                    setSelectedCallUpPlayer(null);
-                  }
-                }}
-                roster={callUpPlayers.map(player => ({
-                  player: {
-                    playerId: player._id,
-                    firstName: player.firstName,
-                    lastName: player.lastName,
-                    jerseyNumber: player.jerseyNo || 0
-                  },
-                  playerPosition: { key: 'F', value: 'Feldspieler' },
-                  passNumber: player.passNo,
-                  called: player.called,
-                  goals: 0,
-                  assists: 0,
-                  points: 0,
-                  penaltyMinutes: 0
-                }))}
-                label="Spieler"
-                placeholder={selectedCallUpTeam ? 'Spieler auswählen' : 'Bitte zuerst eine Mannschaft auswählen'}
-                required={false}
-              />
-            </div>
+                      }}
+                      roster={callUpPlayers.map(player => ({
+                        player: {
+                          playerId: player._id,
+                          firstName: player.firstName,
+                          lastName: player.lastName,
+                          jerseyNumber: player.jerseyNo || 0
+                        },
+                        playerPosition: { key: 'F', value: 'Feldspieler' },
+                        passNumber: player.passNo,
+                        called: player.called,
+                        goals: 0,
+                        assists: 0,
+                        points: 0,
+                        penaltyMinutes: 0
+                      }))}
+                      label="Spieler"
+                      placeholder={selectedCallUpTeam ? 'Spieler auswählen' : 'Bitte zuerst eine Mannschaft auswählen'}
+                      required={false}
+                    />
+                  </div>
 
-            {/* Modal Actions */}
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCallUpModalOpen(false);
-                  setSelectedCallUpTeam(null);
-                  setSelectedCallUpPlayer(null);
-                  setCallUpModalError(null);
-                  // Focus jersey number input after modal closes
-                  setTimeout(() => {
-                    if (jerseyNumberRef.current) {
-                      jerseyNumberRef.current.focus();
-                    }
-                  }, 100);
-                }}
-                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                Abbrechen
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmCallUp}
-                disabled={!selectedCallUpPlayer}
-                data-callup-add-button
-                className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
-                  ? 'bg-indigo-600 hover:bg-indigo-500'
-                  : 'bg-indigo-300 cursor-not-allowed'
-                  }`}
-              >
-                Hinzufügen
-              </button>
+                  {/* Modal Actions */}
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      tabIndex={4}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Tab' && !e.shiftKey) {
+                          e.preventDefault();
+                          // Focus Team Select after TAB key press
+                          setTimeout(() => {
+                            const teamSelectButton = document.querySelector('[tabindex="1"]') as HTMLButtonElement;
+                            if (teamSelectButton) {
+                              teamSelectButton.focus();
+                            }
+                          }, 100);
+                        }
+                      }}
+                      onClick={() => {
+                        setIsCallUpModalOpen(false);
+                        setSelectedCallUpTeam(null);
+                        setSelectedCallUpPlayer(null);
+                        setCallUpModalError(null);
+                        // Focus jersey number input after modal closes
+                        setTimeout(() => {
+                          if (jerseyNumberRef.current) {
+                            jerseyNumberRef.current.focus();
+                          }
+                        }, 100);
+                      }}
+                      className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmCallUp}
+                      disabled={!selectedCallUpPlayer}
+                      tabIndex={3}
+                      data-callup-add-button
+                      className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
+                        ? 'bg-indigo-600 hover:bg-indigo-500'
+                        : 'bg-indigo-300 cursor-not-allowed'
+                        }`}
+                    >
+                      Hinzufügen
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </div>
-        </div>
-      )}
+        </Dialog>
+      </Transition>
 
     </Layout>
   );
