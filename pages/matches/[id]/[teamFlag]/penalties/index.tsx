@@ -422,9 +422,12 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     setFieldValue(`penalties.${index}.penaltyCode`, selectedPenaltyCode);
                                     setError('');
                                     // Move focus to penalty minutes when penalty code is selected
-                                    if (selectedPenaltyCode && penaltyMinutesRefs.current[index]) {
+                                    if (selectedPenaltyCode) {
                                       setTimeout(() => {
-                                        penaltyMinutesRefs.current[index]?.focus();
+                                        const minutesRef = penaltyMinutesRefs.current[index];
+                                        if (minutesRef && minutesRef.focus) {
+                                          minutesRef.focus();
+                                        }
                                       }, 100);
                                     }
                                   }}
@@ -434,6 +437,18 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   placeholder="Strafe auswählen"
                                   showErrorText={false}
                                   tabIndex={index * 6 + 4}
+                                  onKeyDown={(e: React.KeyboardEvent) => {
+                                    if (e.key === 'Enter' || e.key === 'Tab') {
+                                      e.preventDefault();
+                                      // Move focus to penalty minutes
+                                      setTimeout(() => {
+                                        const minutesRef = penaltyMinutesRefs.current[index];
+                                        if (minutesRef && minutesRef.focus) {
+                                          minutesRef.focus();
+                                        }
+                                      }, 100);
+                                    }
+                                  }}
                                 />
                               </div>
                               {/** Minutes, GM, MP */}
