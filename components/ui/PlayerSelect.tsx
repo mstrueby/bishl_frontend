@@ -1,4 +1,3 @@
-
 import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
@@ -216,6 +215,7 @@ const FormikPlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>(({
                               )
                             }
                             value={player}
+                            onClick={() => setIsOpen(false)}
                           >
                             {({ active }) => (
                               <>
@@ -448,6 +448,7 @@ const StandalonePlayerSelect = forwardRef<PlayerSelectHandle, PlayerSelectProps>
                               )
                             }
                             value={player}
+                            onClick={() => setIsOpen(false)}
                           >
                             {({ active }) => (
                               <>
