@@ -73,7 +73,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const roster = matchTeam.roster;
     const scores = matchTeam.scores;
 
-    
+
 
     return {
       props: {
@@ -160,7 +160,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
             firstName: Yup.string().required(),
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
-          }).required('Torschütze ist erforderlich'),
+          })
+          .required('Torschütze ist erforderlich')
+          .nullable(),
         assistPlayer: Yup.object().nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),

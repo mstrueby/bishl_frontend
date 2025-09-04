@@ -16,7 +16,7 @@ import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
 import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
-import PlayerSelect from '../../../../../components/ui/PlayerSelect';
+import EventPlayerSelect from '../../../../../components/ui/EventPlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 import PenaltyCodeSelect from '../../../../../components/ui/PenaltyCodeSelect';
 import Listbox from '../../../../../components/ui/form/Listbox';
@@ -358,20 +358,11 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                               {/** Player, Code */}
                               <div className="flex flex-auto flex-col gap-4">
                                 {/** Player Selection */}
-                                <PlayerSelect
+                                <EventPlayerSelect
                                   name={`penalties.${index}.penaltyPlayer`}
-                                  selectedPlayer={penalty.penaltyPlayer ? roster.find(rp => rp.player.playerId === penalty.penaltyPlayer.playerId) || null : null}
-                                  onChange={(selectedRosterPlayer) => {
-                                    if (selectedRosterPlayer) {
-                                      setFieldValue(`penalties.${index}.penaltyPlayer`, {
-                                        playerId: selectedRosterPlayer.player.playerId,
-                                        firstName: selectedRosterPlayer.player.firstName,
-                                        lastName: selectedRosterPlayer.player.lastName,
-                                        jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                      });
-                                    } else {
-                                      setFieldValue(`penalties.${index}.penaltyPlayer`, null);
-                                    }
+                                  selectedPlayer={penalty.penaltyPlayer || null}
+                                  onChange={(eventPlayer) => {
+                                    setFieldValue(`penalties.${index}.penaltyPlayer`, eventPlayer);
                                   }}
                                   roster={roster}
                                   required={true}
