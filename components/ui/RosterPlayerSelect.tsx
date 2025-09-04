@@ -176,7 +176,6 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                   afterLeave={() => {
-                    setIsOpen(false);
                     // Only clear query if no player is selected and query doesn't match any player
                     if (!selectedPlayer && query) {
                       const hasMatchingPlayer = roster.some(player => {
@@ -414,7 +413,6 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                   afterLeave={() => {
-                    setIsOpen(false);
                     // Only clear query if no player is selected and query doesn't match any player
                     if (!selectedPlayer && query) {
                       const hasMatchingPlayer = roster.some(player => {
