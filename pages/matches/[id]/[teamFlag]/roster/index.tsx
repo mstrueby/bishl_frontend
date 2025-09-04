@@ -534,7 +534,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setAvailablePlayersList(filteredPlayers);
     }
   }, [includeInactivePlayers, rosterList, allAvailablePlayersList, sortRoster]);
-
+  
   // Auto-set published to true if match is finished
   const isMatchFinished = match.matchStatus.key === 'FINISHED';
   useEffect(() => {
@@ -663,7 +663,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     }
   }, [selectedCallUpTeam, club, jwt, rosterList, includeInactivePlayers]);
 
-  
+  // Check if user has permission to access roster - after all hooks
+  if (!hasRosterPermission) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
+            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Aufstellung für diese Mannschaft zu bearbeiten.</p>
+            <Link href={`/matches/${match._id}`}>
+              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Zurück zum Spiel
+              </a>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   // Handle adding the selected call-up player to the available players list
   const handleConfirmCallUp = () => {
@@ -710,22 +727,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Focus jersey number input after modal closes and ensure TAB navigation works
+    // Focus jersey number input after modal closes
     setTimeout(() => {
       if (jerseyNumberRef.current) {
         jerseyNumberRef.current.focus();
-        // Ensure the main form elements are properly in the tab order by setting tabIndex on DOM elements
-        const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-        const addButton = addButtonRef.current;
-
-        if (playerSelectInput) {
-          playerSelectInput.tabIndex = 1;
-        }
-        if (addButton) {
-          addButton.tabIndex = 4;
-        }
       }
-    }, 150);
+    }, 100);
 
     // Optional: Show a success message
     setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
@@ -808,46 +815,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setEditingPlayer(null);
     setModalError(null);
   };
-
-  // Set focus to PlayerSelect when component mounts
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (playerSelectRef.current && playerSelectRef.current.focus) {
-        playerSelectRef.current.focus();
-      }
-      // Ensure proper initial tab order
-      const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-      const jerseyInput = jerseyNumberRef.current;
-      const positionButton = positionSelectRef.current;
-      const addButton = addButtonRef.current;
-
-      if (playerSelectInput) playerSelectInput.tabIndex = 1;
-      if (jerseyInput) jerseyInput.tabIndex = 2;
-      if (positionButton) positionButton.tabIndex = 3;
-      if (addButton) addButton.tabIndex = 4;
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Check if user has permission to access roster - after all hooks
-  if (!hasRosterPermission) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
-            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Aufstellung für diese Mannschaft zu bearbeiten.</p>
-            <Link href={`/matches/${match._id}`}>
-              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Zurück zum Spiel
-              </a>
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   if (loading) {
     return <Layout><div>Loading...</div></Layout>;
@@ -1381,12 +1348,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     if (playerSelectRef.current && playerSelectRef.current.focus) {
                       playerSelectRef.current.focus();
                     }
-                    // Ensure tab order is maintained
-                    const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-                    if (playerSelectInput) {
-                      playerSelectInput.focus();
-                    }
-                  }, 50);
+                  }, 100);
                 }
               }}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
@@ -1607,9 +1569,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/* Double Jersey No check indicator */}
             <div className="flex items-center mt-4">
               <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
-                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
-                  ? 'Doppelte Rückennummern vorhanden'
-                  : 'Keine doppelten Rückennummern'}
+                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
+                  <ExclamationCircleIcon className="h-6 w-6" />
+                ) : (
+                  <CheckCircleIcon className="h-6 w-6" />
+                )}
               </div>
               <span className="ml-2 text-sm">
                 {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
@@ -2082,11 +2046,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
                     if (availablePlayer) {
                       setSelectedCallUpPlayer(availablePlayer);
-                      // Focus the modal's "Hinzufügen" button after player selection
+                      // Focus the "Hinzufügen" button after player selection
                       setTimeout(() => {
-                        const modalAddButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
-                        if (modalAddButton && modalAddButton.offsetParent !== null) {
-                          modalAddButton.focus();
+                        const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
+                        if (hinzufuegenButton) {
+                          hinzufuegenButton.focus();
                         }
                       }, 100);
                     }
@@ -2124,22 +2088,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setSelectedCallUpTeam(null);
                   setSelectedCallUpPlayer(null);
                   setCallUpModalError(null);
-                  // Focus jersey number input after modal closes and reset tab order
+                  // Focus jersey number input after modal closes
                   setTimeout(() => {
                     if (jerseyNumberRef.current) {
                       jerseyNumberRef.current.focus();
-                      // Ensure the main form elements maintain proper tab order by setting tabIndex on DOM elements
-                      const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-                      const addButton = addButtonRef.current;
-
-                      if (playerSelectInput) {
-                        playerSelectInput.tabIndex = 1;
-                      }
-                      if (addButton) {
-                        addButton.tabIndex = 4;
-                      }
                     }
-                  }, 150);
+                  }, 100);
                 }}
                 className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
