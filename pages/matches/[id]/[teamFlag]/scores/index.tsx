@@ -73,7 +73,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const roster = matchTeam.roster;
     const scores = matchTeam.scores;
 
-
+    
 
     return {
       props: {
@@ -154,12 +154,13 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         matchTime: Yup.string()
           .required()
           .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
-        goalPlayer: Yup.mixed()
-          .required('Torschütze ist erforderlich')
-          .nullable()
-          .test('is-selected', 'Torschütze ist erforderlich', (value) => {
-            return value !== null && value !== undefined;
-          }),
+        goalPlayer: Yup.object()
+          .shape({
+            playerId: Yup.string().required(),
+            firstName: Yup.string().required(),
+            lastName: Yup.string().required(),
+            jerseyNumber: Yup.number().required()
+          }).required('Torschütze ist erforderlich'),
         assistPlayer: Yup.object().nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
