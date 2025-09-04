@@ -406,6 +406,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
   const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
 
+  // Set initial focus to PlayerSelect when page loads
+  useEffect(() => {
+    setTimeout(() => {
+      if (playerSelectRef.current && playerSelectRef.current.focus) {
+        playerSelectRef.current.focus();
+      }
+    }, 100);
+  }, []);
+
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
@@ -727,20 +736,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Focus jersey number input after modal closes and ensure TAB navigation works
+    // Focus PlayerSelect after modal closes to maintain proper tab order
     setTimeout(() => {
-      if (jerseyNumberRef.current) {
-        jerseyNumberRef.current.focus();
-        // Ensure the main form elements are properly in the tab order by setting tabIndex on DOM elements
-        const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-        const addButton = addButtonRef.current;
-        
-        if (playerSelectInput) {
-          playerSelectInput.tabIndex = 1;
-        }
-        if (addButton) {
-          addButton.tabIndex = 4;
-        }
+      if (playerSelectRef.current && playerSelectRef.current.focus) {
+        playerSelectRef.current.focus();
       }
     }, 150);
 
@@ -930,10 +929,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
 
-      // Keep focus on the "Hinzufügen" button after adding player
+      // Focus PlayerSelect after adding player to restart tab cycle
       setTimeout(() => {
-        if (addButtonRef.current) {
-          addButtonRef.current.focus();
+        if (playerSelectRef.current && playerSelectRef.current.focus) {
+          playerSelectRef.current.focus();
         }
       }, 100);
 
@@ -1229,9 +1228,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   placeholder="##"
                   tabIndex={2}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === 'Tab') {
+                    if (e.key === 'Tab' && !e.shiftKey) {
                       e.preventDefault();
-                      // Focus the position select dropdown when Enter or Tab is pressed
+                      // Focus the position select dropdown when Tab is pressed
+                      if (positionSelectRef.current) {
+                        positionSelectRef.current.focus();
+                      }
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      // Focus the position select dropdown when Enter is pressed
                       if (positionSelectRef.current) {
                         positionSelectRef.current.focus();
                       }
@@ -1259,7 +1264,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                           ref={positionSelectRef}
                           tabIndex={3}
                           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                            if (e.key === 'Enter' && !open) {
+                            if (e.key === 'Tab' && !e.shiftKey && !open) {
+                              e.preventDefault();
+                              // Focus the Add button when Tab is pressed and dropdown is closed
+                              if (addButtonRef.current) {
+                                addButtonRef.current.focus();
+                              }
+                            } else if (e.key === 'Enter' && !open) {
                               e.preventDefault();
                               // Focus the Add button when Enter is pressed and dropdown is closed
                               if (addButtonRef.current) {
@@ -1353,9 +1364,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault();
-                  // Focus PlayerSelect after TAB key press
+                  // Focus PlayerSelect after TAB key press to cycle navigation
                   setTimeout(() => {
-                    if (playerSelectRef.current) {
+                    if (playerSelectRef.current && playerSelectRef.current.focus) {
                       playerSelectRef.current.focus();
                     }
                   }, 100);
@@ -1966,7 +1977,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 {({ open }) => (
                   <>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                      <Listbox.Button 
+                        tabIndex={1}
+                        onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+                          if (e.key === 'Tab' && !e.shiftKey && !open) {
+                            e.preventDefault();
+                            // Focus call-up player select when Tab is pressed
+                            setTimeout(() => {
+                              const callUpPlayerSelect = document.querySelector('[name="call-up-player-select"]') as HTMLElement;
+                              if (callUpPlayerSelect) {
+                                const input = callUpPlayerSelect.querySelector('input') as HTMLInputElement;
+                                if (input) {
+                                  input.focus();
+                                }
+                              }
+                            }, 100);
+                          }
+                        }}
+                        className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                         <span className={`block truncate ${selectedCallUpTeam ? '' : 'text-gray-400'}`}>
                           {selectedCallUpTeam ? selectedCallUpTeam.name : 'Mannschaft auswählen'}
                         </span>
@@ -2036,6 +2064,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <PlayerSelect
                 ref={playerSelectRef}
                 name="call-up-player-select"
+                tabIndex={2}
                 selectedPlayer={selectedCallUpPlayer ? {
                   player: {
                     playerId: selectedCallUpPlayer._id,
@@ -2098,22 +2127,24 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setSelectedCallUpTeam(null);
                   setSelectedCallUpPlayer(null);
                   setCallUpModalError(null);
-                  // Focus jersey number input after modal closes and reset tab order
+                  // Focus PlayerSelect after modal closes to maintain proper tab order
                   setTimeout(() => {
-                    if (jerseyNumberRef.current) {
-                      jerseyNumberRef.current.focus();
-                      // Ensure the main form elements maintain proper tab order by setting tabIndex on DOM elements
-                      const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
-                      const addButton = addButtonRef.current;
-                      
-                      if (playerSelectInput) {
-                        playerSelectInput.tabIndex = 1;
-                      }
-                      if (addButton) {
-                        addButton.tabIndex = 4;
-                      }
+                    if (playerSelectRef.current && playerSelectRef.current.focus) {
+                      playerSelectRef.current.focus();
                     }
                   }, 150);
+                }}
+                data-callup-cancel-button
+                tabIndex={4}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab' && !e.shiftKey) {
+                    e.preventDefault();
+                    // Cycle back to team listbox
+                    const teamListbox = document.querySelector('[tabindex="1"]') as HTMLButtonElement;
+                    if (teamListbox) {
+                      teamListbox.focus();
+                    }
+                  }
                 }}
                 className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
@@ -2124,6 +2155,17 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 onClick={handleConfirmCallUp}
                 disabled={!selectedCallUpPlayer}
                 data-callup-add-button
+                tabIndex={3}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab' && !e.shiftKey) {
+                    e.preventDefault();
+                    // Focus cancel button
+                    const cancelButton = document.querySelector('[data-callup-cancel-button]') as HTMLButtonElement;
+                    if (cancelButton) {
+                      cancelButton.focus();
+                    }
+                  }
+                }}
                 className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
                   ? 'bg-indigo-600 hover:bg-indigo-500'
                   : 'bg-indigo-300 cursor-not-allowed'
