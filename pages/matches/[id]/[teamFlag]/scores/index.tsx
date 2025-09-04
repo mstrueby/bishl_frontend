@@ -164,8 +164,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
           })
-          .required('Torschütze ist erforderlich')
-          .nullable(),
+          .required('Torschütze ist erforderlich'),
         assistPlayer: Yup.object().nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
