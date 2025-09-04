@@ -16,7 +16,7 @@ import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
 import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
-import PlayerSelect from '../../../../../components/ui/PlayerSelect';
+import EventPlayerSelect from '../../../../../components/ui/EventPlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { calculateMatchButtonPermissions } from '../../../../../tools/utils';
@@ -73,7 +73,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const roster = matchTeam.roster;
     const scores = matchTeam.scores;
 
-    
+
 
     return {
       props: {
@@ -160,7 +160,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
             firstName: Yup.string().required(),
             lastName: Yup.string().required(),
             jerseyNumber: Yup.number().required()
-          }).required('Torschütze ist erforderlich'),
+          })
+          .required('Torschütze ist erforderlich')
+          .nullable(),
         assistPlayer: Yup.object().nullable(), // Optional
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
@@ -314,20 +316,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
                                 {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
-                                  <PlayerSelect
+                                  <EventPlayerSelect
                                     name={`scores.${index}.goalPlayer`}
-                                    selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
-                                    onChange={(selectedRosterPlayer) => {
-                                      if (selectedRosterPlayer) {
-                                        setFieldValue(`scores.${index}.goalPlayer`, {
-                                          playerId: selectedRosterPlayer.player.playerId,
-                                          firstName: selectedRosterPlayer.player.firstName,
-                                          lastName: selectedRosterPlayer.player.lastName,
-                                          jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                        });
-                                      } else {
-                                        setFieldValue(`scores.${index}.goalPlayer`, null);
-                                      }
+                                    selectedPlayer={score.goalPlayer || null}
+                                    onChange={(selectedEventPlayer) => {
+                                      setFieldValue(`scores.${index}.goalPlayer`, selectedEventPlayer);
                                     }}
                                     roster={roster}
                                     required={true}
@@ -339,20 +332,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
                                 {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
-                                  <PlayerSelect
+                                  <EventPlayerSelect
                                     name={`scores.${index}.assistPlayer`}
-                                    selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
-                                    onChange={(selectedRosterPlayer) => {
-                                      if (selectedRosterPlayer) {
-                                        setFieldValue(`scores.${index}.assistPlayer`, {
-                                          playerId: selectedRosterPlayer.player.playerId,
-                                          firstName: selectedRosterPlayer.player.firstName,
-                                          lastName: selectedRosterPlayer.player.lastName,
-                                          jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                        });
-                                      } else {
-                                        setFieldValue(`scores.${index}.assistPlayer`, null);
-                                      }
+                                    selectedPlayer={score.assistPlayer || null}
+                                    onChange={(selectedEventPlayer) => {
+                                      setFieldValue(`scores.${index}.assistPlayer`, selectedEventPlayer);
                                     }}
                                     roster={roster}
                                     required={false}

@@ -1,0 +1,526 @@
+
+import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useField, useFormikContext } from 'formik';
+import { Combobox, Transition } from '@headlessui/react';
+import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
+import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { MinusCircleIcon} from '@heroicons/react/24/outline'
+import { classNames } from '../../tools/utils';
+
+interface EventPlayerSelectProps {
+  name: string;
+  selectedPlayer: EventPlayer | null;
+  onChange: (selectedPlayer: EventPlayer | null) => void;
+  roster: RosterPlayer[];
+  label?: string;
+  required?: boolean;
+  placeholder?: string;
+  tabIndex?: number;
+  removeButton?: boolean;
+  showErrorText?: boolean;
+}
+
+interface EventPlayerSelectHandle {
+  focus: () => void;
+}
+
+// Internal component that uses Formik hooks
+const FormikEventPlayerSelect = forwardRef<EventPlayerSelectHandle, EventPlayerSelectProps>(({
+  name,
+  selectedPlayer: propSelectedPlayer,
+  onChange,
+  roster,
+  label,
+  required = false,
+  placeholder = "Spieler auswählen",
+  tabIndex,
+  removeButton = false,
+  showErrorText = true,  
+}, ref) => {
+  const [field, meta, helpers] = useField(name);
+  const [selectedPlayer, setSelectedPlayer] = useState<EventPlayer | null>(propSelectedPlayer);
+  const [query, setQuery] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // When the 'propSelectedPlayer' changes, update the local state
+  useEffect(() => {
+    setSelectedPlayer(propSelectedPlayer);
+    // Update query to show selected player's name when prop changes, or clear when null
+    if (propSelectedPlayer) {
+      setQuery(`${propSelectedPlayer.lastName}, ${propSelectedPlayer.firstName}`);
+    } else {
+      setQuery(''); // Clear the query to show placeholder
+    }
+  }, [propSelectedPlayer]);
+
+  const [showAllOptions, setShowAllOptions] = useState(false);
+
+  // Filter roster based on query and showAllOptions flag
+  const filteredRoster = showAllOptions || query === ''
+    ? roster
+    : roster.filter((rosterPlayer) => {
+      const queryLower = query.toLowerCase().trim();
+
+      // Jersey number search (exact match and starts-with match)
+      const jerseyNumber = rosterPlayer.player.jerseyNumber?.toString() || '';
+      const jerseyMatch = jerseyNumber === query || jerseyNumber.startsWith(query);
+
+      // Name searches
+      const fullName = `${rosterPlayer.player.firstName} ${rosterPlayer.player.lastName}`.toLowerCase();
+      const reverseName = `${rosterPlayer.player.lastName}, ${rosterPlayer.player.firstName}`.toLowerCase();
+      const nameMatch = fullName.includes(queryLower) || reverseName.includes(queryLower);
+
+      // Combined search (e.g., "12 Smith" or "Smith 12")
+      const combinedMatch = `${jerseyNumber} ${fullName}`.includes(queryLower) ||
+        `${jerseyNumber} ${reverseName}`.includes(queryLower);
+
+      return jerseyMatch || nameMatch || combinedMatch;
+    });
+
+  const handlePlayerChange = (rosterPlayer: RosterPlayer | null) => {
+    const eventPlayer = rosterPlayer ? rosterPlayer.player : null;
+    setSelectedPlayer(eventPlayer);
+    onChange(eventPlayer);
+    if (helpers && helpers.setValue) {
+      helpers.setValue(eventPlayer);
+    }
+    if (helpers && helpers.setTouched) {
+      helpers.setTouched(true);
+    }
+
+    if (eventPlayer) {
+      setQuery(`${eventPlayer.lastName}, ${eventPlayer.firstName}`);
+    } else {
+      setQuery('');
+    }
+  };
+
+  // Add focus method to ref
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  }), []);
+
+  const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setQuery(value);
+    setShowAllOptions(false); // Reset to filtered mode when typing
+
+    // If query doesn't match current selection, clear selection
+    if (selectedPlayer) {
+      const currentPlayerName = `${selectedPlayer.lastName}, ${selectedPlayer.firstName}`;
+      if (!currentPlayerName.toLowerCase().includes(value.toLowerCase()) &&
+        !selectedPlayer.jerseyNumber?.toString().includes(value)) {
+        setSelectedPlayer(null);
+        onChange(null);
+        if (helpers && helpers.setValue) {
+          helpers.setValue(null);
+        }
+      }
+    }
+  };
+
+  const displayValue = (player: EventPlayer | null) => {
+    if (!player) return ''; // Return empty string when no player selected to show placeholder
+    return `${player.jerseyNumber} - ${player.lastName}, ${player.firstName}`;
+  };
+
+  // Find the roster player that matches the selected event player
+  const selectedRosterPlayer = selectedPlayer 
+    ? roster.find(rp => rp.player.playerId === selectedPlayer.playerId) || null
+    : null;
+
+  return (
+    <div className="w-full">
+      <Combobox value={selectedRosterPlayer} onChange={handlePlayerChange}>
+        {({ open }) => (
+          <>
+            {label && (
+              <Combobox.Label className="block mt-6 mb-2 text-sm font-medium text-gray-900">
+                {label}
+              </Combobox.Label>
+            )}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Combobox.Input
+                  ref={inputRef}
+                  tabIndex={tabIndex}
+                  className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
+                  onChange={handleQueryChange}
+                  value={selectedPlayer ? displayValue(selectedPlayer) : query}
+                  placeholder={placeholder}
+                  autoComplete="off"
+                  onFocus={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(true);
+                  }}
+                  onBlur={() => {
+                    // Delay closing to allow for option selection
+                    setTimeout(() => setIsOpen(false), 200);
+                  }}
+                />
+                <Combobox.Button
+                  className="absolute inset-y-0 right-0 flex items-center pr-2"
+                  onClick={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(!isOpen);
+                  }}
+                >
+                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </Combobox.Button>
+
+              <Transition
+                  show={isOpen}
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                  afterLeave={() => {
+                    setIsOpen(false);
+                    // Only clear query if no player is selected and query doesn't match any player
+                    if (!selectedPlayer && query) {
+                      const hasMatchingPlayer = roster.some(rosterPlayer => {
+                        const playerName = `${rosterPlayer.player.lastName}, ${rosterPlayer.player.firstName}`;
+                        return playerName.toLowerCase().includes(query.toLowerCase()) ||
+                          rosterPlayer.player.jerseyNumber?.toString().includes(query);
+                      });
+                      if (!hasMatchingPlayer) {
+                        setQuery('');
+                      }
+                    }
+                  }}
+                >
+                  <Combobox.Options 
+                    className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                  >
+                    {filteredRoster.length === 0 && query !== '' ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Kein Spieler gefunden.
+                      </div>
+                    ) : filteredRoster.length === 0 ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Niemand verfügbar.
+                      </div>
+                    ) : (
+                      filteredRoster.map((rosterPlayer) => {
+                        const isSelected = selectedPlayer?.playerId === rosterPlayer.player.playerId;
+
+                        return (
+                          <Combobox.Option
+                            key={rosterPlayer.player.playerId}
+                            className={({ active }) =>
+                              classNames(
+                                'relative cursor-default select-none py-2 pl-3 pr-9',
+                                active ? 'bg-indigo-600 text-white' : 'text-gray-900'
+                              )
+                            }
+                            value={rosterPlayer}
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {({ active }) => (
+                              <>
+                                <div className={classNames('flex items-center', isSelected ? 'font-semibold' : 'font-normal')}>
+                                  <span className="w-6 text-center mr-3">{rosterPlayer.player.jerseyNumber}</span>
+                                  <span className="truncate">{rosterPlayer.player.lastName}, {rosterPlayer.player.firstName}</span>
+                                </div>
+
+                                {isSelected ? (
+                                  <span
+                                    className={classNames(
+                                      'absolute inset-y-0 right-0 flex items-center pr-4',
+                                      active ? 'text-white' : 'text-indigo-600'
+                                    )}
+                                  >
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Combobox.Option>
+                        );
+                      })
+                    )}
+                  </Combobox.Options>
+                </Transition>
+              </div>
+              {removeButton && selectedPlayer && (
+                <button
+                  type="button"
+                  onClick={() => handlePlayerChange(null)}
+                  className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md border border-gray-300 shadow-sm transition-colors flex-shrink-0"
+                  title="Spieler entfernen"
+                >
+                  <MinusCircleIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </Combobox>
+      {showErrorText && meta.touched && meta.error ? (
+        <p className="mt-2 text-sm text-red-600">
+          {meta.error}
+        </p>
+      ) : null}
+    </div>
+  );
+});
+
+// Standalone component that doesn't use Formik hooks
+const StandaloneEventPlayerSelect = forwardRef<EventPlayerSelectHandle, EventPlayerSelectProps>(({
+  name,
+  selectedPlayer: propSelectedPlayer,
+  onChange,
+  roster,
+  label,
+  required = false,
+  placeholder = "Spieler auswählen",
+  tabIndex,
+  removeButton = false,
+  showErrorText = true,  
+}, ref) => {
+  const [selectedPlayer, setSelectedPlayer] = useState<EventPlayer | null>(propSelectedPlayer);
+  const [query, setQuery] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // When the 'propSelectedPlayer' changes, update the local state
+  useEffect(() => {
+    setSelectedPlayer(propSelectedPlayer);
+    // Update query to show selected player's name when prop changes, or clear when null
+    if (propSelectedPlayer) {
+      setQuery(`${propSelectedPlayer.lastName}, ${propSelectedPlayer.firstName}`);
+    } else {
+      setQuery(''); // Clear the query to show placeholder
+    }
+  }, [propSelectedPlayer]);
+
+  const [showAllOptions, setShowAllOptions] = useState(false);
+
+  // Filter roster based on query and showAllOptions flag
+  const filteredRoster = showAllOptions || query === ''
+    ? roster
+    : roster.filter((rosterPlayer) => {
+      const queryLower = query.toLowerCase().trim();
+
+      // Jersey number search (exact match and starts-with match)
+      const jerseyNumber = rosterPlayer.player.jerseyNumber?.toString() || '';
+      const jerseyMatch = jerseyNumber === query || jerseyNumber.startsWith(query);
+
+      // Name searches
+      const fullName = `${rosterPlayer.player.firstName} ${rosterPlayer.player.lastName}`.toLowerCase();
+      const reverseName = `${rosterPlayer.player.lastName}, ${rosterPlayer.player.firstName}`.toLowerCase();
+      const nameMatch = fullName.includes(queryLower) || reverseName.includes(queryLower);
+
+      // Combined search (e.g., "12 Smith" or "Smith 12")
+      const combinedMatch = `${jerseyNumber} ${fullName}`.includes(queryLower) ||
+        `${jerseyNumber} ${reverseName}`.includes(queryLower);
+
+      return jerseyMatch || nameMatch || combinedMatch;
+    });
+
+  const handlePlayerChange = (rosterPlayer: RosterPlayer | null) => {
+    const eventPlayer = rosterPlayer ? rosterPlayer.player : null;
+    setSelectedPlayer(eventPlayer);
+    onChange(eventPlayer);
+
+    if (eventPlayer) {
+      setQuery(`${eventPlayer.lastName}, ${eventPlayer.firstName}`);
+    } else {
+      setQuery('');
+    }
+  };
+
+  // Add focus method to ref
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  }), []);
+
+  const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setQuery(value);
+    setShowAllOptions(false); // Reset to filtered mode when typing
+
+    // If query doesn't match current selection, clear selection
+    if (selectedPlayer) {
+      const currentPlayerName = `${selectedPlayer.lastName}, ${selectedPlayer.firstName}`;
+      if (!currentPlayerName.toLowerCase().includes(value.toLowerCase()) &&
+        !selectedPlayer.jerseyNumber?.toString().includes(value)) {
+        setSelectedPlayer(null);
+        onChange(null);
+      }
+    }
+  };
+
+  const displayValue = (player: EventPlayer | null) => {
+    if (!player) return ''; // Return empty string when no player selected to show placeholder
+    return `${player.jerseyNumber} - ${player.lastName}, ${player.firstName}`;
+  };
+
+  // Find the roster player that matches the selected event player
+  const selectedRosterPlayer = selectedPlayer 
+    ? roster.find(rp => rp.player.playerId === selectedPlayer.playerId) || null
+    : null;
+
+  return (
+    <div className="w-full">
+      <Combobox value={selectedRosterPlayer} onChange={handlePlayerChange}>
+        {({ open }) => (
+          <>
+            {label && (
+              <Combobox.Label className="block mt-6 mb-2 text-sm font-medium text-gray-900">
+                {label}
+              </Combobox.Label>
+            )}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Combobox.Input
+                  ref={inputRef}
+                  tabIndex={tabIndex}
+                  className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 focus:border-indigo-500 focus:ring-indigo-600 text-gray-900 sm:text-sm"
+                  onChange={handleQueryChange}
+                  value={selectedPlayer ? displayValue(selectedPlayer) : query}
+                  placeholder={placeholder}
+                  autoComplete="off"
+                  onFocus={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(true);
+                  }}
+                  onBlur={() => {
+                    // Delay closing to allow for option selection
+                    setTimeout(() => setIsOpen(false), 200);
+                  }}
+                />
+                <Combobox.Button
+                  className="absolute inset-y-0 right-0 flex items-center pr-2"
+                  onClick={() => {
+                    setShowAllOptions(true);
+                    setIsOpen(!isOpen);
+                  }}
+                >
+                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </Combobox.Button>
+
+              <Transition
+                  show={isOpen}
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                  afterLeave={() => {
+                    setIsOpen(false);
+                    // Only clear query if no player is selected and query doesn't match any player
+                    if (!selectedPlayer && query) {
+                      const hasMatchingPlayer = roster.some(rosterPlayer => {
+                        const playerName = `${rosterPlayer.player.lastName}, ${rosterPlayer.player.firstName}`;
+                        return playerName.toLowerCase().includes(query.toLowerCase()) ||
+                          rosterPlayer.player.jerseyNumber?.toString().includes(query);
+                      });
+                      if (!hasMatchingPlayer) {
+                        setQuery('');
+                      }
+                    }
+                  }}
+                >
+                  <Combobox.Options 
+                    className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                  >
+                    {filteredRoster.length === 0 && query !== '' ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Kein Spieler gefunden.
+                      </div>
+                    ) : filteredRoster.length === 0 ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Niemand verfügbar.
+                      </div>
+                    ) : (
+                      filteredRoster.map((rosterPlayer) => {
+                        const isSelected = selectedPlayer?.playerId === rosterPlayer.player.playerId;
+
+                        return (
+                          <Combobox.Option
+                            key={rosterPlayer.player.playerId}
+                            className={({ active }) =>
+                              classNames(
+                                'relative cursor-default select-none py-2 pl-3 pr-9',
+                                active ? 'bg-indigo-600 text-white' : 'text-gray-900'
+                              )
+                            }
+                            value={rosterPlayer}
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {({ active }) => (
+                              <>
+                                <div className={classNames('flex items-center', isSelected ? 'font-semibold' : 'font-normal')}>
+                                  <span className="w-6 text-center mr-3">{rosterPlayer.player.jerseyNumber}</span>
+                                  <span className="truncate">{rosterPlayer.player.lastName}, {rosterPlayer.player.firstName}</span>
+                                </div>
+
+                                {isSelected ? (
+                                  <span
+                                    className={classNames(
+                                      'absolute inset-y-0 right-0 flex items-center pr-4',
+                                      active ? 'text-white' : 'text-indigo-600'
+                                    )}
+                                  >
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Combobox.Option>
+                        );
+                      })
+                    )}
+                  </Combobox.Options>
+                </Transition>
+              </div>
+              {removeButton && selectedPlayer && (
+                <button
+                  type="button"
+                  onClick={() => handlePlayerChange(null)}
+                  className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md border border-gray-300 shadow-sm transition-colors flex-shrink-0"
+                  title="Spieler entfernen"
+                >
+                  <MinusCircleIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </Combobox>
+    </div>
+  );
+});
+
+// Main component that conditionally renders based on Formik context
+const EventPlayerSelect = forwardRef<EventPlayerSelectHandle, EventPlayerSelectProps>((props, ref) => {
+  const formikContext = useFormikContext();
+  const isInFormikContext = !!formikContext;
+
+  if (isInFormikContext) {
+    return <FormikEventPlayerSelect {...props} ref={ref} />;
+  } else {
+    return <StandaloneEventPlayerSelect {...props} ref={ref} />;
+  }
+});
+
+FormikEventPlayerSelect.displayName = 'FormikEventPlayerSelect';
+StandaloneEventPlayerSelect.displayName = 'StandaloneEventPlayerSelect';
+EventPlayerSelect.displayName = 'EventPlayerSelect';
+
+export default EventPlayerSelect;
