@@ -319,12 +319,15 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
                                       if (selectedRosterPlayer) {
-                                        setFieldValue(`scores.${index}.goalPlayer`, {
+                                        const goalPlayer = {
                                           playerId: selectedRosterPlayer.player.playerId,
                                           firstName: selectedRosterPlayer.player.firstName,
                                           lastName: selectedRosterPlayer.player.lastName,
                                           jerseyNumber: selectedRosterPlayer.player.jerseyNumber
-                                        });
+                                        };
+                                        setFieldValue(`scores.${index}.goalPlayer`, goalPlayer);
+                                        // Clear any validation errors for this field
+                                        setFieldValue(`scores.${index}.goalPlayer`, goalPlayer, true);
                                       } else {
                                         setFieldValue(`scores.${index}.goalPlayer`, null);
                                       }
@@ -332,7 +335,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     roster={roster}
                                     required={true}
                                     placeholder="Torschützen auswählen"
-                                    showErrorText={false}
+                                    showErrorText={true}
                                     tabIndex={index * 3 + 2}
                                   />
                                 </div>
