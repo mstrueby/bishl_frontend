@@ -727,6 +727,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
+    // Focus jersey number input after modal closes
+    setTimeout(() => {
+      if (jerseyNumberRef.current) {
+        jerseyNumberRef.current.focus();
+      }
+    }, 100);
+
     // Optional: Show a success message
     setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
   };
@@ -912,6 +919,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setPlayerNumber(0);
       setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
       setError('');
+
+      // Keep focus on the "Hinzufügen" button after adding player
+      setTimeout(() => {
+        if (addButtonRef.current) {
+          addButtonRef.current.focus();
+        }
+      }, 100);
 
       // Here you would make the actual API call to update the roster
       /*
@@ -1135,6 +1149,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               <PlayerSelect
                 ref={playerSelectRef}
                 name="player-select"
+                tabIndex={1}
                 selectedPlayer={selectedPlayer ? {
                   player: {
                     playerId: selectedPlayer._id,
@@ -1202,6 +1217,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
                   className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   placeholder="##"
+                  tabIndex={2}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === 'Tab') {
                       e.preventDefault();
@@ -1231,6 +1247,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       <div className="relative">
                         <Listbox.Button
                           ref={positionSelectRef}
+                          tabIndex={3}
                           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                             if (e.key === 'Enter' && !open) {
                               e.preventDefault();
@@ -1321,17 +1338,19 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               ref={addButtonRef}
               type="button"
               onClick={handleAddPlayer}
+              disabled={loading}
+              tabIndex={4}
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
+                  e.preventDefault();
                   // Focus PlayerSelect after TAB key press
                   setTimeout(() => {
-                    if (playerSelectRef.current && playerSelectRef.current.focus) {
+                    if (playerSelectRef.current) {
                       playerSelectRef.current.focus();
                     }
                   }, 100);
                 }
               }}
-              disabled={loading}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
@@ -2005,6 +2024,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/* Player Selection - Call Up */}
             <div className="mb-6">
               <PlayerSelect
+                ref={playerSelectRef}
                 name="call-up-player-select"
                 selectedPlayer={selectedCallUpPlayer ? {
                   player: {
@@ -2026,6 +2046,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
                     if (availablePlayer) {
                       setSelectedCallUpPlayer(availablePlayer);
+                      // Focus the "Hinzufügen" button after player selection
+                      setTimeout(() => {
+                        const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
+                        if (hinzufuegenButton) {
+                          hinzufuegenButton.focus();
+                        }
+                      }, 100);
                     }
                   } else {
                     setSelectedCallUpPlayer(null);
@@ -2061,6 +2088,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setSelectedCallUpTeam(null);
                   setSelectedCallUpPlayer(null);
                   setCallUpModalError(null);
+                  // Focus jersey number input after modal closes
+                  setTimeout(() => {
+                    if (jerseyNumberRef.current) {
+                      jerseyNumberRef.current.focus();
+                    }
+                  }, 100);
                 }}
                 className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
@@ -2070,6 +2103,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 type="button"
                 onClick={handleConfirmCallUp}
                 disabled={!selectedCallUpPlayer}
+                data-callup-add-button
                 className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
                   ? 'bg-indigo-600 hover:bg-indigo-500'
                   : 'bg-indigo-300 cursor-not-allowed'
