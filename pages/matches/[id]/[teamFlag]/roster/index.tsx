@@ -534,7 +534,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setAvailablePlayersList(filteredPlayers);
     }
   }, [includeInactivePlayers, rosterList, allAvailablePlayersList, sortRoster]);
-  
+
   // Auto-set published to true if match is finished
   const isMatchFinished = match.matchStatus.key === 'FINISHED';
   useEffect(() => {
@@ -734,7 +734,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         // Ensure the main form elements are properly in the tab order by setting tabIndex on DOM elements
         const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
         const addButton = addButtonRef.current;
-        
+
         if (playerSelectInput) {
           playerSelectInput.tabIndex = 1;
         }
@@ -825,6 +825,27 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setEditingPlayer(null);
     setModalError(null);
   };
+
+  // Set focus to PlayerSelect when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (playerSelectRef.current && playerSelectRef.current.focus) {
+        playerSelectRef.current.focus();
+      }
+      // Ensure proper initial tab order
+      const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
+      const jerseyInput = jerseyNumberRef.current;
+      const positionButton = positionSelectRef.current;
+      const addButton = addButtonRef.current;
+
+      if (playerSelectInput) playerSelectInput.tabIndex = 1;
+      if (jerseyInput) jerseyInput.tabIndex = 2;
+      if (positionButton) positionButton.tabIndex = 3;
+      if (addButton) addButton.tabIndex = 4;
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
     return <Layout><div>Loading...</div></Layout>;
@@ -1355,10 +1376,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   e.preventDefault();
                   // Focus PlayerSelect after TAB key press
                   setTimeout(() => {
-                    if (playerSelectRef.current) {
+                    if (playerSelectRef.current && playerSelectRef.current.focus) {
                       playerSelectRef.current.focus();
                     }
-                  }, 100);
+                    // Ensure tab order is maintained
+                    const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
+                    if (playerSelectInput) {
+                      playerSelectInput.focus();
+                    }
+                  }, 50);
                 }
               }}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
@@ -1579,11 +1605,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/* Double Jersey No check indicator */}
             <div className="flex items-center mt-4">
               <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
-                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                ) : (
-                  <CheckCircleIcon className="h-6 w-6" />
-                )}
+                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
+                  ? 'Doppelte Rückennummern vorhanden'
+                  : 'Keine doppelten Rückennummern'}
               </div>
               <span className="ml-2 text-sm">
                 {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
@@ -2105,7 +2129,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       // Ensure the main form elements maintain proper tab order by setting tabIndex on DOM elements
                       const playerSelectInput = document.querySelector('[name="player-select"] input') as HTMLInputElement;
                       const addButton = addButtonRef.current;
-                      
+
                       if (playerSelectInput) {
                         playerSelectInput.tabIndex = 1;
                       }
