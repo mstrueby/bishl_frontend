@@ -1918,63 +1918,29 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             }
           }, 100);
         }}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black/25" />
-          </Transition.Child>
-
+          <div className="fixed inset-0 bg-black/30 transition-opacity" />
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div className="flex items-center justify-center min-h-full p-4">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
                 leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                    className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
                   >
-                    Spieler aus anderer Mannschaft hinzufügen
+                    Spieler hochmelden
                   </Dialog.Title>
 
                   {callUpModalError && (
-                    <div className="rounded-md bg-red-50 p-4 mb-4">
-                      <div className="flex">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <h3 className="text-sm font-medium text-red-800">{callUpModalError}</h3>
-                        </div>
-                        <div className="ml-auto pl-3">
-                          <div className="-mx-1.5 -my-1.5">
-                            <button
-                              type="button"
-                              onClick={() => setCallUpModalError(null)}
-                              className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
-                            >
-                              <span className="sr-only">Dismiss</span>
-                              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="text-red-600 text-sm mt-2 mb-4">
+                      {callUpModalError}
                     </div>
                   )}
 
@@ -2070,81 +2036,60 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   </div>
 
                   {/* Player Selection - Call Up */}
-                  <div className="mb-6">
-                    <PlayerSelect
-                      ref={playerSelectRef}
-                      name="call-up-player-select"
-                      tabIndex={2}
-                      selectedPlayer={selectedCallUpPlayer ? {
-                        player: {
-                          playerId: selectedCallUpPlayer._id,
-                          firstName: selectedCallUpPlayer.firstName,
-                          lastName: selectedCallUpPlayer.lastName,
-                          jerseyNumber: selectedCallUpPlayer.jerseyNo || 0
-                        },
-                        playerPosition: { key: 'F', value: 'Feldspieler' },
-                        passNumber: selectedCallUpPlayer.passNo,
-                        called: selectedCallUpPlayer.called,
-                        goals: 0,
-                        assists: 0,
-                        points: 0,
-                        penaltyMinutes: 0
-                      } : null}
-                      onChange={(selectedRosterPlayer) => {
-                        if (selectedRosterPlayer) {
-                          const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
-                          if (availablePlayer) {
-                            setSelectedCallUpPlayer(availablePlayer);
-                            // Focus the "Hinzufügen" button after player selection
-                            setTimeout(() => {
-                              const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
-                              if (hinzufuegenButton) {
-                                hinzufuegenButton.focus();
-                              }
-                            }, 100);
-                          }
-                        } else {
-                          setSelectedCallUpPlayer(null);
+                  <PlayerSelect
+                    ref={playerSelectRef}
+                    name="call-up-player-select"
+                    tabIndex={2}
+                    selectedPlayer={selectedCallUpPlayer ? {
+                      player: {
+                        playerId: selectedCallUpPlayer._id,
+                        firstName: selectedCallUpPlayer.firstName,
+                        lastName: selectedCallUpPlayer.lastName,
+                        jerseyNumber: selectedCallUpPlayer.jerseyNo || 0
+                      },
+                      playerPosition: { key: 'F', value: 'Feldspieler' },
+                      passNumber: selectedCallUpPlayer.passNo,
+                      called: selectedCallUpPlayer.called,
+                      goals: 0,
+                      assists: 0,
+                      points: 0,
+                      penaltyMinutes: 0
+                    } : null}
+                    onChange={(selectedRosterPlayer) => {
+                      if (selectedRosterPlayer) {
+                        const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
+                        if (availablePlayer) {
+                          setSelectedCallUpPlayer(availablePlayer);
+                          setCallUpModalError(null);
                         }
-                      }}
-                      roster={callUpPlayers.map(player => ({
-                        player: {
-                          playerId: player._id,
-                          firstName: player.firstName,
-                          lastName: player.lastName,
-                          jerseyNumber: player.jerseyNo || 0
-                        },
-                        playerPosition: { key: 'F', value: 'Feldspieler' },
-                        passNumber: player.passNo,
-                        called: player.called,
-                        goals: 0,
-                        assists: 0,
-                        points: 0,
-                        penaltyMinutes: 0
-                      }))}
-                      label="Spieler"
-                      placeholder={selectedCallUpTeam ? 'Spieler auswählen' : 'Bitte zuerst eine Mannschaft auswählen'}
-                      required={false}
-                    />
-                  </div>
+                      } else {
+                        setSelectedCallUpPlayer(null);
+                      }
+                    }}
+                    roster={callUpPlayers.map(player => ({
+                      player: {
+                        playerId: player._id,
+                        firstName: player.firstName,
+                        lastName: player.lastName,
+                        jerseyNumber: player.jerseyNo || 0
+                      },
+                      playerPosition: { key: 'F', value: 'Feldspieler' },
+                      passNumber: player.passNo,
+                      called: player.called,
+                      goals: 0,
+                      assists: 0,
+                      points: 0,
+                      penaltyMinutes: 0
+                    }))}
+                    label="Spieler"
+                    placeholder={selectedCallUpTeam ? 'Spieler auswählen' : 'Bitte zuerst eine Mannschaft auswählen'}
+                    required={false}
+                    showErrorText={false}
+                  />
 
-                  {/* Modal Actions */}
-                  <div className="flex justify-end space-x-3">
+                  <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
-                      tabIndex={4}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Tab' && !e.shiftKey) {
-                          e.preventDefault();
-                          // Focus Team Select after TAB key press
-                          setTimeout(() => {
-                            const teamSelectButton = document.querySelector('[tabindex="1"]') as HTMLButtonElement;
-                            if (teamSelectButton) {
-                              teamSelectButton.focus();
-                            }
-                          }, 100);
-                        }
-                      }}
                       onClick={() => {
                         setIsCallUpModalOpen(false);
                         setSelectedCallUpTeam(null);
@@ -2157,7 +2102,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                           }
                         }, 100);
                       }}
-                      className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                       Abbrechen
                     </button>
@@ -2165,14 +2110,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       type="button"
                       onClick={handleConfirmCallUp}
                       disabled={!selectedCallUpPlayer}
-                      tabIndex={3}
-                      data-callup-add-button
-                      className={`rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedCallUpPlayer
-                        ? 'bg-indigo-600 hover:bg-indigo-500'
-                        : 'bg-indigo-300 cursor-not-allowed'
-                        }`}
+                      className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Hinzufügen
+                      Speichern
                     </button>
                   </div>
                 </Dialog.Panel>
