@@ -727,12 +727,18 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Focus jersey number input after modal closes
+    // Focus jersey number input after modal closes and ensure TAB navigation works
     setTimeout(() => {
       if (jerseyNumberRef.current) {
         jerseyNumberRef.current.focus();
+        // Ensure the main form elements are properly in the tab order
+        if (playerSelectRef.current && addButtonRef.current) {
+          // Reset any potential tab index conflicts
+          playerSelectRef.current.tabIndex = 1;
+          addButtonRef.current.tabIndex = 4;
+        }
       }
-    }, 100);
+    }, 150);
 
     // Optional: Show a success message
     setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
@@ -2046,11 +2052,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                     const availablePlayer = callUpPlayers.find(p => p._id === selectedRosterPlayer.player.playerId);
                     if (availablePlayer) {
                       setSelectedCallUpPlayer(availablePlayer);
-                      // Focus the "Hinzufügen" button after player selection
+                      // Focus the modal's "Hinzufügen" button after player selection
                       setTimeout(() => {
-                        const hinzufuegenButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
-                        if (hinzufuegenButton) {
-                          hinzufuegenButton.focus();
+                        const modalAddButton = document.querySelector('[data-callup-add-button]') as HTMLButtonElement;
+                        if (modalAddButton && modalAddButton.offsetParent !== null) {
+                          modalAddButton.focus();
                         }
                       }, 100);
                     }
@@ -2088,12 +2094,17 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   setSelectedCallUpTeam(null);
                   setSelectedCallUpPlayer(null);
                   setCallUpModalError(null);
-                  // Focus jersey number input after modal closes
+                  // Focus jersey number input after modal closes and reset tab order
                   setTimeout(() => {
                     if (jerseyNumberRef.current) {
                       jerseyNumberRef.current.focus();
+                      // Ensure the main form elements maintain proper tab order
+                      if (playerSelectRef.current && addButtonRef.current) {
+                        playerSelectRef.current.tabIndex = 1;
+                        addButtonRef.current.tabIndex = 4;
+                      }
                     }
-                  }, 100);
+                  }, 150);
                 }}
                 className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
