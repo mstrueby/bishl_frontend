@@ -16,7 +16,7 @@ import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
 import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
 import ButtonLight from '../../../../../components/ui/form/ButtonLight';
-import PlayerSelect from '../../../../../components/ui/PlayerSelect';
+import RosterPlayerSelect from '../../../../../components/ui/RosterPlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { calculateMatchButtonPermissions } from '../../../../../tools/utils';
@@ -314,7 +314,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
                                 {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
-                                  <PlayerSelect
+                                  <RosterPlayerSelect
                                     name={`scores.${index}.goalPlayer`}
                                     selectedPlayer={score.goalPlayer ? roster.find(rp => rp.player.playerId === score.goalPlayer.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {
@@ -339,7 +339,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
                                 {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
-                                  <PlayerSelect
+                                  <RosterPlayerSelect
                                     name={`scores.${index}.assistPlayer`}
                                     selectedPlayer={score.assistPlayer ? roster.find(rp => rp.player.playerId === score.assistPlayer?.playerId) || null : null}
                                     onChange={(selectedRosterPlayer) => {

@@ -2,7 +2,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import axios from 'axios';
-import PlayerSelect from './PlayerSelect';
+import RosterPlayerSelect from './RosterPlayerSelect';
 import InputMatchTime from './form/InputMatchTime';
 import { RosterPlayer, EventPlayer, ScoresBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
@@ -170,7 +170,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                       </div>
 
                       {/* Goal Player Selection */}
-                      <PlayerSelect
+                      <RosterPlayerSelect
                         name="goalPlayer"
                         selectedPlayer={values.goalPlayer ? roster.find(p => p.player.playerId === values.goalPlayer?.playerId) || null : null}
                         onChange={(player) => {
@@ -195,7 +195,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                       />
 
                       {/* Assist Player Selection */}
-                      <PlayerSelect
+                      <RosterPlayerSelect
                         name="assistPlayer"
                         selectedPlayer={values.assistPlayer ? roster.find(p => p.player.playerId === values.assistPlayer?.playerId) || null : null}
                         onChange={(player) => {
