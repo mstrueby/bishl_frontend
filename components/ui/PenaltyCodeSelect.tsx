@@ -20,7 +20,6 @@ interface PenaltyCodeSelectProps {
   placeholder?: string;
   tabIndex?: number;
   showErrorText?: boolean;
-  onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 // Create a custom type that includes only the methods you want to expose.
@@ -38,7 +37,6 @@ const PenaltyCodeSelect = forwardRef<PenaltyCodeSelectHandle, PenaltyCodeSelectP
   placeholder = "Strafe auswählen",
   tabIndex,
   showErrorText = true,
-  onKeyDown,
 }, ref) => {
   const [field, meta, helpers] = useField(name);
   const [selectedPenaltyCode, setSelectedPenaltyCode] = useState<PenaltyCode | null>(propSelectedPenaltyCode);
@@ -137,7 +135,6 @@ const PenaltyCodeSelect = forwardRef<PenaltyCodeSelectHandle, PenaltyCodeSelectP
                 value={selectedPenaltyCode ? displayValue(selectedPenaltyCode) : query}
                 placeholder={placeholder}
                 autoComplete="off"
-                onKeyDown={onKeyDown}
               />
               <Combobox.Button
                 className="absolute inset-y-0 right-0 flex items-center pr-2"

@@ -13,7 +13,7 @@ import { Listbox, Transition, Switch, Dialog } from '@headlessui/react';
 import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames, calculateMatchButtonPermissions } from '../../../../../tools/utils';
-import PlayerSelect from '../../../../../components/ui/PlayerSelect';
+import RosterPlayerSelect from '../../../../../components/ui/RosterPlayerSelect';
 import RosterList from '../../../../../components/ui/RosterList';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
@@ -1150,7 +1150,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   />
                 </Switch>
               </div>
-              <PlayerSelect
+              <RosterPlayerSelect
                 ref={playerSelectRef}
                 name="player-select"
                 tabIndex={1}
@@ -1996,7 +1996,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   </div>
 
                   {/* Player Selection - Call Up */}
-                  <PlayerSelect
+                  <RosterPlayerSelect
                     ref={playerSelectRef}
                     name="call-up-player-select"
                     tabIndex={2}
