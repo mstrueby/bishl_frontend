@@ -109,6 +109,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
   const goalPlayerRefs = useRef<{ [key: number]: any }>({});
   const assistPlayerRefs = useRef<{ [key: number]: any }>({});
+  const addGoalButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const router = useRouter();
   const { user } = useAuth();
@@ -351,6 +352,12 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     selectedPlayer={score.assistPlayer || null}
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.assistPlayer`, selectedEventPlayer);
+                                      // Move focus to add goal button when assist player is selected
+                                      if (selectedEventPlayer && addGoalButtonRef.current) {
+                                        setTimeout(() => {
+                                          addGoalButtonRef.current?.focus();
+                                        }, 100);
+                                      }
                                     }}
                                     roster={roster}
                                     required={false}
@@ -393,6 +400,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                     <div className="flex justify-center">
                       <button
                         type="button"
+                        ref={addGoalButtonRef}
                         tabIndex={values.scores.length * 3 + 1}
                         onClick={() => {
                           const newIndex = values.scores.length;
