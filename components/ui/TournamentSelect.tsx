@@ -27,17 +27,19 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
   // Placeholder component for the listbox
   const Placeholder = () => (
     <span className="flex items-center">
-      <div className="w-16 flex flex-col items-center">
-        <div className="w-8 h-8 relative">
+      <div className="w-6 flex flex-col items-center">
+        <div className="w-6 h-6 relative">
           <Image
             src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
             alt="BISHL Logo"
-            fill
+            width={24}
+            height={24}
+            layout="fixed"
             className="object-contain"
           />
         </div>
       </div>
-      <span className="ml-3 block truncate text-gray-400">Alle Wettbewerbe</span>
+      <span className="ml-3 block truncate">Alle Wettbewerbe</span>
     </span>
   );
 
@@ -99,11 +101,13 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
                     <>
                       <div className="flex items-center">
                         <div className="w-16 flex flex-col items-center">
-                          <div className="w-8 h-8 relative">
+                          <div className="w-6 h-6 relative">
                             <Image
                               src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
                               alt="BISHL Logo"
-                              fill
+                              width={24}
+                              height={24}
+                              layout="fixed"
                               className="object-contain"
                             />
                           </div>
