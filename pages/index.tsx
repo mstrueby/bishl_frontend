@@ -56,7 +56,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       params: {
         date_from: today,
         date_to: today,
-        published: true
       }
     });
     todaysMatches = matchesRes.data;
