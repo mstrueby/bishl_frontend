@@ -7,7 +7,7 @@ import { tournamentConfigs } from '../../tools/consts';
 
 interface TournamentSelectProps {
   selectedTournament: TournamentValues | null;
-  onTournamentChange: (tournament: TournamentValues) => void;
+  onTournamentChange: (tournament: TournamentValues | null) => void;
   allTournamentsData: TournamentValues[];
 }
 const TournamentSelect: React.FC<TournamentSelectProps> = ({
@@ -31,9 +31,7 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
   return (
     <Listbox value={selectedTournament} onChange={(tournament) => {
       setSelectedTournament(tournament);
-      if (tournament) {
-        onTournamentChange(tournament);
-      }
+      onTournamentChange(tournament);
     }}>
       {({ open }) => (
         <>
