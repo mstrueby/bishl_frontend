@@ -7,7 +7,7 @@ import { tournamentConfigs } from '../../tools/consts';
 
 interface TournamentSelectProps {
   selectedTournament: TournamentValues | null;
-  onTournamentChange: (tournament: TournamentValues) => void;
+  onTournamentChange: (tournament: TournamentValues | null) => void;
   allTournamentsData: TournamentValues[];
 }
 const TournamentSelect: React.FC<TournamentSelectProps> = ({
@@ -25,15 +25,22 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
 
   // Placeholder component for the listbox
   const Placeholder = () => (
-    <span className="block truncate text-gray-400">(auswählen)</span>
+    <span className="flex items-center">
+      <div className="w-16 flex flex-col items-center">
+        <span
+          className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold uppercase ring-1 ring-inset bg-indigo-50 text-indigo-700 ring-indigo-600/10"
+        >
+          BISHL
+        </span>
+      </div>
+      <span className="ml-3 block truncate text-gray-400">Alle Wettbewerbe</span>
+    </span>
   );
 
   return (
     <Listbox value={selectedTournament} onChange={(tournament) => {
       setSelectedTournament(tournament);
-      if (tournament) {
-        onTournamentChange(tournament);
-      }
+      onTournamentChange(tournament);
     }}>
       {({ open }) => (
         <>
@@ -73,6 +80,49 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
               leaveTo="opacity-0"
             >
               <Listbox.Options className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {/* All Tournaments option */}
+                <Listbox.Option
+                  key="all-tournaments"
+                  className={({ active }) =>
+                    classNames(
+                      active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                      'relative cursor-default select-none py-2 pl-3 pr-9'
+                    )
+                  }
+                  value={null}
+                >
+                  {({ selected, active }) => (
+                    <>
+                      <div className="flex items-center">
+                        <div className="w-16 flex flex-col items-center">
+                          <span
+                            className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold uppercase ring-1 ring-inset", "bg-indigo-50 text-indigo-700 ring-indigo-600/10")}
+                          >
+                            BISHL
+                          </span>
+                        </div>
+                        <span
+                          className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}
+                        >
+                          Alle Wettbewerbe
+                        </span>
+                      </div>
+
+                      {selected ? (
+                        <span
+                          className={classNames(
+                            active ? 'text-white' : 'text-indigo-600',
+                            'absolute inset-y-0 right-0 flex items-center pr-4'
+                          )}
+                        >
+                          <CheckIcon className="h-5 w-5" />
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </Listbox.Option>
+                
+                
                 {allTournamentsData
                   ?.filter(tournament => tournamentConfigs[tournament.alias]?.active)
                   ?.sort((a, b) => (tournamentConfigs[a.alias]?.sortOrder || 0) - (tournamentConfigs[b.alias]?.sortOrder || 0))
