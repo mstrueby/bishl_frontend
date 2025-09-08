@@ -11,6 +11,7 @@ import { TournamentValues } from '../types/TournamentValues';
 import Layout from "../components/Layout";
 import { getFuzzyDate } from '../tools/dateUtils';
 import { ArrowLongRightIcon } from '@heroicons/react/20/solid';
+import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import SuccessMessage from '../components/ui/SuccessMessage';
 import TournamentSelect from '../components/ui/TournamentSelect';
@@ -181,9 +182,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <div>
-            {match.matchStatus.key === 'SCHEDULED' ? formatTime(match.startDate) : match.venue.name}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center truncate">
+            <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
+            <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
           </div>
           <Link href={`/matches/${match._id}`}>
             <a className="text-indigo-600 hover:text-indigo-800 font-medium">
