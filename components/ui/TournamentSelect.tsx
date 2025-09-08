@@ -122,8 +122,6 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
                   )}
                 </Listbox.Option>
                 
-                {/* Separator */}
-                <div className="border-t border-gray-200 my-1" />
                 
                 {allTournamentsData
                   ?.filter(tournament => tournamentConfigs[tournament.alias]?.active)
