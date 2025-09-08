@@ -175,9 +175,21 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
       Yup.object().shape({
         matchTimeStart: Yup.string()
           .required()
-          .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
+          .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein')
+          .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function(value) {
+            if (!value || !value.includes(':')) return false;
+            const [minutes, seconds] = value.split(':');
+            const secondsNum = parseInt(seconds, 10);
+            return secondsNum >= 0 && secondsNum <= 59;
+          }),
         matchTimeEnd: Yup.string()
           .matches(/^(\d{1,3}:\d{2})?$/, 'Zeit muss im Format MM:SS sein oder leer bleiben')
+          .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function(value) {
+            if (!value || value === '' || !value.includes(':')) return true; // Allow empty for optional field
+            const [minutes, seconds] = value.split(':');
+            const secondsNum = parseInt(seconds, 10);
+            return secondsNum >= 0 && secondsNum <= 59;
+          })
           .nullable(),
         penaltyPlayer: Yup.object()
           .shape({
