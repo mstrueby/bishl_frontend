@@ -16,12 +16,21 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^\d]/g, ''); // Only allow digits
 
+    // Strip leading zeros to get the actual meaningful digits
+    value = value.replace(/^0+/, '') || '0';
+    
+    // If we ended up with just '0', treat as empty for formatting purposes
+    if (value === '0') {
+      helpers.setValue('');
+      return;
+    }
+
     // Limit to 5 digits maximum (6 and more not allowed)
     if (value.length > 5) {
       value = value.substring(0, 5);
     }
 
-    // Auto-format based on input length
+    // Auto-format based on meaningful digit count
     let formattedValue = '';
     if (value.length === 0) {
       formattedValue = '';
