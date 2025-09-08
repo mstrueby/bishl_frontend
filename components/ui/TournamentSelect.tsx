@@ -4,6 +4,7 @@ import { TournamentValues } from '../../types/TournamentValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { classNames } from '../../tools/utils';
 import { tournamentConfigs } from '../../tools/consts';
+import Image from 'next/image';
 
 interface TournamentSelectProps {
   selectedTournament: TournamentValues | null;
@@ -27,11 +28,14 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
   const Placeholder = () => (
     <span className="flex items-center">
       <div className="w-16 flex flex-col items-center">
-        <span
-          className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold uppercase ring-1 ring-inset bg-indigo-50 text-indigo-700 ring-indigo-600/10"
-        >
-          BISHL
-        </span>
+        <div className="w-8 h-8 relative">
+          <Image
+            src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+            alt="BISHL Logo"
+            fill
+            className="object-contain"
+          />
+        </div>
       </div>
       <span className="ml-3 block truncate text-gray-400">Alle Wettbewerbe</span>
     </span>
@@ -95,11 +99,14 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
                     <>
                       <div className="flex items-center">
                         <div className="w-16 flex flex-col items-center">
-                          <span
-                            className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold uppercase ring-1 ring-inset", "bg-indigo-50 text-indigo-700 ring-indigo-600/10")}
-                          >
-                            BISHL
-                          </span>
+                          <div className="w-8 h-8 relative">
+                            <Image
+                              src="https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                              alt="BISHL Logo"
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
                         </div>
                         <span
                           className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}
