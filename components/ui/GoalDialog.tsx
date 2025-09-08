@@ -22,7 +22,13 @@ interface GoalDialogProps {
 const validationSchema = Yup.object().shape({
   matchTime: Yup.string()
     .required('Zeit ist erforderlich')
-    .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
+    .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein')
+    .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function(value) {
+      if (!value || !value.includes(':')) return false;
+      const [minutes, seconds] = value.split(':');
+      const secondsNum = parseInt(seconds, 10);
+      return secondsNum >= 0 && secondsNum <= 59;
+    }),
   goalPlayer: Yup.object().shape({
     playerId: Yup.string().required('Spieler ist erforderlich'),
     firstName: Yup.string().required(),
