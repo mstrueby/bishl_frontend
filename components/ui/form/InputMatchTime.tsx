@@ -51,6 +51,17 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
       formattedValue = value.substring(0, 3) + ':' + value.substring(3);
     }
 
+    // Validate seconds are in range 00-59
+    if (formattedValue && formattedValue.includes(':')) {
+      const [minutes, seconds] = formattedValue.split(':');
+      const secondsNum = parseInt(seconds, 10);
+      
+      if (secondsNum > 59) {
+        // Don't update if seconds are invalid
+        return;
+      }
+    }
+
     helpers.setValue(formattedValue);
   };
 
