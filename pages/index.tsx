@@ -16,6 +16,7 @@ import SuccessMessage from '../components/ui/SuccessMessage';
 import TournamentSelect from '../components/ui/TournamentSelect';
 import MatchStatusBadge from '../components/ui/MatchStatusBadge';
 import { classNames } from '../tools/utils';
+import { tournamentConfigs } from '../tools/consts';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
@@ -138,9 +139,26 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-500 font-medium uppercase">
-            {match.tournament.alias}
+            {(() => {
+              const item = tournamentConfigs[match.tournament.alias];
+              if (item) {
+                return (
+                  <span
+                    key={item.tinyName}
+                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
+                  >
+                    {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                  </span>
+                );
+              }
+            })()}
           </div>
-          <MatchStatusBadge status={match.matchStatus} />
+          <MatchStatusBadge 
+            statusKey={match.matchStatus.key}
+            finishTypeKey={match.finishType.key}
+            statusValue={match.matchStatus.value}
+            finishTypeValue={match.finishType.value}
+          />
         </div>
         
         <div className="flex items-center justify-between mb-3">
