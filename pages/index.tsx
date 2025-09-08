@@ -153,12 +153,18 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
               }
             })()}
           </div>
-          <MatchStatusBadge 
-            statusKey={match.matchStatus.key}
-            finishTypeKey={match.finishType.key}
-            statusValue={match.matchStatus.value}
-            finishTypeValue={match.finishType.value}
-          />
+          {match.matchStatus.key === 'SCHEDULED' ? (
+            <div className="text-xs text-gray-600 font-medium">
+              {formatTime(match.startDate)}
+            </div>
+          ) : (
+            <MatchStatusBadge 
+              statusKey={match.matchStatus.key}
+              finishTypeKey={match.finishType.key}
+              statusValue={match.matchStatus.value}
+              finishTypeValue={match.finishType.value}
+            />
+          )}
         </div>
         
         <div className="flex items-center justify-between mb-3">
