@@ -25,7 +25,16 @@ const TournamentSelect: React.FC<TournamentSelectProps> = ({
 
   // Placeholder component for the listbox
   const Placeholder = () => (
-    <span className="block truncate text-gray-400">(auswählen)</span>
+    <span className="flex items-center">
+      <div className="w-16 flex flex-col items-center">
+        <span
+          className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold uppercase ring-1 ring-inset bg-indigo-50 text-indigo-700 ring-indigo-600/10"
+        >
+          BISHL
+        </span>
+      </div>
+      <span className="ml-3 block truncate text-gray-400">Alle Wettbewerbe</span>
+    </span>
   );
 
   return (
