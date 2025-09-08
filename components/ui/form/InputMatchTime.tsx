@@ -26,10 +26,10 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
     if (value.length === 0) {
       formattedValue = '';
     } else if (value.length === 1) {
-      // Single digit: format as 0:0X
+      // Single digit: format as 0:0X (seconds only)
       formattedValue = '0:0' + value;
     } else if (value.length === 2) {
-      // Two digits: format as 0:XX
+      // Two digits: format as 0:XX (seconds only)
       formattedValue = '0:' + value;
     } else {
       // Three or more digits: insert colon before last 2 digits
