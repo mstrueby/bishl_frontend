@@ -21,12 +21,18 @@ const InputMatchTime = React.forwardRef<HTMLInputElement, InputMatchTimeProps>((
       value = value.substring(0, 5);
     }
 
-    // Auto-format with colon before last 2 digits
+    // Auto-format based on input length
     let formattedValue = '';
-    if (value.length <= 2) {
-      formattedValue = value;
+    if (value.length === 0) {
+      formattedValue = '';
+    } else if (value.length === 1) {
+      // Single digit: format as 0:0X
+      formattedValue = '0:0' + value;
+    } else if (value.length === 2) {
+      // Two digits: format as 0:XX
+      formattedValue = '0:' + value;
     } else {
-      // Insert colon before last 2 digits
+      // Three or more digits: insert colon before last 2 digits
       const minutes = value.substring(0, value.length - 2);
       const seconds = value.substring(value.length - 2);
       formattedValue = minutes + ':' + seconds;
