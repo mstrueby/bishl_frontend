@@ -6,23 +6,33 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { PostValues } from '../types/PostValues';
+import { Match } from '../types/MatchValues';
+import { TournamentValues } from '../types/TournamentValues';
 import Layout from "../components/Layout";
 import { getFuzzyDate } from '../tools/dateUtils';
 import { ArrowLongRightIcon } from '@heroicons/react/20/solid';
 import { CldImage } from 'next-cloudinary';
 import SuccessMessage from '../components/ui/SuccessMessage';
+import TournamentSelect from '../components/ui/TournamentSelect';
+import MatchStatusBadge from '../components/ui/MatchStatusBadge';
 import { classNames } from '../tools/utils';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
 interface PostsProps {
   jwt: string | null,
-  posts: PostValues[]
+  posts: PostValues[],
+  todaysMatches: Match[],
+  tournaments: TournamentValues[]
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context) || null;
   let posts = null;
+  let todaysMatches = null;
+  let tournaments = null;
+  const today = new Date().toISOString().split('T')[0];
+  
   try {
     const res = await axios.get(BASE_URL, {
       params: {
@@ -39,12 +49,43 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error("Error fetching posts:", error);
     }
   }
-  return posts ? { props: { jwt, posts } } : { props: { jwt } };
+
+  // Fetch today's matches
+  try {
+    const matchesRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/`, {
+      params: {
+        date_from: today,
+        date_to: today,
+      }
+    });
+    todaysMatches = matchesRes.data;
+  } catch (error) {
+    console.error("Error fetching today's matches:", error);
+  }
+
+  // Fetch tournaments
+  try {
+    const tournamentsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+    tournaments = tournamentsRes.data;
+  } catch (error) {
+    console.error("Error fetching tournaments:", error);
+  }
+  
+  return { 
+    props: { 
+      jwt, 
+      posts: posts || [], 
+      todaysMatches: todaysMatches || [], 
+      tournaments: tournaments || [] 
+    } 
+  };
 }
 
 
-const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
+const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tournaments = [] }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
+  const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
   const router = useRouter();
 
   useEffect(() => {
@@ -61,9 +102,73 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
     }
   }, [router]);
 
+  // Filter matches by selected tournament
+  useEffect(() => {
+    if (selectedTournament) {
+      setFilteredMatches(todaysMatches.filter(match => match.tournament.alias === selectedTournament.alias));
+    } else {
+      setFilteredMatches(todaysMatches);
+    }
+  }, [selectedTournament, todaysMatches]);
+
+  // Categorize matches
+  const categorizeMatches = (matches: Match[]) => {
+    const live = matches.filter(match => match.matchStatus.key === 'INPROGRESS');
+    const upcoming = matches.filter(match => match.matchStatus.key === 'SCHEDULED');
+    const finished = matches.filter(match => ['FINISHED', 'FORFEITED'].includes(match.matchStatus.key));
+    
+    return { live, upcoming, finished };
+  };
+
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
+  };
+
+  // MatchCard component for today's games
+  const MatchCard = ({ match }: { match: Match }) => {
+    const formatTime = (date: Date) => {
+      return new Date(date).toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-xs text-gray-500 font-medium uppercase">
+            {match.tournament.alias}
+          </div>
+          <MatchStatusBadge status={match.matchStatus} />
+        </div>
+        
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-3">
+            <div className="text-right">
+              <div className="font-semibold text-gray-900">{match.home.tinyName}</div>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {match.matchStatus.key === 'SCHEDULED' ? 'vs' : `${match.home.stats.goalsFor}:${match.away.stats.goalsFor}`}
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-gray-900">{match.away.tinyName}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <div>
+            {match.matchStatus.key === 'SCHEDULED' ? formatTime(match.startDate) : match.venue.name}
+          </div>
+          <Link href={`/matches/${match._id}`}>
+            <a className="text-indigo-600 hover:text-indigo-800 font-medium">
+              Spielbericht
+            </a>
+          </Link>
+        </div>
+      </div>
+    );
   };
 
   const postItems = posts
@@ -92,6 +197,94 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [] }) => {
       </Head>
       <Layout>
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+        
+        {/* Today's Games Section */}
+        {todaysMatches.length > 0 && (
+          <div className="bg-gray-50 py-12">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                  Spiele heute
+                </h2>
+              </div>
+
+              {/* Tournament Filter */}
+              <div className="max-w-md mx-auto mb-8">
+                <TournamentSelect
+                  selectedTournament={selectedTournament}
+                  onTournamentChange={setSelectedTournament}
+                  allTournamentsData={tournaments}
+                />
+              </div>
+
+              {(() => {
+                const { live, upcoming, finished } = categorizeMatches(filteredMatches);
+                
+                return (
+                  <div className="space-y-12">
+                    {/* Live Games */}
+                    {live.length > 0 && (
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+                          Live
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {live.map((match) => (
+                            <MatchCard key={match._id} match={match} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Upcoming Games */}
+                    {upcoming.length > 0 && (
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+                          Demnächst
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {upcoming
+                            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                            .map((match) => (
+                              <MatchCard key={match._id} match={match} />
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Finished Games */}
+                    {finished.length > 0 && (
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+                          Bereits gespielt
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {finished
+                            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                            .map((match) => (
+                              <MatchCard key={match._id} match={match} />
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {filteredMatches.length === 0 && (
+                      <div className="text-center py-12">
+                        <p className="text-gray-500">
+                          {selectedTournament 
+                            ? `Keine Spiele heute in ${selectedTournament.name}`
+                            : 'Keine Spiele heute'
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        )}
+
         <div className="bg-white py-12 sm:py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             {/** Matze */}

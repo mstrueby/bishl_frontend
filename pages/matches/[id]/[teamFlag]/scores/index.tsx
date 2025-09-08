@@ -156,7 +156,13 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
       Yup.object().shape({
         matchTime: Yup.string()
           .required()
-          .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein'),
+          .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein')
+          .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function(value) {
+            if (!value || !value.includes(':')) return false;
+            const [minutes, seconds] = value.split(':');
+            const secondsNum = parseInt(seconds, 10);
+            return secondsNum >= 0 && secondsNum <= 59;
+          }),
         goalPlayer: Yup.object()
           .shape({
             playerId: Yup.string().required(),
@@ -335,12 +341,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     selectedPlayer={score.goalPlayer || null}
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.goalPlayer`, selectedEventPlayer);
-                                      // Move focus to assist player select when goal player is selected
-                                      if (selectedEventPlayer && assistPlayerRefs.current[index]) {
-                                        setTimeout(() => {
-                                          assistPlayerRefs.current[index]?.focus();
-                                        }, 100);
-                                      }
                                     }}
                                     roster={roster}
                                     required={true}
@@ -360,12 +360,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     selectedPlayer={score.assistPlayer || null}
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.assistPlayer`, selectedEventPlayer);
-                                      // Move focus to add goal button when assist player is selected
-                                      if (selectedEventPlayer && addGoalButtonRef.current) {
-                                        setTimeout(() => {
-                                          addGoalButtonRef.current?.focus();
-                                        }, 100);
-                                      }
                                     }}
                                     roster={roster}
                                     required={false}
