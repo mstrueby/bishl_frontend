@@ -140,6 +140,23 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
         </View>
       </View>
 
+      {/* Team Name Section */}
+      <View style={{ marginBottom: 20, paddingVertical: 15, borderBottom: 1, borderColor: '#DDDDDD' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          {teamLogo && (
+            <View style={{ marginRight: 15 }}>
+              <PDFImage
+                style={{ width: 60, height: 60, objectFit: 'contain' }}
+                src={teamLogo}
+              />
+            </View>
+          )}
+          <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>
+            {teamName}
+          </Text>
+        </View>
+      </View>
+
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
           <Text style={styles.numberCell}>Nr.</Text>
