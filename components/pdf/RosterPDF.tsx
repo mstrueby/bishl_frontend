@@ -216,28 +216,36 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
             </View>
           );
 
-          // Build list of remaining players (goalies and forwards)
-          const remainingPlayers = [];
-
-          // Add goalies
-          goalies.forEach(goalie => remainingPlayers.push(goalie));
-
-          // Add forwards
-          forwards.forEach(forward => remainingPlayers.push(forward));
-
-          // Rows 3-18: Remaining players
-          for (let i = 2; i < 18; i++) {
-            const player = remainingPlayers[i - 2]; // Offset by 2 since first 2 rows are C and A
-            const rowNumber = i + 1;
+          // Rows 3-4: Always two goalie rows
+          for (let i = 0; i < 2; i++) {
+            const goalie = goalies[i];
+            const rowNumber = i + 3; // Row 3 and 4
 
             rows.push(
-              <View key={`row-${i + 1}`} style={styles.tableRow}>
+              <View key={`row-${rowNumber}`} style={styles.tableRow}>
                 <Text style={styles.numberCell}>{rowNumber}</Text>
-                <Text style={styles.positionCell}>{player ? player.playerPosition.key : ''}</Text>
+                <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
                 <Text style={styles.nameCell}>
-                  {player ? `${player.player.lastName}, ${player.player.firstName}${player.called ? ' (H)' : ''}` : ''}
+                  {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
                 </Text>
-                <Text style={styles.passCell}>{player ? (player.passNumber || '-') : '-'}</Text>
+                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '-') : '-'}</Text>
+              </View>
+            );
+          }
+
+          // Rows 5-18: Forward players
+          for (let i = 0; i < 14; i++) {
+            const forward = forwards[i];
+            const rowNumber = i + 5; // Rows 5-18
+
+            rows.push(
+              <View key={`row-${rowNumber}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{rowNumber}</Text>
+                <Text style={styles.positionCell}>{forward ? forward.playerPosition.key : ''}</Text>
+                <Text style={styles.nameCell}>
+                  {forward ? `${forward.player.lastName}, ${forward.player.firstName}${forward.called ? ' (H)' : ''}` : ''}
+                </Text>
+                <Text style={styles.passCell}>{forward ? (forward.passNumber || '-') : '-'}</Text>
               </View>
             );
           }
