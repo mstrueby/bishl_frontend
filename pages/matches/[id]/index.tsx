@@ -369,7 +369,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                         {goal.matchTime}
                       </div>
                     </div>
-                    <div className="flex-shrink-0 text-center ml-6">
+                    <div className="flex-shrink-0 text-center ml-6 mr-3">
                       {goal.goalPlayer && goal.goalPlayer.imageUrl && goal.goalPlayer.imageVisible ? (
                         <CldImage
                           src={goal.goalPlayer.imageUrl}
@@ -378,10 +378,10 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                           height={32}
                           gravity="center"
                           radius="max"
-                          className="w-8 h-8 object-cover mr-3"
+                          className="w-8 h-8 object-cover"
                         />
                       ) : goal.goalPlayer ? (
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                           <span className="text-xs font-medium text-gray-500">
                             {goal.goalPlayer.displayFirstName?.charAt(0)}{goal.goalPlayer.displayLastName?.charAt(0)}
                           </span>
