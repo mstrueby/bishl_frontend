@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let todaysMatches = null;
   let tournaments = null;
   const today = new Date().toISOString().split('T')[0];
-  
+
   try {
     const res = await axios.get(BASE_URL, {
       params: {
@@ -74,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   } catch (error) {
     console.error("Error fetching tournaments:", error);
   }
-  
+
   return { 
     props: { 
       jwt, 
@@ -118,7 +118,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
   // Helper function to get time slot for a match
   const getTimeSlot = (date: Date) => {
     const hour = new Date(date).getHours();
-    
+
     if (hour < 10) {
       return { key: 'morning', label: 'Morgens', description: 'Vor 10 Uhr' };
     } else if (hour < 12) {
@@ -138,13 +138,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
 
   // Group matches by time slots
   const groupMatchesByTimeSlot = (matches: Match[]) => {
-    const groups: { [key: string]: { label: string; matches: Match[] } } = {};
-    
+    const groups: { [key: string]: { label: string; description: string; matches: Match[] } } = {};
+
     matches.forEach(match => {
       const timeSlot = getTimeSlot(match.startDate);
       if (!groups[timeSlot.key]) {
         groups[timeSlot.key] = {
           label: timeSlot.label,
+          description: timeSlot.description,
           matches: []
         };
       }
@@ -165,7 +166,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
     const live = matches.filter(match => match.matchStatus.key === 'INPROGRESS');
     const upcoming = matches.filter(match => match.matchStatus.key === 'SCHEDULED');
     const finished = matches.filter(match => ['FINISHED', 'FORFEITED'].includes(match.matchStatus.key));
-    
+
     return { live, upcoming, finished };
   };
 
@@ -214,7 +215,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
             />
           )}
         </div>
-        
+
         <div className="flex flex-col gap-y-1.5 justify-betwee mt-4 mb-3">
           {/* home */}
           <div className="flex flex-row items-center w-full">
@@ -287,7 +288,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
       </Head>
       <Layout>
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
-        
+
         {/* Today's Games Section */}
         {todaysMatches.length > 0 && (
 
@@ -309,7 +310,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
 
               {(() => {
                 const { live, upcoming, finished } = categorizeMatches(filteredMatches);
-                
+
                 return (
                   <div className="space-y-12">
                     {/* Live Games */}
@@ -341,13 +342,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                               <div key={groupIndex}>
                                 <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-10">
                                   <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                                    <h4 className="mt-2 ml-2 text-base font-semibold text-gray-900 dark:text-white">|{group.label}</h4>
+                                    <h4 className="mt-2 ml-2 text-base font-semibold text-gray-900 dark:text-white">{group.label}</h4>
                                     <p className="mt-1 ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
                                   </div>
                                 </div>
-                                <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
-                                  {group.label}
-                                </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                   {group.matches.map((match) => (
                                     <MatchCard key={match._id} match={match} />
