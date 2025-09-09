@@ -218,7 +218,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
             })()}
           </div>
           {match.matchStatus.key === 'SCHEDULED' ? (
-            <div className="text-xs text-gray-600 font-medium">
+            <div className="text-sm text-gray-600 font-medium">
               {formatTime(match.startDate)}
             </div>
           ) : (
@@ -231,7 +231,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
           )}
         </div>
 
-        <div className="flex flex-col gap-y-1.5 justify-betwee mt-4 mb-3">
+        <div className="flex flex-col gap-y-1.5 justify-betwee mt-6 mb-4">
           {/* home */}
           <div className="flex flex-row items-center w-full">
             <div className="flex-none">
@@ -308,14 +308,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
         {todaysMatches.length > 0 && (
 
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <div className="text-center mb-8">
-                <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
+              <div className="text-center mt-12 mb-8">
+                <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                   Aktuelle Spiele
                 </h2>
               </div>
 
               {/* Tournament Filter */}
-              <div className="max-w-md mx-auto mb-8">
+              <div className="sm:max-w-xs mx-auto mb-12">
                 <TournamentSelect
                   selectedTournament={selectedTournament}
                   onTournamentChange={setSelectedTournament}
@@ -534,7 +534,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
               </div>
             </div>
             */}
-            <div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto max-w-2xl text-center mt-12">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
                 Neueste Artikel
               </h2>
