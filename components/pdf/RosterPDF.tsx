@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 5,
   },
@@ -137,6 +137,23 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
             {tournament && <Text style={styles.subtitle}>{tournament} / {round} / {matchDate}</Text>}
             <Text style={styles.subtitle}>{venue}</Text>
           </View>
+        </View>
+      </View>
+
+      {/* Team Name Section */}
+      <View style={{ marginBottom: 20, paddingVertical: 15, borderBottom: 1, borderColor: '#DDDDDD' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          {teamLogo && (
+            <View style={{ marginRight: 15 }}>
+              <PDFImage
+                style={{ width: 60, height: 60, objectFit: 'contain' }}
+                src={teamLogo}
+              />
+            </View>
+          )}
+          <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>
+            {teamName}
+          </Text>
         </View>
       </View>
 
