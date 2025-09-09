@@ -11,12 +11,15 @@ import { TournamentValues } from '../types/TournamentValues';
 import Layout from "../components/Layout";
 import { getFuzzyDate } from '../tools/dateUtils';
 import { ArrowLongRightIcon } from '@heroicons/react/20/solid';
+import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import SuccessMessage from '../components/ui/SuccessMessage';
 import TournamentSelect from '../components/ui/TournamentSelect';
 import MatchStatusBadge from '../components/ui/MatchStatusBadge';
 import { classNames } from '../tools/utils';
 import { tournamentConfigs } from '../tools/consts';
+import Image from 'next/image';
+
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
@@ -112,6 +115,51 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
     }
   }, [selectedTournament, todaysMatches]);
 
+  // Helper function to get time slot for a match
+  const getTimeSlot = (date: Date) => {
+    const hour = new Date(date).getHours();
+    
+    if (hour < 10) {
+      return { key: 'morning', label: 'Morgens', description: 'Vor 10 Uhr' };
+    } else if (hour < 12) {
+      return { key: 'beforenoon', label: 'Vormittags', description: '10-12 Uhr' };
+    } else if (hour < 14) {
+      return { key: 'noon', label: 'Mittags', description: '12-14 Uhr' };
+    } else if (hour < 16) {
+      return { key: 'afternoon', label: 'Nachmittags', description: '14-16 Uhr' };
+    } else if (hour < 18) {
+      return { key: 'lateafternoon', label: 'Später Nachmittag', description: '16-18 Uhr' };
+    } else if (hour < 20) {
+      return { key: 'evening', label: 'Abends', description: '18-20 Uhr' };
+    } else {
+      return { key: 'night', label: 'Heute Nacht', description: 'Ab 20 Uhr' };
+    }
+  };
+
+  // Group matches by time slots
+  const groupMatchesByTimeSlot = (matches: Match[]) => {
+    const groups: { [key: string]: { label: string; matches: Match[] } } = {};
+    
+    matches.forEach(match => {
+      const timeSlot = getTimeSlot(match.startDate);
+      if (!groups[timeSlot.key]) {
+        groups[timeSlot.key] = {
+          label: timeSlot.label,
+          matches: []
+        };
+      }
+      groups[timeSlot.key].matches.push(match);
+    });
+
+    // Sort groups by time order
+    const sortedGroups = Object.entries(groups).sort(([keyA], [keyB]) => {
+      const order = ['morning', 'beforenoon', 'noon', 'afternoon', 'lateafternoon', 'evening', 'night'];
+      return order.indexOf(keyA) - order.indexOf(keyB);
+    });
+
+    return sortedGroups.map(([key, group]) => group);
+  };
+
   // Categorize matches
   const categorizeMatches = (matches: Match[]) => {
     const live = matches.filter(match => match.matchStatus.key === 'INPROGRESS');
@@ -136,7 +184,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-500 font-medium uppercase">
             {(() => {
@@ -153,31 +201,55 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
               }
             })()}
           </div>
-          <MatchStatusBadge 
-            statusKey={match.matchStatus.key}
-            finishTypeKey={match.finishType.key}
-            statusValue={match.matchStatus.value}
-            finishTypeValue={match.finishType.value}
-          />
+          {match.matchStatus.key === 'SCHEDULED' ? (
+            <div className="text-xs text-gray-600 font-medium">
+              {formatTime(match.startDate)}
+            </div>
+          ) : (
+            <MatchStatusBadge 
+              statusKey={match.matchStatus.key}
+              finishTypeKey={match.finishType.key}
+              statusValue={match.matchStatus.value}
+              finishTypeValue={match.finishType.value}
+            />
+          )}
         </div>
         
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <div className="font-semibold text-gray-900">{match.home.tinyName}</div>
+        <div className="flex flex-col gap-y-1.5 justify-betwee mt-4 mb-3">
+          {/* home */}
+          <div className="flex flex-row items-center w-full">
+            <div className="flex-none">
+              <Image className="flex-none" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={32} width={32} />
             </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {match.matchStatus.key === 'SCHEDULED' ? 'vs' : `${match.home.stats.goalsFor}:${match.away.stats.goalsFor}`}
+            <div className="flex-auto ml-6 truncate text-ellipsis">
+              <p className={`block text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{match.home.shortName}</p>
             </div>
-            <div className="text-left">
-              <div className="font-semibold text-gray-900">{match.away.tinyName}</div>
+            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+              <div className="flex-none w-10">
+                <p className={`text-lg sm:max-md:text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{match.home.stats.goalsFor}</p>
+              </div>
+            )}
+          </div>
+          {/* away */}
+          <div className="flex flex-row items-center w-full">
+            <div className="flex-none">
+              <Image className="flex-none" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={32} width={32} />
             </div>
+            <div className="flex-auto ml-6 w-full truncate">
+              <p className={`block text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{match.away.shortName}</p>
+            </div>
+            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+              <div className="flex-none w-10">
+                <p className={`text-lg sm:max-md:text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{match.away.stats.goalsFor}</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <div>
-            {match.matchStatus.key === 'SCHEDULED' ? formatTime(match.startDate) : match.venue.name}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center truncate mr-4">
+            <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
+            <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
           </div>
           <Link href={`/matches/${match._id}`}>
             <a className="text-indigo-600 hover:text-indigo-800 font-medium">
@@ -218,7 +290,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
         
         {/* Today's Games Section */}
         {todaysMatches.length > 0 && (
-          <div className="bg-gray-50 py-12">
+
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -246,7 +318,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                           Live
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {live.map((match) => (
                             <MatchCard key={match._id} match={match} />
                           ))}
@@ -260,13 +332,40 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                           Demnächst
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {upcoming
-                            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-                            .map((match) => (
-                              <MatchCard key={match._id} match={match} />
+                        {upcoming.length > 6 ? (
+                          // Group by time slots when more than 6 matches
+                          <div className="space-y-8">
+                            {groupMatchesByTimeSlot(
+                              upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                            ).map((group, groupIndex) => (
+                              <div key={groupIndex}>
+                                <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-10">
+                                  <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                                    <h4 className="mt-2 ml-2 text-base font-semibold text-gray-900 dark:text-white">|{group.label}</h4>
+                                    <p className="mt-1 ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
+                                  </div>
+                                </div>
+                                <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
+                                  {group.label}
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {group.matches.map((match) => (
+                                    <MatchCard key={match._id} match={match} />
+                                  ))}
+                                </div>
+                              </div>
                             ))}
-                        </div>
+                          </div>
+                        ) : (
+                          // Show all matches without grouping when 6 or fewer
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {upcoming
+                              .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                              .map((match) => (
+                                <MatchCard key={match._id} match={match} />
+                              ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -274,15 +373,36 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                     {finished.length > 0 && (
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-                          Bereits gespielt
+                          Beendet
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {finished
-                            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-                            .map((match) => (
-                              <MatchCard key={match._id} match={match} />
+                        {finished.length > 6 ? (
+                          // Group by time slots when more than 6 matches
+                          <div className="space-y-8">
+                            {groupMatchesByTimeSlot(
+                              finished.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                            ).map((group, groupIndex) => (
+                              <div key={groupIndex}>
+                                <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
+                                  {group.label}
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {group.matches.map((match) => (
+                                    <MatchCard key={match._id} match={match} />
+                                  ))}
+                                </div>
+                              </div>
                             ))}
-                        </div>
+                          </div>
+                        ) : (
+                          // Show all matches without grouping when 6 or fewer
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {finished
+                              .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                              .map((match) => (
+                                <MatchCard key={match._id} match={match} />
+                              ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -300,7 +420,6 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                 );
               })()}
             </div>
-          </div>
         )}
 
         <div className="bg-white py-12 sm:py-24">
@@ -364,12 +483,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
               </div>
             </div>
             */}
-            {/*<div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
                 Aktuelles
               </h2>
+              {/** 
               <p className="mt-2 text-lg/8 text-gray-600">Learn how to grow your business with our expert advice.</p>
-            </div>*/}
+              */}
+            </div>
             <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               {postItems.map((post) => (
                 <article key={post._id} className="flex flex-col items-start justify-between">
