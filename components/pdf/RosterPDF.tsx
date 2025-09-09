@@ -181,34 +181,58 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
             return jerseyA - jerseyB;
           });
 
-          // Separate goalies and other players
+          // Separate players by position
+          const captains = sortedRoster.filter(p => p.playerPosition.key === 'C');
+          const assistants = sortedRoster.filter(p => p.playerPosition.key === 'A');
           const goalies = sortedRoster.filter(p => p.playerPosition.key === 'G');
-          const otherPlayers = sortedRoster.filter(p => p.playerPosition.key !== 'G');
+          const forwards = sortedRoster.filter(p => p.playerPosition.key === 'F');
 
-          // Create 18 rows total: 2 for goalies, 16 for other players
+          // Create 18 rows total with specific positioning
           const rows = [];
 
-          // Add 2 goalie rows
-          for (let i = 0; i < 2; i++) {
-            const goalie = goalies[i];
-            rows.push(
-              <View key={`goalie-${i}`} style={styles.tableRow}>
-                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '-') : '-'}</Text>
-                <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
-                <Text style={styles.nameCell}>
-                  {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
-                </Text>
-                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '-') : '-'}</Text>
-              </View>
-            );
-          }
+          // Row 1: Captain (C) - always first
+          const captain = captains[0];
+          rows.push(
+            <View key="row-1" style={styles.tableRow}>
+              <Text style={styles.numberCell}>1</Text>
+              <Text style={styles.positionCell}>{captain ? 'C' : ''}</Text>
+              <Text style={styles.nameCell}>
+                {captain ? `${captain.player.lastName}, ${captain.player.firstName}${captain.called ? ' (H)' : ''}` : ''}
+              </Text>
+              <Text style={styles.passCell}>{captain ? (captain.passNumber || '-') : '-'}</Text>
+            </View>
+          );
 
-          // Add 16 rows for other players
-          for (let i = 0; i < 16; i++) {
-            const player = otherPlayers[i];
+          // Row 2: Assistant (A) - always second
+          const assistant = assistants[0];
+          rows.push(
+            <View key="row-2" style={styles.tableRow}>
+              <Text style={styles.numberCell}>2</Text>
+              <Text style={styles.positionCell}>{assistant ? 'A' : ''}</Text>
+              <Text style={styles.nameCell}>
+                {assistant ? `${assistant.player.lastName}, ${assistant.player.firstName}${assistant.called ? ' (H)' : ''}` : ''}
+              </Text>
+              <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '-') : '-'}</Text>
+            </View>
+          );
+
+          // Build list of remaining players (goalies and forwards)
+          const remainingPlayers = [];
+
+          // Add goalies
+          goalies.forEach(goalie => remainingPlayers.push(goalie));
+
+          // Add forwards
+          forwards.forEach(forward => remainingPlayers.push(forward));
+
+          // Rows 3-18: Remaining players
+          for (let i = 2; i < 18; i++) {
+            const player = remainingPlayers[i - 2]; // Offset by 2 since first 2 rows are C and A
+            const rowNumber = i + 1;
+
             rows.push(
-              <View key={`player-${i}`} style={styles.tableRow}>
-                <Text style={styles.numberCell}>{player ? (player.player.jerseyNumber || '-') : '-'}</Text>
+              <View key={`row-${i + 1}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{rowNumber}</Text>
                 <Text style={styles.positionCell}>{player ? player.playerPosition.key : ''}</Text>
                 <Text style={styles.nameCell}>
                   {player ? `${player.player.lastName}, ${player.player.firstName}${player.called ? ' (H)' : ''}` : ''}
