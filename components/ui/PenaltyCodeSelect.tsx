@@ -62,18 +62,11 @@ const PenaltyCodeSelect = forwardRef<PenaltyCodeSelectHandle, PenaltyCodeSelectP
     : penaltyCodes.filter((penaltyCode) => {
       const queryLower = query.toLowerCase().trim();
 
-      // Key search (exact match and starts-with match)
+      // Key search only (exact match and starts-with match)
       const keyMatch = penaltyCode.key.toLowerCase() === queryLower || 
         penaltyCode.key.toLowerCase().startsWith(queryLower);
 
-      // Value search
-      const valueMatch = penaltyCode.value.toLowerCase().includes(queryLower);
-
-      // Combined search (e.g., "M1 Minor")
-      const combinedMatch = `${penaltyCode.key} ${penaltyCode.value}`.toLowerCase().includes(queryLower) ||
-        `${penaltyCode.key} - ${penaltyCode.value}`.toLowerCase().includes(queryLower);
-
-      return keyMatch || valueMatch || combinedMatch;
+      return keyMatch;
     });
 
   const handlePenaltyCodeChange = (penaltyCode: PenaltyCode | null) => {
