@@ -120,19 +120,19 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
     const hour = new Date(date).getHours();
     
     if (hour < 10) {
-      return { key: 'morning', label: 'Vor 10 Uhr' };
+      return { key: 'morning', label: 'Morgens', description: 'Vor 10 Uhr' };
     } else if (hour < 12) {
-      return { key: 'beforenoon', label: '10-12 Uhr' };
+      return { key: 'beforenoon', label: 'Vormittags', description: '10-12 Uhr' };
     } else if (hour < 14) {
-      return { key: 'noon', label: '12-14 Uhr' };
+      return { key: 'noon', label: 'Mittags', description: '12-14 Uhr' };
     } else if (hour < 16) {
-      return { key: 'afternoon', label: '14-16 Uhr' };
+      return { key: 'afternoon', label: 'Nachmittags', description: '14-16 Uhr' };
     } else if (hour < 18) {
-      return { key: 'lateafternoon', label: '16-18 Uhr' };
+      return { key: 'lateafternoon', label: 'Später Nachmittag', description: '16-18 Uhr' };
     } else if (hour < 20) {
-      return { key: 'evening', label: '18-20 Uhr' };
+      return { key: 'evening', label: 'Abends', description: '18-20 Uhr' };
     } else {
-      return { key: 'night', label: 'Ab 20 Uhr' };
+      return { key: 'night', label: 'Heute Nacht', description: 'Ab 20 Uhr' };
     }
   };
 
@@ -339,6 +339,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                               upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
                             ).map((group, groupIndex) => (
                               <div key={groupIndex}>
+                                <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-10">
+                                  <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                                    <h4 className="mt-2 ml-2 text-base font-semibold text-gray-900 dark:text-white">|{group.label}</h4>
+                                    <p className="mt-1 ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
+                                  </div>
+                                </div>
                                 <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
                                   {group.label}
                                 </h4>
@@ -477,12 +483,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
               </div>
             </div>
             */}
-            {/*<div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
                 Aktuelles
               </h2>
+              {/** 
               <p className="mt-2 text-lg/8 text-gray-600">Learn how to grow your business with our expert advice.</p>
-            </div>*/}
+              */}
+            </div>
             <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               {postItems.map((post) => (
                 <article key={post._id} className="flex flex-col items-start justify-between">
