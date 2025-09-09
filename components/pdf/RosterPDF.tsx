@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   bishlLogo: {
-    width: 60,
+    width: 65,
     height: 60,
   },
   pageTitle: {
