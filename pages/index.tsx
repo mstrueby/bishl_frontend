@@ -404,7 +404,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                           // Group by time slots when more than 6 matches
                           <div className="space-y-8">
                             {groupMatchesByTimeSlot(
-                              finished.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                              finished.sort((a, b) => {
+                                // First sort by tournament sortOrder
+                                const tournamentConfigA = tournamentConfigs[a.tournament.alias];
+                                const tournamentConfigB = tournamentConfigs[b.tournament.alias];
+                                const sortOrderA = tournamentConfigA?.sortOrder || 999;
+                                const sortOrderB = tournamentConfigB?.sortOrder || 999;
+                                
+                                if (sortOrderA !== sortOrderB) {
+                                  return sortOrderA - sortOrderB;
+                                }
+                                
+                                // Then sort by startDate (most recent first)
+                                return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+                              })
                             ).map((group, groupIndex) => (
                               <div key={groupIndex}>
                                 <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
@@ -422,7 +435,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                           // Show all matches without grouping when 6 or fewer
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {finished
-                              .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                              .sort((a, b) => {
+                                // First sort by tournament sortOrder
+                                const tournamentConfigA = tournamentConfigs[a.tournament.alias];
+                                const tournamentConfigB = tournamentConfigs[b.tournament.alias];
+                                const sortOrderA = tournamentConfigA?.sortOrder || 999;
+                                const sortOrderB = tournamentConfigB?.sortOrder || 999;
+                                
+                                if (sortOrderA !== sortOrderB) {
+                                  return sortOrderA - sortOrderB;
+                                }
+                                
+                                // Then sort by startDate (most recent first)
+                                return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+                              })
                               .map((match) => (
                                 <MatchCard key={match._id} match={match} />
                               ))}
