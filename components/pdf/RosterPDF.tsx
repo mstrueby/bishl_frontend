@@ -159,14 +159,14 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
 
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
-          <Text style={styles.numberCell}>Lfd. Nr.</Text>
+          <Text style={styles.numberCell}>Nr.</Text>
           <Text style={styles.positionCell}>Position</Text>
           <Text style={styles.nameCell}>Name</Text>
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
 
         {(() => {
-          // Sort roster by specific position order: C, A, G, F
+          // Sort roster by position priority
           const sortedRoster = roster.sort((a, b) => {
             const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
             const posA = positionPriority[a.playerPosition.key] || 99;
@@ -181,37 +181,34 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
             return jerseyA - jerseyB;
           });
 
-          // Separate players by position in desired order
-          const captains = sortedRoster.filter(p => p.playerPosition.key === 'C');
-          const assistants = sortedRoster.filter(p => p.playerPosition.key === 'A');
+          // Separate goalies and other players
           const goalies = sortedRoster.filter(p => p.playerPosition.key === 'G');
-          const forwards = sortedRoster.filter(p => p.playerPosition.key === 'F');
+          const otherPlayers = sortedRoster.filter(p => p.playerPosition.key !== 'G');
 
-          // Build ordered player list: C, A, G, G, then all F players
-          const orderedPlayers = [];
-          
-          // Add C (captain)
-          if (captains[0]) orderedPlayers.push(captains[0]);
-          
-          // Add A (assistant)
-          if (assistants[0]) orderedPlayers.push(assistants[0]);
-          
-          // Add 2 goalies
-          if (goalies[0]) orderedPlayers.push(goalies[0]);
-          if (goalies[1]) orderedPlayers.push(goalies[1]);
-          
-          // Add all forwards
-          forwards.forEach(player => orderedPlayers.push(player));
-
-          // Create 18 rows total with running numbers
+          // Create 18 rows total: 2 for goalies, 16 for other players
           const rows = [];
-          for (let i = 0; i < 18; i++) {
-            const player = orderedPlayers[i];
-            const rowNumber = i + 1;
-            
+
+          // Add 2 goalie rows
+          for (let i = 0; i < 2; i++) {
+            const goalie = goalies[i];
             rows.push(
-              <View key={`row-${i}`} style={styles.tableRow}>
-                <Text style={styles.numberCell}>{rowNumber}</Text>
+              <View key={`goalie-${i}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
+                <Text style={styles.nameCell}>
+                  {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
+                </Text>
+                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '-') : '-'}</Text>
+              </View>
+            );
+          }
+
+          // Add 16 rows for other players
+          for (let i = 0; i < 16; i++) {
+            const player = otherPlayers[i];
+            rows.push(
+              <View key={`player-${i}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{player ? (player.player.jerseyNumber || '-') : '-'}</Text>
                 <Text style={styles.positionCell}>{player ? player.playerPosition.key : ''}</Text>
                 <Text style={styles.nameCell}>
                   {player ? `${player.player.lastName}, ${player.player.firstName}${player.called ? ' (H)' : ''}` : ''}
