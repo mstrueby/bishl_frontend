@@ -59,8 +59,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#DDDDDD',
     borderBottomStyle: 'solid',
     alignItems: 'center',
-    minHeight: 35,
-    paddingVertical: 8,
+    minHeight: 22,
+    paddingVertical: 3,
   },
   tableHeader: {
     backgroundColor: '#E5E7EB',
@@ -165,36 +165,61 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
 
-        {roster
-          .sort((a, b) => {
-            // Define position priorities (C = 1, A = 2, G = 3, F = 4)
+        {(() => {
+          // Sort roster by position priority
+          const sortedRoster = roster.sort((a, b) => {
             const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-            // Get priorities
             const posA = positionPriority[a.playerPosition.key] || 99;
             const posB = positionPriority[b.playerPosition.key] || 99;
 
-            // First sort by position priority
             if (posA !== posB) {
               return posA - posB;
             }
 
-            // If positions are the same, sort by jersey number
             const jerseyA = a.player.jerseyNumber || 999;
             const jerseyB = b.player.jerseyNumber || 999;
             return jerseyA - jerseyB;
-          })
-          .map((player) => (
-            <View key={player.player.playerId} style={styles.tableRow}>
-              <Text style={styles.numberCell}>{player.player.jerseyNumber || '-'}</Text>
-              <Text style={styles.positionCell}>{player.playerPosition.key}</Text>
-              <Text style={styles.nameCell}>
-                {`${player.player.lastName}, ${player.player.firstName}`}
-                {player.called && ' (H)'}
-              </Text>
-              <Text style={styles.passCell}>{player.passNumber || '-'}</Text>
-            </View>
-          ))}
+          });
+
+          // Separate goalies and other players
+          const goalies = sortedRoster.filter(p => p.playerPosition.key === 'G');
+          const otherPlayers = sortedRoster.filter(p => p.playerPosition.key !== 'G');
+
+          // Create 18 rows total: 2 for goalies, 16 for other players
+          const rows = [];
+
+          // Add 2 goalie rows
+          for (let i = 0; i < 2; i++) {
+            const goalie = goalies[i];
+            rows.push(
+              <View key={`goalie-${i}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
+                <Text style={styles.nameCell}>
+                  {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
+                </Text>
+                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '-') : '-'}</Text>
+              </View>
+            );
+          }
+
+          // Add 16 rows for other players
+          for (let i = 0; i < 16; i++) {
+            const player = otherPlayers[i];
+            rows.push(
+              <View key={`player-${i}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{player ? (player.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.positionCell}>{player ? player.playerPosition.key : ''}</Text>
+                <Text style={styles.nameCell}>
+                  {player ? `${player.player.lastName}, ${player.player.firstName}${player.called ? ' (H)' : ''}` : ''}
+                </Text>
+                <Text style={styles.passCell}>{player ? (player.passNumber || '-') : '-'}</Text>
+              </View>
+            );
+          }
+
+          return rows;
+        })()}
       </View>
 
       <View style={styles.footer}>
