@@ -184,8 +184,23 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
       });
     };
 
+    // Determine border color based on match status
+    const getBorderColor = () => {
+      switch (match.matchStatus.key) {
+        case 'INPROGRESS':
+          return 'border-l-red-500';
+        case 'SCHEDULED':
+          return 'border-l-green-500';
+        case 'FINISHED':
+        case 'FORFEITED':
+          return 'border-l-gray-500';
+        default:
+          return 'border-l-gray-300';
+      }
+    };
+
     return (
-      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      <div className={`bg-white rounded-lg shadow border border-gray-200 border-l-4 ${getBorderColor()} p-4 hover:shadow-md transition-shadow`}>
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-500 font-medium uppercase">
             {(() => {
