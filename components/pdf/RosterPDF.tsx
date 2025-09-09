@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
   },
@@ -105,10 +105,14 @@ interface RosterPDFProps {
   matchDate: string;
   venue: string;
   roster: RosterPlayer[];
+  tournament: string;
+  round: string;
+  homeTeam: string;
+  awayTeam: string;
   teamLogo?: string;
 }
 
-const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFProps) => (
+const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -129,9 +133,9 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
             </View>
           )}
           <View style={styles.teamInfo}>
-            <Text style={styles.title}>{teamName}</Text>
-            <Text style={styles.subtitle}>Spieltag: {matchDate}</Text>
-            <Text style={styles.subtitle}>Spielort: {venue}</Text>
+            <Text style={styles.title}>{homeTeam} - {awayTeam}</Text>
+            {tournament && <Text style={styles.subtitle}>{tournament} / {round} / {matchDate}</Text>}
+            <Text style={styles.subtitle}>{venue}</Text>
           </View>
         </View>
       </View>
@@ -143,7 +147,7 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
           <Text style={styles.nameCell}>Name</Text>
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
-        
+
         {roster
           .sort((a, b) => {
             // Define position priorities (C = 1, A = 2, G = 3, F = 4)
