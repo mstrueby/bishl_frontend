@@ -141,7 +141,7 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       {/* Team Name Section */}
-      <View style={{ marginBottom: 20, paddingVertical: 15, borderBottom: 1, borderColor: '#DDDDDD' }}>
+      <View style={{ marginBottom: 10, paddingVertical: 15 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           {teamLogo && (
             <View style={{ marginRight: 15 }}>
@@ -253,7 +253,7 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       <View style={styles.footer}>
-        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')}</Text>
+        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</Text>
       </View>
     </Page>
   </Document>
