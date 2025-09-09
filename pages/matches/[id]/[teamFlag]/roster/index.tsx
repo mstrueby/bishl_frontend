@@ -501,6 +501,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           venue={match.venue.name}
           roster={sortRoster(rosterList)}
           teamLogo={team.logoUrl}
+          tournament={match.tournament.name}
+          round={match.round.name}
+          homeTeam={match.home.fullName}
+          awayTeam={match.away.fullName}
         />
       }
       fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}

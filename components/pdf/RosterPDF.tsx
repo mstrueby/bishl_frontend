@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
   },
@@ -105,15 +105,14 @@ interface RosterPDFProps {
   matchDate: string;
   venue: string;
   roster: RosterPlayer[];
+  tournament: string;
+  round: string;
+  homeTeam: string;
+  awayTeam: string;
   teamLogo?: string;
-  tournament?: string;
-  round?: string;
-  homeTeam?: string;
-  awayTeam?: string;
-  isHomeTeam?: boolean;
 }
 
-const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam, isHomeTeam }: RosterPDFProps) => (
+const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -134,21 +133,9 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
             </View>
           )}
           <View style={styles.teamInfo}>
-            <Text style={styles.title}>{teamName}</Text>
-            {tournament && <Text style={styles.subtitle}>Wettbewerb: {tournament}</Text>}
-            {round && <Text style={styles.subtitle}>Runde: {round}</Text>}
-            <Text style={styles.subtitle}>Spieltag: {matchDate}</Text>
-            <Text style={styles.subtitle}>Spielort: {venue}</Text>
-            {homeTeam && awayTeam && (
-              <Text style={styles.subtitle}>
-                {homeTeam} vs. {awayTeam}
-                {isHomeTeam !== undefined && (
-                  <Text style={{ fontWeight: 'bold' }}>
-                    {' '}({isHomeTeam ? 'Heim' : 'Gast'})
-                  </Text>
-                )}
-              </Text>
-            )}
+            <Text style={styles.title}>{homeTeam} - {awayTeam}</Text>
+            {tournament && <Text style={styles.subtitle}>{tournament} / {round} / {matchDate}</Text>}
+            <Text style={styles.subtitle}>{venue}</Text>
           </View>
         </View>
       </View>
@@ -160,7 +147,7 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
           <Text style={styles.nameCell}>Name</Text>
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
-        
+
         {roster
           .sort((a, b) => {
             // Define position priorities (C = 1, A = 2, G = 3, F = 4)
