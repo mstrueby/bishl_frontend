@@ -18,6 +18,8 @@ import TournamentSelect from '../components/ui/TournamentSelect';
 import MatchStatusBadge from '../components/ui/MatchStatusBadge';
 import { classNames } from '../tools/utils';
 import { tournamentConfigs } from '../tools/consts';
+import Image from 'next/image';
+
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
 
@@ -137,7 +139,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-500 font-medium uppercase">
             {(() => {
@@ -168,22 +170,39 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
           )}
         </div>
         
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <div className="font-semibold text-gray-900">{match.home.tinyName}</div>
+        <div className="flex flex-col gap-y-1.5 justify-betwee mt-4 mb-3">
+          {/* home */}
+          <div className="flex flex-row items-center w-full">
+            <div className="flex-none">
+              <Image className="flex-none" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={32} width={32} />
             </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {match.matchStatus.key === 'SCHEDULED' ? 'vs' : `${match.home.stats.goalsFor}:${match.away.stats.goalsFor}`}
+            <div className="flex-auto ml-6 truncate text-ellipsis">
+              <p className={`block text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{match.home.shortName}</p>
             </div>
-            <div className="text-left">
-              <div className="font-semibold text-gray-900">{match.away.tinyName}</div>
+            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+              <div className="flex-none w-10">
+                <p className={`text-lg sm:max-md:text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{match.home.stats.goalsFor}</p>
+              </div>
+            )}
+          </div>
+          {/* away */}
+          <div className="flex flex-row items-center w-full">
+            <div className="flex-none">
+              <Image className="flex-none" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={32} width={32} />
             </div>
+            <div className="flex-auto ml-6 w-full truncate">
+              <p className={`block text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{match.away.shortName}</p>
+            </div>
+            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+              <div className="flex-none w-10">
+                <p className={`text-lg sm:max-md:text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{match.away.stats.goalsFor}</p>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center truncate">
+          <div className="flex items-center truncate mr-4">
             <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
             <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
           </div>
@@ -226,7 +245,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
         
         {/* Today's Games Section */}
         {todaysMatches.length > 0 && (
-          <div className="bg-gray-50 py-12">
+
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -254,7 +273,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                           Live
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {live.map((match) => (
                             <MatchCard key={match._id} match={match} />
                           ))}
@@ -268,7 +287,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                           Demnächst
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {upcoming
                             .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
                             .map((match) => (
@@ -282,9 +301,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                     {finished.length > 0 && (
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-                          Bereits gespielt
+                          Beendet
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {finished
                             .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
                             .map((match) => (
@@ -308,7 +327,6 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                 );
               })()}
             </div>
-          </div>
         )}
 
         <div className="bg-white py-12 sm:py-24">
