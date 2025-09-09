@@ -294,8 +294,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
 
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                  Spiele heute
+                <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
+                  Aktuelle Spiele
                 </h2>
               </div>
 
@@ -312,13 +312,17 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                 const { live, upcoming, finished } = categorizeMatches(filteredMatches);
 
                 return (
-                  <div className="space-y-12">
+                  <div className="space-y-20">
                     {/* Live Games */}
                     {live.length > 0 && (
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-                          Live
-                        </h3>
+                        <div className="min-w-0 flex-1">
+                          <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                            <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Live</h2>
+                            </div>
+                          </div>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {live.map((match) => (
                             <MatchCard key={match._id} match={match} />
@@ -330,9 +334,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                     {/* Upcoming Games */}
                     {upcoming.length > 0 && (
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-                          Demnächst
-                        </h3>
+                        <div className="min-w-0 flex-1">
+                          <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                            <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Demnächst</h2>
+                            </div>
+                          </div>
+                        </div>
                         {upcoming.length > 6 ? (
                           // Group by time slots when more than 6 matches
                           <div className="space-y-8">
@@ -340,10 +348,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                               upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
                             ).map((group, groupIndex) => (
                               <div key={groupIndex}>
-                                <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-10">
-                                  <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                                    <h4 className="mt-2 ml-2 text-base font-semibold text-gray-900 dark:text-white">{group.label}</h4>
-                                    <p className="mt-1 ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
+                                <div className="mb-6 mt-8">
+                                  <div className="flex flex-wrap items-baseline">
+                                    <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">{group.label}</h4>
+                                    <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -370,9 +378,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                     {/* Finished Games */}
                     {finished.length > 0 && (
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-                          Beendet
-                        </h3>
+                        <div className="min-w-0 flex-1">
+                          <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                            <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Beendet</h2>
+                            </div>
+                          </div>
+                        </div>
                         {finished.length > 6 ? (
                           // Group by time slots when more than 6 matches
                           <div className="space-y-8">
@@ -483,7 +495,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
             */}
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
-                Aktuelles
+                Neueste Artikel
               </h2>
               {/** 
               <p className="mt-2 text-lg/8 text-gray-600">Learn how to grow your business with our expert advice.</p>
