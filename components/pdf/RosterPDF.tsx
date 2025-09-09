@@ -106,9 +106,14 @@ interface RosterPDFProps {
   venue: string;
   roster: RosterPlayer[];
   teamLogo?: string;
+  tournament?: string;
+  round?: string;
+  homeTeam?: string;
+  awayTeam?: string;
+  isHomeTeam?: boolean;
 }
 
-const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFProps) => (
+const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam, isHomeTeam }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -130,8 +135,20 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
           )}
           <View style={styles.teamInfo}>
             <Text style={styles.title}>{teamName}</Text>
+            {tournament && <Text style={styles.subtitle}>Wettbewerb: {tournament}</Text>}
+            {round && <Text style={styles.subtitle}>Runde: {round}</Text>}
             <Text style={styles.subtitle}>Spieltag: {matchDate}</Text>
             <Text style={styles.subtitle}>Spielort: {venue}</Text>
+            {homeTeam && awayTeam && (
+              <Text style={styles.subtitle}>
+                {homeTeam} vs. {awayTeam}
+                {isHomeTeam !== undefined && (
+                  <Text style={{ fontWeight: 'bold' }}>
+                    {' '}({isHomeTeam ? 'Heim' : 'Gast'})
+                  </Text>
+                )}
+              </Text>
+            )}
           </View>
         </View>
       </View>
