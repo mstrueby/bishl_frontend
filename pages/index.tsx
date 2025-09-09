@@ -115,6 +115,51 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
     }
   }, [selectedTournament, todaysMatches]);
 
+  // Helper function to get time slot for a match
+  const getTimeSlot = (date: Date) => {
+    const hour = new Date(date).getHours();
+    
+    if (hour < 10) {
+      return { key: 'morning', label: 'Vor 10 Uhr' };
+    } else if (hour < 12) {
+      return { key: 'beforenoon', label: '10-12 Uhr' };
+    } else if (hour < 14) {
+      return { key: 'noon', label: '12-14 Uhr' };
+    } else if (hour < 16) {
+      return { key: 'afternoon', label: '14-16 Uhr' };
+    } else if (hour < 18) {
+      return { key: 'lateafternoon', label: '16-18 Uhr' };
+    } else if (hour < 20) {
+      return { key: 'evening', label: '18-20 Uhr' };
+    } else {
+      return { key: 'night', label: 'Ab 20 Uhr' };
+    }
+  };
+
+  // Group matches by time slots
+  const groupMatchesByTimeSlot = (matches: Match[]) => {
+    const groups: { [key: string]: { label: string; matches: Match[] } } = {};
+    
+    matches.forEach(match => {
+      const timeSlot = getTimeSlot(match.startDate);
+      if (!groups[timeSlot.key]) {
+        groups[timeSlot.key] = {
+          label: timeSlot.label,
+          matches: []
+        };
+      }
+      groups[timeSlot.key].matches.push(match);
+    });
+
+    // Sort groups by time order
+    const sortedGroups = Object.entries(groups).sort(([keyA], [keyB]) => {
+      const order = ['morning', 'beforenoon', 'noon', 'afternoon', 'lateafternoon', 'evening', 'night'];
+      return order.indexOf(keyA) - order.indexOf(keyB);
+    });
+
+    return sortedGroups.map(([key, group]) => group);
+  };
+
   // Categorize matches
   const categorizeMatches = (matches: Match[]) => {
     const live = matches.filter(match => match.matchStatus.key === 'INPROGRESS');
@@ -287,13 +332,34 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                           Demnächst
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {upcoming
-                            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-                            .map((match) => (
-                              <MatchCard key={match._id} match={match} />
+                        {upcoming.length > 6 ? (
+                          // Group by time slots when more than 6 matches
+                          <div className="space-y-8">
+                            {groupMatchesByTimeSlot(
+                              upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                            ).map((group, groupIndex) => (
+                              <div key={groupIndex}>
+                                <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
+                                  {group.label}
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {group.matches.map((match) => (
+                                    <MatchCard key={match._id} match={match} />
+                                  ))}
+                                </div>
+                              </div>
                             ))}
-                        </div>
+                          </div>
+                        ) : (
+                          // Show all matches without grouping when 6 or fewer
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {upcoming
+                              .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                              .map((match) => (
+                                <MatchCard key={match._id} match={match} />
+                              ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -303,13 +369,34 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                           Beendet
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {finished
-                            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-                            .map((match) => (
-                              <MatchCard key={match._id} match={match} />
+                        {finished.length > 6 ? (
+                          // Group by time slots when more than 6 matches
+                          <div className="space-y-8">
+                            {groupMatchesByTimeSlot(
+                              finished.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                            ).map((group, groupIndex) => (
+                              <div key={groupIndex}>
+                                <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
+                                  {group.label}
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {group.matches.map((match) => (
+                                    <MatchCard key={match._id} match={match} />
+                                  ))}
+                                </div>
+                              </div>
                             ))}
-                        </div>
+                          </div>
+                        ) : (
+                          // Show all matches without grouping when 6 or fewer
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {finished
+                              .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                              .map((match) => (
+                                <MatchCard key={match._id} match={match} />
+                              ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
