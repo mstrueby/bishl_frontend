@@ -323,11 +323,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
             <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
             <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
           </div>
-          <Link href={`/matches/${match._id}`}>
-            <a className="text-indigo-600 hover:text-indigo-800 font-medium">
-              Spielbericht
-            </a>
-          </Link>
+          {(match.matchStatus.key === 'INPROGRESS' || match.matchStatus.key === 'FINISHED') && (
+            <Link href={`/matches/${match._id}`}>
+              <a className="text-indigo-600 hover:text-indigo-800 font-medium">
+                Spielbericht
+              </a>
+            </Link>
+          )}
         </div>
       </div>
     );
