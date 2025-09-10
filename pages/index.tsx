@@ -235,13 +235,18 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
       });
     };
 
-    // Determine border color based on match status
+    // Determine border color based on match status and date
     const getBorderColor = () => {
+      // Check if match is today
+      const today = new Date().toDateString();
+      const matchDate = new Date(match.startDate).toDateString();
+      const isToday = today === matchDate;
+
       switch (match.matchStatus.key) {
         case 'INPROGRESS':
           return 'border-l-red-500';
         case 'SCHEDULED':
-          return 'border-l-green-500';
+          return isToday ? 'border-l-green-500' : ''; // Only show color for today's scheduled matches
         case 'FINISHED':
         case 'FORFEITED':
           return 'border-l-gray-500';
@@ -251,7 +256,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     };
 
     return (
-      <div className={`bg-white rounded-lg shadow border border-gray-200 border-l-4 ${getBorderColor()} p-4 hover:shadow-md transition-shadow`}>
+      <div className={`bg-white rounded-lg shadow border border-gray-200 ${getBorderColor() ? `border-l-4 ${getBorderColor()}` : ''} p-4 hover:shadow-md transition-shadow`}>
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-500 font-medium uppercase">
             {(() => {
@@ -318,11 +323,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
             <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
             <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
           </div>
-          <Link href={`/matches/${match._id}`}>
-            <a className="text-indigo-600 hover:text-indigo-800 font-medium">
-              Spielbericht
-            </a>
-          </Link>
+          {(match.matchStatus.key === 'INPROGRESS' || match.matchStatus.key === 'FINISHED') && (
+            <Link href={`/matches/${match._id}`}>
+              <a className="text-indigo-600 hover:text-indigo-800 font-medium">
+                Spielbericht
+              </a>
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -363,16 +370,21 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                 <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                   {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
                 </h2>
+                {isShowingUpcoming && (
+                  <p className="mt-2 text-lg/8 text-gray-600">DATUM</p>
+                )}
               </div>
 
-              {/* Tournament Filter */}
-              <div className="sm:max-w-xs mx-auto mb-12">
-                <TournamentSelect
-                  selectedTournament={selectedTournament}
-                  onTournamentChange={setSelectedTournament}
-                  allTournamentsData={tournaments}
-                />
-              </div>
+              {/* Tournament Filter - Only show for today's matches */}
+              {!isShowingUpcoming && (
+                <div className="sm:max-w-xs mx-auto mb-12">
+                  <TournamentSelect
+                    selectedTournament={selectedTournament}
+                    onTournamentChange={setSelectedTournament}
+                    allTournamentsData={tournaments}
+                  />
+                </div>
+              )}
 
               {(() => {
                 // If showing upcoming matches and more than 3, group by tournament
@@ -427,7 +439,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                         <div className="min-w-0 flex-1">
                           <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
                             <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">{upcoming.length > 0 ? `${new Date(upcoming[0].startDate).toLocaleDateString('de-DE', { weekday: 'long' })}, ${new Date(upcoming[0].startDate).toLocaleDateString('de-DE')}` : 'Bevorstehende Spiele'}</h2>
+                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">
+                                {!isShowingUpcoming 
+                                  ? 'Demnächst' 
+                                  : (upcoming.length > 0 
+                                      ? (new Date(upcoming[0].startDate).toDateString() === new Date(new Date().setDate(new Date().getDate() + 1)).toDateString() 
+                                          ? 'Morgen' 
+                                          : `${new Date(upcoming[0].startDate).toLocaleDateString('de-DE', { weekday: 'long' })}, ${new Date(upcoming[0].startDate).toLocaleDateString('de-DE')}`) 
+                                      : 'Bevorstehende Spiele')}
+                              </h2>
                             </div>
                           </div>
                         </div>
@@ -485,11 +505,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                 const tournamentConfigB = tournamentConfigs[b.tournament.alias];
                                 const sortOrderA = tournamentConfigA?.sortOrder || 999;
                                 const sortOrderB = tournamentConfigB?.sortOrder || 999;
-                                
+
                                 if (sortOrderA !== sortOrderB) {
                                   return sortOrderA - sortOrderB;
                                 }
-                                
+
                                 // Then sort by startDate (most recent first)
                                 return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                               })
@@ -516,11 +536,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                 const tournamentConfigB = tournamentConfigs[b.tournament.alias];
                                 const sortOrderA = tournamentConfigA?.sortOrder || 999;
                                 const sortOrderB = tournamentConfigB?.sortOrder || 999;
-                                
+
                                 if (sortOrderA !== sortOrderB) {
                                   return sortOrderA - sortOrderB;
                                 }
-                                
+
                                 // Then sort by startDate (most recent first)
                                 return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                               })
