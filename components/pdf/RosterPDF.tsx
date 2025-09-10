@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   bishlLogo: {
-    width: 60,
+    width: 65,
     height: 60,
   },
   pageTitle: {
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 5,
   },
@@ -59,8 +59,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#DDDDDD',
     borderBottomStyle: 'solid',
     alignItems: 'center',
-    minHeight: 35,
-    paddingVertical: 8,
+    minHeight: 22,
+    paddingVertical: 3,
   },
   tableHeader: {
     backgroundColor: '#E5E7EB',
@@ -105,10 +105,14 @@ interface RosterPDFProps {
   matchDate: string;
   venue: string;
   roster: RosterPlayer[];
+  tournament: string;
+  round: string;
+  homeTeam: string;
+  awayTeam: string;
   teamLogo?: string;
 }
 
-const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFProps) => (
+const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -129,10 +133,27 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
             </View>
           )}
           <View style={styles.teamInfo}>
-            <Text style={styles.title}>{teamName}</Text>
-            <Text style={styles.subtitle}>Spieltag: {matchDate}</Text>
-            <Text style={styles.subtitle}>Spielort: {venue}</Text>
+            <Text style={styles.title}>{homeTeam} - {awayTeam}</Text>
+            {tournament && <Text style={styles.subtitle}>{tournament} / {round} / {matchDate}</Text>}
+            <Text style={styles.subtitle}>{venue}</Text>
           </View>
+        </View>
+      </View>
+
+      {/* Team Name Section */}
+      <View style={{ marginBottom: 10, paddingVertical: 15 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          {teamLogo && (
+            <View style={{ marginRight: 15 }}>
+              <PDFImage
+                style={{ width: 60, height: 60, objectFit: 'contain' }}
+                src={teamLogo}
+              />
+            </View>
+          )}
+          <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>
+            {teamName}
+          </Text>
         </View>
       </View>
 
@@ -143,41 +164,96 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo }: RosterPDFPr
           <Text style={styles.nameCell}>Name</Text>
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
-        
-        {roster
-          .sort((a, b) => {
-            // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-            const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
 
-            // Get priorities
+        {(() => {
+          // Sort roster by position priority
+          const sortedRoster = roster.sort((a, b) => {
+            const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
             const posA = positionPriority[a.playerPosition.key] || 99;
             const posB = positionPriority[b.playerPosition.key] || 99;
 
-            // First sort by position priority
             if (posA !== posB) {
               return posA - posB;
             }
 
-            // If positions are the same, sort by jersey number
             const jerseyA = a.player.jerseyNumber || 999;
             const jerseyB = b.player.jerseyNumber || 999;
             return jerseyA - jerseyB;
-          })
-          .map((player) => (
-            <View key={player.player.playerId} style={styles.tableRow}>
-              <Text style={styles.numberCell}>{player.player.jerseyNumber || '-'}</Text>
-              <Text style={styles.positionCell}>{player.playerPosition.key}</Text>
+          });
+
+          // Separate players by position
+          const captains = sortedRoster.filter(p => p.playerPosition.key === 'C');
+          const assistants = sortedRoster.filter(p => p.playerPosition.key === 'A');
+          const goalies = sortedRoster.filter(p => p.playerPosition.key === 'G');
+          const forwards = sortedRoster.filter(p => p.playerPosition.key === 'F');
+
+          // Create 18 rows total with specific positioning
+          const rows = [];
+
+          // Row 1: Captain (C) - always first
+          const captain = captains[0];
+          rows.push(
+            <View key="row-1" style={styles.tableRow}>
+              <Text style={styles.numberCell}>{captain ? (captain.player.jerseyNumber || '-') : '-'}</Text>
+              <Text style={styles.positionCell}>{captain ? 'C' : ''}</Text>
               <Text style={styles.nameCell}>
-                {`${player.player.lastName}, ${player.player.firstName}`}
-                {player.called && ' (H)'}
+                {captain ? `${captain.player.lastName}, ${captain.player.firstName}${captain.called ? ' (H)' : ''}` : ''}
               </Text>
-              <Text style={styles.passCell}>{player.passNumber || '-'}</Text>
+              <Text style={styles.passCell}>{captain ? (captain.passNumber || '-') : '-'}</Text>
             </View>
-          ))}
+          );
+
+          // Row 2: Assistant (A) - always second
+          const assistant = assistants[0];
+          rows.push(
+            <View key="row-2" style={styles.tableRow}>
+              <Text style={styles.numberCell}>{assistant ? (assistant.player.jerseyNumber || '-') : '-'}</Text>
+              <Text style={styles.positionCell}>{assistant ? 'A' : ''}</Text>
+              <Text style={styles.nameCell}>
+                {assistant ? `${assistant.player.lastName}, ${assistant.player.firstName}${assistant.called ? ' (H)' : ''}` : ''}
+              </Text>
+              <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '-') : '-'}</Text>
+            </View>
+          );
+
+          // Rows 3-4: Always two goalie rows
+          for (let i = 0; i < 2; i++) {
+            const goalie = goalies[i];
+
+            rows.push(
+              <View key={`row-goalie-${i}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
+                <Text style={styles.nameCell}>
+                  {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
+                </Text>
+                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '-') : '-'}</Text>
+              </View>
+            );
+          }
+
+          // Rows 5-18: Forward players
+          for (let i = 0; i < 14; i++) {
+            const forward = forwards[i];
+
+            rows.push(
+              <View key={`row-forward-${i}`} style={styles.tableRow}>
+                <Text style={styles.numberCell}>{forward ? (forward.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.positionCell}>{forward ? forward.playerPosition.key : ''}</Text>
+                <Text style={styles.nameCell}>
+                  {forward ? `${forward.player.lastName}, ${forward.player.firstName}${forward.called ? ' (H)' : ''}` : ''}
+                </Text>
+                <Text style={styles.passCell}>{forward ? (forward.passNumber || '-') : '-'}</Text>
+              </View>
+            );
+          }
+
+          return rows;
+        })()}
       </View>
 
       <View style={styles.footer}>
-        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')}</Text>
+        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</Text>
       </View>
     </Page>
   </Document>
