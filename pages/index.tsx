@@ -27,6 +27,7 @@ interface PostsProps {
   jwt: string | null,
   posts: PostValues[],
   todaysMatches: Match[],
+  upcomingMatches: Match[],
   tournaments: TournamentValues[]
 }
 
@@ -64,6 +65,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error("Error fetching today's matches:", error);
   }
 
+  // Fetch upcoming matches
+  let upcomingMatches = null;
+  try {
+    const upcomingRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/upcoming`, {
+
+    });
+    upcomingMatches = upcomingRes.data;
+  } catch (error) {
+    console.error("Error fetching upcoming matches:", error);
+  }
+
   // Fetch tournaments
   try {
     const tournamentsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
@@ -77,17 +89,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       jwt, 
       posts: posts || [], 
       todaysMatches: todaysMatches || [], 
+      upcomingMatches: upcomingMatches || [],
       tournaments: tournaments || [] 
     } 
   };
 }
 
 
-const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tournaments = [] }) => {
+const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcomingMatches = [], tournaments = [] }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
   const router = useRouter();
+
+  // Use upcoming matches if no today's matches
+  const displayMatches = todaysMatches.length > 0 ? todaysMatches : upcomingMatches;
+  const isShowingUpcoming = todaysMatches.length === 0 && upcomingMatches.length > 0;
 
   useEffect(() => {
     if (router.query.message) {
@@ -106,11 +123,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
   // Filter matches by selected tournament
   useEffect(() => {
     if (selectedTournament) {
-      setFilteredMatches(todaysMatches.filter(match => match.tournament.alias === selectedTournament.alias));
+      setFilteredMatches(displayMatches.filter(match => match.tournament.alias === selectedTournament.alias));
     } else {
-      setFilteredMatches(todaysMatches);
+      setFilteredMatches(displayMatches);
     }
-  }, [selectedTournament, todaysMatches]);
+  }, [selectedTournament, displayMatches]);
 
   // Helper function to get time slot for a match
   const getTimeSlot = (date: Date) => {
@@ -170,6 +187,43 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
+  };
+
+  // TournamentMatchCard component for grouped upcoming matches
+  const TournamentMatchCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
+    const tournamentConfig = tournamentConfigs[tournament.alias];
+    const sortedMatches = matches.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+    return (
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
+        <div className="mb-4">
+          {tournamentConfig && (
+            <span className={classNames("inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
+              {tournamentConfig.name}
+            </span>
+          )}
+        </div>
+        <div className="space-y-3">
+          {sortedMatches.map((match) => (
+            <div key={match._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">
+                  {match.home.shortName} - {match.away.shortName}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {new Date(match.startDate).toLocaleDateString('de-DE')} • {new Date(match.startDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+              <Link href={`/matches/${match._id}`}>
+                <a className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                  Details
+                </a>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   // MatchCard component for today's games
@@ -301,13 +355,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
       <Layout>
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
-        {/* Today's Games Section */}
-        {todaysMatches.length > 0 && (
+        {/* Today's Games or Upcoming Games Section */}
+        {(todaysMatches.length > 0 || upcomingMatches.length > 0) && (
 
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="text-center mt-12 mb-8">
                 <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                  Aktuelle Spiele
+                  {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
                 </h2>
               </div>
 
@@ -321,6 +375,30 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
               </div>
 
               {(() => {
+                // If showing upcoming matches and more than 3, group by tournament
+                if (isShowingUpcoming && filteredMatches.length > 3) {
+                  const matchesByTournament = filteredMatches.reduce((acc, match) => {
+                    const tournamentAlias = match.tournament.alias;
+                    if (!acc[tournamentAlias]) {
+                      acc[tournamentAlias] = {
+                        tournament: match.tournament,
+                        matches: []
+                      };
+                    }
+                    acc[tournamentAlias].matches.push(match);
+                    return acc;
+                  }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {Object.values(matchesByTournament).map(({ tournament, matches }) => (
+                        <TournamentMatchCard key={tournament.alias} tournament={tournament} matches={matches} />
+                      ))}
+                    </div>
+                  );
+                }
+
+                // For today's matches or ≤3 upcoming matches, use existing logic
                 const { live, upcoming, finished } = categorizeMatches(filteredMatches);
 
                 return (
@@ -349,7 +427,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                         <div className="min-w-0 flex-1">
                           <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
                             <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Demnächst</h2>
+                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">{upcoming.length > 0 ? `${new Date(upcoming[0].startDate).toLocaleDateString('de-DE', { weekday: 'long' })}, ${new Date(upcoming[0].startDate).toLocaleDateString('de-DE')}` : 'Bevorstehende Spiele'}</h2>
                             </div>
                           </div>
                         </div>
@@ -458,8 +536,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], tourn
                       <div className="text-center py-12">
                         <p className="text-gray-500">
                           {selectedTournament 
-                            ? `Keine Spiele heute in ${selectedTournament.name}`
-                            : 'Keine Spiele heute'
+                            ? `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'} in ${selectedTournament.name}`
+                            : `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'}`
                           }
                         </p>
                       </div>
