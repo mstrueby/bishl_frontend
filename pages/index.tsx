@@ -235,13 +235,18 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
       });
     };
 
-    // Determine border color based on match status
+    // Determine border color based on match status and date
     const getBorderColor = () => {
+      // Check if match is today
+      const today = new Date().toDateString();
+      const matchDate = new Date(match.startDate).toDateString();
+      const isToday = today === matchDate;
+
       switch (match.matchStatus.key) {
         case 'INPROGRESS':
           return 'border-l-red-500';
         case 'SCHEDULED':
-          return 'border-l-green-500';
+          return isToday ? 'border-l-green-500' : ''; // Only show color for today's scheduled matches
         case 'FINISHED':
         case 'FORFEITED':
           return 'border-l-gray-500';
@@ -251,7 +256,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     };
 
     return (
-      <div className={`bg-white rounded-lg shadow border border-gray-200 border-l-4 ${getBorderColor()} p-4 hover:shadow-md transition-shadow`}>
+      <div className={`bg-white rounded-lg shadow border border-gray-200 ${getBorderColor() ? `border-l-4 ${getBorderColor()}` : ''} p-4 hover:shadow-md transition-shadow`}>
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-500 font-medium uppercase">
             {(() => {
@@ -487,11 +492,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                 const tournamentConfigB = tournamentConfigs[b.tournament.alias];
                                 const sortOrderA = tournamentConfigA?.sortOrder || 999;
                                 const sortOrderB = tournamentConfigB?.sortOrder || 999;
-                                
+
                                 if (sortOrderA !== sortOrderB) {
                                   return sortOrderA - sortOrderB;
                                 }
-                                
+
                                 // Then sort by startDate (most recent first)
                                 return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                               })
@@ -518,11 +523,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                 const tournamentConfigB = tournamentConfigs[b.tournament.alias];
                                 const sortOrderA = tournamentConfigA?.sortOrder || 999;
                                 const sortOrderB = tournamentConfigB?.sortOrder || 999;
-                                
+
                                 if (sortOrderA !== sortOrderB) {
                                   return sortOrderA - sortOrderB;
                                 }
-                                
+
                                 // Then sort by startDate (most recent first)
                                 return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                               })
