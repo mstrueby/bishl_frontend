@@ -365,14 +365,16 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                 </h2>
               </div>
 
-              {/* Tournament Filter */}
-              <div className="sm:max-w-xs mx-auto mb-12">
-                <TournamentSelect
-                  selectedTournament={selectedTournament}
-                  onTournamentChange={setSelectedTournament}
-                  allTournamentsData={tournaments}
-                />
-              </div>
+              {/* Tournament Filter - Only show for today's matches */}
+              {!isShowingUpcoming && (
+                <div className="sm:max-w-xs mx-auto mb-12">
+                  <TournamentSelect
+                    selectedTournament={selectedTournament}
+                    onTournamentChange={setSelectedTournament}
+                    allTournamentsData={tournaments}
+                  />
+                </div>
+              )}
 
               {(() => {
                 // If showing upcoming matches and more than 3, group by tournament
