@@ -399,8 +399,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   const matchesByTournament = filteredMatches.reduce((acc, match) => {
                     const tournamentAlias = match.tournament.alias;
                     if (!acc[tournamentAlias]) {
+                      // Find the full tournament data from the tournaments array
+                      const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
                       acc[tournamentAlias] = {
-                        tournament: match.tournament,
+                        tournament: fullTournament || {
+                          _id: '',
+                          name: match.tournament.name,
+                          alias: match.tournament.alias,
+                          tinyName: match.tournament.alias,
+                          ageGroup: { key: '', value: '' },
+                          published: true,
+                          active: true,
+                          external: false,
+                          seasons: []
+                        },
                         matches: []
                       };
                     }
