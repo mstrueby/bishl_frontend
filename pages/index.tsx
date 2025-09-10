@@ -206,8 +206,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
       <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
         <div className="mb-4">
           {tournamentConfig && (
-            <span className={classNames("inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
-              {tournamentConfig.name}
+            <span className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
+              {tournamentConfig.tinyName}
             </span>
           )}
         </div>
