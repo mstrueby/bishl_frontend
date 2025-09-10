@@ -211,14 +211,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   {match.home.shortName} - {match.away.shortName}
                 </div>
                 <div className="text-xs text-gray-500">
-                  {new Date(match.startDate).toLocaleDateString('de-DE')} • {new Date(match.startDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  {match.venue.name}
                 </div>
               </div>
-              <Link href={`/matches/${match._id}`}>
-                <a className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                  Details
-                </a>
-              </Link>
+              <div className="text-sm text-gray-600 font-medium">
+                {formatTime(match.startDate)}
+              </div>
             </div>
           ))}
         </div>
@@ -370,8 +368,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                 <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                   {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
                 </h2>
-                {isShowingUpcoming && (
-                  <p className="mt-2 text-lg/8 text-gray-600">DATUM</p>
+                {isShowingUpcoming && upcomingMatches.length > 0 && (
+                  <p className="mt-2 mb-12 text-lg/8 text-gray-600">
+                    {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
+                      weekday: 'long',
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </p>
                 )}
               </div>
 
@@ -436,21 +441,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                     {/* Upcoming Games */}
                     {upcoming.length > 0 && (
                       <div>
+                        {!isShowingUpcoming && (
                         <div className="min-w-0 flex-1">
                           <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
                             <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">
-                                {!isShowingUpcoming 
-                                  ? 'Demnächst' 
-                                  : (upcoming.length > 0 
-                                      ? (new Date(upcoming[0].startDate).toDateString() === new Date(new Date().setDate(new Date().getDate() + 1)).toDateString() 
-                                          ? 'Morgen' 
-                                          : `${new Date(upcoming[0].startDate).toLocaleDateString('de-DE', { weekday: 'long' })}, ${new Date(upcoming[0].startDate).toLocaleDateString('de-DE')}`) 
-                                      : 'Bevorstehende Spiele')}
-                              </h2>
+                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Demnächst</h2>
                             </div>
                           </div>
                         </div>
+                        )}
                         {upcoming.length > 6 ? (
                           // Group by time slots when more than 6 matches
                           <div className="space-y-8">
