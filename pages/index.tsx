@@ -222,7 +222,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   {match.venue.name}
                 </div>
               </div>
-              <div className="text-sm text-gray-600 font-medium">
+              <div className="text-sm text-gray-400 font-medium">
                 {formatTime(match.startDate)}
               </div>
             </div>
