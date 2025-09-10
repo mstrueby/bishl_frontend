@@ -427,7 +427,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                         <div className="min-w-0 flex-1">
                           <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
                             <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Demnächst</h2>
+                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">{upcoming.length > 0 ? `${new Date(upcoming[0].startDate).toLocaleDateString('de-DE', { weekday: 'long' })}, ${new Date(upcoming[0].startDate).toLocaleDateString('de-DE')}` : 'Bevorstehende Spiele'}</h2>
                             </div>
                           </div>
                         </div>
