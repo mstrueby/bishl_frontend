@@ -370,8 +370,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                 <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                   {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
                 </h2>
-                {isShowingUpcoming && (
-                  <p className="mt-2 text-lg/8 text-gray-600">DATUM</p>
+                {isShowingUpcoming && upcomingMatches.length > 0 && (
+                  <p className="mt-2 text-lg/8 text-gray-600">
+                    {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
+                      weekday: 'long',
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </p>
                 )}
               </div>
 
