@@ -56,11 +56,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch today's matches
   try {
-    const matchesRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/`, {
-      params: {
-        date_from: today,
-        date_to: today,
-      }
+    const matchesRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/today`, {
+
     });
     todaysMatches = matchesRes.data;
   } catch (error) {
