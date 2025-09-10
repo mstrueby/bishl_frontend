@@ -501,6 +501,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           venue={match.venue.name}
           roster={sortRoster(rosterList)}
           teamLogo={team.logoUrl}
+          tournament={match.tournament.name}
+          round={match.round.name}
+          homeTeam={match.home.fullName}
+          awayTeam={match.away.fullName}
         />
       }
       fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
@@ -958,10 +962,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     }
 
     // Check if all requirements are met before saving
+    {/**
     if (!isRosterValid() && (rosterPublished || match.matchStatus.key === 'FINISHED')) {
       setError('Die Aufstellung entspricht nicht allen Anforderungen. Bitte überprüfen Sie alle Punkte in der Checkliste.');
       return;
     }
+    */}
 
     setSavingRoster(true);
     setError('');
@@ -1727,11 +1733,14 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         <button
           type="button"
           onClick={handleSaveRoster}
-          disabled={loading || savingRoster || (match.matchStatus.key === 'FINISHED' && !isRosterValid())}
+          /*disabled={loading || savingRoster || (match.matchStatus.key === 'FINISHED' && !isRosterValid())}
           className={`w-24 inline-flex justify-center items-center rounded-md border border-transparent ${match.matchStatus.key === 'FINISHED' && !isRosterValid()
             ? 'bg-indigo-300 cursor-not-allowed'
             : 'bg-indigo-600 hover:bg-indigo-500'
-            } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+            } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}*/
+          disabled={loading || savingRoster}
+          className={`w-24 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 hover:bg-indigo-500
+            py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
         >
           {savingRoster ? (
             <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -2066,7 +2075,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       disabled={!selectedCallUpPlayer}
                       className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Speichern
+                      Hochmelden
                     </button>
                   </div>
                 </Dialog.Panel>
