@@ -189,6 +189,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     setSuccessMessage(null);
   };
 
+  // Shared formatTime function
+  const formatTime = (date: Date) => {
+    return new Date(date).toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   // TournamentMatchCard component for grouped upcoming matches
   const TournamentMatchCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
     const tournamentConfig = tournamentConfigs[tournament.alias];
@@ -226,12 +234,6 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
 
   // MatchCard component for today's games
   const MatchCard = ({ match }: { match: Match }) => {
-    const formatTime = (date: Date) => {
-      return new Date(date).toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    };
 
     // Determine border color based on match status and date
     const getBorderColor = () => {
