@@ -1470,6 +1470,23 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               </li>
             )}
           </ul>
+          
+          {/* Player Count Summary */}
+          {rosterList.length > 0 && (
+            <div className="border-t border-gray-200 bg-gray-50 px-6 py-3">
+              <div className="flex justify-between text-sm font-medium text-gray-900">
+                <span>
+                  Goalies: {rosterList.filter(player => player.playerPosition.key === 'G').length}
+                </span>
+                <span>
+                  Feldspieler: {rosterList.filter(player => player.playerPosition.key !== 'G').length}
+                </span>
+                <span>
+                  Gesamt: {rosterList.length}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Roster Completeness Check */}
