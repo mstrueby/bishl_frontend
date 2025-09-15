@@ -28,6 +28,7 @@ interface PostsProps {
   posts: PostValues[],
   todaysMatches: Match[],
   upcomingMatches: Match[],
+  restOfWeekMatches: { date: string, dayName: string, matches: Match[] }[],
   tournaments: TournamentValues[]
 }
 
@@ -76,6 +77,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error("Error fetching upcoming matches:", error);
   }
 
+  // Fetch matches for rest of the week
+  let restOfWeekMatches = null;
+  try {
+    const restOfWeekRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/rest-of-week`, {
+      
+    });
+    restOfWeekMatches = restOfWeekRes.data;
+  } catch (error) {
+    console.error("Error fetching rest of week matches:", error);
+  }
+
   // Fetch tournaments
   try {
     const tournamentsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
@@ -90,13 +102,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       posts: posts || [], 
       todaysMatches: todaysMatches || [], 
       upcomingMatches: upcomingMatches || [],
+      restOfWeekMatches: restOfWeekMatches || [],
       tournaments: tournaments || [] 
     } 
   };
 }
 
 
-const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcomingMatches = [], tournaments = [] }) => {
+const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcomingMatches = [], restOfWeekMatches = [], tournaments = [] }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
@@ -197,8 +210,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     });
   };
 
-  // TournamentMatchCard component for grouped upcoming matches
-  const TournamentMatchCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
+  // TournamentCard component for grouped upcoming matches
+  const TournamentCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
     const tournamentConfig = tournamentConfigs[tournament.alias];
     const sortedMatches = matches.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
@@ -206,8 +219,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
       <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
         <div className="mb-4">
           {tournamentConfig && (
-            <span className={classNames("inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
-              {tournamentConfig.name}
+            <span className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
+              {tournamentConfig.tinyName}
             </span>
           )}
         </div>
@@ -399,8 +412,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   const matchesByTournament = filteredMatches.reduce((acc, match) => {
                     const tournamentAlias = match.tournament.alias;
                     if (!acc[tournamentAlias]) {
+                      // Find the full tournament data from the tournaments array
+                      const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
                       acc[tournamentAlias] = {
-                        tournament: match.tournament,
+                        tournament: fullTournament || {
+                          _id: '',
+                          name: match.tournament.name,
+                          alias: match.tournament.alias,
+                          tinyName: match.tournament.alias,
+                          ageGroup: { key: '', value: '' },
+                          published: true,
+                          active: true,
+                          external: false,
+                          seasons: []
+                        },
                         matches: []
                       };
                     }
@@ -411,7 +436,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {Object.values(matchesByTournament).map(({ tournament, matches }) => (
-                        <TournamentMatchCard key={tournament.alias} tournament={tournament} matches={matches} />
+                        <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
                       ))}
                     </div>
                   );

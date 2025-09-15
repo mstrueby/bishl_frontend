@@ -935,6 +935,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
       // Player added successfully
 
+      // Focus the player select for next player addition
+      if (playerSelectRef.current) {
+        playerSelectRef.current.focus();
+      }
+
       // Here you would make the actual API call to update the roster
       /*
       await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
@@ -1465,6 +1470,23 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               </li>
             )}
           </ul>
+          
+          {/* Player Count Summary */}
+          {rosterList.length > 0 && (
+            <div className="border-t border-gray-200 bg-gray-50 px-6 py-3">
+              <div className="flex justify-between text-sm text-gray-900">
+                <span>
+                  Feldspieler: <span className="font-medium">{rosterList.filter(player => player.playerPosition.key !== 'G').length}</span>
+                </span>
+                <span>
+                  Goalies: <span className="font-medium">{rosterList.filter(player => player.playerPosition.key === 'G').length}</span>
+                </span>
+                <span>
+                  Gesamt: <span className="font-medium">{rosterList.length}</span>
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Roster Completeness Check */}
@@ -2065,6 +2087,17 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                         setSelectedCallUpPlayer(null);
                         setCallUpModalError(null);
                       }}
+                      tabIndex={4}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Tab' && !e.shiftKey) {
+                          e.preventDefault();
+                          // Focus back to team select to complete the circle
+                          const teamSelect = document.querySelector('[tabindex="1"]') as HTMLButtonElement;
+                          if (teamSelect) {
+                            teamSelect.focus();
+                          }
+                        }
+                      }}
                       className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                       Abbrechen
@@ -2073,6 +2106,17 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       type="button"
                       onClick={handleConfirmCallUp}
                       disabled={!selectedCallUpPlayer}
+                      tabIndex={3}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Tab' && !e.shiftKey) {
+                          e.preventDefault();
+                          // Focus the cancel button next
+                          const cancelButton = e.currentTarget.parentElement?.querySelector('button:last-child') as HTMLButtonElement;
+                          if (cancelButton) {
+                            cancelButton.focus();
+                          }
+                        }
+                      }}
                       className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Hochmelden
