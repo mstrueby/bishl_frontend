@@ -112,6 +112,26 @@ const RosterList: React.FC<RosterListProps> = ({
                 </tr>
               ))}
             </tbody>
+            {/* Table Footer with Player Count Summary */}
+            {sortedRoster && sortedRoster.length > 0 && (
+              <tfoot className="bg-gray-50">
+                <tr>
+                  <td colSpan={5} className="px-3 py-3">
+                    <div className="flex justify-between text-sm text-gray-900">
+                      <span>
+                        Feldspieler: <span className="font-medium">{sortedRoster.filter(player => player.playerPosition.key !== 'G').length}</span>
+                      </span>
+                      <span>
+                        Goalies: <span className="font-medium">{sortedRoster.filter(player => player.playerPosition.key === 'G').length}</span>
+                      </span>
+                      <span>
+                        Gesamt: <span className="font-medium">{sortedRoster.length}</span>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         ) : (
           <div className="text-center py-5 text-sm text-gray-500">
