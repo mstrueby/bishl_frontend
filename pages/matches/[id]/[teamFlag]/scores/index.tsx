@@ -146,10 +146,10 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
   };
 
   // Sort roster by jersey number
-  const sortedRoster = [...initialRoster].sort((a, b) => {
+  const sortedRoster = [...roster].sort((a, b) => {
     // Ensure jersey numbers are treated as numbers for sorting
-    const jerseyA = a.jerseyNumber || 0;
-    const jerseyB = b.jerseyNumber || 0;
+    const jerseyA = a.player.jerseyNumber || 999;
+    const jerseyB = b.player.jerseyNumber || 999;
     return jerseyA - jerseyB;
   });
 
