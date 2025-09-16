@@ -146,6 +146,14 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
     fetchPenaltyCodes();
   }, []);
 
+  // Sort roster by jersey number
+  const sortedRoster = [...roster].sort((a, b) => {
+    // Ensure jersey numbers are treated as numbers for sorting
+    const jerseyA = a.player.jerseyNumber || 999;
+    const jerseyB = b.player.jerseyNumber || 999;
+    return jerseyA - jerseyB;
+  });
+
   // Calculate permissions
   const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
   const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
@@ -376,7 +384,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   onChange={(eventPlayer) => {
                                     setFieldValue(`penalties.${index}.penaltyPlayer`, eventPlayer);
                                   }}
-                                  roster={roster}
+                                  roster={sortedRoster}
                                   required={true}
                                   placeholder="Spieler auswählen"
                                   showErrorText={false}
