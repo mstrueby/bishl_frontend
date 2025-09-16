@@ -544,15 +544,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                             .map((match) => (
                               <li
                                 key={match._id}
-                                className="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5"
+                                className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5"
                               >
-                                <div className="flex w-12">
+                                <div className="flex-shrink-0 w-16">
                                   {(() => {
                                     const item = tournamentConfigs[match.tournament.alias];
                                     if (item) {
                                       return (
                                         <span
-                                          className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                                          className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
                                         >
                                           {item.tinyName}
                                         </span>
@@ -560,25 +560,28 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     }
                                   })()}
                                 </div>
-                                <div className="flex w-full gap-x-4">
-                                  <div className="min-w-0 flex-auto text-right">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                      {match.home.fullName}
-                                    </p>
-                                  </div>
-                                  <div className="min-w-0 flex-auto text-center">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                <div className="flex-1 text-right pr-4">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {match.home.fullName}
+                                  </p>
+                                </div>
+                                <div className="flex-shrink-0 w-16 text-center">
+                                  {match.matchStatus.key === 'FINISHED' ? (
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
                                     </p>
-                                  </div>
-                                  <div className="min-w-0 flex-auto text-left">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                      {match.away.fullName}
+                                  ) : (
+                                    <p className="text-sm font-medium text-gray-400 dark:text-gray-500 lowercase">
+                                      {match.matchStatus.value}
                                     </p>
-                                  </div>
-                                  
+                                  )}
                                 </div>
-                                <div>
+                                <div className="flex-1 text-left pl-4">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {match.away.fullName}
+                                  </p>
+                                </div>
+                                <div className="flex-shrink-0">
                                   <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
                                 </div>
                               </li>
