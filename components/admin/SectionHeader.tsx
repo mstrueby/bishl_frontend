@@ -1,9 +1,7 @@
-
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
-import HeroIcon from '../HeroIcon';
 import RefMatchFilter from './RefMatchFilter';
 import BulkStatusDialog from './BulkStatusDialog';
 
@@ -14,14 +12,14 @@ interface FilterChangeParams {
   date_to?: string;
 }
 
-export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionIcon, backLink, searchBox }: {
+export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox }: {
   title: string,
   filter?: string,
   newLink?: string,
   onFilterChange?: (filter: FilterChangeParams) => void,
   onBulkUpdate?: (status: string) => void,
   description?: string,
-  descriptionIcon?: string,
+  descriptionLogoUrl?: string,
   backLink?: string
   searchBox?: React.ReactNode
 }) {
@@ -38,11 +36,11 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
         {description && (
           <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
             <div className="mt-2 flex items-center text-sm text-gray-500">
-              {descriptionIcon && (
-                <HeroIcon 
-                  icon={descriptionIcon} 
-                  className="mr-1.5 h-4 w-4 text-gray-400" 
-                  ariaHidden={true} 
+              {descriptionLogoUrl && (
+                <img 
+                  src={descriptionLogoUrl} 
+                  alt="Team logo" 
+                  className="ml-1.5 mr-3 h-6 w-6 object-contain" 
                 />
               )}
               {description}

@@ -97,7 +97,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // get team object
     const teamResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
     const team: TeamValues = await teamResponse.data;
-    console.log(team)
+    //console.log(team)
     const teamAgeGroup = team.ageGroup;
 
     // Fetch available players from the current team
@@ -1118,7 +1118,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         onRefresh={() => { }}
       />
       <div className="mt-12">
-        <SectionHeader title="Mannschaftsaufstellung" description={`${team?.fullName} / ${team?.name}`} descriptionIcon={team?.logoUrl} />
+        <SectionHeader title="Mannschaftsaufstellung" description={`${team?.fullName} / ${team?.name}`} descriptionLogoUrl={team?.logoUrl} />
       </div>
 
       <div className="sm:px-3 pb-2">
