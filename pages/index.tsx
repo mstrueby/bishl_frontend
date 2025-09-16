@@ -565,20 +565,6 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                             {match.venue.name}
                                           </p>
                                         </div>
-                                        <div className="hidden md:block">
-                                          <div>
-                                            <p className="text-sm text-gray-900">
-                                              {formatTime(match.startDate)} Uhr
-                                            </p>
-                                            <p className="text-sm text-gray-500">
-                                              {new Date(match.startDate).toLocaleDateString('de-DE', {
-                                                weekday: 'short',
-                                                day: '2-digit',
-                                                month: 'short'
-                                              })}
-                                            </p>
-                                          </div>
-                                        </div>
                                       </div>
                                     </div>
                                     <div className="flex items-center space-x-4">
