@@ -561,23 +561,40 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                   })()}
                                 </div>
                                 <div className="flex-1 text-right pr-4">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {match.home.tinyName}
+                                  </p>
+                                  <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {match.home.shortName}
+                                  </p>
+                                  <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
                                     {match.home.fullName}
                                   </p>
                                 </div>
-                                <div className="flex-shrink-0 w-16 text-center">
+                                <div className="flex-shrink-0 w-24 text-center">
                                   {match.matchStatus.key === 'FINISHED' ? (
-                                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                    <p className="text-md font-bold text-gray-900 dark:text-white">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+                                      {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
+                                        <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
+                                          {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
+                                        </span>
+                                      )}
                                     </p>
                                   ) : (
-                                    <p className="text-sm font-medium text-gray-400 dark:text-gray-500 lowercase">
+                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase">
                                       {match.matchStatus.value}
                                     </p>
                                   )}
                                 </div>
                                 <div className="flex-1 text-left pl-4">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {match.away.tinyName}
+                                  </p>
+                                  <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {match.away.shortName}
+                                  </p>
+                                  <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
                                     {match.away.fullName}
                                   </p>
                                 </div>
@@ -672,7 +689,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl mb-16">
                 Neueste Artikel
               </h2>
-              {/** 
+              {/**
               <p className="mt-2 text-lg/8 text-gray-600">Learn how to grow your business with our expert advice.</p>
               */}
             </div>
