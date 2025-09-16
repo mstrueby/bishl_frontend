@@ -40,7 +40,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
                 <img 
                   src={descriptionLogoUrl} 
                   alt="Team logo" 
-                  className="mr-1.5 h-4 w-4 object-contain" 
+                  className="ml-1.5 mr-3 h-6 w-6 object-contain" 
                 />
               )}
               {description}
