@@ -521,40 +521,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                             </div>
                           </div>
                         </div>
-                        {finished.length > 6 ? (
-                          // Group by time slots when more than 6 matches
-                          <div className="space-y-8">
-                            {groupMatchesByTimeSlot(
-                              finished.sort((a, b) => {
-                                // First sort by tournament sortOrder
-                                const tournamentConfigA = tournamentConfigs[a.tournament.alias];
-                                const tournamentConfigB = tournamentConfigs[b.tournament.alias];
-                                const sortOrderA = tournamentConfigA?.sortOrder || 999;
-                                const sortOrderB = tournamentConfigB?.sortOrder || 999;
-
-                                if (sortOrderA !== sortOrderB) {
-                                  return sortOrderA - sortOrderB;
-                                }
-
-                                // Then sort by startDate (most recent first)
-                                return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
-                              })
-                            ).map((group, groupIndex) => (
-                              <div key={groupIndex}>
-                                <h4 className="text-lg font-medium text-gray-700 mb-4 text-center">
-                                  {group.label}
-                                </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                  {group.matches.map((match) => (
-                                    <MatchCard key={match._id} match={match} />
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          // Show all matches without grouping when 6 or fewer
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                          <ul role="list" className="divide-y divide-gray-200">
                             {finished
                               .sort((a, b) => {
                                 // First sort by tournament sortOrder
@@ -571,10 +539,57 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                 return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                               })
                               .map((match) => (
-                                <MatchCard key={match._id} match={match} />
+                                <li key={match._id}>
+                                  <div className="px-4 py-4 flex items-center justify-between">
+                                    <div className="flex items-center min-w-0 flex-1">
+                                      <div className="flex-shrink-0">
+                                        {(() => {
+                                          const item = tournamentConfigs[match.tournament.alias];
+                                          if (item) {
+                                            return (
+                                              <span
+                                                className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                                              >
+                                                {item.tinyName}
+                                              </span>
+                                            );
+                                          }
+                                        })()}
+                                      </div>
+                                      <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-900 truncate">
+                                            {match.home.shortName} - {match.away.shortName}
+                                          </p>
+                                          <p className="text-sm text-gray-500">
+                                            {match.venue.name}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                      <div className="flex items-center space-x-2">
+                                        <span className="text-lg font-semibold text-gray-900">
+                                          {match.home.stats.goalsFor}:{match.away.stats.goalsFor}
+                                        </span>
+                                        <MatchStatusBadge 
+                                          statusKey={match.matchStatus.key}
+                                          finishTypeKey={match.finishType.key}
+                                          statusValue={match.matchStatus.value}
+                                          finishTypeValue={match.finishType.value}
+                                        />
+                                      </div>
+                                      <Link href={`/matches/${match._id}`}>
+                                        <a className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                          Bericht
+                                        </a>
+                                      </Link>
+                                    </div>
+                                  </div>
+                                </li>
                               ))}
-                          </div>
-                        )}
+                          </ul>
+                        </div>
                       </div>
                     )}
 
