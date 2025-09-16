@@ -145,6 +145,14 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
     setError(null);
   };
 
+  // Sort roster by jersey number
+  const sortedRoster = [...initialRoster].sort((a, b) => {
+    // Ensure jersey numbers are treated as numbers for sorting
+    const jerseyA = a.jerseyNumber || 0;
+    const jerseyB = b.jerseyNumber || 0;
+    return jerseyA - jerseyB;
+  });
+
   // Initial form values
   ///const initialValues: ScoresBase[] = {
   //  goals: [{ player: '', assist: '', time: '' }]
@@ -342,7 +350,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.goalPlayer`, selectedEventPlayer);
                                     }}
-                                    roster={roster}
+                                    roster={sortedRoster}
                                     required={true}
                                     placeholder="Torschützen auswählen"
                                     showErrorText={false}
@@ -361,7 +369,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     onChange={(selectedEventPlayer) => {
                                       setFieldValue(`scores.${index}.assistPlayer`, selectedEventPlayer);
                                     }}
-                                    roster={roster}
+                                    roster={sortedRoster}
                                     required={false}
                                     placeholder="Keine Vorlage"
                                     tabIndex={index * 3 + 3}
