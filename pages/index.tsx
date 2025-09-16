@@ -578,9 +578,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <div className="flex-shrink-0 w-28 items-center">
+                                <div className="flex-shrink-0 w-24 flex items-center justify-center min-h-[48px]">
                                   {match.matchStatus.key === 'FINISHED' ? (
-                                    <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                    <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
                                       {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
                                         <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
@@ -589,7 +589,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                       )}
                                     </p>
                                   ) : (
-                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap">
+                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap text-center">
                                       {match.matchStatus.value}
                                     </p>
                                   )}
