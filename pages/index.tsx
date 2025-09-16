@@ -578,7 +578,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <div className="flex-shrink-0 flex items-center gap-2">
+                                <div className="flex-shrink-0 w-28 items-center">
                                   {match.matchStatus.key === 'FINISHED' ? (
                                     <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
