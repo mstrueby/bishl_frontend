@@ -521,7 +521,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                           </div>
                         </div>
                       </div>
-                      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                      <div className="bg-white shadow-md rounded-lg border overflow-hidden">
                         <ul
                           role="list"
                           className="divide-y divide-gray-100 overflow-hidden bg-white shadow-xs outline-1 outline-gray-900/5 sm:rounded-xl dark:divide-white/5 dark:bg-gray-800/50 dark:shadow-none dark:outline-white/10 dark:sm:-outline-offset-1"
@@ -560,7 +560,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     }
                                   })()}
                                 </div>
-                                <div className="flex-1 flex items-center justify-end gap-2 pr-4">
+                                <div className="flex-1 flex items-center justify-end gap-4">
                                   <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
                                     {match.home.tinyName}
                                   </p>
@@ -573,12 +573,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                   <Image
                                     src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
                                     alt={match.home.tinyName}
-                                    width={20}
-                                    height={20}
+                                    width={28}
+                                    height={28}
                                     className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <div className="flex-shrink-0 w-24 flex items-center justify-center min-h-[48px]">
+                                <div className="flex-shrink-0 w-24 flex items-center justify-center">
                                   {match.matchStatus.key === 'FINISHED' ? (
                                     <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
@@ -594,12 +594,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     </p>
                                   )}
                                 </div>
-                                <div className="flex-1 flex items-center gap-2 pl-4">
+                                <div className="flex-1 flex items-center gap-4">
                                   <Image
                                     src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
                                     alt={match.away.tinyName}
-                                    width={20}
-                                    height={20}
+                                    width={28}
+                                    height={28}
                                     className="object-contain flex-shrink-0"
                                   />
                                   <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
