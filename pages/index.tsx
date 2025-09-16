@@ -567,16 +567,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                 </div>
                                 <div className="flex-shrink-0 w-16 text-center">
                                   {match.matchStatus.key === 'FINISHED' ? (
-                                    <div>
-                                      <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                        {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
-                                      </p>
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                      {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
                                       {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                        <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
                                           {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
-                                        </p>
+                                        </span>
                                       )}
-                                    </div>
+                                    </p>
                                   ) : (
                                     <p className="text-sm font-medium text-gray-400 dark:text-gray-500 lowercase">
                                       {match.matchStatus.value}
