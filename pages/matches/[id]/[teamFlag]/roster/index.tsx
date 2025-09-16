@@ -1118,7 +1118,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         onRefresh={() => { }}
       />
       <div className="mt-12">
-        <SectionHeader title="Mannschaftsaufstellung" description={`${team?.fullName} / ${team?.name}`} descriptionIcon={team?.logoUrl} />
+        <SectionHeader title="Mannschaftsaufstellung" description={`${team?.fullName} / ${team?.name}`} descriptionLogoUrl={team?.logoUrl} />
       </div>
 
       <div className="sm:px-3 pb-2">
