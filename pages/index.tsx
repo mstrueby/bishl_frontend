@@ -560,7 +560,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     }
                                   })()}
                                 </div>
-                                <div className="flex-1 text-right pr-4">
+                                <div className="flex-1 flex items-center justify-end gap-2 pr-4">
                                   <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
                                     {match.home.tinyName}
                                   </p>
@@ -575,10 +575,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     alt={match.home.tinyName}
                                     width={20}
                                     height={20}
-                                    className="object-contain"
+                                    className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <div className="flex-shrink-0 flex items-center gap-2">
+                                <div className="flex-shrink-0 w-28 items-center">
                                   {match.matchStatus.key === 'FINISHED' ? (
                                     <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
@@ -594,13 +594,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     </p>
                                   )}
                                 </div>
-                                <div className="flex-1 text-left pl-4">
+                                <div className="flex-1 flex items-center gap-2 pl-4">
                                   <Image
                                     src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
                                     alt={match.away.tinyName}
                                     width={20}
                                     height={20}
-                                    className="object-contain"
+                                    className="object-contain flex-shrink-0"
                                   />
                                   <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
                                     {match.away.tinyName}
