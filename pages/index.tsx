@@ -213,7 +213,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
   // TournamentCard component for grouped upcoming matches
   const TournamentCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
     const tournamentConfig = tournamentConfigs[tournament.alias];
-    const sortedMatches = matches.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    const sortedMatches = matches.sort((a, b) => {
+      // First sort by tournament sortOrder
+      const tournamentConfigA = tournamentConfigs[a.tournament.alias];
+      const tournamentConfigB = tournamentConfigs[b.tournament.alias];
+      const sortOrderA = tournamentConfigA?.sortOrder || 999;
+      const sortOrderB = tournamentConfigB?.sortOrder || 999;
+
+      if (sortOrderA !== sortOrderB) {
+        return sortOrderA - sortOrderB;
+      }
+
+      // Then sort by startDate
+      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+    });
 
     return (
       <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
