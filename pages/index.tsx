@@ -571,7 +571,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
                                     </p>
                                   ) : (
-                                    <p className="text-sm font-medium text-gray-400 dark:text-gray-500">
+                                    <p className="text-sm font-medium text-gray-400 dark:text-gray-500 lowercase">
                                       {match.matchStatus.value}
                                     </p>
                                   )}
