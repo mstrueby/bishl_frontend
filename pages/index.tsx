@@ -571,9 +571,16 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     {match.home.fullName}
                                   </p>
                                 </div>
-                                <div className="flex-shrink-0 w-24 text-center">
+                                <div className="flex-shrink-0 flex items-center gap-2">
+                                  <Image 
+                                    src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+                                    alt={match.home.tinyName} 
+                                    width={20} 
+                                    height={20} 
+                                    className="object-contain"
+                                  />
                                   {match.matchStatus.key === 'FINISHED' ? (
-                                    <p className="text-md font-bold text-gray-900 dark:text-white">
+                                    <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
                                       {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
                                         <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
@@ -582,10 +589,17 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                       )}
                                     </p>
                                   ) : (
-                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase">
+                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap">
                                       {match.matchStatus.value}
                                     </p>
                                   )}
+                                  <Image 
+                                    src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+                                    alt={match.away.tinyName} 
+                                    width={20} 
+                                    height={20} 
+                                    className="object-contain"
+                                  />
                                 </div>
                                 <div className="flex-1 text-left pl-4">
                                   <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
