@@ -266,7 +266,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         onRefresh={() => { }}
       />
       <div className="mt-12">
-        <SectionHeader title="Tore" description={`${team?.fullName} / ${team?.name}`} descriptionLogoUrl={team?.logoUrl} />
+        <SectionHeader title="Tore" description={`${team?.fullName} / ${team?.name}`} descriptionLogoUrl={team?.logo} />
       </div>
 
       <div className="sm:px-3 pb-2">
