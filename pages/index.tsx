@@ -566,9 +566,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                   </p>
                                 </div>
                                 <div className="flex-shrink-0 w-16 text-center">
-                                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                    {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
-                                  </p>
+                                  {match.matchStatus.key === 'FINISHED' ? (
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                      {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+                                    </p>
+                                  ) : (
+                                    <p className="text-sm font-medium text-gray-400 dark:text-gray-500">
+                                      {match.matchStatus.value}
+                                    </p>
+                                  )}
                                 </div>
                                 <div className="flex-1 text-left pl-4">
                                   <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
