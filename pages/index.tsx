@@ -10,7 +10,7 @@ import { Match } from '../types/MatchValues';
 import { TournamentValues } from '../types/TournamentValues';
 import Layout from "../components/Layout";
 import { getFuzzyDate } from '../tools/dateUtils';
-import { ArrowLongRightIcon } from '@heroicons/react/20/solid';
+import { ArrowLongRightIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import SuccessMessage from '../components/ui/SuccessMessage';
@@ -81,7 +81,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let restOfWeekMatches = null;
   try {
     const restOfWeekRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/rest-of-week`, {
-      
+
     });
     restOfWeekMatches = restOfWeekRes.data;
   } catch (error) {
@@ -96,15 +96,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error("Error fetching tournaments:", error);
   }
 
-  return { 
-    props: { 
-      jwt, 
-      posts: posts || [], 
-      todaysMatches: todaysMatches || [], 
+  return {
+    props: {
+      jwt,
+      posts: posts || [],
+      todaysMatches: todaysMatches || [],
       upcomingMatches: upcomingMatches || [],
       restOfWeekMatches: restOfWeekMatches || [],
-      tournaments: tournaments || [] 
-    } 
+      tournaments: tournaments || []
+    }
   };
 }
 
@@ -291,7 +291,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
               {formatTime(match.startDate)}
             </div>
           ) : (
-            <MatchStatusBadge 
+            <MatchStatusBadge
               statusKey={match.matchStatus.key}
               finishTypeKey={match.finishType.key}
               statusValue={match.matchStatus.value}
@@ -378,97 +378,97 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
         {/* Today's Games or Upcoming Games Section */}
         {(todaysMatches.length > 0 || upcomingMatches.length > 0) && (
 
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <div className="text-center mt-12 mb-8">
-                <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                  {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
-                </h2>
-                {isShowingUpcoming && upcomingMatches.length > 0 && (
-                  <p className="mt-2 mb-12 text-lg/8 text-gray-600">
-                    {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
-                      weekday: 'long',
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </p>
-                )}
-              </div>
-
-              {/* Tournament Filter - Only show for today's matches */}
-              {!isShowingUpcoming && (
-                <div className="sm:max-w-xs mx-auto mb-12">
-                  <TournamentSelect
-                    selectedTournament={selectedTournament}
-                    onTournamentChange={setSelectedTournament}
-                    allTournamentsData={tournaments}
-                  />
-                </div>
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mt-12 mb-8">
+              <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
+              </h2>
+              {isShowingUpcoming && upcomingMatches.length > 0 && (
+                <p className="mt-2 mb-12 text-lg/8 text-gray-600">
+                  {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                  })}
+                </p>
               )}
+            </div>
 
-              {(() => {
-                // If showing upcoming matches and more than 3, group by tournament
-                if (isShowingUpcoming && filteredMatches.length > 3) {
-                  const matchesByTournament = filteredMatches.reduce((acc, match) => {
-                    const tournamentAlias = match.tournament.alias;
-                    if (!acc[tournamentAlias]) {
-                      // Find the full tournament data from the tournaments array
-                      const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
-                      acc[tournamentAlias] = {
-                        tournament: fullTournament || {
-                          _id: '',
-                          name: match.tournament.name,
-                          alias: match.tournament.alias,
-                          tinyName: match.tournament.alias,
-                          ageGroup: { key: '', value: '' },
-                          published: true,
-                          active: true,
-                          external: false,
-                          seasons: []
-                        },
-                        matches: []
-                      };
-                    }
-                    acc[tournamentAlias].matches.push(match);
-                    return acc;
-                  }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
+            {/* Tournament Filter - Only show for today's matches */}
+            {!isShowingUpcoming && (
+              <div className="sm:max-w-xs mx-auto mb-12">
+                <TournamentSelect
+                  selectedTournament={selectedTournament}
+                  onTournamentChange={setSelectedTournament}
+                  allTournamentsData={tournaments}
+                />
+              </div>
+            )}
 
-                  return (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {Object.values(matchesByTournament).map(({ tournament, matches }) => (
-                        <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
-                      ))}
-                    </div>
-                  );
-                }
-
-                // For today's matches or ≤3 upcoming matches, use existing logic
-                const { live, upcoming, finished } = categorizeMatches(filteredMatches);
+            {(() => {
+              // If showing upcoming matches and more than 3, group by tournament
+              if (isShowingUpcoming && filteredMatches.length > 3) {
+                const matchesByTournament = filteredMatches.reduce((acc, match) => {
+                  const tournamentAlias = match.tournament.alias;
+                  if (!acc[tournamentAlias]) {
+                    // Find the full tournament data from the tournaments array
+                    const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
+                    acc[tournamentAlias] = {
+                      tournament: fullTournament || {
+                        _id: '',
+                        name: match.tournament.name,
+                        alias: match.tournament.alias,
+                        tinyName: match.tournament.alias,
+                        ageGroup: { key: '', value: '' },
+                        published: true,
+                        active: true,
+                        external: false,
+                        seasons: []
+                      },
+                      matches: []
+                    };
+                  }
+                  acc[tournamentAlias].matches.push(match);
+                  return acc;
+                }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
 
                 return (
-                  <div className="space-y-20">
-                    {/* Live Games */}
-                    {live.length > 0 && (
-                      <div>
-                        <div className="min-w-0 flex-1">
-                          <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
-                            <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Live</h2>
-                            </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Object.values(matchesByTournament).map(({ tournament, matches }) => (
+                      <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
+                    ))}
+                  </div>
+                );
+              }
+
+              // For today's matches or ≤3 upcoming matches, use existing logic
+              const { live, upcoming, finished } = categorizeMatches(filteredMatches);
+
+              return (
+                <div className="space-y-20">
+                  {/* Live Games */}
+                  {live.length > 0 && (
+                    <div>
+                      <div className="min-w-0 flex-1">
+                        <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                          <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Live</h2>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {live.map((match) => (
-                            <MatchCard key={match._id} match={match} />
-                          ))}
-                        </div>
                       </div>
-                    )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {live.map((match) => (
+                          <MatchCard key={match._id} match={match} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                    {/* Upcoming Games */}
-                    {upcoming.length > 0 && (
-                      <div>
-                        {!isShowingUpcoming && (
+                  {/* Upcoming Games */}
+                  {upcoming.length > 0 && (
+                    <div>
+                      {!isShowingUpcoming && (
                         <div className="min-w-0 flex-1">
                           <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
                             <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
@@ -476,137 +476,132 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                             </div>
                           </div>
                         </div>
-                        )}
-                        {upcoming.length > 6 ? (
-                          // Group by time slots when more than 6 matches
-                          <div className="space-y-8">
-                            {groupMatchesByTimeSlot(
-                              upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-                            ).map((group, groupIndex) => (
-                              <div key={groupIndex}>
-                                <div className="mb-6 mt-8">
-                                  <div className="flex flex-wrap items-baseline">
-                                    <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">{group.label}</h4>
-                                    <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                  {group.matches.map((match) => (
-                                    <MatchCard key={match._id} match={match} />
-                                  ))}
+                      )}
+                      {upcoming.length > 6 ? (
+                        // Group by time slots when more than 6 matches
+                        <div className="space-y-8">
+                          {groupMatchesByTimeSlot(
+                            upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                          ).map((group, groupIndex) => (
+                            <div key={groupIndex}>
+                              <div className="mb-6 mt-8">
+                                <div className="flex flex-wrap items-baseline">
+                                  <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">{group.label}</h4>
+                                  <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          // Show all matches without grouping when 6 or fewer
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {upcoming
-                              .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-                              .map((match) => (
-                                <MatchCard key={match._id} match={match} />
-                              ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Finished Games */}
-                    {finished.length > 0 && (
-                      <div>
-                        <div className="min-w-0 flex-1">
-                          <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
-                            <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Beendet</h2>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {group.matches.map((match) => (
+                                  <MatchCard key={match._id} match={match} />
+                                ))}
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                      ) : (
+                        // Show all matches without grouping when 6 or fewer
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {upcoming
+                            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                            .map((match) => (
+                              <MatchCard key={match._id} match={match} />
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Finished Games */}
+                  {finished.length > 0 && (
+                    <div>
+                      <div className="min-w-0 flex-1">
+                        <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                          <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Beendet</h2>
                           </div>
                         </div>
-                        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                          <ul role="list" className="divide-y divide-gray-200">
-                            {finished
-                              .sort((a, b) => {
-                                // First sort by tournament sortOrder
-                                const tournamentConfigA = tournamentConfigs[a.tournament.alias];
-                                const tournamentConfigB = tournamentConfigs[b.tournament.alias];
-                                const sortOrderA = tournamentConfigA?.sortOrder || 999;
-                                const sortOrderB = tournamentConfigB?.sortOrder || 999;
+                      </div>
+                      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                        <ul
+                          role="list"
+                          className="divide-y divide-gray-100 overflow-hidden bg-white shadow-xs outline-1 outline-gray-900/5 sm:rounded-xl dark:divide-white/5 dark:bg-gray-800/50 dark:shadow-none dark:outline-white/10 dark:sm:-outline-offset-1"
+                        >
+                          {finished
+                            .sort((a, b) => {
+                              // First sort by tournament sortOrder
+                              const tournamentConfigA = tournamentConfigs[a.tournament.alias];
+                              const tournamentConfigB = tournamentConfigs[b.tournament.alias];
+                              const sortOrderA = tournamentConfigA?.sortOrder || 999;
+                              const sortOrderB = tournamentConfigB?.sortOrder || 999;
 
-                                if (sortOrderA !== sortOrderB) {
-                                  return sortOrderA - sortOrderB;
-                                }
+                              if (sortOrderA !== sortOrderB) {
+                                return sortOrderA - sortOrderB;
+                              }
 
-                                // Then sort by startDate (most recent first)
-                                return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
-                              })
-                              .map((match) => (
-                                <li key={match._id}>
-                                  <div className="px-4 py-4 flex items-center justify-between">
-                                    <div className="flex items-center min-w-0 flex-1">
-                                      <div className="flex-shrink-0">
-                                        {(() => {
-                                          const item = tournamentConfigs[match.tournament.alias];
-                                          if (item) {
-                                            return (
-                                              <span
-                                                className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
-                                              >
-                                                {item.tinyName}
-                                              </span>
-                                            );
-                                          }
-                                        })()}
-                                      </div>
-                                      <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-900 truncate">
-                                            {match.home.shortName} - {match.away.shortName}
-                                          </p>
-                                          <p className="text-sm text-gray-500">
-                                            {match.venue.name}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center space-x-4">
-                                      <div className="flex items-center space-x-2">
-                                        <span className="text-lg font-semibold text-gray-900">
-                                          {match.home.stats.goalsFor}:{match.away.stats.goalsFor}
+                              // Then sort by startDate (most recent first)
+                              return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+                            })
+                            .map((match) => (
+                              <li
+                                key={match._id}
+                                className="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5"
+                              >
+                                <div className="flex w-12">
+                                  {(() => {
+                                    const item = tournamentConfigs[match.tournament.alias];
+                                    if (item) {
+                                      return (
+                                        <span
+                                          className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                                        >
+                                          {item.tinyName}
                                         </span>
-                                        <MatchStatusBadge 
-                                          statusKey={match.matchStatus.key}
-                                          finishTypeKey={match.finishType.key}
-                                          statusValue={match.matchStatus.value}
-                                          finishTypeValue={match.finishType.value}
-                                        />
-                                      </div>
-                                      <Link href={`/matches/${match._id}`}>
-                                        <a className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                          Bericht
-                                        </a>
-                                      </Link>
-                                    </div>
+                                      );
+                                    }
+                                  })()}
+                                </div>
+                                <div className="flex w-full gap-x-4">
+                                  <div className="min-w-0 flex-auto text-right">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                      {match.home.fullName}
+                                    </p>
                                   </div>
-                                </li>
-                              ))}
-                          </ul>
-                        </div>
+                                  <div className="min-w-0 flex-auto text-center">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                      {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+                                    </p>
+                                  </div>
+                                  <div className="min-w-0 flex-auto text-left">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                      {match.away.fullName}
+                                    </p>
+                                  </div>
+                                  
+                                </div>
+                                <div>
+                                  <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
+                                </div>
+                              </li>
+                            ))}
+                        </ul>
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {filteredMatches.length === 0 && (
-                      <div className="text-center py-12">
-                        <p className="text-gray-500">
-                          {selectedTournament 
-                            ? `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'} in ${selectedTournament.name}`
-                            : `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'}`
-                          }
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
+                  {filteredMatches.length === 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500">
+                        {selectedTournament
+                          ? `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'} in ${selectedTournament.name}`
+                          : `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'}`
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
         )}
 
         <div className="bg-white py-12 sm:py-24">
