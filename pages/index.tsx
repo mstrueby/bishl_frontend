@@ -27,7 +27,6 @@ interface PostsProps {
   jwt: string | null,
   posts: PostValues[],
   todaysMatches: Match[],
-  upcomingMatches: Match[],
   restOfWeekMatches: { date: string, dayName: string, matches: Match[] }[],
   tournaments: TournamentValues[]
 }
@@ -66,16 +65,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error("Error fetching today's matches:", error);
   }
 
-  // Fetch upcoming matches
-  let upcomingMatches = null;
-  try {
-    const upcomingRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/upcoming`, {
-
-    });
-    upcomingMatches = upcomingRes.data;
-  } catch (error) {
-    console.error("Error fetching upcoming matches:", error);
-  }
+  
 
   // Fetch matches for rest of the week
   let restOfWeekMatches = null;
@@ -101,7 +91,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       jwt,
       posts: posts || [],
       todaysMatches: todaysMatches || [],
-      upcomingMatches: upcomingMatches || [],
       restOfWeekMatches: restOfWeekMatches || [],
       tournaments: tournaments || []
     }
@@ -109,7 +98,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 }
 
 
-const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcomingMatches = [], restOfWeekMatches = [], tournaments = [] }) => {
+const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restOfWeekMatches = [], tournaments = [] }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
@@ -488,7 +477,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
         {/* Today's Games or Upcoming Games Section */}
-        {(todaysMatches.length > 0 || upcomingMatches.length > 0) && (
+        {(todaysMatches.length > 0 || restOfWeekMatches.length > 0) && (
 
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mt-12 mb-8">
