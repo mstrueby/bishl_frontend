@@ -190,9 +190,59 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
 
   // Categorize matches
   const categorizeMatches = (matches: Match[]) => {
-    const live = matches.filter(match => match.matchStatus.key === 'INPROGRESS');
-    const upcoming = matches.filter(match => match.matchStatus.key === 'SCHEDULED');
-    const finished = matches.filter(match => ['FINISHED', 'FORFEITED'].includes(match.matchStatus.key));
+    const now = new Date();
+    
+    const live = matches.filter(match => {
+      // Always include matches that are explicitly marked as INPROGRESS
+      if (match.matchStatus.key === 'INPROGRESS') {
+        return true;
+      }
+      
+      // For scheduled matches, check if they could potentially be live based on start time and match length
+      if (match.matchStatus.key === 'SCHEDULED') {
+        const tournamentConfig = tournamentConfigs[match.tournament.alias];
+        if (tournamentConfig) {
+          const matchStart = new Date(match.startDate);
+          const matchEndEstimate = new Date(matchStart.getTime() + (tournamentConfig.matchLenMin * 60 * 1000));
+          
+          // Include if current time is between match start and estimated end
+          return now >= matchStart && now <= matchEndEstimate;
+        }
+      }
+      
+      return false;
+    });
+
+    const finished = matches.filter(match => {
+      // Always include matches that are explicitly marked as finished
+      if (['FINISHED', 'FORFEITED'].includes(match.matchStatus.key)) {
+        return true;
+      }
+      
+      // For scheduled matches, check if they should be considered finished based on estimated end time
+      if (match.matchStatus.key === 'SCHEDULED') {
+        const tournamentConfig = tournamentConfigs[match.tournament.alias];
+        if (tournamentConfig) {
+          const matchStart = new Date(match.startDate);
+          const matchEndEstimate = new Date(matchStart.getTime() + (tournamentConfig.matchLenMin * 60 * 1000));
+          
+          // Include if current time is past the estimated end time
+          return now > matchEndEstimate;
+        }
+      }
+      
+      return false;
+    });
+
+    const upcoming = matches.filter(match => {
+      // Only include scheduled matches that haven't started yet and aren't considered finished
+      if (match.matchStatus.key === 'SCHEDULED') {
+        const matchStart = new Date(match.startDate);
+        return now < matchStart;
+      }
+      
+      return false;
+    });
 
     return { live, upcoming, finished };
   };
