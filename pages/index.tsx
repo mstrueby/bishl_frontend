@@ -119,6 +119,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
   const displayMatches = todaysMatches.length > 0 ? todaysMatches : restOfWeekMatches.flatMap(day => day.matches);
   const isShowingUpcoming = todaysMatches.length === 0 && restOfWeekMatches.length > 0;
 
+  // Reset expanded tournaments when switching between display modes
+  useEffect(() => {
+    setExpandedTournaments(new Set());
+  }, [isShowingUpcoming]);
+
   useEffect(() => {
     if (router.query.message) {
       setSuccessMessage(router.query.message as string);
@@ -536,7 +541,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                           const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
                           acc[tournamentAlias] = {
                             tournament: fullTournament || {
-                              _id: '',
+                              _id: match.tournament._id || tournamentAlias,
                               name: match.tournament.name,
                               alias: match.tournament.alias,
                               tinyName: match.tournament.alias,
