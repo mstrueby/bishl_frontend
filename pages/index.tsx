@@ -322,12 +322,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
               {showAllMatches ? (
                 <>
                   Weniger anzeigen
-                  <ChevronUpIcon className="ml-1 h-3 w-3" />
+                  <ChevronUpIcon className="ml-1 h-3 w-3 text-indigo-600" />
                 </>
               ) : (
                 <>
                   {sortedMatches.length - 3 === 1 ? '1 weiteres Spiel anzeigen' : `${sortedMatches.length - 3} weitere Spiele anzeigen`}
-                  <ChevronDownIcon className="ml-1 h-3 w-3" />
+                  <ChevronDownIcon className="ml-1 h-3 w-3 text-indigo-600" />
                 </>
               )}
             </button>
