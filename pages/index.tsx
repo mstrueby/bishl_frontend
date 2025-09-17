@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -261,23 +261,27 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
   };
 
   // TournamentCard component for grouped upcoming matches
-  const TournamentCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
+  const TournamentCard = React.memo(({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
     const [showAllMatches, setShowAllMatches] = useState(false);
     const tournamentConfig = tournamentConfigs[tournament.alias];
-    const sortedMatches = matches.sort((a, b) => {
-      // First sort by tournament sortOrder
-      const tournamentConfigA = tournamentConfigs[a.tournament.alias];
-      const tournamentConfigB = tournamentConfigs[b.tournament.alias];
-      const sortOrderA = tournamentConfigA?.sortOrder || 999;
-      const sortOrderB = tournamentConfigB?.sortOrder || 999;
+    
+    // Memoize sorted matches to prevent unnecessary re-sorting
+    const sortedMatches = React.useMemo(() => {
+      return matches.sort((a, b) => {
+        // First sort by tournament sortOrder
+        const tournamentConfigA = tournamentConfigs[a.tournament.alias];
+        const tournamentConfigB = tournamentConfigs[b.tournament.alias];
+        const sortOrderA = tournamentConfigA?.sortOrder || 999;
+        const sortOrderB = tournamentConfigB?.sortOrder || 999;
 
-      if (sortOrderA !== sortOrderB) {
-        return sortOrderA - sortOrderB;
-      }
+        if (sortOrderA !== sortOrderB) {
+          return sortOrderA - sortOrderB;
+        }
 
-      // Then sort by startDate
-      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-    });
+        // Then sort by startDate
+        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+      });
+    }, [matches]);
 
     const hasMoreThanThree = sortedMatches.length > 3;
     const displayedMatches = hasMoreThanThree && !showAllMatches 
@@ -286,6 +290,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
 
     // Calculate minimum height to maintain consistent card sizes (3 matches + toggle button space)
     const minHeight = hasMoreThanThree ? '280px' : 'auto';
+
+    const handleToggle = React.useCallback(() => {
+      setShowAllMatches(prev => !prev);
+    }, []);
 
     return (
       <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
@@ -316,7 +324,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
         {hasMoreThanThree && (
           <div className="p-2 border-t border-gray-900/5 bg-gray-50">
             <button
-              onClick={() => setShowAllMatches(!showAllMatches)}
+              onClick={handleToggle}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center w-full"
             >
               {showAllMatches ? (
@@ -335,7 +343,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
         )}
       </div>
     );
-  };
+  });
 
   // MatchCard component for today's games
   const MatchCard = ({ match }: { match: Match }) => {
