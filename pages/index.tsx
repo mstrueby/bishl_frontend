@@ -471,8 +471,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mt-12 mb-8">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
+                {isShowingUpcoming ? 'Kommende Spiele' : 'Aktuelle Spiele'}
               </h2>
+              {/**
               {isShowingUpcoming && upcomingMatches.length > 0 && (
                 <p className="mt-2 mb-12 text-lg/8 text-gray-600">
                   {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
@@ -483,6 +484,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   })}
                 </p>
               )}
+              */}
             </div>
 
             {/* Tournament Filter - Only show for today's matches */}
