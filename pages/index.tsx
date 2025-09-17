@@ -65,7 +65,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error("Error fetching today's matches:", error);
   }
 
-  
+
 
   // Fetch matches for rest of the week
   let restOfWeekMatches = null;
@@ -272,8 +272,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
   // TournamentCard component for grouped upcoming matches
   const TournamentCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
     const tournamentConfig = tournamentConfigs[tournament.alias];
-    const showAllMatches = expandedTournaments.has(tournament.alias);
-    
+    const isExpanded = expandedTournaments.has(tournament.alias);
+
     // Sort matches
     const sortedMatches = matches.sort((a, b) => {
       // First sort by tournament sortOrder
@@ -291,8 +291,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
     });
 
     const hasMoreThanThree = sortedMatches.length > 3;
-    const displayedMatches = hasMoreThanThree && !showAllMatches 
-      ? sortedMatches.slice(0, 3) 
+    const displayedMatches = hasMoreThanThree && !isExpanded
+      ? sortedMatches.slice(0, 3)
       : sortedMatches;
 
     // Calculate minimum height to maintain consistent card sizes (3 matches + toggle button space)
@@ -330,7 +330,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
               onClick={() => toggleTournament(tournament.alias)}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center w-full"
             >
-              {showAllMatches ? (
+              {isExpanded ? (
                 <>
                   Weniger anzeigen
                   <ChevronUpIcon className="ml-1 h-3 w-3 text-indigo-600" />
@@ -516,10 +516,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                   <div className="space-y-8">
                     {restOfWeekMatches.map((dayGroup, dayIndex) => {
                       // Filter matches for this day based on selected tournament
-                      const dayFilteredMatches = selectedTournament 
+                      const dayFilteredMatches = selectedTournament
                         ? dayGroup.matches.filter(match => match.tournament.alias === selectedTournament.alias)
                         : dayGroup.matches;
-                      
+
                       if (dayFilteredMatches.length === 0) return null;
 
                       // Group matches by tournament for this day
