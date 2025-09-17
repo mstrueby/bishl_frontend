@@ -10,7 +10,7 @@ import { Match } from '../types/MatchValues';
 import { TournamentValues } from '../types/TournamentValues';
 import Layout from "../components/Layout";
 import { getFuzzyDate } from '../tools/dateUtils';
-import { ArrowLongRightIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
+import { ArrowLongRightIcon, ChevronRightIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid';
 import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import SuccessMessage from '../components/ui/SuccessMessage';
@@ -262,6 +262,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
 
   // TournamentCard component for grouped upcoming matches
   const TournamentCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
+    const [showAllMatches, setShowAllMatches] = useState(false);
     const tournamentConfig = tournamentConfigs[tournament.alias];
     const sortedMatches = matches.sort((a, b) => {
       // First sort by tournament sortOrder
@@ -278,8 +279,16 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
       return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
     });
 
+    const hasMoreThanThree = sortedMatches.length > 3;
+    const displayedMatches = hasMoreThanThree && !showAllMatches 
+      ? sortedMatches.slice(0, 3) 
+      : sortedMatches;
+
+    // Calculate minimum height to maintain consistent card sizes (3 matches + toggle button space)
+    const minHeight = hasMoreThanThree ? '280px' : 'auto';
+
     return (
-      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
         <div className="mb-4">
           {tournamentConfig && (
             <span className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
@@ -287,8 +296,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
             </span>
           )}
         </div>
-        <div className="space-y-3">
-          {sortedMatches.map((match) => (
+        <div className="space-y-3 flex-1">
+          {displayedMatches.map((match) => (
             <div key={match._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-900">
@@ -304,6 +313,26 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
             </div>
           ))}
         </div>
+        {hasMoreThanThree && (
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <button
+              onClick={() => setShowAllMatches(!showAllMatches)}
+              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center w-full"
+            >
+              {showAllMatches ? (
+                <>
+                  Weniger anzeigen
+                  <ChevronUpIcon className="ml-1 h-3 w-3" />
+                </>
+              ) : (
+                <>
+                  {sortedMatches.length - 3 === 1 ? '1 weiteres Spiel anzeigen' : `${sortedMatches.length - 3} weitere Spiele anzeigen`}
+                  <ChevronDownIcon className="ml-1 h-3 w-3" />
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     );
   };
