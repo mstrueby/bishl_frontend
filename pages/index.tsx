@@ -640,6 +640,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                 </div>
                                 <Link href={`/matches/${match._id}`}>
                                   <a className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer">
+                                    <span className="absolute inset-x-0 -top-px bottom-0" />
                                     {match.matchStatus.key === 'FINISHED' ? (
                                       <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
                                         {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
