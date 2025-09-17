@@ -341,7 +341,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                 return (
                   <span
                     key={item.tinyName}
-                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
+                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
                   >
                     {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
                   </span>
@@ -603,10 +603,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                               return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                             })
                             .map((match) => (
-                              <li
-                                key={match._id}
-                                className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5"
-                              >
+                              <li key={match._id} className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5 border-b border-gray-100 last:border-b-0">
                                 <div className="flex-shrink-0 w-16">
                                   {(() => {
                                     const item = tournamentConfigs[match.tournament.alias];
@@ -641,26 +638,29 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <div className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center">
-                                  {match.matchStatus.key === 'FINISHED' ? (
-                                    <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
-                                      {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
-                                      {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
-                                        <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
-                                          {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
-                                        </span>
-                                      )}
-                                    </p>
-                                  ) : (match.matchStatus.key === 'SCHEDULED' ? (
-                                    <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
-                                      - : -
-                                    </p>
-                                  ) : (
-                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap text-center">
-                                      {match.matchStatus.value}
-                                    </p>
-                                  ))}
-                                </div>
+                                <Link href={`/matches/${match._id}`}>
+                                  <a className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer">
+                                    <span className="absolute inset-x-0 -top-px bottom-0" />
+                                    {match.matchStatus.key === 'FINISHED' ? (
+                                      <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
+                                        {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+                                        {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
+                                          <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
+                                            {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
+                                          </span>
+                                        )}
+                                      </p>
+                                    ) : (match.matchStatus.key === 'SCHEDULED' ? (
+                                      <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
+                                        - : -
+                                      </p>
+                                    ) : (
+                                      <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap text-center">
+                                        {match.matchStatus.value}
+                                      </p>
+                                    ))}
+                                  </a>
+                                </Link>
                                 <div className="flex-1 flex items-center gap-4">
                                   <Image
                                     src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
