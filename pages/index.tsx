@@ -341,7 +341,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                 return (
                   <span
                     key={item.tinyName}
-                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
+                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
                   >
                     {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
                   </span>
@@ -603,89 +603,87 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                               return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                             })
                             .map((match) => (
-                              <Link key={match._id} href={`/matches/${match._id}`}>
-                                <a>
-                                  <li className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5 cursor-pointer">
-                                    <div className="flex-shrink-0 w-16">
-                                      {(() => {
-                                        const item = tournamentConfigs[match.tournament.alias];
-                                        if (item) {
-                                          return (
-                                            <span
-                                              className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
-                                            >
-                                              {item.tinyName}
-                                            </span>
-                                          );
-                                        }
-                                      })()}
-                                    </div>
-                                    <div className="flex-1 flex items-center justify-end gap-4">
-                                      <div className="hidden sm:block">
-                                        <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
-                                          {match.home.tinyName}
-                                        </p>
-                                        <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                          {match.home.shortName}
-                                        </p>
-                                        <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                          {match.home.fullName}
-                                        </p>
-                                      </div>
-                                      <Image
-                                        src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                                        alt={match.home.tinyName}
-                                        width={28}
-                                        height={28}
-                                        className="object-contain flex-shrink-0"
-                                      />
-                                    </div>
-                                    <div className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center">
-                                      {match.matchStatus.key === 'FINISHED' ? (
-                                        <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
-                                          {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
-                                          {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
-                                            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
-                                              {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
-                                            </span>
-                                          )}
-                                        </p>
-                                      ) : (match.matchStatus.key === 'SCHEDULED' ? (
-                                        <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
-                                          - : -
-                                        </p>
-                                      ) : (
-                                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap text-center">
-                                          {match.matchStatus.value}
-                                        </p>
-                                      ))}
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-4">
-                                      <Image
-                                        src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                                        alt={match.away.tinyName}
-                                        width={28}
-                                        height={28}
-                                        className="object-contain flex-shrink-0"
-                                      />
-                                      <div className="hidden sm:block">
-                                        <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
-                                          {match.away.tinyName}
-                                        </p>
-                                        <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                          {match.away.shortName}
-                                        </p>
-                                        <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                          {match.away.fullName}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <div className="flex-shrink-0">
-                                      <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
-                                    </div>
-                                  </li>
-                                </a>
-                              </Link>
+                              <li key={match._id} className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5 border-b border-gray-100 last:border-b-0">
+                                <div className="flex-shrink-0 w-16">
+                                  {(() => {
+                                    const item = tournamentConfigs[match.tournament.alias];
+                                    if (item) {
+                                      return (
+                                        <span
+                                          className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                                        >
+                                          {item.tinyName}
+                                        </span>
+                                      );
+                                    }
+                                  })()}
+                                </div>
+                                <div className="flex-1 flex items-center justify-end gap-4">
+                                  <div className="hidden sm:block">
+                                    <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.home.tinyName}
+                                    </p>
+                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.home.shortName}
+                                    </p>
+                                    <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.home.fullName}
+                                    </p>
+                                  </div>
+                                  <Image
+                                    src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                    alt={match.home.tinyName}
+                                    width={28}
+                                    height={28}
+                                    className="object-contain flex-shrink-0"
+                                  />
+                                </div>
+                                <Link href={`/matches/${match._id}`}>
+                                  <a className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer">
+                                    {match.matchStatus.key === 'FINISHED' ? (
+                                      <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
+                                        {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+                                        {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
+                                          <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
+                                            {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
+                                          </span>
+                                        )}
+                                      </p>
+                                    ) : (match.matchStatus.key === 'SCHEDULED' ? (
+                                      <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
+                                        - : -
+                                      </p>
+                                    ) : (
+                                      <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap text-center">
+                                        {match.matchStatus.value}
+                                      </p>
+                                    ))}
+                                  </a>
+                                </Link>
+                                <div className="flex-1 flex items-center gap-4">
+                                  <Image
+                                    src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                    alt={match.away.tinyName}
+                                    width={28}
+                                    height={28}
+                                    className="object-contain flex-shrink-0"
+                                  />
+                                  <div className="hidden sm:block">
+                                    <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.away.tinyName}
+                                    </p>
+                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.away.shortName}
+                                    </p>
+                                    <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.away.fullName}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex-shrink-0">
+                                  <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
+                                </div>
+                              </li>
                             ))}
                         </ul>
                       </div>
