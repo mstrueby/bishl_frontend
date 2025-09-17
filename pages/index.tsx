@@ -115,10 +115,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
   const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
   const router = useRouter();
 
-  // Use upcoming matches from restOfWeekMatches if no today's matches
-  const upcomingMatchesFlat = restOfWeekMatches.flatMap(day => day.matches);
-  const displayMatches = todaysMatches.length > 0 ? todaysMatches : upcomingMatchesFlat;
-  const isShowingUpcoming = todaysMatches.length === 0 && restOfWeekMatches.length > 0;
+  // Use upcoming matches if no today's matches
+  const displayMatches = todaysMatches.length > 0 ? todaysMatches : upcomingMatches;
+  const isShowingUpcoming = todaysMatches.length === 0 && upcomingMatches.length > 0;
 
   useEffect(() => {
     if (router.query.message) {
@@ -289,15 +288,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     const minHeight = hasMoreThanThree ? '280px' : 'auto';
 
     return (
-      <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
-        <div className="p-4 border-b border-gray-900/5 bg-gray-50">
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
+        <div className="mb-4">
           {tournamentConfig && (
             <span className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
               {tournamentConfig.tinyName}
             </span>
           )}
         </div>
-        <div className="space-y-3 flex-1 p-4">
+        <div className="space-y-3 flex-1">
           {displayedMatches.map((match) => (
             <div key={match._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
               <div className="flex-1">
@@ -315,7 +314,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
           ))}
         </div>
         {hasMoreThanThree && (
-          <div className="p-2 border-t border-gray-900/5 bg-gray-50">
+          <div className="mt-4 pt-3 border-t border-gray-100">
             <button
               onClick={() => setShowAllMatches(!showAllMatches)}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center w-full"
@@ -474,9 +473,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                 {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
               </h2>
-              {isShowingUpcoming && restOfWeekMatches.length > 0 && (
+              {isShowingUpcoming && upcomingMatches.length > 0 && (
                 <p className="mt-2 mb-12 text-lg/8 text-gray-600">
-                  Diese Woche
+                  {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                  })}
                 </p>
               )}
             </div>
@@ -493,47 +497,36 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
             )}
 
             {(() => {
-              // If showing upcoming matches, group by date
-              if (isShowingUpcoming) {
-                // Filter restOfWeekMatches by selected tournament
-                const filteredRestOfWeekMatches = selectedTournament
-                  ? restOfWeekMatches.map(day => ({
-                      ...day,
-                      matches: day.matches.filter(match => match.tournament.alias === selectedTournament.alias)
-                    })).filter(day => day.matches.length > 0)
-                  : restOfWeekMatches.filter(day => day.matches.length > 0);
-
-                if (filteredRestOfWeekMatches.length === 0) {
-                  return (
-                    <div className="text-center py-12">
-                      <p className="text-gray-500">
-                        {selectedTournament
-                          ? `Keine Spiele diese Woche in ${selectedTournament.name}`
-                          : 'Keine Spiele diese Woche'
-                        }
-                      </p>
-                    </div>
-                  );
-                }
+              // If showing upcoming matches and more than 3, group by tournament
+              if (isShowingUpcoming && filteredMatches.length > 3) {
+                const matchesByTournament = filteredMatches.reduce((acc, match) => {
+                  const tournamentAlias = match.tournament.alias;
+                  if (!acc[tournamentAlias]) {
+                    // Find the full tournament data from the tournaments array
+                    const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
+                    acc[tournamentAlias] = {
+                      tournament: fullTournament || {
+                        _id: '',
+                        name: match.tournament.name,
+                        alias: match.tournament.alias,
+                        tinyName: match.tournament.alias,
+                        ageGroup: { key: '', value: '' },
+                        published: true,
+                        active: true,
+                        external: false,
+                        seasons: []
+                      },
+                      matches: []
+                    };
+                  }
+                  acc[tournamentAlias].matches.push(match);
+                  return acc;
+                }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
 
                 return (
-                  <div className="space-y-8">
-                    {filteredRestOfWeekMatches.map((day, dayIndex) => (
-                      <div key={dayIndex}>
-                        <div className="mb-6 mt-8">
-                          <div className="flex flex-wrap items-baseline">
-                            <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">{day.dayName}</h4>
-                            <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{day.date}</p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {day.matches
-                            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-                            .map((match) => (
-                              <MatchCard key={match._id} match={match} />
-                            ))}
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Object.values(matchesByTournament).map(({ tournament, matches }) => (
+                      <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
                     ))}
                   </div>
                 );
@@ -727,12 +720,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                     </div>
                   )}
 
-                  {!isShowingUpcoming && filteredMatches.length === 0 && (
+                  {filteredMatches.length === 0 && (
                     <div className="text-center py-12">
                       <p className="text-gray-500">
                         {selectedTournament
-                          ? `Keine Spiele heute in ${selectedTournament.name}`
-                          : 'Keine Spiele heute'
+                          ? `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'} in ${selectedTournament.name}`
+                          : `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'}`
                         }
                       </p>
                     </div>
