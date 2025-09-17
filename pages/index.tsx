@@ -116,7 +116,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
   const router = useRouter();
 
   // Use upcoming matches if no today's matches
-  const displayMatches = todaysMatches.length > 0 ? todaysMatches : restOfWeekMatches;
+  const displayMatches = todaysMatches.length > 0 ? todaysMatches : restOfWeekMatches.flatMap(day => day.matches);
   const isShowingUpcoming = todaysMatches.length === 0 && restOfWeekMatches.length > 0;
 
   useEffect(() => {
@@ -471,8 +471,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mt-12 mb-8">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                {isShowingUpcoming ? 'Nächste Spiele' : 'Aktuelle Spiele'}
+                {isShowingUpcoming ? 'Kommende Spiele' : 'Aktuelle Spiele'}
               </h2>
+              {/**
               {isShowingUpcoming && upcomingMatches.length > 0 && (
                 <p className="mt-2 mb-12 text-lg/8 text-gray-600">
                   {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
@@ -483,6 +484,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   })}
                 </p>
               )}
+              */}
             </div>
 
             {/* Tournament Filter - Only show for today's matches */}
@@ -497,37 +499,69 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
             )}
 
             {(() => {
-              // If showing upcoming matches and more than 3, group by tournament
-              if (isShowingUpcoming && filteredMatches.length > 3) {
-                const matchesByTournament = filteredMatches.reduce((acc, match) => {
-                  const tournamentAlias = match.tournament.alias;
-                  if (!acc[tournamentAlias]) {
-                    // Find the full tournament data from the tournaments array
-                    const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
-                    acc[tournamentAlias] = {
-                      tournament: fullTournament || {
-                        _id: '',
-                        name: match.tournament.name,
-                        alias: match.tournament.alias,
-                        tinyName: match.tournament.alias,
-                        ageGroup: { key: '', value: '' },
-                        published: true,
-                        active: true,
-                        external: false,
-                        seasons: []
-                      },
-                      matches: []
-                    };
-                  }
-                  acc[tournamentAlias].matches.push(match);
-                  return acc;
-                }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
-
+              // If showing upcoming matches, group by date
+              if (isShowingUpcoming) {
                 return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {Object.values(matchesByTournament).map(({ tournament, matches }) => (
-                      <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
-                    ))}
+                  <div className="space-y-8">
+                    {restOfWeekMatches.map((dayGroup, dayIndex) => {
+                      // Filter matches for this day based on selected tournament
+                      const dayFilteredMatches = selectedTournament 
+                        ? dayGroup.matches.filter(match => match.tournament.alias === selectedTournament.alias)
+                        : dayGroup.matches;
+                      
+                      if (dayFilteredMatches.length === 0) return null;
+
+                      // Group matches by tournament for this day
+                      const matchesByTournament = dayFilteredMatches.reduce((acc, match) => {
+                        const tournamentAlias = match.tournament.alias;
+                        if (!acc[tournamentAlias]) {
+                          // Find the full tournament data from the tournaments array
+                          const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
+                          acc[tournamentAlias] = {
+                            tournament: fullTournament || {
+                              _id: '',
+                              name: match.tournament.name,
+                              alias: match.tournament.alias,
+                              tinyName: match.tournament.alias,
+                              ageGroup: { key: '', value: '' },
+                              published: true,
+                              active: true,
+                              external: false,
+                              seasons: []
+                            },
+                            matches: []
+                          };
+                        }
+                        acc[tournamentAlias].matches.push(match);
+                        return acc;
+                      }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
+
+                      return (
+                        <div key={dayIndex}>
+                          <div className="mb-6 mt-8">
+                            <div className="flex flex-wrap items-baseline">
+                              <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">
+                                {new Date(dayGroup.date).toLocaleDateString('de-DE', {
+                                  weekday: 'long'
+                                })}
+                              </h4>
+                              <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">
+                                {new Date(dayGroup.date).toLocaleDateString('de-DE', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {Object.values(matchesByTournament).map(({ tournament, matches }) => (
+                              <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               }
