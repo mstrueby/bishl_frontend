@@ -538,7 +538,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                         <div key={dayIndex}>
                           <div className="mb-6 mt-8">
                             <div className="flex flex-wrap items-baseline">
-                              <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">{dayGroup.dayName}</h4>
+                              <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">
+                                {new Date(dayGroup.date).toLocaleDateString('de-DE', {
+                                  weekday: 'long'
+                                })}
+                              </h4>
                               <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">
                                 {new Date(dayGroup.date).toLocaleDateString('de-DE', {
                                   day: '2-digit',
