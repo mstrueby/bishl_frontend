@@ -603,10 +603,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                               return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                             })
                             .map((match) => (
-                              <li
-                                key={match._id}
-                                className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5"
-                              >
+                              <Link key={match._id} href={`/matches/${match._id}`}>
+                                <a>
+                                  <li className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5 cursor-pointer"
+                                  ></a>
+                              </Link>
                                 <div className="flex-shrink-0 w-16">
                                   {(() => {
                                     const item = tournamentConfigs[match.tournament.alias];
@@ -682,9 +683,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0">
-                                  <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
-                                </div>
-                              </li>
+                                      <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
+                                    </div>
+                                  </li>
+                                </a>
+                              </Link>
                             ))}
                         </ul>
                       </div>
