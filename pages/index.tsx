@@ -288,15 +288,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     const minHeight = hasMoreThanThree ? '280px' : 'auto';
 
     return (
-      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
-        <div className="mb-4">
+      <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
+        <div className="p-4 border-b border-gray-900/5 bg-gray-50">
           {tournamentConfig && (
             <span className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
               {tournamentConfig.tinyName}
             </span>
           )}
         </div>
-        <div className="space-y-3 flex-1">
+        <div className="space-y-3 flex-1 p-4">
           {displayedMatches.map((match) => (
             <div key={match._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
               <div className="flex-1">
@@ -314,7 +314,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
           ))}
         </div>
         {hasMoreThanThree && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
+          <div className="p-2 border-t border-gray-900/5 bg-gray-50">
             <button
               onClick={() => setShowAllMatches(!showAllMatches)}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center w-full"
