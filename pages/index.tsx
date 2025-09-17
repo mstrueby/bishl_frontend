@@ -191,25 +191,25 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
   // Categorize matches
   const categorizeMatches = (matches: Match[]) => {
     const now = new Date();
-    
+
     const live = matches.filter(match => {
       // Always include matches that are explicitly marked as INPROGRESS
       if (match.matchStatus.key === 'INPROGRESS') {
         return true;
       }
-      
+
       // For scheduled matches, check if they could potentially be live based on start time and match length
       if (match.matchStatus.key === 'SCHEDULED') {
         const tournamentConfig = tournamentConfigs[match.tournament.alias];
         if (tournamentConfig) {
           const matchStart = new Date(match.startDate);
           const matchEndEstimate = new Date(matchStart.getTime() + (tournamentConfig.matchLenMin * 60 * 1000));
-          
+
           // Include if current time is between match start and estimated end
           return now >= matchStart && now <= matchEndEstimate;
         }
       }
-      
+
       return false;
     });
 
@@ -218,19 +218,19 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
       if (['FINISHED', 'FORFEITED'].includes(match.matchStatus.key)) {
         return true;
       }
-      
+
       // For scheduled matches, check if they should be considered finished based on estimated end time
       if (match.matchStatus.key === 'SCHEDULED') {
         const tournamentConfig = tournamentConfigs[match.tournament.alias];
         if (tournamentConfig) {
           const matchStart = new Date(match.startDate);
           const matchEndEstimate = new Date(matchStart.getTime() + (tournamentConfig.matchLenMin * 60 * 1000));
-          
+
           // Include if current time is past the estimated end time
           return now > matchEndEstimate;
         }
       }
-      
+
       return false;
     });
 
@@ -240,7 +240,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
         const matchStart = new Date(match.startDate);
         return now < matchStart;
       }
-      
+
       return false;
     });
 
@@ -399,13 +399,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
             <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
             <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
           </div>
-          {(match.matchStatus.key === 'INPROGRESS' || match.matchStatus.key === 'FINISHED') && (
-            <Link href={`/matches/${match._id}`}>
-              <a className="text-indigo-600 hover:text-indigo-800 font-medium">
-                Spielbericht
-              </a>
-            </Link>
-          )}
+          <Link href={`/matches/${match._id}`}>
+            <a className="text-indigo-600 hover:text-indigo-800 font-medium">
+              Spielbericht
+            </a>
+          </Link>
         </div>
       </div>
     );
@@ -624,15 +622,17 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                   })()}
                                 </div>
                                 <div className="flex-1 flex items-center justify-end gap-4">
-                                  <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {match.home.tinyName}
-                                  </p>
-                                  <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {match.home.shortName}
-                                  </p>
-                                  <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {match.home.fullName}
-                                  </p>
+                                  <div className="hidden sm:block">
+                                    <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.home.tinyName}
+                                    </p>
+                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.home.shortName}
+                                    </p>
+                                    <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.home.fullName}
+                                    </p>
+                                  </div>
                                   <Image
                                     src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
                                     alt={match.home.tinyName}
@@ -641,7 +641,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <div className="flex-shrink-0 w-24 flex items-center justify-center">
+                                <div className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center">
                                   {match.matchStatus.key === 'FINISHED' ? (
                                     <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
                                       {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
@@ -651,11 +651,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                         </span>
                                       )}
                                     </p>
+                                  ) : (match.matchStatus.key === 'SCHEDULED' ? (
+                                    <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
+                                      - : -
+                                    </p>
                                   ) : (
                                     <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap text-center">
                                       {match.matchStatus.value}
                                     </p>
-                                  )}
+                                  ))}
                                 </div>
                                 <div className="flex-1 flex items-center gap-4">
                                   <Image
@@ -665,15 +669,17 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                                     height={28}
                                     className="object-contain flex-shrink-0"
                                   />
-                                  <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {match.away.tinyName}
-                                  </p>
-                                  <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {match.away.shortName}
-                                  </p>
-                                  <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {match.away.fullName}
-                                  </p>
+                                  <div className="hidden sm:block">
+                                    <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.away.tinyName}
+                                    </p>
+                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.away.shortName}
+                                    </p>
+                                    <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {match.away.fullName}
+                                    </p>
+                                  </div>
                                 </div>
                                 <div className="flex-shrink-0">
                                   <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
