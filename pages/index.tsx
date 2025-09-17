@@ -509,6 +509,31 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                       
                       if (dayFilteredMatches.length === 0) return null;
 
+                      // Group matches by tournament for this day
+                      const matchesByTournament = dayFilteredMatches.reduce((acc, match) => {
+                        const tournamentAlias = match.tournament.alias;
+                        if (!acc[tournamentAlias]) {
+                          // Find the full tournament data from the tournaments array
+                          const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
+                          acc[tournamentAlias] = {
+                            tournament: fullTournament || {
+                              _id: '',
+                              name: match.tournament.name,
+                              alias: match.tournament.alias,
+                              tinyName: match.tournament.alias,
+                              ageGroup: { key: '', value: '' },
+                              published: true,
+                              active: true,
+                              external: false,
+                              seasons: []
+                            },
+                            matches: []
+                          };
+                        }
+                        acc[tournamentAlias].matches.push(match);
+                        return acc;
+                      }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
+
                       return (
                         <div key={dayIndex}>
                           <div className="mb-6 mt-8">
@@ -524,8 +549,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                             </div>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {dayFilteredMatches.map((match) => (
-                              <MatchCard key={match._id} match={match} />
+                            {Object.values(matchesByTournament).map(({ tournament, matches }) => (
+                              <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
                             ))}
                           </div>
                         </div>
