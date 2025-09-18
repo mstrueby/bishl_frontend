@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import Image from 'next/image';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import RefMatchFilter from './RefMatchFilter';
@@ -37,10 +38,12 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
           <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
             <div className="mt-2 flex items-center text-sm text-gray-500">
               {descriptionLogoUrl && (
-                <img 
-                  src={descriptionLogoUrl} 
-                  alt="Team logo" 
-                  className="ml-1.5 mr-3 h-6 w-6 object-contain" 
+                <Image
+                  src={descriptionLogoUrl}
+                  alt="Team logo"
+                  width={24}
+                  height={24}
+                  className="ml-1.5 mr-3 h-6 w-6 object-contain"
                 />
               )}
               {description}
