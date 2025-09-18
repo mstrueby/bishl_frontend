@@ -530,7 +530,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                           const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
                           acc[tournamentAlias] = {
                             tournament: fullTournament || {
-                              _id: match.tournament._id || tournamentAlias,
+                              _id: tournamentAlias,
                               name: match.tournament.name,
                               alias: match.tournament.alias,
                               tinyName: match.tournament.alias,
