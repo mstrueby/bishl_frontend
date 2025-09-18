@@ -569,7 +569,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                             </div>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {Object.values(matchesByTournament).map(({ tournament, matches }) => (
+                            {Object.values(matchesByTournament)
+                              .sort((a, b) => {
+                                const sortOrderA = tournamentConfigs[a.tournament.alias]?.sortOrder || 999;
+                                const sortOrderB = tournamentConfigs[b.tournament.alias]?.sortOrder || 999;
+                                return sortOrderA - sortOrderB;
+                              })
+                              .map(({ tournament, matches }) => (
                               <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
                             ))}
                           </div>
