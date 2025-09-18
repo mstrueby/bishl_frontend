@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -104,8 +104,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
   const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
   const router = useRouter();
 
-  // Use upcoming matches if no today's matches
-  const displayMatches = todaysMatches.length > 0 ? todaysMatches : restOfWeekMatches.flatMap(day => day.matches);
+  // Use upcoming matches if no today's matches - memoize to prevent re-renders
+  const displayMatches = useMemo(() => {
+    return todaysMatches.length > 0 ? todaysMatches : restOfWeekMatches.flatMap(day => day.matches);
+  }, [todaysMatches, restOfWeekMatches]);
+
   const isShowingUpcoming = todaysMatches.length === 0 && restOfWeekMatches.length > 0;
 
   // Reset expanded tournaments when switching between display modes
@@ -125,7 +128,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
         query: currentQuery,
       }, undefined, { shallow: true });
     }
-  }, [router]);
+  }, [router.query.message, router]);
 
   // Filter matches by selected tournament
   useEffect(() => {
