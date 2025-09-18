@@ -37,40 +37,50 @@ interface CalendarProps {
   clubs: ClubValues[];
   tournaments: TournamentValues[];
 }
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   try {
+    // Only fetch matches for the current month initially
+    const now = new Date();
+    const startOfCurrentMonth = startOfMonth(now);
+    const endOfCurrentMonth = endOfMonth(now);
+
     const matchesRes = await axios(`${BASE_URL}/matches`, {
       params: {
         season: CURRENT_SEASON,
+        date_from: format(startOfCurrentMonth, 'yyyy-MM-dd'),
+        date_to: format(endOfCurrentMonth, 'yyyy-MM-dd'),
       }
     });
     const matchesData: Match[] = matchesRes.data;
+    
     const venuesRes = await axios(`${BASE_URL}/venues`, {
       params: {
         active: true,
       }
     });
     const venuesData: VenueValues[] = venuesRes.data
+    
     const clubsRes = await axios(`${BASE_URL}/clubs`, {
       params: {
         active: true
       }
     });
     const clubsData: ClubValues[] = clubsRes.data;
+    
     const tournamentsRes = await axios(`${BASE_URL}/tournaments`, {
       params: {
         active: true
       }
     });
     const tournamentsData: TournamentValues[] = tournamentsRes.data
+    
     return {
       props: {
         matches: matchesData,
         venues: venuesData,
         clubs: clubsData,
         tournaments: tournamentsData
-      },
-      revalidate: 60
+      }
     };
   } catch (error) {
     console.error(error);
@@ -128,14 +138,35 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
     return [...prevMonthDays, ...daysArray, ...nextMonthDays];
   })();
 
+  const fetchMatchesForMonth = async (month: Date) => {
+    try {
+      const startDate = startOfMonth(month);
+      const endDate = endOfMonth(month);
+      
+      const response = await axios(`${BASE_URL}/matches`, {
+        params: {
+          season: CURRENT_SEASON,
+          date_from: format(startDate, 'yyyy-MM-dd'),
+          date_to: format(endDate, 'yyyy-MM-dd'),
+        }
+      });
+      
+      setCalendarMatches(response.data);
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+    }
+  };
+
   const previousMonth = () => {
     const firstDayNextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
     setCurrentMonth(firstDayNextMonth);
+    fetchMatchesForMonth(firstDayNextMonth);
   };
 
   const nextMonth = () => {
     const firstDayNextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
     setCurrentMonth(firstDayNextMonth);
+    fetchMatchesForMonth(firstDayNextMonth);
   };
 
   const matchesByDate = useCallback((date: Date) => {
