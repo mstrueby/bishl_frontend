@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -27,7 +27,6 @@ interface PostsProps {
   jwt: string | null,
   posts: PostValues[],
   todaysMatches: Match[],
-  upcomingMatches: Match[],
   restOfWeekMatches: { date: string, dayName: string, matches: Match[] }[],
   tournaments: TournamentValues[]
 }
@@ -66,16 +65,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error("Error fetching today's matches:", error);
   }
 
-  // Fetch upcoming matches
-  let upcomingMatches = null;
-  try {
-    const upcomingRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/upcoming`, {
 
-    });
-    upcomingMatches = upcomingRes.data;
-  } catch (error) {
-    console.error("Error fetching upcoming matches:", error);
-  }
 
   // Fetch matches for rest of the week
   let restOfWeekMatches = null;
@@ -101,7 +91,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       jwt,
       posts: posts || [],
       todaysMatches: todaysMatches || [],
-      upcomingMatches: upcomingMatches || [],
       restOfWeekMatches: restOfWeekMatches || [],
       tournaments: tournaments || []
     }
@@ -109,7 +98,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 }
 
 
-const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcomingMatches = [], restOfWeekMatches = [], tournaments = [] }) => {
+const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restOfWeekMatches = [], tournaments = [] }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
@@ -118,6 +107,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
   // Use upcoming matches if no today's matches
   const displayMatches = todaysMatches.length > 0 ? todaysMatches : restOfWeekMatches.flatMap(day => day.matches);
   const isShowingUpcoming = todaysMatches.length === 0 && restOfWeekMatches.length > 0;
+
+  // Reset expanded tournaments when switching between display modes
+  useEffect(() => {
+    setExpandedTournaments(new Set());
+  }, [isShowingUpcoming]);
 
   useEffect(() => {
     if (router.query.message) {
@@ -260,10 +254,27 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     });
   };
 
+  // State to manage expanded tournaments
+  const [expandedTournaments, setExpandedTournaments] = useState<Set<string>>(new Set());
+
+  const toggleTournament = (tournamentAlias: string) => {
+    setExpandedTournaments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(tournamentAlias)) {
+        newSet.delete(tournamentAlias);
+      } else {
+        newSet.add(tournamentAlias);
+      }
+      return newSet;
+    });
+  };
+
   // TournamentCard component for grouped upcoming matches
   const TournamentCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
-    const [showAllMatches, setShowAllMatches] = useState(false);
     const tournamentConfig = tournamentConfigs[tournament.alias];
+    const isExpanded = expandedTournaments.has(tournament.alias);
+
+    // Sort matches
     const sortedMatches = matches.sort((a, b) => {
       // First sort by tournament sortOrder
       const tournamentConfigA = tournamentConfigs[a.tournament.alias];
@@ -280,8 +291,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
     });
 
     const hasMoreThanThree = sortedMatches.length > 3;
-    const displayedMatches = hasMoreThanThree && !showAllMatches 
-      ? sortedMatches.slice(0, 3) 
+    const displayedMatches = hasMoreThanThree && !isExpanded
+      ? sortedMatches.slice(0, 3)
       : sortedMatches;
 
     // Calculate minimum height to maintain consistent card sizes (3 matches + toggle button space)
@@ -316,10 +327,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
         {hasMoreThanThree && (
           <div className="p-2 border-t border-gray-900/5 bg-gray-50">
             <button
-              onClick={() => setShowAllMatches(!showAllMatches)}
+              onClick={() => toggleTournament(tournament.alias)}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center w-full"
             >
-              {showAllMatches ? (
+              {isExpanded ? (
                 <>
                   Weniger anzeigen
                   <ChevronUpIcon className="ml-1 h-3 w-3 text-indigo-600" />
@@ -466,7 +477,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
         {/* Today's Games or Upcoming Games Section */}
-        {(todaysMatches.length > 0 || upcomingMatches.length > 0) && (
+        {(todaysMatches.length > 0 || restOfWeekMatches.length > 0) && (
 
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mt-12 mb-8">
@@ -505,10 +516,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                   <div className="space-y-8">
                     {restOfWeekMatches.map((dayGroup, dayIndex) => {
                       // Filter matches for this day based on selected tournament
-                      const dayFilteredMatches = selectedTournament 
+                      const dayFilteredMatches = selectedTournament
                         ? dayGroup.matches.filter(match => match.tournament.alias === selectedTournament.alias)
                         : dayGroup.matches;
-                      
+
                       if (dayFilteredMatches.length === 0) return null;
 
                       // Group matches by tournament for this day
@@ -519,7 +530,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], upcom
                           const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
                           acc[tournamentAlias] = {
                             tournament: fullTournament || {
-                              _id: '',
+                              _id: match.tournament._id || tournamentAlias,
                               name: match.tournament.name,
                               alias: match.tournament.alias,
                               tinyName: match.tournament.alias,
