@@ -517,7 +517,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         </>
       )}
     </PDFDownloadLink>
-  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
+  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, match.tournament.name, match.round.name, match.home.fullName, match.away.fullName, sortRoster, rosterList]);
 
   {/** Debugging focus events
   useEffect(() => {
