@@ -39,9 +39,15 @@ interface CalendarProps {
 }
 export const getStaticProps: GetStaticProps = async () => {
   try {
+    // Calculate the 20th of last month
+    const currentDate = new Date();
+    const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20);
+    const dateFrom = format(lastMonth, 'yyyy-MM-dd');
+    
     const matchesRes = await axios(`${BASE_URL}/matches`, {
       params: {
         season: CURRENT_SEASON,
+        date_from: dateFrom,
       }
     });
     const matchesData: Match[] = matchesRes.data;
