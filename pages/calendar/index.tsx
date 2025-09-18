@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
@@ -143,9 +143,9 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
       const startDate = startOfMonth(month);
       const endDate = endOfMonth(month);
       
-      const response = await axios(`${BASE_URL}/matches`, {
+      const response = await axios(`${process.env.NEXT_PUBLIC_API_URL}/matches`, {
         params: {
-          season: CURRENT_SEASON,
+          season: process.env.NEXT_PUBLIC_CURRENT_SEASON,
           date_from: format(startDate, 'yyyy-MM-dd'),
           date_to: format(endDate, 'yyyy-MM-dd'),
         }
