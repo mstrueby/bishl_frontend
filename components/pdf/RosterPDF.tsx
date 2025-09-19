@@ -284,13 +284,9 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           // Rows 5-18: Forward players
           for (let i = 0; i < 14; i++) {
             const forward = forwards[i];
-            const isLastForwardRow = i === 13; // Last forward row (index 13 = 14th row)
 
             rows.push(
-              <View key={`row-forward-${i}`} style={[
-                styles.tableRow, 
-                isLastForwardRow && { borderBottomColor: '#333', borderBottomWidth: 1 }
-              ]}>
+              <View key={`row-forward-${i}`} style={styles.tableRow}>
                 <Text style={styles.numberCell}>{forward ? (forward.player.jerseyNumber || '') : ''}</Text>
                 <Text style={styles.positionCell}>{forward ? forward.playerPosition.key : ''}</Text>
                 <Text style={styles.nameCell}>
@@ -335,12 +331,8 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           {/* Staff Rows - Always show exactly 4 rows */}
           {Array.from({ length: 4 }, (_, index) => {
             const staffMember = staff && staff[index];
-            const isLastStaffRow = index === 3; // Last staff row (index 3 = 4th row)
             return (
-              <View key={index} style={[
-                styles.officialsTableRow,
-                isLastStaffRow && { borderBottomColor: '#333', borderBottomWidth: 1 }
-              ]}>
+              <View key={index} style={styles.officialsTableRow}>
                 <Text style={styles.officialsRoleCell}>
                   {staffMember && staffMember.role ? staffMember.role : ''}
                 </Text>
