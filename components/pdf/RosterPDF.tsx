@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
   footer: {
     position: 'absolute',
     bottom: 20,
-    left: 20,
-    right: 20,
+    left: 40,
+    right: 40,
     textAlign: 'center',
     color: '#666',
     borderTop: 1,
@@ -183,7 +183,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       {/* Team Name Section */}
-      <View style={{ marginBottom: 8, paddingVertical: 8 }}>
+      <View style={{ paddingVertical: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           {teamLogo && (
             <View style={{ marginRight: 10 }}>
@@ -199,13 +199,17 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
         </View>
       </View>
 
-      <View style={styles.table}>
-        <View style={[styles.tableRow, styles.tableHeader]}>
-          <Text style={styles.numberCell}>Nr.</Text>
-          <Text style={styles.positionCell}>Pos.</Text>
-          <Text style={styles.nameCell}>Name, Vorname</Text>
-          <Text style={styles.passCell}>Pass-Nr.</Text>
-        </View>
+      {/* Spieler Section */}
+      <View style={{ marginTop: 15, paddingTop: 10 }}>
+        <Text style={styles.teamOfficialsTitle}>Spieler</Text>
+
+        <View style={styles.table}>
+          <View style={[styles.tableRow, styles.tableHeader]}>
+            <Text style={styles.numberCell}>Nr.</Text>
+            <Text style={styles.positionCell}>Pos.</Text>
+            <Text style={styles.nameCell}>Name, Vorname</Text>
+            <Text style={styles.passCell}>Pass-Nr.</Text>
+          </View>
 
         {(() => {
           // Sort roster by position priority
@@ -277,9 +281,13 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           // Rows 5-18: Forward players
           for (let i = 0; i < 14; i++) {
             const forward = forwards[i];
+            const isLastRow = i === 13; // Last forward row
 
             rows.push(
-              <View key={`row-forward-${i}`} style={styles.tableRow}>
+              <View key={`row-forward-${i}`} style={[
+                styles.tableRow, 
+                isLastRow && { borderBottomColor: '#333', borderBottomWidth: 1 }
+              ]}>
                 <Text style={styles.numberCell}>{forward ? (forward.player.jerseyNumber || '-') : '-'}</Text>
                 <Text style={styles.positionCell}>{forward ? forward.playerPosition.key : ''}</Text>
                 <Text style={styles.nameCell}>
@@ -292,6 +300,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
           return rows;
         })()}
+        </View>
       </View>
 
       {/* Team Officials Section */}
@@ -323,8 +332,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           {/* Staff Rows - Always show exactly 4 rows */}
           {Array.from({ length: 4 }, (_, index) => {
             const staffMember = staff && staff[index];
+            const isLastRow = index === 3; // Last staff row
             return (
-              <View key={index} style={styles.officialsTableRow}>
+              <View key={index} style={[
+                styles.officialsTableRow,
+                isLastRow && { borderBottomColor: '#333', borderBottomWidth: 1 }
+              ]}>
                 <Text style={styles.officialsRoleCell}>
                   {staffMember && staffMember.role ? staffMember.role : ''}
                 </Text>
