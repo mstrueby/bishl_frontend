@@ -133,11 +133,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   officialsNameCell: {
-    width: '60%',
+    width: '50%',
     paddingHorizontal: 4,
   },
   officialsLicenceCell: {
-    width: '20%',
+    width: '30%',
     paddingHorizontal: 4,
     textAlign: 'center',
   }
