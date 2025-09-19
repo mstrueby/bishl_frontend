@@ -534,6 +534,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           awayTeam={match.away}
           coach={coachData}
           staff={staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim())}
+          userEmail={user?.email || ''} // Pass user email here
         />
       }
       fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
@@ -546,7 +547,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         </>
       )}
     </PDFDownloadLink>
-  ), [teamFlag, match.startDate, match.venue.name, match.tournament.name, match.round.name, match.home, match.away, team.alias, team.logoUrl, rosterList, coachData, staffData]);
+  ), [teamFlag, match.startDate, match.venue.name, match.tournament.name, match.round.name, match.home, match.away, team.alias, team.logoUrl, rosterList, coachData, staffData, user?.email]);
 
   {/** Debugging focus events
   useEffect(() => {
@@ -1419,7 +1420,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault();
-                  // Focus the position select dropdown when Enter or Tab is pressed
+                  // Focus the player select for next player addition
                   if (playerSelectRef.current) {
                     playerSelectRef.current.focus();
                   }
@@ -1660,11 +1661,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/* Double Jersey No check indicator */}
             <div className="flex items-center mt-4">
               <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
-                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                ) : (
-                  <CheckCircleIcon className="h-6 w-6" />
-                )}
+                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
+                  ? 'Doppelte Rückennummern vorhanden'
+                  : 'Keine doppelten Rückennummern'}
               </div>
               <span className="ml-2 text-sm">
                 {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
