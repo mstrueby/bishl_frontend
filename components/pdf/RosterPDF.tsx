@@ -168,11 +168,11 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
+        <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
         <PDFImage
           style={styles.bishlLogo}
           src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.png"
         />
-        <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
       </View>
       <View style={styles.matchPanel}>
         <View>
