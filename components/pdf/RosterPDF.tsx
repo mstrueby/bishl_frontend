@@ -89,12 +89,14 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 40,
     right: 40,
-    textAlign: 'center',
     color: '#666',
     borderTop: 1,
     borderColor: '#333',
     paddingTop: 8,
     fontSize: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   teamOfficials: {
     marginTop: 15,
@@ -131,11 +133,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   officialsNameCell: {
-    width: '60%',
+    width: '50%',
     paddingHorizontal: 4,
   },
   officialsLicenceCell: {
-    width: '20%',
+    width: '30%',
     paddingHorizontal: 4,
     textAlign: 'center',
   }
@@ -162,9 +164,10 @@ interface RosterPDFProps {
     lastName: string;
     role: string;
   }[];
+  userEmail?: string;
 }
 
-const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam, coach, staff }: RosterPDFProps) => (
+const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam, coach, staff, userEmail }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -240,12 +243,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           const captain = captains[0];
           rows.push(
             <View key="row-1" style={styles.tableRow}>
-              <Text style={styles.numberCell}>{captain ? (captain.player.jerseyNumber || '-') : '-'}</Text>
+              <Text style={styles.numberCell}>{captain ? (captain.player.jerseyNumber || '') : ''}</Text>
               <Text style={styles.positionCell}>{captain ? 'C' : ''}</Text>
               <Text style={styles.nameCell}>
                 {captain ? `${captain.player.lastName}, ${captain.player.firstName}${captain.called ? ' (H)' : ''}` : ''}
               </Text>
-              <Text style={styles.passCell}>{captain ? (captain.passNumber || '-') : '-'}</Text>
+              <Text style={styles.passCell}>{captain ? (captain.passNumber || '') : ''}</Text>
             </View>
           );
 
@@ -253,12 +256,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           const assistant = assistants[0];
           rows.push(
             <View key="row-2" style={styles.tableRow}>
-              <Text style={styles.numberCell}>{assistant ? (assistant.player.jerseyNumber || '-') : '-'}</Text>
+              <Text style={styles.numberCell}>{assistant ? (assistant.player.jerseyNumber || '') : ''}</Text>
               <Text style={styles.positionCell}>{assistant ? 'A' : ''}</Text>
               <Text style={styles.nameCell}>
                 {assistant ? `${assistant.player.lastName}, ${assistant.player.firstName}${assistant.called ? ' (H)' : ''}` : ''}
               </Text>
-              <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '-') : '-'}</Text>
+              <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '') : ''}</Text>
             </View>
           );
 
@@ -268,12 +271,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
             rows.push(
               <View key={`row-goalie-${i}`} style={styles.tableRow}>
-                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '') : ''}</Text>
                 <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
                 <Text style={styles.nameCell}>
                   {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
                 </Text>
-                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '-') : '-'}</Text>
+                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '') : ''}</Text>
               </View>
             );
           }
@@ -356,6 +359,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
       <View style={styles.footer}>
         <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</Text>
+        <Text>{userEmail || ''}</Text>
       </View>
     </Page>
   </Document>
