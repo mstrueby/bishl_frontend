@@ -1745,9 +1745,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         {/* Staff Section */}
         <div className="py-4">
           <h4 className="text-md font-medium text-gray-900 mb-4">Betreuer (max. 4)</h4>
-          <div className="sm:p-6 space-y-12 sm:space-y-6 sm:border sm:rounded-md sm:shadow">
+          <div className="sm:p-6 space-y-12 sm:space-y-6 sm:border sm:rounded-md sm:shadow divide-y divide-gray-200">
             {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).map((staff, index) => (
-              <div key={index} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div key={index} className={`grid grid-cols-1 gap-4 sm:grid-cols-3 ${index > 0 ? 'pt-6' : ''}`}>
                 <div>
                   <label htmlFor={`staff-${index}-firstName`} className="block text-sm font-medium text-gray-700 mb-1">
                     Vorname
