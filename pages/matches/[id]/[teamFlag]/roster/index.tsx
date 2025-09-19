@@ -532,6 +532,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           round={match.round.name}
           homeTeam={match.home}
           awayTeam={match.away}
+          coach={coachData}
+          staff={staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim())}
         />
       }
       fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
