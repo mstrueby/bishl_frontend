@@ -1802,8 +1802,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               </div>
             ))}
 
-            {/* Add Staff Button */}
-            {staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length < 4 && (
+            {/* Add Staff Button - only show if less than 4 staff rows are displayed */}
+            {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).length < 4 && (
               <div className="flex justify-center py-4">
                 <button
                   type="button"
