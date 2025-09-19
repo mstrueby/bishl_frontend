@@ -31,12 +31,12 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
   return (
     <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-6">
       <div className="min-w-0 flex-1">
-        <h2 className="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+        <h2 className="text-2xl font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
           {title}
         </h2>
         {description && (
           <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
-            <div className="mt-2 flex items-center text-sm text-gray-500">
+            <div className="mt-2flex items-center text-sm text-gray-500">
               {descriptionLogoUrl && (
                 <Image
                   src={descriptionLogoUrl}
@@ -46,7 +46,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
                   className="ml-1.5 mr-3 h-6 w-6 object-contain"
                 />
               )}
-              {description}
+              <span className="ml-2">{description}</span>
             </div>
           </div>
         )}
