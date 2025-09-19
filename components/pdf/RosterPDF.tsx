@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
 import { RosterPlayer } from '../../types/MatchValues';
+import { Match, Team } from '../../types/MatchValues';
 
 const styles = StyleSheet.create({
   page: {
@@ -101,18 +102,19 @@ const styles = StyleSheet.create({
 });
 
 interface RosterPDFProps {
-  teamName: string;
+  teamFlag: string;
+  
   matchDate: string;
   venue: string;
   roster: RosterPlayer[];
   tournament: string;
   round: string;
-  homeTeam: string;
-  awayTeam: string;
+  homeTeam: Team;
+  awayTeam: Team;
   teamLogo?: string;
 }
 
-const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam }: RosterPDFProps) => (
+const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -124,16 +126,8 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
       </View>
       <View style={styles.matchInfo}>
         <View style={[styles.headerContent, { flexDirection: 'row', alignItems: 'center' }]}>
-          {teamLogo && (
-            <View style={{ width: 80, marginRight: 20 }}>
-              <PDFImage
-                style={styles.logo}
-                src={teamLogo}
-              />
-            </View>
-          )}
           <View style={styles.teamInfo}>
-            <Text style={styles.title}>{homeTeam} - {awayTeam}</Text>
+            <Text style={styles.title}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
             {tournament && <Text style={styles.subtitle}>{tournament} / {round} / {matchDate}</Text>}
             <Text style={styles.subtitle}>{venue}</Text>
           </View>
@@ -146,13 +140,13 @@ const RosterPDF = ({ teamName, matchDate, venue, roster, teamLogo, tournament, r
           {teamLogo && (
             <View style={{ marginRight: 15 }}>
               <PDFImage
-                style={{ width: 60, height: 60, objectFit: 'contain' }}
+                style={{ width: 30, height: 30, objectFit: 'contain' }}
                 src={teamLogo}
               />
             </View>
           )}
-          <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>
-            {teamName}
+          <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'left' }}>
+            {teamFlag === 'home' ? `${homeTeam.fullName} / ${homeTeam.name}` : `${awayTeam.fullName} / ${awayTeam.name}`}
           </Text>
         </View>
       </View>
