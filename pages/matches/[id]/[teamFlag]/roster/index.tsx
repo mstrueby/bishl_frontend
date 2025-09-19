@@ -1693,13 +1693,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       </div>
 
       {/* Coach and Staff Section */}
-      <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Teamoffizielle</h2>
+      <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900 border-b pb-2">Teamoffizielle</h2>
 
       {/* Coach Section */}
-      <div className="mt-8">
+      <div className="mt-2">
         <div className="py-4">
           <h3 className="text-md font-medium text-gray-900 mb-4">Trainer</h3>
-          <div className="sm:px-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="px-6 pt-4 pb-6 grid grid-cols-1 gap-4 sm:grid-cols-3 border rounded-md shadow bg-gray-50">
             <div>
               <label htmlFor="coach-firstName" className="block text-sm font-medium text-gray-700 mb-1">
                 Vorname
@@ -1710,7 +1710,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 value={coachData.firstName}
                 onChange={(e) => setCoachData(prev => ({ ...prev, firstName: e.target.value }))}
                 className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Vorname"
               />
             </div>
             <div>
@@ -1723,7 +1722,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 value={coachData.lastName}
                 onChange={(e) => setCoachData(prev => ({ ...prev, lastName: e.target.value }))}
                 className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Nachname"
               />
             </div>
             <div>
@@ -1736,7 +1734,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 value={coachData.licence}
                 onChange={(e) => setCoachData(prev => ({ ...prev, licence: e.target.value }))}
                 className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Lizenz"
               />
             </div>
           </div>
@@ -1745,9 +1742,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         {/* Staff Section */}
         <div className="py-4">
           <h4 className="text-md font-medium text-gray-900 mb-4">Betreuer (max. 4)</h4>
-          <div className="space-y-12 sm:space-y-6 sm:border sm:rounded-md sm:shadow divide-y divide-gray-200">
+          <div className="border rounded-md shadow bg-gray-50 divide-y divide-gray-200">
             {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).map((staff, index) => (
-              <div key={index} className={`grid grid-cols-1 gap-4 sm:grid-cols-3 pt-4 px-6`}>
+              <div key={index} className={`grid grid-cols-1 gap-4 sm:grid-cols-3 pt-4 pb-6 px-6`}>
                 <div>
                   <label htmlFor={`staff-${index}-firstName`} className="block text-sm font-medium text-gray-700 mb-1">
                     Vorname
@@ -1762,7 +1759,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       setStaffData(newStaffData);
                     }}
                     className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="Vorname"
                   />
                 </div>
                 <div>
@@ -1779,7 +1775,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       setStaffData(newStaffData);
                     }}
                     className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="Nachname"
                   />
                 </div>
                 <div>
@@ -1796,7 +1791,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       setStaffData(newStaffData);
                     }}
                     className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="z.B. Betreuer, Physiotherapeut"
                   />
                 </div>
               </div>
@@ -1838,8 +1832,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         return matchDate.toDateString() === otherMatchDate.toDateString();
       }).length > 0 && (
           <>
-            <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-            <div className="bg-white  mb-6">
+            <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900 border-b pb-2">Weitere Spiele am gleichen Spieltag</h2>
+            <div className="bg-white mb-6 px-6">
               {match.matchday && match.round && match.season && match.tournament && (
                 <ul className="divide-y divide-gray-200">
                   {matches
@@ -1853,7 +1847,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                       return matchDate.toDateString() === otherMatchDate.toDateString();
                     })
                     .map((m) => (
-                      <li key={m._id} className="px-6 py-4">
+                      <li key={m._id} className="px-4 py-4">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center space-x-4">
                             <input
@@ -1914,7 +1908,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
 
       {/* Publish Roster Checkbox */}
-      <div className="flex items-center justify-between mt-8 p-6">
+      <div className="flex items-center justify-between mt-12 p-6 border-t">
         <div className="flex items-center">
           <div className="relative inline-flex items-center">
             <div className="flex items-center h-6">
