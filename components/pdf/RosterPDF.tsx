@@ -89,12 +89,14 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 40,
     right: 40,
-    textAlign: 'center',
     color: '#666',
     borderTop: 1,
     borderColor: '#333',
     paddingTop: 8,
     fontSize: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   teamOfficials: {
     marginTop: 15,
@@ -162,9 +164,10 @@ interface RosterPDFProps {
     lastName: string;
     role: string;
   }[];
+  userEmail?: string;
 }
 
-const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam, coach, staff }: RosterPDFProps) => (
+const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam, coach, staff, userEmail }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -356,6 +359,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
       <View style={styles.footer}>
         <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</Text>
+        <Text>{userEmail || ''}</Text>
       </View>
     </Page>
   </Document>
