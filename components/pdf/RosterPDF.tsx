@@ -177,7 +177,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       <View style={styles.matchPanel}>
         <View>
           <Text style={styles.matchTitle}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
-          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {matchDate}</Text>}
+          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {matchDate} / {new Date(matchDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>}
           <Text style={styles.matchInfo}>{venue}</Text>
         </View>
       </View>
@@ -355,7 +355,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       <View style={styles.footer}>
-        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</Text>
+        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</Text>
       </View>
     </Page>
   </Document>
