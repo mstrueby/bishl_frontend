@@ -532,6 +532,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           round={match.round.name}
           homeTeam={match.home}
           awayTeam={match.away}
+          coach={coachData}
+          staff={staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim())}
         />
       }
       fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
@@ -544,7 +546,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         </>
       )}
     </PDFDownloadLink>
-  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, match.tournament.name, match.round.name, match.home.fullName, match.away.fullName, sortRoster, rosterList]);
+  ), [teamFlag, match.startDate, match.venue.name, match.tournament.name, match.round.name, match.home, match.away, team.alias, team.logoUrl, rosterList, coachData, staffData]);
 
   {/** Debugging focus events
   useEffect(() => {

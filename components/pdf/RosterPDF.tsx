@@ -4,55 +4,51 @@ import { Match, Team } from '../../types/MatchValues';
 
 const styles = StyleSheet.create({
   page: {
-    padding: 30,
-    fontSize: 12,
+    padding: 20,
+    fontSize: 10,
     fontFamily: 'Helvetica',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
   },
   bishlLogo: {
-    width: 65,
-    height: 60,
+    width: 50,
+    height: 45,
   },
   pageTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
   },
-  matchInfo: {
-    marginBottom: 20,
-    borderBottom: 2,
-    paddingBottom: 15,
+  matchPanel: {
+    marginBottom: 15,
+    borderBottom: 1,
+    paddingBottom: 10,
     borderColor: '#333',
-  },
-  headerContent: {
-    width: '100%',
+    fontSize: 12,
+    flexDirection: 'row', 
+    alignItems: 'center',
   },
   logo: {
     width: 80,
     height: 80,
     objectFit: 'contain',
   },
-  teamInfo: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 14,
+  matchTitle: {
     fontWeight: 'bold',
     marginBottom: 5,
-  },
-  subtitle: {
     fontSize: 14,
+  },
+  matchInfo: {
     color: '#666',
     marginBottom: 3,
   },
   table: {
     width: '100%',
-    marginTop: 20,
+    marginTop: 8,
   },
   tableRow: {
     flexDirection: 'row',
@@ -60,50 +56,136 @@ const styles = StyleSheet.create({
     borderBottomColor: '#DDDDDD',
     borderBottomStyle: 'solid',
     alignItems: 'center',
-    minHeight: 22,
-    paddingVertical: 3,
+    minHeight: 18,
+    paddingVertical: 2,
   },
   tableHeader: {
     backgroundColor: '#E5E7EB',
     borderBottomColor: '#333',
-    borderBottomWidth: 2,
+    borderBottomWidth: 1,
     fontWeight: 'bold',
   },
   numberCell: {
     width: '12%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     textAlign: 'center',
   },
   positionCell: {
     width: '15%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
+    textAlign: 'center',
   },
   nameCell: {
     width: '53%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   passCell: {
     width: '20%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     textAlign: 'center',
   },
   footer: {
     position: 'absolute',
-    bottom: 30,
-    left: 30,
-    right: 30,
+    bottom: 20,
+    left: 20,
+    right: 20,
     textAlign: 'center',
     color: '#666',
     borderTop: 1,
-    borderColor: '#999',
+    borderColor: '#333',
+    paddingTop: 8,
+    fontSize: 8,
+  },
+  teamOfficials: {
+    marginTop: 15,
     paddingTop: 10,
+    borderTop: 1,
+    borderColor: '#DDDDDD',
+  },
+  teamOfficialsTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  officialsTable: {
+    width: '100%',
+  },
+  coachSection: {
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottom: 1,
+    borderColor: '#E5E5E5',
+  },
+  coachSectionTitle: {
     fontSize: 10,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  coachRow: {
+    flexDirection: 'row',
+    marginBottom: 2,
+  },
+  coachLabel: {
+    width: '20%',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+  coachValue: {
+    width: '80%',
+    fontSize: 9,
+  },
+  staffSection: {
+    marginTop: 8,
+  },
+  staffSectionTitle: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  staffTable: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+  },
+  staffTableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#DDDDDD',
+    paddingVertical: 2,
+    minHeight: 18,
+  },
+  staffTableHeader: {
+    backgroundColor: '#F3F4F6',
+    fontWeight: 'bold',
+  },
+  staffNameHeader: {
+    width: '60%',
+    fontSize: 10,
+    fontWeight: 'bold',
+    paddingHorizontal: 4,
+  },
+  staffRoleHeader: {
+    width: '40%',
+    fontSize: 10,
+    fontWeight: 'bold',
+    paddingHorizontal: 4,
+  },
+  staffNameCell: {
+    width: '60%',
+    fontSize: 10,
+    paddingHorizontal: 4,
+  },
+  staffRoleCell: {
+    width: '40%',
+    fontSize: 10,
+    paddingHorizontal: 4,
   }
 });
 
 interface RosterPDFProps {
   teamFlag: string;
-  
+
   matchDate: string;
   venue: string;
   roster: RosterPlayer[];
@@ -112,9 +194,19 @@ interface RosterPDFProps {
   homeTeam: Team;
   awayTeam: Team;
   teamLogo?: string;
+  coach?: {
+    firstName?: string;
+    lastName?: string;
+    licence?: string;
+  };
+  staff?: {
+    firstName: string;
+    lastName: string;
+    role: string;
+  }[];
 }
 
-const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam }: RosterPDFProps) => (
+const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, round, homeTeam, awayTeam, coach, staff }: RosterPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -124,28 +216,26 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
         />
         <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
       </View>
-      <View style={styles.matchInfo}>
-        <View style={[styles.headerContent, { flexDirection: 'row', alignItems: 'center' }]}>
-          <View style={styles.teamInfo}>
-            <Text style={styles.title}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
-            {tournament && <Text style={styles.subtitle}>{tournament} / {round} / {matchDate}</Text>}
-            <Text style={styles.subtitle}>{venue}</Text>
-          </View>
+      <View style={styles.matchPanel}>
+        <View>
+          <Text style={styles.matchTitle}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
+          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {matchDate}</Text>}
+          <Text style={styles.matchInfo}>{venue}</Text>
         </View>
       </View>
 
       {/* Team Name Section */}
-      <View style={{ marginBottom: 10, paddingVertical: 15 }}>
+      <View style={{ marginBottom: 8, paddingVertical: 8 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           {teamLogo && (
-            <View style={{ marginRight: 15 }}>
+            <View style={{ marginRight: 10 }}>
               <PDFImage
-                style={{ width: 30, height: 30, objectFit: 'contain' }}
+                style={{ width: 25, height: 25, objectFit: 'contain' }}
                 src={teamLogo}
               />
             </View>
           )}
-          <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'left' }}>
+          <Text style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'left' }}>
             {teamFlag === 'home' ? `${homeTeam.fullName} / ${homeTeam.name}` : `${awayTeam.fullName} / ${awayTeam.name}`}
           </Text>
         </View>
@@ -154,8 +244,8 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
           <Text style={styles.numberCell}>Nr.</Text>
-          <Text style={styles.positionCell}>Position</Text>
-          <Text style={styles.nameCell}>Name</Text>
+          <Text style={styles.positionCell}>Pos.</Text>
+          <Text style={styles.nameCell}>Name, Vorname</Text>
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
 
@@ -244,6 +334,63 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
           return rows;
         })()}
+      </View>
+
+      {/* Team Officials Section */}
+      <View style={styles.teamOfficials}>
+        <Text style={styles.teamOfficialsTitle}>Team Officials</Text>
+
+        {/* Officials Table */}
+        <View style={styles.officialsTable}>
+          {/* Coach Section */}
+          <View style={styles.coachSection}>
+            <Text style={styles.coachSectionTitle}>Coach</Text>
+            <View style={styles.coachRow}>
+              <Text style={styles.coachLabel}>Name:</Text>
+              <Text style={styles.coachValue}>
+                {coach && (coach.firstName || coach.lastName)
+                  ? [coach.firstName, coach.lastName].filter(Boolean).join(' ')
+                  : ''
+                }
+              </Text>
+            </View>
+            <View style={styles.coachRow}>
+              <Text style={styles.coachLabel}>Lizenz:</Text>
+              <Text style={styles.coachValue}>
+                {coach && coach.licence ? coach.licence : ''}
+              </Text>
+            </View>
+          </View>
+
+          {/* Staff Section */}
+          <View style={styles.staffSection}>
+            <View style={styles.table}>
+              {/* Staff Table Header */}
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <Text style={styles.staffRoleHeader}>Funktion</Text>
+                <Text style={styles.staffNameHeader}>Name, Vorname</Text>
+              </View>
+
+              {/* Always show exactly 4 staff rows */}
+              {Array.from({ length: 4 }, (_, index) => {
+                const staffMember = staff && staff[index];
+                return (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.staffRoleCell}>
+                      {staffMember && staffMember.role ? staffMember.role : ''}
+                    </Text>
+                    <Text style={styles.staffNameCell}>
+                      {staffMember && (staffMember.lastName || staffMember.firstName)
+                        ? [staffMember.lastName, staffMember.firstName].filter(Boolean).join(', ')
+                        : ''
+                      }
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        </View>
       </View>
 
       <View style={styles.footer}>
