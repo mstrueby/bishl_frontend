@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     flex: 1,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   matchPanel: {
     marginBottom: 15,
@@ -177,7 +177,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       <View style={styles.matchPanel}>
         <View>
           <Text style={styles.matchTitle}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
-          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {new Date(matchDate).toLocaleDateString('de-DE')} / {new Date(matchDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>}
+          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {new Date(matchDate).toLocaleDateString('de-DE')}, {new Date(matchDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>}
           <Text style={styles.matchInfo}>{venue}</Text>
         </View>
       </View>
@@ -200,7 +200,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       {/* Spieler Section */}
-      <View style={{ marginTop: 15, paddingTop: 10 }}>
+      <View style={{ marginTop: 10, paddingTop: 10 }}>
         <Text style={styles.teamOfficialsTitle}>Spieler</Text>
 
         <View style={styles.table}>
