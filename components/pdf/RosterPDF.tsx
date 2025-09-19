@@ -23,36 +23,32 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-  matchInfo: {
+  matchPanel: {
     marginBottom: 15,
-    borderBottom: 2,
+    borderBottom: 1,
     paddingBottom: 10,
     borderColor: '#333',
-  },
-  headerContent: {
-    width: '100%',
+    fontSize: 12,
+    flexDirection: 'row', 
+    alignItems: 'center',
   },
   logo: {
     width: 80,
     height: 80,
     objectFit: 'contain',
   },
-  teamInfo: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 14,
+  matchTitle: {
     fontWeight: 'bold',
     marginBottom: 5,
-  },
-  subtitle: {
     fontSize: 14,
+  },
+  matchInfo: {
     color: '#666',
     marginBottom: 3,
   },
   table: {
     width: '100%',
-    marginTop: 10,
+    marginTop: 8,
   },
   tableRow: {
     flexDirection: 'row',
@@ -60,31 +56,32 @@ const styles = StyleSheet.create({
     borderBottomColor: '#DDDDDD',
     borderBottomStyle: 'solid',
     alignItems: 'center',
-    minHeight: 22,
-    paddingVertical: 3,
+    minHeight: 18,
+    paddingVertical: 2,
   },
   tableHeader: {
     backgroundColor: '#E5E7EB',
     borderBottomColor: '#333',
-    borderBottomWidth: 2,
+    borderBottomWidth: 1,
     fontWeight: 'bold',
   },
   numberCell: {
     width: '12%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     textAlign: 'center',
   },
   positionCell: {
     width: '15%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
+    textAlign: 'center',
   },
   nameCell: {
     width: '53%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   passCell: {
     width: '20%',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     textAlign: 'center',
   },
   footer: {
@@ -95,7 +92,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#666',
     borderTop: 1,
-    borderColor: '#999',
+    borderColor: '#333',
     paddingTop: 8,
     fontSize: 8,
   },
@@ -155,8 +152,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#DDDDDD',
-    paddingVertical: 3,
-    paddingHorizontal: 4,
+    paddingVertical: 2,
     minHeight: 18,
   },
   staffTableHeader: {
@@ -165,27 +161,31 @@ const styles = StyleSheet.create({
   },
   staffNameHeader: {
     width: '60%',
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 'bold',
+    paddingHorizontal: 4,
   },
   staffRoleHeader: {
     width: '40%',
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 'bold',
+    paddingHorizontal: 4,
   },
   staffNameCell: {
     width: '60%',
-    fontSize: 8,
+    fontSize: 10,
+    paddingHorizontal: 4,
   },
   staffRoleCell: {
     width: '40%',
-    fontSize: 8,
+    fontSize: 10,
+    paddingHorizontal: 4,
   }
 });
 
 interface RosterPDFProps {
   teamFlag: string;
-  
+
   matchDate: string;
   venue: string;
   roster: RosterPlayer[];
@@ -216,13 +216,11 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
         />
         <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
       </View>
-      <View style={styles.matchInfo}>
-        <View style={[styles.headerContent, { flexDirection: 'row', alignItems: 'center' }]}>
-          <View style={styles.teamInfo}>
-            <Text style={styles.title}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
-            {tournament && <Text style={styles.subtitle}>{tournament} / {round} / {matchDate}</Text>}
-            <Text style={styles.subtitle}>{venue}</Text>
-          </View>
+      <View style={styles.matchPanel}>
+        <View>
+          <Text style={styles.matchTitle}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
+          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {matchDate}</Text>}
+          <Text style={styles.matchInfo}>{venue}</Text>
         </View>
       </View>
 
@@ -246,8 +244,8 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
           <Text style={styles.numberCell}>Nr.</Text>
-          <Text style={styles.positionCell}>Position</Text>
-          <Text style={styles.nameCell}>Name</Text>
+          <Text style={styles.positionCell}>Pos.</Text>
+          <Text style={styles.nameCell}>Name, Vorname</Text>
           <Text style={styles.passCell}>Pass-Nr.</Text>
         </View>
 
@@ -341,7 +339,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       {/* Team Officials Section */}
       <View style={styles.teamOfficials}>
         <Text style={styles.teamOfficialsTitle}>Team Officials</Text>
-        
+
         {/* Officials Table */}
         <View style={styles.officialsTable}>
           {/* Coach Section */}
@@ -350,7 +348,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
             <View style={styles.coachRow}>
               <Text style={styles.coachLabel}>Name:</Text>
               <Text style={styles.coachValue}>
-                {coach && (coach.firstName || coach.lastName) 
+                {coach && (coach.firstName || coach.lastName)
                   ? [coach.firstName, coach.lastName].filter(Boolean).join(' ')
                   : ''
                 }
@@ -366,27 +364,26 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
           {/* Staff Section */}
           <View style={styles.staffSection}>
-            <Text style={styles.staffSectionTitle}>Staff</Text>
-            <View style={styles.staffTable}>
+            <View style={styles.table}>
               {/* Staff Table Header */}
-              <View style={[styles.staffTableRow, styles.staffTableHeader]}>
-                <Text style={styles.staffNameHeader}>Name</Text>
-                <Text style={styles.staffRoleHeader}>Position</Text>
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <Text style={styles.staffRoleHeader}>Funktion</Text>
+                <Text style={styles.staffNameHeader}>Name, Vorname</Text>
               </View>
-              
+
               {/* Always show exactly 4 staff rows */}
               {Array.from({ length: 4 }, (_, index) => {
                 const staffMember = staff && staff[index];
                 return (
-                  <View key={index} style={styles.staffTableRow}>
-                    <Text style={styles.staffNameCell}>
-                      {staffMember && (staffMember.firstName || staffMember.lastName)
-                        ? [staffMember.firstName, staffMember.lastName].filter(Boolean).join(' ')
-                        : ''
-                      }
-                    </Text>
+                  <View key={index} style={styles.tableRow}>
                     <Text style={styles.staffRoleCell}>
                       {staffMember && staffMember.role ? staffMember.role : ''}
+                    </Text>
+                    <Text style={styles.staffNameCell}>
+                      {staffMember && (staffMember.lastName || staffMember.firstName)
+                        ? [staffMember.lastName, staffMember.firstName].filter(Boolean).join(', ')
+                        : ''
+                      }
                     </Text>
                   </View>
                 );
