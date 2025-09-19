@@ -1417,7 +1417,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault();
-                  // Focus the player select for next player addition
+                  // Focus the position select dropdown when Enter or Tab is pressed
                   if (playerSelectRef.current) {
                     playerSelectRef.current.focus();
                   }
@@ -1658,9 +1658,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             {/* Double Jersey No check indicator */}
             <div className="flex items-center mt-4">
               <div className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
-                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
-                  ? 'Doppelte Rückennummern vorhanden'
-                  : 'Keine doppelten Rückennummern'}
+                {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? (
+                  <ExclamationCircleIcon className="h-6 w-6" />
+                ) : (
+                  <CheckCircleIcon className="h-6 w-6" />
+                )}
               </div>
               <span className="ml-2 text-sm">
                 {rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)
@@ -1741,7 +1743,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         </div>
 
         {/* Staff Section */}
-        <div className="px-6 py-4 border-t border-gray-200">
+        <div className="py-4">
           <h4 className="text-md font-medium text-gray-900 mb-4">Betreuer (max. 4)</h4>
           <div className="sm:p-6 space-y-12 sm:space-y-6 sm:border sm:rounded-md sm:shadow">
             {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).map((staff, index) => (
