@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     flex: 1,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   matchPanel: {
     marginBottom: 15,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
 interface RosterPDFProps {
   teamFlag: string;
 
-  matchDate: string;
+  matchDate: Date | string;
   venue: string;
   roster: RosterPlayer[];
   tournament: string;
@@ -168,16 +168,16 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
+        <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
         <PDFImage
           style={styles.bishlLogo}
           src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.png"
         />
-        <Text style={styles.pageTitle}>Mannschaftsaufstellung</Text>
       </View>
       <View style={styles.matchPanel}>
         <View>
           <Text style={styles.matchTitle}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
-          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {matchDate}</Text>}
+          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {new Date(matchDate).toLocaleDateString('de-DE')}, {new Date(matchDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>}
           <Text style={styles.matchInfo}>{venue}</Text>
         </View>
       </View>
@@ -200,7 +200,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       {/* Spieler Section */}
-      <View style={{ marginTop: 15, paddingTop: 10 }}>
+      <View style={{ marginTop: 10, paddingTop: 10 }}>
         <Text style={styles.teamOfficialsTitle}>Spieler</Text>
 
         <View style={styles.table}>
@@ -355,7 +355,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       <View style={styles.footer}>
-        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</Text>
+        <Text>Erstellt am {new Date().toLocaleDateString('de-DE')} um {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</Text>
       </View>
     </Page>
   </Document>
