@@ -524,7 +524,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       document={
         <RosterPDF
           teamFlag={teamFlag}
-          matchDate={new Date(match.startDate).toLocaleDateString()}
+          matchDate={match.startDate}
           venue={match.venue.name}
           roster={sortRoster(rosterList)}
           teamLogo={team.logoUrl}

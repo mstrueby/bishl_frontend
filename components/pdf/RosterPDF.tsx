@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
 interface RosterPDFProps {
   teamFlag: string;
 
-  matchDate: string;
+  matchDate: Date | string;
   venue: string;
   roster: RosterPlayer[];
   tournament: string;
@@ -177,7 +177,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       <View style={styles.matchPanel}>
         <View>
           <Text style={styles.matchTitle}>{homeTeam.fullName} - {awayTeam.fullName}</Text>
-          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {matchDate} / {new Date(matchDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>}
+          {tournament && <Text style={styles.matchInfo}>{tournament} / {round} / {new Date(matchDate).toLocaleDateString('de-DE')} / {new Date(matchDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>}
           <Text style={styles.matchInfo}>{venue}</Text>
         </View>
       </View>
