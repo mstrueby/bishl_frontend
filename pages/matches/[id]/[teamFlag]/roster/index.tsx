@@ -413,6 +413,21 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
+  const [coachData, setCoachData] = useState({
+    firstName: coach?.firstName || '',
+    lastName: coach?.lastName || '',
+    licence: coach?.licence || ''
+  });
+  const [staffData, setStaffData] = useState(() => {
+    const initialStaff = staff || [];
+    // Start with existing staff or at least one empty slot
+    const staffArray = [...initialStaff];
+    if (staffArray.length === 0) {
+      staffArray.push({ firstName: '', lastName: '', role: '' });
+    }
+    // Limit to 4 staff members maximum
+    return staffArray.slice(0, 4);
+  });
 
   // Calculate permissions for this user and match
   const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
@@ -993,7 +1008,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     // Prepare the data to be sent
     const rosterData = {
       roster: rosterList,
-      published: rosterPublished || match.matchStatus.key === 'FINISHED' // Always publish if match is finished
+      published: rosterPublished || match.matchStatus.key === 'FINISHED', // Always publish if match is finished
+      coach: coachData,
+      staff: staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()) // Only include non-empty staff
     };
 
     console.log('Roster data to be saved:', rosterData)
@@ -1026,6 +1043,42 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           throw error;
         }
         console.log('Roster published status not changed (304)');
+      }
+
+      // Save coach data
+      try {
+        await axios.patch(`${BASE_URL}/matches/${match._id}`, {
+          [teamFlag]: {
+            coach: rosterData.coach
+          }
+        }, {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          }
+        });
+        console.log('Coach data saved successfully');
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status !== 304) {
+          console.error('Error saving coach data:', error);
+        }
+      }
+
+      // Save staff data
+      try {
+        await axios.patch(`${BASE_URL}/matches/${match._id}`, {
+          [teamFlag]: {
+            staff: rosterData.staff
+          }
+        }, {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          }
+        });
+        console.log('Staff data saved successfully');
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status !== 304) {
+          console.error('Error saving staff data:', error);
+        }
       }
 
       // Save roster for selected additional matches
@@ -1071,6 +1124,25 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               throw error;
             }
             console.log(`Roster published status not changed (304) for match ${m._id}`);
+          }
+
+          // Save coach and staff data for additional matches
+          try {
+            await axios.patch(`${BASE_URL}/matches/${m._id}`, {
+              [matchTeamFlag]: {
+                coach: rosterData.coach,
+                staff: rosterData.staff
+              }
+            }, {
+              headers: {
+                Authorization: `Bearer ${jwt}`,
+              }
+            });
+            console.log(`Coach and staff data saved for match ${m._id}`);
+          } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status !== 304) {
+              console.error(`Error saving coach/staff data for match ${m._id}:`, error);
+            }
           }
 
         } catch (error) {
@@ -1620,52 +1692,140 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
       </div>
 
-      {/* Publish Roster Checkbox */}
-      <div className="flex items-center justify-between mt-8 bg-white shadow rounded-md border p-6">
-        <div className="flex items-center">
-          <div className="relative inline-flex items-center">
-            <div className="flex items-center h-6">
-              {/* Check if all required conditions are met using isRosterValid function */}
-              {(() => {
-                // If match is finished, always publish roster and disable checkbox
-                const isFinished = match.matchStatus.key === 'FINISHED';
-                const allChecksPass = isRosterValid();
+      {/* Coach and Staff Section */}
+      <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Teamoffizielle</h2>
 
-                // If checks don't pass and not a finished match, always set rosterPublished to false
-                if (!allChecksPass && !isFinished) {
-                  // Ensure rosterPublished is false if checks don't pass
-                  if (rosterPublished) {
-                    setRosterPublished(false);
-                  }
-                }
+      {/* Coach Section */}
+      <div className="mt-8">
+        <div className="py-4">
+          <h3 className="text-md font-medium text-gray-900 mb-4">Trainer</h3>
+          <div className="sm:px-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label htmlFor="coach-firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                Vorname
+              </label>
+              <input
+                type="text"
+                id="coach-firstName"
+                value={coachData.firstName}
+                onChange={(e) => setCoachData(prev => ({ ...prev, firstName: e.target.value }))}
+                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                placeholder="Vorname"
+              />
+            </div>
+            <div>
+              <label htmlFor="coach-lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                Nachname
+              </label>
+              <input
+                type="text"
+                id="coach-lastName"
+                value={coachData.lastName}
+                onChange={(e) => setCoachData(prev => ({ ...prev, lastName: e.target.value }))}
+                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                placeholder="Nachname"
+              />
+            </div>
+            <div>
+              <label htmlFor="coach-licence" className="block text-sm font-medium text-gray-700 mb-1">
+                Lizenz
+              </label>
+              <input
+                type="text"
+                id="coach-licence"
+                value={coachData.licence}
+                onChange={(e) => setCoachData(prev => ({ ...prev, licence: e.target.value }))}
+                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                placeholder="Lizenz"
+              />
+            </div>
+          </div>
+        </div>
 
-                // If match is finished, always set rosterPublished to true
-                if (isFinished && !rosterPublished) {
-                  setRosterPublished(true);
-                }
-
-                return (
+        {/* Staff Section */}
+        <div className="py-4">
+          <h4 className="text-md font-medium text-gray-900 mb-4">Betreuer (max. 4)</h4>
+          <div className="sm:p-6 space-y-12 sm:space-y-6 sm:border sm:rounded-md sm:shadow">
+            {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).map((staff, index) => (
+              <div key={index} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label htmlFor={`staff-${index}-firstName`} className="block text-sm font-medium text-gray-700 mb-1">
+                    Vorname
+                  </label>
                   <input
-                    id="rosterPublished"
-                    type="checkbox"
-                    className={`h-4 w-4 rounded border-gray-300 ${allChecksPass || isFinished ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
-                    checked={rosterPublished || isFinished}
+                    type="text"
+                    id={`staff-${index}-firstName`}
+                    value={staff.firstName}
                     onChange={(e) => {
-                      if (allChecksPass && !isFinished) {
-                        setRosterPublished(e.target.checked);
-                      }
+                      const newStaffData = [...staffData];
+                      newStaffData[index] = { ...newStaffData[index], firstName: e.target.value };
+                      setStaffData(newStaffData);
                     }}
-                    disabled={!allChecksPass || isFinished}
+                    className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    placeholder="Vorname"
                   />
-                );
-              })()}
-            </div>
-            <div className="ml-3 text-sm leading-6">
-              <label htmlFor="rosterPublished" className={`font-medium ${isRosterValid() ? 'text-gray-900' : 'text-gray-400'}`}>Veröffentlichen</label>
-              <p className="text-gray-500">
-                {!isRosterValid() ? "Behebe zuerst alle Fehler in der Aufstellung" : "Austellung öffentlich sichtbar machen"}
-              </p>
-            </div>
+                </div>
+                <div>
+                  <label htmlFor={`staff-${index}-lastName`} className="block text-sm font-medium text-gray-700 mb-1">
+                    Nachname
+                  </label>
+                  <input
+                    type="text"
+                    id={`staff-${index}-lastName`}
+                    value={staff.lastName}
+                    onChange={(e) => {
+                      const newStaffData = [...staffData];
+                      newStaffData[index] = { ...newStaffData[index], lastName: e.target.value };
+                      setStaffData(newStaffData);
+                    }}
+                    className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    placeholder="Nachname"
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`staff-${index}-role`} className="block text-sm font-medium text-gray-700 mb-1">
+                    Funktion
+                  </label>
+                  <input
+                    type="text"
+                    id={`staff-${index}-role`}
+                    value={staff.role}
+                    onChange={(e) => {
+                      const newStaffData = [...staffData];
+                      newStaffData[index] = { ...newStaffData[index], role: e.target.value };
+                      setStaffData(newStaffData);
+                    }}
+                    className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    placeholder="z.B. Betreuer, Physiotherapeut"
+                  />
+                </div>
+              </div>
+            ))}
+
+            {/* Add Staff Button */}
+            {staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length < 4 && (
+              <div className="flex justify-center pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const filledStaffCount = staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length;
+                    if (filledStaffCount < 4) {
+                      // Find the next empty slot or add a new one
+                      const newStaffData = [...staffData];
+                      const nextEmptyIndex = newStaffData.findIndex(s => !s.firstName.trim() && !s.lastName.trim() && !s.role.trim());
+                      if (nextEmptyIndex === -1 && newStaffData.length < 4) {
+                        newStaffData.push({ firstName: '', lastName: '', role: '' });
+                      }
+                      setStaffData(newStaffData);
+                    }
+                  }}
+                  className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  <PlusIcon className="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
+                  Hinzufügen
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1679,7 +1839,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       }).length > 0 && (
           <>
             <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-            <div className="bg-white shadow rounded-md border mb-6">
+            <div className="bg-white  mb-6">
               {match.matchday && match.round && match.season && match.tournament && (
                 <ul className="divide-y divide-gray-200">
                   {matches
@@ -1751,6 +1911,57 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             </div>
           </>
         )}
+
+
+      {/* Publish Roster Checkbox */}
+      <div className="flex items-center justify-between mt-8 p-6">
+        <div className="flex items-center">
+          <div className="relative inline-flex items-center">
+            <div className="flex items-center h-6">
+              {/* Check if all required conditions are met using isRosterValid function */}
+              {(() => {
+                // If match is finished, always publish roster and disable checkbox
+                const isFinished = match.matchStatus.key === 'FINISHED';
+                const allChecksPass = isRosterValid();
+
+                // If checks don't pass and not a finished match, always set rosterPublished to false
+                if (!allChecksPass && !isFinished) {
+                  // Ensure rosterPublished is false if checks don't pass
+                  if (rosterPublished) {
+                    setRosterPublished(false);
+                  }
+                }
+
+                // If match is finished, always set rosterPublished to true
+                if (isFinished && !rosterPublished) {
+                  setRosterPublished(true);
+                }
+
+                return (
+                  <input
+                    id="rosterPublished"
+                    type="checkbox"
+                    className={`h-4 w-4 rounded border-gray-300 ${allChecksPass || isFinished ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
+                    checked={rosterPublished || isFinished}
+                    onChange={(e) => {
+                      if (allChecksPass && !isFinished) {
+                        setRosterPublished(e.target.checked);
+                      }
+                    }}
+                    disabled={!allChecksPass || isFinished}
+                  />
+                );
+              })()}
+            </div>
+            <div className="ml-3 text-sm leading-6">
+              <label htmlFor="rosterPublished" className={`font-medium ${isRosterValid() ? 'text-gray-900' : 'text-gray-400'}`}>Veröffentlichen</label>
+              <p className="text-gray-500">
+                {!isRosterValid() ? "Behebe zuerst alle Fehler in der Aufstellung" : "Austellung öffentlich sichtbar machen"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Close, Save buttons */}
       <div className="flex space-x-3 mt-6 justify-end">
