@@ -420,12 +420,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   });
   const [staffData, setStaffData] = useState(() => {
     const initialStaff = staff || [];
-    // Ensure we have exactly 4 staff slots
+    // Start with existing staff or at least one empty slot
     const staffArray = [...initialStaff];
-    while (staffArray.length < 4) {
+    if (staffArray.length === 0) {
       staffArray.push({ firstName: '', lastName: '', role: '' });
     }
-    return staffArray.slice(0, 4); // Limit to 4 staff members
+    // Limit to 4 staff members maximum
+    return staffArray.slice(0, 4);
   });
 
   // Calculate permissions for this user and match
@@ -1747,7 +1748,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         <div className="px-6 py-4">
           <h4 className="text-md font-medium text-gray-900 mb-4">Betreuer (max. 4)</h4>
           <div className="space-y-4">
-            {staffData.map((staff, index) => (
+            {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).map((staff, index) => (
               <div key={index} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
                   <label htmlFor={`staff-${index}-firstName`} className="block text-sm font-medium text-gray-700 mb-1">
@@ -1802,6 +1803,31 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 </div>
               </div>
             ))}
+            
+            {/* Add Staff Button */}
+            {staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length < 4 && (
+              <div className="flex justify-center pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const filledStaffCount = staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length;
+                    if (filledStaffCount < 4) {
+                      // Find the next empty slot or add a new one
+                      const newStaffData = [...staffData];
+                      const nextEmptyIndex = newStaffData.findIndex(s => !s.firstName.trim() && !s.lastName.trim() && !s.role.trim());
+                      if (nextEmptyIndex === -1 && newStaffData.length < 4) {
+                        newStaffData.push({ firstName: '', lastName: '', role: '' });
+                      }
+                      setStaffData(newStaffData);
+                    }
+                  }}
+                  className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  <PlusIcon className="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
+                  Hinzufügen
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
