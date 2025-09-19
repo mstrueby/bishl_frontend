@@ -523,15 +523,15 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     <PDFDownloadLink
       document={
         <RosterPDF
-          teamName={team.fullName}
+          teamFlag={teamFlag}
           matchDate={new Date(match.startDate).toLocaleDateString()}
           venue={match.venue.name}
           roster={sortRoster(rosterList)}
           teamLogo={team.logoUrl}
           tournament={match.tournament.name}
           round={match.round.name}
-          homeTeam={match.home.fullName}
-          awayTeam={match.away.fullName}
+          homeTeam={match.home}
+          awayTeam={match.away}
         />
       }
       fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
