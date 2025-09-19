@@ -4,7 +4,7 @@ import { Match, Team } from '../../types/MatchValues';
 
 const styles = StyleSheet.create({
   page: {
-    padding: 20,
+    padding: 40,
     fontSize: 10,
     fontFamily: 'Helvetica',
   },
@@ -99,8 +99,6 @@ const styles = StyleSheet.create({
   teamOfficials: {
     marginTop: 15,
     paddingTop: 10,
-    borderTop: 1,
-    borderColor: '#DDDDDD',
   },
   teamOfficialsTitle: {
     fontSize: 12,
@@ -298,7 +296,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
       {/* Team Officials Section */}
       <View style={styles.teamOfficials}>
-        <Text style={styles.teamOfficialsTitle}>Team Officials</Text>
+        <Text style={styles.teamOfficialsTitle}>Teamoffizielle</Text>
 
         <View style={styles.officialsTable}>
           {/* Table Header */}
