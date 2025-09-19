@@ -55,6 +55,16 @@ interface RosterPageProps {
   team: TeamValues;
   roster: RosterPlayer[];
   rosterPublished: boolean;
+  coach: {
+    firstName: string;
+    lastName: string;
+    licence: string
+  };
+  staff: {
+    firstName: string;
+    lastName: string;
+    role: string;
+  }[];
   teamFlag: string;
   availablePlayers: AvailablePlayer[];
   allAvailablePlayers: AvailablePlayer[];
@@ -319,6 +329,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         team,
         roster: matchTeam.roster || [],
         rosterPublished: matchTeam.rosterPublished || false,
+        coach: matchTeam.coach || {},
+        staff: matchTeam.staff || [],
         teamFlag,
         availablePlayers: filteredAvailablePlayers || [],
         allAvailablePlayers: availablePlayers || [],
@@ -344,7 +356,7 @@ const playerPositions = [
   { key: 'G', value: 'Goalie' },
 ];
 
-const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
+const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, coach, staff, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -517,7 +529,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         </>
       )}
     </PDFDownloadLink>
-  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, sortRoster, rosterList]);
+  ), [team.fullName, team.alias, team.logoUrl, match.startDate, match.venue.name, match.tournament.name, match.round.name, match.home.fullName, match.away.fullName, sortRoster, rosterList]);
 
   {/** Debugging focus events
   useEffect(() => {
@@ -1470,7 +1482,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               </li>
             )}
           </ul>
-          
+
           {/* Player Count Summary */}
           {rosterList.length > 0 && (
             <div className="border-t border-gray-200 bg-gray-50 px-6 py-3">

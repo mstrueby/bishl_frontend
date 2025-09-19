@@ -64,6 +64,16 @@ export interface Team {
   stats: TeamStats;
   roster?: RosterPlayer[];
   rosterPublished?: boolean;
+  coach?: {
+    firstName?: string;
+    lastName?: string;
+    licence?: string;
+  }
+  staff?: {
+    firstName: string;
+    lastName: string;
+    role: string;
+  }[]
   scores?: ScoresBase[];
   penalties?: PenaltiesBase[];
 }
