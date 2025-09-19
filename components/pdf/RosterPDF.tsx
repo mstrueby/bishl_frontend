@@ -199,13 +199,17 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
         </View>
       </View>
 
-      <View style={styles.table}>
-        <View style={[styles.tableRow, styles.tableHeader]}>
-          <Text style={styles.numberCell}>Nr.</Text>
-          <Text style={styles.positionCell}>Pos.</Text>
-          <Text style={styles.nameCell}>Name, Vorname</Text>
-          <Text style={styles.passCell}>Pass-Nr.</Text>
-        </View>
+      {/* Spieler Section */}
+      <View style={{ marginTop: 15, paddingTop: 10 }}>
+        <Text style={styles.teamOfficialsTitle}>Spieler</Text>
+
+        <View style={styles.table}>
+          <View style={[styles.tableRow, styles.tableHeader]}>
+            <Text style={styles.numberCell}>Nr.</Text>
+            <Text style={styles.positionCell}>Pos.</Text>
+            <Text style={styles.nameCell}>Name, Vorname</Text>
+            <Text style={styles.passCell}>Pass-Nr.</Text>
+          </View>
 
         {(() => {
           // Sort roster by position priority
@@ -292,6 +296,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
           return rows;
         })()}
+        </View>
       </View>
 
       {/* Team Officials Section */}
