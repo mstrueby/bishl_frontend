@@ -243,12 +243,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           const captain = captains[0];
           rows.push(
             <View key="row-1" style={styles.tableRow}>
-              <Text style={styles.numberCell}>{captain ? (captain.player.jerseyNumber || '-') : '-'}</Text>
+              <Text style={styles.numberCell}>{captain ? (captain.player.jerseyNumber || '') : ''}</Text>
               <Text style={styles.positionCell}>{captain ? 'C' : ''}</Text>
               <Text style={styles.nameCell}>
                 {captain ? `${captain.player.lastName}, ${captain.player.firstName}${captain.called ? ' (H)' : ''}` : ''}
               </Text>
-              <Text style={styles.passCell}>{captain ? (captain.passNumber || '-') : '-'}</Text>
+              <Text style={styles.passCell}>{captain ? (captain.passNumber || '') : ''}</Text>
             </View>
           );
 
@@ -256,12 +256,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           const assistant = assistants[0];
           rows.push(
             <View key="row-2" style={styles.tableRow}>
-              <Text style={styles.numberCell}>{assistant ? (assistant.player.jerseyNumber || '-') : '-'}</Text>
+              <Text style={styles.numberCell}>{assistant ? (assistant.player.jerseyNumber || '') : ''}</Text>
               <Text style={styles.positionCell}>{assistant ? 'A' : ''}</Text>
               <Text style={styles.nameCell}>
                 {assistant ? `${assistant.player.lastName}, ${assistant.player.firstName}${assistant.called ? ' (H)' : ''}` : ''}
               </Text>
-              <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '-') : '-'}</Text>
+              <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '') : ''}</Text>
             </View>
           );
 
@@ -271,12 +271,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
 
             rows.push(
               <View key={`row-goalie-${i}`} style={styles.tableRow}>
-                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '') : ''}</Text>
                 <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
                 <Text style={styles.nameCell}>
                   {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
                 </Text>
-                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '-') : '-'}</Text>
+                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '') : ''}</Text>
               </View>
             );
           }
