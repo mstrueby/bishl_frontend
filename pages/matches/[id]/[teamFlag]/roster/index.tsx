@@ -1693,15 +1693,13 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       </div>
 
       {/* Coach and Staff Section */}
-      <div className="mt-8 bg-white shadow rounded-md border">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Trainer und Betreuer</h3>
-        </div>
-        
-        {/* Coach Section */}
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h4 className="text-md font-medium text-gray-900 mb-4">Trainer</h4>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Teamoffizielle</h2>
+
+      {/* Coach Section */}
+      <div className="mt-8">
+        <div className="py-4">
+          <h3 className="text-md font-medium text-gray-900 mb-4">Trainer</h3>
+          <div className="sm:px-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label htmlFor="coach-firstName" className="block text-sm font-medium text-gray-700 mb-1">
                 Vorname
@@ -1745,9 +1743,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         </div>
 
         {/* Staff Section */}
-        <div className="px-6 py-4">
+        <div className="py-4">
           <h4 className="text-md font-medium text-gray-900 mb-4">Betreuer (max. 4)</h4>
-          <div className="space-y-4">
+          <div className="sm:p-6 space-y-12 sm:space-y-6 sm:border sm:rounded-md sm:shadow">
             {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).map((staff, index) => (
               <div key={index} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
@@ -1786,7 +1784,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 </div>
                 <div>
                   <label htmlFor={`staff-${index}-role`} className="block text-sm font-medium text-gray-700 mb-1">
-                    Rolle
+                    Funktion
                   </label>
                   <input
                     type="text"
@@ -1803,7 +1801,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 </div>
               </div>
             ))}
-            
+
             {/* Add Staff Button */}
             {staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length < 4 && (
               <div className="flex justify-center pt-4">
@@ -1832,56 +1830,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         </div>
       </div>
 
-      {/* Publish Roster Checkbox */}
-      <div className="flex items-center justify-between mt-8 bg-white shadow rounded-md border p-6">
-        <div className="flex items-center">
-          <div className="relative inline-flex items-center">
-            <div className="flex items-center h-6">
-              {/* Check if all required conditions are met using isRosterValid function */}
-              {(() => {
-                // If match is finished, always publish roster and disable checkbox
-                const isFinished = match.matchStatus.key === 'FINISHED';
-                const allChecksPass = isRosterValid();
-
-                // If checks don't pass and not a finished match, always set rosterPublished to false
-                if (!allChecksPass && !isFinished) {
-                  // Ensure rosterPublished is false if checks don't pass
-                  if (rosterPublished) {
-                    setRosterPublished(false);
-                  }
-                }
-
-                // If match is finished, always set rosterPublished to true
-                if (isFinished && !rosterPublished) {
-                  setRosterPublished(true);
-                }
-
-                return (
-                  <input
-                    id="rosterPublished"
-                    type="checkbox"
-                    className={`h-4 w-4 rounded border-gray-300 ${allChecksPass || isFinished ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
-                    checked={rosterPublished || isFinished}
-                    onChange={(e) => {
-                      if (allChecksPass && !isFinished) {
-                        setRosterPublished(e.target.checked);
-                      }
-                    }}
-                    disabled={!allChecksPass || isFinished}
-                  />
-                );
-              })()}
-            </div>
-            <div className="ml-3 text-sm leading-6">
-              <label htmlFor="rosterPublished" className={`font-medium ${isRosterValid() ? 'text-gray-900' : 'text-gray-400'}`}>Veröffentlichen</label>
-              <p className="text-gray-500">
-                {!isRosterValid() ? "Behebe zuerst alle Fehler in der Aufstellung" : "Austellung öffentlich sichtbar machen"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Other Matchday Matches */}
       {matches.filter(m => {
         if (m._id === match._id) return false;
@@ -1891,7 +1839,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       }).length > 0 && (
           <>
             <h2 className="mt-8 mb-3 text-lg font-medium text-gray-900">Weitere Spiele am gleichen Spieltag</h2>
-            <div className="bg-white shadow rounded-md border mb-6">
+            <div className="bg-white  mb-6">
               {match.matchday && match.round && match.season && match.tournament && (
                 <ul className="divide-y divide-gray-200">
                   {matches
@@ -1963,6 +1911,57 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             </div>
           </>
         )}
+
+
+      {/* Publish Roster Checkbox */}
+      <div className="flex items-center justify-between mt-8 p-6">
+        <div className="flex items-center">
+          <div className="relative inline-flex items-center">
+            <div className="flex items-center h-6">
+              {/* Check if all required conditions are met using isRosterValid function */}
+              {(() => {
+                // If match is finished, always publish roster and disable checkbox
+                const isFinished = match.matchStatus.key === 'FINISHED';
+                const allChecksPass = isRosterValid();
+
+                // If checks don't pass and not a finished match, always set rosterPublished to false
+                if (!allChecksPass && !isFinished) {
+                  // Ensure rosterPublished is false if checks don't pass
+                  if (rosterPublished) {
+                    setRosterPublished(false);
+                  }
+                }
+
+                // If match is finished, always set rosterPublished to true
+                if (isFinished && !rosterPublished) {
+                  setRosterPublished(true);
+                }
+
+                return (
+                  <input
+                    id="rosterPublished"
+                    type="checkbox"
+                    className={`h-4 w-4 rounded border-gray-300 ${allChecksPass || isFinished ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
+                    checked={rosterPublished || isFinished}
+                    onChange={(e) => {
+                      if (allChecksPass && !isFinished) {
+                        setRosterPublished(e.target.checked);
+                      }
+                    }}
+                    disabled={!allChecksPass || isFinished}
+                  />
+                );
+              })()}
+            </div>
+            <div className="ml-3 text-sm leading-6">
+              <label htmlFor="rosterPublished" className={`font-medium ${isRosterValid() ? 'text-gray-900' : 'text-gray-400'}`}>Veröffentlichen</label>
+              <p className="text-gray-500">
+                {!isRosterValid() ? "Behebe zuerst alle Fehler in der Aufstellung" : "Austellung öffentlich sichtbar machen"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Close, Save buttons */}
       <div className="flex space-x-3 mt-6 justify-end">
