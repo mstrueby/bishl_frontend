@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
   footer: {
     position: 'absolute',
     bottom: 20,
-    left: 20,
-    right: 20,
+    left: 40,
+    right: 40,
     textAlign: 'center',
     color: '#666',
     borderTop: 1,
@@ -183,7 +183,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       </View>
 
       {/* Team Name Section */}
-      <View style={{ marginBottom: 8, paddingVertical: 8 }}>
+      <View style={{ paddingVertical: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           {teamLogo && (
             <View style={{ marginRight: 10 }}>
