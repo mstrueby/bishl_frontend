@@ -110,76 +110,36 @@ const styles = StyleSheet.create({
   },
   officialsTable: {
     width: '100%',
-  },
-  coachSection: {
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottom: 1,
-    borderColor: '#E5E5E5',
-  },
-  coachSectionTitle: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  coachRow: {
-    flexDirection: 'row',
-    marginBottom: 2,
-  },
-  coachLabel: {
-    width: '20%',
-    fontSize: 9,
-    fontWeight: 'bold',
-  },
-  coachValue: {
-    width: '80%',
-    fontSize: 9,
-  },
-  staffSection: {
     marginTop: 8,
   },
-  staffSectionTitle: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  staffTable: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
-  },
-  staffTableRow: {
+  officialsTableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#DDDDDD',
-    paddingVertical: 2,
+    borderBottomStyle: 'solid',
+    alignItems: 'center',
     minHeight: 18,
+    paddingVertical: 2,
   },
-  staffTableHeader: {
-    backgroundColor: '#F3F4F6',
+  officialsTableHeader: {
+    backgroundColor: '#E5E7EB',
+    borderBottomColor: '#333',
+    borderBottomWidth: 1,
     fontWeight: 'bold',
   },
-  staffNameHeader: {
+  officialsRoleCell: {
+    width: '20%',
+    paddingHorizontal: 4,
+    textAlign: 'center',
+  },
+  officialsNameCell: {
     width: '60%',
-    fontSize: 10,
-    fontWeight: 'bold',
     paddingHorizontal: 4,
   },
-  staffRoleHeader: {
-    width: '40%',
-    fontSize: 10,
-    fontWeight: 'bold',
+  officialsLicenceCell: {
+    width: '20%',
     paddingHorizontal: 4,
-  },
-  staffNameCell: {
-    width: '60%',
-    fontSize: 10,
-    paddingHorizontal: 4,
-  },
-  staffRoleCell: {
-    width: '40%',
-    fontSize: 10,
-    paddingHorizontal: 4,
+    textAlign: 'center',
   }
 });
 
@@ -340,56 +300,46 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
       <View style={styles.teamOfficials}>
         <Text style={styles.teamOfficialsTitle}>Team Officials</Text>
 
-        {/* Officials Table */}
         <View style={styles.officialsTable}>
-          {/* Coach Section */}
-          <View style={styles.coachSection}>
-            <Text style={styles.coachSectionTitle}>Coach</Text>
-            <View style={styles.coachRow}>
-              <Text style={styles.coachLabel}>Name:</Text>
-              <Text style={styles.coachValue}>
-                {coach && (coach.firstName || coach.lastName)
-                  ? [coach.firstName, coach.lastName].filter(Boolean).join(' ')
-                  : ''
-                }
-              </Text>
-            </View>
-            <View style={styles.coachRow}>
-              <Text style={styles.coachLabel}>Lizenz:</Text>
-              <Text style={styles.coachValue}>
-                {coach && coach.licence ? coach.licence : ''}
-              </Text>
-            </View>
+          {/* Table Header */}
+          <View style={[styles.officialsTableRow, styles.officialsTableHeader]}>
+            <Text style={styles.officialsRoleCell}>Funktion</Text>
+            <Text style={styles.officialsNameCell}>Name, Vorname</Text>
+            <Text style={styles.officialsLicenceCell}>Lizenz</Text>
           </View>
 
-          {/* Staff Section */}
-          <View style={styles.staffSection}>
-            <View style={styles.table}>
-              {/* Staff Table Header */}
-              <View style={[styles.tableRow, styles.tableHeader]}>
-                <Text style={styles.staffRoleHeader}>Funktion</Text>
-                <Text style={styles.staffNameHeader}>Name, Vorname</Text>
+          {/* Coach Row - Always first */}
+          <View style={styles.officialsTableRow}>
+            <Text style={styles.officialsRoleCell}>Trainer</Text>
+            <Text style={styles.officialsNameCell}>
+              {coach && (coach.firstName || coach.lastName)
+                ? [coach.lastName, coach.firstName].filter(Boolean).join(', ')
+                : ''
+              }
+            </Text>
+            <Text style={styles.officialsLicenceCell}>
+              {coach && coach.licence ? coach.licence : ''}
+            </Text>
+          </View>
+
+          {/* Staff Rows - Always show exactly 4 rows */}
+          {Array.from({ length: 4 }, (_, index) => {
+            const staffMember = staff && staff[index];
+            return (
+              <View key={index} style={styles.officialsTableRow}>
+                <Text style={styles.officialsRoleCell}>
+                  {staffMember && staffMember.role ? staffMember.role : ''}
+                </Text>
+                <Text style={styles.officialsNameCell}>
+                  {staffMember && (staffMember.lastName || staffMember.firstName)
+                    ? [staffMember.lastName, staffMember.firstName].filter(Boolean).join(', ')
+                    : ''
+                  }
+                </Text>
+                <Text style={styles.officialsLicenceCell}></Text>
               </View>
-
-              {/* Always show exactly 4 staff rows */}
-              {Array.from({ length: 4 }, (_, index) => {
-                const staffMember = staff && staff[index];
-                return (
-                  <View key={index} style={styles.tableRow}>
-                    <Text style={styles.staffRoleCell}>
-                      {staffMember && staffMember.role ? staffMember.role : ''}
-                    </Text>
-                    <Text style={styles.staffNameCell}>
-                      {staffMember && (staffMember.lastName || staffMember.firstName)
-                        ? [staffMember.lastName, staffMember.firstName].filter(Boolean).join(', ')
-                        : ''
-                      }
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
+            );
+          })}
         </View>
       </View>
 
