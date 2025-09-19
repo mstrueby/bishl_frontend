@@ -291,12 +291,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 styles.tableRow, 
                 isLastForwardRow && { borderBottomColor: '#333', borderBottomWidth: 1 }
               ]}>
-                <Text style={styles.numberCell}>{forward ? (forward.player.jerseyNumber || '-') : '-'}</Text>
+                <Text style={styles.numberCell}>{forward ? (forward.player.jerseyNumber || '') : ''}</Text>
                 <Text style={styles.positionCell}>{forward ? forward.playerPosition.key : ''}</Text>
                 <Text style={styles.nameCell}>
                   {forward ? `${forward.player.lastName}, ${forward.player.firstName}${forward.called ? ' (H)' : ''}` : ''}
                 </Text>
-                <Text style={styles.passCell}>{forward ? (forward.passNumber || '-') : '-'}</Text>
+                <Text style={styles.passCell}>{forward ? (forward.passNumber || '') : ''}</Text>
               </View>
             );
           }
