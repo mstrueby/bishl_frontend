@@ -1,14 +1,25 @@
 import { Fragment } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react';
 
-const DeleteConfirmationModal: React.FC<{
-  isOpen: boolean,
-  onClose: () => void,
-  onConfirm: () => void,
-  title: string | null,
-  description: string | null,
-  descriptionSubText: string | null
-}> = ({ isOpen, onClose, onConfirm, title, description, descriptionSubText }) => {
+interface DeleteConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string | null;
+  description: string | null;
+  descriptionSubText: string | null;
+  isLoading?: boolean;
+}
+
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  descriptionSubText,
+  isLoading = false
+}) => {
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} as="div"
@@ -49,15 +60,27 @@ const DeleteConfirmationModal: React.FC<{
                   type="button"
                   className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 sm:mt-0 sm:w-auto"
                   onClick={onClose}
+                  disabled={isLoading}
                 >
                   Abbrechen
                 </button>
                 <button
                   type="button"
-                  className="mt-3 inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 sm:ml-3 sm:w-auto"
+                  className="mt-3 inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 sm:ml-3 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={onConfirm}
+                  disabled={isLoading}
                 >
-                  Löschen
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                      </svg>
+                      Löschen...
+                    </>
+                  ) : (
+                    'Löschen'
+                  )}
                 </button>
               </div>
             </DialogPanel>

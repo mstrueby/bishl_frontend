@@ -34,6 +34,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<ScoresBase | undefined>(undefined);
+  const [isDeleting, setIsDeleting] = useState(false); // State for deletion loading
 
   const handleDeleteClick = (goal: ScoresBase) => {
     setGoalToDelete(goal);
@@ -43,6 +44,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
   const handleDeleteConfirm = async () => {
     if (!goalToDelete) return;
     try {
+      setIsDeleting(true); // Set loading state
       const response = await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/${goalToDelete._id}`,
         {
@@ -57,9 +59,11 @@ const ScoresList: React.FC<ScoresListProps> = ({
           refreshMatchData();
         }
       }
+      refreshMatchData();
     } catch (error) {
       console.error('Error deleting goal:', error);
     } finally {
+      setIsDeleting(false); // Reset loading state
       setIsDeleteModalOpen(false);
       setGoalToDelete(undefined);
     }
@@ -126,6 +130,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
                       <button
                         onClick={() => handleDeleteClick(score)}
                         className="text-red-600 hover:text-red-900"
+                        disabled={isDeleting} // Disable button when deleting
                       >
                         <TrashIcon className="h-5 w-5" aria-hidden="true" />
                       </button>
@@ -151,6 +156,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
         title="Tor löschen"
         description={`Bist du sicher, dass du das Tor von <strong>${goalToDelete?.goalPlayer ? `#${goalToDelete.goalPlayer.jerseyNumber} ${goalToDelete.goalPlayer.firstName} ${goalToDelete.goalPlayer.lastName} (Zeit ${goalToDelete.matchTime})` : 'Unbekannt'}</strong> löschen möchtest?`}
         descriptionSubText="Das Ergebnis wird um 1 verringert. Diese Aktion kann nicht rückgängig gemacht werden."
+        isConfirmButtonDisabled={isDeleting} // Pass loading state to modal's confirm button
       />
     </div>
   );
