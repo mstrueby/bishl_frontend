@@ -529,8 +529,8 @@ export default function Tournament({
               {/* MATCHDAY dropdown */}
               {/*
               <div className="mt-4">
-                <span>{`${selectedRound.matchdaysType.key} / ${selectedRound.matchdaysSortedBy.key}`}</span>   
-              </div>  
+                <span>{`${selectedRound.matchdaysType.key} / ${selectedRound.matchdaysSortedBy.key}`}</span>
+              </div>
               */}
               {matchdays.length > 1 &&
                 <Listbox value={selectedMatchday} onChange={setSelectedMatchday}>

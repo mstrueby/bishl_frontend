@@ -162,9 +162,7 @@ const MatchCard: React.FC<{
     clubAlias: string;
   } | null>(null);
   const [isLoadingOwner, setIsLoadingOwner] = useState(true);
-  const [homeScoresLength, setHomeScoresLength] = useState<number>(0);
-  const [awayScoresLength, setAwayScoresLength] = useState<number>(0);
-  const [isLoadingScores, setIsLoadingScores] = useState(true);
+  
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
 
@@ -190,34 +188,7 @@ const MatchCard: React.FC<{
     fetchMatchdayOwner();
   }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
 
-  // Fetch scores data for both teams
-  useEffect(() => {
-    const fetchScoresData = async () => {
-      try {
-        setIsLoadingScores(true);
-        
-        // Fetch home scores
-        const homeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/home/scores/`);
-        if (homeResponse.ok) {
-          const homeScores = await homeResponse.json();
-          setHomeScoresLength(Array.isArray(homeScores) ? homeScores.length : 0);
-        }
-
-        // Fetch away scores
-        const awayResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}/away/scores/`);
-        if (awayResponse.ok) {
-          const awayScores = await awayResponse.json();
-          setAwayScoresLength(Array.isArray(awayScores) ? awayScores.length : 0);
-        }
-      } catch (error) {
-        console.error('Error fetching scores data:', error);
-      } finally {
-        setIsLoadingScores(false);
-      }
-    };
-
-    fetchScoresData();
-  }, [match._id]);
+  
 
   // Auto-refresh for in-progress matches
   useEffect(() => {
@@ -429,14 +400,9 @@ const MatchCard: React.FC<{
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
           {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED' || match.matchStatus.key === 'FORFEITED') && (() => {
-            // Compare goals with scores array lengths to determine if scores match
-            const homeGoalsMatch = match.home.stats.goalsFor === homeScoresLength;
-            const awayGoalsMatch = match.away.stats.goalsFor === awayScoresLength;
-            const scoresMatch = homeGoalsMatch && awayGoalsMatch;
-            
-            const buttonClass = !scoresMatch 
-              ? "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              : "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2";
+            const buttonClass = match.matchSheetComplete
+              ? "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
             
             return (
               <Link href={`/matches/${match._id}`}>
