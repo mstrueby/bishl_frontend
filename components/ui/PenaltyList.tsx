@@ -34,6 +34,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [penaltyToDelete, setPenaltyToDelete] = useState<PenaltiesBase | undefined>(undefined);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteClick = (penalty: PenaltiesBase) => {
     setPenaltyToDelete(penalty);
@@ -42,6 +43,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
   const handleDeleteConfirm = async () => {
     if (!penaltyToDelete) return;
     try {
+      setIsDeleting(true);
       const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/penalties/${penaltyToDelete._id}`,
         {
           headers: {
@@ -59,6 +61,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
     } catch (error) {
       console.error('Error deleting penalty:', error);
     } finally {
+      setIsDeleting(false);
       setIsDeleteModalOpen(false);
       setPenaltyToDelete(undefined);
     }
@@ -148,6 +151,7 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
         title="Strafe löschen"
         description={`Bist du sicher, dass du die Strafe von <strong>${penaltyToDelete?.penaltyPlayer ? `#${penaltyToDelete.penaltyPlayer.jerseyNumber} ${penaltyToDelete?.penaltyPlayer?.firstName} ${penaltyToDelete?.penaltyPlayer?.lastName} (Zeit ${penaltyToDelete?.matchTimeStart})` : 'Unbekannt'}</strong> löschen möchtest?`}
         descriptionSubText="Diese Aktion kann nicht rückgängig gemacht werden."
+        isLoading={isDeleting}
       />
     </div>
   )
