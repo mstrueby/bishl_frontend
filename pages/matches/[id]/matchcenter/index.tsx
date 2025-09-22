@@ -784,6 +784,53 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
               </div>
             )}
           </div>
+
+          {/* Match Sheet Complete Toggle */}
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-900">
+                Spielbericht vollständig
+              </span>
+              <span className="text-xs text-gray-500">
+                Markiere das Spiel als vollständig erfasst
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const newCompleteStatus = !match.matchSheetComplete;
+                  const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+                    matchSheetComplete: newCompleteStatus
+                  }, {
+                    headers: {
+                      Authorization: `Bearer ${jwt}`,
+                      'Content-Type': 'application/json'
+                    }
+                  });
+
+                  if (response.status === 200) {
+                    setMatch({ ...match, matchSheetComplete: newCompleteStatus });
+                  }
+                } catch (error) {
+                  console.error('Error updating match sheet complete status:', error);
+                }
+              }}
+              className={classNames(
+                match.matchSheetComplete ? 'bg-indigo-600' : 'bg-gray-200',
+                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+              )}
+            >
+              <span className="sr-only">Spielbericht vollständig</span>
+              <span
+                aria-hidden="true"
+                className={classNames(
+                  match.matchSheetComplete ? 'translate-x-5' : 'translate-x-0',
+                  'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                )}
+              />
+            </button>
+          </div>
         </div>
       </div>
     </Layout >
