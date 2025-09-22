@@ -119,4 +119,5 @@ export interface Match {
   published: boolean;
   referee1?: Referee;
   referee2?: Referee;
+  matchSheetComplete?: boolean;
 }
