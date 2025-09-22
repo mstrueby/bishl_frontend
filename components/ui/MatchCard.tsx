@@ -402,7 +402,7 @@ const MatchCard: React.FC<{
           {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED' || match.matchStatus.key === 'FORFEITED') && (() => {
             const buttonClass = match.matchSheetComplete
               ? "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-white py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
+              : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200/50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
             
             return (
               <Link href={`/matches/${match._id}`}>
