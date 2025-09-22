@@ -792,7 +792,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                 Spielbericht vollständig
               </span>
               <span className="text-xs text-gray-500">
-                Markieren Sie das Spiel als vollständig abgeschlossen
+                Markiere das Spiel als vollständig erfasst
               </span>
             </div>
             <button
