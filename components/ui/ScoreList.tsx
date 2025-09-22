@@ -156,7 +156,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
         title="Tor löschen"
         description={`Bist du sicher, dass du das Tor von <strong>${goalToDelete?.goalPlayer ? `#${goalToDelete.goalPlayer.jerseyNumber} ${goalToDelete.goalPlayer.firstName} ${goalToDelete.goalPlayer.lastName} (Zeit ${goalToDelete.matchTime})` : 'Unbekannt'}</strong> löschen möchtest?`}
         descriptionSubText="Das Ergebnis wird um 1 verringert. Diese Aktion kann nicht rückgängig gemacht werden."
-        isConfirmButtonDisabled={isDeleting} // Pass loading state to modal's confirm button
+        isLoading={isDeleting} // Pass loading state to modal's confirm button
       />
     </div>
   );
