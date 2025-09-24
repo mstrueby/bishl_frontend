@@ -467,7 +467,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
                     </div>
                     <div className="flex-grow ml-6">
                       <p className="text-sm font-medium text-gray-900">
-                        {penalty.penaltyPlayer ? `${penalty.penaltyPlayer.displayFirstName} ${penalty.penaltyPlayer.displayLastName}` : 'Unbekannt'}
+                        {penalty.teamName}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {penalty.isGM && 'GM · '}
