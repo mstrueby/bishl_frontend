@@ -1028,48 +1028,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       });
       console.log('Roster successfully saved:', rosterResponse.data);
 
-      try {
-        // Update roster published status for the main match
-        const publishResponse = await axios.patch(`${BASE_URL}/matches/${match._id}`, {
-          [teamFlag]: {
-            rosterPublished: rosterData.published
-          }
-        }, {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          }
-        });
-        console.log('Roster published status updated:', rosterData.published);
-      } catch (error) {
-        // Ignore 304 responses and continue
-        if (axios.isAxiosError(error) && error.response?.status !== 304) {
-          throw error;
-        }
-        console.log('Roster published status not changed (304)');
-      }
-
-      // Save coach data
+      // Update match details (published status, coach, and staff) in a single API call
       try {
         await axios.patch(`${BASE_URL}/matches/${match._id}`, {
           [teamFlag]: {
-            coach: rosterData.coach
-          }
-        }, {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          }
-        });
-        console.log('Coach data saved successfully');
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status !== 304) {
-          console.error('Error saving coach data:', error);
-        }
-      }
-
-      // Save staff data
-      try {
-        await axios.patch(`${BASE_URL}/matches/${match._id}`, {
-          [teamFlag]: {
+            rosterPublished: rosterData.published,
+            coach: rosterData.coach,
             staff: rosterData.staff
           }
         }, {
@@ -1077,10 +1041,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             Authorization: `Bearer ${jwt}`,
           }
         });
-        console.log('Staff data saved successfully');
+        console.log('Match details updated successfully (published status, coach, and staff)');
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status !== 304) {
-          console.error('Error saving staff data:', error);
+          console.error('Error updating match details:', error);
+        } else {
+          console.log('Match details not changed (304)');
         }
       }
 
@@ -1105,34 +1071,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           console.log(`Roster successfully saved for match ${m._id} as ${matchTeamFlag} team:`, rosterResponse.data);
           cntAdditionalMatches += 1;
 
-          try {
-            // Update roster published status with correct team flag
-            await axios.patch(
-              `${BASE_URL}/matches/${m._id}`,
-              {
-                [matchTeamFlag]: {
-                  rosterPublished: rosterData.published
-                }
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${jwt}`,
-                }
-              }
-            );
-            console.log(`Roster published status updated for match ${m._id} as ${matchTeamFlag} team`);
-          } catch (error) {
-            // Ignore 304 responses and continue
-            if (axios.isAxiosError(error) && error.response?.status !== 304) {
-              throw error;
-            }
-            console.log(`Roster published status not changed (304) for match ${m._id}`);
-          }
-
-          // Save coach and staff data for additional matches
+          // Update match details (published status, coach, and staff) in a single API call
           try {
             await axios.patch(`${BASE_URL}/matches/${m._id}`, {
               [matchTeamFlag]: {
+                rosterPublished: rosterData.published,
                 coach: rosterData.coach,
                 staff: rosterData.staff
               }
@@ -1141,10 +1084,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 Authorization: `Bearer ${jwt}`,
               }
             });
-            console.log(`Coach and staff data saved for match ${m._id}`);
+            console.log(`Match details updated for match ${m._id} as ${matchTeamFlag} team (published status, coach, and staff)`);
           } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status !== 304) {
-              console.error(`Error saving coach/staff data for match ${m._id}:`, error);
+              console.error(`Error updating match details for match ${m._id}:`, error);
+            } else {
+              console.log(`Match details not changed (304) for match ${m._id}`);
             }
           }
 
