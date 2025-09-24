@@ -3,6 +3,7 @@ entrypoint = "index.js"
 hidden = [".config", ".next", ".swc"]
 
 run = "npm run dev"
+modules = ["nodejs-20"]
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
@@ -15,7 +16,6 @@ channel = "stable-21_11"
 XDG_CONFIG_HOME = "/home/runner/.config"
 PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin"
 npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
-NODE_ENV = "development"
 
 [packager]
 language = "nodejs"
@@ -86,12 +86,17 @@ externalPort = 3001
 localPort = 3002
 externalPort = 3002
 
+[[ports]]
+localPort = 3003
+externalPort = 3003
+
 [deployment]
 deploymentTarget = "cloudrun"
-build = ["sh", "-c", "npm run build"]
+build = ["sh", "-c", "NODE_ENV=production npm run build"]
 run = ["sh", "-c", "npm start"]
 
 [workflows]
+runButton = "Dev"
 
 [[workflows.workflow]]
 name = "Dev"
@@ -99,4 +104,15 @@ author = 19449957
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "NODE_ENV=production npm run dev"
+args = "NODE_ENV=development npm run dev"
+
+[[workflows.workflow]]
+name = "Build"
+author = 19449957
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "NODE_ENV=production npm run build"
+
+[agent]
+expertMode = true

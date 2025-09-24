@@ -59,7 +59,9 @@ const ScoresList: React.FC<ScoresListProps> = ({
           refreshMatchData();
         }
       }
-      refreshMatchData();
+      if (refreshMatchData) {
+        refreshMatchData();
+      }
     } catch (error) {
       console.error('Error deleting goal:', error);
     } finally {
