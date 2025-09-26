@@ -961,14 +961,14 @@ export default function MatchDetails({
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                      { key: "ruleBook", label: "Aktuelle Spielregeln/WKO", description: "Sind die aktuellen Spielregeln und WKO verfügbar?" },
+                      { key: "ruleBook", label: "Spielregeln/WKO", description: "Sind die aktuellen Spielregeln und WKO verfügbar?" },
                       { key: "goalDisplay", label: "Manuelle Toranzeige", description: "Ist eine manuelle Toranzeige vorhanden?" },
                       { key: "soundSource", label: "Ersatz-Tonquelle", description: "Ist eine Ersatz-Tonquelle (Pfeife/Horn) verfügbar?" },
                       { key: "matchClock", label: "Spieluhr", description: "Ist eine funktionierende Spieluhr vorhanden?" },
-                      { key: "matchBalls", label: "10 Spielbälle", description: "Sind mindestens 10 regelkonforme Spielbälle verfügbar?" },
+                      { key: "matchBalls", label: "10 Spielbälle", description: "Sind mind. 10 regelkonforme Spielbälle verfügbar?" },
                       { key: "firstAidKit", label: "Erste-Hilfe-Ausrüstung", description: "Ist vollständige Erste-Hilfe-Ausrüstung vorhanden?" },
-                      { key: "fieldLines", label: "Fläche mit allen Pflichtlinien", description: "Ist das Spielfeld vollständig mit allen Pflichtlinien markiert?" },
-                      { key: "nets", label: "Tornetze gem. 2.1.9 der Spielregeln", description: "Sind regelkonforme Tornetze angebracht?" },
+                      { key: "fieldLines", label: "Pflichtlinien", description: "Ist das Spielfeld vollständig mit allen Pflichtlinien markiert?" },
+                      { key: "nets", label: "Tornetze", description: "Sind regelkonforme Tornetze angebracht?" },
                     ].map((item) => (
                       <div key={item.key} className="flex items-center justify-between">
                         <div className="flex flex-col">
@@ -1015,9 +1015,9 @@ export default function MatchDetails({
                     </h5>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {[
-                        { key: "homeRoster", label: "Aufstellung rechtzeitig veröfffentlicht", description: "Wurde die Aufstellung fristgerecht eingereicht?" },
-                        { key: "homePlayerPasses", label: "Spielerpässe vollständig", description: "Sind alle Spielerpässe vollständig und gültig?" },
-                        { key: "homeUniformPlayerClothing", label: "Einheitliche Spielerkleidung", description: "Trägt die Mannschaft einheitliche Spielerkleidung?" },
+                        { key: "homeRoster", label: "Aufstellung rechtzeitig veröfffentlicht", description: "Wurde die Aufstellung fristgerecht veröffentlicht?" },
+                        { key: "homePlayerPasses", label: "Spielerpässe vollständig", description: "Liegen alle Spielerpässe vor?" },
+                        { key: "homeUniformPlayerClothing", label: "Einheitliche Spielerkleidung", description: "Einheitliche Helme, Trikots, Hosen?" },
                       ].map((item) => (
                         <div key={item.key} className="flex items-center justify-between">
                           <div className="flex flex-col">
@@ -1058,10 +1058,10 @@ export default function MatchDetails({
                     </h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {[
-                        { key: "awayRoster", label: "Aufstellung rechtzeitig veröfffentlicht", description: "Wurde die Aufstellung fristgerecht eingereicht?" },
-                        { key: "awayPlayerPasses", label: "Spielerpässe vollständig", description: "Sind alle Spielerpässe vollständig und gültig?" },
-                        { key: "awayUniformPlayerClothing", label: "Einheitliche Spielerkleidung", description: "Trägt die Mannschaft einheitliche Spielerkleidung?" },
-                        { key: "awaySecondJerseySet", label: "Zweiter Trikotsatz", description: "Ist ein zweiter Trikotsatz für Farbkonflikte verfügbar?" },
+                        { key: "awayRoster", label: "Aufstellung rechtzeitig veröfffentlicht", description: "Wurde die Aufstellung fristgerecht veröffentlicht?" },
+                        { key: "awayPlayerPasses", label: "Spielerpässe vollständig", description: "Liegen alle Spielerpässe vor?" },
+                        { key: "awayUniformPlayerClothing", label: "Einheitliche Spielerkleidung", description: "Einheitliche Helme, Trikots, Hosen?" },
+                        { key: "awaySecondJerseySet", label: "Zweiter Trikotsatz", description: "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?" },
                       ].map((item) => (
                         <div key={item.key} className="flex items-center justify-between">
                           <div className="flex flex-col">
