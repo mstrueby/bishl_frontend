@@ -111,6 +111,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
 
   const isShowingUpcoming = todaysMatches.length === 0 && restOfWeekMatches.length > 0;
 
+  // State to manage expanded tournaments
+  const [expandedTournaments, setExpandedTournaments] = useState<Set<string>>(new Set());
+
   // Reset expanded tournaments when switching between display modes
   useEffect(() => {
     setExpandedTournaments(new Set());
@@ -256,9 +259,6 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       minute: '2-digit'
     });
   };
-
-  // State to manage expanded tournaments
-  const [expandedTournaments, setExpandedTournaments] = useState<Set<string>>(new Set());
 
   const toggleTournament = (tournamentAlias: string) => {
     setExpandedTournaments(prev => {
@@ -479,114 +479,26 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       <Layout>
         {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
-        {/* Today's Games or Upcoming Games Section */}
-        {(todaysMatches.length > 0 || restOfWeekMatches.length > 0) && (
-
+        {/* Today's Games Section */}
+        {todaysMatches.length > 0 && (
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mt-12 mb-8">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                {isShowingUpcoming ? 'Kommende Spiele' : 'Aktuelle Spiele'}
+                Aktuelle Spiele
               </h2>
-              {/**
-              {isShowingUpcoming && upcomingMatches.length > 0 && (
-                <p className="mt-2 mb-12 text-lg/8 text-gray-600">
-                  {new Date(upcomingMatches[0].startDate).toLocaleDateString('de-DE', {
-                    weekday: 'long',
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                  })}
-                </p>
-              )}
-              */}
             </div>
 
-            {/* Tournament Filter - Only show for today's matches */}
-            {!isShowingUpcoming && (
-              <div className="sm:max-w-xs mx-auto mb-12">
-                <TournamentSelect
-                  selectedTournament={selectedTournament}
-                  onTournamentChange={setSelectedTournament}
-                  allTournamentsData={tournaments}
-                />
-              </div>
-            )}
+            {/* Tournament Filter */}
+            <div className="sm:max-w-xs mx-auto mb-12">
+              <TournamentSelect
+                selectedTournament={selectedTournament}
+                onTournamentChange={setSelectedTournament}
+                allTournamentsData={tournaments}
+              />
+            </div>
 
             {(() => {
-              // If showing upcoming matches, group by date
-              if (isShowingUpcoming) {
-                return (
-                  <div className="space-y-8">
-                    {restOfWeekMatches.map((dayGroup, dayIndex) => {
-                      // Filter matches for this day based on selected tournament
-                      const dayFilteredMatches = selectedTournament
-                        ? dayGroup.matches.filter(match => match.tournament.alias === selectedTournament.alias)
-                        : dayGroup.matches;
-
-                      if (dayFilteredMatches.length === 0) return null;
-
-                      // Group matches by tournament for this day
-                      const matchesByTournament = dayFilteredMatches.reduce((acc, match) => {
-                        const tournamentAlias = match.tournament.alias;
-                        if (!acc[tournamentAlias]) {
-                          // Find the full tournament data from the tournaments array
-                          const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
-                          acc[tournamentAlias] = {
-                            tournament: fullTournament || {
-                              _id: tournamentAlias,
-                              name: match.tournament.name,
-                              alias: match.tournament.alias,
-                              tinyName: match.tournament.alias,
-                              ageGroup: { key: '', value: '' },
-                              published: true,
-                              active: true,
-                              external: false,
-                              seasons: []
-                            },
-                            matches: []
-                          };
-                        }
-                        acc[tournamentAlias].matches.push(match);
-                        return acc;
-                      }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
-
-                      return (
-                        <div key={dayIndex}>
-                          <div className="mb-6 mt-8">
-                            <div className="flex flex-wrap items-baseline">
-                              <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">
-                                {new Date(dayGroup.date).toLocaleDateString('de-DE', {
-                                  weekday: 'long'
-                                })}
-                              </h4>
-                              <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">
-                                {new Date(dayGroup.date).toLocaleDateString('de-DE', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric'
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {Object.values(matchesByTournament)
-                              .sort((a, b) => {
-                                const sortOrderA = tournamentConfigs[a.tournament.alias]?.sortOrder || 999;
-                                const sortOrderB = tournamentConfigs[b.tournament.alias]?.sortOrder || 999;
-                                return sortOrderA - sortOrderB;
-                              })
-                              .map(({ tournament, matches }) => (
-                              <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              }
-
-              // For today's matches or ≤3 upcoming matches, use existing logic
+              // For today's matches, use existing logic
               const { live, upcoming, finished } = categorizeMatches(filteredMatches);
 
               return (
@@ -612,15 +524,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                   {/* Upcoming Games */}
                   {upcoming.length > 0 && (
                     <div>
-                      {!isShowingUpcoming && (
-                        <div className="min-w-0 flex-1">
-                          <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
-                            <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                              <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Demnächst</h2>
-                            </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                          <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Demnächst</h2>
                           </div>
                         </div>
-                      )}
+                      </div>
                       {upcoming.length > 6 ? (
                         // Group by time slots when more than 6 matches
                         <div className="space-y-8">
@@ -778,12 +688,96 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                     <div className="text-center py-12">
                       <p className="text-gray-500">
                         {selectedTournament
-                          ? `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'} in ${selectedTournament.name}`
-                          : `Keine Spiele ${isShowingUpcoming ? 'demnächst' : 'heute'}`
+                          ? `Keine Spiele heute in ${selectedTournament.name}`
+                          : `Keine Spiele heute`
                         }
                       </p>
                     </div>
                   )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* Rest of Week Matches Section */}
+        {restOfWeekMatches.length > 0 && (
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mt-12 mb-8">
+              <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                Kommende Spiele
+              </h2>
+            </div>
+
+            {(() => {
+              // Group by date
+              return (
+                <div className="space-y-8">
+                  {restOfWeekMatches.map((dayGroup, dayIndex) => {
+                    // Filter matches for this day based on selected tournament
+                    const dayFilteredMatches = selectedTournament
+                      ? dayGroup.matches.filter(match => match.tournament.alias === selectedTournament.alias)
+                      : dayGroup.matches;
+
+                    if (dayFilteredMatches.length === 0) return null;
+
+                    // Group matches by tournament for this day
+                    const matchesByTournament = dayFilteredMatches.reduce((acc, match) => {
+                      const tournamentAlias = match.tournament.alias;
+                      if (!acc[tournamentAlias]) {
+                        // Find the full tournament data from the tournaments array
+                        const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
+                        acc[tournamentAlias] = {
+                          tournament: fullTournament || {
+                            _id: tournamentAlias,
+                            name: match.tournament.name,
+                            alias: match.tournament.alias,
+                            tinyName: match.tournament.alias,
+                            ageGroup: { key: '', value: '' },
+                            published: true,
+                            active: true,
+                            external: false,
+                            seasons: []
+                          },
+                          matches: []
+                        };
+                      }
+                      acc[tournamentAlias].matches.push(match);
+                      return acc;
+                    }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
+
+                    return (
+                      <div key={dayIndex}>
+                        <div className="mb-6 mt-8">
+                          <div className="flex flex-wrap items-baseline">
+                            <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">
+                              {new Date(dayGroup.date).toLocaleDateString('de-DE', {
+                                weekday: 'long'
+                              })}
+                            </h4>
+                            <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(dayGroup.date).toLocaleDateString('de-DE', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {Object.values(matchesByTournament)
+                            .sort((a, b) => {
+                              const sortOrderA = tournamentConfigs[a.tournament.alias]?.sortOrder || 999;
+                              const sortOrderB = tournamentConfigs[b.tournament.alias]?.sortOrder || 999;
+                              return sortOrderA - sortOrderB;
+                            })
+                            .map(({ tournament, matches }) => (
+                            <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })()}
