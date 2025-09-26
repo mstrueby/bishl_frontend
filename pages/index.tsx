@@ -264,11 +264,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
     setExpandedTournaments(prev => {
       const newSet = new Set(prev);
       if (newSet.has(tournamentAlias)) {
-        // If already expanded, collapse it
         newSet.delete(tournamentAlias);
       } else {
-        // If not expanded, expand only this one (collapse all others)
-        newSet.clear();
         newSet.add(tournamentAlias);
       }
       return newSet;
@@ -301,8 +298,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       ? sortedMatches.slice(0, 3)
       : sortedMatches;
 
+    // Calculate minimum height to maintain consistent card sizes (3 matches + toggle button space)
+    const minHeight = hasMoreThanThree ? '280px' : 'auto';
+
     return (
-      <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col">
+      <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
         <div className="p-4 border-b border-gray-900/5 bg-gray-50">
           {tournamentConfig && (
             <span className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
