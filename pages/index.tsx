@@ -264,8 +264,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
     setExpandedTournaments(prev => {
       const newSet = new Set(prev);
       if (newSet.has(tournamentAlias)) {
+        // If already expanded, collapse it
         newSet.delete(tournamentAlias);
       } else {
+        // If not expanded, expand only this one (collapse all others)
+        newSet.clear();
         newSet.add(tournamentAlias);
       }
       return newSet;
