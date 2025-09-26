@@ -731,7 +731,7 @@ export default function MatchDetails({
                     </span>
                     <button
                       type="button"
-                      disabled={savingSupplementaryField === "masterToggle"}
+                      disabled={savingSupplementaryField === "masterToggle" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                       onClick={async () => {
                         try {
                           setSavingSupplementaryField("masterToggle");
@@ -812,7 +812,7 @@ export default function MatchDetails({
                           const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
                           return hasAnyTrue ? "bg-indigo-600" : "bg-gray-200";
                         })(),
-                        savingSupplementaryField === "masterToggle" ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                        savingSupplementaryField === "masterToggle" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
                         "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                       )}
                     >
