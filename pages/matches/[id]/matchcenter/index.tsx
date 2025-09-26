@@ -842,16 +842,16 @@ export default function MatchDetails({
                 {/* Referee Attendance Section */}
                 <div className="mb-8">
                   <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Schiedsrichter Anwesenheit
+                    Schiedsrichter
                   </h4>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter Anwesenheit
+                          Anwesenheit
                         </span>
                         <span className="text-xs text-gray-500">
-                          Status der Schiedsrichter Anwesenheit
+                          Sind die offiziell eingeteilten Schiedsrichter angetreten?
                         </span>
                       </div>
                       <select
@@ -871,7 +871,7 @@ export default function MatchDetails({
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter 1 Pass verfügbar
+                          Schiedsrichter 1 Pass liegt vor
                         </span>
                       </div>
                       <button
@@ -897,7 +897,7 @@ export default function MatchDetails({
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter 2 Pass verfügbar
+                          Schiedsrichter 2 Pass liegt vor
                         </span>
                       </div>
                       <button
@@ -957,18 +957,18 @@ export default function MatchDetails({
                 {/* Equipment Check Section */}
                 <div className="mb-8">
                   <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Nutzungserlaubnis / Ausrüstung
+                    Dokumente / Ausrüstung
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                      { key: "ruleBook", label: "Regelwerk" },
-                      { key: "goalDisplay", label: "Tor-Anzeige" },
-                      { key: "soundSource", label: "Schallquelle" },
+                      { key: "ruleBook", label: "Aktuelle Spielregeln/WKO" },
+                      { key: "goalDisplay", label: "Manuelle Toranzeige" },
+                      { key: "soundSource", label: "Ersatz-Tonquelle" },
                       { key: "matchClock", label: "Spieluhr" },
-                      { key: "matchBalls", label: "Spielbälle" },
-                      { key: "firstAidKit", label: "Erste-Hilfe-Kasten" },
-                      { key: "fieldLines", label: "Feldlinien" },
-                      { key: "nets", label: "Netze" },
+                      { key: "matchBalls", label: "10 Spielbälle" },
+                      { key: "firstAidKit", label: "Erste-Hilfe-Ausrüstung" },
+                      { key: "fieldLines", label: "Fläche mit allen Pflichtlinien" },
+                      { key: "nets", label: "Tornetze gem. 2.1.9 der Spielregeln" },
                     ].map((item) => (
                       <div key={item.key} className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-900">
@@ -1000,7 +1000,7 @@ export default function MatchDetails({
                 {/* Team Equipment Section */}
                 <div className="mb-8">
                   <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Mannschaftsausrüstung
+                    Mannschaften
                   </h4>
                   
                   {/* Home Team */}
@@ -1010,8 +1010,8 @@ export default function MatchDetails({
                     </h5>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {[
-                        { key: "homeRoster", label: "Aufstellung" },
-                        { key: "homePlayerPasses", label: "Spielerpässe" },
+                        { key: "homeRoster", label: "Aufstellung rechtzeitig veröfffentlicht" },
+                        { key: "homePlayerPasses", label: "Spielerpässe vollständig" },
                         { key: "homeUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
                       ].map((item) => (
                         <div key={item.key} className="flex items-center justify-between">
@@ -1048,8 +1048,8 @@ export default function MatchDetails({
                     </h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {[
-                        { key: "awayRoster", label: "Aufstellung" },
-                        { key: "awayPlayerPasses", label: "Spielerpässe" },
+                        { key: "awayRoster", label: "Aufstellung rechtzeitig veröfffentlicht" },
+                        { key: "awayPlayerPasses", label: "Spielerpässe vollständig" },
                         { key: "awayUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
                         { key: "awaySecondJerseySet", label: "Zweiter Trikotsatz" },
                       ].map((item) => (
