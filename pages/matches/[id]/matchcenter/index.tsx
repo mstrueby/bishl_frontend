@@ -128,6 +128,7 @@ export default function MatchDetails({
   const [awayPlayerStats, setAwayPlayerStats] = useState<{
     [playerId: string]: number;
   }>({});
+  const [isSavingMatchSheetComplete, setIsSavingMatchSheetComplete] = useState(false);
   {
     /** 
   const [editData, setEditData] = useState<EditMatchData>({
@@ -1013,8 +1014,10 @@ export default function MatchDetails({
               </div>
               <button
                 type="button"
+                disabled={isSavingMatchSheetComplete}
                 onClick={async () => {
                   try {
+                    setIsSavingMatchSheetComplete(true);
                     const newCompleteStatus = !match.matchSheetComplete;
                     const response = await axios.patch(
                       `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
@@ -1040,23 +1043,51 @@ export default function MatchDetails({
                       "Error updating match sheet complete status:",
                       error,
                     );
+                  } finally {
+                    setIsSavingMatchSheetComplete(false);
                   }
                 }}
                 className={classNames(
                   match.matchSheetComplete ? "bg-indigo-600" : "bg-gray-200",
-                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                  isSavingMatchSheetComplete ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                  "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                 )}
               >
                 <span className="sr-only">Spielbericht vollständig</span>
-                <span
-                  aria-hidden="true"
-                  className={classNames(
-                    match.matchSheetComplete
-                      ? "translate-x-5"
-                      : "translate-x-0",
-                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                  )}
-                />
+                {isSavingMatchSheetComplete ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg
+                      className="animate-spin h-3 w-3 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                      ></path>
+                    </svg>
+                  </div>
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className={classNames(
+                      match.matchSheetComplete
+                        ? "translate-x-5"
+                        : "translate-x-0",
+                      "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                    )}
+                  />
+                )}
               </button>
             </div>
           </div>
