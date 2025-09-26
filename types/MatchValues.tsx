@@ -87,6 +87,44 @@ export interface Referee {
   points: number;
 }
 
+export interface RefereePaymentDetails {
+  travelExpenses?: number;
+  expenseAllowance?: number;
+  gameFees?: number;
+}
+
+export interface RefereePayment {
+  referee1?: RefereePaymentDetails;
+  referee2?: RefereePaymentDetails;
+}
+
+export interface SupplementarySheet {
+  refereeAttendance?: string; // yes, only 1, no referee, substitute referee
+  referee1PassAvailable?: boolean;
+  referee2PassAvailable?: boolean;
+  referee1DelayMin?: number;
+  referee2DelayMin?: number;
+  // Nutzungserlaubnis
+  ruleBook?: boolean;
+  goalDisplay?: boolean;
+  soundSource?: boolean;
+  matchClock?: boolean;
+  matchBalls?: boolean;
+  firstAidKit?: boolean;
+  fieldLines?: boolean;
+  nets?: boolean;
+  homeRoster?: boolean;
+  homePlayerPasses?: boolean;
+  homeUniformPlayerClothing?: boolean;
+  awayRoster?: boolean;
+  awayPlayerPasses?: boolean;
+  awayUniformPlayerClothing?: boolean;
+  awaySecondJerseySet?: boolean;
+  refereePayment?: RefereePayment;
+  specialEvents?: boolean;
+  refereeComments?: string;
+}
+
 export interface Match {
   _id: string;
   matchId: number;
@@ -120,4 +158,5 @@ export interface Match {
   referee1?: Referee;
   referee2?: Referee;
   matchSheetComplete?: boolean;
+  supplementarySheet?: SupplementarySheet;
 }
