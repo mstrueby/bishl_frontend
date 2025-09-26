@@ -121,6 +121,8 @@ export interface SupplementarySheet {
   awayUniformPlayerClothing?: boolean;
   awaySecondJerseySet?: boolean;
   refereePayment?: RefereePayment;
+  specialEvents?: boolean;
+  refereeComments?: string;
 }
 
 export interface Match {
