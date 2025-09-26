@@ -132,7 +132,7 @@ export default function MatchDetails({
   const [isSavingMatchSheetComplete, setIsSavingMatchSheetComplete] = useState(false);
   const [savingSupplementaryField, setSavingSupplementaryField] = useState<string | null>(null);
   {
-    /** 
+    /**
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -735,7 +735,7 @@ export default function MatchDetails({
                       onClick={async () => {
                         try {
                           setSavingSupplementaryField("masterToggle");
-                          
+
                           // Determine if we should activate or deactivate all
                           const currentSheet = match.supplementarySheet || {};
                           const booleanFields = [
@@ -746,11 +746,11 @@ export default function MatchDetails({
                             'awayRoster', 'awayPlayerPasses', 'awayUniformPlayerClothing',
                             'awaySecondJerseySet'
                           ];
-                          
+
                           // Check if any field is currently true - if so, set all to false, otherwise set all to true
                           const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
                           const newValue = !hasAnyTrue;
-                          
+
                           // Create the updated supplementary sheet object
                           const updatedSheet = {
                             ...currentSheet,
@@ -772,7 +772,7 @@ export default function MatchDetails({
                             awayUniformPlayerClothing: newValue,
                             awaySecondJerseySet: newValue,
                           };
-                          
+
                           const response = await axios.patch(
                             `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
                             {
@@ -838,7 +838,7 @@ export default function MatchDetails({
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Referee Attendance Section */}
                 <div className="mb-8">
                   <h4 className="text-md font-medium text-gray-900 mb-4">
@@ -876,11 +876,11 @@ export default function MatchDetails({
                       </div>
                       <button
                         type="button"
-                        disabled={savingSupplementaryField === "referee1PassAvailable"}
+                        disabled={savingSupplementaryField === "referee1PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                         onClick={() => updateSupplementaryField("referee1PassAvailable", !match.supplementarySheet?.referee1PassAvailable)}
                         className={classNames(
                           match.supplementarySheet?.referee1PassAvailable ? "bg-indigo-600" : "bg-gray-200",
-                          savingSupplementaryField === "referee1PassAvailable" ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                          savingSupplementaryField === "referee1PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
                           "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                         )}
                       >
@@ -902,11 +902,11 @@ export default function MatchDetails({
                       </div>
                       <button
                         type="button"
-                        disabled={savingSupplementaryField === "referee2PassAvailable"}
+                        disabled={savingSupplementaryField === "referee2PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                         onClick={() => updateSupplementaryField("referee2PassAvailable", !match.supplementarySheet?.referee2PassAvailable)}
                         className={classNames(
                           match.supplementarySheet?.referee2PassAvailable ? "bg-indigo-600" : "bg-gray-200",
-                          savingSupplementaryField === "referee2PassAvailable" ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                          savingSupplementaryField === "referee2PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
                           "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                         )}
                       >
@@ -931,7 +931,7 @@ export default function MatchDetails({
                         min="0"
                         value={match.supplementarySheet?.referee1DelayMin || 0}
                         onChange={(e) => updateSupplementaryField("referee1DelayMin", parseInt(e.target.value) || 0)}
-                        disabled={savingSupplementaryField === "referee1DelayMin"}
+                        disabled={savingSupplementaryField === "referee1DelayMin" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                         className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       />
                     </div>
@@ -947,7 +947,7 @@ export default function MatchDetails({
                         min="0"
                         value={match.supplementarySheet?.referee2DelayMin || 0}
                         onChange={(e) => updateSupplementaryField("referee2DelayMin", parseInt(e.target.value) || 0)}
-                        disabled={savingSupplementaryField === "referee2DelayMin"}
+                        disabled={savingSupplementaryField === "referee2DelayMin" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                         className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       />
                     </div>
@@ -981,11 +981,11 @@ export default function MatchDetails({
                         </div>
                         <button
                           type="button"
-                          disabled={savingSupplementaryField === item.key}
+                          disabled={savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                           onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
                           className={classNames(
                             match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
-                            savingSupplementaryField === item.key ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                            savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
                             "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                           )}
                         >
@@ -1007,7 +1007,7 @@ export default function MatchDetails({
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Mannschaften
                   </h4>
-                  
+
                   {/* Home Team */}
                   <div className="mb-6">
                     <h5 className="text-sm font-medium text-gray-700 mb-3">
@@ -1030,11 +1030,11 @@ export default function MatchDetails({
                           </div>
                           <button
                             type="button"
-                            disabled={savingSupplementaryField === item.key}
+                            disabled={savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                             onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
                             className={classNames(
                               match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
-                              savingSupplementaryField === item.key ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                              savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
                               "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                             )}
                           >
@@ -1074,11 +1074,11 @@ export default function MatchDetails({
                           </div>
                           <button
                             type="button"
-                            disabled={savingSupplementaryField === item.key}
+                            disabled={savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                             onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
                             className={classNames(
                               match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
-                              savingSupplementaryField === item.key ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                              savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
                               "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                             )}
                           >
@@ -1101,7 +1101,7 @@ export default function MatchDetails({
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Schiedsrichter Vergütung
                   </h4>
-                  
+
                   {/* Referee 1 Payment */}
                   <div className="mb-6">
                     <h5 className="text-sm font-medium text-gray-700 mb-3">
@@ -1124,7 +1124,7 @@ export default function MatchDetails({
                               travelExpenses: parseFloat(e.target.value) || 0
                             }
                           })}
-                          disabled={savingSupplementaryField === "refereePayment"}
+                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -1144,7 +1144,7 @@ export default function MatchDetails({
                               expenseAllowance: parseFloat(e.target.value) || 0
                             }
                           })}
-                          disabled={savingSupplementaryField === "refereePayment"}
+                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -1164,7 +1164,7 @@ export default function MatchDetails({
                               gameFees: parseFloat(e.target.value) || 0
                             }
                           })}
-                          disabled={savingSupplementaryField === "refereePayment"}
+                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -1193,7 +1193,7 @@ export default function MatchDetails({
                               travelExpenses: parseFloat(e.target.value) || 0
                             }
                           })}
-                          disabled={savingSupplementaryField === "refereePayment"}
+                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -1213,7 +1213,7 @@ export default function MatchDetails({
                               expenseAllowance: parseFloat(e.target.value) || 0
                             }
                           })}
-                          disabled={savingSupplementaryField === "refereePayment"}
+                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
@@ -1233,7 +1233,7 @@ export default function MatchDetails({
                               gameFees: parseFloat(e.target.value) || 0
                             }
                           })}
-                          disabled={savingSupplementaryField === "refereePayment"}
+                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                       </div>
