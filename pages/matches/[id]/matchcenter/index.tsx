@@ -721,9 +721,123 @@ export default function MatchDetails({
           {activeTab === "supplementary" && (
             <div className="py-4">
               <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-6">
-                  Zusatzblatt
-                </h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Zusatzblatt
+                  </h3>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-medium text-gray-700">
+                      Alle aktivieren/deaktivieren
+                    </span>
+                    <button
+                      type="button"
+                      disabled={savingSupplementaryField === "masterToggle"}
+                      onClick={async () => {
+                        try {
+                          setSavingSupplementaryField("masterToggle");
+                          
+                          // Determine if we should activate or deactivate all
+                          const currentSheet = match.supplementarySheet || {};
+                          const booleanFields = [
+                            'referee1PassAvailable', 'referee2PassAvailable',
+                            'ruleBook', 'goalDisplay', 'soundSource', 'matchClock',
+                            'matchBalls', 'firstAidKit', 'fieldLines', 'nets',
+                            'homeRoster', 'homePlayerPasses', 'homeUniformPlayerClothing',
+                            'awayRoster', 'awayPlayerPasses', 'awayUniformPlayerClothing',
+                            'awaySecondJerseySet'
+                          ];
+                          
+                          // Check if any field is currently true - if so, set all to false, otherwise set all to true
+                          const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
+                          const newValue = !hasAnyTrue;
+                          
+                          // Create the updated supplementary sheet object
+                          const updatedSheet = {
+                            ...currentSheet,
+                            referee1PassAvailable: newValue,
+                            referee2PassAvailable: newValue,
+                            ruleBook: newValue,
+                            goalDisplay: newValue,
+                            soundSource: newValue,
+                            matchClock: newValue,
+                            matchBalls: newValue,
+                            firstAidKit: newValue,
+                            fieldLines: newValue,
+                            nets: newValue,
+                            homeRoster: newValue,
+                            homePlayerPasses: newValue,
+                            homeUniformPlayerClothing: newValue,
+                            awayRoster: newValue,
+                            awayPlayerPasses: newValue,
+                            awayUniformPlayerClothing: newValue,
+                            awaySecondJerseySet: newValue,
+                          };
+                          
+                          const response = await axios.patch(
+                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+                            {
+                              supplementarySheet: updatedSheet,
+                            },
+                            {
+                              headers: {
+                                Authorization: `Bearer ${jwt}`,
+                                "Content-Type": "application/json",
+                              },
+                            },
+                          );
+
+                          if (response.status === 200) {
+                            setMatch({
+                              ...match,
+                              supplementarySheet: updatedSheet,
+                            });
+                          }
+                        } catch (error) {
+                          console.error("Error updating all supplementary fields:", error);
+                        } finally {
+                          setSavingSupplementaryField(null);
+                        }
+                      }}
+                      className={classNames(
+                        (() => {
+                          const currentSheet = match.supplementarySheet || {};
+                          const booleanFields = [
+                            'referee1PassAvailable', 'referee2PassAvailable',
+                            'ruleBook', 'goalDisplay', 'soundSource', 'matchClock',
+                            'matchBalls', 'firstAidKit', 'fieldLines', 'nets',
+                            'homeRoster', 'homePlayerPasses', 'homeUniformPlayerClothing',
+                            'awayRoster', 'awayPlayerPasses', 'awayUniformPlayerClothing',
+                            'awaySecondJerseySet'
+                          ];
+                          const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
+                          return hasAnyTrue ? "bg-indigo-600" : "bg-gray-200";
+                        })(),
+                        savingSupplementaryField === "masterToggle" ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                        "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={classNames(
+                          (() => {
+                            const currentSheet = match.supplementarySheet || {};
+                            const booleanFields = [
+                              'referee1PassAvailable', 'referee2PassAvailable',
+                              'ruleBook', 'goalDisplay', 'soundSource', 'matchClock',
+                              'matchBalls', 'firstAidKit', 'fieldLines', 'nets',
+                              'homeRoster', 'homePlayerPasses', 'homeUniformPlayerClothing',
+                              'awayRoster', 'awayPlayerPasses', 'awayUniformPlayerClothing',
+                              'awaySecondJerseySet'
+                            ];
+                            const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
+                            return hasAnyTrue ? "translate-x-5" : "translate-x-0";
+                          })(),
+                          "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                        )}
+                      />
+                    </button>
+                  </div>
+                </div>
                 
                 {/* Referee Attendance Section */}
                 <div className="mb-8">
