@@ -61,6 +61,7 @@ const tabs = [
   { id: "roster", name: "Aufstellung" },
   { id: "goals", name: "Tore" },
   { id: "penalties", name: "Strafen" },
+  { id: "supplementary", name: "Zusatzblatt" },
 ];
 
 export default function MatchDetails({
@@ -129,6 +130,7 @@ export default function MatchDetails({
     [playerId: string]: number;
   }>({});
   const [isSavingMatchSheetComplete, setIsSavingMatchSheetComplete] = useState(false);
+  const [savingSupplementaryField, setSavingSupplementaryField] = useState<string | null>(null);
   {
     /** 
   const [editData, setEditData] = useState<EditMatchData>({
@@ -145,7 +147,7 @@ export default function MatchDetails({
   // Get active tab from query parameter, default to 'roster'
   const getActiveTabFromQuery = useCallback(() => {
     const { tab } = router.query;
-    const validTabs = ["roster", "goals", "penalties"];
+    const validTabs = ["roster", "goals", "penalties", "supplementary"];
     return validTabs.includes(tab as string) ? (tab as string) : "roster";
   }, [router.query]);
 
@@ -265,6 +267,42 @@ export default function MatchDetails({
       setIsRefreshing(false);
     }
   }, [id, isRefreshing]);
+
+  // Function to handle supplementary sheet field updates
+  const updateSupplementaryField = async (fieldName: string, value: any) => {
+    try {
+      setSavingSupplementaryField(fieldName);
+      const response = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+        {
+          supplementarySheet: {
+            ...match.supplementarySheet,
+            [fieldName]: value,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.status === 200) {
+        setMatch({
+          ...match,
+          supplementarySheet: {
+            ...match.supplementarySheet,
+            [fieldName]: value,
+          },
+        });
+      }
+    } catch (error) {
+      console.error(`Error updating supplementary field ${fieldName}:`, error);
+    } finally {
+      setSavingSupplementaryField(null);
+    }
+  };
 
   const permissions = calculateMatchButtonPermissions(
     user,
@@ -675,6 +713,403 @@ export default function MatchDetails({
                     setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
                     setEditingPenalty={setEditingAwayPenalty}
                   />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "supplementary" && (
+            <div className="py-4">
+              <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-6">
+                  Zusatzblatt
+                </h3>
+                
+                {/* Referee Attendance Section */}
+                <div className="mb-8">
+                  <h4 className="text-md font-medium text-gray-900 mb-4">
+                    Schiedsrichter Anwesenheit
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter Anwesenheit
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          Status der Schiedsrichter Anwesenheit
+                        </span>
+                      </div>
+                      <select
+                        value={match.supplementarySheet?.refereeAttendance || ""}
+                        onChange={(e) => updateSupplementaryField("refereeAttendance", e.target.value)}
+                        disabled={savingSupplementaryField === "refereeAttendance"}
+                        className="ml-4 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      >
+                        <option value="">Auswählen...</option>
+                        <option value="yes">Ja</option>
+                        <option value="only 1">Nur 1</option>
+                        <option value="no referee">Kein Schiedsrichter</option>
+                        <option value="substitute referee">Ersatz Schiedsrichter</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter 1 Pass verfügbar
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={savingSupplementaryField === "referee1PassAvailable"}
+                        onClick={() => updateSupplementaryField("referee1PassAvailable", !match.supplementarySheet?.referee1PassAvailable)}
+                        className={classNames(
+                          match.supplementarySheet?.referee1PassAvailable ? "bg-indigo-600" : "bg-gray-200",
+                          savingSupplementaryField === "referee1PassAvailable" ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={classNames(
+                            match.supplementarySheet?.referee1PassAvailable ? "translate-x-5" : "translate-x-0",
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                          )}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter 2 Pass verfügbar
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={savingSupplementaryField === "referee2PassAvailable"}
+                        onClick={() => updateSupplementaryField("referee2PassAvailable", !match.supplementarySheet?.referee2PassAvailable)}
+                        className={classNames(
+                          match.supplementarySheet?.referee2PassAvailable ? "bg-indigo-600" : "bg-gray-200",
+                          savingSupplementaryField === "referee2PassAvailable" ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={classNames(
+                            match.supplementarySheet?.referee2PassAvailable ? "translate-x-5" : "translate-x-0",
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                          )}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter 1 Verspätung (Min)
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        value={match.supplementarySheet?.referee1DelayMin || 0}
+                        onChange={(e) => updateSupplementaryField("referee1DelayMin", parseInt(e.target.value) || 0)}
+                        disabled={savingSupplementaryField === "referee1DelayMin"}
+                        className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter 2 Verspätung (Min)
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        value={match.supplementarySheet?.referee2DelayMin || 0}
+                        onChange={(e) => updateSupplementaryField("referee2DelayMin", parseInt(e.target.value) || 0)}
+                        disabled={savingSupplementaryField === "referee2DelayMin"}
+                        className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Equipment Check Section */}
+                <div className="mb-8">
+                  <h4 className="text-md font-medium text-gray-900 mb-4">
+                    Nutzungserlaubnis / Ausrüstung
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { key: "ruleBook", label: "Regelwerk" },
+                      { key: "goalDisplay", label: "Tor-Anzeige" },
+                      { key: "soundSource", label: "Schallquelle" },
+                      { key: "matchClock", label: "Spieluhr" },
+                      { key: "matchBalls", label: "Spielbälle" },
+                      { key: "firstAidKit", label: "Erste-Hilfe-Kasten" },
+                      { key: "fieldLines", label: "Feldlinien" },
+                      { key: "nets", label: "Netze" },
+                    ].map((item) => (
+                      <div key={item.key} className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-900">
+                          {item.label}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={savingSupplementaryField === item.key}
+                          onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
+                          className={classNames(
+                            match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
+                            savingSupplementaryField === item.key ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "translate-x-5" : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            )}
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Team Equipment Section */}
+                <div className="mb-8">
+                  <h4 className="text-md font-medium text-gray-900 mb-4">
+                    Mannschaftsausrüstung
+                  </h4>
+                  
+                  {/* Home Team */}
+                  <div className="mb-6">
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">
+                      Heimmannschaft - {match.home.fullName}
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[
+                        { key: "homeRoster", label: "Aufstellung" },
+                        { key: "homePlayerPasses", label: "Spielerpässe" },
+                        { key: "homeUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
+                      ].map((item) => (
+                        <div key={item.key} className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-900">
+                            {item.label}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={savingSupplementaryField === item.key}
+                            onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
+                            className={classNames(
+                              match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
+                              savingSupplementaryField === item.key ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                              "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                            )}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className={classNames(
+                                match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "translate-x-5" : "translate-x-0",
+                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                              )}
+                            />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Away Team */}
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">
+                      Gastmannschaft - {match.away.fullName}
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { key: "awayRoster", label: "Aufstellung" },
+                        { key: "awayPlayerPasses", label: "Spielerpässe" },
+                        { key: "awayUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
+                        { key: "awaySecondJerseySet", label: "Zweiter Trikotsatz" },
+                      ].map((item) => (
+                        <div key={item.key} className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-900">
+                            {item.label}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={savingSupplementaryField === item.key}
+                            onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
+                            className={classNames(
+                              match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
+                              savingSupplementaryField === item.key ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                              "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                            )}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className={classNames(
+                                match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "translate-x-5" : "translate-x-0",
+                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                              )}
+                            />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Referee Payment Section */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-900 mb-4">
+                    Schiedsrichter Vergütung
+                  </h4>
+                  
+                  {/* Referee 1 Payment */}
+                  <div className="mb-6">
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">
+                      Schiedsrichter 1
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Reisekosten (€)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={match.supplementarySheet?.refereePayment?.referee1?.travelExpenses || 0}
+                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee1: {
+                              ...match.supplementarySheet?.refereePayment?.referee1,
+                              travelExpenses: parseFloat(e.target.value) || 0
+                            }
+                          })}
+                          disabled={savingSupplementaryField === "refereePayment"}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Aufwandsentschädigung (€)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={match.supplementarySheet?.refereePayment?.referee1?.expenseAllowance || 0}
+                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee1: {
+                              ...match.supplementarySheet?.refereePayment?.referee1,
+                              expenseAllowance: parseFloat(e.target.value) || 0
+                            }
+                          })}
+                          disabled={savingSupplementaryField === "refereePayment"}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Spielgebühren (€)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={match.supplementarySheet?.refereePayment?.referee1?.gameFees || 0}
+                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee1: {
+                              ...match.supplementarySheet?.refereePayment?.referee1,
+                              gameFees: parseFloat(e.target.value) || 0
+                            }
+                          })}
+                          disabled={savingSupplementaryField === "refereePayment"}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Referee 2 Payment */}
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">
+                      Schiedsrichter 2
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Reisekosten (€)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={match.supplementarySheet?.refereePayment?.referee2?.travelExpenses || 0}
+                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee2: {
+                              ...match.supplementarySheet?.refereePayment?.referee2,
+                              travelExpenses: parseFloat(e.target.value) || 0
+                            }
+                          })}
+                          disabled={savingSupplementaryField === "refereePayment"}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Aufwandsentschädigung (€)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={match.supplementarySheet?.refereePayment?.referee2?.expenseAllowance || 0}
+                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee2: {
+                              ...match.supplementarySheet?.refereePayment?.referee2,
+                              expenseAllowance: parseFloat(e.target.value) || 0
+                            }
+                          })}
+                          disabled={savingSupplementaryField === "refereePayment"}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Spielgebühren (€)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={match.supplementarySheet?.refereePayment?.referee2?.gameFees || 0}
+                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee2: {
+                              ...match.supplementarySheet?.refereePayment?.referee2,
+                              gameFees: parseFloat(e.target.value) || 0
+                            }
+                          })}
+                          disabled={savingSupplementaryField === "refereePayment"}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
