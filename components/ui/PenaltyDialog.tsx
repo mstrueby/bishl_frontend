@@ -253,6 +253,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         <InputMatchTime
                           name="matchTimeStart"
                           label="Start"
+                          tabIndex={1}
                         />
                       </div>
 
@@ -261,6 +262,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         <InputMatchTime
                           name="matchTimeEnd"
                           label="Ende"
+                          tabIndex={2}
                         />
                       </div>
 
@@ -279,6 +281,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         required={true}
                         placeholder="Spieler auswählen"
                         showErrorText={false}
+                        tabIndex={3}
                       />
 
                       {/* Penalty Code Selection */}
@@ -294,6 +297,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         required={true}
                         placeholder="Strafe auswählen"
                         showErrorText={false}
+                        tabIndex={4}
                       />
 
                       {/* Penalty Minutes */}
@@ -303,16 +307,19 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                         options={penaltyMinuteOptions}
                         placeholder="Minuten auswählen"
                         showErrorText={false}
+                        tabIndex={5}
                       />
 
                       {/* Penalty Type Toggles */}
                       <Toggle
                         name="isGM"
                         label="Spieldauer (GM)"
+                        tabIndex={6}
                       />
                       <Toggle
                         name="isMP"
                         label="Matchstrafe (MP)"
+                        tabIndex={7}
                       />
 
                       {error && (
@@ -323,15 +330,9 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
 
                       <div className="mt-6 flex justify-end space-x-3">
                         <button
-                          type="button"
-                          onClick={onClose}
-                          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                          Abbrechen
-                        </button>
-                        <button
                           type="submit"
                           disabled={isSubmitting}
+                          tabIndex={8}
                           className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmitting ? (
@@ -342,6 +343,14 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
                           ) : (
                             'Speichern'
                           )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={onClose}
+                          tabIndex={9}
+                          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                          Abbrechen
                         </button>
                       </div>
                     </Form>
