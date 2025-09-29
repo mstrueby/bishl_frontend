@@ -507,9 +507,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                   {live.length > 0 && (
                     <div>
                       <div className="min-w-0 flex-1">
-                        <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                        <div className="border-b border-gray-200 pb-5 mb-6">
                           <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Live</h2>
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Live</h2>
                           </div>
                         </div>
                       </div>
@@ -525,9 +525,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                   {upcoming.length > 0 && (
                     <div>
                       <div className="min-w-0 flex-1">
-                        <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                        <div className="border-b border-gray-200 pb-5 mb-6">
                           <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Demnächst</h2>
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Demnächst</h2>
                           </div>
                         </div>
                       </div>
@@ -540,8 +540,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                             <div key={groupIndex}>
                               <div className="mb-6 mt-8">
                                 <div className="flex flex-wrap items-baseline">
-                                  <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">{group.label}</h4>
-                                  <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
+                                  <h4 className="ml-2 text-base font-semibold text-gray-900">{group.label}</h4>
+                                  <p className="ml-2 truncate text-sm text-gray-500">{group.description}</p>
                                 </div>
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -569,16 +569,16 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                   {finished.length > 0 && (
                     <div>
                       <div className="min-w-0 flex-1">
-                        <div className="border-b border-gray-200 pb-5 dark:border-white/10 mb-6">
+                        <div className="border-b border-gray-200 pb-5 mb-6">
                           <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Beendet</h2>
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Beendet</h2>
                           </div>
                         </div>
                       </div>
                       <div className="bg-white shadow-md rounded-lg border overflow-hidden">
                         <ul
                           role="list"
-                          className="divide-y divide-gray-100 overflow-hidden bg-white shadow-xs outline-1 outline-gray-900/5 sm:rounded-xl dark:divide-white/5 dark:bg-gray-800/50 dark:shadow-none dark:outline-white/10 dark:sm:-outline-offset-1"
+                          className="divide-y divide-gray-100 overflow-hidden bg-white shadow-xs outline-1 outline-gray-900/5 sm:rounded-xl"
                         >
                           {finished
                             .sort((a, b) => {
@@ -596,7 +596,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                               return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
                             })
                             .map((match) => (
-                              <li key={match._id} className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 dark:hover:bg-white/2.5 border-b border-gray-100 last:border-b-0">
+                              <li key={match._id} className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 border-b border-gray-100 last:border-b-0">
                                 <div className="flex-shrink-0 w-16">
                                   {(() => {
                                     const item = tournamentConfigs[match.tournament.alias];
@@ -613,13 +613,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                                 </div>
                                 <div className="flex-1 flex items-center justify-end gap-4">
                                   <div className="hidden sm:block">
-                                    <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate">
                                       {match.home.tinyName}
                                     </p>
-                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate">
                                       {match.home.shortName}
                                     </p>
-                                    <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <p className="hidden lg:block text-sm font-medium text-gray-900 truncate">
                                       {match.home.fullName}
                                     </p>
                                   </div>
@@ -635,20 +635,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                                   <a className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer">
                                     <span className="absolute inset-x-0 -top-px bottom-0" />
                                     {match.matchStatus.key === 'FINISHED' ? (
-                                      <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
+                                      <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
                                         {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
                                         {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
-                                          <span className="text-xs font-medium text-gray-400 dark:text-gray-500 ml-1">
+                                          <span className="text-xs font-medium text-gray-400 ml-1">
                                             {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
                                           </span>
                                         )}
                                       </p>
                                     ) : (match.matchStatus.key === 'SCHEDULED' ? (
-                                      <p className="text-md font-bold text-gray-900 dark:text-white whitespace-nowrap text-center">
+                                      <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
                                         - : -
                                       </p>
                                     ) : (
-                                      <p className="text-xs font-medium text-gray-400 dark:text-gray-500 lowercase whitespace-nowrap text-center">
+                                      <p className="text-xs font-medium text-gray-400 lowercase whitespace-nowrap text-center">
                                         {match.matchStatus.value}
                                       </p>
                                     ))}
@@ -663,19 +663,19 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                                     className="object-contain flex-shrink-0"
                                   />
                                   <div className="hidden sm:block">
-                                    <p className="block sm:hidden text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate">
                                       {match.away.tinyName}
                                     </p>
-                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate">
                                       {match.away.shortName}
                                     </p>
-                                    <p className="hidden lg:block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <p className="hidden lg:block text-sm font-medium text-gray-900 truncate">
                                       {match.away.fullName}
                                     </p>
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0">
-                                  <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400 dark:text-gray-500" />
+                                  <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
                                 </div>
                               </li>
                             ))}
@@ -750,12 +750,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       <div key={dayIndex}>
                         <div className="mb-6 mt-8">
                           <div className="flex flex-wrap items-baseline">
-                            <h4 className="ml-2 text-base font-semibold text-gray-900 dark:text-white">
+                            <h4 className="ml-2 text-base font-semibold text-gray-900">
                               {new Date(dayGroup.date).toLocaleDateString('de-DE', {
                                 weekday: 'long'
                               })}
                             </h4>
-                            <p className="ml-2 truncate text-sm text-gray-500 dark:text-gray-400">
+                            <p className="ml-2 truncate text-sm text-gray-500">
                               {new Date(dayGroup.date).toLocaleDateString('de-DE', {
                                 day: '2-digit',
                                 month: 'short',
