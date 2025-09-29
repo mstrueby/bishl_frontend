@@ -430,7 +430,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   });
 
   // Calculate permissions for this user and match
-  const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
+  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner || undefined, backLink.includes('matchcenter'));
   const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
 
   // Handler to close the success message
