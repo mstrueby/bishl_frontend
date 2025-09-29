@@ -101,9 +101,11 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                 <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   P
                 </th>
+                {/**
                 <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   SM
                 </th>
+                */}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -147,9 +149,11 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
                     {(player.points || 0)}
                   </td>
+                  {/**
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
                     {player.penaltyMinutes || 0}
                   </td>
+                  */}
                 </tr>
               ))}
             </tbody>
