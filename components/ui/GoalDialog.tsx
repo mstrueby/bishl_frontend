@@ -172,6 +172,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                         <InputMatchTime
                           name="matchTime"
                           label="Spielzeit"
+                          tabIndex={1}
                         />
                       </div>
 
@@ -190,6 +191,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                         required={true}
                         placeholder="Spieler auswählen"
                         showErrorText={false}
+                        tabIndex={2}
                       />
 
                       {/* Assist Player Selection */}
@@ -205,6 +207,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                         placeholder="Spieler auswählen"
                         removeButton={true}
                         showErrorText={false}
+                        tabIndex={3}
                       />
 
                       {error && (
@@ -217,6 +220,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                         <button
                           type="button"
                           onClick={onClose}
+                          tabIndex={5}
                           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
                           Abbrechen
@@ -224,6 +228,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
                         <button
                           type="submit"
                           disabled={isSubmitting}
+                          tabIndex={4}
                           className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmitting ? (
