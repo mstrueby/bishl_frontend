@@ -214,8 +214,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
     });
 
     const finished = matches.filter(match => {
-      // Always include matches that are explicitly marked as finished
-      if (['FINISHED', 'FORFEITED'].includes(match.matchStatus.key)) {
+      // Only include matches that are explicitly marked as FINISHED
+      if (match.matchStatus.key === 'FINISHED') {
         return true;
       }
 
