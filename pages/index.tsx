@@ -214,21 +214,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
     });
 
     const finished = matches.filter(match => {
-      // Always include matches that are explicitly marked as finished
-      if (['FINISHED', 'FORFEITED'].includes(match.matchStatus.key)) {
+      // Only include matches that are explicitly marked as FINISHED
+      if (match.matchStatus.key === 'FINISHED') {
         return true;
-      }
-
-      // For scheduled matches, check if they should be considered finished based on estimated end time
-      if (match.matchStatus.key === 'SCHEDULED') {
-        const tournamentConfig = tournamentConfigs[match.tournament.alias];
-        if (tournamentConfig) {
-          const matchStart = new Date(match.startDate);
-          const matchEndEstimate = new Date(matchStart.getTime() + (tournamentConfig.matchLenMin * 60 * 1000));
-
-          // Include if current time is past the estimated end time
-          return now > matchEndEstimate;
-        }
       }
 
       return false;
