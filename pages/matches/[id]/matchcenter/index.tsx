@@ -920,40 +920,40 @@ export default function MatchDetails({
                     delayMin: number | undefined;
                   }> = ({ refereeNumber, passAvailable, passNo, delayMin }) => (
                     <div>
-                      <div className="flex flex-col">
+                      <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-900">
                           Schiedsrichter {refereeNumber} Pass liegt vor
                         </span>
-                      </div>
-                      <button
-                        type="button"
-                        disabled={
-                          savingSupplementaryField === `referee${refereeNumber}PassAvailable` ||
-                          !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                        }
-                        onClick={() =>
-                          updateSupplementaryField(
-                            `referee${refereeNumber}PassAvailable`,
-                            !passAvailable,
-                          )
-                        }
-                        className={classNames(
-                          passAvailable ? "bg-indigo-600" : "bg-gray-200",
-                          savingSupplementaryField === `referee${refereeNumber}PassAvailable` ||
+                        <button
+                          type="button"
+                          disabled={
+                            savingSupplementaryField === `referee${refereeNumber}PassAvailable` ||
                             !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                            ? "opacity-50 cursor-not-allowed"
-                            : "cursor-pointer",
-                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                        )}
-                      >
-                        <span
-                          aria-hidden="true"
+                          }
+                          onClick={() =>
+                            updateSupplementaryField(
+                              `referee${refereeNumber}PassAvailable`,
+                              !passAvailable,
+                            )
+                          }
                           className={classNames(
-                            passAvailable ? "translate-x-5" : "translate-x-0",
-                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            passAvailable ? "bg-indigo-600" : "bg-gray-200",
+                            savingSupplementaryField === `referee${refereeNumber}PassAvailable` ||
+                              !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                           )}
-                        />
-                      </button>
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              passAvailable ? "translate-x-5" : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            )}
+                          />
+                        </button>
+                      </div>
 
                       <div className="flex items-center justify-between mt-4">
                         <span className="text-sm font-medium text-gray-900">
