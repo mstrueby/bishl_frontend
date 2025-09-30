@@ -1446,10 +1446,19 @@ export default function MatchDetails({
               </div>
 
               {/* Special Events and Comments Section */}
-              <div className="mb-8">
-                <h4 className="text-md font-medium text-gray-900 mb-4">
-                  Besondere Vorkommnisse
-                </h4>
+              <div className="px-4 mb-8">
+                {/** Header */}
+                <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                      Besondere Vorkomnisse
+                    </h3>
+                    <p className="mt-0 text-xs text-gray-500">
+                      Dieser Bereich ist von den{" "}
+                      <strong>Schiedsrichtern</strong> auszufüllen
+                    </p>
+                  </div>
+                </div>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
@@ -1526,10 +1535,19 @@ export default function MatchDetails({
               </div>
 
               {/* Referee Payment Section */}
-              <div>
-                <h4 className="text-md font-medium text-gray-900 mb-4">
-                  Schiedsrichter Vergütung
-                </h4>
+              <div className="px-4 mb-8">
+                {/** Header */}
+                <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                      Schiedsrichtervergütung
+                    </h3>
+                    <p className="mt-0 text-xs text-gray-500">
+                      Dieser Bereich ist von den{" "}
+                      <strong>Schiedsrichtern</strong> auszufüllen
+                    </p>
+                  </div>
+                </div>
 
                 {/* Referee 1 Payment */}
                 <div className="mb-6">
