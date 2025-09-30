@@ -955,49 +955,49 @@ export default function MatchDetails({
                         />
                       </button>
 
-                      <div className="flex flex-col mt-4">
+                      <div className="flex items-center justify-between mt-4">
                         <span className="text-sm font-medium text-gray-900">
                           Schiedsrichter {refereeNumber} Pass-Nr.
                         </span>
+                        <input
+                          type="text"
+                          value={passNo || ""}
+                          onChange={(e) =>
+                            updateSupplementaryField(
+                              `referee${refereeNumber}PassNo`,
+                              e.target.value,
+                            )
+                          }
+                          disabled={
+                            savingSupplementaryField === `referee${refereeNumber}PassNo` ||
+                            !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
+                          }
+                          className="ml-4 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          placeholder="Pass-Nummer eingeben..."
+                        />
                       </div>
-                      <input
-                        type="text"
-                        value={passNo || ""}
-                        onChange={(e) =>
-                          updateSupplementaryField(
-                            `referee${refereeNumber}PassNo`,
-                            e.target.value,
-                          )
-                        }
-                        disabled={
-                          savingSupplementaryField === `referee${refereeNumber}PassNo` ||
-                          !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                        }
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        placeholder="Pass-Nummer eingeben..."
-                      />
 
-                      <div className="flex flex-col mt-4">
+                      <div className="flex items-center justify-between mt-4">
                         <span className="text-sm font-medium text-gray-900">
                           Schiedsrichter {refereeNumber} Verspätung (Min)
                         </span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={delayMin || 0}
+                          onChange={(e) =>
+                            updateSupplementaryField(
+                              `referee${refereeNumber}DelayMin`,
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          disabled={
+                            savingSupplementaryField === `referee${refereeNumber}DelayMin` ||
+                            !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
+                          }
+                          className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
                       </div>
-                      <input
-                        type="number"
-                        min="0"
-                        value={delayMin || 0}
-                        onChange={(e) =>
-                          updateSupplementaryField(
-                            `referee${refereeNumber}DelayMin`,
-                            parseInt(e.target.value) || 0,
-                          )
-                        }
-                        disabled={
-                          savingSupplementaryField === `referee${refereeNumber}DelayMin` ||
-                          !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                        }
-                        className="block w-full md:w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
                     </div>
                   );
 
