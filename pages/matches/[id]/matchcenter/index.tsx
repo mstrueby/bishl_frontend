@@ -726,7 +726,7 @@ export default function MatchDetails({
           {activeTab === "supplementary" && (
             <div className="py-4">
               {/* Referee Attendance Section */}
-              <div className="px-4">
+              <div className="px-4 mb-8">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -734,7 +734,186 @@ export default function MatchDetails({
                       Schiedsrichter
                     </h3>
                     <p className="mt-0 text-xs text-gray-500">
-                      Dieser Bereich ist vom Zeitnehmer 1 auszufüllen
+                      Dieser Bereich ist von den <strong>Zeitnehmern</strong>{" "}
+                      auszufüllen
+                    </p>
+                  </div>
+                </div>
+                {/* Reusable Referee Attendance Component */}
+                {(() => {
+                  const RefereeAttendanceSection: React.FC<{
+                    refereeNumber: 1 | 2;
+                    passAvailable: boolean | undefined;
+                    passNo: string | undefined;
+                    delayMin: number | undefined;
+                  }> = ({ refereeNumber, passAvailable, passNo, delayMin }) => (
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter {refereeNumber} Pass liegt vor
+                        </span>
+                        <button
+                          type="button"
+                          disabled={
+                            savingSupplementaryField ===
+                              `referee${refereeNumber}PassAvailable` ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          onClick={() =>
+                            updateSupplementaryField(
+                              `referee${refereeNumber}PassAvailable`,
+                              !passAvailable,
+                            )
+                          }
+                          className={classNames(
+                            passAvailable ? "bg-indigo-600" : "bg-gray-200",
+                            savingSupplementaryField ===
+                              `referee${refereeNumber}PassAvailable` ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              passAvailable ? "translate-x-5" : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            )}
+                          />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-4">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter {refereeNumber} Pass-Nr.
+                        </span>
+                        <input
+                          type="text"
+                          value={passNo || ""}
+                          onChange={(e) =>
+                            updateSupplementaryField(
+                              `referee${refereeNumber}PassNo`,
+                              e.target.value,
+                            )
+                          }
+                          disabled={
+                            savingSupplementaryField ===
+                              `referee${refereeNumber}PassNo` ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          className="ml-4 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          placeholder="Pass-Nummer eingeben..."
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between mt-4">
+                        <span className="text-sm font-medium text-gray-900">
+                          Schiedsrichter {refereeNumber} Verspätung (Min)
+                        </span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={delayMin || 0}
+                          onChange={(e) =>
+                            updateSupplementaryField(
+                              `referee${refereeNumber}DelayMin`,
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          disabled={
+                            savingSupplementaryField ===
+                              `referee${refereeNumber}DelayMin` ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  );
+
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            Anwesenheit
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Sind die offiziell eingeteilten Schiedsrichter
+                            angetreten?
+                          </span>
+                        </div>
+                        <select
+                          value={
+                            match.supplementarySheet?.refereeAttendance || ""
+                          }
+                          onChange={(e) =>
+                            updateSupplementaryField(
+                              "refereeAttendance",
+                              e.target.value,
+                            )
+                          }
+                          disabled={
+                            savingSupplementaryField === "refereeAttendance"
+                          }
+                          className="ml-4 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                          <option value="">Auswählen...</option>
+                          <option value="yes">Ja</option>
+                          <option value="only 1">Nur 1</option>
+                          <option value="no referee">
+                            Kein Schiedsrichter
+                          </option>
+                          <option value="substitute referee">
+                            Ersatz Schiedsrichter
+                          </option>
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <RefereeAttendanceSection
+                          refereeNumber={1}
+                          passAvailable={
+                            match.supplementarySheet?.referee1PassAvailable
+                          }
+                          passNo={match.supplementarySheet?.referee1PassNo}
+                          delayMin={match.supplementarySheet?.referee1DelayMin}
+                        />
+                        <RefereeAttendanceSection
+                          refereeNumber={2}
+                          passAvailable={
+                            match.supplementarySheet?.referee2PassAvailable
+                          }
+                          passNo={match.supplementarySheet?.referee2PassNo}
+                          delayMin={match.supplementarySheet?.referee2DelayMin}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Equipment Check Section */}
+              <div className="px-4 mb-8">
+                {/** Header */}
+                <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                      Dokumente / Ausrüstung
+                    </h3>
+                    <p className="mt-0 text-xs text-gray-500">
+                      Dieser Bereich ist von den{" "}
+                      <strong>Schiedsrichtern</strong> auszufüllen
                     </p>
                   </div>
                   {/** Alle aktivieren/deaktivieren */}
@@ -757,8 +936,6 @@ export default function MatchDetails({
                           // Determine if we should activate or deactivate all
                           const currentSheet = match.supplementarySheet || {};
                           const booleanFields = [
-                            "referee1PassAvailable",
-                            "referee2PassAvailable",
                             "ruleBook",
                             "goalDisplay",
                             "soundSource",
@@ -767,13 +944,6 @@ export default function MatchDetails({
                             "firstAidKit",
                             "fieldLines",
                             "nets",
-                            "homeRoster",
-                            "homePlayerPasses",
-                            "homeUniformPlayerClothing",
-                            "awayRoster",
-                            "awayPlayerPasses",
-                            "awayUniformPlayerClothing",
-                            "awaySecondJerseySet",
                           ];
 
                           // Check if any field is currently true - if so, set all to false, otherwise set all to true
@@ -786,8 +956,6 @@ export default function MatchDetails({
                           // Create the updated supplementary sheet object
                           const updatedSheet = {
                             ...currentSheet,
-                            referee1PassAvailable: newValue,
-                            referee2PassAvailable: newValue,
                             ruleBook: newValue,
                             goalDisplay: newValue,
                             soundSource: newValue,
@@ -796,13 +964,6 @@ export default function MatchDetails({
                             firstAidKit: newValue,
                             fieldLines: newValue,
                             nets: newValue,
-                            homeRoster: newValue,
-                            homePlayerPasses: newValue,
-                            homeUniformPlayerClothing: newValue,
-                            awayRoster: newValue,
-                            awayPlayerPasses: newValue,
-                            awayUniformPlayerClothing: newValue,
-                            awaySecondJerseySet: newValue,
                           };
 
                           const response = await axios.patch(
@@ -837,8 +998,6 @@ export default function MatchDetails({
                         (() => {
                           const currentSheet = match.supplementarySheet || {};
                           const booleanFields = [
-                            "referee1PassAvailable",
-                            "referee2PassAvailable",
                             "ruleBook",
                             "goalDisplay",
                             "soundSource",
@@ -847,13 +1006,6 @@ export default function MatchDetails({
                             "firstAidKit",
                             "fieldLines",
                             "nets",
-                            "homeRoster",
-                            "homePlayerPasses",
-                            "homeUniformPlayerClothing",
-                            "awayRoster",
-                            "awayPlayerPasses",
-                            "awayUniformPlayerClothing",
-                            "awaySecondJerseySet",
                           ];
                           const hasAnyTrue = booleanFields.some(
                             (field) =>
@@ -876,8 +1028,6 @@ export default function MatchDetails({
                           (() => {
                             const currentSheet = match.supplementarySheet || {};
                             const booleanFields = [
-                              "referee1PassAvailable",
-                              "referee2PassAvailable",
                               "ruleBook",
                               "goalDisplay",
                               "soundSource",
@@ -886,13 +1036,6 @@ export default function MatchDetails({
                               "firstAidKit",
                               "fieldLines",
                               "nets",
-                              "homeRoster",
-                              "homePlayerPasses",
-                              "homeUniformPlayerClothing",
-                              "awayRoster",
-                              "awayPlayerPasses",
-                              "awayUniformPlayerClothing",
-                              "awaySecondJerseySet",
                             ];
                             const hasAnyTrue = booleanFields.some(
                               (field) =>
@@ -910,151 +1053,6 @@ export default function MatchDetails({
                     </button>
                   </div>
                 </div>
-
-                {/* Reusable Referee Attendance Component */}
-                {(() => {
-                  const RefereeAttendanceSection: React.FC<{
-                    refereeNumber: 1 | 2;
-                    passAvailable: boolean | undefined;
-                    passNo: string | undefined;
-                    delayMin: number | undefined;
-                  }> = ({ refereeNumber, passAvailable, passNo, delayMin }) => (
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter {refereeNumber} Pass liegt vor
-                        </span>
-                        <button
-                          type="button"
-                          disabled={
-                            savingSupplementaryField === `referee${refereeNumber}PassAvailable` ||
-                            !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                          }
-                          onClick={() =>
-                            updateSupplementaryField(
-                              `referee${refereeNumber}PassAvailable`,
-                              !passAvailable,
-                            )
-                          }
-                          className={classNames(
-                            passAvailable ? "bg-indigo-600" : "bg-gray-200",
-                            savingSupplementaryField === `referee${refereeNumber}PassAvailable` ||
-                              !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                              ? "opacity-50 cursor-not-allowed"
-                              : "cursor-pointer",
-                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                          )}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              passAvailable ? "translate-x-5" : "translate-x-0",
-                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                            )}
-                          />
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-4">
-                        <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter {refereeNumber} Pass-Nr.
-                        </span>
-                        <input
-                          type="text"
-                          value={passNo || ""}
-                          onChange={(e) =>
-                            updateSupplementaryField(
-                              `referee${refereeNumber}PassNo`,
-                              e.target.value,
-                            )
-                          }
-                          disabled={
-                            savingSupplementaryField === `referee${refereeNumber}PassNo` ||
-                            !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                          }
-                          className="ml-4 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          placeholder="Pass-Nummer eingeben..."
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between mt-4">
-                        <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter {refereeNumber} Verspätung (Min)
-                        </span>
-                        <input
-                          type="number"
-                          min="0"
-                          value={delayMin || 0}
-                          onChange={(e) =>
-                            updateSupplementaryField(
-                              `referee${refereeNumber}DelayMin`,
-                              parseInt(e.target.value) || 0,
-                            )
-                          }
-                          disabled={
-                            savingSupplementaryField === `referee${refereeNumber}DelayMin` ||
-                            !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)
-                          }
-                          className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                    </div>
-                  );
-
-                  return (
-                    <div className="mb-8">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-900">
-                              Anwesenheit
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Sind die offiziell eingeteilten Schiedsrichter
-                              angetreten?
-                            </span>
-                          </div>
-                          <select
-                            value={match.supplementarySheet?.refereeAttendance || ""}
-                            onChange={(e) =>
-                              updateSupplementaryField("refereeAttendance", e.target.value)
-                            }
-                            disabled={savingSupplementaryField === "refereeAttendance"}
-                            className="ml-4 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          >
-                            <option value="">Auswählen...</option>
-                            <option value="yes">Ja</option>
-                            <option value="only 1">Nur 1</option>
-                            <option value="no referee">Kein Schiedsrichter</option>
-                            <option value="substitute referee">Ersatz Schiedsrichter</option>
-                          </select>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <RefereeAttendanceSection
-                            refereeNumber={1}
-                            passAvailable={match.supplementarySheet?.referee1PassAvailable}
-                            passNo={match.supplementarySheet?.referee1PassNo}
-                            delayMin={match.supplementarySheet?.referee1DelayMin}
-                          />
-                          <RefereeAttendanceSection
-                            refereeNumber={2}
-                            passAvailable={match.supplementarySheet?.referee2PassAvailable}
-                            passNo={match.supplementarySheet?.referee2PassNo}
-                            delayMin={match.supplementarySheet?.referee2DelayMin}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Equipment Check Section */}
-              <div className="mb-8">
-                <h4 className="text-md font-medium text-gray-900 mb-4">
-                  Dokumente / Ausrüstung
-                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
                     {
@@ -1165,10 +1163,151 @@ export default function MatchDetails({
               </div>
 
               {/* Team Equipment Section */}
-              <div className="mb-8">
-                <h4 className="text-md font-medium text-gray-900 mb-4">
-                  Mannschaften
-                </h4>
+              <div className="px-4 mb-8">
+                {/** Header */}
+                <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                      Mannschaften
+                    </h3>
+                    <p className="mt-0 text-xs text-gray-500">
+                      Dieser Bereich ist von den{" "}
+                      <strong>Schiedsrichtern</strong> auszufüllen
+                    </p>
+                  </div>
+                  {/** Alle aktivieren/deaktivieren */}
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-medium text-gray-700">
+                      Alle aktivieren/deaktivieren
+                    </span>
+                    <button
+                      type="button"
+                      disabled={
+                        savingSupplementaryField === "masterToggle" ||
+                        !["SCHEDULED", "INPROGRESS"].includes(
+                          match.matchStatus.key,
+                        )
+                      }
+                      onClick={async () => {
+                        try {
+                          setSavingSupplementaryField("masterToggle");
+
+                          // Determine if we should activate or deactivate all
+                          const currentSheet = match.supplementarySheet || {};
+                          const booleanFields = [
+                            "homeRoster",
+                            "homePlayerPasses",
+                            "homeUniformPlayerClothing",
+                            "awayRoster",
+                            "awayPlayerPasses",
+                            "awayUniformPlayerClothing",
+                            "awaySecondJerseySet",
+                          ];
+
+                          // Check if any field is currently true - if so, set all to false, otherwise set all to true
+                          const hasAnyTrue = booleanFields.some(
+                            (field) =>
+                              currentSheet[field as keyof typeof currentSheet],
+                          );
+                          const newValue = !hasAnyTrue;
+
+                          // Create the updated supplementary sheet object
+                          const updatedSheet = {
+                            ...currentSheet,
+                            homeRoster: newValue,
+                            homePlayerPasses: newValue,
+                            homeUniformPlayerClothing: newValue,
+                            awayRoster: newValue,
+                            awayPlayerPasses: newValue,
+                            awayUniformPlayerClothing: newValue,
+                            awaySecondJerseySet: newValue,
+                          };
+
+                          const response = await axios.patch(
+                            `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+                            {
+                              supplementarySheet: updatedSheet,
+                            },
+                            {
+                              headers: {
+                                Authorization: `Bearer ${jwt}`,
+                                "Content-Type": "application/json",
+                              },
+                            },
+                          );
+
+                          if (response.status === 200) {
+                            setMatch({
+                              ...match,
+                              supplementarySheet: updatedSheet,
+                            });
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error updating all supplementary fields:",
+                            error,
+                          );
+                        } finally {
+                          setSavingSupplementaryField(null);
+                        }
+                      }}
+                      className={classNames(
+                        (() => {
+                          const currentSheet = match.supplementarySheet || {};
+                          const booleanFields = [
+                            "homeRoster",
+                            "homePlayerPasses",
+                            "homeUniformPlayerClothing",
+                            "awayRoster",
+                            "awayPlayerPasses",
+                            "awayUniformPlayerClothing",
+                            "awaySecondJerseySet",
+                          ];
+                          const hasAnyTrue = booleanFields.some(
+                            (field) =>
+                              currentSheet[field as keyof typeof currentSheet],
+                          );
+                          return hasAnyTrue ? "bg-indigo-600" : "bg-gray-200";
+                        })(),
+                        savingSupplementaryField === "masterToggle" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                          ? "opacity-50 cursor-not-allowed"
+                          : "cursor-pointer",
+                        "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={classNames(
+                          (() => {
+                            const currentSheet = match.supplementarySheet || {};
+                            const booleanFields = [
+                              "homeRoster",
+                              "homePlayerPasses",
+                              "homeUniformPlayerClothing",
+                              "awayRoster",
+                              "awayPlayerPasses",
+                              "awayUniformPlayerClothing",
+                              "awaySecondJerseySet",
+                            ];
+                            const hasAnyTrue = booleanFields.some(
+                              (field) =>
+                                currentSheet[
+                                  field as keyof typeof currentSheet
+                                ],
+                            );
+                            return hasAnyTrue
+                              ? "translate-x-5"
+                              : "translate-x-0";
+                          })(),
+                          "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                        )}
+                      />
+                    </button>
+                  </div>
+                </div>
 
                 {/* Home Team */}
                 <div className="mb-6">
