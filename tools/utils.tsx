@@ -20,6 +20,7 @@ export interface MatchButtonPermissions {
   showButtonPenaltiesAway?: boolean;
   showButtonEvents?: boolean;
   showButtonMatchCenter?: boolean;
+  showButtonSupplementary?: boolean;
 }
 
 interface User {
@@ -68,6 +69,7 @@ export function calculateMatchButtonPermissions(
     showButtonPenaltiesAway: false,
     showButtonEvents: false,
     showButtonMatchCenter: false,
+    showButtonSupplementary: false,
   };
   if (!user) return permissions;
 
@@ -80,6 +82,7 @@ export function calculateMatchButtonPermissions(
   if (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) {
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
+    permissions.showButtonSupplementary = true;
     
     if (isMatchCenter) {
       permissions.showButtonEvents = true;
@@ -147,6 +150,7 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonRosterAway = true;
     permissions.showButtonStatus = true;
     permissions.showButtonMatchCenter = true;
+    permissions.showButtonSupplementary = true;
     
     if (isMatchCenter) {
       permissions.showButtonEvents = true;
@@ -160,6 +164,7 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonRosterAway = false;
     permissions.showButtonStatus = false;
     permissions.showButtonMatchCenter = false;
+    permissions.showButtonSupplementary = false;
     
     if (isMatchCenter) {
       permissions.showButtonEvents = false;
@@ -172,6 +177,7 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
     permissions.showButtonMatchCenter = true;
+    permissions.showButtonSupplementary = true;
     
     if (isMatchCenter) {
       permissions.showButtonRosterHome = true;
@@ -189,6 +195,7 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonStatus = false;
     permissions.showButtonRosterHome = false;
     permissions.showButtonRosterAway = false;
+    permissions.showButtonSupplementary = false;
     
     if (isMatchCenter) {
       permissions.showButtonScoresHome = false;
