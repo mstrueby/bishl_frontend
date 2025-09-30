@@ -413,6 +413,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
+  const [matchdayOwner, setMatchdayOwner] = useState<{
+    clubId: string;
+    clubName: string;
+    clubAlias: string;
+  } | null>(null);
   const [coachData, setCoachData] = useState({
     firstName: coach?.firstName || '',
     lastName: coach?.lastName || '',
@@ -430,8 +435,27 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
   });
 
   // Calculate permissions for this user and match
-  const permissions = calculateMatchButtonPermissions(user, match, undefined, backLink.includes('matchcenter'));
+  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner || undefined, backLink.includes('matchcenter'));
   const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
+
+  // Fetch matchday owner
+  useEffect(() => {
+    const fetchMatchdayOwner = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
+        );
+        if (response.ok) {
+          const matchdayData = await response.json();
+          setMatchdayOwner(matchdayData.owner || null);
+        }
+      } catch (error) {
+        console.error('Error fetching matchday owner:', error);
+      }
+    };
+
+    fetchMatchdayOwner();
+  }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
