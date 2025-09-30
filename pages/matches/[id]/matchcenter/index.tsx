@@ -1096,6 +1096,57 @@ export default function MatchDetails({
                   </div>
                 </div>
 
+                {/* Special Events and Comments Section */}
+                <div className="mb-8">
+                  <h4 className="text-md font-medium text-gray-900 mb-4">
+                    Besondere Vorkommnisse
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          Besondere Vorkommnisse
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          Gab es besondere Vorkommnisse während des Spiels?
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={savingSupplementaryField === "specialEvents" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
+                        onClick={() => updateSupplementaryField("specialEvents", !match.supplementarySheet?.specialEvents)}
+                        className={classNames(
+                          match.supplementarySheet?.specialEvents ? "bg-indigo-600" : "bg-gray-200",
+                          savingSupplementaryField === "specialEvents" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={classNames(
+                            match.supplementarySheet?.specialEvents ? "translate-x-5" : "translate-x-0",
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                          )}
+                        />
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Schiedsrichter Kommentare
+                      </label>
+                      <textarea
+                        value={match.supplementarySheet?.refereeComments || ""}
+                        onChange={(e) => updateSupplementaryField("refereeComments", e.target.value)}
+                        disabled={savingSupplementaryField === "refereeComments" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
+                        rows={4}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Kommentare des Schiedsrichters zu besonderen Vorkommnissen, Problemen oder Anmerkungen..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Referee Payment Section */}
                 <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
