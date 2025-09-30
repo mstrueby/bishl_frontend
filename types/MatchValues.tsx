@@ -102,6 +102,8 @@ export interface SupplementarySheet {
   refereeAttendance?: string; // yes, only 1, no referee, substitute referee
   referee1PassAvailable?: boolean;
   referee2PassAvailable?: boolean;
+  referee1PassNo?: string;
+  referee2PassNo?: string;
   referee1DelayMin?: number;
   referee2DelayMin?: number;
   // Nutzungserlaubnis

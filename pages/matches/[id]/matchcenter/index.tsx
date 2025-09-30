@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, Fragment } from "react";
 import Link from "next/link";
-import Head from 'next/head';
+import Head from "next/head";
 import useAuth from "../../../../hooks/useAuth";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -129,8 +129,11 @@ export default function MatchDetails({
   const [awayPlayerStats, setAwayPlayerStats] = useState<{
     [playerId: string]: number;
   }>({});
-  const [isSavingMatchSheetComplete, setIsSavingMatchSheetComplete] = useState(false);
-  const [savingSupplementaryField, setSavingSupplementaryField] = useState<string | null>(null);
+  const [isSavingMatchSheetComplete, setIsSavingMatchSheetComplete] =
+    useState(false);
+  const [savingSupplementaryField, setSavingSupplementaryField] = useState<
+    string | null
+  >(null);
   {
     /**
   const [editData, setEditData] = useState<EditMatchData>({
@@ -339,7 +342,9 @@ export default function MatchDetails({
   return (
     <>
       <Head>
-        <title>Match Center - {match.home.shortName} - {match.away.shortName}</title>
+        <title>
+          Match Center - {match.home.shortName} - {match.away.shortName}
+        </title>
       </Head>
       <Layout>
         <div className="flex items-center justify-between text-gray-500 hover:text-gray-700 text-sm font-base">
@@ -720,18 +725,31 @@ export default function MatchDetails({
 
           {activeTab === "supplementary" && (
             <div className="py-4">
-              <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Zusatzblatt
-                  </h3>
+              {/* Referee Attendance Section */}
+              <div className="px-4">
+                {/** Header */}
+                <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                      Schiedsrichter
+                    </h3>
+                    <p className="mt-0 text-xs text-gray-500">
+                      Dieser Bereich ist vom Zeitnehmer 1 auszufüllen
+                    </p>
+                  </div>
+                  {/** Alle aktivieren/deaktivieren */}
                   <div className="flex items-center space-x-3">
                     <span className="text-sm font-medium text-gray-700">
                       Alle aktivieren/deaktivieren
                     </span>
                     <button
                       type="button"
-                      disabled={savingSupplementaryField === "masterToggle" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
+                      disabled={
+                        savingSupplementaryField === "masterToggle" ||
+                        !["SCHEDULED", "INPROGRESS"].includes(
+                          match.matchStatus.key,
+                        )
+                      }
                       onClick={async () => {
                         try {
                           setSavingSupplementaryField("masterToggle");
@@ -739,16 +757,30 @@ export default function MatchDetails({
                           // Determine if we should activate or deactivate all
                           const currentSheet = match.supplementarySheet || {};
                           const booleanFields = [
-                            'referee1PassAvailable', 'referee2PassAvailable',
-                            'ruleBook', 'goalDisplay', 'soundSource', 'matchClock',
-                            'matchBalls', 'firstAidKit', 'fieldLines', 'nets',
-                            'homeRoster', 'homePlayerPasses', 'homeUniformPlayerClothing',
-                            'awayRoster', 'awayPlayerPasses', 'awayUniformPlayerClothing',
-                            'awaySecondJerseySet'
+                            "referee1PassAvailable",
+                            "referee2PassAvailable",
+                            "ruleBook",
+                            "goalDisplay",
+                            "soundSource",
+                            "matchClock",
+                            "matchBalls",
+                            "firstAidKit",
+                            "fieldLines",
+                            "nets",
+                            "homeRoster",
+                            "homePlayerPasses",
+                            "homeUniformPlayerClothing",
+                            "awayRoster",
+                            "awayPlayerPasses",
+                            "awayUniformPlayerClothing",
+                            "awaySecondJerseySet",
                           ];
 
                           // Check if any field is currently true - if so, set all to false, otherwise set all to true
-                          const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
+                          const hasAnyTrue = booleanFields.some(
+                            (field) =>
+                              currentSheet[field as keyof typeof currentSheet],
+                          );
                           const newValue = !hasAnyTrue;
 
                           // Create the updated supplementary sheet object
@@ -793,7 +825,10 @@ export default function MatchDetails({
                             });
                           }
                         } catch (error) {
-                          console.error("Error updating all supplementary fields:", error);
+                          console.error(
+                            "Error updating all supplementary fields:",
+                            error,
+                          );
                         } finally {
                           setSavingSupplementaryField(null);
                         }
@@ -802,17 +837,36 @@ export default function MatchDetails({
                         (() => {
                           const currentSheet = match.supplementarySheet || {};
                           const booleanFields = [
-                            'referee1PassAvailable', 'referee2PassAvailable',
-                            'ruleBook', 'goalDisplay', 'soundSource', 'matchClock',
-                            'matchBalls', 'firstAidKit', 'fieldLines', 'nets',
-                            'homeRoster', 'homePlayerPasses', 'homeUniformPlayerClothing',
-                            'awayRoster', 'awayPlayerPasses', 'awayUniformPlayerClothing',
-                            'awaySecondJerseySet'
+                            "referee1PassAvailable",
+                            "referee2PassAvailable",
+                            "ruleBook",
+                            "goalDisplay",
+                            "soundSource",
+                            "matchClock",
+                            "matchBalls",
+                            "firstAidKit",
+                            "fieldLines",
+                            "nets",
+                            "homeRoster",
+                            "homePlayerPasses",
+                            "homeUniformPlayerClothing",
+                            "awayRoster",
+                            "awayPlayerPasses",
+                            "awayUniformPlayerClothing",
+                            "awaySecondJerseySet",
                           ];
-                          const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
+                          const hasAnyTrue = booleanFields.some(
+                            (field) =>
+                              currentSheet[field as keyof typeof currentSheet],
+                          );
                           return hasAnyTrue ? "bg-indigo-600" : "bg-gray-200";
                         })(),
-                        savingSupplementaryField === "masterToggle" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                        savingSupplementaryField === "masterToggle" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                          ? "opacity-50 cursor-not-allowed"
+                          : "cursor-pointer",
                         "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                       )}
                     >
@@ -822,15 +876,33 @@ export default function MatchDetails({
                           (() => {
                             const currentSheet = match.supplementarySheet || {};
                             const booleanFields = [
-                              'referee1PassAvailable', 'referee2PassAvailable',
-                              'ruleBook', 'goalDisplay', 'soundSource', 'matchClock',
-                              'matchBalls', 'firstAidKit', 'fieldLines', 'nets',
-                              'homeRoster', 'homePlayerPasses', 'homeUniformPlayerClothing',
-                              'awayRoster', 'awayPlayerPasses', 'awayUniformPlayerClothing',
-                              'awaySecondJerseySet'
+                              "referee1PassAvailable",
+                              "referee2PassAvailable",
+                              "ruleBook",
+                              "goalDisplay",
+                              "soundSource",
+                              "matchClock",
+                              "matchBalls",
+                              "firstAidKit",
+                              "fieldLines",
+                              "nets",
+                              "homeRoster",
+                              "homePlayerPasses",
+                              "homeUniformPlayerClothing",
+                              "awayRoster",
+                              "awayPlayerPasses",
+                              "awayUniformPlayerClothing",
+                              "awaySecondJerseySet",
                             ];
-                            const hasAnyTrue = booleanFields.some(field => currentSheet[field as keyof typeof currentSheet]);
-                            return hasAnyTrue ? "translate-x-5" : "translate-x-0";
+                            const hasAnyTrue = booleanFields.some(
+                              (field) =>
+                                currentSheet[
+                                  field as keyof typeof currentSheet
+                                ],
+                            );
+                            return hasAnyTrue
+                              ? "translate-x-5"
+                              : "translate-x-0";
                           })(),
                           "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                         )}
@@ -839,11 +911,7 @@ export default function MatchDetails({
                   </div>
                 </div>
 
-                {/* Referee Attendance Section */}
                 <div className="mb-8">
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Schiedsrichter
-                  </h4>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
@@ -851,126 +919,329 @@ export default function MatchDetails({
                           Anwesenheit
                         </span>
                         <span className="text-xs text-gray-500">
-                          Sind die offiziell eingeteilten Schiedsrichter angetreten?
+                          Sind die offiziell eingeteilten Schiedsrichter
+                          angetreten?
                         </span>
                       </div>
                       <select
-                        value={match.supplementarySheet?.refereeAttendance || ""}
-                        onChange={(e) => updateSupplementaryField("refereeAttendance", e.target.value)}
-                        disabled={savingSupplementaryField === "refereeAttendance"}
+                        value={
+                          match.supplementarySheet?.refereeAttendance || ""
+                        }
+                        onChange={(e) =>
+                          updateSupplementaryField(
+                            "refereeAttendance",
+                            e.target.value,
+                          )
+                        }
+                        disabled={
+                          savingSupplementaryField === "refereeAttendance"
+                        }
                         className="ml-4 block w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       >
                         <option value="">Auswählen...</option>
                         <option value="yes">Ja</option>
                         <option value="only 1">Nur 1</option>
                         <option value="no referee">Kein Schiedsrichter</option>
-                        <option value="substitute referee">Ersatz Schiedsrichter</option>
+                        <option value="substitute referee">
+                          Ersatz Schiedsrichter
+                        </option>
                       </select>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter 1 Pass liegt vor
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        disabled={savingSupplementaryField === "referee1PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                        onClick={() => updateSupplementaryField("referee1PassAvailable", !match.supplementarySheet?.referee1PassAvailable)}
-                        className={classNames(
-                          match.supplementarySheet?.referee1PassAvailable ? "bg-indigo-600" : "bg-gray-200",
-                          savingSupplementaryField === "referee1PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                        )}
-                      >
-                        <span
-                          aria-hidden="true"
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            Schiedsrichter 1 Pass liegt vor
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={
+                            savingSupplementaryField ===
+                              "referee1PassAvailable" ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          onClick={() =>
+                            updateSupplementaryField(
+                              "referee1PassAvailable",
+                              !match.supplementarySheet?.referee1PassAvailable,
+                            )
+                          }
                           className={classNames(
-                            match.supplementarySheet?.referee1PassAvailable ? "translate-x-5" : "translate-x-0",
-                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            match.supplementarySheet?.referee1PassAvailable
+                              ? "bg-indigo-600"
+                              : "bg-gray-200",
+                            savingSupplementaryField ===
+                              "referee1PassAvailable" ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                           )}
-                        />
-                      </button>
-                    </div>
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              match.supplementarySheet?.referee1PassAvailable
+                                ? "translate-x-5"
+                                : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            )}
+                          />
+                        </button>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter 2 Pass liegt vor
-                        </span>
+                        <div className="flex flex-col mt-4">
+                          <span className="text-sm font-medium text-gray-900">
+                            Schiedsrichter 1 Verspätung (Min)
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          value={match.supplementarySheet?.referee1DelayMin || 0}
+                          onChange={(e) =>
+                            updateSupplementaryField(
+                              "referee1DelayMin",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          disabled={
+                            savingSupplementaryField === "referee1DelayMin" ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          className="block w-full md:w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
                       </div>
-                      <button
-                        type="button"
-                        disabled={savingSupplementaryField === "referee2PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                        onClick={() => updateSupplementaryField("referee2PassAvailable", !match.supplementarySheet?.referee2PassAvailable)}
-                        className={classNames(
-                          match.supplementarySheet?.referee2PassAvailable ? "bg-indigo-600" : "bg-gray-200",
-                          savingSupplementaryField === "referee2PassAvailable" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                        )}
-                      >
-                        <span
-                          aria-hidden="true"
+                      <div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            Schiedsrichter 2 Pass liegt vor
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={
+                            savingSupplementaryField ===
+                              "referee2PassAvailable" ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          onClick={() =>
+                            updateSupplementaryField(
+                              "referee2PassAvailable",
+                              !match.supplementarySheet?.referee2PassAvailable,
+                            )
+                          }
                           className={classNames(
-                            match.supplementarySheet?.referee2PassAvailable ? "translate-x-5" : "translate-x-0",
-                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            match.supplementarySheet?.referee2PassAvailable
+                              ? "bg-indigo-600"
+                              : "bg-gray-200",
+                            savingSupplementaryField ===
+                              "referee2PassAvailable" ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                           )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              match.supplementarySheet?.referee2PassAvailable
+                                ? "translate-x-5"
+                                : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            )}
+                          />
+                        </button>
+
+                        <div className="flex flex-col mt-4">
+                          <span className="text-sm font-medium text-gray-900">
+                            Schiedsrichter 2 Verspätung (Min)
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          value={match.supplementarySheet?.referee2DelayMin || 0}
+                          onChange={(e) =>
+                            updateSupplementaryField(
+                              "referee2DelayMin",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          disabled={
+                            savingSupplementaryField === "referee2DelayMin" ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          className="block w-full md:w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter 1 Verspätung (Min)
-                        </span>
                       </div>
-                      <input
-                        type="number"
-                        min="0"
-                        value={match.supplementarySheet?.referee1DelayMin || 0}
-                        onChange={(e) => updateSupplementaryField("referee1DelayMin", parseInt(e.target.value) || 0)}
-                        disabled={savingSupplementaryField === "referee1DelayMin" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                        className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">
-                          Schiedsrichter 2 Verspätung (Min)
-                        </span>
-                      </div>
-                      <input
-                        type="number"
-                        min="0"
-                        value={match.supplementarySheet?.referee2DelayMin || 0}
-                        onChange={(e) => updateSupplementaryField("referee2DelayMin", parseInt(e.target.value) || 0)}
-                        disabled={savingSupplementaryField === "referee2DelayMin" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                        className="ml-4 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Equipment Check Section */}
-                <div className="mb-8">
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Dokumente / Ausrüstung
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Equipment Check Section */}
+              <div className="mb-8">
+                <h4 className="text-md font-medium text-gray-900 mb-4">
+                  Dokumente / Ausrüstung
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    {
+                      key: "ruleBook",
+                      label: "Spielregeln/WKO",
+                      description:
+                        "Sind die aktuellen Spielregeln und WKO verfügbar?",
+                    },
+                    {
+                      key: "goalDisplay",
+                      label: "Manuelle Toranzeige",
+                      description: "Ist eine manuelle Toranzeige vorhanden?",
+                    },
+                    {
+                      key: "soundSource",
+                      label: "Ersatz-Tonquelle",
+                      description:
+                        "Ist eine Ersatz-Tonquelle (Pfeife/Horn) verfügbar?",
+                    },
+                    {
+                      key: "matchClock",
+                      label: "Spieluhr",
+                      description:
+                        "Ist eine funktionierende Spieluhr vorhanden?",
+                    },
+                    {
+                      key: "matchBalls",
+                      label: "10 Spielbälle",
+                      description:
+                        "Sind mind. 10 regelkonforme Spielbälle verfügbar?",
+                    },
+                    {
+                      key: "firstAidKit",
+                      label: "Erste-Hilfe-Ausrüstung",
+                      description:
+                        "Ist vollständige Erste-Hilfe-Ausrüstung vorhanden?",
+                    },
+                    {
+                      key: "fieldLines",
+                      label: "Pflichtlinien",
+                      description:
+                        "Ist das Spielfeld vollständig mit allen Pflichtlinien markiert?",
+                    },
+                    {
+                      key: "nets",
+                      label: "Tornetze",
+                      description: "Sind regelkonforme Tornetze angebracht?",
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.key}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          {item.label}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {item.description}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={
+                          savingSupplementaryField === item.key ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                        }
+                        onClick={() =>
+                          updateSupplementaryField(
+                            item.key,
+                            !match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ],
+                          )
+                        }
+                        className={classNames(
+                          match.supplementarySheet?.[
+                            item.key as keyof typeof match.supplementarySheet
+                          ]
+                            ? "bg-indigo-600"
+                            : "bg-gray-200",
+                          savingSupplementaryField === item.key ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                            ? "opacity-50 cursor-not-allowed"
+                            : "cursor-pointer",
+                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={classNames(
+                            match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ]
+                              ? "translate-x-5"
+                              : "translate-x-0",
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                          )}
+                        />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Team Equipment Section */}
+              <div className="mb-8">
+                <h4 className="text-md font-medium text-gray-900 mb-4">
+                  Mannschaften
+                </h4>
+
+                {/* Home Team */}
+                <div className="mb-6">
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">
+                    Heimmannschaft - {match.home.fullName}
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[
-                      { key: "ruleBook", label: "Spielregeln/WKO", description: "Sind die aktuellen Spielregeln und WKO verfügbar?" },
-                      { key: "goalDisplay", label: "Manuelle Toranzeige", description: "Ist eine manuelle Toranzeige vorhanden?" },
-                      { key: "soundSource", label: "Ersatz-Tonquelle", description: "Ist eine Ersatz-Tonquelle (Pfeife/Horn) verfügbar?" },
-                      { key: "matchClock", label: "Spieluhr", description: "Ist eine funktionierende Spieluhr vorhanden?" },
-                      { key: "matchBalls", label: "10 Spielbälle", description: "Sind mind. 10 regelkonforme Spielbälle verfügbar?" },
-                      { key: "firstAidKit", label: "Erste-Hilfe-Ausrüstung", description: "Ist vollständige Erste-Hilfe-Ausrüstung vorhanden?" },
-                      { key: "fieldLines", label: "Pflichtlinien", description: "Ist das Spielfeld vollständig mit allen Pflichtlinien markiert?" },
-                      { key: "nets", label: "Tornetze", description: "Sind regelkonforme Tornetze angebracht?" },
+                      {
+                        key: "homeRoster",
+                        label: "Aufstellung rechtzeitig veröfffentlicht",
+                        description:
+                          "Wurde die Aufstellung fristgerecht veröffentlicht?",
+                      },
+                      {
+                        key: "homePlayerPasses",
+                        label: "Spielerpässe vollständig",
+                        description: "Liegen alle Spielerpässe vor?",
+                      },
+                      {
+                        key: "homeUniformPlayerClothing",
+                        label: "Einheitliche Spielerkleidung",
+                        description: "Einheitliche Helme, Trikots, Hosen?",
+                      },
                     ].map((item) => (
-                      <div key={item.key} className="flex items-center justify-between">
+                      <div
+                        key={item.key}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex flex-col">
                           <span className="text-sm font-medium text-gray-900">
                             {item.label}
@@ -981,18 +1252,43 @@ export default function MatchDetails({
                         </div>
                         <button
                           type="button"
-                          disabled={savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                          onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
+                          disabled={
+                            savingSupplementaryField === item.key ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          onClick={() =>
+                            updateSupplementaryField(
+                              item.key,
+                              !match.supplementarySheet?.[
+                                item.key as keyof typeof match.supplementarySheet
+                              ],
+                            )
+                          }
                           className={classNames(
-                            match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
-                            savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                            match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ]
+                              ? "bg-indigo-600"
+                              : "bg-gray-200",
+                            savingSupplementaryField === item.key ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer",
                             "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                           )}
                         >
                           <span
                             aria-hidden="true"
                             className={classNames(
-                              match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "translate-x-5" : "translate-x-0",
+                              match.supplementarySheet?.[
+                                item.key as keyof typeof match.supplementarySheet
+                              ]
+                                ? "translate-x-5"
+                                : "translate-x-0",
                               "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                             )}
                           />
@@ -1002,292 +1298,383 @@ export default function MatchDetails({
                   </div>
                 </div>
 
-                {/* Team Equipment Section */}
-                <div className="mb-8">
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Mannschaften
-                  </h4>
-
-                  {/* Home Team */}
-                  <div className="mb-6">
-                    <h5 className="text-sm font-medium text-gray-700 mb-3">
-                      Heimmannschaft - {match.home.fullName}
-                    </h5>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {[
-                        { key: "homeRoster", label: "Aufstellung rechtzeitig veröfffentlicht", description: "Wurde die Aufstellung fristgerecht veröffentlicht?" },
-                        { key: "homePlayerPasses", label: "Spielerpässe vollständig", description: "Liegen alle Spielerpässe vor?" },
-                        { key: "homeUniformPlayerClothing", label: "Einheitliche Spielerkleidung", description: "Einheitliche Helme, Trikots, Hosen?" },
-                      ].map((item) => (
-                        <div key={item.key} className="flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-900">
-                              {item.label}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {item.description}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            disabled={savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                            onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
-                            className={classNames(
-                              match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
-                              savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-                              "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                            )}
-                          >
-                            <span
-                              aria-hidden="true"
-                              className={classNames(
-                                match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "translate-x-5" : "translate-x-0",
-                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              )}
-                            />
-                          </button>
+                {/* Away Team */}
+                <div>
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">
+                    Gastmannschaft - {match.away.fullName}
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      {
+                        key: "awayRoster",
+                        label: "Aufstellung rechtzeitig veröfffentlicht",
+                        description:
+                          "Wurde die Aufstellung fristgerecht veröffentlicht?",
+                      },
+                      {
+                        key: "awayPlayerPasses",
+                        label: "Spielerpässe vollständig",
+                        description: "Liegen alle Spielerpässe vor?",
+                      },
+                      {
+                        key: "awayUniformPlayerClothing",
+                        label: "Einheitliche Spielerkleidung",
+                        description: "Einheitliche Helme, Trikots, Hosen?",
+                      },
+                      {
+                        key: "awaySecondJerseySet",
+                        label: "Zweiter Trikotsatz",
+                        description:
+                          "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?",
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.key}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            {item.label}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {item.description}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Away Team */}
-                  <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-3">
-                      Gastmannschaft - {match.away.fullName}
-                    </h5>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[
-                        { key: "awayRoster", label: "Aufstellung rechtzeitig veröfffentlicht", description: "Wurde die Aufstellung fristgerecht veröffentlicht?" },
-                        { key: "awayPlayerPasses", label: "Spielerpässe vollständig", description: "Liegen alle Spielerpässe vor?" },
-                        { key: "awayUniformPlayerClothing", label: "Einheitliche Spielerkleidung", description: "Einheitliche Helme, Trikots, Hosen?" },
-                        { key: "awaySecondJerseySet", label: "Zweiter Trikotsatz", description: "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?" },
-                      ].map((item) => (
-                        <div key={item.key} className="flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-900">
-                              {item.label}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {item.description}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            disabled={savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                            onClick={() => updateSupplementaryField(item.key, !match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet])}
+                        <button
+                          type="button"
+                          disabled={
+                            savingSupplementaryField === item.key ||
+                            !["SCHEDULED", "INPROGRESS"].includes(
+                              match.matchStatus.key,
+                            )
+                          }
+                          onClick={() =>
+                            updateSupplementaryField(
+                              item.key,
+                              !match.supplementarySheet?.[
+                                item.key as keyof typeof match.supplementarySheet
+                              ],
+                            )
+                          }
+                          className={classNames(
+                            match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ]
+                              ? "bg-indigo-600"
+                              : "bg-gray-200",
+                            savingSupplementaryField === item.key ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
                             className={classNames(
-                              match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "bg-indigo-600" : "bg-gray-200",
-                              savingSupplementaryField === item.key || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-                              "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                              match.supplementarySheet?.[
+                                item.key as keyof typeof match.supplementarySheet
+                              ]
+                                ? "translate-x-5"
+                                : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                             )}
-                          >
-                            <span
-                              aria-hidden="true"
-                              className={classNames(
-                                match.supplementarySheet?.[item.key as keyof typeof match.supplementarySheet] ? "translate-x-5" : "translate-x-0",
-                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              )}
-                            />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                          />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
+              </div>
 
-                {/* Special Events and Comments Section */}
-                <div className="mb-8">
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Besondere Vorkommnisse
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">
-                          Besondere Vorkommnisse
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          Gab es besondere Vorkommnisse während des Spiels?
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        disabled={savingSupplementaryField === "specialEvents" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                        onClick={() => updateSupplementaryField("specialEvents", !match.supplementarySheet?.specialEvents)}
-                        className={classNames(
-                          match.supplementarySheet?.specialEvents ? "bg-indigo-600" : "bg-gray-200",
-                          savingSupplementaryField === "specialEvents" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key) ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-                          "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                        )}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className={classNames(
-                            match.supplementarySheet?.specialEvents ? "translate-x-5" : "translate-x-0",
-                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                          )}
-                        />
-                      </button>
+              {/* Special Events and Comments Section */}
+              <div className="mb-8">
+                <h4 className="text-md font-medium text-gray-900 mb-4">
+                  Besondere Vorkommnisse
+                </h4>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">
+                        Besondere Vorkommnisse
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Gab es besondere Vorkommnisse während des Spiels?
+                      </span>
                     </div>
+                    <button
+                      type="button"
+                      disabled={
+                        savingSupplementaryField === "specialEvents" ||
+                        !["SCHEDULED", "INPROGRESS"].includes(
+                          match.matchStatus.key,
+                        )
+                      }
+                      onClick={() =>
+                        updateSupplementaryField(
+                          "specialEvents",
+                          !match.supplementarySheet?.specialEvents,
+                        )
+                      }
+                      className={classNames(
+                        match.supplementarySheet?.specialEvents
+                          ? "bg-indigo-600"
+                          : "bg-gray-200",
+                        savingSupplementaryField === "specialEvents" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                          ? "opacity-50 cursor-not-allowed"
+                          : "cursor-pointer",
+                        "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={classNames(
+                          match.supplementarySheet?.specialEvents
+                            ? "translate-x-5"
+                            : "translate-x-0",
+                          "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                        )}
+                      />
+                    </button>
+                  </div>
 
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Schiedsrichter Kommentare
+                    </label>
+                    <textarea
+                      value={match.supplementarySheet?.refereeComments || ""}
+                      onChange={(e) =>
+                        updateSupplementaryField(
+                          "refereeComments",
+                          e.target.value,
+                        )
+                      }
+                      disabled={
+                        savingSupplementaryField === "refereeComments" ||
+                        !["SCHEDULED", "INPROGRESS"].includes(
+                          match.matchStatus.key,
+                        )
+                      }
+                      rows={4}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      placeholder="Kommentare des Schiedsrichters zu besonderen Vorkommnissen, Problemen oder Anmerkungen..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Referee Payment Section */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 mb-4">
+                  Schiedsrichter Vergütung
+                </h4>
+
+                {/* Referee 1 Payment */}
+                <div className="mb-6">
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">
+                    Schiedsrichter 1
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Schiedsrichter Kommentare
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Reisekosten (€)
                       </label>
-                      <textarea
-                        value={match.supplementarySheet?.refereeComments || ""}
-                        onChange={(e) => updateSupplementaryField("refereeComments", e.target.value)}
-                        disabled={savingSupplementaryField === "refereeComments" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                        rows={4}
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          match.supplementarySheet?.refereePayment?.referee1
+                            ?.travelExpenses || 0
+                        }
+                        onChange={(e) =>
+                          updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee1: {
+                              ...match.supplementarySheet?.refereePayment
+                                ?.referee1,
+                              travelExpenses: parseFloat(e.target.value) || 0,
+                            },
+                          })
+                        }
+                        disabled={
+                          savingSupplementaryField === "refereePayment" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                        }
                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        placeholder="Kommentare des Schiedsrichters zu besonderen Vorkommnissen, Problemen oder Anmerkungen..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Aufwandsentschädigung (€)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          match.supplementarySheet?.refereePayment?.referee1
+                            ?.expenseAllowance || 0
+                        }
+                        onChange={(e) =>
+                          updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee1: {
+                              ...match.supplementarySheet?.refereePayment
+                                ?.referee1,
+                              expenseAllowance: parseFloat(e.target.value) || 0,
+                            },
+                          })
+                        }
+                        disabled={
+                          savingSupplementaryField === "refereePayment" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Spielgebühren (€)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          match.supplementarySheet?.refereePayment?.referee1
+                            ?.gameFees || 0
+                        }
+                        onChange={(e) =>
+                          updateSupplementaryField("refereePayment", {
+                            ...match.supplementarySheet?.refereePayment,
+                            referee1: {
+                              ...match.supplementarySheet?.refereePayment
+                                ?.referee1,
+                              gameFees: parseFloat(e.target.value) || 0,
+                            },
+                          })
+                        }
+                        disabled={
+                          savingSupplementaryField === "refereePayment" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Referee Payment Section */}
+                {/* Referee 2 Payment */}
                 <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Schiedsrichter Vergütung
-                  </h4>
-
-                  {/* Referee 1 Payment */}
-                  <div className="mb-6">
-                    <h5 className="text-sm font-medium text-gray-700 mb-3">
-                      Schiedsrichter 1
-                    </h5>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Reisekosten (€)
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={match.supplementarySheet?.refereePayment?.referee1?.travelExpenses || 0}
-                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">
+                    Schiedsrichter 2
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Reisekosten (€)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          match.supplementarySheet?.refereePayment?.referee2
+                            ?.travelExpenses || 0
+                        }
+                        onChange={(e) =>
+                          updateSupplementaryField("refereePayment", {
                             ...match.supplementarySheet?.refereePayment,
-                            referee1: {
-                              ...match.supplementarySheet?.refereePayment?.referee1,
-                              travelExpenses: parseFloat(e.target.value) || 0
-                            }
-                          })}
-                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Aufwandsentschädigung (€)
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={match.supplementarySheet?.refereePayment?.referee1?.expenseAllowance || 0}
-                          onChange={(e) => updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee1: {
-                              ...match.supplementarySheet?.refereePayment?.referee1,
-                              expenseAllowance: parseFloat(e.target.value) || 0
-                            }
-                          })}
-                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Spielgebühren (€)
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={match.supplementarySheet?.refereePayment?.referee1?.gameFees || 0}
-                          onChange={(e) => updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee1: {
-                              ...match.supplementarySheet?.refereePayment?.referee1,
-                              gameFees: parseFloat(e.target.value) || 0
-                            }
-                          })}
-                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
+                            referee2: {
+                              ...match.supplementarySheet?.refereePayment
+                                ?.referee2,
+                              travelExpenses: parseFloat(e.target.value) || 0,
+                            },
+                          })
+                        }
+                        disabled={
+                          savingSupplementaryField === "refereePayment" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
                     </div>
-                  </div>
-
-                  {/* Referee 2 Payment */}
-                  <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-3">
-                      Schiedsrichter 2
-                    </h5>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Reisekosten (€)
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={match.supplementarySheet?.refereePayment?.referee2?.travelExpenses || 0}
-                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Aufwandsentschädigung (€)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          match.supplementarySheet?.refereePayment?.referee2
+                            ?.expenseAllowance || 0
+                        }
+                        onChange={(e) =>
+                          updateSupplementaryField("refereePayment", {
                             ...match.supplementarySheet?.refereePayment,
                             referee2: {
-                              ...match.supplementarySheet?.refereePayment?.referee2,
-                              travelExpenses: parseFloat(e.target.value) || 0
-                            }
-                          })}
-                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Aufwandsentschädigung (€)
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={match.supplementarySheet?.refereePayment?.referee2?.expenseAllowance || 0}
-                          onChange={(e) => updateSupplementaryField("refereePayment", {
+                              ...match.supplementarySheet?.refereePayment
+                                ?.referee2,
+                              expenseAllowance: parseFloat(e.target.value) || 0,
+                            },
+                          })
+                        }
+                        disabled={
+                          savingSupplementaryField === "refereePayment" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Spielgebühren (€)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          match.supplementarySheet?.refereePayment?.referee2
+                            ?.gameFees || 0
+                        }
+                        onChange={(e) =>
+                          updateSupplementaryField("refereePayment", {
                             ...match.supplementarySheet?.refereePayment,
                             referee2: {
-                              ...match.supplementarySheet?.refereePayment?.referee2,
-                              expenseAllowance: parseFloat(e.target.value) || 0
-                            }
-                          })}
-                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Spielgebühren (€)
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={match.supplementarySheet?.refereePayment?.referee2?.gameFees || 0}
-                          onChange={(e) => updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee2: {
-                              ...match.supplementarySheet?.refereePayment?.referee2,
-                              gameFees: parseFloat(e.target.value) || 0
-                            }
-                          })}
-                          disabled={savingSupplementaryField === "refereePayment" || !["SCHEDULED", "INPROGRESS"].includes(match.matchStatus.key)}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
+                              ...match.supplementarySheet?.refereePayment
+                                ?.referee2,
+                              gameFees: parseFloat(e.target.value) || 0,
+                            },
+                          })
+                        }
+                        disabled={
+                          savingSupplementaryField === "refereePayment" ||
+                          !["SCHEDULED", "INPROGRESS"].includes(
+                            match.matchStatus.key,
+                          )
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
                     </div>
                   </div>
                 </div>
@@ -1664,7 +2051,9 @@ export default function MatchDetails({
                 }}
                 className={classNames(
                   match.matchSheetComplete ? "bg-indigo-600" : "bg-gray-200",
-                  isSavingMatchSheetComplete ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                  isSavingMatchSheetComplete
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer",
                   "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                 )}
               >
