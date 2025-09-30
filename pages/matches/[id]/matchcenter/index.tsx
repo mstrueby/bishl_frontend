@@ -1558,113 +1558,153 @@ export default function MatchDetails({
                       expenseAllowance?: number;
                       gameFees?: number;
                     } | undefined;
-                  }> = ({ refereeNumber, paymentData }) => (
-                    <div>
-                      <h5 className="text-sm font-medium text-gray-700 mb-3">
-                        Schiedsrichter {refereeNumber}
-                      </h5>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Reisekosten (€)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={paymentData?.travelExpenses || 0}
-                            onChange={(e) =>
-                              updateSupplementaryField("refereePayment", {
-                                ...match.supplementarySheet?.refereePayment,
-                                [`referee${refereeNumber}`]: {
-                                  ...match.supplementarySheet?.refereePayment?.[
-                                    `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
-                                  ],
-                                  travelExpenses: parseFloat(e.target.value) || 0,
-                                },
-                              })
-                            }
-                            disabled={
-                              savingSupplementaryField === "refereePayment" ||
-                              !["SCHEDULED", "INPROGRESS"].includes(
-                                match.matchStatus.key,
-                              )
-                            }
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Aufwandsentschädigung (€)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={paymentData?.expenseAllowance || 0}
-                            onChange={(e) =>
-                              updateSupplementaryField("refereePayment", {
-                                ...match.supplementarySheet?.refereePayment,
-                                [`referee${refereeNumber}`]: {
-                                  ...match.supplementarySheet?.refereePayment?.[
-                                    `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
-                                  ],
-                                  expenseAllowance: parseFloat(e.target.value) || 0,
-                                },
-                              })
-                            }
-                            disabled={
-                              savingSupplementaryField === "refereePayment" ||
-                              !["SCHEDULED", "INPROGRESS"].includes(
-                                match.matchStatus.key,
-                              )
-                            }
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Spielgebühren (€)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={paymentData?.gameFees || 0}
-                            onChange={(e) =>
-                              updateSupplementaryField("refereePayment", {
-                                ...match.supplementarySheet?.refereePayment,
-                                [`referee${refereeNumber}`]: {
-                                  ...match.supplementarySheet?.refereePayment?.[
-                                    `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
-                                  ],
-                                  gameFees: parseFloat(e.target.value) || 0,
-                                },
-                              })
-                            }
-                            disabled={
-                              savingSupplementaryField === "refereePayment" ||
-                              !["SCHEDULED", "INPROGRESS"].includes(
-                                match.matchStatus.key,
-                              )
-                            }
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
+                  }> = ({ refereeNumber, paymentData }) => {
+                    const total = (paymentData?.travelExpenses || 0) + 
+                                  (paymentData?.expenseAllowance || 0) + 
+                                  (paymentData?.gameFees || 0);
+
+                    return (
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-3">
+                          Schiedsrichter {refereeNumber}
+                        </h5>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              Reisekosten (€)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={paymentData?.travelExpenses || 0}
+                              onChange={(e) =>
+                                updateSupplementaryField("refereePayment", {
+                                  ...match.supplementarySheet?.refereePayment,
+                                  [`referee${refereeNumber}`]: {
+                                    ...match.supplementarySheet?.refereePayment?.[
+                                      `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
+                                    ],
+                                    travelExpenses: parseFloat(e.target.value) || 0,
+                                  },
+                                })
+                              }
+                              disabled={
+                                savingSupplementaryField === "refereePayment" ||
+                                !["SCHEDULED", "INPROGRESS"].includes(
+                                  match.matchStatus.key,
+                                )
+                              }
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              Aufwandsentschädigung (€)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={paymentData?.expenseAllowance || 0}
+                              onChange={(e) =>
+                                updateSupplementaryField("refereePayment", {
+                                  ...match.supplementarySheet?.refereePayment,
+                                  [`referee${refereeNumber}`]: {
+                                    ...match.supplementarySheet?.refereePayment?.[
+                                      `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
+                                    ],
+                                    expenseAllowance: parseFloat(e.target.value) || 0,
+                                  },
+                                })
+                              }
+                              disabled={
+                                savingSupplementaryField === "refereePayment" ||
+                                !["SCHEDULED", "INPROGRESS"].includes(
+                                  match.matchStatus.key,
+                                )
+                              }
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              Spielgebühren (€)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={paymentData?.gameFees || 0}
+                              onChange={(e) =>
+                                updateSupplementaryField("refereePayment", {
+                                  ...match.supplementarySheet?.refereePayment,
+                                  [`referee${refereeNumber}`]: {
+                                    ...match.supplementarySheet?.refereePayment?.[
+                                      `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
+                                    ],
+                                    gameFees: parseFloat(e.target.value) || 0,
+                                  },
+                                })
+                              }
+                              disabled={
+                                savingSupplementaryField === "refereePayment" ||
+                                !["SCHEDULED", "INPROGRESS"].includes(
+                                  match.matchStatus.key,
+                                )
+                              }
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                          </div>
+                          <div className="pt-2 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-medium text-gray-700">
+                                Summe Schiedsrichter {refereeNumber}:
+                              </span>
+                              <span className="text-sm font-semibold text-gray-900">
+                                {total.toFixed(2)} €
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
+                    );
+                  };
+
+                  const referee1Total = (match.supplementarySheet?.refereePayment?.referee1?.travelExpenses || 0) +
+                                       (match.supplementarySheet?.refereePayment?.referee1?.expenseAllowance || 0) +
+                                       (match.supplementarySheet?.refereePayment?.referee1?.gameFees || 0);
+
+                  const referee2Total = (match.supplementarySheet?.refereePayment?.referee2?.travelExpenses || 0) +
+                                       (match.supplementarySheet?.refereePayment?.referee2?.expenseAllowance || 0) +
+                                       (match.supplementarySheet?.refereePayment?.referee2?.gameFees || 0);
+
+                  const overallTotal = referee1Total + referee2Total;
 
                   return (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <RefereePaymentSection
-                        refereeNumber={1}
-                        paymentData={match.supplementarySheet?.refereePayment?.referee1}
-                      />
-                      <RefereePaymentSection
-                        refereeNumber={2}
-                        paymentData={match.supplementarySheet?.refereePayment?.referee2}
-                      />
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <RefereePaymentSection
+                          refereeNumber={1}
+                          paymentData={match.supplementarySheet?.refereePayment?.referee1}
+                        />
+                        <RefereePaymentSection
+                          refereeNumber={2}
+                          paymentData={match.supplementarySheet?.refereePayment?.referee2}
+                        />
+                      </div>
+                      
+                      {/* Overall Total */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-gray-900">
+                            Gesamtsumme Schiedsrichtervergütung:
+                          </span>
+                          <span className="text-lg font-bold text-gray-900">
+                            {overallTotal.toFixed(2)} €
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   );
                 })()}
