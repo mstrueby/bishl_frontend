@@ -724,9 +724,9 @@ export default function MatchDetails({
           )}
 
           {activeTab === "supplementary" && (
-            <div className="py-4">
+            <div className="py-4 space-y-12">
               {/* Referee Attendance Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -904,7 +904,7 @@ export default function MatchDetails({
               </div>
 
               {/* Equipment Check Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -918,7 +918,7 @@ export default function MatchDetails({
                   </div>
                   {/** Alle aktivieren/deaktivieren */}
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-light text-gray-700">
                       Alle aktivieren/deaktivieren
                     </span>
                     <button
@@ -1163,7 +1163,7 @@ export default function MatchDetails({
               </div>
 
               {/* Team Equipment Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -1177,7 +1177,7 @@ export default function MatchDetails({
                   </div>
                   {/** Alle aktivieren/deaktivieren */}
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-light text-gray-700">
                       Alle aktivieren/deaktivieren
                     </span>
                     <button
@@ -1446,7 +1446,7 @@ export default function MatchDetails({
               </div>
 
               {/* Special Events and Comments Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -1535,7 +1535,7 @@ export default function MatchDetails({
               </div>
 
               {/* Referee Payment Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
