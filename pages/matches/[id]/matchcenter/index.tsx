@@ -724,9 +724,9 @@ export default function MatchDetails({
           )}
 
           {activeTab === "supplementary" && (
-            <div className="py-4">
+            <div className="py-4 space-y-12">
               {/* Referee Attendance Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -904,7 +904,7 @@ export default function MatchDetails({
               </div>
 
               {/* Equipment Check Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -918,7 +918,7 @@ export default function MatchDetails({
                   </div>
                   {/** Alle aktivieren/deaktivieren */}
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-light text-gray-700">
                       Alle aktivieren/deaktivieren
                     </span>
                     <button
@@ -1163,7 +1163,7 @@ export default function MatchDetails({
               </div>
 
               {/* Team Equipment Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -1177,7 +1177,7 @@ export default function MatchDetails({
                   </div>
                   {/** Alle aktivieren/deaktivieren */}
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-light text-gray-700">
                       Alle aktivieren/deaktivieren
                     </span>
                     <button
@@ -1446,7 +1446,7 @@ export default function MatchDetails({
               </div>
 
               {/* Special Events and Comments Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -1535,7 +1535,7 @@ export default function MatchDetails({
               </div>
 
               {/* Referee Payment Section */}
-              <div className="px-4 mb-8">
+              <div className="px-4">
                 {/** Header */}
                 <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
                   <div className="min-w-0 flex-1">
@@ -1549,209 +1549,125 @@ export default function MatchDetails({
                   </div>
                 </div>
 
-                {/* Referee 1 Payment */}
-                <div className="mb-6">
-                  <h5 className="text-sm font-medium text-gray-700 mb-3">
-                    Schiedsrichter 1
-                  </h5>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Reusable Referee Payment Components */}
+                {(() => {
+                  const RefereePaymentSection: React.FC<{
+                    refereeNumber: 1 | 2;
+                    paymentData: {
+                      travelExpenses?: number;
+                      expenseAllowance?: number;
+                      gameFees?: number;
+                    } | undefined;
+                  }> = ({ refereeNumber, paymentData }) => (
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Reisekosten (€)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={
-                          match.supplementarySheet?.refereePayment?.referee1
-                            ?.travelExpenses || 0
-                        }
-                        onChange={(e) =>
-                          updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee1: {
-                              ...match.supplementarySheet?.refereePayment
-                                ?.referee1,
-                              travelExpenses: parseFloat(e.target.value) || 0,
-                            },
-                          })
-                        }
-                        disabled={
-                          savingSupplementaryField === "refereePayment" ||
-                          !["SCHEDULED", "INPROGRESS"].includes(
-                            match.matchStatus.key,
-                          )
-                        }
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
+                      <h5 className="text-sm font-medium text-gray-700 mb-3">
+                        Schiedsrichter {refereeNumber}
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Reisekosten (€)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={paymentData?.travelExpenses || 0}
+                            onChange={(e) =>
+                              updateSupplementaryField("refereePayment", {
+                                ...match.supplementarySheet?.refereePayment,
+                                [`referee${refereeNumber}`]: {
+                                  ...match.supplementarySheet?.refereePayment?.[
+                                    `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
+                                  ],
+                                  travelExpenses: parseFloat(e.target.value) || 0,
+                                },
+                              })
+                            }
+                            disabled={
+                              savingSupplementaryField === "refereePayment" ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                            }
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Aufwandsentschädigung (€)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={paymentData?.expenseAllowance || 0}
+                            onChange={(e) =>
+                              updateSupplementaryField("refereePayment", {
+                                ...match.supplementarySheet?.refereePayment,
+                                [`referee${refereeNumber}`]: {
+                                  ...match.supplementarySheet?.refereePayment?.[
+                                    `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
+                                  ],
+                                  expenseAllowance: parseFloat(e.target.value) || 0,
+                                },
+                              })
+                            }
+                            disabled={
+                              savingSupplementaryField === "refereePayment" ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                            }
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Spielgebühren (€)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={paymentData?.gameFees || 0}
+                            onChange={(e) =>
+                              updateSupplementaryField("refereePayment", {
+                                ...match.supplementarySheet?.refereePayment,
+                                [`referee${refereeNumber}`]: {
+                                  ...match.supplementarySheet?.refereePayment?.[
+                                    `referee${refereeNumber}` as keyof typeof match.supplementarySheet.refereePayment
+                                  ],
+                                  gameFees: parseFloat(e.target.value) || 0,
+                                },
+                              })
+                            }
+                            disabled={
+                              savingSupplementaryField === "refereePayment" ||
+                              !["SCHEDULED", "INPROGRESS"].includes(
+                                match.matchStatus.key,
+                              )
+                            }
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Aufwandsentschädigung (€)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={
-                          match.supplementarySheet?.refereePayment?.referee1
-                            ?.expenseAllowance || 0
-                        }
-                        onChange={(e) =>
-                          updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee1: {
-                              ...match.supplementarySheet?.refereePayment
-                                ?.referee1,
-                              expenseAllowance: parseFloat(e.target.value) || 0,
-                            },
-                          })
-                        }
-                        disabled={
-                          savingSupplementaryField === "refereePayment" ||
-                          !["SCHEDULED", "INPROGRESS"].includes(
-                            match.matchStatus.key,
-                          )
-                        }
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Spielgebühren (€)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={
-                          match.supplementarySheet?.refereePayment?.referee1
-                            ?.gameFees || 0
-                        }
-                        onChange={(e) =>
-                          updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee1: {
-                              ...match.supplementarySheet?.refereePayment
-                                ?.referee1,
-                              gameFees: parseFloat(e.target.value) || 0,
-                            },
-                          })
-                        }
-                        disabled={
-                          savingSupplementaryField === "refereePayment" ||
-                          !["SCHEDULED", "INPROGRESS"].includes(
-                            match.matchStatus.key,
-                          )
-                        }
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
+                  );
 
-                {/* Referee 2 Payment */}
-                <div>
-                  <h5 className="text-sm font-medium text-gray-700 mb-3">
-                    Schiedsrichter 2
-                  </h5>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Reisekosten (€)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={
-                          match.supplementarySheet?.refereePayment?.referee2
-                            ?.travelExpenses || 0
-                        }
-                        onChange={(e) =>
-                          updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee2: {
-                              ...match.supplementarySheet?.refereePayment
-                                ?.referee2,
-                              travelExpenses: parseFloat(e.target.value) || 0,
-                            },
-                          })
-                        }
-                        disabled={
-                          savingSupplementaryField === "refereePayment" ||
-                          !["SCHEDULED", "INPROGRESS"].includes(
-                            match.matchStatus.key,
-                          )
-                        }
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <RefereePaymentSection
+                        refereeNumber={1}
+                        paymentData={match.supplementarySheet?.refereePayment?.referee1}
+                      />
+                      <RefereePaymentSection
+                        refereeNumber={2}
+                        paymentData={match.supplementarySheet?.refereePayment?.referee2}
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Aufwandsentschädigung (€)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={
-                          match.supplementarySheet?.refereePayment?.referee2
-                            ?.expenseAllowance || 0
-                        }
-                        onChange={(e) =>
-                          updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee2: {
-                              ...match.supplementarySheet?.refereePayment
-                                ?.referee2,
-                              expenseAllowance: parseFloat(e.target.value) || 0,
-                            },
-                          })
-                        }
-                        disabled={
-                          savingSupplementaryField === "refereePayment" ||
-                          !["SCHEDULED", "INPROGRESS"].includes(
-                            match.matchStatus.key,
-                          )
-                        }
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Spielgebühren (€)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={
-                          match.supplementarySheet?.refereePayment?.referee2
-                            ?.gameFees || 0
-                        }
-                        onChange={(e) =>
-                          updateSupplementaryField("refereePayment", {
-                            ...match.supplementarySheet?.refereePayment,
-                            referee2: {
-                              ...match.supplementarySheet?.refereePayment
-                                ?.referee2,
-                              gameFees: parseFloat(e.target.value) || 0,
-                            },
-                          })
-                        }
-                        disabled={
-                          savingSupplementaryField === "refereePayment" ||
-                          !["SCHEDULED", "INPROGRESS"].includes(
-                            match.matchStatus.key,
-                          )
-                        }
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
             </div>
           )}
