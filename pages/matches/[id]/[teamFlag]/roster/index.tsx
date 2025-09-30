@@ -1018,14 +1018,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setRosterPublished(true);
     }
 
-    // Check if all requirements are met before saving
-    {/**
-    if (!isRosterValid() && (rosterPublished || match.matchStatus.key === 'FINISHED')) {
-      setError('Die Aufstellung entspricht nicht allen Anforderungen. Bitte überprüfen Sie alle Punkte in der Checkliste.');
-      return;
-    }
-    */}
-
     setSavingRoster(true);
     setError('');
     let cntAdditionalMatches = 0;
@@ -1882,19 +1874,10 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         <div className="flex items-center">
           <div className="relative inline-flex items-center">
             <div className="flex items-center h-6">
-              {/* Check if all required conditions are met using isRosterValid function */}
               {(() => {
                 // If match is finished, always publish roster and disable checkbox
                 const isFinished = match.matchStatus.key === 'FINISHED';
                 const allChecksPass = isRosterValid();
-
-                // If checks don't pass and not a finished match, always set rosterPublished to false
-                if (!allChecksPass && !isFinished) {
-                  // Ensure rosterPublished is false if checks don't pass
-                  if (rosterPublished) {
-                    setRosterPublished(false);
-                  }
-                }
 
                 // If match is finished, always set rosterPublished to true
                 if (isFinished && !rosterPublished) {
@@ -1905,22 +1888,57 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                   <input
                     id="rosterPublished"
                     type="checkbox"
-                    className={`h-4 w-4 rounded border-gray-300 ${allChecksPass || isFinished ? 'text-indigo-600' : 'text-gray-400 bg-gray-100'} focus:ring-indigo-600`}
+                    className={`h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600`}
                     checked={rosterPublished || isFinished}
                     onChange={(e) => {
-                      if (allChecksPass && !isFinished) {
+                      if (!isFinished) {
                         setRosterPublished(e.target.checked);
                       }
                     }}
-                    disabled={!allChecksPass || isFinished}
+                    disabled={isFinished}
                   />
                 );
               })()}
             </div>
             <div className="ml-3 text-sm leading-6">
-              <label htmlFor="rosterPublished" className={`font-medium ${isRosterValid() ? 'text-gray-900' : 'text-gray-400'}`}>Veröffentlichen</label>
+              <label htmlFor="rosterPublished" className="font-medium text-gray-900">Veröffentlichen</label>
               <p className="text-gray-500">
-                {!isRosterValid() ? "Behebe zuerst alle Fehler in der Aufstellung" : "Austellung öffentlich sichtbar machen"}
+                {(() => {
+                  const allChecksPass = isRosterValid();
+                  const isFinished = match.matchStatus.key === 'FINISHED';
+                  
+                  if (isFinished) {
+                    return "Aufstellung ist veröffentlicht (Spiel beendet)";
+                  } else if (!allChecksPass) {
+                    const errors = [];
+                    
+                    if (!rosterList.some(player => player.playerPosition.key === 'C')) {
+                      errors.push("kein Captain");
+                    }
+                    if (!rosterList.some(player => player.playerPosition.key === 'A')) {
+                      errors.push("kein Assistant");
+                    }
+                    if (!rosterList.some(player => player.playerPosition.key === 'G')) {
+                      errors.push("kein Goalie");
+                    }
+                    if (rosterList.filter(player => player.playerPosition.key != 'G').length < minSkaterCount) {
+                      errors.push(`weniger als ${minSkaterCount} Feldspieler`);
+                    }
+                    if (rosterList.some(player => player.player.jerseyNumber === 0)) {
+                      errors.push("fehlende Rückennummern");
+                    }
+                    if (rosterList.some((player, index) => rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index)) {
+                      errors.push("doppelte Rückennummern");
+                    }
+                    if (rosterList.filter(player => player.called).length > 5) {
+                      errors.push("zu viele hochgemeldete Spieler");
+                    }
+                    
+                    return `Aufstellung öffentlich sichtbar machen (Warnung: ${errors.join(", ")})`;
+                  } else {
+                    return "Aufstellung öffentlich sichtbar machen";
+                  }
+                })()}
               </p>
             </div>
           </div>
@@ -1942,14 +1960,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         <button
           type="button"
           onClick={handleSaveRoster}
-          /*disabled={loading || savingRoster || (match.matchStatus.key === 'FINISHED' && !isRosterValid())}
-          className={`w-24 inline-flex justify-center items-center rounded-md border border-transparent ${match.matchStatus.key === 'FINISHED' && !isRosterValid()
-            ? 'bg-indigo-300 cursor-not-allowed'
-            : 'bg-indigo-600 hover:bg-indigo-500'
-            } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}*/
           disabled={loading || savingRoster}
-          className={`w-24 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 hover:bg-indigo-500
-            py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+          className="w-24 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 hover:bg-indigo-500 py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           {savingRoster ? (
             <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
