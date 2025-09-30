@@ -1309,186 +1309,156 @@ export default function MatchDetails({
                   </div>
                 </div>
 
-                {/* Home Team */}
-                <div className="mb-6">
-                  <h5 className="text-sm font-medium text-gray-700 mb-3">
-                    Heimmannschaft - {match.home.fullName}
-                  </h5>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[
-                      {
-                        key: "homeRoster",
-                        label: "Aufstellung rechtzeitig veröfffentlicht",
-                        description:
-                          "Wurde die Aufstellung fristgerecht veröffentlicht?",
-                      },
-                      {
-                        key: "homePlayerPasses",
-                        label: "Spielerpässe vollständig",
-                        description: "Liegen alle Spielerpässe vor?",
-                      },
-                      {
-                        key: "homeUniformPlayerClothing",
-                        label: "Einheitliche Spielerkleidung",
-                        description: "Einheitliche Helme, Trikots, Hosen?",
-                      },
-                    ].map((item) => (
-                      <div
-                        key={item.key}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">
-                            {item.label}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {item.description}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          disabled={
-                            savingSupplementaryField === item.key ||
-                            !["SCHEDULED", "INPROGRESS"].includes(
-                              match.matchStatus.key,
-                            )
-                          }
-                          onClick={() =>
-                            updateSupplementaryField(
-                              item.key,
-                              !match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ],
-                            )
-                          }
-                          className={classNames(
-                            match.supplementarySheet?.[
-                              item.key as keyof typeof match.supplementarySheet
-                            ]
-                              ? "bg-indigo-600"
-                              : "bg-gray-200",
-                            savingSupplementaryField === item.key ||
-                              !["SCHEDULED", "INPROGRESS"].includes(
-                                match.matchStatus.key,
-                              )
-                              ? "opacity-50 cursor-not-allowed"
-                              : "cursor-pointer",
-                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                          )}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ]
-                                ? "translate-x-5"
-                                : "translate-x-0",
-                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                            )}
-                          />
-                        </button>
+                {/* Reusable Team Equipment Components */}
+                {(() => {
+                  const TeamEquipmentSection: React.FC<{
+                    teamType: "home" | "away";
+                    teamName: string;
+                    items: {
+                      key: string;
+                      label: string;
+                      description: string;
+                    }[];
+                  }> = ({ teamType, teamName, items }) => (
+                    <div>
+                      <h5 className="text-sm font-medium text-gray-700 mb-3">
+                        {teamType === "home" ? "Heimmannschaft" : "Gastmannschaft"} - {teamName}
+                      </h5>
+                      <div className="space-y-4">
+                        {items.map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-gray-900">
+                                {item.label}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {item.description}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              disabled={
+                                savingSupplementaryField === item.key ||
+                                !["SCHEDULED", "INPROGRESS"].includes(
+                                  match.matchStatus.key,
+                                )
+                              }
+                              onClick={() =>
+                                updateSupplementaryField(
+                                  item.key,
+                                  !match.supplementarySheet?.[
+                                    item.key as keyof typeof match.supplementarySheet
+                                  ],
+                                )
+                              }
+                              className={classNames(
+                                match.supplementarySheet?.[
+                                  item.key as keyof typeof match.supplementarySheet
+                                ]
+                                  ? "bg-indigo-600"
+                                  : "bg-gray-200",
+                                savingSupplementaryField === item.key ||
+                                  !["SCHEDULED", "INPROGRESS"].includes(
+                                    match.matchStatus.key,
+                                  )
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : "cursor-pointer",
+                                "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                              )}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className={classNames(
+                                  match.supplementarySheet?.[
+                                    item.key as keyof typeof match.supplementarySheet
+                                  ]
+                                    ? "translate-x-5"
+                                    : "translate-x-0",
+                                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                )}
+                              />
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  );
 
-                {/* Away Team */}
-                <div>
-                  <h5 className="text-sm font-medium text-gray-700 mb-3">
-                    Gastmannschaft - {match.away.fullName}
-                  </h5>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      {
-                        key: "awayRoster",
-                        label: "Aufstellung rechtzeitig veröfffentlicht",
-                        description:
-                          "Wurde die Aufstellung fristgerecht veröffentlicht?",
-                      },
-                      {
-                        key: "awayPlayerPasses",
-                        label: "Spielerpässe vollständig",
-                        description: "Liegen alle Spielerpässe vor?",
-                      },
-                      {
-                        key: "awayUniformPlayerClothing",
-                        label: "Einheitliche Spielerkleidung",
-                        description: "Einheitliche Helme, Trikots, Hosen?",
-                      },
-                      {
-                        key: "awaySecondJerseySet",
-                        label: "Zweiter Trikotsatz",
-                        description:
-                          "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?",
-                      },
-                    ].map((item) => (
-                      <div
-                        key={item.key}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">
-                            {item.label}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {item.description}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          disabled={
-                            savingSupplementaryField === item.key ||
-                            !["SCHEDULED", "INPROGRESS"].includes(
-                              match.matchStatus.key,
-                            )
-                          }
-                          onClick={() =>
-                            updateSupplementaryField(
-                              item.key,
-                              !match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ],
-                            )
-                          }
-                          className={classNames(
-                            match.supplementarySheet?.[
-                              item.key as keyof typeof match.supplementarySheet
-                            ]
-                              ? "bg-indigo-600"
-                              : "bg-gray-200",
-                            savingSupplementaryField === item.key ||
-                              !["SCHEDULED", "INPROGRESS"].includes(
-                                match.matchStatus.key,
-                              )
-                              ? "opacity-50 cursor-not-allowed"
-                              : "cursor-pointer",
-                            "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                          )}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ]
-                                ? "translate-x-5"
-                                : "translate-x-0",
-                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                            )}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  const homeTeamItems = [
+                    {
+                      key: "homeRoster",
+                      label: "Aufstellung rechtzeitig veröfffentlicht",
+                      description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
+                    },
+                    {
+                      key: "homePlayerPasses",
+                      label: "Spielerpässe vollständig",
+                      description: "Liegen alle Spielerpässe vor?",
+                    },
+                    {
+                      key: "homeUniformPlayerClothing",
+                      label: "Einheitliche Spielerkleidung",
+                      description: "Einheitliche Helme, Trikots, Hosen?",
+                    },
+                  ];
+
+                  const awayTeamItems = [
+                    {
+                      key: "awayRoster",
+                      label: "Aufstellung rechtzeitig veröfffentlicht",
+                      description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
+                    },
+                    {
+                      key: "awayPlayerPasses",
+                      label: "Spielerpässe vollständig",
+                      description: "Liegen alle Spielerpässe vor?",
+                    },
+                    {
+                      key: "awayUniformPlayerClothing",
+                      label: "Einheitliche Spielerkleidung",
+                      description: "Einheitliche Helme, Trikots, Hosen?",
+                    },
+                    {
+                      key: "awaySecondJerseySet",
+                      label: "Zweiter Trikotsatz",
+                      description: "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?",
+                    },
+                  ];
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <TeamEquipmentSection
+                        teamType="home"
+                        teamName={match.home.fullName}
+                        items={homeTeamItems}
+                      />
+                      <TeamEquipmentSection
+                        teamType="away"
+                        teamName={match.away.fullName}
+                        items={awayTeamItems}
+                      />
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Special Events and Comments Section */}
-              <div className="mb-8">
-                <h4 className="text-md font-medium text-gray-900 mb-4">
-                  Besondere Vorkommnisse
-                </h4>
+              <div className="px-4 mb-8">
+                {/** Header */}
+                <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                      Besondere Vorkomnisse
+                    </h3>
+                    <p className="mt-0 text-xs text-gray-500">
+                      Dieser Bereich ist von den{" "}
+                      <strong>Schiedsrichtern</strong> auszufüllen
+                    </p>
+                  </div>
+                </div>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
@@ -1565,10 +1535,19 @@ export default function MatchDetails({
               </div>
 
               {/* Referee Payment Section */}
-              <div>
-                <h4 className="text-md font-medium text-gray-900 mb-4">
-                  Schiedsrichter Vergütung
-                </h4>
+              <div className="px-4 mb-8">
+                {/** Header */}
+                <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                      Schiedsrichtervergütung
+                    </h3>
+                    <p className="mt-0 text-xs text-gray-500">
+                      Dieser Bereich ist von den{" "}
+                      <strong>Schiedsrichtern</strong> auszufüllen
+                    </p>
+                  </div>
+                </div>
 
                 {/* Referee 1 Payment */}
                 <div className="mb-6">
