@@ -1,0 +1,606 @@
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+import { Match, SupplementarySheet } from '../../../../types/MatchValues';
+import { MatchdayOwner } from '../../../../types/TournamentValues';
+import Layout from '../../../../components/Layout';
+import { getCookie } from 'cookies-next';
+import axios from 'axios';
+import useAuth from '../../../../hooks/useAuth';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { calculateMatchButtonPermissions, classNames } from '../../../../tools/utils';
+import MatchHeader from '../../../../components/ui/MatchHeader';
+import SectionHeader from '../../../../components/admin/SectionHeader';
+
+interface SupplementaryFormProps {
+  match: Match;
+  matchdayOwner: MatchdayOwner;
+  jwt?: string;
+}
+
+export default function SupplementaryForm({
+  match: initialMatch,
+  matchdayOwner,
+  jwt,
+}: SupplementaryFormProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [match, setMatch] = useState<Match>(initialMatch);
+  const [formData, setFormData] = useState<SupplementarySheet>(
+    match.supplementarySheet || {}
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const permissions = calculateMatchButtonPermissions(
+    user,
+    match,
+    matchdayOwner
+  );
+
+  // Check permissions
+  if (!permissions.showButtonSupplementary) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Nicht berechtigt
+            </h2>
+            <p className="text-gray-500 mb-4">
+              Sie haben keine Berechtigung, das Zusatzblatt zu bearbeiten.
+            </p>
+            <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`}>
+              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                Zurück zum Match Center
+              </a>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+        {
+          supplementarySheet: formData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setSuccessMessage('Zusatzblatt wurde erfolgreich gespeichert');
+        setMatch({ ...match, supplementarySheet: formData });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error('Error saving supplementary sheet:', error);
+      setError('Fehler beim Speichern des Zusatzblatts');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateField = (field: string, value: any) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const updateRefereePayment = (refereeNumber: 1 | 2, field: string, value: number) => {
+    setFormData({
+      ...formData,
+      refereePayment: {
+        ...formData.refereePayment,
+        [`referee${refereeNumber}`]: {
+          ...formData.refereePayment?.[`referee${refereeNumber}` as keyof typeof formData.refereePayment],
+          [field]: value,
+        },
+      },
+    });
+  };
+
+  return (
+    <>
+      <Head>
+        <title>
+          Zusatzblatt - {match.home.shortName} - {match.away.shortName}
+        </title>
+      </Head>
+      <Layout>
+        <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`}>
+          <a className="flex items-center text-gray-500 hover:text-gray-700 text-sm font-base">
+            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+            <span className="ml-2">Match Center</span>
+          </a>
+        </Link>
+
+        <MatchHeader match={match} isRefreshing={false} onRefresh={() => {}} />
+
+        <div className="mt-12">
+          <SectionHeader
+            title="Zusatzblatt"
+            description={`${match.home.shortName} - ${match.away.shortName}`}
+          />
+
+          {error && (
+            <div className="rounded-md bg-red-50 p-4 mb-4">
+              <div className="text-sm text-red-700">{error}</div>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="rounded-md bg-green-50 p-4 mb-4">
+              <div className="text-sm text-green-700">{successMessage}</div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-12">
+            {/* Referee Attendance Section */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-6">Schiedsrichter</h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Anwesenheit
+                  </label>
+                  <select
+                    value={formData.refereeAttendance || ''}
+                    onChange={(e) => updateField('refereeAttendance', e.target.value)}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  >
+                    <option value="">Auswählen...</option>
+                    <option value="yes">Ja</option>
+                    <option value="only 1">Nur 1</option>
+                    <option value="no referee">Kein Schiedsrichter</option>
+                    <option value="substitute referee">Ersatz Schiedsrichter</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2].map((refNumber) => (
+                    <div key={refNumber} className="space-y-4">
+                      <h4 className="text-md font-medium text-gray-800">
+                        Schiedsrichter {refNumber}
+                      </h4>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">Pass liegt vor</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateField(
+                              `referee${refNumber}PassAvailable`,
+                              !formData[`referee${refNumber}PassAvailable` as keyof SupplementarySheet]
+                            )
+                          }
+                          className={classNames(
+                            formData[`referee${refNumber}PassAvailable` as keyof SupplementarySheet]
+                              ? 'bg-indigo-600'
+                              : 'bg-gray-200',
+                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                          )}
+                        >
+                          <span
+                            className={classNames(
+                              formData[`referee${refNumber}PassAvailable` as keyof SupplementarySheet]
+                                ? 'translate-x-5'
+                                : 'translate-x-0',
+                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                            )}
+                          />
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Pass-Nr.
+                        </label>
+                        <input
+                          type="text"
+                          value={formData[`referee${refNumber}PassNo` as keyof SupplementarySheet] as string || ''}
+                          onChange={(e) =>
+                            updateField(`referee${refNumber}PassNo`, e.target.value)
+                          }
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          placeholder="Pass-Nummer"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Verspätung (Min)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={formData[`referee${refNumber}DelayMin` as keyof SupplementarySheet] as number || 0}
+                          onChange={(e) =>
+                            updateField(
+                              `referee${refNumber}DelayMin`,
+                              parseInt(e.target.value) || 0
+                            )
+                          }
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Equipment Section */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-6">
+                Dokumente / Ausrüstung
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { key: 'ruleBook', label: 'Spielregeln/WKO' },
+                  { key: 'goalDisplay', label: 'Manuelle Toranzeige' },
+                  { key: 'soundSource', label: 'Ersatz-Tonquelle' },
+                  { key: 'matchClock', label: 'Spieluhr' },
+                  { key: 'matchBalls', label: '10 Spielbälle' },
+                  { key: 'firstAidKit', label: 'Erste-Hilfe-Ausrüstung' },
+                  { key: 'fieldLines', label: 'Pflichtlinien' },
+                  { key: 'nets', label: 'Tornetze' },
+                ].map((item) => (
+                  <div key={item.key} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-700">{item.label}</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateField(
+                          item.key,
+                          !formData[item.key as keyof SupplementarySheet]
+                        )
+                      }
+                      className={classNames(
+                        formData[item.key as keyof SupplementarySheet]
+                          ? 'bg-indigo-600'
+                          : 'bg-gray-200',
+                        'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                      )}
+                    >
+                      <span
+                        className={classNames(
+                          formData[item.key as keyof SupplementarySheet]
+                            ? 'translate-x-5'
+                            : 'translate-x-0',
+                          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                        )}
+                      />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Team Equipment Section */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-6">Mannschaften</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Home Team */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-800 mb-4">
+                    Heimmannschaft - {match.home.fullName}
+                  </h4>
+                  <div className="space-y-4">
+                    {[
+                      { key: 'homeRoster', label: 'Aufstellung rechtzeitig' },
+                      { key: 'homePlayerPasses', label: 'Spielerpässe vollständig' },
+                      { key: 'homeUniformPlayerClothing', label: 'Einheitliche Spielerkleidung' },
+                    ].map((item) => (
+                      <div key={item.key} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">{item.label}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateField(
+                              item.key,
+                              !formData[item.key as keyof SupplementarySheet]
+                            )
+                          }
+                          className={classNames(
+                            formData[item.key as keyof SupplementarySheet]
+                              ? 'bg-indigo-600'
+                              : 'bg-gray-200',
+                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                          )}
+                        >
+                          <span
+                            className={classNames(
+                              formData[item.key as keyof SupplementarySheet]
+                                ? 'translate-x-5'
+                                : 'translate-x-0',
+                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                            )}
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Away Team */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-800 mb-4">
+                    Gastmannschaft - {match.away.fullName}
+                  </h4>
+                  <div className="space-y-4">
+                    {[
+                      { key: 'awayRoster', label: 'Aufstellung rechtzeitig' },
+                      { key: 'awayPlayerPasses', label: 'Spielerpässe vollständig' },
+                      { key: 'awayUniformPlayerClothing', label: 'Einheitliche Spielerkleidung' },
+                      { key: 'awaySecondJerseySet', label: 'Zweiter Trikotsatz' },
+                    ].map((item) => (
+                      <div key={item.key} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">{item.label}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateField(
+                              item.key,
+                              !formData[item.key as keyof SupplementarySheet]
+                            )
+                          }
+                          className={classNames(
+                            formData[item.key as keyof SupplementarySheet]
+                              ? 'bg-indigo-600'
+                              : 'bg-gray-200',
+                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                          )}
+                        >
+                          <span
+                            className={classNames(
+                              formData[item.key as keyof SupplementarySheet]
+                                ? 'translate-x-5'
+                                : 'translate-x-0',
+                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                            )}
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Special Events Section */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-6">
+                Besondere Vorkommnisse
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">
+                    Besondere Vorkommnisse
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => updateField('specialEvents', !formData.specialEvents)}
+                    className={classNames(
+                      formData.specialEvents ? 'bg-indigo-600' : 'bg-gray-200',
+                      'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                    )}
+                  >
+                    <span
+                      className={classNames(
+                        formData.specialEvents ? 'translate-x-5' : 'translate-x-0',
+                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                      )}
+                    />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Schiedsrichter Kommentare
+                  </label>
+                  <textarea
+                    value={formData.refereeComments || ''}
+                    onChange={(e) => updateField('refereeComments', e.target.value)}
+                    rows={4}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Kommentare des Schiedsrichters..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Referee Payment Section */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-6">
+                Schiedsrichtervergütung
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2].map((refNumber) => {
+                  const paymentData = formData.refereePayment?.[`referee${refNumber}` as keyof typeof formData.refereePayment];
+                  const total = (paymentData?.travelExpenses || 0) + 
+                              (paymentData?.expenseAllowance || 0) + 
+                              (paymentData?.gameFees || 0);
+
+                  return (
+                    <div key={refNumber}>
+                      <h4 className="text-md font-medium text-gray-800 mb-4">
+                        Schiedsrichter {refNumber}
+                      </h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Reisekosten (€)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={paymentData?.travelExpenses || 0}
+                            onChange={(e) =>
+                              updateRefereePayment(refNumber as 1 | 2, 'travelExpenses', parseFloat(e.target.value) || 0)
+                            }
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Aufwandsentschädigung (€)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={paymentData?.expenseAllowance || 0}
+                            onChange={(e) =>
+                              updateRefereePayment(refNumber as 1 | 2, 'expenseAllowance', parseFloat(e.target.value) || 0)
+                            }
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Spielgebühren (€)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={paymentData?.gameFees || 0}
+                            onChange={(e) =>
+                              updateRefereePayment(refNumber as 1 | 2, 'gameFees', parseFloat(e.target.value) || 0)
+                            }
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
+                        <div className="pt-2 border-t border-gray-200">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-700">
+                              Summe:
+                            </span>
+                            <span className="text-sm font-semibold text-gray-900">
+                              {total.toFixed(2)} €
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Overall Total */}
+              <div className="mt-6 bg-gray-50 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-900">
+                    Gesamtsumme Schiedsrichtervergütung:
+                  </span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {(
+                      (formData.refereePayment?.referee1?.travelExpenses || 0) +
+                      (formData.refereePayment?.referee1?.expenseAllowance || 0) +
+                      (formData.refereePayment?.referee1?.gameFees || 0) +
+                      (formData.refereePayment?.referee2?.travelExpenses || 0) +
+                      (formData.refereePayment?.referee2?.expenseAllowance || 0) +
+                      (formData.refereePayment?.referee2?.gameFees || 0)
+                    ).toFixed(2)} €
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end space-x-3">
+              <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`}>
+                <a className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  Abbrechen
+                </a>
+              </Link>
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                      ></path>
+                    </svg>
+                    Speichern...
+                  </>
+                ) : (
+                  'Speichern'
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </Layout>
+    </>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params as { id: string };
+  const jwt = (getCookie('jwt', context) || '') as string;
+
+  try {
+    const match: Match = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`
+    ).then((res) => res.json());
+
+    const matchday = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`
+    ).then((res) => res.json());
+
+    return {
+      props: {
+        match,
+        matchdayOwner: matchday.owner,
+        jwt,
+      },
+    };
+  } catch (error) {
+    return {
+      notFound: true,
+    };
+  }
+};
