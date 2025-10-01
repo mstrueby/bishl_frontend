@@ -818,7 +818,7 @@ export default function MatchDetails({
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Dokumente / Ausrüstung
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                     {[
                       { key: "ruleBook", label: "Spielregeln/WKO" },
                       { key: "goalDisplay", label: "Manuelle Toranzeige" },
@@ -831,37 +831,18 @@ export default function MatchDetails({
                     ].map((item) => (
                       <div
                         key={item.key}
-                        className="overflow-hidden rounded-lg bg-gray-50 shadow"
+                        className="flex items-center space-x-2 "
                       >
-                        <div className="bg-white px-4 py-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-900">{item.label}</span>
-                            <div
-                              className={`w-3 h-3 rounded-full ${
-                                match.supplementarySheet?.[
-                                  item.key as keyof typeof match.supplementarySheet
-                                ]
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
-                              }`}
-                            />
-                          </div>
-                          <div className="mt-1">
-                            <span className={`text-xs ${
-                              match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ]
-                                ? "text-green-600"
-                                : "text-gray-500"
-                            }`}>
-                              {match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ]
-                                ? "Verfügbar"
-                                : "Nicht verfügbar"}
-                            </span>
-                          </div>
-                        </div>
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ]
+                              ? "bg-green-500"
+                              : "bg-gray-300"
+                          }`}
+                        />
+                        <span className="text-gray-700">{item.label}</span>
                       </div>
                     ))}
                   </div>
