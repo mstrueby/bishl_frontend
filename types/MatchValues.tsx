@@ -100,6 +100,8 @@ export interface RefereePayment {
 
 export interface SupplementarySheet {
   refereeAttendance?: string; // yes, only 1, no referee, substitute referee
+  referee1Present?: boolean;
+  referee2Present?: boolean
   referee1PassAvailable?: boolean;
   referee2PassAvailable?: boolean;
   referee1PassNo?: string;
