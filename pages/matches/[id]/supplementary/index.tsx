@@ -27,7 +27,7 @@ function SectionHeaderSimple({
   description,
 }: SectionHeaderSimpleProps) {
   return (
-    <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+    <div className="mb-4 pb-3 flex items-center justify-between min-h-[2.5rem]">
       <div className="min-w-0 flex-1">
         <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
           {title}
@@ -189,7 +189,7 @@ export default function SupplementaryForm({
             <div>
               <SectionHeaderSimple
                 title="Schiedsrichter"
-                description="Dieser Bereich ist von den Zeitnehmern auszufüllen"
+                description="Dieser Bereich ist von den <strong>Zeitnehmern</strong> auszufüllen"
               />
               {/* Reusable Referee Attendance Component */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -329,8 +329,11 @@ export default function SupplementaryForm({
             </div>
 
             {/* Equipment Section */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <SectionHeaderSimple title="Dokumente / Ausrüstung" />
+            <div>
+              <SectionHeaderSimple 
+                title="Dokumente / Ausrüstung" 
+                description="Dieser Bereich ist von den <strong>Schiedsrichtern</strong> auszufüllen"
+/>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
