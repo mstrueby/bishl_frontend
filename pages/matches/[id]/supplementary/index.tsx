@@ -50,16 +50,44 @@ interface TeamEquipmentCardProps {
 function TeamEquipmentCard({ teamName, teamType, formData, updateField }: TeamEquipmentCardProps) {
   const items = teamType === 'home' 
     ? [
-        { key: "homeRoster", label: "Aufstellung rechtzeitig" },
-        { key: "homePlayerPasses", label: "Spielerpässe vollständig" },
-        { key: "homeUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
-      ]
+      {
+        key: "homeRoster",
+        label: "Aufstellung rechtzeitig veröfffentlicht",
+        description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
+      },
+      {
+        key: "homePlayerPasses",
+        label: "Spielerpässe vollständig",
+        description: "Liegen alle Spielerpässe vor?",
+      },
+      {
+        key: "homeUniformPlayerClothing",
+        label: "Einheitliche Spielerkleidung",
+        description: "Einheitliche Helme, Trikots, Hosen?",
+      },
+    ]
     : [
-        { key: "awayRoster", label: "Aufstellung rechtzeitig" },
-        { key: "awayPlayerPasses", label: "Spielerpässe vollständig" },
-        { key: "awayUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
-        { key: "awaySecondJerseySet", label: "Zweiter Trikotsatz" },
-      ];
+      {
+        key: "awayRoster",
+        label: "Aufstellung rechtzeitig veröfffentlicht",
+        description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
+      },
+      {
+        key: "awayPlayerPasses",
+        label: "Spielerpässe vollständig",
+        description: "Liegen alle Spielerpässe vor?",
+      },
+      {
+        key: "awayUniformPlayerClothing",
+        label: "Einheitliche Spielerkleidung",
+        description: "Einheitliche Helme, Trikots, Hosen?",
+      },
+      {
+        key: "awaySecondJerseySet",
+        label: "Zweiter Trikotsatz",
+        description: "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?",
+      },
+    ];
 
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
@@ -393,7 +421,7 @@ export default function SupplementaryForm({
               </div>
             </div>
 
-            {/* Equipment Section */}
+            {/* Documents/Equipment Section */}
             <div>
               <SectionHeaderSimple
                 title="Dokumente / Ausrüstung"
