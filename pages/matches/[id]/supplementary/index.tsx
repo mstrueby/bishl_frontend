@@ -24,7 +24,7 @@ interface SectionHeaderSimpleProps {
 
 function SectionHeaderSimple({ title, description }: SectionHeaderSimpleProps) {
   return (
-    <div className="mb-4 pb-3 flex items-center justify-between min-h-[2.5rem]">
+    <div className="mb-6 pb-3 flex items-center justify-between min-h-[2.5rem]">
       <div className="min-w-0 flex-1">
         <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
           {title}
@@ -40,60 +40,229 @@ function SectionHeaderSimple({ title, description }: SectionHeaderSimpleProps) {
   );
 }
 
-interface TeamEquipmentCardProps {
-  teamName: string;
-  teamType: 'home' | 'away';
+interface RefereeAttendanceCardProps {
+  refereeNumber: 1 | 2;
   formData: SupplementarySheet;
   updateField: (field: string, value: any) => void;
 }
 
-function TeamEquipmentCard({ teamName, teamType, formData, updateField }: TeamEquipmentCardProps) {
-  const items = teamType === 'home' 
-    ? [
-      {
-        key: "homeRoster",
-        label: "Aufstellung rechtzeitig veröffentlicht",
-        description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
-      },
-      {
-        key: "homePlayerPasses",
-        label: "Spielerpässe vollständig",
-        description: "Liegen alle Spielerpässe vor?",
-      },
-      {
-        key: "homeUniformPlayerClothing",
-        label: "Einheitliche Spielerkleidung",
-        description: "Einheitliche Helme, Trikots, Hosen?",
-      },
-    ]
-    : [
-      {
-        key: "awayRoster",
-        label: "Aufstellung rechtzeitig veröffentlicht",
-        description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
-      },
-      {
-        key: "awayPlayerPasses",
-        label: "Spielerpässe vollständig",
-        description: "Liegen alle Spielerpässe vor?",
-      },
-      {
-        key: "awayUniformPlayerClothing",
-        label: "Einheitliche Spielerkleidung",
-        description: "Einheitliche Helme, Trikots, Hosen?",
-      },
-      {
-        key: "awaySecondJerseySet",
-        label: "Zweiter Trikotsatz",
-        description: "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?",
-      },
-    ];
+function RefereeAttendanceCard({
+  refereeNumber,
+  formData,
+  updateField,
+}: RefereeAttendanceCardProps) {
+  return (
+    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+        <h4 className="text-sm font-medium text-gray-800">
+          Schiedsrichter {refereeNumber}
+        </h4>
+      </div>
+      <div className="bg-white px-4 py-5 sm:p-6">
+        <div className="text-sm text-gray-700 space-y-4">
+          {/** Referee present */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-900">Anwesend</span>
+            <button
+              type="button"
+              onClick={() =>
+                updateField(
+                  `referee${refereeNumber}Present`,
+                  !formData[
+                    `referee${refereeNumber}Present` as keyof SupplementarySheet
+                  ],
+                )
+              }
+              className={classNames(
+                formData[
+                  `referee${refereeNumber}Present` as keyof SupplementarySheet
+                ]
+                  ? "bg-indigo-600"
+                  : "bg-gray-200",
+                "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+              )}
+            >
+              <span
+                className={classNames(
+                  formData[
+                    `referee${refereeNumber}Present` as keyof SupplementarySheet
+                  ]
+                    ? "translate-x-5"
+                    : "translate-x-0",
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                )}
+              />
+            </button>
+          </div>
+          {/** Referee pass available */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-900">
+              Pass liegt vor
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                updateField(
+                  `referee${refereeNumber}PassAvailable`,
+                  !formData[
+                    `referee${refereeNumber}PassAvailable` as keyof SupplementarySheet
+                  ],
+                )
+              }
+              className={classNames(
+                formData[
+                  `referee${refereeNumber}PassAvailable` as keyof SupplementarySheet
+                ]
+                  ? "bg-indigo-600"
+                  : "bg-gray-200",
+                "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+              )}
+            >
+              <span
+                className={classNames(
+                  formData[
+                    `referee${refereeNumber}PassAvailable` as keyof SupplementarySheet
+                  ]
+                    ? "translate-x-5"
+                    : "translate-x-0",
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                )}
+              />
+            </button>
+          </div>
+          {/** Referee pass number */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`referee${refereeNumber}Pass`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Pass-Nr.
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  name={`referee${refereeNumber}Pass`}
+                  id={`referee${refereeNumber}pass`}
+                  placeholder=""
+                  value={
+                    (formData[
+                      `referee${refereeNumber}PassNo` as keyof SupplementarySheet
+                    ] as string) || ""
+                  }
+                  onChange={(e) =>
+                    updateField(`referee${refereeNumber}PassNo`, e.target.value)
+                  }
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                />
+              </div>
+            </div>
+          </div>
+          {/** Referee delay */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`referee${refereeNumber}Delay`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Verspätung
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  name={`referee${refereeNumber}Delay`}
+                  id={`referee${refereeNumber}delay`}
+                  placeholder="0"
+                  value={
+                    (formData[
+                      `referee${refereeNumber}DelayMin` as keyof SupplementarySheet
+                    ] as number) || 0
+                  }
+                  onChange={(e) =>
+                    updateField(
+                      `referee${refereeNumber}DelayMin`,
+                      parseInt(e.target.value) || 0,
+                    )
+                  }
+                  aria-describedby="delay-in-minutes"
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                />
+                <div
+                  id="delay-in-minutes"
+                  className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
+                >
+                  Min.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface TeamEquipmentCardProps {
+  teamName: string;
+  teamType: "home" | "away";
+  formData: SupplementarySheet;
+  updateField: (field: string, value: any) => void;
+}
+
+function TeamEquipmentCard({
+  teamName,
+  teamType,
+  formData,
+  updateField,
+}: TeamEquipmentCardProps) {
+  const items =
+    teamType === "home"
+      ? [
+          {
+            key: "homeRoster",
+            label: "Aufstellung rechtzeitig veröffentlicht",
+            description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
+          },
+          {
+            key: "homePlayerPasses",
+            label: "Spielerpässe vollständig",
+            description: "Liegen alle Spielerpässe vor?",
+          },
+          {
+            key: "homeUniformPlayerClothing",
+            label: "Einheitliche Spielerkleidung",
+            description: "Einheitliche Helme, Trikots, Hosen?",
+          },
+        ]
+      : [
+          {
+            key: "awayRoster",
+            label: "Aufstellung rechtzeitig veröffentlicht",
+            description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
+          },
+          {
+            key: "awayPlayerPasses",
+            label: "Spielerpässe vollständig",
+            description: "Liegen alle Spielerpässe vor?",
+          },
+          {
+            key: "awayUniformPlayerClothing",
+            label: "Einheitliche Spielerkleidung",
+            description: "Einheitliche Helme, Trikots, Hosen?",
+          },
+          {
+            key: "awaySecondJerseySet",
+            label: "Zweiter Trikotsatz",
+            description:
+              "Ist bei Farbkonflikten ein zweiter Trikotsatz verfügbar?",
+          },
+        ];
 
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
-          {teamType === 'home' ? 'HEIM' : 'GAST'} - {teamName}
+          {teamType === "home" ? "HEIM" : "GAST"} - {teamName}
         </h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
@@ -289,139 +458,14 @@ export default function SupplementaryForm({
                 title="Schiedsrichter"
                 description="Dieser Bereich ist von den <strong>Zeitnehmern</strong> auszufüllen"
               />
-              {/* Reusable Referee Attendance Component */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2].map((refNumber) => (
-                  <div
+                  <RefereeAttendanceCard
                     key={refNumber}
-                    className="overflow-hidden bg-white rounded-md shadow-md border"
-                  >
-                    <div className="px-4 py-5 sm:px-6 bg-gray-50">
-                      <h4 className="text-sm font-medium text-gray-800">
-                        Schiedsrichter {refNumber}
-                      </h4>
-                    </div>
-                    <div className="bg-white px-4 py-5 sm:p-6">
-                      <div className="text-sm text-gray-700 space-y-4">
-                        {/** Referee present */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-700">
-                            Anwesend
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateField(
-                                `referee${refNumber}Present`,
-                                !formData[
-                                  `referee${refNumber}Present` as keyof SupplementarySheet
-                                ],
-                              )
-                            }
-                            className={classNames(
-                              formData[
-                                `referee${refNumber}Present` as keyof SupplementarySheet
-                              ]
-                                ? "bg-indigo-600"
-                                : "bg-gray-200",
-                              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                            )}
-                          >
-                            <span
-                              className={classNames(
-                                formData[
-                                  `referee${refNumber}Present` as keyof SupplementarySheet
-                                ]
-                                  ? "translate-x-5"
-                                  : "translate-x-0",
-                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              )}
-                            />
-                          </button>
-                        </div>
-                        {/** Referee pass available */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-700">
-                            Pass liegt vor
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateField(
-                                `referee${refNumber}PassAvailable`,
-                                !formData[
-                                  `referee${refNumber}PassAvailable` as keyof SupplementarySheet
-                                ],
-                              )
-                            }
-                            className={classNames(
-                              formData[
-                                `referee${refNumber}PassAvailable` as keyof SupplementarySheet
-                              ]
-                                ? "bg-indigo-600"
-                                : "bg-gray-200",
-                              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                            )}
-                          >
-                            <span
-                              className={classNames(
-                                formData[
-                                  `referee${refNumber}PassAvailable` as keyof SupplementarySheet
-                                ]
-                                  ? "translate-x-5"
-                                  : "translate-x-0",
-                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              )}
-                            />
-                          </button>
-                        </div>
-                        {/** Referee pass number */}
-                        <div className="flex items-center justify-between">
-                          <label className="block text-sm text-gray-700 mb-1">
-                            Pass-Nr.
-                          </label>
-                          <input
-                            type="text"
-                            value={
-                              (formData[
-                                `referee${refNumber}PassNo` as keyof SupplementarySheet
-                              ] as string) || ""
-                            }
-                            onChange={(e) =>
-                              updateField(
-                                `referee${refNumber}PassNo`,
-                                e.target.value,
-                              )
-                            }
-                            className="block w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                            placeholder="Pass-Nummer"
-                          />
-                        </div>
-                        {/** Referee delay */}
-                        <div className="flex items-center justify-between">
-                          <label className="block text-sm text-gray-700 mb-1">
-                            Verspätung (Min)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={
-                              (formData[
-                                `referee${refNumber}DelayMin` as keyof SupplementarySheet
-                              ] as number) || 0
-                            }
-                            onChange={(e) =>
-                              updateField(
-                                `referee${refNumber}DelayMin`,
-                                parseInt(e.target.value) || 0,
-                              )
-                            }
-                            className="block w-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    refereeNumber={refNumber as 1 | 2}
+                    formData={formData}
+                    updateField={updateField}
+                  />
                 ))}
               </div>
             </div>
@@ -546,14 +590,22 @@ export default function SupplementaryForm({
             </div>
 
             {/* Special Events Section */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <SectionHeaderSimple title="Besondere Vorkommnisse" />
+            <div>
+              <SectionHeaderSimple
+                title="Besondere Vorkommnisse"
+                description="Dieser Bereich ist von den <strong>Schiedsrichtern</strong> auszufüllen"
+              />
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700">
-                    Besondere Vorkommnisse
-                  </span>
+                <div className="flex items-center justify-between px-4 sm:px-6">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-900">
+                      Besondere Vorkommnisse
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      Gab es Vorkomnisse, die dokumentiert werden müssen?
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() =>
@@ -575,8 +627,8 @@ export default function SupplementaryForm({
                   </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="px-4 sm:px-6">
+                  <label className="block text-sm/6 font-medium text-gray-900 mb-2">
                     Schiedsrichter Kommentare
                   </label>
                   <textarea
@@ -585,7 +637,7 @@ export default function SupplementaryForm({
                       updateField("refereeComments", e.target.value)
                     }
                     rows={4}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                     placeholder="Kommentare des Schiedsrichters..."
                   />
                 </div>
@@ -593,9 +645,11 @@ export default function SupplementaryForm({
             </div>
 
             {/* Referee Payment Section */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <SectionHeaderSimple title="Schiedsrichtervergütung" />
-
+            <div>
+              <SectionHeaderSimple
+                title="Schiedsrichtervergütung"
+                description="Dieser Bereich ist von den <strong>Schiedsrichtern</strong> auszufüllen"
+              />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2].map((refNumber) => {
                   const paymentData =
@@ -614,62 +668,102 @@ export default function SupplementaryForm({
                       </h4>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm text-gray-700 mb-1">
-                            Reisekosten (€)
+                          <label
+                            htmlFor="price"
+                            className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                          >
+                            Fahrtkosten
                           </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={paymentData?.travelExpenses || 0}
-                            onChange={(e) =>
-                              updateRefereePayment(
-                                refNumber as 1 | 2,
-                                "travelExpenses",
-                                parseFloat(e.target.value) || 0,
-                              )
-                            }
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
+                          <div className="mt-2">
+                            <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                              <input
+                                type="text"
+                                placeholder="0,00"
+                                value={paymentData?.travelExpenses || 0}
+                                onChange={(e) =>
+                                  updateRefereePayment(
+                                    refNumber as 1 | 2,
+                                    "travelExpenses",
+                                    parseFloat(e.target.value) || 0,
+                                  )
+                                }
+                                aria-describedby="price-currency"
+                                className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                              />
+                              <div
+                                id="price-currency"
+                                className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
+                              >
+                                €
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-sm text-gray-700 mb-1">
-                            Aufwandsentschädigung (€)
+                          <label
+                            htmlFor="price"
+                            className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                          >
+                            Aufwandsentschädigung
                           </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={paymentData?.expenseAllowance || 0}
-                            onChange={(e) =>
-                              updateRefereePayment(
-                                refNumber as 1 | 2,
-                                "expenseAllowance",
-                                parseFloat(e.target.value) || 0,
-                              )
-                            }
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
+                          <div className="mt-2">
+                            <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                              <input
+                                type="text"
+                                placeholder="0,00"
+                                value={paymentData?.expenseAllowance || 0}
+                                onChange={(e) =>
+                                  updateRefereePayment(
+                                    refNumber as 1 | 2,
+                                    "expenseAllowance",
+                                    parseFloat(e.target.value) || 0,
+                                  )
+                                }
+                                aria-describedby="price-currency"
+                                className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                              />
+                              <div
+                                id="price-currency"
+                                className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
+                              >
+                                €
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-sm text-gray-700 mb-1">
-                            Spielgebühren (€)
+                          <label
+                            htmlFor="price"
+                            className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                          >
+                            Spielgebühren
                           </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={paymentData?.gameFees || 0}
-                            onChange={(e) =>
-                              updateRefereePayment(
-                                refNumber as 1 | 2,
-                                "gameFees",
-                                parseFloat(e.target.value) || 0,
-                              )
-                            }
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
+                          <div className="mt-2">
+                            <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                              <input
+                                type="text"
+                                placeholder="0,00"
+                                value={paymentData?.gameFees || 0}
+                                onChange={(e) =>
+                                  updateRefereePayment(
+                                    refNumber as 1 | 2,
+                                    "gameFees",
+                                    parseFloat(e.target.value) || 0,
+                                  )
+                                }
+                                aria-describedby="price-currency"
+                                className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                              />
+                              <div
+                                id="price-currency"
+                                className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
+                              >
+                                €
+                              </div>
+                            </div>
+                          </div>
                         </div>
+
                         <div className="pt-2 border-t border-gray-200">
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-medium text-gray-700">
