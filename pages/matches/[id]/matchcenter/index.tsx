@@ -746,70 +746,55 @@ export default function MatchDetails({
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Schiedsrichter
                   </h4>
-                  {/**
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-700">
-                        Anwesenheit:
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {match.supplementarySheet?.refereeAttendance ||
-                          "Nicht angegeben"}
-                      </span>
-                    </div>
-                    */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[1, 2].map((refNumber) => (
-                      <div
-                        key={refNumber}
-                        className="overflow-hidden bg-white rounded-md shadow-md border"
-                      >
-                        <div className="px-4 py-5 sm:px-6 bg-gray-50">
-                          {/* Content goes here */}
-                          <h5 className="text-sm font-medium text-gray-800">
-                            Schiedsrichter {refNumber}
-                          </h5>
-                        </div>
-                        <div className="bg-white px-4 py-5 sm:p-6">
-                          <div className="text-sm text-gray-700 space-y-1">
-                            <div className="flex justify-between">
-                              <span>Pass liegt vor:</span>
-                              <span
-                                className={
-                                  match.supplementarySheet?.[
-                                    `referee${refNumber}PassAvailable` as keyof typeof match.supplementarySheet
-                                  ]
-                                    ? "text-green-600 font-medium"
-                                    : "text-gray-500"
-                                }
-                              >
-                                {match.supplementarySheet?.[
-                                  `referee${refNumber}PassAvailable` as keyof typeof match.supplementarySheet
-                                ]
-                                  ? "Ja"
-                                  : "Nein"}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Pass-Nr.:</span>
-                              <span>
-                                {match.supplementarySheet?.[
-                                  `referee${refNumber}PassNo` as keyof typeof match.supplementarySheet
-                                ] || "-"}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Verspätung:</span>
-                              <span>
-                                {match.supplementarySheet?.[
-                                  `referee${refNumber}DelayMin` as keyof typeof match.supplementarySheet
-                                ] || 0}{" "}
-                                Min
-                              </span>
+                    {[1, 2].map((refNumber) => {
+                      const passAvailable = match.supplementarySheet?.[
+                        `referee${refNumber}PassAvailable` as keyof SupplementarySheet
+                      ] as boolean | undefined;
+                      const passNo = match.supplementarySheet?.[
+                        `referee${refNumber}PassNo` as keyof SupplementarySheet
+                      ] as string | undefined;
+                      const delayMin = match.supplementarySheet?.[
+                        `referee${refNumber}DelayMin` as keyof SupplementarySheet
+                      ] as number | undefined;
+
+                      return (
+                        <div
+                          key={refNumber}
+                          className="overflow-hidden bg-white rounded-md shadow-md border"
+                        >
+                          <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                            <h5 className="text-sm font-medium text-gray-800">
+                              Schiedsrichter {refNumber}
+                            </h5>
+                          </div>
+                          <div className="bg-white px-4 py-5 sm:p-6">
+                            <div className="text-sm text-gray-700 space-y-1">
+                              <div className="flex justify-between">
+                                <span>Pass liegt vor:</span>
+                                <span
+                                  className={
+                                    passAvailable
+                                      ? "text-green-600 font-medium"
+                                      : "text-gray-500"
+                                  }
+                                >
+                                  {passAvailable ? "Ja" : "Nein"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Pass-Nr.:</span>
+                                <span>{passNo || "-"}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Verspätung:</span>
+                                <span>{delayMin || 0} Min</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
