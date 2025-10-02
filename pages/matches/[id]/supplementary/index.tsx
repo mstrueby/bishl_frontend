@@ -91,9 +91,9 @@ function TeamEquipmentCard({ teamName, teamType, formData, updateField }: TeamEq
 
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
-      <div className="px-4 py-5 sm:px-6 bg-gray-50">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
-          {teamType === 'home' ? 'Heimmannschaft' : 'Gastmannschaft'} - {teamName}
+          {teamType === 'home' ? 'HEIM' : 'GAST'} - {teamName}
         </h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
