@@ -1,19 +1,21 @@
-
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Head from 'next/head';
-import { GetServerSideProps } from 'next';
-import { useRouter } from 'next/router';
-import { Match, SupplementarySheet } from '../../../../types/MatchValues';
-import { MatchdayOwner } from '../../../../types/TournamentValues';
-import Layout from '../../../../components/Layout';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
-import useAuth from '../../../../hooks/useAuth';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { calculateMatchButtonPermissions, classNames } from '../../../../tools/utils';
-import MatchHeader from '../../../../components/ui/MatchHeader';
-import SectionHeader from '../../../../components/admin/SectionHeader';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Head from "next/head";
+import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { Match, SupplementarySheet } from "../../../../types/MatchValues";
+import { MatchdayOwner } from "../../../../types/TournamentValues";
+import Layout from "../../../../components/Layout";
+import { getCookie } from "cookies-next";
+import axios from "axios";
+import useAuth from "../../../../hooks/useAuth";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import {
+  calculateMatchButtonPermissions,
+  classNames,
+} from "../../../../tools/utils";
+import MatchHeader from "../../../../components/ui/MatchHeader";
+import SectionHeader from "../../../../components/admin/SectionHeader";
 
 interface SupplementaryFormProps {
   match: Match;
@@ -30,7 +32,7 @@ export default function SupplementaryForm({
   const { user } = useAuth();
   const [match, setMatch] = useState<Match>(initialMatch);
   const [formData, setFormData] = useState<SupplementarySheet>(
-    match.supplementarySheet || {}
+    match.supplementarySheet || {},
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export default function SupplementaryForm({
   const permissions = calculateMatchButtonPermissions(
     user,
     match,
-    matchdayOwner
+    matchdayOwner,
   );
 
   // Check permissions
@@ -80,20 +82,20 @@ export default function SupplementaryForm({
         {
           headers: {
             Authorization: `Bearer ${jwt}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200) {
-        setSuccessMessage('Zusatzblatt wurde erfolgreich gespeichert');
+        setSuccessMessage("Zusatzblatt wurde erfolgreich gespeichert");
         setMatch({ ...match, supplementarySheet: formData });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
-      console.error('Error saving supplementary sheet:', error);
-      setError('Fehler beim Speichern des Zusatzblatts');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      console.error("Error saving supplementary sheet:", error);
+      setError("Fehler beim Speichern des Zusatzblatts");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setLoading(false);
     }
@@ -103,13 +105,19 @@ export default function SupplementaryForm({
     setFormData({ ...formData, [field]: value });
   };
 
-  const updateRefereePayment = (refereeNumber: 1 | 2, field: string, value: number) => {
+  const updateRefereePayment = (
+    refereeNumber: 1 | 2,
+    field: string,
+    value: number,
+  ) => {
     setFormData({
       ...formData,
       refereePayment: {
         ...formData.refereePayment,
         [`referee${refereeNumber}`]: {
-          ...formData.refereePayment?.[`referee${refereeNumber}` as keyof typeof formData.refereePayment],
+          ...formData.refereePayment?.[
+            `referee${refereeNumber}` as keyof typeof formData.refereePayment
+          ],
           [field]: value,
         },
       },
@@ -126,7 +134,10 @@ export default function SupplementaryForm({
       <Layout>
         <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`}>
           <a className="flex items-center text-gray-500 hover:text-gray-700 text-sm font-base">
-            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+            <ChevronLeftIcon
+              aria-hidden="true"
+              className="h-3 w-3 text-gray-400"
+            />
             <span className="ml-2">Match Center</span>
           </a>
         </Link>
@@ -136,7 +147,6 @@ export default function SupplementaryForm({
         <div className="mt-12">
           <SectionHeader
             title="Zusatzblatt"
-            description={`${match.home.shortName} - ${match.away.shortName}`}
           />
 
           {error && (
@@ -153,125 +163,153 @@ export default function SupplementaryForm({
 
           <form onSubmit={handleSubmit} className="space-y-12">
             {/* Referee Attendance Section */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">Schiedsrichter</h3>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Anwesenheit
-                  </label>
-                  <select
-                    value={formData.refereeAttendance || ''}
-                    onChange={(e) => updateField('refereeAttendance', e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  >
-                    <option value="">Auswählen...</option>
-                    <option value="yes">Ja</option>
-                    <option value="only 1">Nur 1</option>
-                    <option value="no referee">Kein Schiedsrichter</option>
-                    <option value="substitute referee">Ersatz Schiedsrichter</option>
-                  </select>
+            <div>
+              {/** Header */}
+              <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+                    Schiedsrichter
+                  </h3>
+                  <p className="mt-0 text-xs text-gray-500">
+                    Dieser Bereich ist von den <strong>Zeitnehmern</strong>{" "}
+                    auszufüllen
+                  </p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[1, 2].map((refNumber) => (
-                    <div key={refNumber} className="space-y-4">
-                      <h4 className="text-md font-medium text-gray-800">
+              </div>
+              {/* Reusable Referee Attendance Component */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2].map((refNumber) => (
+                  <div
+                    key={refNumber}
+                    className="overflow-hidden bg-white rounded-md shadow-md border"
+                  >
+                    <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                      <h4 className="text-sm font-medium text-gray-800">
                         Schiedsrichter {refNumber}
                       </h4>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Anwesend</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateField(
-                              `referee${refNumber}Present`,
-                              !formData[`referee${refNumber}Present` as keyof SupplementarySheet]
-                            )
-                          }
-                          className={classNames(
-                            formData[`referee${refNumber}Present` as keyof SupplementarySheet]
-                              ? 'bg-indigo-600'
-                              : 'bg-gray-200',
-                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
-                          )}
-                        >
-                          <span
+                    </div>
+                    <div className="bg-white px-4 py-5 sm:p-6">
+                      <div className="text-sm text-gray-700 space-y-4">
+                        {/** Referee present */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-700">
+                            Anwesend
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateField(
+                                `referee${refNumber}Present`,
+                                !formData[
+                                  `referee${refNumber}Present` as keyof SupplementarySheet
+                                ],
+                              )
+                            }
                             className={classNames(
-                              formData[`referee${refNumber}Present` as keyof SupplementarySheet]
-                                ? 'translate-x-5'
-                                : 'translate-x-0',
-                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                              formData[
+                                `referee${refNumber}Present` as keyof SupplementarySheet
+                              ]
+                                ? "bg-indigo-600"
+                                : "bg-gray-200",
+                              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                             )}
-                          />
-                        </button>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Pass liegt vor</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateField(
-                              `referee${refNumber}PassAvailable`,
-                              !formData[`referee${refNumber}PassAvailable` as keyof SupplementarySheet]
-                            )
-                          }
-                          className={classNames(
-                            formData[`referee${refNumber}PassAvailable` as keyof SupplementarySheet]
-                              ? 'bg-indigo-600'
-                              : 'bg-gray-200',
-                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
-                          )}
-                        >
-                          <span
+                          >
+                            <span
+                              className={classNames(
+                                formData[
+                                  `referee${refNumber}Present` as keyof SupplementarySheet
+                                ]
+                                  ? "translate-x-5"
+                                  : "translate-x-0",
+                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                              )}
+                            />
+                          </button>
+                        </div>
+                        {/** Referee pass available */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-700">
+                            Pass liegt vor
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateField(
+                                `referee${refNumber}PassAvailable`,
+                                !formData[
+                                  `referee${refNumber}PassAvailable` as keyof SupplementarySheet
+                                ],
+                              )
+                            }
                             className={classNames(
-                              formData[`referee${refNumber}PassAvailable` as keyof SupplementarySheet]
-                                ? 'translate-x-5'
-                                : 'translate-x-0',
-                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                              formData[
+                                `referee${refNumber}PassAvailable` as keyof SupplementarySheet
+                              ]
+                                ? "bg-indigo-600"
+                                : "bg-gray-200",
+                              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                             )}
+                          >
+                            <span
+                              className={classNames(
+                                formData[
+                                  `referee${refNumber}PassAvailable` as keyof SupplementarySheet
+                                ]
+                                  ? "translate-x-5"
+                                  : "translate-x-0",
+                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                              )}
+                            />
+                          </button>
+                        </div>
+                        {/** Referee pass number */}
+                        <div className="flex items-center justify-between">
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Pass-Nr.
+                          </label>
+                          <input
+                            type="text"
+                            value={
+                              (formData[
+                                `referee${refNumber}PassNo` as keyof SupplementarySheet
+                              ] as string) || ""
+                            }
+                            onChange={(e) =>
+                              updateField(
+                                `referee${refNumber}PassNo`,
+                                e.target.value,
+                              )
+                            }
+                            className="block w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            placeholder="Pass-Nummer"
                           />
-                        </button>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm text-gray-700 mb-1">
-                          Pass-Nr.
-                        </label>
-                        <input
-                          type="text"
-                          value={formData[`referee${refNumber}PassNo` as keyof SupplementarySheet] as string || ''}
-                          onChange={(e) =>
-                            updateField(`referee${refNumber}PassNo`, e.target.value)
-                          }
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          placeholder="Pass-Nummer"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm text-gray-700 mb-1">
-                          Verspätung (Min)
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={formData[`referee${refNumber}DelayMin` as keyof SupplementarySheet] as number || 0}
-                          onChange={(e) =>
-                            updateField(
-                              `referee${refNumber}DelayMin`,
-                              parseInt(e.target.value) || 0
-                            )
-                          }
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
+                        </div>
+                        {/** Referee delay */}
+                        <div className="flex items-center justify-between">
+                          <label className="block text-sm text-gray-700 mb-1">
+                            Verspätung (Min)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={
+                              (formData[
+                                `referee${refNumber}DelayMin` as keyof SupplementarySheet
+                              ] as number) || 0
+                            }
+                            onChange={(e) =>
+                              updateField(
+                                `referee${refNumber}DelayMin`,
+                                parseInt(e.target.value) || 0,
+                              )
+                            }
+                            className="block w-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -280,41 +318,44 @@ export default function SupplementaryForm({
               <h3 className="text-lg font-medium text-gray-900 mb-6">
                 Dokumente / Ausrüstung
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  { key: 'ruleBook', label: 'Spielregeln/WKO' },
-                  { key: 'goalDisplay', label: 'Manuelle Toranzeige' },
-                  { key: 'soundSource', label: 'Ersatz-Tonquelle' },
-                  { key: 'matchClock', label: 'Spieluhr' },
-                  { key: 'matchBalls', label: '10 Spielbälle' },
-                  { key: 'firstAidKit', label: 'Erste-Hilfe-Ausrüstung' },
-                  { key: 'fieldLines', label: 'Pflichtlinien' },
-                  { key: 'nets', label: 'Tornetze' },
+                  { key: "ruleBook", label: "Spielregeln/WKO" },
+                  { key: "goalDisplay", label: "Manuelle Toranzeige" },
+                  { key: "soundSource", label: "Ersatz-Tonquelle" },
+                  { key: "matchClock", label: "Spieluhr" },
+                  { key: "matchBalls", label: "10 Spielbälle" },
+                  { key: "firstAidKit", label: "Erste-Hilfe-Ausrüstung" },
+                  { key: "fieldLines", label: "Pflichtlinien" },
+                  { key: "nets", label: "Tornetze" },
                 ].map((item) => (
-                  <div key={item.key} className="flex items-center justify-between">
+                  <div
+                    key={item.key}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm text-gray-700">{item.label}</span>
                     <button
                       type="button"
                       onClick={() =>
                         updateField(
                           item.key,
-                          !formData[item.key as keyof SupplementarySheet]
+                          !formData[item.key as keyof SupplementarySheet],
                         )
                       }
                       className={classNames(
                         formData[item.key as keyof SupplementarySheet]
-                          ? 'bg-indigo-600'
-                          : 'bg-gray-200',
-                        'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                          ? "bg-indigo-600"
+                          : "bg-gray-200",
+                        "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                       )}
                     >
                       <span
                         className={classNames(
                           formData[item.key as keyof SupplementarySheet]
-                            ? 'translate-x-5'
-                            : 'translate-x-0',
-                          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                            ? "translate-x-5"
+                            : "translate-x-0",
+                          "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                         )}
                       />
                     </button>
@@ -325,8 +366,10 @@ export default function SupplementaryForm({
 
             {/* Team Equipment Section */}
             <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">Mannschaften</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-6">
+                Mannschaften
+              </h3>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Home Team */}
                 <div>
@@ -335,33 +378,44 @@ export default function SupplementaryForm({
                   </h4>
                   <div className="space-y-4">
                     {[
-                      { key: 'homeRoster', label: 'Aufstellung rechtzeitig' },
-                      { key: 'homePlayerPasses', label: 'Spielerpässe vollständig' },
-                      { key: 'homeUniformPlayerClothing', label: 'Einheitliche Spielerkleidung' },
+                      { key: "homeRoster", label: "Aufstellung rechtzeitig" },
+                      {
+                        key: "homePlayerPasses",
+                        label: "Spielerpässe vollständig",
+                      },
+                      {
+                        key: "homeUniformPlayerClothing",
+                        label: "Einheitliche Spielerkleidung",
+                      },
                     ].map((item) => (
-                      <div key={item.key} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">{item.label}</span>
+                      <div
+                        key={item.key}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="text-sm text-gray-700">
+                          {item.label}
+                        </span>
                         <button
                           type="button"
                           onClick={() =>
                             updateField(
                               item.key,
-                              !formData[item.key as keyof SupplementarySheet]
+                              !formData[item.key as keyof SupplementarySheet],
                             )
                           }
                           className={classNames(
                             formData[item.key as keyof SupplementarySheet]
-                              ? 'bg-indigo-600'
-                              : 'bg-gray-200',
-                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                              ? "bg-indigo-600"
+                              : "bg-gray-200",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                           )}
                         >
                           <span
                             className={classNames(
                               formData[item.key as keyof SupplementarySheet]
-                                ? 'translate-x-5'
-                                : 'translate-x-0',
-                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                                ? "translate-x-5"
+                                : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                             )}
                           />
                         </button>
@@ -377,34 +431,48 @@ export default function SupplementaryForm({
                   </h4>
                   <div className="space-y-4">
                     {[
-                      { key: 'awayRoster', label: 'Aufstellung rechtzeitig' },
-                      { key: 'awayPlayerPasses', label: 'Spielerpässe vollständig' },
-                      { key: 'awayUniformPlayerClothing', label: 'Einheitliche Spielerkleidung' },
-                      { key: 'awaySecondJerseySet', label: 'Zweiter Trikotsatz' },
+                      { key: "awayRoster", label: "Aufstellung rechtzeitig" },
+                      {
+                        key: "awayPlayerPasses",
+                        label: "Spielerpässe vollständig",
+                      },
+                      {
+                        key: "awayUniformPlayerClothing",
+                        label: "Einheitliche Spielerkleidung",
+                      },
+                      {
+                        key: "awaySecondJerseySet",
+                        label: "Zweiter Trikotsatz",
+                      },
                     ].map((item) => (
-                      <div key={item.key} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">{item.label}</span>
+                      <div
+                        key={item.key}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="text-sm text-gray-700">
+                          {item.label}
+                        </span>
                         <button
                           type="button"
                           onClick={() =>
                             updateField(
                               item.key,
-                              !formData[item.key as keyof SupplementarySheet]
+                              !formData[item.key as keyof SupplementarySheet],
                             )
                           }
                           className={classNames(
                             formData[item.key as keyof SupplementarySheet]
-                              ? 'bg-indigo-600'
-                              : 'bg-gray-200',
-                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                              ? "bg-indigo-600"
+                              : "bg-gray-200",
+                            "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                           )}
                         >
                           <span
                             className={classNames(
                               formData[item.key as keyof SupplementarySheet]
-                                ? 'translate-x-5'
-                                : 'translate-x-0',
-                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                                ? "translate-x-5"
+                                : "translate-x-0",
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                             )}
                           />
                         </button>
@@ -420,7 +488,7 @@ export default function SupplementaryForm({
               <h3 className="text-lg font-medium text-gray-900 mb-6">
                 Besondere Vorkommnisse
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">
@@ -428,16 +496,20 @@ export default function SupplementaryForm({
                   </span>
                   <button
                     type="button"
-                    onClick={() => updateField('specialEvents', !formData.specialEvents)}
+                    onClick={() =>
+                      updateField("specialEvents", !formData.specialEvents)
+                    }
                     className={classNames(
-                      formData.specialEvents ? 'bg-indigo-600' : 'bg-gray-200',
-                      'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+                      formData.specialEvents ? "bg-indigo-600" : "bg-gray-200",
+                      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
                     )}
                   >
                     <span
                       className={classNames(
-                        formData.specialEvents ? 'translate-x-5' : 'translate-x-0',
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                        formData.specialEvents
+                          ? "translate-x-5"
+                          : "translate-x-0",
+                        "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                       )}
                     />
                   </button>
@@ -448,8 +520,10 @@ export default function SupplementaryForm({
                     Schiedsrichter Kommentare
                   </label>
                   <textarea
-                    value={formData.refereeComments || ''}
-                    onChange={(e) => updateField('refereeComments', e.target.value)}
+                    value={formData.refereeComments || ""}
+                    onChange={(e) =>
+                      updateField("refereeComments", e.target.value)
+                    }
                     rows={4}
                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     placeholder="Kommentare des Schiedsrichters..."
@@ -463,13 +537,17 @@ export default function SupplementaryForm({
               <h3 className="text-lg font-medium text-gray-900 mb-6">
                 Schiedsrichtervergütung
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2].map((refNumber) => {
-                  const paymentData = formData.refereePayment?.[`referee${refNumber}` as keyof typeof formData.refereePayment];
-                  const total = (paymentData?.travelExpenses || 0) + 
-                              (paymentData?.expenseAllowance || 0) + 
-                              (paymentData?.gameFees || 0);
+                  const paymentData =
+                    formData.refereePayment?.[
+                      `referee${refNumber}` as keyof typeof formData.refereePayment
+                    ];
+                  const total =
+                    (paymentData?.travelExpenses || 0) +
+                    (paymentData?.expenseAllowance || 0) +
+                    (paymentData?.gameFees || 0);
 
                   return (
                     <div key={refNumber}>
@@ -487,7 +565,11 @@ export default function SupplementaryForm({
                             min="0"
                             value={paymentData?.travelExpenses || 0}
                             onChange={(e) =>
-                              updateRefereePayment(refNumber as 1 | 2, 'travelExpenses', parseFloat(e.target.value) || 0)
+                              updateRefereePayment(
+                                refNumber as 1 | 2,
+                                "travelExpenses",
+                                parseFloat(e.target.value) || 0,
+                              )
                             }
                             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           />
@@ -502,7 +584,11 @@ export default function SupplementaryForm({
                             min="0"
                             value={paymentData?.expenseAllowance || 0}
                             onChange={(e) =>
-                              updateRefereePayment(refNumber as 1 | 2, 'expenseAllowance', parseFloat(e.target.value) || 0)
+                              updateRefereePayment(
+                                refNumber as 1 | 2,
+                                "expenseAllowance",
+                                parseFloat(e.target.value) || 0,
+                              )
                             }
                             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           />
@@ -517,7 +603,11 @@ export default function SupplementaryForm({
                             min="0"
                             value={paymentData?.gameFees || 0}
                             onChange={(e) =>
-                              updateRefereePayment(refNumber as 1 | 2, 'gameFees', parseFloat(e.target.value) || 0)
+                              updateRefereePayment(
+                                refNumber as 1 | 2,
+                                "gameFees",
+                                parseFloat(e.target.value) || 0,
+                              )
                             }
                             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           />
@@ -537,7 +627,7 @@ export default function SupplementaryForm({
                   );
                 })}
               </div>
-              
+
               {/* Overall Total */}
               <div className="mt-6 bg-gray-50 rounded-lg p-4">
                 <div className="flex justify-between items-center">
@@ -547,12 +637,15 @@ export default function SupplementaryForm({
                   <span className="text-lg font-bold text-gray-900">
                     {(
                       (formData.refereePayment?.referee1?.travelExpenses || 0) +
-                      (formData.refereePayment?.referee1?.expenseAllowance || 0) +
+                      (formData.refereePayment?.referee1?.expenseAllowance ||
+                        0) +
                       (formData.refereePayment?.referee1?.gameFees || 0) +
                       (formData.refereePayment?.referee2?.travelExpenses || 0) +
-                      (formData.refereePayment?.referee2?.expenseAllowance || 0) +
+                      (formData.refereePayment?.referee2?.expenseAllowance ||
+                        0) +
                       (formData.refereePayment?.referee2?.gameFees || 0)
-                    ).toFixed(2)} €
+                    ).toFixed(2)}{" "}
+                    €
                   </span>
                 </div>
               </div>
@@ -560,7 +653,9 @@ export default function SupplementaryForm({
 
             {/* Submit Button */}
             <div className="flex justify-end space-x-3">
-              <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`}>
+              <Link
+                href={`/matches/${match._id}/matchcenter?tab=supplementary`}
+              >
                 <a className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   Abbrechen
                 </a>
@@ -595,7 +690,7 @@ export default function SupplementaryForm({
                     Speichern...
                   </>
                 ) : (
-                  'Speichern'
+                  "Speichern"
                 )}
               </button>
             </div>
@@ -608,15 +703,15 @@ export default function SupplementaryForm({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
-  const jwt = (getCookie('jwt', context) || '') as string;
+  const jwt = (getCookie("jwt", context) || "") as string;
 
   try {
     const match: Match = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`
+      `${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`,
     ).then((res) => res.json());
 
     const matchday = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`,
     ).then((res) => res.json());
 
     return {
