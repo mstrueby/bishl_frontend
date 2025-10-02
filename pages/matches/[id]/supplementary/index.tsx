@@ -40,6 +40,73 @@ function SectionHeaderSimple({ title, description }: SectionHeaderSimpleProps) {
   );
 }
 
+interface TeamEquipmentCardProps {
+  teamName: string;
+  teamType: 'home' | 'away';
+  formData: SupplementarySheet;
+  updateField: (field: string, value: any) => void;
+}
+
+function TeamEquipmentCard({ teamName, teamType, formData, updateField }: TeamEquipmentCardProps) {
+  const items = teamType === 'home' 
+    ? [
+        { key: "homeRoster", label: "Aufstellung rechtzeitig" },
+        { key: "homePlayerPasses", label: "Spielerpässe vollständig" },
+        { key: "homeUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
+      ]
+    : [
+        { key: "awayRoster", label: "Aufstellung rechtzeitig" },
+        { key: "awayPlayerPasses", label: "Spielerpässe vollständig" },
+        { key: "awayUniformPlayerClothing", label: "Einheitliche Spielerkleidung" },
+        { key: "awaySecondJerseySet", label: "Zweiter Trikotsatz" },
+      ];
+
+  return (
+    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50">
+        <h4 className="text-sm font-medium text-gray-800">
+          {teamType === 'home' ? 'Heimmannschaft' : 'Gastmannschaft'} - {teamName}
+        </h4>
+      </div>
+      <div className="bg-white px-4 py-5 sm:p-6">
+        <div className="text-sm text-gray-700 space-y-4">
+          {items.map((item) => (
+            <div key={item.key} className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">
+                {item.label}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  updateField(
+                    item.key,
+                    !formData[item.key as keyof SupplementarySheet],
+                  )
+                }
+                className={classNames(
+                  formData[item.key as keyof SupplementarySheet]
+                    ? "bg-indigo-600"
+                    : "bg-gray-200",
+                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                )}
+              >
+                <span
+                  className={classNames(
+                    formData[item.key as keyof SupplementarySheet]
+                      ? "translate-x-5"
+                      : "translate-x-0",
+                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                  )}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface SupplementaryFormProps {
   match: Match;
   matchdayOwner: MatchdayOwner;
@@ -430,115 +497,18 @@ export default function SupplementaryForm({
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Home Team */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-800 mb-4">
-                    Heimmannschaft - {match.home.fullName}
-                  </h4>
-                  <div className="space-y-4">
-                    {[
-                      { key: "homeRoster", label: "Aufstellung rechtzeitig" },
-                      {
-                        key: "homePlayerPasses",
-                        label: "Spielerpässe vollständig",
-                      },
-                      {
-                        key: "homeUniformPlayerClothing",
-                        label: "Einheitliche Spielerkleidung",
-                      },
-                    ].map((item) => (
-                      <div
-                        key={item.key}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-sm text-gray-700">
-                          {item.label}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateField(
-                              item.key,
-                              !formData[item.key as keyof SupplementarySheet],
-                            )
-                          }
-                          className={classNames(
-                            formData[item.key as keyof SupplementarySheet]
-                              ? "bg-indigo-600"
-                              : "bg-gray-200",
-                            "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                          )}
-                        >
-                          <span
-                            className={classNames(
-                              formData[item.key as keyof SupplementarySheet]
-                                ? "translate-x-5"
-                                : "translate-x-0",
-                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                            )}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Away Team */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-800 mb-4">
-                    Gastmannschaft - {match.away.fullName}
-                  </h4>
-                  <div className="space-y-4">
-                    {[
-                      { key: "awayRoster", label: "Aufstellung rechtzeitig" },
-                      {
-                        key: "awayPlayerPasses",
-                        label: "Spielerpässe vollständig",
-                      },
-                      {
-                        key: "awayUniformPlayerClothing",
-                        label: "Einheitliche Spielerkleidung",
-                      },
-                      {
-                        key: "awaySecondJerseySet",
-                        label: "Zweiter Trikotsatz",
-                      },
-                    ].map((item) => (
-                      <div
-                        key={item.key}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-sm text-gray-700">
-                          {item.label}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateField(
-                              item.key,
-                              !formData[item.key as keyof SupplementarySheet],
-                            )
-                          }
-                          className={classNames(
-                            formData[item.key as keyof SupplementarySheet]
-                              ? "bg-indigo-600"
-                              : "bg-gray-200",
-                            "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                          )}
-                        >
-                          <span
-                            className={classNames(
-                              formData[item.key as keyof SupplementarySheet]
-                                ? "translate-x-5"
-                                : "translate-x-0",
-                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                            )}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <TeamEquipmentCard
+                  teamName={match.home.fullName}
+                  teamType="home"
+                  formData={formData}
+                  updateField={updateField}
+                />
+                <TeamEquipmentCard
+                  teamName={match.away.fullName}
+                  teamType="away"
+                  formData={formData}
+                  updateField={updateField}
+                />
               </div>
             </div>
 
