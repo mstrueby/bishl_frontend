@@ -17,6 +17,29 @@ import {
 import MatchHeader from "../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 
+interface SectionHeaderSimpleProps {
+  title: string;
+  description?: string;
+}
+
+function SectionHeaderSimple({
+  title,
+  description,
+}: SectionHeaderSimpleProps) {
+  return (
+    <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
+      <div className="min-w-0 flex-1">
+        <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
+          {title}
+        </h3>
+        {description && (
+          <p className="mt-0 text-xs text-gray-500">{description}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface SupplementaryFormProps {
   match: Match;
   matchdayOwner: MatchdayOwner;
@@ -164,18 +187,10 @@ export default function SupplementaryForm({
           <form onSubmit={handleSubmit} className="space-y-12">
             {/* Referee Attendance Section */}
             <div>
-              {/** Header */}
-              <div className="border-b mb-4 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-md font-semibold text-gray-900 pt-1.5 truncate">
-                    Schiedsrichter
-                  </h3>
-                  <p className="mt-0 text-xs text-gray-500">
-                    Dieser Bereich ist von den <strong>Zeitnehmern</strong>{" "}
-                    auszufüllen
-                  </p>
-                </div>
-              </div>
+              <SectionHeaderSimple
+                title="Schiedsrichter"
+                description="Dieser Bereich ist von den Zeitnehmern auszufüllen"
+              />
               {/* Reusable Referee Attendance Component */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2].map((refNumber) => (
@@ -315,9 +330,7 @@ export default function SupplementaryForm({
 
             {/* Equipment Section */}
             <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">
-                Dokumente / Ausrüstung
-              </h3>
+              <SectionHeaderSimple title="Dokumente / Ausrüstung" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
@@ -366,9 +379,7 @@ export default function SupplementaryForm({
 
             {/* Team Equipment Section */}
             <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">
-                Mannschaften
-              </h3>
+              <SectionHeaderSimple title="Mannschaften" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Home Team */}
@@ -485,9 +496,7 @@ export default function SupplementaryForm({
 
             {/* Special Events Section */}
             <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">
-                Besondere Vorkommnisse
-              </h3>
+              <SectionHeaderSimple title="Besondere Vorkommnisse" />
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -534,9 +543,7 @@ export default function SupplementaryForm({
 
             {/* Referee Payment Section */}
             <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">
-                Schiedsrichtervergütung
-              </h3>
+              <SectionHeaderSimple title="Schiedsrichtervergütung" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2].map((refNumber) => {
