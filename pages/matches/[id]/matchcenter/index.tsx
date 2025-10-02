@@ -740,9 +740,9 @@ export default function MatchDetails({
                 )}
               </div>
 
-              <div className="space-y-12">
+              <div className="space-y-12 sm:px4">
                 {/* Referee Attendance Section */}
-                <div className="px-4">
+                <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Schiedsrichter
                   </h4>
@@ -761,16 +761,16 @@ export default function MatchDetails({
                     {[1, 2].map((refNumber) => (
                       <div
                         key={refNumber}
-                        className="overflow-hidden rounded-lg bg-gray-50 shadow "
+                        className="overflow-hidden bg-white rounded-md shadow-md border"
                       >
-                        <div className="px-4 py-5 sm:px-6">
+                        <div className="px-4 py-5 sm:px-6 bg-gray-50">
                           {/* Content goes here */}
                           <h5 className="text-sm font-medium text-gray-800">
                             Schiedsrichter {refNumber}
                           </h5>
                         </div>
                         <div className="bg-white px-4 py-5 sm:p-6">
-                          <div className="text-sm text-gray-600 space-y-1">
+                          <div className="text-sm text-gray-700 space-y-1">
                             <div className="flex justify-between">
                               <span>Pass liegt vor:</span>
                               <span
@@ -814,125 +814,142 @@ export default function MatchDetails({
                 </div>
 
                 {/* Equipment Section */}
-                <div className="px-4">
+                <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Dokumente / Ausrüstung
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                    {[
-                      { key: "ruleBook", label: "Spielregeln/WKO" },
-                      { key: "goalDisplay", label: "Manuelle Toranzeige" },
-                      { key: "soundSource", label: "Ersatz-Tonquelle" },
-                      { key: "matchClock", label: "Spieluhr" },
-                      { key: "matchBalls", label: "10 Spielbälle" },
-                      { key: "firstAidKit", label: "Erste-Hilfe-Ausrüstung" },
-                      { key: "fieldLines", label: "Pflichtlinien" },
-                      { key: "nets", label: "Tornetze" },
-                    ].map((item) => (
-                      <div
-                        key={item.key}
-                        className="flex items-center space-x-2 "
-                      >
-                        <div
-                          className={`w-3 h-3 rounded-full ${
-                            match.supplementarySheet?.[
-                              item.key as keyof typeof match.supplementarySheet
-                            ]
-                              ? "bg-green-500"
-                              : "bg-gray-300"
-                          }`}
-                        />
-                        <span className="text-gray-700">{item.label}</span>
+                  <div className="overflow-hidden bg-white rounded-md shadow-md border">
+                    <div className="px-4 py-5 sm:px-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {[
+                          { key: "ruleBook", label: "Spielregeln/WKO" },
+                          { key: "goalDisplay", label: "Manuelle Toranzeige" },
+                          { key: "soundSource", label: "Ersatz-Tonquelle" },
+                          { key: "matchClock", label: "Spieluhr" },
+                          { key: "matchBalls", label: "10 Spielbälle" },
+                          {
+                            key: "firstAidKit",
+                            label: "Erste-Hilfe-Ausrüstung",
+                          },
+                          { key: "fieldLines", label: "Pflichtlinien" },
+                          { key: "nets", label: "Tornetze" },
+                        ].map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center space-x-3"
+                          >
+                            <div
+                              className={`w-3 h-3 rounded-full ${
+                                match.supplementarySheet?.[
+                                  item.key as keyof typeof match.supplementarySheet
+                                ]
+                                  ? "bg-green-500"
+                                  : "bg-gray-300"
+                              }`}
+                            />
+                            <span className="text-sm text-gray-700">
+                              {item.label}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Team Equipment Section */}
-                <div className="bg-white rounded-lg shadow p-6">
+                <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Mannschaften
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Home Team */}
-                    <div>
-                      <h5 className="text-sm font-medium text-gray-800 mb-3">
-                        Heimmannschaft - {match.home.fullName}
-                      </h5>
-                      <div className="space-y-2 text-sm">
-                        {[
-                          {
-                            key: "homeRoster",
-                            label: "Aufstellung rechtzeitig",
-                          },
-                          {
-                            key: "homePlayerPasses",
-                            label: "Spielerpässe vollständig",
-                          },
-                          {
-                            key: "homeUniformPlayerClothing",
-                            label: "Einheitliche Spielerkleidung",
-                          },
-                        ].map((item) => (
-                          <div
-                            key={item.key}
-                            className="flex items-center space-x-2"
-                          >
+                    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+                      <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                        <h5 className="text-sm font-medium text-gray-800">
+                          Heimmannschaft - {match.home.fullName}
+                        </h5>
+                      </div>
+                      <div className="bg-white px-4 py-5 sm:p-6">
+                        <div className="text-sm text-gray-700 space-y-2">
+                          {[
+                            {
+                              key: "homeRoster",
+                              label: "Aufstellung rechtzeitig",
+                            },
+                            {
+                              key: "homePlayerPasses",
+                              label: "Spielerpässe vollständig",
+                            },
+                            {
+                              key: "homeUniformPlayerClothing",
+                              label: "Einheitliche Spielerkleidung",
+                            },
+                          ].map((item) => (
                             <div
-                              className={`w-3 h-3 rounded-full ${
-                                match.supplementarySheet?.[
-                                  item.key as keyof typeof match.supplementarySheet
-                                ]
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
-                              }`}
-                            />
-                            <span className="text-gray-700">{item.label}</span>
-                          </div>
-                        ))}
+                              key={item.key}
+                              className="flex items-center space-x-3"
+                            >
+                              <div
+                                className={`w-3 h-3 rounded-full ${
+                                  match.supplementarySheet?.[
+                                    item.key as keyof typeof match.supplementarySheet
+                                  ]
+                                    ? "bg-green-500"
+                                    : "bg-gray-300"
+                                }`}
+                              />
+                              <span>{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
                     {/* Away Team */}
-                    <div>
-                      <h5 className="text-sm font-medium text-gray-800 mb-3">
-                        Gastmannschaft - {match.away.fullName}
-                      </h5>
-                      <div className="space-y-2 text-sm">
-                        {[
-                          {
-                            key: "awayRoster",
-                            label: "Aufstellung rechtzeitig",
-                          },
-                          {
-                            key: "awayPlayerPasses",
-                            label: "Spielerpässe vollständig",
-                          },
-                          {
-                            key: "awayUniformPlayerClothing",
-                            label: "Einheitliche Spielerkleidung",
-                          },
-                          {
-                            key: "awaySecondJerseySet",
-                            label: "Zweiter Trikotsatz",
-                          },
-                        ].map((item) => (
-                          <div
-                            key={item.key}
-                            className="flex items-center space-x-2"
-                          >
+                    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+                      <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                        <h5 className="text-sm font-medium text-gray-800">
+                          Gastmannschaft - {match.away.fullName}
+                        </h5>
+                      </div>
+                      <div className="bg-white px-4 py-5 sm:p-6">
+                        <div className="text-sm text-gray-700 space-y-2">
+                          {[
+                            {
+                              key: "awayRoster",
+                              label: "Aufstellung rechtzeitig",
+                            },
+                            {
+                              key: "awayPlayerPasses",
+                              label: "Spielerpässe vollständig",
+                            },
+                            {
+                              key: "awayUniformPlayerClothing",
+                              label: "Einheitliche Spielerkleidung",
+                            },
+                            {
+                              key: "awaySecondJerseySet",
+                              label: "Zweiter Trikotsatz",
+                            },
+                          ].map((item) => (
                             <div
-                              className={`w-3 h-3 rounded-full ${
-                                match.supplementarySheet?.[
-                                  item.key as keyof typeof match.supplementarySheet
-                                ]
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
-                              }`}
-                            />
-                            <span className="text-gray-700">{item.label}</span>
-                          </div>
-                        ))}
+                              key={item.key}
+                              className="flex items-center space-x-3"
+                            >
+                              <div
+                                className={`w-3 h-3 rounded-full ${
+                                  match.supplementarySheet?.[
+                                    item.key as keyof typeof match.supplementarySheet
+                                  ]
+                                    ? "bg-green-500"
+                                    : "bg-gray-300"
+                                }`}
+                              />
+                              <span>{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
