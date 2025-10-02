@@ -757,6 +757,9 @@ export default function MatchDetails({
                       const delayMin = match.supplementarySheet?.[
                         `referee${refNumber}DelayMin` as keyof SupplementarySheet
                       ] as number | undefined;
+                      const refereePresent = match.supplementarySheet?.[
+                        `referee${refNumber}Present` as keyof SupplementarySheet
+                      ] as boolean | undefined;
 
                       return (
                         <div
@@ -770,6 +773,18 @@ export default function MatchDetails({
                           </div>
                           <div className="bg-white px-4 py-5 sm:p-6">
                             <div className="text-sm text-gray-700 space-y-1">
+                              <div className="flex justify-between">
+                                <span>Anwesend:</span>
+                                <span
+                                  className={
+                                    refereePresent
+                                      ? "text-green-600 font-medium"
+                                      : "text-gray-500"
+                                  }
+                                >
+                                  {refereePresent ? "Ja" : "Nein"}
+                                </span>
+                              </div>
                               <div className="flex justify-between">
                                 <span>Pass liegt vor:</span>
                                 <span
