@@ -674,7 +674,7 @@ export default function SupplementaryForm({
                           >
                             Fahrtkosten
                           </label>
-                          <div className="mt-2">
+                          <div className="mt-2 w-full sm:w-32">
                             <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                               <input
                                 type="text"
@@ -706,7 +706,7 @@ export default function SupplementaryForm({
                           >
                             Aufwandsentschädigung
                           </label>
-                          <div className="mt-2">
+                          <div className="mt-2 w-full sm:w-32">
                             <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                               <input
                                 type="text"
@@ -738,7 +738,7 @@ export default function SupplementaryForm({
                           >
                             Spielgebühren
                           </label>
-                          <div className="mt-2">
+                          <div className="mt-2 w-full sm:w-32">
                             <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                               <input
                                 type="text"
