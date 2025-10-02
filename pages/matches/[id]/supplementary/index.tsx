@@ -40,6 +40,144 @@ function SectionHeaderSimple({ title, description }: SectionHeaderSimpleProps) {
   );
 }
 
+interface RefereeAttendanceCardProps {
+  refereeNumber: 1 | 2;
+  formData: SupplementarySheet;
+  updateField: (field: string, value: any) => void;
+}
+
+function RefereeAttendanceCard({ refereeNumber, formData, updateField }: RefereeAttendanceCardProps) {
+  return (
+    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+        <h4 className="text-sm font-medium text-gray-800">
+          Schiedsrichter {refereeNumber}
+        </h4>
+      </div>
+      <div className="bg-white px-4 py-5 sm:p-6">
+        <div className="text-sm text-gray-700 space-y-4">
+          {/** Referee present */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700">
+              Anwesend
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                updateField(
+                  `referee${refereeNumber}Present`,
+                  !formData[
+                    `referee${refereeNumber}Present` as keyof SupplementarySheet
+                  ],
+                )
+              }
+              className={classNames(
+                formData[
+                  `referee${refereeNumber}Present` as keyof SupplementarySheet
+                ]
+                  ? "bg-indigo-600"
+                  : "bg-gray-200",
+                "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+              )}
+            >
+              <span
+                className={classNames(
+                  formData[
+                    `referee${refereeNumber}Present` as keyof SupplementarySheet
+                  ]
+                    ? "translate-x-5"
+                    : "translate-x-0",
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                )}
+              />
+            </button>
+          </div>
+          {/** Referee pass available */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700">
+              Pass liegt vor
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                updateField(
+                  `referee${refereeNumber}PassAvailable`,
+                  !formData[
+                    `referee${refereeNumber}PassAvailable` as keyof SupplementarySheet
+                  ],
+                )
+              }
+              className={classNames(
+                formData[
+                  `referee${refereeNumber}PassAvailable` as keyof SupplementarySheet
+                ]
+                  ? "bg-indigo-600"
+                  : "bg-gray-200",
+                "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+              )}
+            >
+              <span
+                className={classNames(
+                  formData[
+                    `referee${refereeNumber}PassAvailable` as keyof SupplementarySheet
+                  ]
+                    ? "translate-x-5"
+                    : "translate-x-0",
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                )}
+              />
+            </button>
+          </div>
+          {/** Referee pass number */}
+          <div className="flex items-center justify-between">
+            <label className="block text-sm text-gray-700 mb-1">
+              Pass-Nr.
+            </label>
+            <input
+              type="text"
+              value={
+                (formData[
+                  `referee${refereeNumber}PassNo` as keyof SupplementarySheet
+                ] as string) || ""
+              }
+              onChange={(e) =>
+                updateField(
+                  `referee${refereeNumber}PassNo`,
+                  e.target.value,
+                )
+              }
+              className="block w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              placeholder="Pass-Nummer"
+            />
+          </div>
+          {/** Referee delay */}
+          <div className="flex items-center justify-between">
+            <label className="block text-sm text-gray-700 mb-1">
+              Verspätung (Min)
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={
+                (formData[
+                  `referee${refereeNumber}DelayMin` as keyof SupplementarySheet
+                ] as number) || 0
+              }
+              onChange={(e) =>
+                updateField(
+                  `referee${refereeNumber}DelayMin`,
+                  parseInt(e.target.value) || 0,
+                )
+              }
+              className="block w-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface TeamEquipmentCardProps {
   teamName: string;
   teamType: 'home' | 'away';
@@ -289,139 +427,14 @@ export default function SupplementaryForm({
                 title="Schiedsrichter"
                 description="Dieser Bereich ist von den <strong>Zeitnehmern</strong> auszufüllen"
               />
-              {/* Reusable Referee Attendance Component */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2].map((refNumber) => (
-                  <div
+                  <RefereeAttendanceCard
                     key={refNumber}
-                    className="overflow-hidden bg-white rounded-md shadow-md border"
-                  >
-                    <div className="px-4 py-5 sm:px-6 bg-gray-50">
-                      <h4 className="text-sm font-medium text-gray-800">
-                        Schiedsrichter {refNumber}
-                      </h4>
-                    </div>
-                    <div className="bg-white px-4 py-5 sm:p-6">
-                      <div className="text-sm text-gray-700 space-y-4">
-                        {/** Referee present */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-700">
-                            Anwesend
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateField(
-                                `referee${refNumber}Present`,
-                                !formData[
-                                  `referee${refNumber}Present` as keyof SupplementarySheet
-                                ],
-                              )
-                            }
-                            className={classNames(
-                              formData[
-                                `referee${refNumber}Present` as keyof SupplementarySheet
-                              ]
-                                ? "bg-indigo-600"
-                                : "bg-gray-200",
-                              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                            )}
-                          >
-                            <span
-                              className={classNames(
-                                formData[
-                                  `referee${refNumber}Present` as keyof SupplementarySheet
-                                ]
-                                  ? "translate-x-5"
-                                  : "translate-x-0",
-                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              )}
-                            />
-                          </button>
-                        </div>
-                        {/** Referee pass available */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-700">
-                            Pass liegt vor
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateField(
-                                `referee${refNumber}PassAvailable`,
-                                !formData[
-                                  `referee${refNumber}PassAvailable` as keyof SupplementarySheet
-                                ],
-                              )
-                            }
-                            className={classNames(
-                              formData[
-                                `referee${refNumber}PassAvailable` as keyof SupplementarySheet
-                              ]
-                                ? "bg-indigo-600"
-                                : "bg-gray-200",
-                              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                            )}
-                          >
-                            <span
-                              className={classNames(
-                                formData[
-                                  `referee${refNumber}PassAvailable` as keyof SupplementarySheet
-                                ]
-                                  ? "translate-x-5"
-                                  : "translate-x-0",
-                                "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              )}
-                            />
-                          </button>
-                        </div>
-                        {/** Referee pass number */}
-                        <div className="flex items-center justify-between">
-                          <label className="block text-sm text-gray-700 mb-1">
-                            Pass-Nr.
-                          </label>
-                          <input
-                            type="text"
-                            value={
-                              (formData[
-                                `referee${refNumber}PassNo` as keyof SupplementarySheet
-                              ] as string) || ""
-                            }
-                            onChange={(e) =>
-                              updateField(
-                                `referee${refNumber}PassNo`,
-                                e.target.value,
-                              )
-                            }
-                            className="block w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                            placeholder="Pass-Nummer"
-                          />
-                        </div>
-                        {/** Referee delay */}
-                        <div className="flex items-center justify-between">
-                          <label className="block text-sm text-gray-700 mb-1">
-                            Verspätung (Min)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={
-                              (formData[
-                                `referee${refNumber}DelayMin` as keyof SupplementarySheet
-                              ] as number) || 0
-                            }
-                            onChange={(e) =>
-                              updateField(
-                                `referee${refNumber}DelayMin`,
-                                parseInt(e.target.value) || 0,
-                              )
-                            }
-                            className="block w-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    refereeNumber={refNumber as 1 | 2}
+                    formData={formData}
+                    updateField={updateField}
+                  />
                 ))}
               </div>
             </div>
