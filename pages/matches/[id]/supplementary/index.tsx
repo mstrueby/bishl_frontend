@@ -22,10 +22,7 @@ interface SectionHeaderSimpleProps {
   description?: string;
 }
 
-function SectionHeaderSimple({
-  title,
-  description,
-}: SectionHeaderSimpleProps) {
+function SectionHeaderSimple({ title, description }: SectionHeaderSimpleProps) {
   return (
     <div className="mb-4 pb-3 flex items-center justify-between min-h-[2.5rem]">
       <div className="min-w-0 flex-1">
@@ -33,7 +30,10 @@ function SectionHeaderSimple({
           {title}
         </h3>
         {description && (
-          <p className="mt-0 text-xs text-gray-500" dangerouslySetInnerHTML={{ __html: description }} />
+          <p
+            className="mt-0 text-xs text-gray-500"
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
         )}
       </div>
     </div>
@@ -168,9 +168,7 @@ export default function SupplementaryForm({
         <MatchHeader match={match} isRefreshing={false} onRefresh={() => {}} />
 
         <div className="mt-12">
-          <SectionHeader
-            title="Zusatzblatt"
-          />
+          <SectionHeader title="Zusatzblatt" />
 
           {error && (
             <div className="rounded-md bg-red-50 p-4 mb-4">
@@ -330,27 +328,71 @@ export default function SupplementaryForm({
 
             {/* Equipment Section */}
             <div>
-              <SectionHeaderSimple 
-                title="Dokumente / Ausrüstung" 
+              <SectionHeaderSimple
+                title="Dokumente / Ausrüstung"
                 description="Dieser Bereich ist von den <strong>Schiedsrichtern</strong> auszufüllen"
-/>
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  { key: "ruleBook", label: "Spielregeln/WKO" },
-                  { key: "goalDisplay", label: "Manuelle Toranzeige" },
-                  { key: "soundSource", label: "Ersatz-Tonquelle" },
-                  { key: "matchClock", label: "Spieluhr" },
-                  { key: "matchBalls", label: "10 Spielbälle" },
-                  { key: "firstAidKit", label: "Erste-Hilfe-Ausrüstung" },
-                  { key: "fieldLines", label: "Pflichtlinien" },
-                  { key: "nets", label: "Tornetze" },
+                  {
+                    key: "ruleBook",
+                    label: "Spielregeln/WKO",
+                    description:
+                      "Sind die aktuellen Spielregeln und WKO verfügbar?",
+                  },
+                  {
+                    key: "goalDisplay",
+                    label: "Manuelle Toranzeige",
+                    description: "Ist eine manuelle Toranzeige vorhanden?",
+                  },
+                  {
+                    key: "soundSource",
+                    label: "Ersatz-Tonquelle",
+                    description:
+                      "Ist eine Ersatz-Tonquelle (Pfeife/Horn) verfügbar?",
+                  },
+                  {
+                    key: "matchClock",
+                    label: "Spieluhr",
+                    description: "Ist eine funktionierende Spieluhr vorhanden?",
+                  },
+                  {
+                    key: "matchBalls",
+                    label: "10 Spielbälle",
+                    description:
+                      "Sind mind. 10 regelkonforme Spielbälle verfügbar?",
+                  },
+                  {
+                    key: "firstAidKit",
+                    label: "Erste-Hilfe-Ausrüstung",
+                    description:
+                      "Ist vollständige Erste-Hilfe-Ausrüstung vorhanden?",
+                  },
+                  {
+                    key: "fieldLines",
+                    label: "Pflichtlinien",
+                    description:
+                      "Ist das Spielfeld vollständig mit allen Pflichtlinien markiert?",
+                  },
+                  {
+                    key: "nets",
+                    label: "Tornetze",
+                    description: "Sind regelkonforme Tornetze angebracht?",
+                  },
                 ].map((item) => (
                   <div
                     key={item.key}
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between  px-4 sm:px-6"
                   >
-                    <span className="text-sm text-gray-700">{item.label}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">
+                        {item.label}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {item.description}
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() =>
@@ -381,8 +423,11 @@ export default function SupplementaryForm({
             </div>
 
             {/* Team Equipment Section */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <SectionHeaderSimple title="Mannschaften" />
+            <div>
+              <SectionHeaderSimple
+                title="Mannschaften"
+                description="Dieser Bereich ist von den <strong>Schiedsrichtern</strong> auszufüllen"
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Home Team */}
