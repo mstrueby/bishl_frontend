@@ -52,7 +52,7 @@ function TeamEquipmentCard({ teamName, teamType, formData, updateField }: TeamEq
     ? [
       {
         key: "homeRoster",
-        label: "Aufstellung rechtzeitig veröfffentlicht",
+        label: "Aufstellung rechtzeitig veröffentlicht",
         description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
       },
       {
@@ -69,7 +69,7 @@ function TeamEquipmentCard({ teamName, teamType, formData, updateField }: TeamEq
     : [
       {
         key: "awayRoster",
-        label: "Aufstellung rechtzeitig veröfffentlicht",
+        label: "Aufstellung rechtzeitig veröffentlicht",
         description: "Wurde die Aufstellung fristgerecht veröffentlicht?",
       },
       {
@@ -91,18 +91,23 @@ function TeamEquipmentCard({ teamName, teamType, formData, updateField }: TeamEq
 
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
-      <div className="px-4 py-5 sm:px-6 bg-gray-50">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
-          {teamType === 'home' ? 'Heimmannschaft' : 'Gastmannschaft'} - {teamName}
+          {teamType === 'home' ? 'HEIM' : 'GAST'} - {teamName}
         </h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
         <div className="text-sm text-gray-700 space-y-4">
           {items.map((item) => (
             <div key={item.key} className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">
-                {item.label}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-900">
+                  {item.label}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {item.description}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() =>
