@@ -12,6 +12,7 @@ import {
   RosterPlayer,
   PenaltiesBase,
   ScoresBase,
+  SupplementarySheet
 } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
@@ -748,18 +749,15 @@ export default function MatchDetails({
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[1, 2].map((refNumber) => {
-                      const passAvailable = match.supplementarySheet?.[
-                        `referee${refNumber}PassAvailable` as keyof SupplementarySheet
-                      ] as boolean | undefined;
-                      const passNo = match.supplementarySheet?.[
-                        `referee${refNumber}PassNo` as keyof SupplementarySheet
-                      ] as string | undefined;
-                      const delayMin = match.supplementarySheet?.[
-                        `referee${refNumber}DelayMin` as keyof SupplementarySheet
-                      ] as number | undefined;
-                      const refereePresent = match.supplementarySheet?.[
-                        `referee${refNumber}Present` as keyof SupplementarySheet
-                      ] as boolean | undefined;
+                      const passAvailableKey = `referee${refNumber}PassAvailable` as keyof SupplementarySheet;
+                      const passNoKey = `referee${refNumber}PassNo` as keyof SupplementarySheet;
+                      const delayMinKey = `referee${refNumber}DelayMin` as keyof SupplementarySheet;
+                      const refereePresentKey = `referee${refNumber}Present` as keyof SupplementarySheet;
+                      
+                      const passAvailable = match.supplementarySheet?.[passAvailableKey] as boolean | undefined;
+                      const passNo = match.supplementarySheet?.[passNoKey] as string | undefined;
+                      const delayMin = match.supplementarySheet?.[delayMinKey] as number | undefined;
+                      const refereePresent = match.supplementarySheet?.[refereePresentKey] as boolean | undefined;
 
                       return (
                         <div
