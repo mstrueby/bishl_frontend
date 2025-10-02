@@ -33,7 +33,7 @@ function SectionHeaderSimple({
           {title}
         </h3>
         {description && (
-          <p className="mt-0 text-xs text-gray-500">{description}</p>
+          <p className="mt-0 text-xs text-gray-500" dangerouslySetInnerHTML={{ __html: description }} />
         )}
       </div>
     </div>
