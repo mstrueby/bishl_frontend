@@ -741,7 +741,7 @@ export default function MatchDetails({
                 )}
               </div>
 
-              <div className="space-y-12 sm:px4">
+              <div className="space-y-12 md:px4">
                 {/* Referee Attendance Section */}
                 <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
@@ -771,7 +771,7 @@ export default function MatchDetails({
                           </div>
                           <div className="bg-white px-4 py-5 sm:p-6">
                             <div className="text-sm text-gray-700 space-y-1">
-                              <div className="flex justify-between">
+                              <div className="flex items-center justify-between">
                                 <span>Anwesend:</span>
                                 <span
                                   className={
