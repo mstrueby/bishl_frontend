@@ -44,18 +44,27 @@ interface RefereeAttendanceCardProps {
   refereeNumber: 1 | 2;
   formData: SupplementarySheet;
   updateField: (field: string, value: any) => void;
+  match: Match;
 }
 
 function RefereeAttendanceCard({
   refereeNumber,
   formData,
   updateField,
+  match,
 }: RefereeAttendanceCardProps) {
+  const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
+  
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
           Schiedsrichter {refereeNumber}
+          {referee && (
+            <span className="ml-2 text-gray-600">
+              - {referee.firstName} {referee.lastName}
+            </span>
+          )}
         </h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
@@ -465,6 +474,7 @@ export default function SupplementaryForm({
                     refereeNumber={refNumber as 1 | 2}
                     formData={formData}
                     updateField={updateField}
+                    match={match}
                   />
                 ))}
               </div>
