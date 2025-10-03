@@ -662,19 +662,19 @@ export default function SupplementaryForm({
                     (paymentData?.gameFees || 0);
 
                   return (
-                    <div key={refNumber}>
+                    <div key={refNumber} className="px-4 sm:px-6">
                       <h4 className="text-md font-medium text-gray-800 mb-4">
                         Schiedsrichter {refNumber}
                       </h4>
                       <div className="space-y-4">
-                        <div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                           <label
                             htmlFor="price"
                             className="block text-sm/6 font-medium text-gray-900 dark:text-white"
                           >
                             Fahrtkosten
                           </label>
-                          <div className="mt-2">
+                          <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
                             <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                               <input
                                 type="text"
@@ -699,14 +699,14 @@ export default function SupplementaryForm({
                             </div>
                           </div>
                         </div>
-                        <div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                           <label
                             htmlFor="price"
                             className="block text-sm/6 font-medium text-gray-900 dark:text-white"
                           >
                             Aufwandsentschädigung
                           </label>
-                          <div className="mt-2">
+                          <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
                             <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                               <input
                                 type="text"
@@ -731,14 +731,14 @@ export default function SupplementaryForm({
                             </div>
                           </div>
                         </div>
-                        <div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                           <label
                             htmlFor="price"
                             className="block text-sm/6 font-medium text-gray-900 dark:text-white"
                           >
                             Spielgebühren
                           </label>
-                          <div className="mt-2">
+                          <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
                             <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                               <input
                                 type="text"
@@ -783,8 +783,11 @@ export default function SupplementaryForm({
               {/* Overall Total */}
               <div className="mt-6 bg-gray-50 rounded-lg p-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="hidden sm:block text-sm font-medium text-gray-900">
                     Gesamtsumme Schiedsrichtervergütung:
+                  </span>
+                  <span className="sm:hidden text-sm font-medium text-gray-900">
+                    Gesamtsumme:
                   </span>
                   <span className="text-lg font-bold text-gray-900">
                     {(
