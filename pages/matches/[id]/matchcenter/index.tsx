@@ -564,7 +564,7 @@ export default function MatchDetails({
                   activeTab === tab.id
                     ? "border-indigo-500 text-indigo-600"
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                  "w-1/3 border-b-2 px-1 py-4 text-center text-md font-medium",
+                  "w-1/3 border-b-2 px-1 py-4 text-center text-sm sm:text-base sm:text-md font-medium",
                 )}
               >
                 {tab.name}
@@ -728,8 +728,8 @@ export default function MatchDetails({
           {activeTab === "supplementary" && (
             <div className="py-4">
               {/* Section Header with Edit Button */}
-              <div className="border-b mb-6 border-gray-200 pb-3 flex items-center justify-between min-h-[2.5rem]">
-                <h3 className="text-lg font-semibold text-gray-900">
+              <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
+                <h3 className="text-md font-semibold text-gray-900 py-1.5 truncate">
                   Zusatzblatt
                 </h3>
                 {permissions.showButtonSupplementary && (

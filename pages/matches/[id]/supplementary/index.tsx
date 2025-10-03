@@ -59,10 +59,10 @@ function RefereeAttendanceCard({
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
-          Schiedsrichter {refereeNumber}
+          SR {refereeNumber}
           {referee && (
             <span className="ml-2 text-gray-600">
-              - {referee.firstName} {referee.lastName}
+             - {referee.firstName} {referee.lastName}
             </span>
           )}
         </h4>
