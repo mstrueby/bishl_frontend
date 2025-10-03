@@ -770,7 +770,7 @@ export default function SupplementaryForm({
                               Summe:
                             </span>
                             <span className="text-sm font-semibold text-gray-900">
-                              {total.toFixed(2)} €
+                              {total.toFixed(2).replace('.', ',')} €
                             </span>
                           </div>
                         </div>
@@ -799,7 +799,7 @@ export default function SupplementaryForm({
                       (formData.refereePayment?.referee2?.expenseAllowance ||
                         0) +
                       (formData.refereePayment?.referee2?.gameFees || 0)
-                    ).toFixed(2)}{" "}
+                    ).toFixed(2).replace('.', ',')}{" "}
                     €
                   </span>
                 </div>
