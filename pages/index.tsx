@@ -701,7 +701,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
         )}
 
         {/* Rest of Week Matches Section */}
-        {restOfWeekMatches.length > 0 && (
+        {restOfWeekMatches.some(day => day.matches.length > 0) && (
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mt-12 mb-8">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
