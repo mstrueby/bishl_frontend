@@ -12,7 +12,7 @@ import {
   RosterPlayer,
   PenaltiesBase,
   ScoresBase,
-  SupplementarySheet
+  SupplementarySheet,
 } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
@@ -749,15 +749,27 @@ export default function MatchDetails({
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[1, 2].map((refNumber) => {
-                      const passAvailableKey = `referee${refNumber}PassAvailable` as keyof SupplementarySheet;
-                      const passNoKey = `referee${refNumber}PassNo` as keyof SupplementarySheet;
-                      const delayMinKey = `referee${refNumber}DelayMin` as keyof SupplementarySheet;
-                      const refereePresentKey = `referee${refNumber}Present` as keyof SupplementarySheet;
-                      
-                      const passAvailable = match.supplementarySheet?.[passAvailableKey] as boolean | undefined;
-                      const passNo = match.supplementarySheet?.[passNoKey] as string | undefined;
-                      const delayMin = match.supplementarySheet?.[delayMinKey] as number | undefined;
-                      const refereePresent = match.supplementarySheet?.[refereePresentKey] as boolean | undefined;
+                      const passAvailableKey =
+                        `referee${refNumber}PassAvailable` as keyof SupplementarySheet;
+                      const passNoKey =
+                        `referee${refNumber}PassNo` as keyof SupplementarySheet;
+                      const delayMinKey =
+                        `referee${refNumber}DelayMin` as keyof SupplementarySheet;
+                      const refereePresentKey =
+                        `referee${refNumber}Present` as keyof SupplementarySheet;
+
+                      const passAvailable = match.supplementarySheet?.[
+                        passAvailableKey
+                      ] as boolean | undefined;
+                      const passNo = match.supplementarySheet?.[passNoKey] as
+                        | string
+                        | undefined;
+                      const delayMin = match.supplementarySheet?.[
+                        delayMinKey
+                      ] as number | undefined;
+                      const refereePresent = match.supplementarySheet?.[
+                        refereePresentKey
+                      ] as boolean | undefined;
 
                       return (
                         <div
@@ -820,6 +832,7 @@ export default function MatchDetails({
                     <div className="px-4 py-5 sm:px-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                         {[
+                          { key: "usageApproval", label: "Nutzungserlaubnis" },
                           { key: "ruleBook", label: "Spielregeln/WKO" },
                           { key: "goalDisplay", label: "Manuelle Toranzeige" },
                           { key: "soundSource", label: "Ersatz-Tonquelle" },
@@ -1353,7 +1366,7 @@ export default function MatchDetails({
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-400">
-                      Nicht zugewiesen
+                      Nicht eingeteilt
                     </p>
                     <p className="text-xs text-gray-500">Schiedsrichter 1</p>
                   </div>
@@ -1395,7 +1408,7 @@ export default function MatchDetails({
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-400">
-                      Nicht zugewiesen
+                      Nicht eingeteilt
                     </p>
                     <p className="text-xs text-gray-500">Schiedsrichter 2</p>
                   </div>

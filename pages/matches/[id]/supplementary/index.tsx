@@ -54,7 +54,7 @@ function RefereeAttendanceCard({
   match,
 }: RefereeAttendanceCardProps) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
-  
+
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
@@ -62,7 +62,7 @@ function RefereeAttendanceCard({
           SR {refereeNumber}
           {referee && (
             <span className="ml-2 text-gray-600">
-             - {referee.firstName} {referee.lastName}
+              - {referee.firstName} {referee.lastName}
             </span>
           )}
         </h4>
@@ -490,6 +490,12 @@ export default function SupplementaryForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   {
+                    key: "usageApproval",
+                    label: "Nutzungserlaubnis",
+                    description:
+                      "Eine gültige Nutzungserlaubnis liegt vor?",
+                  },
+                  {
                     key: "ruleBook",
                     label: "Spielregeln/WKO",
                     description:
@@ -780,7 +786,7 @@ export default function SupplementaryForm({
                               Summe:
                             </span>
                             <span className="text-sm font-semibold text-gray-900">
-                              {total.toFixed(2).replace('.', ',')} €
+                              {total.toFixed(2).replace(".", ",")} €
                             </span>
                           </div>
                         </div>
@@ -809,7 +815,9 @@ export default function SupplementaryForm({
                       (formData.refereePayment?.referee2?.expenseAllowance ||
                         0) +
                       (formData.refereePayment?.referee2?.gameFees || 0)
-                    ).toFixed(2).replace('.', ',')}{" "}
+                    )
+                      .toFixed(2)
+                      .replace(".", ",")}{" "}
                     €
                   </span>
                 </div>
