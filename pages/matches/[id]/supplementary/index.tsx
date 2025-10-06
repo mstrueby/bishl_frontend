@@ -382,7 +382,7 @@ export default function SupplementaryForm({
       const response = await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
         {
-          supplementarySheet: formData,
+          supplementarySheet: { ...formData, isSaved: true },
         },
         {
           headers: {
@@ -394,7 +394,9 @@ export default function SupplementaryForm({
 
       if (response.status === 200) {
         setSuccessMessage("Zusatzblatt wurde erfolgreich gespeichert");
-        setMatch({ ...match, supplementarySheet: formData });
+        const updatedFormData = { ...formData, isSaved: true };
+        setFormData(updatedFormData);
+        setMatch({ ...match, supplementarySheet: updatedFormData });
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
