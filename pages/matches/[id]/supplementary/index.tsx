@@ -60,9 +60,13 @@ function RefereeAttendanceCard({
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
           SR {refereeNumber}
-          {referee && (
+          {referee ? (
             <span className="ml-2 text-gray-600">
               - {referee.firstName} {referee.lastName}
+            </span>
+          ) : (
+            <span className="ml-2 text-gray-400">
+              - nicht eingeteilt
             </span>
           )}
         </h4>
