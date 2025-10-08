@@ -77,6 +77,8 @@ module.exports = {
     'ring-cyan-700/10',
     'ring-purple-700/10',
     'ring-pink-700/10',
+    'ring-yellow-400/20',
+    'ring-yellow-600/10',
 
     // Fill colors
     'fill-blue-500',
