@@ -573,7 +573,7 @@ const Header = () => {
                   as={MyLink}
                   key="calendar"
                   href="/calendar"
-                  className="block inline-flex items-center justify-center rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
                 >
                   <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium mr-5 w-16 text-gray-300">
                     <CalendarDaysIcon
@@ -590,7 +590,7 @@ const Header = () => {
                       as={MyLink}
                       key="tdm"
                       href="/tournaments/tag-der-meister"
-                      className="block inline-flex items-center justify-center rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
+                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
                     >
                       <span
                         key={item.name}
