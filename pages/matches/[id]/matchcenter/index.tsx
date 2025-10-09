@@ -1004,7 +1004,9 @@ export default function MatchDetails({
                         className={`${
                           match.supplementarySheet?.specialEvents
                             ? "text-red-500 bg-red-500/20"
-                            : "text-green-500 bg-green-500/20"
+                            : match.supplementarySheet?.isSaved
+                              ? "text-green-500 bg-green-500/20"
+                              : "text-gray-500 bg-gray-800/10"
                         } flex-none rounded-full p-1`}
                       >
                         <div className="h-2 w-2 rounded-full bg-current" />
