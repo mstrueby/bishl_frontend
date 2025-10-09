@@ -856,14 +856,16 @@ export default function MatchDetails({
                               className="flex items-center space-x-3"
                             >
                               <div
-                                className={`w-3 h-3 rounded-full ${
+                                className={`${
                                   isChecked
-                                    ? "bg-green-500"
+                                    ? "text-green-500 bg-green-500/20"
                                     : isSaved
-                                      ? "bg-red-500"
-                                      : "bg-gray-300"
-                                }`}
-                              />
+                                      ? "text-red-500 bg-red-500/20"
+                                      : "text-gray-500 bg-gray-800/10"
+                                } flex-none rounded-full p-1`}
+                              >
+                                <div className="h-2 w-2 rounded-full bg-current" />
+                              </div>
                               <span className="text-sm text-gray-700">
                                 {item.label}
                               </span>
@@ -915,14 +917,16 @@ export default function MatchDetails({
                                 className="flex items-center space-x-3"
                               >
                                 <div
-                                  className={`w-3 h-3 rounded-full ${
+                                  className={`${
                                     isChecked
-                                      ? "bg-green-500"
+                                      ? "text-green-500 bg-green-500/20"
                                       : isSaved
-                                        ? "bg-red-500"
-                                        : "bg-gray-300"
-                                  }`}
-                                />
+                                        ? "text-red-500 bg-red-500/20"
+                                        : "text-gray-500 bg-gray-800/10"
+                                  } flex-none rounded-full p-1`}
+                                >
+                                  <div className="h-2 w-2 rounded-full bg-current" />
+                                </div>
                                 <span>{item.label}</span>
                               </div>
                             );
@@ -969,14 +973,16 @@ export default function MatchDetails({
                                 className="flex items-center space-x-3"
                               >
                                 <div
-                                  className={`w-3 h-3 rounded-full ${
+                                  className={`${
                                     isChecked
-                                      ? "bg-green-500"
+                                      ? "text-green-500 bg-green-500/20"
                                       : isSaved
-                                        ? "bg-red-500"
-                                        : "bg-gray-300"
-                                  }`}
-                                />
+                                        ? "text-red-500 bg-red-500/20"
+                                        : "text-gray-500 bg-gray-800/10"
+                                  } flex-none rounded-full p-1`}
+                                >
+                                  <div className="h-2 w-2 rounded-full bg-current" />
+                                </div>
                                 <span>{item.label}</span>
                               </div>
                             );
@@ -995,12 +1001,14 @@ export default function MatchDetails({
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${
+                        className={`${
                           match.supplementarySheet?.specialEvents
-                            ? "bg-red-500"
-                            : "bg-green-500"
-                        }`}
-                      />
+                            ? "text-red-500 bg-red-500/20"
+                            : "text-green-500 bg-green-500/20"
+                        } flex-none rounded-full p-1`}
+                      >
+                        <div className="h-2 w-2 rounded-full bg-current" />
+                      </div>
                       <span className="text-sm text-gray-700">
                         {match.supplementarySheet?.specialEvents
                           ? "Besondere Vorkommnisse aufgetreten"
