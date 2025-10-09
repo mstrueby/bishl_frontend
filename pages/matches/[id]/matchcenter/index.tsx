@@ -828,8 +828,8 @@ export default function MatchDetails({
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Dokumente / Ausrüstung
                   </h4>
-                  <div className="overflow-hidden bg-white rounded-md shadow-md border">
-                    <div className="px-4 py-5 sm:px-6">
+                  <div className="overflow-hidden">
+                    <div className="px-4 sm:px-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                         {[
                           { key: "usageApproval", label: "Nutzungserlaubnis" },
@@ -994,11 +994,11 @@ export default function MatchDetails({
                 </div>
 
                 {/* Special Events Section */}
-                <div className="bg-white rounded-lg shadow p-6">
+                <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Besondere Vorkommnisse
                   </h4>
-                  <div className="space-y-4">
+                  <div className="space-y-4 px-4 sm:px-6">
                     <div className="flex items-center space-x-2">
                       <div
                         className={`${
@@ -1032,7 +1032,7 @@ export default function MatchDetails({
                 </div>
 
                 {/* Referee Payment Section */}
-                <div className="bg-white rounded-lg shadow p-6">
+                <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Schiedsrichtervergütung
                   </h4>
