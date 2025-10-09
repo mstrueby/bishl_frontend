@@ -844,25 +844,32 @@ export default function MatchDetails({
                           },
                           { key: "fieldLines", label: "Pflichtlinien" },
                           { key: "nets", label: "Tornetze" },
-                        ].map((item) => (
-                          <div
-                            key={item.key}
-                            className="flex items-center space-x-3"
-                          >
+                        ].map((item) => {
+                          const isChecked = match.supplementarySheet?.[
+                            item.key as keyof typeof match.supplementarySheet
+                          ];
+                          const isSaved = match.supplementarySheet?.isSaved;
+                          
+                          return (
                             <div
-                              className={`w-3 h-3 rounded-full ${
-                                match.supplementarySheet?.[
-                                  item.key as keyof typeof match.supplementarySheet
-                                ]
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
-                              }`}
-                            />
-                            <span className="text-sm text-gray-700">
-                              {item.label}
-                            </span>
-                          </div>
-                        ))}
+                              key={item.key}
+                              className="flex items-center space-x-3"
+                            >
+                              <div
+                                className={`w-3 h-3 rounded-full ${
+                                  isChecked
+                                    ? "bg-green-500"
+                                    : isSaved
+                                      ? "bg-red-500"
+                                      : "bg-gray-300"
+                                }`}
+                              />
+                              <span className="text-sm text-gray-700">
+                                {item.label}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -896,23 +903,30 @@ export default function MatchDetails({
                               key: "homeUniformPlayerClothing",
                               label: "Einheitliche Spielerkleidung",
                             },
-                          ].map((item) => (
-                            <div
-                              key={item.key}
-                              className="flex items-center space-x-3"
-                            >
+                          ].map((item) => {
+                            const isChecked = match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ];
+                            const isSaved = match.supplementarySheet?.isSaved;
+                            
+                            return (
                               <div
-                                className={`w-3 h-3 rounded-full ${
-                                  match.supplementarySheet?.[
-                                    item.key as keyof typeof match.supplementarySheet
-                                  ]
-                                    ? "bg-green-500"
-                                    : "bg-gray-300"
-                                }`}
-                              />
-                              <span>{item.label}</span>
-                            </div>
-                          ))}
+                                key={item.key}
+                                className="flex items-center space-x-3"
+                              >
+                                <div
+                                  className={`w-3 h-3 rounded-full ${
+                                    isChecked
+                                      ? "bg-green-500"
+                                      : isSaved
+                                        ? "bg-red-500"
+                                        : "bg-gray-300"
+                                  }`}
+                                />
+                                <span>{item.label}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -943,23 +957,30 @@ export default function MatchDetails({
                               key: "awaySecondJerseySet",
                               label: "Zweiter Trikotsatz",
                             },
-                          ].map((item) => (
-                            <div
-                              key={item.key}
-                              className="flex items-center space-x-3"
-                            >
+                          ].map((item) => {
+                            const isChecked = match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ];
+                            const isSaved = match.supplementarySheet?.isSaved;
+                            
+                            return (
                               <div
-                                className={`w-3 h-3 rounded-full ${
-                                  match.supplementarySheet?.[
-                                    item.key as keyof typeof match.supplementarySheet
-                                  ]
-                                    ? "bg-green-500"
-                                    : "bg-gray-300"
-                                }`}
-                              />
-                              <span>{item.label}</span>
-                            </div>
-                          ))}
+                                key={item.key}
+                                className="flex items-center space-x-3"
+                              >
+                                <div
+                                  className={`w-3 h-3 rounded-full ${
+                                    isChecked
+                                      ? "bg-green-500"
+                                      : isSaved
+                                        ? "bg-red-500"
+                                        : "bg-gray-300"
+                                  }`}
+                                />
+                                <span>{item.label}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
