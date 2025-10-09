@@ -65,6 +65,30 @@ const tabs = [
   { id: "supplementary", name: "Zusatzblatt" },
 ];
 
+// Reusable Info Card Component
+interface InfoCardProps {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const InfoCard: React.FC<InfoCardProps> = ({
+  title,
+  children,
+  className = "",
+}) => {
+  return (
+    <div
+      className={`overflow-hidden bg-white rounded-md shadow-md border ${className}`}
+    >
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+        <h4 className="text-sm font-medium text-gray-800">{title}</h4>
+      </div>
+      <div className="bg-white px-4 py-5 sm:p-6">{children}</div>
+    </div>
+  );
+};
+
 export default function MatchDetails({
   match: initialMatch,
   matchdayOwner,
@@ -845,11 +869,12 @@ export default function MatchDetails({
                           { key: "fieldLines", label: "Pflichtlinien" },
                           { key: "nets", label: "Tornetze" },
                         ].map((item) => {
-                          const isChecked = match.supplementarySheet?.[
-                            item.key as keyof typeof match.supplementarySheet
-                          ];
+                          const isChecked =
+                            match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ];
                           const isSaved = match.supplementarySheet?.isSaved;
-                          
+
                           return (
                             <div
                               key={item.key}
@@ -906,11 +931,12 @@ export default function MatchDetails({
                               label: "Einheitliche Spielerkleidung",
                             },
                           ].map((item) => {
-                            const isChecked = match.supplementarySheet?.[
-                              item.key as keyof typeof match.supplementarySheet
-                            ];
+                            const isChecked =
+                              match.supplementarySheet?.[
+                                item.key as keyof typeof match.supplementarySheet
+                              ];
                             const isSaved = match.supplementarySheet?.isSaved;
-                            
+
                             return (
                               <div
                                 key={item.key}
@@ -962,11 +988,12 @@ export default function MatchDetails({
                               label: "Zweiter Trikotsatz",
                             },
                           ].map((item) => {
-                            const isChecked = match.supplementarySheet?.[
-                              item.key as keyof typeof match.supplementarySheet
-                            ];
+                            const isChecked =
+                              match.supplementarySheet?.[
+                                item.key as keyof typeof match.supplementarySheet
+                              ];
                             const isSaved = match.supplementarySheet?.isSaved;
-                            
+
                             return (
                               <div
                                 key={item.key}
@@ -1036,7 +1063,7 @@ export default function MatchDetails({
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Schiedsrichtervergütung
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     {[1, 2].map((refNumber) => {
                       const paymentData =
                         match.supplementarySheet?.refereePayment?.[
@@ -1048,10 +1075,10 @@ export default function MatchDetails({
                         (paymentData?.gameFees || 0);
 
                       return (
-                        <div key={refNumber}>
-                          <h5 className="text-sm font-medium text-gray-800 mb-3">
-                            Schiedsrichter {refNumber}
-                          </h5>
+                        <InfoCard
+                          key={refNumber}
+                          title={`Schiedsrichter ${refNumber}`}
+                        >
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                               <span className="text-gray-600">
@@ -1090,16 +1117,19 @@ export default function MatchDetails({
                               </span>
                             </div>
                           </div>
-                        </div>
+                        </InfoCard>
                       );
                     })}
                   </div>
 
-                  {/* Overall Total */}
-                  <div className="mt-6 bg-gray-50 rounded-lg p-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-900">
+                  {/* Overall Total Card */}
+                  <div className="mt-6 px-4">
+                    <div className="flex justify-end items-center space-x-8">
+                      <span className="hidden sm:block text-sm font-medium text-gray-900">
                         Gesamtsumme Schiedsrichtervergütung:
+                      </span>
+                      <span className="sm:hidden text-sm font-medium text-gray-900">
+                        Gesamtsumme:
                       </span>
                       <span className="text-lg font-bold text-gray-900">
                         {(
@@ -1124,6 +1154,189 @@ export default function MatchDetails({
               </div>
             </div>
           )}
+        </div>
+
+        {/* Referees Section */}
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Schiedsrichter
+        </h3>
+        <div className="bg-white rounded-md shadow-md border px-4 py-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
+            {match.referee1 ? (
+              <div className="flex items-center mb-3 sm:mb-0">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+                  {match.referee1.firstName.charAt(0)}
+                  {match.referee1.lastName.charAt(0)}
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">
+                    {match.referee1.firstName} {match.referee1.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {match.referee1.clubName && `${match.referee1.clubName}`}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center mb-3 sm:mb-0">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-400">
+                    Nicht eingeteilt
+                  </p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 1</p>
+                </div>
+              </div>
+            )}
+
+            {match.referee2 ? (
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
+                  {match.referee2.firstName.charAt(0)}
+                  {match.referee2.lastName.charAt(0)}
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">
+                    {match.referee2.firstName} {match.referee2.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {match.referee2.clubName && `${match.referee2.clubName}`}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-400">
+                    Nicht eingeteilt
+                  </p>
+                  <p className="text-xs text-gray-500">Schiedsrichter 2</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Match Sheet Complete Toggle */}
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-900">
+                Spielbericht vollständig
+              </span>
+              <span className="text-xs text-gray-500">
+                Markiere das Spiel als vollständig erfasst
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled={isSavingMatchSheetComplete}
+              onClick={async () => {
+                try {
+                  setIsSavingMatchSheetComplete(true);
+                  const newCompleteStatus = !match.matchSheetComplete;
+                  const response = await axios.patch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+                    {
+                      matchSheetComplete: newCompleteStatus,
+                    },
+                    {
+                      headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        "Content-Type": "application/json",
+                      },
+                    },
+                  );
+
+                  if (response.status === 200) {
+                    setMatch({
+                      ...match,
+                      matchSheetComplete: newCompleteStatus,
+                    });
+                  }
+                } catch (error) {
+                  console.error(
+                    "Error updating match sheet complete status:",
+                    error,
+                  );
+                } finally {
+                  setIsSavingMatchSheetComplete(false);
+                }
+              }}
+              className={classNames(
+                match.matchSheetComplete ? "bg-indigo-600" : "bg-gray-200",
+                isSavingMatchSheetComplete
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer",
+                "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+              )}
+            >
+              <span className="sr-only">Spielbericht vollständig</span>
+              {isSavingMatchSheetComplete ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg
+                    className="animate-spin h-3 w-3 text-indigo-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                    ></path>
+                  </svg>
+                </div>
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className={classNames(
+                    match.matchSheetComplete
+                      ? "translate-x-5"
+                      : "translate-x-0",
+                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                  )}
+                />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Finish Match Dialog */}
@@ -1354,191 +1567,6 @@ export default function MatchDetails({
             }
           }}
         />
-
-        {/* Referees Section */}
-        <div className="py-6 mt-4 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Schiedsrichter
-          </h3>
-          <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
-              {match.referee1 ? (
-                <div className="flex items-center mb-3 sm:mb-0">
-                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                    {match.referee1.firstName.charAt(0)}
-                    {match.referee1.lastName.charAt(0)}
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">
-                      {match.referee1.firstName} {match.referee1.lastName}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {match.referee1.clubName && `${match.referee1.clubName}`}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center mb-3 sm:mb-0">
-                  <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-400">
-                      Nicht eingeteilt
-                    </p>
-                    <p className="text-xs text-gray-500">Schiedsrichter 1</p>
-                  </div>
-                </div>
-              )}
-
-              {match.referee2 ? (
-                <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                    {match.referee2.firstName.charAt(0)}
-                    {match.referee2.lastName.charAt(0)}
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">
-                      {match.referee2.firstName} {match.referee2.lastName}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {match.referee2.clubName && `${match.referee2.clubName}`}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-400">
-                      Nicht eingeteilt
-                    </p>
-                    <p className="text-xs text-gray-500">Schiedsrichter 2</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Match Sheet Complete Toggle */}
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900">
-                  Spielbericht vollständig
-                </span>
-                <span className="text-xs text-gray-500">
-                  Markiere das Spiel als vollständig erfasst
-                </span>
-              </div>
-              <button
-                type="button"
-                disabled={isSavingMatchSheetComplete}
-                onClick={async () => {
-                  try {
-                    setIsSavingMatchSheetComplete(true);
-                    const newCompleteStatus = !match.matchSheetComplete;
-                    const response = await axios.patch(
-                      `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
-                      {
-                        matchSheetComplete: newCompleteStatus,
-                      },
-                      {
-                        headers: {
-                          Authorization: `Bearer ${jwt}`,
-                          "Content-Type": "application/json",
-                        },
-                      },
-                    );
-
-                    if (response.status === 200) {
-                      setMatch({
-                        ...match,
-                        matchSheetComplete: newCompleteStatus,
-                      });
-                    }
-                  } catch (error) {
-                    console.error(
-                      "Error updating match sheet complete status:",
-                      error,
-                    );
-                  } finally {
-                    setIsSavingMatchSheetComplete(false);
-                  }
-                }}
-                className={classNames(
-                  match.matchSheetComplete ? "bg-indigo-600" : "bg-gray-200",
-                  isSavingMatchSheetComplete
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer",
-                  "relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                )}
-              >
-                <span className="sr-only">Spielbericht vollständig</span>
-                {isSavingMatchSheetComplete ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <svg
-                      className="animate-spin h-3 w-3 text-indigo-600"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
-                      ></path>
-                    </svg>
-                  </div>
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className={classNames(
-                      match.matchSheetComplete
-                        ? "translate-x-5"
-                        : "translate-x-0",
-                      "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                    )}
-                  />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
       </Layout>
     </>
   );
