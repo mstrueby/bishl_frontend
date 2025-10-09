@@ -12,7 +12,7 @@ import {
   RosterPlayer,
   PenaltiesBase,
   ScoresBase,
-  SupplementarySheet
+  SupplementarySheet,
 } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
@@ -749,15 +749,27 @@ export default function MatchDetails({
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[1, 2].map((refNumber) => {
-                      const passAvailableKey = `referee${refNumber}PassAvailable` as keyof SupplementarySheet;
-                      const passNoKey = `referee${refNumber}PassNo` as keyof SupplementarySheet;
-                      const delayMinKey = `referee${refNumber}DelayMin` as keyof SupplementarySheet;
-                      const refereePresentKey = `referee${refNumber}Present` as keyof SupplementarySheet;
-                      
-                      const passAvailable = match.supplementarySheet?.[passAvailableKey] as boolean | undefined;
-                      const passNo = match.supplementarySheet?.[passNoKey] as string | undefined;
-                      const delayMin = match.supplementarySheet?.[delayMinKey] as number | undefined;
-                      const refereePresent = match.supplementarySheet?.[refereePresentKey] as boolean | undefined;
+                      const passAvailableKey =
+                        `referee${refNumber}PassAvailable` as keyof SupplementarySheet;
+                      const passNoKey =
+                        `referee${refNumber}PassNo` as keyof SupplementarySheet;
+                      const delayMinKey =
+                        `referee${refNumber}DelayMin` as keyof SupplementarySheet;
+                      const refereePresentKey =
+                        `referee${refNumber}Present` as keyof SupplementarySheet;
+
+                      const passAvailable = match.supplementarySheet?.[
+                        passAvailableKey
+                      ] as boolean | undefined;
+                      const passNo = match.supplementarySheet?.[passNoKey] as
+                        | string
+                        | undefined;
+                      const delayMin = match.supplementarySheet?.[
+                        delayMinKey
+                      ] as number | undefined;
+                      const refereePresent = match.supplementarySheet?.[
+                        refereePresentKey
+                      ] as boolean | undefined;
 
                       return (
                         <div
@@ -816,10 +828,11 @@ export default function MatchDetails({
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Dokumente / Ausrüstung
                   </h4>
-                  <div className="overflow-hidden bg-white rounded-md shadow-md border">
-                    <div className="px-4 py-5 sm:px-6">
+                  <div className="overflow-hidden">
+                    <div className="px-4 sm:px-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                         {[
+                          { key: "usageApproval", label: "Nutzungserlaubnis" },
                           { key: "ruleBook", label: "Spielregeln/WKO" },
                           { key: "goalDisplay", label: "Manuelle Toranzeige" },
                           { key: "soundSource", label: "Ersatz-Tonquelle" },
@@ -831,25 +844,34 @@ export default function MatchDetails({
                           },
                           { key: "fieldLines", label: "Pflichtlinien" },
                           { key: "nets", label: "Tornetze" },
-                        ].map((item) => (
-                          <div
-                            key={item.key}
-                            className="flex items-center space-x-3"
-                          >
+                        ].map((item) => {
+                          const isChecked = match.supplementarySheet?.[
+                            item.key as keyof typeof match.supplementarySheet
+                          ];
+                          const isSaved = match.supplementarySheet?.isSaved;
+                          
+                          return (
                             <div
-                              className={`w-3 h-3 rounded-full ${
-                                match.supplementarySheet?.[
-                                  item.key as keyof typeof match.supplementarySheet
-                                ]
-                                  ? "bg-green-500"
-                                  : "bg-gray-300"
-                              }`}
-                            />
-                            <span className="text-sm text-gray-700">
-                              {item.label}
-                            </span>
-                          </div>
-                        ))}
+                              key={item.key}
+                              className="flex items-center space-x-3"
+                            >
+                              <div
+                                className={`${
+                                  isChecked
+                                    ? "text-green-500 bg-green-500/20"
+                                    : isSaved
+                                      ? "text-red-500 bg-red-500/20"
+                                      : "text-gray-500 bg-gray-800/10"
+                                } flex-none rounded-full p-1`}
+                              >
+                                <div className="h-2 w-2 rounded-full bg-current" />
+                              </div>
+                              <span className="text-sm text-gray-700">
+                                {item.label}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -883,23 +905,32 @@ export default function MatchDetails({
                               key: "homeUniformPlayerClothing",
                               label: "Einheitliche Spielerkleidung",
                             },
-                          ].map((item) => (
-                            <div
-                              key={item.key}
-                              className="flex items-center space-x-3"
-                            >
+                          ].map((item) => {
+                            const isChecked = match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ];
+                            const isSaved = match.supplementarySheet?.isSaved;
+                            
+                            return (
                               <div
-                                className={`w-3 h-3 rounded-full ${
-                                  match.supplementarySheet?.[
-                                    item.key as keyof typeof match.supplementarySheet
-                                  ]
-                                    ? "bg-green-500"
-                                    : "bg-gray-300"
-                                }`}
-                              />
-                              <span>{item.label}</span>
-                            </div>
-                          ))}
+                                key={item.key}
+                                className="flex items-center space-x-3"
+                              >
+                                <div
+                                  className={`${
+                                    isChecked
+                                      ? "text-green-500 bg-green-500/20"
+                                      : isSaved
+                                        ? "text-red-500 bg-red-500/20"
+                                        : "text-gray-500 bg-gray-800/10"
+                                  } flex-none rounded-full p-1`}
+                                >
+                                  <div className="h-2 w-2 rounded-full bg-current" />
+                                </div>
+                                <span>{item.label}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -930,23 +961,32 @@ export default function MatchDetails({
                               key: "awaySecondJerseySet",
                               label: "Zweiter Trikotsatz",
                             },
-                          ].map((item) => (
-                            <div
-                              key={item.key}
-                              className="flex items-center space-x-3"
-                            >
+                          ].map((item) => {
+                            const isChecked = match.supplementarySheet?.[
+                              item.key as keyof typeof match.supplementarySheet
+                            ];
+                            const isSaved = match.supplementarySheet?.isSaved;
+                            
+                            return (
                               <div
-                                className={`w-3 h-3 rounded-full ${
-                                  match.supplementarySheet?.[
-                                    item.key as keyof typeof match.supplementarySheet
-                                  ]
-                                    ? "bg-green-500"
-                                    : "bg-gray-300"
-                                }`}
-                              />
-                              <span>{item.label}</span>
-                            </div>
-                          ))}
+                                key={item.key}
+                                className="flex items-center space-x-3"
+                              >
+                                <div
+                                  className={`${
+                                    isChecked
+                                      ? "text-green-500 bg-green-500/20"
+                                      : isSaved
+                                        ? "text-red-500 bg-red-500/20"
+                                        : "text-gray-500 bg-gray-800/10"
+                                  } flex-none rounded-full p-1`}
+                                >
+                                  <div className="h-2 w-2 rounded-full bg-current" />
+                                </div>
+                                <span>{item.label}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -954,19 +994,23 @@ export default function MatchDetails({
                 </div>
 
                 {/* Special Events Section */}
-                <div className="bg-white rounded-lg shadow p-6">
+                <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Besondere Vorkommnisse
                   </h4>
-                  <div className="space-y-4">
+                  <div className="space-y-4 px-4 sm:px-6">
                     <div className="flex items-center space-x-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${
+                        className={`${
                           match.supplementarySheet?.specialEvents
-                            ? "bg-red-500"
-                            : "bg-green-500"
-                        }`}
-                      />
+                            ? "text-red-500 bg-red-500/20"
+                            : match.supplementarySheet?.isSaved
+                              ? "text-green-500 bg-green-500/20"
+                              : "text-gray-500 bg-gray-800/10"
+                        } flex-none rounded-full p-1`}
+                      >
+                        <div className="h-2 w-2 rounded-full bg-current" />
+                      </div>
                       <span className="text-sm text-gray-700">
                         {match.supplementarySheet?.specialEvents
                           ? "Besondere Vorkommnisse aufgetreten"
@@ -988,7 +1032,7 @@ export default function MatchDetails({
                 </div>
 
                 {/* Referee Payment Section */}
-                <div className="bg-white rounded-lg shadow p-6">
+                <div>
                   <h4 className="text-md font-medium text-gray-900 mb-4">
                     Schiedsrichtervergütung
                   </h4>
@@ -1353,7 +1397,7 @@ export default function MatchDetails({
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-400">
-                      Nicht zugewiesen
+                      Nicht eingeteilt
                     </p>
                     <p className="text-xs text-gray-500">Schiedsrichter 1</p>
                   </div>
@@ -1395,7 +1439,7 @@ export default function MatchDetails({
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-400">
-                      Nicht zugewiesen
+                      Nicht eingeteilt
                     </p>
                     <p className="text-xs text-gray-500">Schiedsrichter 2</p>
                   </div>

@@ -108,7 +108,7 @@ export interface SupplementarySheet {
   referee2PassNo?: string;
   referee1DelayMin?: number;
   referee2DelayMin?: number;
-  // Nutzungserlaubnis
+  usageApproval?: boolean;
   ruleBook?: boolean;
   goalDisplay?: boolean;
   soundSource?: boolean;
@@ -127,6 +127,7 @@ export interface SupplementarySheet {
   refereePayment?: RefereePayment;
   specialEvents?: boolean;
   refereeComments?: string;
+  isSaved?: boolean;
 }
 
 export interface Match {

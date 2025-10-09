@@ -1,58 +1,175 @@
-import { Fragment, useEffect, forwardRef, ReactNode } from 'react'
-import Link from 'next/link'
-import Image from 'next/image';
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, UserIcon, DocumentIcon, PencilSquareIcon, ArrowLeftStartOnRectangleIcon, HandRaisedIcon, RectangleStackIcon, BookmarkIcon, CalendarIcon, Cog8ToothIcon, UserGroupIcon, StarIcon, ListBulletIcon, CalendarDaysIcon } from '@heroicons/react/24/outline'
-import useAuth from '../hooks/useAuth'
+import { Fragment, useEffect, forwardRef, ReactNode } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Menu,
+  MenuButton,
+  MenuItems,
+  MenuItem,
+  Transition,
+} from "@headlessui/react";
+import {
+  Bars3Icon,
+  BellIcon,
+  XMarkIcon,
+  UserIcon,
+  DocumentIcon,
+  PencilSquareIcon,
+  ArrowLeftStartOnRectangleIcon,
+  HandRaisedIcon,
+  RectangleStackIcon,
+  BookmarkIcon,
+  CalendarIcon,
+  Cog8ToothIcon,
+  UserGroupIcon,
+  StarIcon,
+  ListBulletIcon,
+  CalendarDaysIcon,
+} from "@heroicons/react/24/outline";
+import useAuth from "../hooks/useAuth";
 // import { tournamentConfigs } from '../tools/consts'
 
-
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
 const tournamentConfigs = [
-  { name: 'Regionalliga Ost', tiny_name: 'RLO', href: '/tournaments/regionalliga-ost', bdg_col_dark: 'bg-red-400/10 text-red-400 ring-red-400/20', bdg_col_light: 'bg-red-50 text-red-700 ring-red-600/10' },
-  { name: 'Landesliga', tiny_name: 'LL', href: '/tournaments/landesliga', bdg_col_dark: 'bg-gray-400/10 text-gray-400 ring-gray-400/20', bdg_col_light: 'bg-gray-50 text-gray-600 ring-gray-500/10' },
-  { name: 'Hobbyliga', tiny_name: 'HL', href: '/tournaments/hobbyliga', bdg_col_dark: 'bg-stone-200/10 text-stone-400 ring-stone-200/20', bdg_col_light: 'bg-stone-100 text-stone-600 ring-stone-800/10' },
-  { name: 'Juniorenliga', tiny_name: 'U19', href: '/tournaments/juniorenliga', bdg_col_dark: 'bg-green-500/10 text-green-400 ring-green-500/20', bdg_col_light: 'bg-green-50 text-green-700 ring-green-600/20' },
-  { name: 'Jugendliga', tiny_name: 'U16', href: '/tournaments/jugendliga', bdg_col_dark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdg_col_light: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
-  { name: 'Jugendliga P', tiny_name: 'U16-P', href: '/tournaments/jugendliga-p', bdg_col_dark: 'bg-blue-400/10 text-blue-400 ring-blue-400/30', bdg_col_light: 'bg-blue-50 text-blue-700 ring-blue-700/10' },
-  { name: 'Schülerliga', tiny_name: 'U13', href: '/tournaments/schuelerliga', bdg_col_dark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30', bdg_col_light: 'bg-cyan-50 text-cyan-700 ring-cyan-700/10' },
-  { name: 'Schülerliga LK2', tiny_name: 'U13-II', href: '/tournaments/schuelerliga-lk2', bdg_col_dark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30', bdg_col_light: 'bg-cyan-50 text-cyan-700 ring-cyan-700/10' },
-  { name: 'Schülerliga P', tiny_name: 'U13-P', href: '/tournaments/schuelerliga-p', bdg_col_dark: 'bg-cyan-400/10 text-cyan-400 ring-cyan-400/30', bdg_col_light: 'bg-cyan-50 text-cyan-700 ring-cyan-700/10' },
-  { name: 'Bambini', tiny_name: 'U10', href: '/tournaments/bambini', bdg_col_dark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdg_col_light: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
-  { name: 'Bambini LK2', tiny_name: 'U10-II', href: '/tournaments/bambini-lk2', bdg_col_dark: 'bg-purple-400/10 text-purple-400 ring-purple-400/30', bdg_col_light: 'bg-purple-50 text-purple-700 ring-purple-700/10' },
-  { name: 'Mini', tiny_name: 'U8', href: '/tournaments/mini', bdg_col_dark: 'bg-pink-400/10 text-pink-400 ring-pink-400/20', bdg_col_light: 'bg-pink-50 text-pink-700 ring-pink-700/10' },
+  {
+    name: "Regionalliga Ost",
+    tiny_name: "RLO",
+    href: "/tournaments/regionalliga-ost",
+    bdg_col_dark: "bg-red-400/10 text-red-400 ring-red-400/20",
+    bdg_col_light: "bg-red-50 text-red-700 ring-red-600/10",
+  },
+  {
+    name: "Landesliga",
+    tiny_name: "LL",
+    href: "/tournaments/landesliga",
+    bdg_col_dark: "bg-gray-400/10 text-gray-400 ring-gray-400/20",
+    bdg_col_light: "bg-gray-50 text-gray-600 ring-gray-500/10",
+  },
+  {
+    name: "Hobbyliga",
+    tiny_name: "HL",
+    href: "/tournaments/hobbyliga",
+    bdg_col_dark: "bg-stone-200/10 text-stone-400 ring-stone-200/20",
+    bdg_col_light: "bg-stone-100 text-stone-600 ring-stone-800/10",
+  },
+  {
+    name: "Juniorenliga",
+    tiny_name: "U19",
+    href: "/tournaments/juniorenliga",
+    bdg_col_dark: "bg-green-500/10 text-green-400 ring-green-500/20",
+    bdg_col_light: "bg-green-50 text-green-700 ring-green-600/20",
+  },
+  {
+    name: "Jugendliga",
+    tiny_name: "U16",
+    href: "/tournaments/jugendliga",
+    bdg_col_dark: "bg-blue-400/10 text-blue-400 ring-blue-400/30",
+    bdg_col_light: "bg-blue-50 text-blue-700 ring-blue-700/10",
+  },
+  {
+    name: "Jugendliga P",
+    tiny_name: "U16-P",
+    href: "/tournaments/jugendliga-p",
+    bdg_col_dark: "bg-blue-400/10 text-blue-400 ring-blue-400/30",
+    bdg_col_light: "bg-blue-50 text-blue-700 ring-blue-700/10",
+  },
+  {
+    name: "Schülerliga",
+    tiny_name: "U13",
+    href: "/tournaments/schuelerliga",
+    bdg_col_dark: "bg-cyan-400/10 text-cyan-400 ring-cyan-400/30",
+    bdg_col_light: "bg-cyan-50 text-cyan-700 ring-cyan-700/10",
+  },
+  {
+    name: "Schülerliga LK2",
+    tiny_name: "U13-II",
+    href: "/tournaments/schuelerliga-lk2",
+    bdg_col_dark: "bg-cyan-400/10 text-cyan-400 ring-cyan-400/30",
+    bdg_col_light: "bg-cyan-50 text-cyan-700 ring-cyan-700/10",
+  },
+  {
+    name: "Schülerliga P",
+    tiny_name: "U13-P",
+    href: "/tournaments/schuelerliga-p",
+    bdg_col_dark: "bg-cyan-400/10 text-cyan-400 ring-cyan-400/30",
+    bdg_col_light: "bg-cyan-50 text-cyan-700 ring-cyan-700/10",
+  },
+  {
+    name: "Bambini",
+    tiny_name: "U10",
+    href: "/tournaments/bambini",
+    bdg_col_dark: "bg-purple-400/10 text-purple-400 ring-purple-400/30",
+    bdg_col_light: "bg-purple-50 text-purple-700 ring-purple-700/10",
+  },
+  {
+    name: "Bambini LK2",
+    tiny_name: "U10-II",
+    href: "/tournaments/bambini-lk2",
+    bdg_col_dark: "bg-purple-400/10 text-purple-400 ring-purple-400/30",
+    bdg_col_light: "bg-purple-50 text-purple-700 ring-purple-700/10",
+  },
+  {
+    name: "Mini",
+    tiny_name: "U8",
+    href: "/tournaments/mini",
+    bdg_col_dark: "bg-pink-400/10 text-pink-400 ring-pink-400/20",
+    bdg_col_light: "bg-pink-50 text-pink-700 ring-pink-700/10",
+  },
+  {
+    name: "Tag der Meister",
+    tiny_name: "TDM",
+    href: "/tournaments/tag-der-meister",
+    bdg_col_dark: "bg-yellow-400/10 text-yellow-400 ring-yellow-400/20",
+    bdg_col_light: "bg-yellow-50 text-yellow-800 ring-yellow-600/20",
+  },
 ];
 
 const men = tournamentConfigs.filter((config: { name: string }) =>
-  ['Regionalliga Ost', 'Landesliga', 'Hobbyliga'].includes(config.name)
+  ["Regionalliga Ost", "Landesliga", "Hobbyliga"].includes(config.name),
 );
 
 const youth = tournamentConfigs.filter((config: { name: string }) =>
-  ['Juniorenliga', 'Jugendliga', 'Jugendliga P', 'Schülerliga', 'Schülerliga LK2', 'Bambini', 'Bambini LK2', 'Mini'].includes(config.name)
+  [
+    "Juniorenliga",
+    "Jugendliga",
+    "Jugendliga P",
+    "Schülerliga",
+    "Schülerliga LK2",
+    "Bambini",
+    "Bambini LK2",
+    "Mini",
+  ].includes(config.name),
 );
 
-const item = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-const itemActive = "inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
+const item =
+  "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white";
+const itemActive =
+  "inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900";
 
-const MyLink = forwardRef<HTMLAnchorElement, { href: string; children: ReactNode; className?: string }>(
-  ({ href, children, ...rest }, ref) => (
-    <Link href={href}>
-      <a ref={ref as any} {...rest}>
-        {children}
-      </a>
-    </Link>
-  )
-);
+const MyLink = forwardRef<
+  HTMLAnchorElement,
+  { href: string; children: ReactNode; className?: string }
+>(({ href, children, ...rest }, ref) => (
+  <Link href={href}>
+    <a ref={ref as any} {...rest}>
+      {children}
+    </a>
+  </Link>
+));
 
 const Header = () => {
-  const { user, setUser, authError, setAuthError, loading, setLoading } = useAuth();
+  const { user, setUser, authError, setAuthError, loading, setLoading } =
+    useAuth();
   useEffect(() => {
     setLoading(true);
     (async () => {
-      const userData = await fetch('/api/user');
+      const userData = await fetch("/api/user");
       try {
         const user = await userData.json();
         setUser(user);
@@ -70,10 +187,8 @@ const Header = () => {
         <>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
-
               {/* Navigation (tablet, desktop) */}
               <div className="flex items-center">
-
                 <div className="flex-shrink-0 flex items-center justify-center">
                   <Link href="/">
                     <div className="hover:cursor-pointer flex justify-center items-center">
@@ -93,6 +208,9 @@ const Header = () => {
                     <Link href="/calendar">
                       <a className={item}>Kalender</a>
                     </Link>
+                    <Link href="/tournaments/tag-der-meister">
+                      <a className={item}>Tag der Meister</a>
+                    </Link>
                     <Menu as="div" className="relative inline-block text-left">
                       <MenuButton className={item}>Herren</MenuButton>
                       <Transition
@@ -111,12 +229,15 @@ const Header = () => {
                                 <MyLink
                                   href={item.href}
                                   className={classNames(
-                                    active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900'
+                                    active ? "bg-gray-100" : "",
+                                    "block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900",
                                   )}
                                 >
                                   <span
-                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14", item.bdg_col_light)}
+                                    className={classNames(
+                                      "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14",
+                                      item.bdg_col_light,
+                                    )}
                                   >
                                     {item.tiny_name}
                                   </span>
@@ -146,12 +267,15 @@ const Header = () => {
                                 <MyLink
                                   href={item.href}
                                   className={classNames(
-                                    active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900'
+                                    active ? "bg-gray-100" : "",
+                                    "block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900",
                                   )}
                                 >
                                   <span
-                                    className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14", item.bdg_col_light)}
+                                    className={classNames(
+                                      "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14",
+                                      item.bdg_col_light,
+                                    )}
                                   >
                                     {item.tiny_name}
                                   </span>
@@ -189,7 +313,10 @@ const Header = () => {
                         <MenuButton className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                           <span className="absolute -inset-1.5" />
                           <span className="sr-only">Open user menu</span>
-                          <UserIcon className="block h-6 w-6" aria-hidden="true" />
+                          <UserIcon
+                            className="block h-6 w-6"
+                            aria-hidden="true"
+                          />
                         </MenuButton>
                       </div>
                       <Transition
@@ -202,24 +329,40 @@ const Header = () => {
                         leaveTo="transform opacity-0 scale-95"
                       >
                         <MenuItems className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <p className="block px-4 py-2 text-sm font-bold text-gray-900 border-b border-gray-200">Hallo {user.firstName}</p>
+                          <p className="block px-4 py-2 text-sm font-bold text-gray-900 border-b border-gray-200">
+                            Hallo {user.firstName}
+                          </p>
 
                           {/* Admin items - only for admins */}
-                          {(user.roles?.includes('AUTHOR') || user.roles?.includes('ADMIN')) && (
+                          {(user.roles?.includes("AUTHOR") ||
+                            user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink href="/admin/posts" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                  <PencilSquareIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <MyLink
+                                  href="/admin/posts"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                                >
+                                  <PencilSquareIcon
+                                    className="mr-3 h-5 w-5 text-gray-500"
+                                    aria-hidden="true"
+                                  />
                                   <span>Beiträge</span>
                                 </MyLink>
                               </MenuItem>
                             </>
                           )}
-                          {(user.roles?.includes('DOC_ADMIN') || user.roles?.includes('ADMIN')) && (
+                          {(user.roles?.includes("DOC_ADMIN") ||
+                            user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink href="/admin/documents" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                  <DocumentIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <MyLink
+                                  href="/admin/documents"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                                >
+                                  <DocumentIcon
+                                    className="mr-3 h-5 w-5 text-gray-500"
+                                    aria-hidden="true"
+                                  />
                                   <span>Dokumente</span>
                                 </MyLink>
                               </MenuItem>
@@ -227,76 +370,124 @@ const Header = () => {
                           )}
 
                           {/* Referee admin items - only for referee admins */}
-                          {(user.roles?.includes('REF_ADMIN') || user.roles?.includes('ADMIN')) && (
+                          {(user.roles?.includes("REF_ADMIN") ||
+                            user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink href="/admin/refadmin/referees" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                  <ListBulletIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <MyLink
+                                  href="/admin/refadmin/referees"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                                >
+                                  <ListBulletIcon
+                                    className="mr-3 h-5 w-5 text-gray-500"
+                                    aria-hidden="true"
+                                  />
                                   <span>Schiedsrichter</span>
                                 </MyLink>
                               </MenuItem>
                               <MenuItem>
-                                <MyLink href="/admin/refadmin" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                  <CalendarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <MyLink
+                                  href="/admin/refadmin"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                                >
+                                  <CalendarIcon
+                                    className="mr-3 h-5 w-5 text-gray-500"
+                                    aria-hidden="true"
+                                  />
                                   <span>Schiris einteilen</span>
                                 </MyLink>
                               </MenuItem>
                             </>
-
                           )}
 
                           {/* Referee items - only for referees */}
-                          {user.roles?.includes('REFEREE') && (
+                          {user.roles?.includes("REFEREE") && (
                             <MenuItem>
-                              <MyLink href="/admin/myref" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                <HandRaisedIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <MyLink
+                                href="/admin/myref"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                              >
+                                <HandRaisedIcon
+                                  className="mr-3 h-5 w-5 text-gray-500"
+                                  aria-hidden="true"
+                                />
                                 <span>Meine Einsätze</span>
                               </MyLink>
                             </MenuItem>
                           )}
 
                           {/* My Club administration */}
-                          {(user.roles?.includes('CLUB_ADMIN') || user.roles?.includes('ADMIN')) && (
+                          {(user.roles?.includes("CLUB_ADMIN") ||
+                            user.roles?.includes("ADMIN")) && (
                             <MenuItem>
-                              <MyLink href="/admin/myclub" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                <StarIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <MyLink
+                                href="/admin/myclub"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                              >
+                                <StarIcon
+                                  className="mr-3 h-5 w-5 text-gray-500"
+                                  aria-hidden="true"
+                                />
                                 <span>Mein Verein</span>
                               </MyLink>
                             </MenuItem>
                           )}
                           {/* LEAGUE_ADMIN items */}
-                          {(user.roles?.includes('LEAGUE_ADMIN') || user.roles?.includes('ADMIN')) && (
+                          {(user.roles?.includes("LEAGUE_ADMIN") ||
+                            user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink href="/admin/clubs" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
-                                  <BookmarkIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <MyLink
+                                  href="/admin/clubs"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
+                                >
+                                  <BookmarkIcon
+                                    className="mr-3 h-5 w-5 text-gray-500"
+                                    aria-hidden="true"
+                                  />
                                   <span>Vereine</span>
                                 </MyLink>
                               </MenuItem>
                             </>
                           )}
                           {/* PLAYER_ADMIN items */}
-                          {(user.roles?.includes('PLAYER_ADMIN') || user.roles?.includes('ADMIN')) && (
+                          {(user.roles?.includes("PLAYER_ADMIN") ||
+                            user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink href="/admin/players" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                                  <UserGroupIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <MyLink
+                                  href="/admin/players"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                                >
+                                  <UserGroupIcon
+                                    className="mr-3 h-5 w-5 text-gray-500"
+                                    aria-hidden="true"
+                                  />
                                   <span>Spieler</span>
                                 </MyLink>
                               </MenuItem>
                             </>
                           )}
                           {/* ADMIN items - only for admins */}
-                          {user.roles?.includes('ADMIN') && (
+                          {user.roles?.includes("ADMIN") && (
                             <>
                               <MenuItem>
-                                <MyLink href="/admin/venues" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'>
-                                  <RectangleStackIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                                <MyLink
+                                  href="/admin/venues"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
+                                >
+                                  <RectangleStackIcon
+                                    className="mr-3 h-5 w-5 text-gray-500"
+                                    aria-hidden="true"
+                                  />
                                   <span>Spielflächen</span>
                                 </MyLink>
                               </MenuItem>
                               <MenuItem>
-                                <MyLink href="/leaguemanager" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
+                                <MyLink
+                                  href="/leaguemanager"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                                >
                                   Spielbetrieb
                                 </MyLink>
                               </MenuItem>
@@ -307,17 +498,26 @@ const Header = () => {
                           <MenuItem>
                             <MyLink
                               href="/admin/profile"
-                              className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200'
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
                             >
-                              <Cog8ToothIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                              <Cog8ToothIcon
+                                className="mr-3 h-5 w-5 text-gray-500"
+                                aria-hidden="true"
+                              />
                               <span>Mein Profil</span>
                             </MyLink>
                           </MenuItem>
 
                           {/* Logout - visible to all */}
                           <MenuItem>
-                            <MyLink href="/logout" className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center'>
-                              <ArrowLeftStartOnRectangleIcon className="mr-3 h-5 w-5 text-gray-500" aria-hidden="true" />
+                            <MyLink
+                              href="/logout"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
+                            >
+                              <ArrowLeftStartOnRectangleIcon
+                                className="mr-3 h-5 w-5 text-gray-500"
+                                aria-hidden="true"
+                              />
                               <span>Abmelden</span>
                             </MyLink>
                           </MenuItem>
@@ -325,19 +525,22 @@ const Header = () => {
                       </Transition>
                     </Menu>
                   ) : (
-
                     /* Login Menu Link */
                     <Link href="/login">
-                      <a className={classNames("border-2 border-gray-100 hover:no-underline", item)}>Anmelden</a>
+                      <a
+                        className={classNames(
+                          "border-2 border-gray-100 hover:no-underline",
+                          item,
+                        )}
+                      >
+                        Anmelden
+                      </a>
                     </Link>
-
                   )}
                 </div>
 
-
                 {/* Mobile menu */}
                 <div className="-mr-2 ml-3 flex sm:hidden items-center">
-
                   {/* Mobile menu button */}
                   <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                     <span className="absolute -inset-0.5" />
@@ -370,22 +573,53 @@ const Header = () => {
                   as={MyLink}
                   key="calendar"
                   href="/calendar"
-                  className="block inline-flex items-center justify-center rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
                 >
                   <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium mr-5 w-16 text-gray-300">
-                    <CalendarDaysIcon className="h-5 w-5 text-gray-300" aria-hidden="true" />
+                    <CalendarDaysIcon
+                      className="h-5 w-5 text-gray-300"
+                      aria-hidden="true"
+                    />
                   </span>
                   Kalender
                 </Disclosure.Button>
+                {tournamentConfigs
+                  .filter((config) => config.name === "Tag der Meister")
+                  .map((item) => (
+                    <Disclosure.Button
+                      as={MyLink}
+                      key="tdm"
+                      href="/tournaments/tag-der-meister"
+                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
+                    >
+                      <span
+                        key={item.name}
+                        className={classNames(
+                          "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16",
+                          item.bdg_col_dark,
+                        )}
+                      >
+                        {item.tiny_name}
+                      </span>
+                      {item.name}
+                    </Disclosure.Button>
+                  ))}
 
                 {men.map((item, index) => (
                   <Disclosure.Button
                     as={MyLink}
                     key={index}
                     href={item.href}
-                    className='block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline'
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
                   >
-                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
+                    <span
+                      className={classNames(
+                        "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16",
+                        item.bdg_col_dark,
+                      )}
+                    >
+                      {item.tiny_name}
+                    </span>
                     {item.name}
                   </Disclosure.Button>
                 ))}
@@ -395,23 +629,29 @@ const Header = () => {
                     as={MyLink}
                     key={index}
                     href={item.href}
-                    className='block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline'
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
                   >
-                    <span className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16", item.bdg_col_dark)}>{item.tiny_name}</span>
+                    <span
+                      className={classNames(
+                        "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16",
+                        item.bdg_col_dark,
+                      )}
+                    >
+                      {item.tiny_name}
+                    </span>
                     {item.name}
                   </Disclosure.Button>
                 ))}
-
               </div>
             </Disclosure.Panel>
           </Transition>
         </>
       )}
     </Disclosure>
-  )
+  );
 };
 
-MyLink.displayName = 'MyLink';
-Header.displayName = 'Header';
+MyLink.displayName = "MyLink";
+Header.displayName = "Header";
 
 export default Header;

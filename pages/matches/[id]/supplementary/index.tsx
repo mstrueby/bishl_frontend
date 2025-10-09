@@ -54,15 +54,19 @@ function RefereeAttendanceCard({
   match,
 }: RefereeAttendanceCardProps) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
-  
+
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
           SR {refereeNumber}
-          {referee && (
+          {referee ? (
             <span className="ml-2 text-gray-600">
-             - {referee.firstName} {referee.lastName}
+              - {referee.firstName} {referee.lastName}
+            </span>
+          ) : (
+            <span className="ml-2 text-gray-400">
+              - nicht eingeteilt
             </span>
           )}
         </h4>
@@ -378,7 +382,7 @@ export default function SupplementaryForm({
       const response = await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
         {
-          supplementarySheet: formData,
+          supplementarySheet: { ...formData, isSaved: true },
         },
         {
           headers: {
@@ -390,7 +394,9 @@ export default function SupplementaryForm({
 
       if (response.status === 200) {
         setSuccessMessage("Zusatzblatt wurde erfolgreich gespeichert");
-        setMatch({ ...match, supplementarySheet: formData });
+        const updatedFormData = { ...formData, isSaved: true };
+        setFormData(updatedFormData);
+        setMatch({ ...match, supplementarySheet: updatedFormData });
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
@@ -489,6 +495,12 @@ export default function SupplementaryForm({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
+                  {
+                    key: "usageApproval",
+                    label: "Nutzungserlaubnis",
+                    description:
+                      "Eine gültige Nutzungserlaubnis liegt vor?",
+                  },
                   {
                     key: "ruleBook",
                     label: "Spielregeln/WKO",
@@ -780,7 +792,7 @@ export default function SupplementaryForm({
                               Summe:
                             </span>
                             <span className="text-sm font-semibold text-gray-900">
-                              {total.toFixed(2).replace('.', ',')} €
+                              {total.toFixed(2).replace(".", ",")} €
                             </span>
                           </div>
                         </div>
@@ -809,7 +821,9 @@ export default function SupplementaryForm({
                       (formData.refereePayment?.referee2?.expenseAllowance ||
                         0) +
                       (formData.refereePayment?.referee2?.gameFees || 0)
-                    ).toFixed(2).replace('.', ',')}{" "}
+                    )
+                      .toFixed(2)
+                      .replace(".", ",")}{" "}
                     €
                   </span>
                 </div>
