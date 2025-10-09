@@ -65,6 +65,26 @@ const tabs = [
   { id: "supplementary", name: "Zusatzblatt" },
 ];
 
+// Reusable Info Card Component
+interface InfoCardProps {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const InfoCard: React.FC<InfoCardProps> = ({ title, children, className = "" }) => {
+  return (
+    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${className}`}>
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+        <h4 className="text-sm font-medium text-gray-800">{title}</h4>
+      </div>
+      <div className="bg-white px-4 py-5 sm:p-6">
+        {children}
+      </div>
+    </div>
+  );
+};
+
 export default function MatchDetails({
   match: initialMatch,
   matchdayOwner,
@@ -1360,10 +1380,12 @@ export default function MatchDetails({
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             Schiedsrichter
           </h3>
-          <div className="bg-white rounded-lg shadow px-4 py-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-12">
+          
+          {/* Referee Info Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <InfoCard title="Schiedsrichter 1">
               {match.referee1 ? (
-                <div className="flex items-center mb-3 sm:mb-0">
+                <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
                     {match.referee1.firstName.charAt(0)}
                     {match.referee1.lastName.charAt(0)}
@@ -1373,12 +1395,12 @@ export default function MatchDetails({
                       {match.referee1.firstName} {match.referee1.lastName}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {match.referee1.clubName && `${match.referee1.clubName}`}
+                      {match.referee1.clubName || "-"}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center mb-3 sm:mb-0">
+                <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1399,11 +1421,12 @@ export default function MatchDetails({
                     <p className="text-sm font-medium text-gray-400">
                       Nicht eingeteilt
                     </p>
-                    <p className="text-xs text-gray-500">Schiedsrichter 1</p>
                   </div>
                 </div>
               )}
+            </InfoCard>
 
+            <InfoCard title="Schiedsrichter 2">
               {match.referee2 ? (
                 <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
@@ -1415,7 +1438,7 @@ export default function MatchDetails({
                       {match.referee2.firstName} {match.referee2.lastName}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {match.referee2.clubName && `${match.referee2.clubName}`}
+                      {match.referee2.clubName || "-"}
                     </p>
                   </div>
                 </div>
@@ -1441,14 +1464,76 @@ export default function MatchDetails({
                     <p className="text-sm font-medium text-gray-400">
                       Nicht eingeteilt
                     </p>
-                    <p className="text-xs text-gray-500">Schiedsrichter 2</p>
                   </div>
                 </div>
               )}
-            </div>
+            </InfoCard>
+          </div>
 
-            {/* Match Sheet Complete Toggle */}
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+          {/* Referee Payment Cards */}
+          <h4 className="text-md font-medium text-gray-900 mb-4">Schiedsrichtervergütung</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {[1, 2].map((refNumber) => {
+              const paymentData = match.supplementarySheet?.refereePayment?.[
+                `referee${refNumber}` as keyof typeof match.supplementarySheet.refereePayment
+              ];
+              const total =
+                (paymentData?.travelExpenses || 0) +
+                (paymentData?.expenseAllowance || 0) +
+                (paymentData?.gameFees || 0);
+
+              return (
+                <InfoCard key={refNumber} title={`Schiedsrichter ${refNumber}`}>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Reisekosten:</span>
+                      <span className="font-medium">
+                        {(paymentData?.travelExpenses || 0).toFixed(2)} €
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Aufwandsentschädigung:</span>
+                      <span className="font-medium">
+                        {(paymentData?.expenseAllowance || 0).toFixed(2)} €
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Spielgebühren:</span>
+                      <span className="font-medium">
+                        {(paymentData?.gameFees || 0).toFixed(2)} €
+                      </span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t border-gray-200">
+                      <span className="font-medium text-gray-900">Summe:</span>
+                      <span className="font-semibold text-gray-900">
+                        {total.toFixed(2)} €
+                      </span>
+                    </div>
+                  </div>
+                </InfoCard>
+              );
+            })}
+          </div>
+
+          {/* Overall Total Card */}
+          <InfoCard title="Gesamtsumme Schiedsrichtervergütung" className="bg-gray-50">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-gray-900">
+                {(
+                  (match.supplementarySheet?.refereePayment?.referee1?.travelExpenses || 0) +
+                  (match.supplementarySheet?.refereePayment?.referee1?.expenseAllowance || 0) +
+                  (match.supplementarySheet?.refereePayment?.referee1?.gameFees || 0) +
+                  (match.supplementarySheet?.refereePayment?.referee2?.travelExpenses || 0) +
+                  (match.supplementarySheet?.refereePayment?.referee2?.expenseAllowance || 0) +
+                  (match.supplementarySheet?.refereePayment?.referee2?.gameFees || 0)
+                ).toFixed(2)} €
+              </span>
+            </div>
+          </InfoCard>
+
+          {/* Match Sheet Complete Toggle */}
+          <div className="mt-6 bg-white rounded-lg shadow px-4 py-5 sm:p-6">
+            <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-gray-900">
                   Spielbericht vollständig
