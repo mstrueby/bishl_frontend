@@ -807,7 +807,7 @@ export default function MatchDetails({
                             </h5>
                           </div>
                           <div className="bg-white px-4 py-5 sm:p-6">
-                            <div className="text-sm text-gray-700 space-y-1">
+                            <div className="text-sm text-gray-700 space-y-3">
                               <div className="flex items-center justify-between">
                                 <span>Anwesend:</span>
                                 <Badge info={refereePresent ? "Ja" : "Nein"} />
@@ -1070,7 +1070,9 @@ export default function MatchDetails({
                                 Reisekosten:
                               </span>
                               <span className="font-medium">
-                                {(paymentData?.travelExpenses || 0).toFixed(2).replace('.', ',')}{" "}
+                                {(paymentData?.travelExpenses || 0)
+                                  .toFixed(2)
+                                  .replace(".", ",")}{" "}
                                 €
                               </span>
                             </div>
@@ -1079,9 +1081,9 @@ export default function MatchDetails({
                                 Aufwandsentschädigung:
                               </span>
                               <span className="font-medium">
-                                {(paymentData?.expenseAllowance || 0).toFixed(
-                                  2,
-                                ).replace('.', ',')}{" "}
+                                {(paymentData?.expenseAllowance || 0)
+                                  .toFixed(2)
+                                  .replace(".", ",")}{" "}
                                 €
                               </span>
                             </div>
@@ -1090,7 +1092,10 @@ export default function MatchDetails({
                                 Spielgebühren:
                               </span>
                               <span className="font-medium">
-                                {(paymentData?.gameFees || 0).toFixed(2).replace('.', ',')} €
+                                {(paymentData?.gameFees || 0)
+                                  .toFixed(2)
+                                  .replace(".", ",")}{" "}
+                                €
                               </span>
                             </div>
                             <div className="flex justify-between pt-2 border-t border-gray-200">
@@ -1098,7 +1103,7 @@ export default function MatchDetails({
                                 Summe:
                               </span>
                               <span className="font-semibold text-gray-900">
-                                {total.toFixed(2).replace('.', ',')} €
+                                {total.toFixed(2).replace(".", ",")} €
                               </span>
                             </div>
                           </div>
@@ -1130,7 +1135,9 @@ export default function MatchDetails({
                             ?.expenseAllowance || 0) +
                           (match.supplementarySheet?.refereePayment?.referee2
                             ?.gameFees || 0)
-                        ).toFixed(2).replace('.', ',')}{" "}
+                        )
+                          .toFixed(2)
+                          .replace(".", ",")}{" "}
                         €
                       </span>
                     </div>
