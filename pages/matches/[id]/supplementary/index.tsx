@@ -544,18 +544,31 @@ export default function SupplementaryForm({
     setSuccessMessage(null);
 
     try {
-      const response = await axios.patch(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
         {
-          supplementarySheet: { ...formData, isSaved: true },
-        },
-        {
+          method: 'PATCH',
           headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`,
           },
-        },
+          body: JSON.stringify({
+            supplementarySheet: { ...formData, isSaved: true },
+          }),
+        }
       );
+
+      // Ignore 304 Not Modified status - no changes needed
+      if (response.status === 304) {
+        setSuccessMessage('Keine Änderungen erforderlich');
+        console.log('No changes needed (304)');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to save supplementary sheet');
+      }
 
       if (response.status === 200) {
         setSuccessMessage("Zusatzblatt wurde erfolgreich gespeichert");
@@ -877,43 +890,40 @@ export default function SupplementaryForm({
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 pt-8">
               <Link
                 href={`/matches/${match._id}/matchcenter?tab=supplementary`}
               >
-                <a className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                   Abbrechen
                 </a>
               </Link>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
-                      ></path>
-                    </svg>
-                    Speichern...
-                  </>
+                  <svg
+                    className="animate-spin h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                    ></path>
+                  </svg>
                 ) : (
                   "Speichern"
                 )}
