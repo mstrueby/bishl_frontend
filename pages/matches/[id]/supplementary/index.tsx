@@ -215,6 +215,159 @@ function RefereeAttendanceCard({
   );
 }
 
+interface RefereePaymentCardProps {
+  refereeNumber: 1 | 2;
+  formData: SupplementarySheet;
+  updateRefereePayment: (refereeNumber: 1 | 2, field: string, value: number) => void;
+  match: Match;
+}
+
+function RefereePaymentCard({
+  refereeNumber,
+  formData,
+  updateRefereePayment,
+  match,
+}: RefereePaymentCardProps) {
+  const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
+  const paymentData =
+    formData.refereePayment?.[
+      `referee${refereeNumber}` as keyof typeof formData.refereePayment
+    ];
+  const total =
+    (paymentData?.travelExpenses || 0) +
+    (paymentData?.expenseAllowance || 0) +
+    (paymentData?.gameFees || 0);
+
+  return (
+    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+        <h4 className="text-sm font-medium text-gray-800">
+          SR {refereeNumber}
+          {referee ? (
+            <span className="ml-2 text-gray-600">
+              - {referee.firstName} {referee.lastName}
+            </span>
+          ) : (
+            <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
+          )}
+        </h4>
+      </div>
+      <div className="bg-white px-4 py-5 sm:p-6">
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`referee${refereeNumber}TravelExpenses`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Fahrtkosten
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  id={`referee${refereeNumber}TravelExpenses`}
+                  placeholder="0,00"
+                  value={paymentData?.travelExpenses || 0}
+                  onChange={(e) =>
+                    updateRefereePayment(
+                      refereeNumber,
+                      "travelExpenses",
+                      parseFloat(e.target.value) || 0
+                    )
+                  }
+                  aria-describedby="price-currency"
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                />
+                <div
+                  id="price-currency"
+                  className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
+                >
+                  €
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`referee${refereeNumber}ExpenseAllowance`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Aufwandsentschädigung
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  id={`referee${refereeNumber}ExpenseAllowance`}
+                  placeholder="0,00"
+                  value={paymentData?.expenseAllowance || 0}
+                  onChange={(e) =>
+                    updateRefereePayment(
+                      refereeNumber,
+                      "expenseAllowance",
+                      parseFloat(e.target.value) || 0
+                    )
+                  }
+                  aria-describedby="price-currency"
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                />
+                <div
+                  id="price-currency"
+                  className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
+                >
+                  €
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`referee${refereeNumber}GameFees`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Spielgebühren
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  id={`referee${refereeNumber}GameFees`}
+                  placeholder="0,00"
+                  value={paymentData?.gameFees || 0}
+                  onChange={(e) =>
+                    updateRefereePayment(
+                      refereeNumber,
+                      "gameFees",
+                      parseFloat(e.target.value) || 0
+                    )
+                  }
+                  aria-describedby="price-currency"
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                />
+                <div
+                  id="price-currency"
+                  className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
+                >
+                  €
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-gray-200">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-900">Summe:</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {total.toFixed(2).replace(".", ",")} €
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface TeamEquipmentCardProps {
   teamName: string;
   teamType: "home" | "away";
@@ -672,139 +825,21 @@ export default function SupplementaryForm({
                 title="Schiedsrichtervergütung"
                 description="Dieser Bereich ist von den <strong>Schiedsrichtern</strong> auszufüllen"
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[1, 2].map((refNumber) => {
-                  const paymentData =
-                    formData.refereePayment?.[
-                      `referee${refNumber}` as keyof typeof formData.refereePayment
-                    ];
-                  const total =
-                    (paymentData?.travelExpenses || 0) +
-                    (paymentData?.expenseAllowance || 0) +
-                    (paymentData?.gameFees || 0);
-
-                  return (
-                    <div key={refNumber} className="px-4 sm:px-6">
-                      <h4 className="text-md font-medium text-gray-800 mb-4">
-                        Schiedsrichter {refNumber}
-                      </h4>
-                      <div className="space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                          <label
-                            htmlFor="price"
-                            className="block text-sm/6 font-medium text-gray-900 dark:text-white"
-                          >
-                            Fahrtkosten
-                          </label>
-                          <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 md:w-28 lg:w-48">
-                            <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                              <input
-                                type="text"
-                                placeholder="0,00"
-                                value={paymentData?.travelExpenses || 0}
-                                onChange={(e) =>
-                                  updateRefereePayment(
-                                    refNumber as 1 | 2,
-                                    "travelExpenses",
-                                    parseFloat(e.target.value) || 0,
-                                  )
-                                }
-                                aria-describedby="price-currency"
-                                className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
-                              />
-                              <div
-                                id="price-currency"
-                                className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
-                              >
-                                €
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                          <label
-                            htmlFor="price"
-                            className="block text-sm/6 font-medium text-gray-900 dark:text-white"
-                          >
-                            Aufwandsentschädigung
-                          </label>
-                          <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 md:w-28 lg:w-48">
-                            <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                              <input
-                                type="text"
-                                placeholder="0,00"
-                                value={paymentData?.expenseAllowance || 0}
-                                onChange={(e) =>
-                                  updateRefereePayment(
-                                    refNumber as 1 | 2,
-                                    "expenseAllowance",
-                                    parseFloat(e.target.value) || 0,
-                                  )
-                                }
-                                aria-describedby="price-currency"
-                                className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
-                              />
-                              <div
-                                id="price-currency"
-                                className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
-                              >
-                                €
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                          <label
-                            htmlFor="price"
-                            className="block text-sm/6 font-medium text-gray-900 dark:text-white"
-                          >
-                            Spielgebühren
-                          </label>
-                          <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 md:w-28 lg:w-48">
-                            <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                              <input
-                                type="text"
-                                placeholder="0,00"
-                                value={paymentData?.gameFees || 0}
-                                onChange={(e) =>
-                                  updateRefereePayment(
-                                    refNumber as 1 | 2,
-                                    "gameFees",
-                                    parseFloat(e.target.value) || 0,
-                                  )
-                                }
-                                aria-describedby="price-currency"
-                                className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
-                              />
-                              <div
-                                id="price-currency"
-                                className="shrink-0 select-none text-base text-gray-500 sm:text-sm/6"
-                              >
-                                €
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="pt-2 border-t border-gray-200">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-gray-700">
-                              Summe:
-                            </span>
-                            <span className="text-sm font-semibold text-gray-900">
-                              {total.toFixed(2).replace(".", ",")} €
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {[1, 2].map((refNumber) => (
+                  <RefereePaymentCard
+                    key={refNumber}
+                    refereeNumber={refNumber as 1 | 2}
+                    formData={formData}
+                    updateRefereePayment={updateRefereePayment}
+                    match={match}
+                  />
+                ))}
               </div>
 
               {/* Overall Total */}
-              <div className="mt-6 bg-gray-50 rounded-lg p-4">
-                <div className="flex justify-between items-center">
+              <div className="mt-6 px-4">
+                <div className="flex justify-end items-center space-x-8">
                   <span className="hidden sm:block text-sm font-medium text-gray-900">
                     Gesamtsumme Schiedsrichtervergütung:
                   </span>
