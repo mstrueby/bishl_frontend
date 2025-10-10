@@ -33,6 +33,7 @@ import {
 } from "../../../../tools/utils";
 import MatchStatusBadge from "../../../../components/ui/MatchStatusBadge";
 import MatchHeader from "../../../../components/ui/MatchHeader";
+import Badge from "../../../../components/ui/Badge";
 import FinishTypeSelect from "../../../../components/admin/ui/FinishTypeSelect";
 import MatchStatus from "../../../../components/admin/ui/MatchStatus";
 import GoalDialog from "../../../../components/ui/GoalDialog";
@@ -809,27 +810,11 @@ export default function MatchDetails({
                             <div className="text-sm text-gray-700 space-y-1">
                               <div className="flex items-center justify-between">
                                 <span>Anwesend:</span>
-                                <span
-                                  className={
-                                    refereePresent
-                                      ? "text-green-600 font-medium"
-                                      : "text-gray-500"
-                                  }
-                                >
-                                  {refereePresent ? "Ja" : "Nein"}
-                                </span>
+                                <Badge info={refereePresent ? "Ja" : "Nein"} />
                               </div>
                               <div className="flex justify-between">
                                 <span>Pass liegt vor:</span>
-                                <span
-                                  className={
-                                    passAvailable
-                                      ? "text-green-600 font-medium"
-                                      : "text-gray-500"
-                                  }
-                                >
-                                  {passAvailable ? "Ja" : "Nein"}
-                                </span>
+                                <Badge info={passAvailable ? "Ja" : "Nein"} />
                               </div>
                               <div className="flex justify-between">
                                 <span>Pass-Nr.:</span>
