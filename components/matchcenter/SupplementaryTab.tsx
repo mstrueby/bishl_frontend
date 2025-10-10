@@ -58,8 +58,13 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
               const delayMin = match.supplementarySheet?.[delayMinKey] as number | undefined;
               const refereePresent = match.supplementarySheet?.[refereePresentKey] as boolean | undefined;
 
+              const referee = refNumber === 1 ? match.referee1 : match.referee2;
+              const refereeTitle = referee 
+                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}`
+                : `SR ${refNumber} - nicht eingeteilt`;
+
               return (
-                <InfoCard key={refNumber} title={`Schiedsrichter ${refNumber}`}>
+                <InfoCard key={refNumber} title={refereeTitle}>
                   <div className="text-sm text-gray-700 space-y-3">
                     <div className="flex items-center justify-between">
                       <span>Anwesend:</span>
@@ -240,9 +245,14 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
                 (paymentData?.travelExpenses || 0) +
                 (paymentData?.expenseAllowance || 0) +
                 (paymentData?.gameFees || 0);
+              
+              const referee = refNumber === 1 ? match.referee1 : match.referee2;
+              const refereeTitle = referee 
+                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}`
+                : `SR ${refNumber} - nicht eingeteilt`;
 
               return (
-                <InfoCard key={refNumber} title={`Schiedsrichter ${refNumber}`}>
+                <InfoCard key={refNumber} title={refereeTitle}>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Reisekosten:</span>
