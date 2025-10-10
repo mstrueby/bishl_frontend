@@ -38,9 +38,10 @@ import FinishTypeSelect from "../../../../components/admin/ui/FinishTypeSelect";
 import MatchStatus from "../../../../components/admin/ui/MatchStatus";
 import GoalDialog from "../../../../components/ui/GoalDialog";
 import PenaltyDialog from "../../../../components/ui/PenaltyDialog";
-import RosterList from "../../../../components/ui/RosterList";
-import ScoreList from "../../../../components/ui/ScoreList";
-import PenaltyList from "../../../../components/ui/PenaltyList";
+import RosterTab from "../../../../components/matchcenter/RosterTab";
+import GoalsTab from "../../../../components/matchcenter/GoalsTab";
+import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
+import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
 
 interface MatchDetailsProps {
   match: Match;
@@ -602,155 +603,68 @@ export default function MatchDetails({
         <div className="py-6">
           {activeTab === "roster" && (
             <div className="py-4">
-              {/* Sort function for roster */}
-              {(() => {
-                // Sort roster by position order: C, A, G, F, then by jersey number
-                const sortRoster = (rosterToSort: RosterPlayer[]) => {
-                  if (!rosterToSort || rosterToSort.length === 0) return [];
-
-                  return [...rosterToSort].sort((a, b) => {
-                    // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-                    const positionPriority = { C: 1, A: 2, G: 3, F: 4 };
-
-                    // Get priorities
-                    const posA =
-                      positionPriority[
-                        a.playerPosition.key as keyof typeof positionPriority
-                      ] || 99;
-                    const posB =
-                      positionPriority[
-                        b.playerPosition.key as keyof typeof positionPriority
-                      ] || 99;
-
-                    // First sort by position priority
-                    if (posA !== posB) {
-                      return posA - posB;
-                    }
-
-                    // If positions are the same, sort by jersey number
-                    return a.player.jerseyNumber - b.player.jerseyNumber;
-                  });
-                };
-
-                // Sort rosters
-                const sortedHomeRoster = sortRoster(match.home.roster || []);
-                const sortedAwayRoster = sortRoster(match.away.roster || []);
-
-                return (
-                  <div className="flex flex-col md:flex-row md:space-x-8">
-                    {/* Home team roster */}
-                    <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                      <RosterList
-                        teamName={match.home.fullName}
-                        roster={sortedHomeRoster}
-                        isPublished={match.home.rosterPublished || false}
-                        showEditButton={permissions.showButtonRosterHome}
-                        editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
-                        sortRoster={sortRoster}
-                        playerStats={homePlayerStats}
-                      />
-                    </div>
-                    {/* Away team roster */}
-                    <div className="w-full md:w-1/2">
-                      <RosterList
-                        teamName={match.away.fullName}
-                        roster={sortedAwayRoster}
-                        isPublished={match.away.rosterPublished || false}
-                        showEditButton={permissions.showButtonRosterAway}
-                        editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
-                        sortRoster={sortRoster}
-                        playerStats={awayPlayerStats}
-                      />
-                    </div>
-                  </div>
-                );
-              })()}
+              <RosterTab
+                match={match}
+                permissions={{
+                  showButtonRosterHome: permissions.showButtonRosterHome,
+                  showButtonRosterAway: permissions.showButtonRosterAway,
+                }}
+                homePlayerStats={homePlayerStats}
+                awayPlayerStats={awayPlayerStats}
+              />
             </div>
           )}
 
           {activeTab === "goals" && (
             <div className="py-4">
-              {/* Container for side-by-side or stacked goals */}
-              <div className="flex flex-col md:flex-row md:space-x-8">
-                {/* Home team goals */}
-                <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                  <ScoreList
-                    jwt={jwt || ""}
-                    teamName={match.home.fullName}
-                    matchId={match._id}
-                    teamFlag="home"
-                    scores={match.home.scores || []}
-                    showEditButton={permissions.showButtonScoresHome}
-                    editUrl={`/matches/${match._id}/home/scores`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsGoalDialogOpen={setIsHomeGoalDialogOpen}
-                    setEditingGoal={setEditingHomeGoal}
-                  />
-                </div>
-                {/* Away team goals */}
-                <div className="w-full md:w-1/2">
-                  <ScoreList
-                    jwt={jwt || ""}
-                    teamName={match.away.fullName}
-                    matchId={match._id}
-                    teamFlag="away"
-                    scores={match.away.scores || []}
-                    showEditButton={permissions.showButtonScoresAway}
-                    editUrl={`/matches/${match._id}/away/scores`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsGoalDialogOpen={setIsAwayGoalDialogOpen}
-                    setEditingGoal={setEditingAwayGoal}
-                  />
-                </div>
-              </div>
+              <GoalsTab
+                match={match}
+                jwt={jwt || ""}
+                permissions={{
+                  showButtonScoresHome: permissions.showButtonScoresHome,
+                  showButtonScoresAway: permissions.showButtonScoresAway,
+                  showButtonEvents: permissions.showButtonEvents,
+                }}
+                refreshMatchData={refreshMatchData}
+                setIsHomeGoalDialogOpen={setIsHomeGoalDialogOpen}
+                setIsAwayGoalDialogOpen={setIsAwayGoalDialogOpen}
+                setEditingHomeGoal={setEditingHomeGoal}
+                setEditingAwayGoal={setEditingAwayGoal}
+              />
             </div>
           )}
 
           {activeTab === "penalties" && (
             <div className="py-4">
-              {/* Container for side-by-side or stacked penalties */}
-              <div className="flex flex-col md:flex-row md:space-x-8">
-                {/* Home team penalties */}
-                <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                  <PenaltyList
-                    jwt={jwt || ""}
-                    teamName={match.home.fullName}
-                    matchId={match._id}
-                    teamFlag="home"
-                    penalties={match.home.penalties || []}
-                    showEditButton={permissions.showButtonPenaltiesHome}
-                    editUrl={`/matches/${match._id}/home/penalties`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsPenaltyDialogOpen={setIsHomePenaltyDialogOpen}
-                    setEditingPenalty={setEditingHomePenalty}
-                  />
-                </div>
-
-                {/* Away team penalties */}
-                <div className="w-full md:w-1/2">
-                  <PenaltyList
-                    jwt={jwt || ""}
-                    teamName={match.away.fullName}
-                    matchId={match._id}
-                    teamFlag="away"
-                    penalties={match.away.penalties || []}
-                    showEditButton={permissions.showButtonPenaltiesAway}
-                    editUrl={`/matches/${match._id}/away/penalties`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
-                    setEditingPenalty={setEditingAwayPenalty}
-                  />
-                </div>
-              </div>
+              <PenaltiesTab
+                match={match}
+                jwt={jwt || ""}
+                permissions={{
+                  showButtonPenaltiesHome: permissions.showButtonPenaltiesHome,
+                  showButtonPenaltiesAway: permissions.showButtonPenaltiesAway,
+                  showButtonEvents: permissions.showButtonEvents,
+                }}
+                refreshMatchData={refreshMatchData}
+                setIsHomePenaltyDialogOpen={setIsHomePenaltyDialogOpen}
+                setIsAwayPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
+                setEditingHomePenalty={setEditingHomePenalty}
+                setEditingAwayPenalty={setEditingAwayPenalty}
+              />
             </div>
           )}
 
-          {/* Read-only display of supplementary sheet data */}
           {activeTab === "supplementary" && (
+            <SupplementaryTab
+              match={match}
+              permissions={{
+                showButtonSupplementary: permissions.showButtonSupplementary,
+              }}
+            />
+          )}
+        </div>
+
+        {/* Old supplementary code - can be deleted */}
+          {false && activeTab === "supplementary-old" && (
             <div className="py-4">
               {/* Section Header with Edit Button */}
               <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
