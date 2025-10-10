@@ -38,9 +38,10 @@ import FinishTypeSelect from "../../../../components/admin/ui/FinishTypeSelect";
 import MatchStatus from "../../../../components/admin/ui/MatchStatus";
 import GoalDialog from "../../../../components/ui/GoalDialog";
 import PenaltyDialog from "../../../../components/ui/PenaltyDialog";
-import RosterList from "../../../../components/ui/RosterList";
-import ScoreList from "../../../../components/ui/ScoreList";
-import PenaltyList from "../../../../components/ui/PenaltyList";
+import RosterTab from "../../../../components/matchcenter/RosterTab";
+import GoalsTab from "../../../../components/matchcenter/GoalsTab";
+import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
+import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
 
 interface MatchDetailsProps {
   match: Match;
@@ -602,549 +603,63 @@ export default function MatchDetails({
         <div className="py-6">
           {activeTab === "roster" && (
             <div className="py-4">
-              {/* Sort function for roster */}
-              {(() => {
-                // Sort roster by position order: C, A, G, F, then by jersey number
-                const sortRoster = (rosterToSort: RosterPlayer[]) => {
-                  if (!rosterToSort || rosterToSort.length === 0) return [];
-
-                  return [...rosterToSort].sort((a, b) => {
-                    // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-                    const positionPriority = { C: 1, A: 2, G: 3, F: 4 };
-
-                    // Get priorities
-                    const posA =
-                      positionPriority[
-                        a.playerPosition.key as keyof typeof positionPriority
-                      ] || 99;
-                    const posB =
-                      positionPriority[
-                        b.playerPosition.key as keyof typeof positionPriority
-                      ] || 99;
-
-                    // First sort by position priority
-                    if (posA !== posB) {
-                      return posA - posB;
-                    }
-
-                    // If positions are the same, sort by jersey number
-                    return a.player.jerseyNumber - b.player.jerseyNumber;
-                  });
-                };
-
-                // Sort rosters
-                const sortedHomeRoster = sortRoster(match.home.roster || []);
-                const sortedAwayRoster = sortRoster(match.away.roster || []);
-
-                return (
-                  <div className="flex flex-col md:flex-row md:space-x-8">
-                    {/* Home team roster */}
-                    <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                      <RosterList
-                        teamName={match.home.fullName}
-                        roster={sortedHomeRoster}
-                        isPublished={match.home.rosterPublished || false}
-                        showEditButton={permissions.showButtonRosterHome}
-                        editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
-                        sortRoster={sortRoster}
-                        playerStats={homePlayerStats}
-                      />
-                    </div>
-                    {/* Away team roster */}
-                    <div className="w-full md:w-1/2">
-                      <RosterList
-                        teamName={match.away.fullName}
-                        roster={sortedAwayRoster}
-                        isPublished={match.away.rosterPublished || false}
-                        showEditButton={permissions.showButtonRosterAway}
-                        editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
-                        sortRoster={sortRoster}
-                        playerStats={awayPlayerStats}
-                      />
-                    </div>
-                  </div>
-                );
-              })()}
+              <RosterTab
+                match={match}
+                permissions={{
+                  showButtonRosterHome: permissions.showButtonRosterHome,
+                  showButtonRosterAway: permissions.showButtonRosterAway,
+                }}
+                homePlayerStats={homePlayerStats}
+                awayPlayerStats={awayPlayerStats}
+              />
             </div>
           )}
 
           {activeTab === "goals" && (
             <div className="py-4">
-              {/* Container for side-by-side or stacked goals */}
-              <div className="flex flex-col md:flex-row md:space-x-8">
-                {/* Home team goals */}
-                <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                  <ScoreList
-                    jwt={jwt || ""}
-                    teamName={match.home.fullName}
-                    matchId={match._id}
-                    teamFlag="home"
-                    scores={match.home.scores || []}
-                    showEditButton={permissions.showButtonScoresHome}
-                    editUrl={`/matches/${match._id}/home/scores`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsGoalDialogOpen={setIsHomeGoalDialogOpen}
-                    setEditingGoal={setEditingHomeGoal}
-                  />
-                </div>
-                {/* Away team goals */}
-                <div className="w-full md:w-1/2">
-                  <ScoreList
-                    jwt={jwt || ""}
-                    teamName={match.away.fullName}
-                    matchId={match._id}
-                    teamFlag="away"
-                    scores={match.away.scores || []}
-                    showEditButton={permissions.showButtonScoresAway}
-                    editUrl={`/matches/${match._id}/away/scores`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsGoalDialogOpen={setIsAwayGoalDialogOpen}
-                    setEditingGoal={setEditingAwayGoal}
-                  />
-                </div>
-              </div>
+              <GoalsTab
+                match={match}
+                jwt={jwt || ""}
+                permissions={{
+                  showButtonScoresHome: permissions.showButtonScoresHome,
+                  showButtonScoresAway: permissions.showButtonScoresAway,
+                  showButtonEvents: permissions.showButtonEvents,
+                }}
+                refreshMatchData={refreshMatchData}
+                setIsHomeGoalDialogOpen={setIsHomeGoalDialogOpen}
+                setIsAwayGoalDialogOpen={setIsAwayGoalDialogOpen}
+                setEditingHomeGoal={setEditingHomeGoal}
+                setEditingAwayGoal={setEditingAwayGoal}
+              />
             </div>
           )}
 
           {activeTab === "penalties" && (
             <div className="py-4">
-              {/* Container for side-by-side or stacked penalties */}
-              <div className="flex flex-col md:flex-row md:space-x-8">
-                {/* Home team penalties */}
-                <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                  <PenaltyList
-                    jwt={jwt || ""}
-                    teamName={match.home.fullName}
-                    matchId={match._id}
-                    teamFlag="home"
-                    penalties={match.home.penalties || []}
-                    showEditButton={permissions.showButtonPenaltiesHome}
-                    editUrl={`/matches/${match._id}/home/penalties`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsPenaltyDialogOpen={setIsHomePenaltyDialogOpen}
-                    setEditingPenalty={setEditingHomePenalty}
-                  />
-                </div>
-
-                {/* Away team penalties */}
-                <div className="w-full md:w-1/2">
-                  <PenaltyList
-                    jwt={jwt || ""}
-                    teamName={match.away.fullName}
-                    matchId={match._id}
-                    teamFlag="away"
-                    penalties={match.away.penalties || []}
-                    showEditButton={permissions.showButtonPenaltiesAway}
-                    editUrl={`/matches/${match._id}/away/penalties`}
-                    showEventButtons={permissions.showButtonEvents}
-                    refreshMatchData={refreshMatchData}
-                    setIsPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
-                    setEditingPenalty={setEditingAwayPenalty}
-                  />
-                </div>
-              </div>
+              <PenaltiesTab
+                match={match}
+                jwt={jwt || ""}
+                permissions={{
+                  showButtonPenaltiesHome: permissions.showButtonPenaltiesHome,
+                  showButtonPenaltiesAway: permissions.showButtonPenaltiesAway,
+                  showButtonEvents: permissions.showButtonEvents,
+                }}
+                refreshMatchData={refreshMatchData}
+                setIsHomePenaltyDialogOpen={setIsHomePenaltyDialogOpen}
+                setIsAwayPenaltyDialogOpen={setIsAwayPenaltyDialogOpen}
+                setEditingHomePenalty={setEditingHomePenalty}
+                setEditingAwayPenalty={setEditingAwayPenalty}
+              />
             </div>
           )}
 
-          {/* Read-only display of supplementary sheet data */}
           {activeTab === "supplementary" && (
-            <div className="py-4">
-              {/* Section Header with Edit Button */}
-              <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
-                <h3 className="text-md font-semibold text-gray-900 py-1.5 truncate">
-                  Zusatzblatt
-                </h3>
-                {permissions.showButtonSupplementary && (
-                  <Link href={`/matches/${match._id}/supplementary`}>
-                    <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                      Bearbeiten
-                    </a>
-                  </Link>
-                )}
-              </div>
-
-              <div className="space-y-12 md:px4">
-                {/* Referee Attendance Section */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Schiedsrichter
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[1, 2].map((refNumber) => {
-                      const passAvailableKey =
-                        `referee${refNumber}PassAvailable` as keyof SupplementarySheet;
-                      const passNoKey =
-                        `referee${refNumber}PassNo` as keyof SupplementarySheet;
-                      const delayMinKey =
-                        `referee${refNumber}DelayMin` as keyof SupplementarySheet;
-                      const refereePresentKey =
-                        `referee${refNumber}Present` as keyof SupplementarySheet;
-
-                      const passAvailable = match.supplementarySheet?.[
-                        passAvailableKey
-                      ] as boolean | undefined;
-                      const passNo = match.supplementarySheet?.[passNoKey] as
-                        | string
-                        | undefined;
-                      const delayMin = match.supplementarySheet?.[
-                        delayMinKey
-                      ] as number | undefined;
-                      const refereePresent = match.supplementarySheet?.[
-                        refereePresentKey
-                      ] as boolean | undefined;
-
-                      return (
-                        <div
-                          key={refNumber}
-                          className="overflow-hidden bg-white rounded-md shadow-md border"
-                        >
-                          <div className="px-4 py-5 sm:px-6 bg-gray-50">
-                            <h5 className="text-sm font-medium text-gray-800">
-                              Schiedsrichter {refNumber}
-                            </h5>
-                          </div>
-                          <div className="bg-white px-4 py-5 sm:p-6">
-                            <div className="text-sm text-gray-700 space-y-3">
-                              <div className="flex items-center justify-between">
-                                <span>Anwesend:</span>
-                                <Badge info={refereePresent ? "Ja" : "Nein"} />
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Pass liegt vor:</span>
-                                <Badge info={passAvailable ? "Ja" : "Nein"} />
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Pass-Nr.:</span>
-                                <span>{passNo || "-"}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Verspätung:</span>
-                                <span>{delayMin || 0} Min</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Equipment Section */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Dokumente / Ausrüstung
-                  </h4>
-                  <div className="overflow-hidden">
-                    <div className="px-4 sm:px-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {[
-                          { key: "usageApproval", label: "Nutzungserlaubnis" },
-                          { key: "ruleBook", label: "Spielregeln/WKO" },
-                          { key: "goalDisplay", label: "Manuelle Toranzeige" },
-                          { key: "soundSource", label: "Ersatz-Tonquelle" },
-                          { key: "matchClock", label: "Spieluhr" },
-                          { key: "matchBalls", label: "10 Spielbälle" },
-                          {
-                            key: "firstAidKit",
-                            label: "Erste-Hilfe-Ausrüstung",
-                          },
-                          { key: "fieldLines", label: "Pflichtlinien" },
-                          { key: "nets", label: "Tornetze" },
-                        ].map((item) => {
-                          const isChecked =
-                            match.supplementarySheet?.[
-                              item.key as keyof typeof match.supplementarySheet
-                            ];
-                          const isSaved = match.supplementarySheet?.isSaved;
-
-                          return (
-                            <div
-                              key={item.key}
-                              className="flex items-center space-x-3"
-                            >
-                              <div
-                                className={`${
-                                  isChecked
-                                    ? "text-green-500 bg-green-500/20"
-                                    : isSaved
-                                      ? "text-red-500 bg-red-500/20"
-                                      : "text-gray-500 bg-gray-800/10"
-                                } flex-none rounded-full p-1`}
-                              >
-                                <div className="h-2 w-2 rounded-full bg-current" />
-                              </div>
-                              <span className="text-sm text-gray-700">
-                                {item.label}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Team Equipment Section */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Mannschaften
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Home Team */}
-                    <div className="overflow-hidden bg-white rounded-md shadow-md border">
-                      <div className="px-4 py-5 sm:px-6 bg-gray-50">
-                        <h5 className="text-sm font-medium text-gray-800">
-                          Heimmannschaft - {match.home.fullName}
-                        </h5>
-                      </div>
-                      <div className="bg-white px-4 py-5 sm:p-6">
-                        <div className="text-sm text-gray-700 space-y-2">
-                          {[
-                            {
-                              key: "homeRoster",
-                              label: "Aufstellung rechtzeitig",
-                            },
-                            {
-                              key: "homePlayerPasses",
-                              label: "Spielerpässe vollständig",
-                            },
-                            {
-                              key: "homeUniformPlayerClothing",
-                              label: "Einheitliche Spielerkleidung",
-                            },
-                          ].map((item) => {
-                            const isChecked =
-                              match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ];
-                            const isSaved = match.supplementarySheet?.isSaved;
-
-                            return (
-                              <div
-                                key={item.key}
-                                className="flex items-center space-x-3"
-                              >
-                                <div
-                                  className={`${
-                                    isChecked
-                                      ? "text-green-500 bg-green-500/20"
-                                      : isSaved
-                                        ? "text-red-500 bg-red-500/20"
-                                        : "text-gray-500 bg-gray-800/10"
-                                  } flex-none rounded-full p-1`}
-                                >
-                                  <div className="h-2 w-2 rounded-full bg-current" />
-                                </div>
-                                <span>{item.label}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Away Team */}
-                    <div className="overflow-hidden bg-white rounded-md shadow-md border">
-                      <div className="px-4 py-5 sm:px-6 bg-gray-50">
-                        <h5 className="text-sm font-medium text-gray-800">
-                          Gastmannschaft - {match.away.fullName}
-                        </h5>
-                      </div>
-                      <div className="bg-white px-4 py-5 sm:p-6">
-                        <div className="text-sm text-gray-700 space-y-2">
-                          {[
-                            {
-                              key: "awayRoster",
-                              label: "Aufstellung rechtzeitig",
-                            },
-                            {
-                              key: "awayPlayerPasses",
-                              label: "Spielerpässe vollständig",
-                            },
-                            {
-                              key: "awayUniformPlayerClothing",
-                              label: "Einheitliche Spielerkleidung",
-                            },
-                            {
-                              key: "awaySecondJerseySet",
-                              label: "Zweiter Trikotsatz",
-                            },
-                          ].map((item) => {
-                            const isChecked =
-                              match.supplementarySheet?.[
-                                item.key as keyof typeof match.supplementarySheet
-                              ];
-                            const isSaved = match.supplementarySheet?.isSaved;
-
-                            return (
-                              <div
-                                key={item.key}
-                                className="flex items-center space-x-3"
-                              >
-                                <div
-                                  className={`${
-                                    isChecked
-                                      ? "text-green-500 bg-green-500/20"
-                                      : isSaved
-                                        ? "text-red-500 bg-red-500/20"
-                                        : "text-gray-500 bg-gray-800/10"
-                                  } flex-none rounded-full p-1`}
-                                >
-                                  <div className="h-2 w-2 rounded-full bg-current" />
-                                </div>
-                                <span>{item.label}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Special Events Section */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Besondere Vorkommnisse
-                  </h4>
-                  <div className="space-y-4 px-4 sm:px-6">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className={`${
-                          match.supplementarySheet?.specialEvents
-                            ? "text-red-500 bg-red-500/20"
-                            : match.supplementarySheet?.isSaved
-                              ? "text-green-500 bg-green-500/20"
-                              : "text-gray-500 bg-gray-800/10"
-                        } flex-none rounded-full p-1`}
-                      >
-                        <div className="h-2 w-2 rounded-full bg-current" />
-                      </div>
-                      <span className="text-sm text-gray-700">
-                        {match.supplementarySheet?.specialEvents
-                          ? "Besondere Vorkommnisse aufgetreten"
-                          : "Keine besonderen Vorkommnisse"}
-                      </span>
-                    </div>
-
-                    {match.supplementarySheet?.refereeComments && (
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-800 mb-2">
-                          Schiedsrichter Kommentare:
-                        </h5>
-                        <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                          {match.supplementarySheet.refereeComments}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Referee Payment Section */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-4">
-                    Schiedsrichtervergütung
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    {[1, 2].map((refNumber) => {
-                      const paymentData =
-                        match.supplementarySheet?.refereePayment?.[
-                          `referee${refNumber}` as keyof typeof match.supplementarySheet.refereePayment
-                        ];
-                      const total =
-                        (paymentData?.travelExpenses || 0) +
-                        (paymentData?.expenseAllowance || 0) +
-                        (paymentData?.gameFees || 0);
-
-                      return (
-                        <InfoCard
-                          key={refNumber}
-                          title={`Schiedsrichter ${refNumber}`}
-                        >
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Reisekosten:
-                              </span>
-                              <span className="font-medium">
-                                {(paymentData?.travelExpenses || 0)
-                                  .toFixed(2)
-                                  .replace(".", ",")}{" "}
-                                €
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Aufwandsentschädigung:
-                              </span>
-                              <span className="font-medium">
-                                {(paymentData?.expenseAllowance || 0)
-                                  .toFixed(2)
-                                  .replace(".", ",")}{" "}
-                                €
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Spielgebühren:
-                              </span>
-                              <span className="font-medium">
-                                {(paymentData?.gameFees || 0)
-                                  .toFixed(2)
-                                  .replace(".", ",")}{" "}
-                                €
-                              </span>
-                            </div>
-                            <div className="flex justify-between pt-2 border-t border-gray-200">
-                              <span className="font-medium text-gray-900">
-                                Summe:
-                              </span>
-                              <span className="font-semibold text-gray-900">
-                                {total.toFixed(2).replace(".", ",")} €
-                              </span>
-                            </div>
-                          </div>
-                        </InfoCard>
-                      );
-                    })}
-                  </div>
-
-                  {/* Overall Total Card */}
-                  <div className="mt-6 px-4">
-                    <div className="flex justify-end items-center space-x-8">
-                      <span className="hidden sm:block text-sm font-medium text-gray-900">
-                        Gesamtsumme Schiedsrichtervergütung:
-                      </span>
-                      <span className="sm:hidden text-sm font-medium text-gray-900">
-                        Gesamtsumme:
-                      </span>
-                      <span className="text-lg font-bold text-gray-900">
-                        {(
-                          (match.supplementarySheet?.refereePayment?.referee1
-                            ?.travelExpenses || 0) +
-                          (match.supplementarySheet?.refereePayment?.referee1
-                            ?.expenseAllowance || 0) +
-                          (match.supplementarySheet?.refereePayment?.referee1
-                            ?.gameFees || 0) +
-                          (match.supplementarySheet?.refereePayment?.referee2
-                            ?.travelExpenses || 0) +
-                          (match.supplementarySheet?.refereePayment?.referee2
-                            ?.expenseAllowance || 0) +
-                          (match.supplementarySheet?.refereePayment?.referee2
-                            ?.gameFees || 0)
-                        )
-                          .toFixed(2)
-                          .replace(".", ",")}{" "}
-                        €
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <SupplementaryTab
+              match={match}
+              permissions={{
+                showButtonSupplementary: permissions.showButtonSupplementary,
+              }}
+            />
           )}
         </div>
 
@@ -1470,7 +985,6 @@ export default function MatchDetails({
                 </Transition.Child>
               </div>
             </div>
-            d
           </Dialog>
         </Transition>
 
