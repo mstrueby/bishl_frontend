@@ -1384,7 +1384,6 @@ export default function MatchDetails({
                 </Transition.Child>
               </div>
             </div>
-            d
           </Dialog>
         </Transition>
 
