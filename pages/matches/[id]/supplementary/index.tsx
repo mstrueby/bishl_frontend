@@ -16,6 +16,9 @@ import {
 } from "../../../../tools/utils";
 import MatchHeader from "../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../components/admin/SectionHeader";
+import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import SuccessMessage from '../../../../components/ui/SuccessMessage';
+
 
 interface SectionHeaderSimpleProps {
   title: string;
@@ -65,9 +68,7 @@ function RefereeAttendanceCard({
               - {referee.firstName} {referee.lastName}
             </span>
           ) : (
-            <span className="ml-2 text-gray-400">
-              - nicht eingeteilt
-            </span>
+            <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
           )}
         </h4>
       </div>
@@ -218,7 +219,11 @@ function RefereeAttendanceCard({
 interface RefereePaymentCardProps {
   refereeNumber: 1 | 2;
   formData: SupplementarySheet;
-  updateRefereePayment: (refereeNumber: 1 | 2, field: string, value: number) => void;
+  updateRefereePayment: (
+    refereeNumber: 1 | 2,
+    field: string,
+    value: number,
+  ) => void;
   match: Match;
 }
 
@@ -272,7 +277,7 @@ function RefereePaymentCard({
                     updateRefereePayment(
                       refereeNumber,
                       "travelExpenses",
-                      parseFloat(e.target.value) || 0
+                      parseFloat(e.target.value) || 0,
                     )
                   }
                   aria-describedby="price-currency"
@@ -305,7 +310,7 @@ function RefereePaymentCard({
                     updateRefereePayment(
                       refereeNumber,
                       "expenseAllowance",
-                      parseFloat(e.target.value) || 0
+                      parseFloat(e.target.value) || 0,
                     )
                   }
                   aria-describedby="price-currency"
@@ -338,7 +343,7 @@ function RefereePaymentCard({
                     updateRefereePayment(
                       refereeNumber,
                       "gameFees",
-                      parseFloat(e.target.value) || 0
+                      parseFloat(e.target.value) || 0,
                     )
                   }
                   aria-describedby="price-currency"
@@ -514,9 +519,9 @@ export default function SupplementaryForm({
             <p className="text-gray-500 mb-4">
               Sie haben keine Berechtigung, das Zusatzblatt zu bearbeiten.
             </p>
-            <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`}>
+            <Link href={`/matches/${match._id}`}>
               <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                Zurück zum Match Center
+                Zurück zum Spiel
               </a>
             </Link>
           </div>
@@ -524,6 +529,13 @@ export default function SupplementaryForm({
       </Layout>
     );
   }
+
+  const handleCloseSuccessMessage = () => {
+    setSuccessMessage(null);
+  };
+  const handleCloseErrorMessage = () => {
+    setError(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -607,17 +619,17 @@ export default function SupplementaryForm({
         <div className="mt-12">
           <SectionHeader title="Zusatzblatt" />
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4 mb-4">
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="rounded-md bg-green-50 p-4 mb-4">
-              <div className="text-sm text-green-700">{successMessage}</div>
-            </div>
-          )}
+          <div className="sm:px-3 pb-2">
+            {successMessage && (
+              <SuccessMessage
+                message={successMessage}
+                onClose={handleCloseSuccessMessage}
+              />
+            )}
+            {error && (
+              <ErrorMessage error={error} onClose={handleCloseErrorMessage} />
+            )}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-12">
             {/* Referee Attendance Section */}
@@ -651,8 +663,7 @@ export default function SupplementaryForm({
                   {
                     key: "usageApproval",
                     label: "Nutzungserlaubnis",
-                    description:
-                      "Eine gültige Nutzungserlaubnis liegt vor?",
+                    description: "Eine gültige Nutzungserlaubnis liegt vor?",
                   },
                   {
                     key: "ruleBook",
