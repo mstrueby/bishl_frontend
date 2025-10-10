@@ -557,6 +557,14 @@ export default function SupplementaryForm({
         },
       );
 
+      // Ignore 304 Not Modified status - no changes needed
+      if (response.status === 304) {
+        setSuccessMessage('Keine Änderungen erforderlich');
+        console.log('No changes needed (304)');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
       if (response.status === 200) {
         setSuccessMessage("Zusatzblatt wurde erfolgreich gespeichert");
         const updatedFormData = { ...formData, isSaved: true };
