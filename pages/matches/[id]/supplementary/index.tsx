@@ -544,17 +544,18 @@ export default function SupplementaryForm({
     setSuccessMessage(null);
 
     try {
-      const response = await axios.patch(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
         {
-          supplementarySheet: { ...formData, isSaved: true },
-        },
-        {
+          method: 'PATCH',
           headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`,
           },
-        },
+          body: JSON.stringify({
+            supplementarySheet: { ...formData, isSaved: true },
+          }),
+        }
       );
 
       // Ignore 304 Not Modified status - no changes needed
@@ -563,6 +564,10 @@ export default function SupplementaryForm({
         console.log('No changes needed (304)');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to save supplementary sheet');
       }
 
       if (response.status === 200) {
