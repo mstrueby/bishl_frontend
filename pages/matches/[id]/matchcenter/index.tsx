@@ -606,8 +606,8 @@ export default function MatchDetails({
               <RosterTab
                 match={match}
                 permissions={{
-                  showButtonRosterHome: permissions.showButtonRosterHome,
-                  showButtonRosterAway: permissions.showButtonRosterAway,
+                  showButtonRosterHome: permissions.showButtonRosterHome ?? false,
+                  showButtonRosterAway: permissions.showButtonRosterAway ?? false,
                 }}
                 homePlayerStats={homePlayerStats}
                 awayPlayerStats={awayPlayerStats}
@@ -621,9 +621,9 @@ export default function MatchDetails({
                 match={match}
                 jwt={jwt || ""}
                 permissions={{
-                  showButtonScoresHome: permissions.showButtonScoresHome,
-                  showButtonScoresAway: permissions.showButtonScoresAway,
-                  showButtonEvents: permissions.showButtonEvents,
+                  showButtonScoresHome: permissions.showButtonScoresHome ?? false,
+                  showButtonScoresAway: permissions.showButtonScoresAway ?? false,
+                  showButtonEvents: permissions.showButtonEvents ?? false,
                 }}
                 refreshMatchData={refreshMatchData}
                 setIsHomeGoalDialogOpen={setIsHomeGoalDialogOpen}
@@ -640,9 +640,9 @@ export default function MatchDetails({
                 match={match}
                 jwt={jwt || ""}
                 permissions={{
-                  showButtonPenaltiesHome: permissions.showButtonPenaltiesHome,
-                  showButtonPenaltiesAway: permissions.showButtonPenaltiesAway,
-                  showButtonEvents: permissions.showButtonEvents,
+                  showButtonPenaltiesHome: permissions.showButtonPenaltiesHome ?? false,
+                  showButtonPenaltiesAway: permissions.showButtonPenaltiesAway ?? false,
+                  showButtonEvents: permissions.showButtonEvents ?? false,
                 }}
                 refreshMatchData={refreshMatchData}
                 setIsHomePenaltyDialogOpen={setIsHomePenaltyDialogOpen}
@@ -657,7 +657,7 @@ export default function MatchDetails({
             <SupplementaryTab
               match={match}
               permissions={{
-                showButtonSupplementary: permissions.showButtonSupplementary,
+                showButtonSupplementary: permissions.showButtonSupplementary ?? false,
               }}
             />
           )}
