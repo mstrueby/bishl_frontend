@@ -133,7 +133,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                 <InfoCard 
                   key={refNumber} 
                   title={refereeTitle}
-                  className={isDifferentReferee ? 'border-red-500 border-2' : ''}
+                  className={isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}
                 >
                   <div className="text-sm text-gray-700 space-y-3">
                     <div className="flex items-center justify-between">
