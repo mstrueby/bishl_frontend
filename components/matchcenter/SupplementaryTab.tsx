@@ -63,16 +63,26 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
                 ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}`
                 : `SR ${refNumber} - nicht eingeteilt`;
 
+              const isSaved = match.supplementarySheet?.isSaved;
+
               return (
                 <InfoCard key={refNumber} title={refereeTitle}>
                   <div className="text-sm text-gray-700 space-y-3">
                     <div className="flex items-center justify-between">
                       <span>Anwesend:</span>
-                      <Badge info={refereePresent ? 'Ja' : 'Nein'} />
+                      {isSaved ? (
+                        <Badge info={refereePresent ? 'Ja' : 'Nein'} />
+                      ) : (
+                        <span>-</span>
+                      )}
                     </div>
                     <div className="flex justify-between">
                       <span>Pass liegt vor:</span>
-                      <Badge info={passAvailable ? 'Ja' : 'Nein'} />
+                      {isSaved ? (
+                        <Badge info={passAvailable ? 'Ja' : 'Nein'} />
+                      ) : (
+                        <span>-</span>
+                      )}
                     </div>
                     <div className="flex justify-between">
                       <span>Pass-Nr.:</span>
