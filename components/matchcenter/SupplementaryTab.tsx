@@ -55,6 +55,9 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
         );
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched assignments:', data);
+          console.log('Match referee1:', match.referee1);
+          console.log('Match referee2:', match.referee2);
           setAssignments(data);
         }
       } catch (error) {
@@ -103,6 +106,15 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
 
               // Find assignment for this position
               const assignment = assignments.find(a => a.position === refNumber);
+              
+              // Debug logging
+              console.log(`=== Referee ${refNumber} Debug ===`);
+              console.log('Referee object:', referee);
+              console.log('Assignment object:', assignment);
+              console.log('Assignment referee userId:', assignment?.referee?.userId);
+              console.log('Match referee userId:', referee?.userId);
+              console.log('Are they different?', assignment && referee && assignment.referee.userId !== referee.userId);
+              
               const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
               return (
