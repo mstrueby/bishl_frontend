@@ -3,13 +3,13 @@ import Link from "next/link";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import { Match, SupplementarySheet } from "../../../../types/MatchValues";
+import { Match, SupplementarySheet, Referee } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
 import { getCookie } from "cookies-next";
 import axios from "axios";
 import useAuth from "../../../../hooks/useAuth";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import {
   calculateMatchButtonPermissions,
   classNames,
@@ -18,6 +18,10 @@ import MatchHeader from "../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
+import { AssignmentValues } from '../../../../types/AssignmentValues';
+import RefereeSelect from '../../../../components/ui/RefereeSelect';
 
 
 interface SectionHeaderSimpleProps {
@@ -141,18 +145,104 @@ function OfficialCard({
   );
 }
 
+interface RefereeChangeDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  refereeNumber: 1 | 2;
+  assignments: AssignmentValues[];
+  jwt: string;
+  onConfirm: (assignment: AssignmentValues, position: number) => Promise<void>;
+  onAssignmentComplete: (referee: Referee) => void;
+}
+
+function RefereeChangeDialog({
+  isOpen,
+  onClose,
+  refereeNumber,
+  assignments,
+  jwt,
+  onConfirm,
+  onAssignmentComplete,
+}: RefereeChangeDialogProps) {
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                >
+                  SR {refereeNumber} ändern
+                </Dialog.Title>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Wählen Sie einen neuen Schiedsrichter für Position {refereeNumber}
+                  </p>
+                  <RefereeSelect
+                    assignments={assignments}
+                    position={refereeNumber}
+                    jwt={jwt}
+                    onConfirm={onConfirm}
+                    onAssignmentComplete={onAssignmentComplete}
+                    disabled={false}
+                  />
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    onClick={onClose}
+                  >
+                    Schließen
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+}
+
 function RefereeAttendanceCard({
   refereeNumber,
   formData,
   updateField,
   match,
   assignments,
+  onOpenRefereeDialog,
 }: {
   refereeNumber: 1 | 2;
   formData: SupplementarySheet;
   updateField: (field: string, value: any) => void;
   match: Match;
   assignments: Assignment[];
+  onOpenRefereeDialog: () => void;
 }) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
   const assignment = assignments.find(a => a.position === refereeNumber);
@@ -160,7 +250,7 @@ function RefereeAttendanceCard({
 
   return (
     <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-500 border-2' : ''}`}>
-      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5 flex items-center justify-between">
         <h4 className="text-sm font-medium text-gray-800">
           SR {refereeNumber}
           {referee ? (
@@ -171,6 +261,13 @@ function RefereeAttendanceCard({
             <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
           )}
         </h4>
+        <button
+          type="button"
+          onClick={onOpenRefereeDialog}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          <PencilSquareIcon className="h-5 w-5" />
+        </button>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
         <div className="text-sm text-gray-700 space-y-4">
@@ -634,6 +731,8 @@ export default function SupplementaryForm({
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [refereeDialogOpen, setRefereeDialogOpen] = useState(false);
+  const [selectedRefereePosition, setSelectedRefereePosition] = useState<1 | 2>(1);
 
   const permissions = calculateMatchButtonPermissions(
     user,
@@ -641,31 +740,83 @@ export default function SupplementaryForm({
     matchdayOwner,
   );
 
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      try {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
-        
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${jwt}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setAssignments(data);
-        }
-      } catch (error) {
-        console.error('Error fetching assignments:', error);
+  const fetchAssignments = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAssignments(data);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching assignments:', error);
+    }
+  };
 
+  useEffect(() => {
     if (jwt) {
       fetchAssignments();
     }
   }, [match._id, jwt]);
+
+  const handleOpenRefereeDialog = (position: 1 | 2) => {
+    setSelectedRefereePosition(position);
+    setRefereeDialogOpen(true);
+  };
+
+  const handleRefereeChange = async (assignment: AssignmentValues, position: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`,
+          },
+          body: JSON.stringify({
+            [`referee${position}`]: assignment.referee.userId,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update referee');
+      }
+
+      const updatedMatch = await response.json();
+      setMatch(updatedMatch);
+      
+      // Reset form values for the changed referee
+      const resetFields = {
+        [`referee${position}Present`]: false,
+        [`referee${position}PassAvailable`]: false,
+        [`referee${position}PassNo`]: '',
+        [`referee${position}DelayMin`]: 0,
+      };
+      
+      setFormData({ ...formData, ...resetFields });
+      
+      setSuccessMessage(`Schiedsrichter ${position} wurde erfolgreich geändert`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error('Error updating referee:', error);
+      setError('Fehler beim Aktualisieren des Schiedsrichters');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleAssignmentComplete = (referee: Referee) => {
+    setRefereeDialogOpen(false);
+    fetchAssignments();
+  };
 
   // Check permissions
   if (!permissions.showButtonSupplementary) {
@@ -834,6 +985,7 @@ export default function SupplementaryForm({
                     updateField={updateField}
                     match={match}
                     assignments={assignments}
+                    onOpenRefereeDialog={() => handleOpenRefereeDialog(refNumber as 1 | 2)}
                   />
                 ))}
               </div>
@@ -1166,6 +1318,16 @@ export default function SupplementaryForm({
               </button>
             </div>
           </form>
+
+          <RefereeChangeDialog
+            isOpen={refereeDialogOpen}
+            onClose={() => setRefereeDialogOpen(false)}
+            refereeNumber={selectedRefereePosition}
+            assignments={assignments}
+            jwt={jwt || ''}
+            onConfirm={handleRefereeChange}
+            onAssignmentComplete={handleAssignmentComplete}
+          />
         </div>
       </Layout>
     </>
