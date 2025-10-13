@@ -155,6 +155,12 @@ function RefereeAttendanceCard({
   match,
 }: RefereeAttendanceCardProps) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
+  const assignment =
+    refereeNumber === 1
+      ? match.referee1Assignment
+      : match.referee2Assignment;
+  const isDifferentReferee = assignment && assignment.referee._id !== referee?._id;
+
 
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
@@ -310,6 +316,19 @@ function RefereeAttendanceCard({
           </div>
         </div>
       </div>
+      {isDifferentReferee && (
+        <div className="bg-gray-50 -mx-6 -mb-6 px-6 py-3 border-t border-gray-200">
+          <div className="text-xs text-gray-600">
+            <div className="font-medium text-gray-600 mb-2">
+              {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
+            </div>
+            <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
+            {assignment.referee.clubName && (
+              <div className="text-gray-500 pb-1">{assignment.referee.clubName}</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
