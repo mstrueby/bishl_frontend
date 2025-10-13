@@ -3,13 +3,13 @@ import Link from "next/link";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import { Match, SupplementarySheet } from "../../../../types/MatchValues";
+import { Match, SupplementarySheet, Referee } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
 import { getCookie } from "cookies-next";
 import axios from "axios";
 import useAuth from "../../../../hooks/useAuth";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import {
   calculateMatchButtonPermissions,
   classNames,
@@ -18,6 +18,11 @@ import MatchHeader from "../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
+import { Dialog, Transition, Listbox } from '@headlessui/react';
+import { Fragment } from 'react';
+import { AssignmentValues } from '../../../../types/AssignmentValues';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+import { UserValues } from '../../../../types/UserValues';
 
 
 interface SectionHeaderSimpleProps {
@@ -141,11 +146,150 @@ function OfficialCard({
   );
 }
 
-interface RefereeAttendanceCardProps {
+interface RefereeChangeDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
   refereeNumber: 1 | 2;
-  formData: SupplementarySheet;
-  updateField: (field: string, value: any) => void;
-  match: Match;
+  assignments: AssignmentValues[];
+  jwt: string;
+  onConfirm: (assignment: AssignmentValues, position: number) => Promise<void>;
+  onAssignmentComplete: (referee: Referee) => void;
+}
+
+function RefereeChangeDialog({
+  isOpen,
+  onClose,
+  refereeNumber,
+  allReferees,
+  selectedReferee,
+  setSelectedReferee,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  refereeNumber: 1 | 2;
+  allReferees: UserValues[];
+  selectedReferee: UserValues | null;
+  setSelectedReferee: (referee: UserValues | null) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
+                >
+                  Schiedsrichter {refereeNumber} ändern
+                </Dialog.Title>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Wählen Sie einen neuen Schiedsrichter für Position {refereeNumber}
+                  </p>
+                  
+                  <Listbox value={selectedReferee} onChange={setSelectedReferee}>
+                    <div className="relative mt-1">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
+                        <span className="block truncate text-gray-400">
+                          {selectedReferee 
+                            ? `${selectedReferee.firstName} ${selectedReferee.lastName}${selectedReferee.referee?.club?.clubName ? ` - ${selectedReferee.referee.club.clubName}` : ''}`
+                            : '(auswählen)'
+                          }
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        </span>
+                      </Listbox.Button>
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {allReferees.map((referee) => (
+                            <Listbox.Option
+                              key={referee._id}
+                              className={({ active }) =>
+                                `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                                  active ? 'bg-indigo-600 text-white' : 'text-gray-900'
+                                }`
+                              }
+                              value={referee}
+                            >
+                              {({ selected, active }) => (
+                                <>
+                                  <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
+                                    {referee.firstName} {referee.lastName}
+                                    {referee.referee?.club?.clubName && ` - ${referee.referee.club.clubName}`}
+                                  </span>
+                                  {selected ? (
+                                    <span
+                                      className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                                        active ? 'text-white' : 'text-indigo-600'
+                                      }`}
+                                    >
+                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                  ) : null}
+                                </>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    onClick={onClose}
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                    onClick={onConfirm}
+                    disabled={!selectedReferee}
+                  >
+                    Bestätigen
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
 }
 
 function RefereeAttendanceCard({
@@ -153,12 +297,23 @@ function RefereeAttendanceCard({
   formData,
   updateField,
   match,
-}: RefereeAttendanceCardProps) {
+  assignments,
+  onOpenRefereeDialog,
+}: {
+  refereeNumber: 1 | 2;
+  formData: SupplementarySheet;
+  updateField: (field: string, value: any) => void;
+  match: Match;
+  assignments: Assignment[];
+  onOpenRefereeDialog: () => void;
+}) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
+  const assignment = assignments.find(a => a.position === refereeNumber);
+  const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
   return (
-    <div className="overflow-hidden bg-white rounded-md shadow-md border">
-      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-500 border-2' : ''}`}>
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5 flex items-center justify-between">
         <h4 className="text-sm font-medium text-gray-800">
           SR {refereeNumber}
           {referee ? (
@@ -169,6 +324,13 @@ function RefereeAttendanceCard({
             <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
           )}
         </h4>
+        <button
+          type="button"
+          onClick={onOpenRefereeDialog}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          <PencilSquareIcon className="h-5 w-5" />
+        </button>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
         <div className="text-sm text-gray-700 space-y-4">
@@ -310,6 +472,19 @@ function RefereeAttendanceCard({
           </div>
         </div>
       </div>
+      {isDifferentReferee && assignment && (
+        <div className=" pt-3 border-t border-gray-200 bg-gray-50 px-6 py-3">
+          <div className="text-xs text-gray-600">
+            <div className="font-medium text-gray-600 mb-2">
+              {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
+            </div>
+            <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
+            {assignment.referee.clubName && (
+              <div className="text-gray-500 pb-1">{assignment.referee.clubName}</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -584,6 +759,23 @@ interface SupplementaryFormProps {
   jwt?: string;
 }
 
+interface Assignment {
+  _id: string;
+  matchId: string;
+  status: string;
+  referee: {
+    _id: string;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    clubId: string;
+    clubName: string;
+    logoUrl: string;
+    level: string;
+  };
+  position: number;
+}
+
 export default function SupplementaryForm({
   match: initialMatch,
   matchdayOwner,
@@ -601,12 +793,146 @@ export default function SupplementaryForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [refereeDialogOpen, setRefereeDialogOpen] = useState(false);
+  const [selectedRefereePosition, setSelectedRefereePosition] = useState<1 | 2>(1);
+  const [allReferees, setAllReferees] = useState<UserValues[]>([]);
+  const [selectedReferee, setSelectedReferee] = useState<UserValues | null>(null);
 
   const permissions = calculateMatchButtonPermissions(
     user,
     match,
     matchdayOwner,
   );
+
+  const fetchAssignments = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAssignments(data);
+      }
+    } catch (error) {
+      console.error('Error fetching assignments:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (jwt) {
+      fetchAssignments();
+    }
+  }, [match._id, jwt]);
+
+  useEffect(() => {
+    const fetchReferees = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/referees`, {
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setAllReferees(data);
+        }
+      } catch (error) {
+        console.error('Error fetching referees:', error);
+      }
+    };
+
+    if (jwt) {
+      fetchReferees();
+    }
+  }, [jwt]);
+
+  const handleOpenRefereeDialog = (position: 1 | 2) => {
+    setSelectedRefereePosition(position);
+    setRefereeDialogOpen(true);
+  };
+
+  const handleRefereeChange = async () => {
+    if (!selectedReferee) return;
+
+    console.log('Selected referee:', selectedReferee);
+
+    // Construct the referee object in the expected format
+    const refereeData = {
+      userId: selectedReferee._id,
+      firstName: selectedReferee.firstName,
+      lastName: selectedReferee.lastName,
+      clubId: selectedReferee.referee?.club?.clubId || '',
+      clubName: selectedReferee.referee?.club?.clubName || '',
+      logoUrl: selectedReferee.referee?.club?.logoUrl || '',
+      points: selectedReferee.referee?.points || 0,
+      level: selectedReferee.referee?.level || 'n/a'
+    };
+
+    console.log('Referee data to send:', refereeData);
+
+    const requestBody = {
+      [`referee${selectedRefereePosition}`]: refereeData
+    };
+
+    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`,
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to update referee: ${JSON.stringify(errorData)}`);
+      }
+
+      const updatedMatch = await response.json();
+      console.log('Updated match:', updatedMatch);
+      setMatch(updatedMatch);
+      
+      // Reset form values for the changed referee
+      const resetFields = {
+        [`referee${selectedRefereePosition}Present`]: false,
+        [`referee${selectedRefereePosition}PassAvailable`]: false,
+        [`referee${selectedRefereePosition}PassNo`]: '',
+        [`referee${selectedRefereePosition}DelayMin`]: 0,
+      };
+      
+      setFormData({ ...formData, ...resetFields });
+      
+      setSuccessMessage(`Schiedsrichter ${selectedRefereePosition} wurde erfolgreich geändert`);
+      setRefereeDialogOpen(false);
+      setSelectedReferee(null);
+      fetchAssignments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error('Error updating referee:', error);
+      setError(`Fehler beim Aktualisieren des Schiedsrichters: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  
 
   // Check permissions
   if (!permissions.showButtonSupplementary) {
@@ -774,6 +1100,8 @@ export default function SupplementaryForm({
                     formData={formData}
                     updateField={updateField}
                     match={match}
+                    assignments={assignments}
+                    onOpenRefereeDialog={() => handleOpenRefereeDialog(refNumber as 1 | 2)}
                   />
                 ))}
               </div>
@@ -1106,6 +1434,19 @@ export default function SupplementaryForm({
               </button>
             </div>
           </form>
+
+          <RefereeChangeDialog
+            isOpen={refereeDialogOpen}
+            onClose={() => {
+              setRefereeDialogOpen(false);
+              setSelectedReferee(null);
+            }}
+            refereeNumber={selectedRefereePosition}
+            allReferees={allReferees}
+            selectedReferee={selectedReferee}
+            setSelectedReferee={setSelectedReferee}
+            onConfirm={handleRefereeChange}
+          />
         </div>
       </Layout>
     </>

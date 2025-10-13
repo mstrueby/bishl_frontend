@@ -130,7 +130,11 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
               const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
               return (
-                <InfoCard key={refNumber} title={refereeTitle}>
+                <InfoCard 
+                  key={refNumber} 
+                  title={refereeTitle}
+                  className={isDifferentReferee ? 'border-red-500 border-2' : ''}
+                >
                   <div className="text-sm text-gray-700 space-y-3">
                     <div className="flex items-center justify-between">
                       <span>Anwesend:</span>
@@ -158,7 +162,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                     </div>
                   </div>
                   {isDifferentReferee && (
-                    <div className="mt-4 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
+                    <div className="mt-6 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
                       <div className="text-xs text-gray-600">
                         <div className="font-medium text-gray-600 mb-2">
                           {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
