@@ -782,7 +782,7 @@ export default function SupplementaryForm({
             {/* Officials Section */}
             <div>
               <SectionHeaderSimple
-                title="Offizielle"
+                title="Weitere Offizielle"
                 description="Dieser Bereich ist von den <strong>Zeitnehmern</strong> auszufüllen"
               />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -832,7 +832,7 @@ export default function SupplementaryForm({
                         onChange={(e) =>
                           updateField('crowd', parseInt(e.target.value) || 0)
                         }
-                        className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                        className="block min-w-0 grow bg-white py-1.5 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
                       />
                     </div>
                   </div>
