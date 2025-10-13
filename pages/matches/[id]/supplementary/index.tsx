@@ -141,19 +141,17 @@ function OfficialCard({
   );
 }
 
-interface RefereeAttendanceCardProps {
-  refereeNumber: 1 | 2;
-  formData: SupplementarySheet;
-  updateField: (field: string, value: any) => void;
-  match: Match;
-}
-
 function RefereeAttendanceCard({
   refereeNumber,
   formData,
   updateField,
   match,
-}: RefereeAttendanceCardProps) {
+}: {
+  refereeNumber: 1 | 2;
+  formData: SupplementarySheet;
+  updateField: (field: string, value: any) => void;
+  match: Match;
+}) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
   const assignment =
     refereeNumber === 1
