@@ -656,9 +656,8 @@ export default function MatchDetails({
           {activeTab === "supplementary" && (
             <SupplementaryTab
               match={match}
-              permissions={{
-                showButtonSupplementary: permissions.showButtonSupplementary ?? false,
-              }}
+              jwt={jwt}
+              permissions={permissions}
             />
           )}
         </div>
@@ -835,9 +834,7 @@ export default function MatchDetails({
                 <span
                   aria-hidden="true"
                   className={classNames(
-                    match.matchSheetComplete
-                      ? "translate-x-5"
-                      : "translate-x-0",
+                    match.matchSheetComplete ? "translate-x-5" : "translate-x-0",
                     "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                   )}
                 />

@@ -22,6 +22,7 @@ interface Assignment {
 
 interface SupplementaryTabProps {
   match: Match;
+  jwt: string;
   permissions: {
     showButtonSupplementary: boolean;
   };
@@ -44,7 +45,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ title, children, className = '' }) 
   );
 };
 
-const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions }) => {
+const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permissions }) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
 
   useEffect(() => {
@@ -53,7 +54,12 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
         const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
         console.log('Fetching assignments from URL:', url);
         
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
+          },
+        });
         console.log('Response status:', response.status);
         console.log('Response ok:', response.ok);
         
@@ -72,7 +78,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
     };
 
     fetchAssignments();
-  }, [match._id]);
+  }, [match._id, jwt]);
 
   return (
     <div className="py-4">
