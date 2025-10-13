@@ -146,22 +146,20 @@ function RefereeAttendanceCard({
   formData,
   updateField,
   match,
+  assignments,
 }: {
   refereeNumber: 1 | 2;
   formData: SupplementarySheet;
   updateField: (field: string, value: any) => void;
   match: Match;
+  assignments: Assignment[];
 }) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
-  const assignment =
-    refereeNumber === 1
-      ? match.referee1Assignment
-      : match.referee2Assignment;
-  const isDifferentReferee = assignment && assignment.referee._id !== referee?._id;
-
+  const assignment = assignments.find(a => a.position === refereeNumber);
+  const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
   return (
-    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-500 border-2' : ''}`}>
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">
           SR {refereeNumber}
@@ -314,7 +312,7 @@ function RefereeAttendanceCard({
           </div>
         </div>
       </div>
-      {isDifferentReferee && (
+      {isDifferentReferee && assignment && (
         <div className="bg-gray-50 -mx-6 -mb-6 px-6 py-3 border-t border-gray-200">
           <div className="text-xs text-gray-600">
             <div className="font-medium text-gray-600 mb-2">
@@ -601,6 +599,23 @@ interface SupplementaryFormProps {
   jwt?: string;
 }
 
+interface Assignment {
+  _id: string;
+  matchId: string;
+  status: string;
+  referee: {
+    _id: string;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    clubId: string;
+    clubName: string;
+    logoUrl: string;
+    level: string;
+  };
+  position: number;
+}
+
 export default function SupplementaryForm({
   match: initialMatch,
   matchdayOwner,
@@ -618,12 +633,39 @@ export default function SupplementaryForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
 
   const permissions = calculateMatchButtonPermissions(
     user,
     match,
     matchdayOwner,
   );
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
+        
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setAssignments(data);
+        }
+      } catch (error) {
+        console.error('Error fetching assignments:', error);
+      }
+    };
+
+    if (jwt) {
+      fetchAssignments();
+    }
+  }, [match._id, jwt]);
 
   // Check permissions
   if (!permissions.showButtonSupplementary) {
@@ -791,6 +833,7 @@ export default function SupplementaryForm({
                     formData={formData}
                     updateField={updateField}
                     match={match}
+                    assignments={assignments}
                   />
                 ))}
               </div>
