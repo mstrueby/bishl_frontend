@@ -160,12 +160,12 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                   {isDifferentReferee && (
                     <div className="mt-4 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
                       <div className="text-xs text-gray-600">
-                        <div className="font-medium text-gray-700 mb-1">
-                          {assignment.status === 'ASSIGNED' ? 'Eingeteilt' : 'Akzeptiert'}:
+                        <div className="font-medium text-gray-600 mb-2">
+                          {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
                         </div>
-                        <div>{assignment.referee.firstName} {assignment.referee.lastName}</div>
+                        <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
                         {assignment.referee.clubName && (
-                          <div className="text-gray-500">{assignment.referee.clubName}</div>
+                          <div className="text-gray-500 pb-1">{assignment.referee.clubName}</div>
                         )}
                       </div>
                     </div>
