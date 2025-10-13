@@ -325,7 +325,7 @@ function RefereeAttendanceCard({
   const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
   return (
-    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-500 border-2' : ''}`}>
+    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}`}>
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5 flex items-center justify-between">
         <h4 className="text-sm font-medium text-gray-800">
           SR {refereeNumber}
