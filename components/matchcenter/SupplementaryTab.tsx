@@ -162,7 +162,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                     </div>
                   </div>
                   {isDifferentReferee && (
-                    <div className="mt-4 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
+                    <div className="mt-6 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
                       <div className="text-xs text-gray-600">
                         <div className="font-medium text-gray-600 mb-2">
                           {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
