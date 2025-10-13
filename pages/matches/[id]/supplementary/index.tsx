@@ -863,6 +863,28 @@ export default function SupplementaryForm({
   const handleRefereeChange = async () => {
     if (!selectedReferee) return;
 
+    console.log('Selected referee:', selectedReferee);
+
+    // Construct the referee object in the expected format
+    const refereeData = {
+      userId: selectedReferee._id,
+      firstName: selectedReferee.firstName,
+      lastName: selectedReferee.lastName,
+      clubId: selectedReferee.referee?.club?.clubId || '',
+      clubName: selectedReferee.referee?.club?.clubName || '',
+      logoUrl: selectedReferee.referee?.club?.logoUrl || '',
+      points: selectedReferee.referee?.points || 0,
+      level: selectedReferee.referee?.level || 'n/a'
+    };
+
+    console.log('Referee data to send:', refereeData);
+
+    const requestBody = {
+      [`referee${selectedRefereePosition}`]: refereeData
+    };
+
+    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
@@ -872,17 +894,20 @@ export default function SupplementaryForm({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${jwt}`,
           },
-          body: JSON.stringify({
-            [`referee${selectedRefereePosition}`]: selectedReferee._id,
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to update referee');
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to update referee: ${JSON.stringify(errorData)}`);
       }
 
       const updatedMatch = await response.json();
+      console.log('Updated match:', updatedMatch);
       setMatch(updatedMatch);
       
       // Reset form values for the changed referee
@@ -902,7 +927,7 @@ export default function SupplementaryForm({
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Error updating referee:', error);
-      setError('Fehler beim Aktualisieren des Schiedsrichters');
+      setError(`Fehler beim Aktualisieren des Schiedsrichters: ${error instanceof Error ? error.message : 'Unknown error'}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
