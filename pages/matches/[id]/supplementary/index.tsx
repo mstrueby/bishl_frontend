@@ -592,9 +592,12 @@ export default function SupplementaryForm({
   const router = useRouter();
   const { user } = useAuth();
   const [match, setMatch] = useState<Match>(initialMatch);
-  const [formData, setFormData] = useState<SupplementarySheet>(
-    match.supplementarySheet || {},
-  );
+  const [formData, setFormData] = useState<SupplementarySheet>({
+    ...match.supplementarySheet,
+    timekeeper1: match.supplementarySheet?.timekeeper1 || {},
+    timekeeper2: match.supplementarySheet?.timekeeper2 || {},
+    technicalDirector: match.supplementarySheet?.technicalDirector || {},
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
