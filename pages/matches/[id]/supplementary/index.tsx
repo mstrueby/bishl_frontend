@@ -231,7 +231,7 @@ function RefereeChangeDialog({
                         leaveTo="opacity-0"
                       >
                         <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {allReferees.map((referee) => (
+                          {[...allReferees].sort((a, b) => a.firstName.localeCompare(b.firstName)).map((referee) => (
                             <Listbox.Option
                               key={referee._id}
                               className={({ active }) =>
