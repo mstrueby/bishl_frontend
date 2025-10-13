@@ -43,6 +43,104 @@ function SectionHeaderSimple({ title, description }: SectionHeaderSimpleProps) {
   );
 }
 
+interface OfficialCardProps {
+  title: string;
+  officialKey: 'timekeeper1' | 'timekeeper2' | 'technicalDirector';
+  formData: SupplementarySheet;
+  updateOfficialField: (
+    officialKey: 'timekeeper1' | 'timekeeper2' | 'technicalDirector',
+    field: 'firstName' | 'lastName' | 'licence',
+    value: string,
+  ) => void;
+}
+
+function OfficialCard({
+  title,
+  officialKey,
+  formData,
+  updateOfficialField,
+}: OfficialCardProps) {
+  const official = formData[officialKey];
+
+  return (
+    <div className="overflow-hidden bg-white rounded-md shadow-md border">
+      <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
+        <h4 className="text-sm font-medium text-gray-800">{title}</h4>
+      </div>
+      <div className="bg-white px-4 py-5 sm:p-6">
+        <div className="text-sm text-gray-700 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`${officialKey}FirstName`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Vorname
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  id={`${officialKey}FirstName`}
+                  placeholder=""
+                  value={official?.firstName || ''}
+                  onChange={(e) =>
+                    updateOfficialField(officialKey, 'firstName', e.target.value)
+                  }
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`${officialKey}LastName`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Nachname
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  id={`${officialKey}LastName`}
+                  placeholder=""
+                  value={official?.lastName || ''}
+                  onChange={(e) =>
+                    updateOfficialField(officialKey, 'lastName', e.target.value)
+                  }
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <label
+              htmlFor={`${officialKey}Licence`}
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              Lizenz
+            </label>
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+              <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                <input
+                  type="text"
+                  id={`${officialKey}Licence`}
+                  placeholder=""
+                  value={official?.licence || ''}
+                  onChange={(e) =>
+                    updateOfficialField(officialKey, 'licence', e.target.value)
+                  }
+                  className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface RefereeAttendanceCardProps {
   refereeNumber: 1 | 2;
   formData: SupplementarySheet;
@@ -609,6 +707,20 @@ export default function SupplementaryForm({
     });
   };
 
+  const updateOfficialField = (
+    officialKey: 'timekeeper1' | 'timekeeper2' | 'technicalDirector',
+    field: 'firstName' | 'lastName' | 'licence',
+    value: string,
+  ) => {
+    setFormData({
+      ...formData,
+      [officialKey]: {
+        ...formData[officialKey],
+        [field]: value,
+      },
+    });
+  };
+
   return (
     <>
       <Head>
@@ -661,6 +773,67 @@ export default function SupplementaryForm({
                     match={match}
                   />
                 ))}
+              </div>
+            </div>
+
+            {/* Officials Section */}
+            <div>
+              <SectionHeaderSimple
+                title="Offizielle"
+                description="Dieser Bereich ist von den <strong>Zeitnehmern</strong> auszufüllen"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <OfficialCard
+                  title="Zeitnehmer 1"
+                  officialKey="timekeeper1"
+                  formData={formData}
+                  updateOfficialField={updateOfficialField}
+                />
+                <OfficialCard
+                  title="Zeitnehmer 2"
+                  officialKey="timekeeper2"
+                  formData={formData}
+                  updateOfficialField={updateOfficialField}
+                />
+                <OfficialCard
+                  title="Technischer Direktor"
+                  officialKey="technicalDirector"
+                  formData={formData}
+                  updateOfficialField={updateOfficialField}
+                />
+              </div>
+            </div>
+
+            {/* Crowd Section */}
+            <div>
+              <SectionHeaderSimple
+                title="Zuschauer"
+                description="Dieser Bereich ist von den <strong>Zeitnehmern</strong> auszufüllen"
+              />
+              <div className="px-4 sm:px-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between max-w-md">
+                  <label
+                    htmlFor="crowd"
+                    className="block text-sm/6 font-medium text-gray-900"
+                  >
+                    Anzahl Zuschauer
+                  </label>
+                  <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+                    <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                      <input
+                        type="number"
+                        id="crowd"
+                        placeholder="0"
+                        min="0"
+                        value={formData.crowd || 0}
+                        onChange={(e) =>
+                          updateField('crowd', parseInt(e.target.value) || 0)
+                        }
+                        className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

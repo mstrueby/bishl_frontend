@@ -99,6 +99,82 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
           </div>
         </div>
 
+        {/* Officials Section */}
+        <div>
+          <h4 className="text-md font-medium text-gray-900 mb-4">Offizielle</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <InfoCard title="Zeitnehmer 1">
+              <div className="text-sm text-gray-700 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Name:</span>
+                  <span className="font-medium">
+                    {match.supplementarySheet?.timekeeper1?.firstName && match.supplementarySheet?.timekeeper1?.lastName
+                      ? `${match.supplementarySheet.timekeeper1.firstName} ${match.supplementarySheet.timekeeper1.lastName}`
+                      : '-'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Lizenz:</span>
+                  <span className="font-medium">
+                    {match.supplementarySheet?.timekeeper1?.licence || '-'}
+                  </span>
+                </div>
+              </div>
+            </InfoCard>
+
+            <InfoCard title="Zeitnehmer 2">
+              <div className="text-sm text-gray-700 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Name:</span>
+                  <span className="font-medium">
+                    {match.supplementarySheet?.timekeeper2?.firstName && match.supplementarySheet?.timekeeper2?.lastName
+                      ? `${match.supplementarySheet.timekeeper2.firstName} ${match.supplementarySheet.timekeeper2.lastName}`
+                      : '-'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Lizenz:</span>
+                  <span className="font-medium">
+                    {match.supplementarySheet?.timekeeper2?.licence || '-'}
+                  </span>
+                </div>
+              </div>
+            </InfoCard>
+
+            <InfoCard title="Technischer Direktor">
+              <div className="text-sm text-gray-700 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Name:</span>
+                  <span className="font-medium">
+                    {match.supplementarySheet?.technicalDirector?.firstName && match.supplementarySheet?.technicalDirector?.lastName
+                      ? `${match.supplementarySheet.technicalDirector.firstName} ${match.supplementarySheet.technicalDirector.lastName}`
+                      : '-'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Lizenz:</span>
+                  <span className="font-medium">
+                    {match.supplementarySheet?.technicalDirector?.licence || '-'}
+                  </span>
+                </div>
+              </div>
+            </InfoCard>
+          </div>
+        </div>
+
+        {/* Crowd Section */}
+        <div>
+          <h4 className="text-md font-medium text-gray-900 mb-4">Zuschauer</h4>
+          <div className="px-4 sm:px-6">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">Anzahl Zuschauer:</span>
+              <span className="text-lg font-semibold text-gray-900">
+                {match.supplementarySheet?.crowd || 0}
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Equipment Section */}
         <div>
           <h4 className="text-md font-medium text-gray-900 mb-4">Dokumente / Ausrüstung</h4>
