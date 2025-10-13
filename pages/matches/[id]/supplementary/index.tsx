@@ -202,9 +202,9 @@ function RefereeChangeDialog({
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                  className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
                 >
-                  SR {refereeNumber} ändern
+                  Schiedsrichter {refereeNumber} ändern
                 </Dialog.Title>
                 <div className="mt-2">
                   <p className="text-sm text-gray-500 mb-4">
@@ -214,10 +214,10 @@ function RefereeChangeDialog({
                   <Listbox value={selectedReferee} onChange={setSelectedReferee}>
                     <div className="relative mt-1">
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
-                        <span className="block truncate">
+                        <span className="block truncate text-gray-400">
                           {selectedReferee 
                             ? `${selectedReferee.firstName} ${selectedReferee.lastName}${selectedReferee.referee?.club?.clubName ? ` - ${selectedReferee.referee.club.clubName}` : ''}`
-                            : 'Schiedsrichter auswählen'
+                            : '(auswählen)'
                           }
                         </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -230,7 +230,7 @@ function RefereeChangeDialog({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                       >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                           {allReferees.map((referee) => (
                             <Listbox.Option
                               key={referee._id}
