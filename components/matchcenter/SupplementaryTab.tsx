@@ -130,7 +130,11 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
               const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
               return (
-                <InfoCard key={refNumber} title={refereeTitle}>
+                <InfoCard 
+                  key={refNumber} 
+                  title={refereeTitle}
+                  className={isDifferentReferee ? 'border-red-500 border-2' : ''}
+                >
                   <div className="text-sm text-gray-700 space-y-3">
                     <div className="flex items-center justify-between">
                       <span>Anwesend:</span>
