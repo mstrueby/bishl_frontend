@@ -50,15 +50,21 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`
-        );
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
+        console.log('Fetching assignments from URL:', url);
+        
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched assignments:', data);
           console.log('Match referee1:', match.referee1);
           console.log('Match referee2:', match.referee2);
           setAssignments(data);
+        } else {
+          console.log('Response not ok, status:', response.status);
         }
       } catch (error) {
         console.error('Error fetching assignments:', error);
