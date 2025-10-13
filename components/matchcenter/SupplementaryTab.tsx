@@ -163,30 +163,13 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                   </div>
                   {isDifferentReferee && (
                     <div className="mt-6 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
-                      <div className="text-xs text-gray-600 mb-2 font-medium">
-                        {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
-                      </div>
-                      <div className="flex items-center gap-x-3">
-                        <div className="flex items-center gap-x-3 flex-1 truncate">
-                          {/* Profile Avatar */}
-                          <div className="size-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                            {assignment.referee.firstName.charAt(0)}{assignment.referee.lastName.charAt(0)}
-                          </div>
-                          {/* Name */}
-                          <div className="flex flex-col">
-                            <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
-                            {assignment.referee.clubName && (
-                              <div className="text-xs text-gray-500">{assignment.referee.clubName}</div>
-                            )}
-                          </div>
+                      <div className="text-xs text-gray-600">
+                        <div className="font-medium text-gray-600 mb-2">
+                          {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
                         </div>
-                        {/* Club Logo */}
-                        {assignment.referee.logoUrl && (
-                          <img
-                            src={assignment.referee.logoUrl}
-                            alt={assignment.referee.clubName}
-                            className="h-6 w-6 object-contain"
-                          />
+                        <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
+                        {assignment.referee.clubName && (
+                          <div className="text-gray-500 pb-1">{assignment.referee.clubName}</div>
                         )}
                       </div>
                     </div>
