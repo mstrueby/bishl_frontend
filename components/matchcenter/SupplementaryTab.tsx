@@ -1,11 +1,28 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Match, SupplementarySheet } from '../../types/MatchValues';
 import Badge from '../ui/Badge';
 
+interface Assignment {
+  _id: string;
+  matchId: string;
+  status: string;
+  referee: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    clubId: string;
+    clubName: string;
+    logoUrl: string;
+    level: string;
+  };
+  position: number;
+}
+
 interface SupplementaryTabProps {
   match: Match;
+  jwt: string;
   permissions: {
     showButtonSupplementary: boolean;
   };
@@ -28,7 +45,41 @@ const InfoCard: React.FC<InfoCardProps> = ({ title, children, className = '' }) 
   );
 };
 
-const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions }) => {
+const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permissions }) => {
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
+        console.log('Fetching assignments from URL:', url);
+        
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fetched assignments:', data);
+          console.log('Match referee1:', match.referee1);
+          console.log('Match referee2:', match.referee2);
+          setAssignments(data);
+        } else {
+          console.log('Response not ok, status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching assignments:', error);
+      }
+    };
+
+    fetchAssignments();
+  }, [match._id, jwt]);
+
   return (
     <div className="py-4">
       <div className="border-b mb-3 border-gray-200 pb-3 flex items-center justify-between mt-3 sm:mt-0 sm:mx-3 min-h-[2.5rem]">
@@ -65,6 +116,19 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
 
               const isSaved = match.supplementarySheet?.isSaved;
 
+              // Find assignment for this position
+              const assignment = assignments.find(a => a.position === refNumber);
+              
+              // Debug logging
+              console.log(`=== Referee ${refNumber} Debug ===`);
+              console.log('Referee object:', referee);
+              console.log('Assignment object:', assignment);
+              console.log('Assignment referee userId:', assignment?.referee?.userId);
+              console.log('Match referee userId:', referee?.userId);
+              console.log('Are they different?', assignment && referee && assignment.referee.userId !== referee.userId);
+              
+              const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
+
               return (
                 <InfoCard key={refNumber} title={refereeTitle}>
                   <div className="text-sm text-gray-700 space-y-3">
@@ -93,6 +157,19 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, permissions 
                       <span>{delayMin || 0} Min</span>
                     </div>
                   </div>
+                  {isDifferentReferee && (
+                    <div className="mt-4 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
+                      <div className="text-xs text-gray-600">
+                        <div className="font-medium text-gray-600 mb-2">
+                          {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
+                        </div>
+                        <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
+                        {assignment.referee.clubName && (
+                          <div className="text-gray-500 pb-1">{assignment.referee.clubName}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </InfoCard>
               );
             })}
