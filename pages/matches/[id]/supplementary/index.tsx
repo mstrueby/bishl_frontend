@@ -18,10 +18,11 @@ import MatchHeader from "../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { Fragment } from 'react';
 import { AssignmentValues } from '../../../../types/AssignmentValues';
-import RefereeSelect from '../../../../components/ui/RefereeSelect';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+import { UserValues } from '../../../../types/UserValues';
 
 
 interface SectionHeaderSimpleProps {
@@ -159,11 +160,19 @@ function RefereeChangeDialog({
   isOpen,
   onClose,
   refereeNumber,
-  assignments,
-  jwt,
+  allReferees,
+  selectedReferee,
+  setSelectedReferee,
   onConfirm,
-  onAssignmentComplete,
-}: RefereeChangeDialogProps) {
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  refereeNumber: 1 | 2;
+  allReferees: UserValues[];
+  selectedReferee: UserValues | null;
+  setSelectedReferee: (referee: UserValues | null) => void;
+  onConfirm: () => void;
+}) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -201,23 +210,77 @@ function RefereeChangeDialog({
                   <p className="text-sm text-gray-500 mb-4">
                     Wählen Sie einen neuen Schiedsrichter für Position {refereeNumber}
                   </p>
-                  <RefereeSelect
-                    assignments={assignments}
-                    position={refereeNumber}
-                    jwt={jwt}
-                    onConfirm={onConfirm}
-                    onAssignmentComplete={onAssignmentComplete}
-                    disabled={false}
-                  />
+                  
+                  <Listbox value={selectedReferee} onChange={setSelectedReferee}>
+                    <div className="relative mt-1">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
+                        <span className="block truncate">
+                          {selectedReferee 
+                            ? `${selectedReferee.firstName} ${selectedReferee.lastName}${selectedReferee.referee?.club?.clubName ? ` - ${selectedReferee.referee.club.clubName}` : ''}`
+                            : 'Schiedsrichter auswählen'
+                          }
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        </span>
+                      </Listbox.Button>
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {allReferees.map((referee) => (
+                            <Listbox.Option
+                              key={referee._id}
+                              className={({ active }) =>
+                                `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                                  active ? 'bg-indigo-600 text-white' : 'text-gray-900'
+                                }`
+                              }
+                              value={referee}
+                            >
+                              {({ selected, active }) => (
+                                <>
+                                  <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
+                                    {referee.firstName} {referee.lastName}
+                                    {referee.referee?.club?.clubName && ` - ${referee.referee.club.clubName}`}
+                                  </span>
+                                  {selected ? (
+                                    <span
+                                      className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                                        active ? 'text-white' : 'text-indigo-600'
+                                      }`}
+                                    >
+                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                  ) : null}
+                                </>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
                 </div>
 
-                <div className="mt-4 flex justify-end">
+                <div className="mt-6 flex justify-end gap-3">
                   <button
                     type="button"
                     className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     onClick={onClose}
                   >
-                    Schließen
+                    Abbrechen
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                    onClick={onConfirm}
+                    disabled={!selectedReferee}
+                  >
+                    Bestätigen
                   </button>
                 </div>
               </Dialog.Panel>
@@ -733,6 +796,8 @@ export default function SupplementaryForm({
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [refereeDialogOpen, setRefereeDialogOpen] = useState(false);
   const [selectedRefereePosition, setSelectedRefereePosition] = useState<1 | 2>(1);
+  const [allReferees, setAllReferees] = useState<UserValues[]>([]);
+  const [selectedReferee, setSelectedReferee] = useState<UserValues | null>(null);
 
   const permissions = calculateMatchButtonPermissions(
     user,
@@ -766,12 +831,38 @@ export default function SupplementaryForm({
     }
   }, [match._id, jwt]);
 
+  useEffect(() => {
+    const fetchReferees = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/referees`, {
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setAllReferees(data);
+        }
+      } catch (error) {
+        console.error('Error fetching referees:', error);
+      }
+    };
+
+    if (jwt) {
+      fetchReferees();
+    }
+  }, [jwt]);
+
   const handleOpenRefereeDialog = (position: 1 | 2) => {
     setSelectedRefereePosition(position);
     setRefereeDialogOpen(true);
   };
 
-  const handleRefereeChange = async (assignment: AssignmentValues, position: number) => {
+  const handleRefereeChange = async () => {
+    if (!selectedReferee) return;
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
@@ -782,7 +873,7 @@ export default function SupplementaryForm({
             'Authorization': `Bearer ${jwt}`,
           },
           body: JSON.stringify({
-            [`referee${position}`]: assignment.referee.userId,
+            [`referee${selectedRefereePosition}`]: selectedReferee._id,
           }),
         }
       );
@@ -796,15 +887,18 @@ export default function SupplementaryForm({
       
       // Reset form values for the changed referee
       const resetFields = {
-        [`referee${position}Present`]: false,
-        [`referee${position}PassAvailable`]: false,
-        [`referee${position}PassNo`]: '',
-        [`referee${position}DelayMin`]: 0,
+        [`referee${selectedRefereePosition}Present`]: false,
+        [`referee${selectedRefereePosition}PassAvailable`]: false,
+        [`referee${selectedRefereePosition}PassNo`]: '',
+        [`referee${selectedRefereePosition}DelayMin`]: 0,
       };
       
       setFormData({ ...formData, ...resetFields });
       
-      setSuccessMessage(`Schiedsrichter ${position} wurde erfolgreich geändert`);
+      setSuccessMessage(`Schiedsrichter ${selectedRefereePosition} wurde erfolgreich geändert`);
+      setRefereeDialogOpen(false);
+      setSelectedReferee(null);
+      fetchAssignments();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Error updating referee:', error);
@@ -813,10 +907,7 @@ export default function SupplementaryForm({
     }
   };
 
-  const handleAssignmentComplete = (referee: Referee) => {
-    setRefereeDialogOpen(false);
-    fetchAssignments();
-  };
+  
 
   // Check permissions
   if (!permissions.showButtonSupplementary) {
@@ -1321,12 +1412,15 @@ export default function SupplementaryForm({
 
           <RefereeChangeDialog
             isOpen={refereeDialogOpen}
-            onClose={() => setRefereeDialogOpen(false)}
+            onClose={() => {
+              setRefereeDialogOpen(false);
+              setSelectedReferee(null);
+            }}
             refereeNumber={selectedRefereePosition}
-            assignments={assignments}
-            jwt={jwt || ''}
+            allReferees={allReferees}
+            selectedReferee={selectedReferee}
+            setSelectedReferee={setSelectedReferee}
             onConfirm={handleRefereeChange}
-            onAssignmentComplete={handleAssignmentComplete}
           />
         </div>
       </Layout>
