@@ -199,7 +199,7 @@ function RefereeChangeDialog({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
                   className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
@@ -212,7 +212,7 @@ function RefereeChangeDialog({
                   </p>
                   
                   <Listbox value={selectedReferee} onChange={setSelectedReferee}>
-                    <div className="relative mt-1">
+                    <div className="relative mt-1 z-50">
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
                         <span className="block truncate text-gray-400">
                           {selectedReferee 
