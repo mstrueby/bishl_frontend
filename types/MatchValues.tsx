@@ -98,6 +98,12 @@ export interface RefereePayment {
   referee2?: RefereePaymentDetails;
 }
 
+export interface Official {
+  firstName?: string;
+  lastName?: string;
+  licence?: string;
+}
+
 export interface SupplementarySheet {
   refereeAttendance?: string; // yes, only 1, no referee, substitute referee
   referee1Present?: boolean;
@@ -108,6 +114,10 @@ export interface SupplementarySheet {
   referee2PassNo?: string;
   referee1DelayMin?: number;
   referee2DelayMin?: number;
+  timekeeper1?: Official;
+  timekeeper2?: Official;
+  technicalDirector?: Official;
+  crowd?: number;
   usageApproval?: boolean;
   ruleBook?: boolean;
   goalDisplay?: boolean;
