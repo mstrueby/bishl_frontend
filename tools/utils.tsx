@@ -214,7 +214,11 @@ export function calculateMatchButtonPermissions(
 
       // Home club admin and matchday owner: keep permissions only on match day
       if (isMatchDay && (isHomeClubAdmin || isMatchdayOwnerAdmin)) {
-        // Keep permissions that were granted earlier
+        // grant scores and penalties permissions for finished matches
+        permissions.showButtonScoresHome = true;
+        permissions.showButtonScoresAway = true;
+        permissions.showButtonPenaltiesHome = true;
+        permissions.showButtonPenaltiesAway = true;
       } else {
         // Apply finished match restrictions for all other cases
         permissions.showButtonEdit = false;
