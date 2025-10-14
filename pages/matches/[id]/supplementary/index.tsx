@@ -199,7 +199,7 @@ function RefereeChangeDialog({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
                   className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
@@ -212,14 +212,20 @@ function RefereeChangeDialog({
                   </p>
                   
                   <Listbox value={selectedReferee} onChange={setSelectedReferee}>
-                    <div className="relative mt-1">
+                    <div className="relative mt-1 z-50">
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
-                        <span className="block truncate text-gray-400">
-                          {selectedReferee 
-                            ? `${selectedReferee.firstName} ${selectedReferee.lastName}${selectedReferee.referee?.club?.clubName ? ` - ${selectedReferee.referee.club.clubName}` : ''}`
-                            : '(auswählen)'
-                          }
-                        </span>
+                        {selectedReferee ? (
+                          <div className="flex items-center gap-x-3">
+                            <div className="size-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                              {selectedReferee.firstName.charAt(0)}{selectedReferee.lastName.charAt(0)}
+                            </div>
+                            <span className="block truncate">
+                              {selectedReferee.firstName} {selectedReferee.lastName}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="block truncate text-gray-400">(auswählen)</span>
+                        )}
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                           <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                         </span>
@@ -231,32 +237,39 @@ function RefereeChangeDialog({
                         leaveTo="opacity-0"
                       >
                         <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {allReferees.map((referee) => (
+                          {[...allReferees].sort((a, b) => a.firstName.localeCompare(b.firstName)).map((referee) => (
                             <Listbox.Option
                               key={referee._id}
                               className={({ active }) =>
-                                `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                                `relative cursor-default select-none py-2 px-3 ${
                                   active ? 'bg-indigo-600 text-white' : 'text-gray-900'
                                 }`
                               }
                               value={referee}
                             >
                               {({ selected, active }) => (
-                                <>
-                                  <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
-                                    {referee.firstName} {referee.lastName}
-                                    {referee.referee?.club?.clubName && ` - ${referee.referee.club.clubName}`}
-                                  </span>
-                                  {selected ? (
-                                    <span
-                                      className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
-                                        active ? 'text-white' : 'text-indigo-600'
-                                      }`}
-                                    >
-                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                <div className="flex items-center gap-x-3">
+                                  <div className="flex items-center gap-x-3 flex-1 truncate">
+                                    {/* Profile Avatar */}
+                                    <div className={`size-5 rounded-full flex items-center justify-center text-xs ${
+                                      active ? 'bg-indigo-500' : 'bg-gray-100'
+                                    }`}>
+                                      {referee.firstName.charAt(0)}{referee.lastName.charAt(0)}
+                                    </div>
+                                    {/* Name */}
+                                    <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
+                                      {referee.firstName} {referee.lastName}
                                     </span>
-                                  ) : null}
-                                </>
+                                  </div>
+                                  {/* Club Logo */}
+                                  {referee.referee?.club?.logoUrl && (
+                                    <img
+                                      src={referee.referee.club.logoUrl}
+                                      alt={referee.referee.club.clubName}
+                                      className="h-6 w-6 object-contain"
+                                    />
+                                  )}
+                                </div>
                               )}
                             </Listbox.Option>
                           ))}
@@ -312,7 +325,7 @@ function RefereeAttendanceCard({
   const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
   return (
-    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-500 border-2' : ''}`}>
+    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}`}>
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5 flex items-center justify-between">
         <h4 className="text-sm font-medium text-gray-800">
           SR {refereeNumber}
