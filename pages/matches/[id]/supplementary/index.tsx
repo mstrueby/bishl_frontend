@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import Image from "next/image";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { Match, SupplementarySheet, Referee } from "../../../../types/MatchValues";
@@ -263,10 +264,12 @@ function RefereeChangeDialog({
                                   </div>
                                   {/* Club Logo */}
                                   {referee.referee?.club?.logoUrl && (
-                                    <img
+                                    <Image
                                       src={referee.referee.club.logoUrl}
                                       alt={referee.referee.club.clubName}
-                                      className="h-6 w-6 object-contain"
+                                      width={24}
+                                      height={24}
+                                      className="object-contain"
                                     />
                                   )}
                                 </div>
