@@ -1,12 +1,18 @@
 export function formatFileSize(bytes: number): string {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes === 0) return '0 Byte';
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)).toString().replace('.', ',') + ' ' + sizes[i];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  if (bytes === 0) return "0 Byte";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (
+    parseFloat((bytes / Math.pow(1024, i)).toFixed(2))
+      .toString()
+      .replace(".", ",") +
+    " " +
+    sizes[i]
+  );
 }
 
 export function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
 export interface MatchButtonPermissions {
@@ -45,18 +51,20 @@ interface MatchdayOwner {
 
 // Helper function to check if matchdayOwner is valid
 function isValidMatchdayOwner(matchdayOwner?: MatchdayOwner): boolean {
-  return matchdayOwner != null && 
-         typeof matchdayOwner === 'object' && 
-         'clubId' in matchdayOwner && 
-         matchdayOwner.clubId != null && 
-         matchdayOwner.clubId !== '';
+  return (
+    matchdayOwner != null &&
+    typeof matchdayOwner === "object" &&
+    "clubId" in matchdayOwner &&
+    matchdayOwner.clubId != null &&
+    matchdayOwner.clubId !== ""
+  );
 }
 
 export function calculateMatchButtonPermissions(
   user: User | null,
   match: Match,
   matchdayOwner?: MatchdayOwner,
-  isMatchCenter: boolean = false
+  isMatchCenter: boolean = false,
 ): MatchButtonPermissions {
   const permissions: MatchButtonPermissions = {
     showButtonEdit: false,
@@ -76,14 +84,15 @@ export function calculateMatchButtonPermissions(
   const now = Date.now();
   const matchStartTime = new Date(match.startDate).getTime();
   const thirtyMinutesFromNow = now + 30 * 60 * 1000;
-  const isMatchToday = new Date(match.startDate).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0);
+  const isMatchToday =
+    new Date(match.startDate).setHours(0, 0, 0, 0) <=
+    new Date().setHours(0, 0, 0, 0);
 
   // LEAGUE_ADMIN permissions
-  if (user.roles.includes('LEAGUE_ADMIN') || user.roles.includes('ADMIN')) {
+  if (user.roles.includes("LEAGUE_ADMIN") || user.roles.includes("ADMIN")) {
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
-    permissions.showButtonSupplementary = true;
-    
+
     if (isMatchCenter) {
       permissions.showButtonEvents = true;
     }
@@ -93,11 +102,13 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonRosterHome = true;
       permissions.showButtonRosterAway = true;
       permissions.showButtonMatchCenter = true;
+      permissions.showButtonSupplementary = true;
     }
 
-    if (match.matchStatus.key === 'INPROGRESS') {
+    if (match.matchStatus.key === "INPROGRESS") {
       permissions.showButtonRosterHome = true;
       permissions.showButtonRosterAway = true;
+      permissions.showButtonSupplementary = true;
     }
   }
 
@@ -105,16 +116,20 @@ export function calculateMatchButtonPermissions(
   if (
     user.club &&
     user.club.clubId === match.home.clubId &&
-    user.roles.includes('CLUB_ADMIN')
+    user.roles.includes("CLUB_ADMIN")
   ) {
     permissions.showButtonRosterHome = true;
 
     // Additional permissions when match starts soon
-    if (matchStartTime < thirtyMinutesFromNow && !isValidMatchdayOwner(matchdayOwner)) {
+    if (
+      matchStartTime < thirtyMinutesFromNow &&
+      !isValidMatchdayOwner(matchdayOwner)
+    ) {
       permissions.showButtonRosterAway = true;
       permissions.showButtonStatus = true;
       permissions.showButtonMatchCenter = true;
-      
+      permissions.showButtonSupplementary = true;
+
       if (isMatchCenter) {
         permissions.showButtonEvents = true;
       }
@@ -122,7 +137,11 @@ export function calculateMatchButtonPermissions(
   }
 
   // Away team club admin permissions
-  if (user.club && user.club.clubId === match.away.clubId && user.roles.includes('CLUB_ADMIN')) {
+  if (
+    user.club &&
+    user.club.clubId === match.away.clubId &&
+    user.roles.includes("CLUB_ADMIN")
+  ) {
     // Can edit away roster if match is more than 30 minutes away
     if (matchStartTime > thirtyMinutesFromNow) {
       permissions.showButtonRosterAway = true;
@@ -134,51 +153,58 @@ export function calculateMatchButtonPermissions(
     }
 
     // Cannot edit roster when match is in progress
-    if (match.matchStatus.key === 'INPROGRESS') {
+    if (match.matchStatus.key === "INPROGRESS") {
       permissions.showButtonRosterAway = false;
     }
   }
 
   // Matchday owner permissions
-  if (user.club && 
-      isValidMatchdayOwner(matchdayOwner) &&
-      matchdayOwner &&
-      user.club.clubId === matchdayOwner.clubId && 
-      user.roles.includes('CLUB_ADMIN') && 
-      isMatchToday) {
+  if (
+    user.club &&
+    isValidMatchdayOwner(matchdayOwner) &&
+    matchdayOwner &&
+    user.club.clubId === matchdayOwner.clubId &&
+    user.roles.includes("CLUB_ADMIN") &&
+    isMatchToday
+  ) {
     permissions.showButtonRosterHome = true;
     permissions.showButtonRosterAway = true;
     permissions.showButtonStatus = true;
     permissions.showButtonMatchCenter = true;
     permissions.showButtonSupplementary = true;
-    
+
     if (isMatchCenter) {
       permissions.showButtonEvents = true;
     }
   }
 
   // Finished match restrictions
-  if (match.matchStatus.key !== 'INPROGRESS' && match.matchStatus.key !== 'SCHEDULED') {
+  if (
+    match.matchStatus.key !== "INPROGRESS" &&
+    match.matchStatus.key !== "SCHEDULED"
+  ) {
     permissions.showButtonEdit = false;
     permissions.showButtonRosterHome = false;
     permissions.showButtonRosterAway = false;
     permissions.showButtonStatus = false;
     permissions.showButtonMatchCenter = false;
     permissions.showButtonSupplementary = false;
-    
+
     if (isMatchCenter) {
       permissions.showButtonEvents = false;
     }
   }
 
   // ADMIN/LEAGUE_ADMIN can edit finished matches
-  if ((user.roles.includes('ADMIN') || user.roles.includes('LEAGUE_ADMIN')) && 
-      (match.matchStatus.key !== 'SCHEDULED' && match.matchStatus.key !== 'INPROGRESS')) {
+  if (
+    (user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN")) &&
+    match.matchStatus.key !== "SCHEDULED" &&
+    match.matchStatus.key !== "INPROGRESS"
+  ) {
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
     permissions.showButtonMatchCenter = true;
-    permissions.showButtonSupplementary = true;
-    
+
     if (isMatchCenter) {
       permissions.showButtonRosterHome = true;
       permissions.showButtonRosterAway = true;
@@ -186,17 +212,19 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonScoresAway = true;
       permissions.showButtonPenaltiesHome = true;
       permissions.showButtonPenaltiesAway = true;
+      permissions.showButtonSupplementary = true;
     }
   }
 
   // Season restrictions
-  if (match.season.alias !== process.env['NEXT_PUBLIC_CURRENT_SEASON']) {
+  if (match.season.alias !== process.env["NEXT_PUBLIC_CURRENT_SEASON"]) {
     permissions.showButtonEdit = false;
     permissions.showButtonStatus = false;
     permissions.showButtonRosterHome = false;
     permissions.showButtonRosterAway = false;
+    permissions.showButtonMatchCenter = false;
     permissions.showButtonSupplementary = false;
-    
+
     if (isMatchCenter) {
       permissions.showButtonScoresHome = false;
       permissions.showButtonScoresAway = false;
