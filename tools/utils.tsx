@@ -177,15 +177,38 @@ export function calculateMatchButtonPermissions(
     match.matchStatus.key !== "INPROGRESS" &&
     match.matchStatus.key !== "SCHEDULED"
   ) {
-    permissions.showButtonEdit = false;
-    permissions.showButtonRosterHome = false;
-    permissions.showButtonRosterAway = false;
-    permissions.showButtonStatus = false;
-    permissions.showButtonMatchCenter = false;
-    permissions.showButtonSupplementary = false;
+    // Check if it's the same day as the match
+    const matchDate = new Date(match.startDate).setHours(0, 0, 0, 0);
+    const today = new Date().setHours(0, 0, 0, 0);
+    const isMatchDay = matchDate === today;
 
-    if (isMatchCenter) {
-      permissions.showButtonEvents = false;
+    // Allow home team club admin full access on match day
+    const isHomeClubAdmin = user.club &&
+      user.club.clubId === match.home.clubId &&
+      user.roles.includes("CLUB_ADMIN");
+
+    // Allow matchday owner full access on match day
+    const isMatchdayOwnerAdmin = user.club &&
+      isValidMatchdayOwner(matchdayOwner) &&
+      matchdayOwner &&
+      user.club.clubId === matchdayOwner.clubId &&
+      user.roles.includes("CLUB_ADMIN");
+
+    // If it's match day and user is home club admin or matchday owner, keep permissions
+    if (isMatchDay && (isHomeClubAdmin || isMatchdayOwnerAdmin)) {
+      // Don't restrict permissions - they keep what was granted earlier
+    } else {
+      // Apply finished match restrictions for everyone else
+      permissions.showButtonEdit = false;
+      permissions.showButtonRosterHome = false;
+      permissions.showButtonRosterAway = false;
+      permissions.showButtonStatus = false;
+      permissions.showButtonMatchCenter = false;
+      permissions.showButtonSupplementary = false;
+
+      if (isMatchCenter) {
+        permissions.showButtonEvents = false;
+      }
     }
   }
 
