@@ -81,15 +81,24 @@ export function calculateMatchButtonPermissions(
   };
   if (!user) return permissions;
 
+  // Early check: if match is in the past (before today), only ADMIN/LEAGUE_ADMIN can access
+  const matchDate = new Date(match.startDate).setHours(0, 0, 0, 0);
+  const today = new Date().setHours(0, 0, 0, 0);
+  const isMatchInPast = matchDate < today;
+  const isAdminOrLeagueAdmin = user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN");
+  
+  // For non-admins, deny all access to past matches
+  if (isMatchInPast && !isAdminOrLeagueAdmin) {
+    return permissions;
+  }
+
   const now = Date.now();
   const matchStartTime = new Date(match.startDate).getTime();
   const thirtyMinutesFromNow = now + 30 * 60 * 1000;
-  const matchDate = new Date(match.startDate).setHours(0, 0, 0, 0);
-  const today = new Date().setHours(0, 0, 0, 0);
   const isMatchDay = matchDate === today;
 
-  // LEAGUE_ADMIN permissions
-  if (user.roles.includes("LEAGUE_ADMIN") || user.roles.includes("ADMIN")) {
+  // LEAGUE_ADMIN permissions (already verified as admin above)
+  if (isAdminOrLeagueAdmin) {
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
 
@@ -188,9 +197,6 @@ export function calculateMatchButtonPermissions(
       matchdayOwner &&
       user.club.clubId === matchdayOwner.clubId &&
       user.roles.includes("CLUB_ADMIN");
-
-    // ADMIN/LEAGUE_ADMIN can always edit finished matches
-    const isAdminOrLeagueAdmin = user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN");
 
     // If it's match day and user is home club admin or matchday owner, keep permissions
     // Or if user is ADMIN/LEAGUE_ADMIN, grant full permissions
