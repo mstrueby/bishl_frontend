@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
@@ -859,7 +859,7 @@ export default function SupplementaryForm({
     matchdayOwner,
   );
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = useCallback(async () => {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
       
@@ -877,13 +877,13 @@ export default function SupplementaryForm({
     } catch (error) {
       console.error('Error fetching assignments:', error);
     }
-  };
+  }, [match._id, jwt]);
 
   useEffect(() => {
     if (jwt) {
       fetchAssignments();
     }
-  }, [match._id, jwt]);
+  }, [jwt, fetchAssignments]);
 
   useEffect(() => {
     const fetchReferees = async () => {
