@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import Image from "next/image";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { Match, SupplementarySheet, Referee } from "../../../../types/MatchValues";
@@ -263,10 +264,12 @@ function RefereeChangeDialog({
                                   </div>
                                   {/* Club Logo */}
                                   {referee.referee?.club?.logoUrl && (
-                                    <img
+                                    <Image
                                       src={referee.referee.club.logoUrl}
                                       alt={referee.referee.club.clubName}
-                                      className="h-6 w-6 object-contain"
+                                      width={24}
+                                      height={24}
+                                      className="object-contain"
                                     />
                                   )}
                                 </div>
@@ -324,19 +327,38 @@ function RefereeAttendanceCard({
   const assignment = assignments.find(a => a.position === refereeNumber);
   const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
+  const refereeTitle = referee ? (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-medium text-gray-800">
+        {referee.firstName} {referee.lastName}
+      </div>
+      {referee.clubName && (
+        <div className="text-xs font-normal text-gray-500">
+          {referee.clubName}
+        </div>
+      )}
+    </div>
+  ) : (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-base text-gray-500">
+        nicht eingeteilt
+      </div>
+      <div className="text-xs font-normal text-gray-500">
+        &nbsp;
+      </div>
+    </div>
+  );
+
   return (
     <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}`}>
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5 flex items-center justify-between">
-        <h4 className="text-sm font-medium text-gray-800">
-          SR {refereeNumber}
-          {referee ? (
-            <span className="ml-2 text-gray-600">
-              - {referee.firstName} {referee.lastName}
-            </span>
-          ) : (
-            <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
-          )}
-        </h4>
+        <h4 className="text-sm">{refereeTitle}</h4>
         <button
           type="button"
           onClick={onOpenRefereeDialog}
@@ -529,19 +551,38 @@ function RefereePaymentCard({
     (paymentData?.expenseAllowance || 0) +
     (paymentData?.gameFees || 0);
 
+  const refereeTitle = referee ? (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-medium text-gray-800">
+        {referee.firstName} {referee.lastName}
+      </div>
+      {referee.clubName && (
+        <div className="text-xs font-normal text-gray-500">
+          {referee.clubName}
+        </div>
+      )}
+    </div>
+  ) : (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-base text-gray-500">
+        nicht eingeteilt
+      </div>
+      <div className="text-xs font-normal text-gray-500">
+        &nbsp;
+      </div>
+    </div>
+  );
+
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
-        <h4 className="text-sm font-medium text-gray-800">
-          SR {refereeNumber}
-          {referee ? (
-            <span className="ml-2 text-gray-600">
-              - {referee.firstName} {referee.lastName}
-            </span>
-          ) : (
-            <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
-          )}
-        </h4>
+        <h4 className="text-sm">{refereeTitle}</h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
         <div className="space-y-4">
@@ -818,7 +859,7 @@ export default function SupplementaryForm({
     matchdayOwner,
   );
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = useCallback(async () => {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
       
@@ -836,13 +877,13 @@ export default function SupplementaryForm({
     } catch (error) {
       console.error('Error fetching assignments:', error);
     }
-  };
+  }, [match._id, jwt]);
 
   useEffect(() => {
     if (jwt) {
       fetchAssignments();
     }
-  }, [match._id, jwt]);
+  }, [jwt, fetchAssignments]);
 
   useEffect(() => {
     const fetchReferees = async () => {
