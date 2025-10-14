@@ -21,7 +21,7 @@ interface Assignment {
 
 interface SupplementaryTabProps {
   match: Match;
-  jwt: string;
+  jwt?: string;
   permissions: {
     showButtonSupplementary: boolean;
   };
@@ -66,6 +66,8 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({
 
   useEffect(() => {
     const fetchAssignments = async () => {
+      if (!jwt) return;
+      
       try {
         const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
         console.log("Fetching assignments from URL:", url);
