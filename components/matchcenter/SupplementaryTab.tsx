@@ -28,7 +28,7 @@ interface SupplementaryTabProps {
 }
 
 interface InfoCardProps {
-  title: string;
+  title: string | React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
@@ -38,7 +38,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ title, children, footer, className 
   return (
     <div className={`overflow-hidden bg-white rounded-md shadow-md border ${className}`}>
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
-        <h4 className="text-sm font-medium text-gray-800">{title}</h4>
+        <h4 className="text-sm">{title}</h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">{children}</div>
       {footer && (
@@ -116,7 +116,14 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
 
               const referee = refNumber === 1 ? match.referee1 : match.referee2;
               const refereeTitle = referee
-                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}${referee.clubName ? ` (${referee.clubName})` : ''}`
+                ? (
+                    <div>
+                      <div className="font-medium text-gray-800">SR {refNumber} - {referee.firstName} {referee.lastName}</div>
+                      {referee.clubName && (
+                        <div className="text-xs font-normal text-gray-500 mt-0.5">{referee.clubName}</div>
+                      )}
+                    </div>
+                  )
                 : `SR ${refNumber} - nicht eingeteilt`;
 
               const isSaved = match.supplementarySheet?.isSaved;
@@ -418,7 +425,14 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
 
               const referee = refNumber === 1 ? match.referee1 : match.referee2;
               const refereeTitle = referee
-                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}${referee.clubName ? ` (${referee.clubName})` : ''}`
+                ? (
+                    <div>
+                      <div className="font-medium text-gray-800">SR {refNumber} - {referee.firstName} {referee.lastName}</div>
+                      {referee.clubName && (
+                        <div className="text-xs font-normal text-gray-500 mt-0.5">{referee.clubName}</div>
+                      )}
+                    </div>
+                  )
                 : `SR ${refNumber} - nicht eingeteilt`;
 
               return (
