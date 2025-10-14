@@ -104,12 +104,6 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonMatchCenter = true;
       permissions.showButtonSupplementary = true;
     }
-
-    if (match.matchStatus.key === "INPROGRESS") {
-      permissions.showButtonRosterHome = true;
-      permissions.showButtonRosterAway = true;
-      permissions.showButtonSupplementary = true;
-    }
   }
 
   // Home team club admin permissions
