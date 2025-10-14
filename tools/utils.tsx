@@ -84,9 +84,9 @@ export function calculateMatchButtonPermissions(
   const now = Date.now();
   const matchStartTime = new Date(match.startDate).getTime();
   const thirtyMinutesFromNow = now + 30 * 60 * 1000;
-  const isMatchToday =
-    new Date(match.startDate).setHours(0, 0, 0, 0) <=
-    new Date().setHours(0, 0, 0, 0);
+  const matchDate = new Date(match.startDate).setHours(0, 0, 0, 0);
+  const today = new Date().setHours(0, 0, 0, 0);
+  const isMatchDay = matchDate === today;
 
   // LEAGUE_ADMIN permissions
   if (user.roles.includes("LEAGUE_ADMIN") || user.roles.includes("ADMIN")) {
@@ -159,7 +159,7 @@ export function calculateMatchButtonPermissions(
     matchdayOwner &&
     user.club.clubId === matchdayOwner.clubId &&
     user.roles.includes("CLUB_ADMIN") &&
-    isMatchToday
+    isMatchDay
   ) {
     permissions.showButtonRosterHome = true;
     permissions.showButtonRosterAway = true;
@@ -177,11 +177,6 @@ export function calculateMatchButtonPermissions(
     match.matchStatus.key !== "INPROGRESS" &&
     match.matchStatus.key !== "SCHEDULED"
   ) {
-    // Check if it's the same day as the match
-    const matchDate = new Date(match.startDate).setHours(0, 0, 0, 0);
-    const today = new Date().setHours(0, 0, 0, 0);
-    const isMatchDay = matchDate === today;
-
     // Allow home team club admin full access on match day
     const isHomeClubAdmin = user.club &&
       user.club.clubId === match.home.clubId &&
@@ -194,9 +189,30 @@ export function calculateMatchButtonPermissions(
       user.club.clubId === matchdayOwner.clubId &&
       user.roles.includes("CLUB_ADMIN");
 
+    // ADMIN/LEAGUE_ADMIN can always edit finished matches
+    const isAdminOrLeagueAdmin = user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN");
+
     // If it's match day and user is home club admin or matchday owner, keep permissions
-    if (isMatchDay && (isHomeClubAdmin || isMatchdayOwnerAdmin)) {
+    // Or if user is ADMIN/LEAGUE_ADMIN, grant full permissions
+    if ((isMatchDay && (isHomeClubAdmin || isMatchdayOwnerAdmin)) || isAdminOrLeagueAdmin) {
       // Don't restrict permissions - they keep what was granted earlier
+      
+      // Grant additional permissions for ADMIN/LEAGUE_ADMIN
+      if (isAdminOrLeagueAdmin) {
+        permissions.showButtonEdit = true;
+        permissions.showButtonStatus = true;
+        permissions.showButtonMatchCenter = true;
+
+        if (isMatchCenter) {
+          permissions.showButtonRosterHome = true;
+          permissions.showButtonRosterAway = true;
+          permissions.showButtonScoresHome = true;
+          permissions.showButtonScoresAway = true;
+          permissions.showButtonPenaltiesHome = true;
+          permissions.showButtonPenaltiesAway = true;
+          permissions.showButtonSupplementary = true;
+        }
+      }
     } else {
       // Apply finished match restrictions for everyone else
       permissions.showButtonEdit = false;
@@ -209,27 +225,6 @@ export function calculateMatchButtonPermissions(
       if (isMatchCenter) {
         permissions.showButtonEvents = false;
       }
-    }
-  }
-
-  // ADMIN/LEAGUE_ADMIN can edit finished matches
-  if (
-    (user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN")) &&
-    match.matchStatus.key !== "SCHEDULED" &&
-    match.matchStatus.key !== "INPROGRESS"
-  ) {
-    permissions.showButtonEdit = true;
-    permissions.showButtonStatus = true;
-    permissions.showButtonMatchCenter = true;
-
-    if (isMatchCenter) {
-      permissions.showButtonRosterHome = true;
-      permissions.showButtonRosterAway = true;
-      permissions.showButtonScoresHome = true;
-      permissions.showButtonScoresAway = true;
-      permissions.showButtonPenaltiesHome = true;
-      permissions.showButtonPenaltiesAway = true;
-      permissions.showButtonSupplementary = true;
     }
   }
 
