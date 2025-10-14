@@ -657,7 +657,9 @@ export default function MatchDetails({
             <SupplementaryTab
               match={match}
               jwt={jwt}
-              permissions={permissions}
+              permissions={{
+                showButtonSupplementary: permissions.showButtonSupplementary ?? false,
+              }}
             />
           )}
         </div>
