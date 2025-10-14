@@ -31,16 +31,22 @@ interface SupplementaryTabProps {
 interface InfoCardProps {
   title: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   className?: string;
 }
 
-const InfoCard: React.FC<InfoCardProps> = ({ title, children, className = '' }) => {
+const InfoCard: React.FC<InfoCardProps> = ({ title, children, footer, className = '' }) => {
   return (
     <div className={`overflow-hidden bg-white rounded-md shadow-md border ${className}`}>
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
         <h4 className="text-sm font-medium text-gray-800">{title}</h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">{children}</div>
+      {footer && (
+        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+          {footer}
+        </div>
+      )}
     </div>
   );
 };
@@ -134,6 +140,17 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                   key={refNumber} 
                   title={refereeTitle}
                   className={isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}
+                  footer={isDifferentReferee ? (
+                    <div className="text-xs text-gray-600">
+                      <div className="font-medium text-gray-600 mb-2">
+                        {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
+                      </div>
+                      <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
+                      {assignment.referee.clubName && (
+                        <div className="text-gray-500">{assignment.referee.clubName}</div>
+                      )}
+                    </div>
+                  ) : undefined}
                 >
                   <div className="text-sm text-gray-700 space-y-3">
                     <div className="flex items-center justify-between">
@@ -161,19 +178,6 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                       <span>{delayMin || 0} Min</span>
                     </div>
                   </div>
-                  {isDifferentReferee && (
-                    <div className="mt-6 pt-3 border-t border-gray-200 bg-gray-50 -mx-6 -mb-6 px-6 py-3">
-                      <div className="text-xs text-gray-600">
-                        <div className="font-medium text-gray-600 mb-2">
-                          {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
-                        </div>
-                        <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
-                        {assignment.referee.clubName && (
-                          <div className="text-gray-500 pb-1">{assignment.referee.clubName}</div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </InfoCard>
               );
             })}
