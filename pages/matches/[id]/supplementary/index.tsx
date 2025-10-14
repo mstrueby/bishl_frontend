@@ -324,19 +324,38 @@ function RefereeAttendanceCard({
   const assignment = assignments.find(a => a.position === refereeNumber);
   const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
+  const refereeTitle = referee ? (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-medium text-gray-800">
+        {referee.firstName} {referee.lastName}
+      </div>
+      {referee.clubName && (
+        <div className="text-xs font-normal text-gray-500">
+          {referee.clubName}
+        </div>
+      )}
+    </div>
+  ) : (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-base text-gray-500">
+        nicht eingeteilt
+      </div>
+      <div className="text-xs font-normal text-gray-500">
+        &nbsp;
+      </div>
+    </div>
+  );
+
   return (
     <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}`}>
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5 flex items-center justify-between">
-        <h4 className="text-sm font-medium text-gray-800">
-          SR {refereeNumber}
-          {referee ? (
-            <span className="ml-2 text-gray-600">
-              - {referee.firstName} {referee.lastName}
-            </span>
-          ) : (
-            <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
-          )}
-        </h4>
+        <h4 className="text-sm">{refereeTitle}</h4>
         <button
           type="button"
           onClick={onOpenRefereeDialog}
@@ -529,19 +548,38 @@ function RefereePaymentCard({
     (paymentData?.expenseAllowance || 0) +
     (paymentData?.gameFees || 0);
 
+  const refereeTitle = referee ? (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-medium text-gray-800">
+        {referee.firstName} {referee.lastName}
+      </div>
+      {referee.clubName && (
+        <div className="text-xs font-normal text-gray-500">
+          {referee.clubName}
+        </div>
+      )}
+    </div>
+  ) : (
+    <div>
+      <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
+        Schiedsrichter {refereeNumber}
+      </div>
+      <div className="font-base text-gray-500">
+        nicht eingeteilt
+      </div>
+      <div className="text-xs font-normal text-gray-500">
+        &nbsp;
+      </div>
+    </div>
+  );
+
   return (
     <div className="overflow-hidden bg-white rounded-md shadow-md border">
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5">
-        <h4 className="text-sm font-medium text-gray-800">
-          SR {refereeNumber}
-          {referee ? (
-            <span className="ml-2 text-gray-600">
-              - {referee.firstName} {referee.lastName}
-            </span>
-          ) : (
-            <span className="ml-2 text-gray-400">- nicht eingeteilt</span>
-          )}
-        </h4>
+        <h4 className="text-sm">{refereeTitle}</h4>
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
         <div className="space-y-4">
