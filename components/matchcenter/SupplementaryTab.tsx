@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Match, SupplementarySheet } from '../../types/MatchValues';
@@ -59,7 +58,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
       try {
         const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
         console.log('Fetching assignments from URL:', url);
-        
+
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${jwt}`,
@@ -68,7 +67,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
         });
         console.log('Response status:', response.status);
         console.log('Response ok:', response.ok);
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched assignments:', data);
@@ -116,15 +115,15 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
               const refereePresent = match.supplementarySheet?.[refereePresentKey] as boolean | undefined;
 
               const referee = refNumber === 1 ? match.referee1 : match.referee2;
-              const refereeTitle = referee 
-                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}`
+              const refereeTitle = referee
+                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}${referee.clubName ? ` (${referee.clubName})` : ''}`
                 : `SR ${refNumber} - nicht eingeteilt`;
 
               const isSaved = match.supplementarySheet?.isSaved;
 
               // Find assignment for this position
               const assignment = assignments.find(a => a.position === refNumber);
-              
+
               // Debug logging
               console.log(`=== Referee ${refNumber} Debug ===`);
               console.log('Referee object:', referee);
@@ -132,12 +131,12 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
               console.log('Assignment referee userId:', assignment?.referee?.userId);
               console.log('Match referee userId:', referee?.userId);
               console.log('Are they different?', assignment && referee && assignment.referee.userId !== referee.userId);
-              
+
               const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
 
               return (
-                <InfoCard 
-                  key={refNumber} 
+                <InfoCard
+                  key={refNumber}
                   title={refereeTitle}
                   className={isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}
                   footer={isDifferentReferee ? (
@@ -416,10 +415,10 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({ match, jwt, permiss
                 (paymentData?.travelExpenses || 0) +
                 (paymentData?.expenseAllowance || 0) +
                 (paymentData?.gameFees || 0);
-              
+
               const referee = refNumber === 1 ? match.referee1 : match.referee2;
-              const refereeTitle = referee 
-                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}`
+              const refereeTitle = referee
+                ? `SR ${refNumber} - ${referee.firstName} ${referee.lastName}${referee.clubName ? ` (${referee.clubName})` : ''}`
                 : `SR ${refNumber} - nicht eingeteilt`;
 
               return (
