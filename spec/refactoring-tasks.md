@@ -368,27 +368,114 @@
 
 ---
 
+## High Impact / High Risk (Continued)
+
+### 17. Next.js & Dependencies Upgrade
+**Impact:** High | **Risk:** High | **Effort:** Large
+
+**Issues:**
+- Next.js 12.2.0 is severely outdated (current is 14.x/15.x)
+- Missing critical security patches and performance improvements
+- Tailwind CSS outdated (3.4.14 vs latest 3.4.x)
+- HeadlessUI outdated (2.2.0)
+- React 18.2.0 (stable but could be newer)
+- No access to modern Next.js features (App Router, Server Components, etc.)
+- Breaking changes expected in upgrade path
+
+**Tasks:**
+- [ ] Evaluate upgrade path: incremental (12 → 13 → 14) vs fresh repl
+- [ ] Update Next.js to latest stable version
+- [ ] Update Tailwind CSS to latest version
+- [ ] Update HeadlessUI to latest version
+- [ ] Update React and React-DOM if needed
+- [ ] Update all other dependencies to compatible versions
+- [ ] Test all pages and API routes after upgrade
+- [ ] Update build configuration for new Next.js features
+- [ ] Consider migrating to App Router (if going to Next.js 13+)
+- [ ] Update middleware configuration if needed
+
+**Files Affected:** `package.json`, `next.config.js`, potentially all pages if migrating to App Router
+
+**Dependencies:** Should be done before #18 (URL structure refactoring)
+
+---
+
+### 18. Tournament Page URL Structure Refactoring
+**Impact:** High | **Risk:** High | **Effort:** Large
+
+**Issues:**
+- `/tournaments/[alias].tsx` is monolithic and handles too many responsibilities
+- No distinct URLs for seasons, rounds, matchdays
+- Poor SEO (all content on single dynamic route)
+- Difficult to share specific standings, matchdays, or matches
+- Client-side state management complexity
+- No proper deep linking support
+- Difficult to implement proper ISR/SSG strategies
+
+**Current Structure:**
+```
+/tournaments/landesliga (shows everything)
+```
+
+**Target Structure:**
+```
+/tournaments/landesliga
+/tournaments/landesliga/2024-2025
+/tournaments/landesliga/2024-2025/hauptrunde
+/tournaments/landesliga/2024-2025/hauptrunde/matchday-1
+/tournaments/landesliga/2024-2025/hauptrunde/matchday-1/standings
+/tournaments/landesliga/2024-2025/hauptrunde/matchday-1/stats
+/matches/[matchId] (for individual matches)
+```
+
+**Tasks:**
+- [ ] Create `/tournaments/[tAlias]/index.tsx` - tournament overview
+- [ ] Create `/tournaments/[tAlias]/[sAlias]/index.tsx` - season overview
+- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/index.tsx` - round overview
+- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/index.tsx` - matchday matches
+- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/standings.tsx` - matchday standings
+- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/stats.tsx` - matchday stats
+- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/standings.tsx` - round standings
+- [ ] Implement proper breadcrumb navigation
+- [ ] Add canonical URLs and meta tags
+- [ ] Implement proper getStaticPaths for all levels
+- [ ] Update all internal links to use new URL structure
+- [ ] Add redirects from old structure (if needed)
+- [ ] Update sitemap generation
+
+**Files Affected:** New page files, existing tournament page, navigation components, `sitemap.xml.tsx`
+
+**Dependencies:** Should be done after #17 (Next.js upgrade)
+
+---
+
 ## Priority Recommendations
 
-### Immediate (Before Season 2):
-1. Authentication & Authorization System (#2)
-2. API Integration & Error Handling (#3)
+### Phase 0 - Foundation (Critical - Start Immediately):
+1. **Next.js & Dependencies Upgrade (#17)** - Must be done first
+2. Authentication & Authorization System (#2)
 3. Security Vulnerabilities (#7)
 
-### Short-term (Early Season 2):
-4. TypeScript Migration (#1)
-5. Performance Optimization (#4)
-6. Form Management (#5)
+### Phase 1 - Core Refactoring (Before Season 2):
+4. **Tournament URL Structure Refactoring (#18)** - After upgrade
+5. API Integration & Error Handling (#3)
+6. TypeScript Migration (#1)
 
-### Medium-term (Mid Season 2):
-7. Data Fetching Strategy (#6)
-8. Component Architecture (#8)
-9. State Management (#9)
+### Phase 2 - Infrastructure (Early Season 2):
+7. Code Quality & Testing (#12) - Set up testing before more changes
+8. Performance Optimization (#4)
+9. Data Fetching Strategy (#6)
 
-### Long-term (Post Season 2):
-10. Code Quality & Testing (#12)
-11. Documentation (#13)
-12. Accessibility (#14)
+### Phase 3 - Enhancement (Mid Season 2):
+10. Form Management (#5)
+11. Component Architecture (#8)
+12. State Management (#9)
+
+### Phase 4 - Polish (Post Season 2):
+13. Image & Asset Management (#10)
+14. Documentation (#13)
+15. Accessibility (#14)
+16. Styling & UI Consistency (#15)
 
 ---
 
