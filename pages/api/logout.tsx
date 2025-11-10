@@ -1,17 +1,15 @@
-import cookie from 'cookie'
+
 import { NextApiRequest, NextApiResponse } from 'next'
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {  
-  res.status(200).setHeader('Set-Cookie', cookie.serialize(
-    'jwt', 
-    '', 
-    { 
-      path: '/', 
-      httpOnly: true,
-      sameSite: 'strict',
-      maxAge: -1
-    }
-  )).end()
+const logoutHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method === 'POST') {
+    // Logout is now handled client-side by clearing localStorage
+    // This endpoint can remain for backward compatibility but does nothing
+    res.status(200).json({ message: 'Logged out successfully' });
+  } else {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).json({ message: `Method ${req.method} not allowed` });
+  }
 }
 
-export default handler
+export default logoutHandler;

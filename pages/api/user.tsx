@@ -1,33 +1,41 @@
+
 import { NextApiRequest, NextApiResponse } from 'next'
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'GET') {
-    const { jwt } = req.cookies;
-
-    if (!jwt) {
-      res.status(401).end();
-      return;
-    }
-
     try {
-      const result = await fetch(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
+      // Get access token from Authorization header
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'No access token provided' });
+      }
+      
+      const accessToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Fetch user info from backend using access token
+      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`
+          'Authorization': `Bearer ${accessToken}`
         }
       });
-      const userData = await result.json();
-      userData['jwt'] = jwt;
-      res.status(200).json(userData);
+
+      if (result.ok) {
+        const userData = await result.json();
+        res.status(200).json(userData);
+      } else {
+        const errorData = await result.json();
+        res.status(result.status).json({ error: errorData.detail || 'Failed to fetch user' });
+      }
     } catch (error) {
-      res.status(401).end();
-      return;
+      console.error('User fetch error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   } else {
     res.setHeader('Allow', ['GET']);
     res.status(405).json({ message: `Method ${req.method} not allowed` });
   }
-};
+}
 
-export default handler;
+export default userHandler;
