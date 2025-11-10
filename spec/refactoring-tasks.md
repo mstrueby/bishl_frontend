@@ -62,17 +62,20 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - Authorization logic scattered across components
 
 **Tasks:**
-- [ ] Update `/api/login.tsx` to handle new backend response format
-- [ ] Remove cookie-based token storage, use localStorage for both tokens
-- [ ] Implement Axios response interceptor for automatic token refresh on 401
-- [ ] Implement Axios request interceptor to add access token to headers
-- [ ] Update `AuthContext` to store both access_token and refresh_token
-- [ ] Add refresh token flow using `/users/refresh` endpoint
-- [ ] Handle refresh token expiration (redirect to login after 7 days)
-- [ ] Update `/api/logout.tsx` to clear both tokens
-- [ ] Update `/api/user.tsx` to use access token from localStorage
-- [ ] Remove HTTP-only cookie logic (no longer needed)
-- [ ] Test full auth flow: login → API calls → token refresh → logout
+- [x] Update `/api/login.tsx` to handle new backend response format
+- [x] Remove cookie-based token storage, use localStorage for both tokens
+- [x] Implement Axios response interceptor for automatic token refresh on 401
+- [x] Implement Axios request interceptor to add access token to headers
+- [x] Update `AuthContext` to store both access_token and refresh_token
+- [x] Add refresh token flow using `/users/refresh` endpoint
+- [x] Handle refresh token expiration (redirect to login after 7 days)
+- [x] Update `/api/logout.tsx` to clear both tokens
+- [x] Update `/api/user.tsx` to use access token from localStorage
+- [x] Remove HTTP-only cookie logic (no longer needed)
+- [x] Test full auth flow: login → API calls → token refresh → logout
+- [ ] Centralize authorization logic (move from components to middleware/utilities)
+- [ ] Implement server-side permission validation in API routes
+- [ ] Create RBAC utility functions for role-based access control
 
 **Files Affected:** 
 - `pages/api/login.tsx` (update response handling)
@@ -87,8 +90,9 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 2. ✅ **COMPLETE:** Update `pages/api/login.tsx` to parse new response structure
 3. ✅ **COMPLETE:** Update `AuthContext` to manage both tokens in localStorage
 4. ✅ **COMPLETE:** Update all API route handlers to use new token storage
-5. ⏳ **IN PROGRESS:** Replace all `fetch()` calls with configured axios instance (Phase 2 of api-fetch-update-plan.md)
+5. ✅ **COMPLETE:** Replace all `fetch()` calls with configured axios instance (Phase 2 of api-fetch-update-plan.md)
 6. ✅ **COMPLETE:** Test complete auth flow end-to-end
+7. ⏳ **REMAINING:** Centralize authorization logic and implement RBAC utilities
 
 **Breaking Changes:**
 ⚠️ **Users will need to re-login after deployment** (token format changed)
