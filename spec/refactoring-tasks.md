@@ -1,9 +1,26 @@
 
 # BISHL App - Refactoring & Improvement Tasks
 
-**Document Version:** 1.0  
+**Document Version:** 1.1  
 **Date:** 2025-01-24  
-**Season Status:** Season 1 Complete
+**Season Status:** Season 1 Complete  
+**Last Updated:** 2025-01-24 (Added dependency upgrade strategy)
+
+---
+
+## 🚨 CRITICAL: Dependency Upgrade Strategy
+
+**TL;DR - BEST TIME TO UPGRADE NEXT.JS:** 
+
+**AFTER completing Phase 0b (Authentication, Security, API refactoring)**
+
+**UPGRADE SEQUENCE:**
+1. **NOW (Week 1):** Upgrade all dependencies EXCEPT Next.js (TypeScript, React, utilities)
+2. **Week 2-3:** Complete foundation refactoring (Auth, Security, API, TypeScript strict mode)
+3. **Week 4-6:** Upgrade Next.js incrementally (12 → 13 → 14)
+4. **Week 7+:** Continue other refactoring with modern Next.js
+
+See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 
 ---
 
@@ -370,33 +387,78 @@
 
 ## High Impact / High Risk (Continued)
 
-### 17. Next.js & Dependencies Upgrade
+### 17. Dependencies & Next.js Upgrade Strategy
 **Impact:** High | **Risk:** High | **Effort:** Large
 
 **Issues:**
 - Next.js 12.2.0 is severely outdated (current is 14.x/15.x)
 - Missing critical security patches and performance improvements
-- Tailwind CSS outdated (3.4.14 vs latest 3.4.x)
-- HeadlessUI outdated (2.2.0)
-- React 18.2.0 (stable but could be newer)
+- Tailwind CSS 3.4.14 (current stable)
+- HeadlessUI 2.2.0 (current: 2.2.0 - latest)
+- React 18.2.0 (current stable: 18.3.1)
+- TypeScript 4.7.4 (current: 5.x)
+- Other dependencies need security updates
 - No access to modern Next.js features (App Router, Server Components, etc.)
 - Breaking changes expected in upgrade path
 
-**Tasks:**
-- [ ] Evaluate upgrade path: incremental (12 → 13 → 14) vs fresh repl
-- [ ] Update Next.js to latest stable version
-- [ ] Update Tailwind CSS to latest version
-- [ ] Update HeadlessUI to latest version
-- [ ] Update React and React-DOM if needed
-- [ ] Update all other dependencies to compatible versions
-- [ ] Test all pages and API routes after upgrade
-- [ ] Update build configuration for new Next.js features
-- [ ] Consider migrating to App Router (if going to Next.js 13+)
-- [ ] Update middleware configuration if needed
+**RECOMMENDED UPGRADE SEQUENCE:**
 
-**Files Affected:** `package.json`, `next.config.js`, potentially all pages if migrating to App Router
+**Phase 0a: Pre-Foundation Dependencies (DO NOW)**
+- [ ] Update TypeScript to 5.x
+- [ ] Update React to 18.3.1
+- [ ] Update Tailwind CSS to latest 3.x
+- [ ] Update date-fns, axios, formik, yup (non-breaking)
+- [ ] Update development dependencies (eslint, etc.)
+- [ ] Test application thoroughly
+- [ ] **DO NOT upgrade Next.js yet**
 
-**Dependencies:** Should be done before #18 (URL structure refactoring)
+**Phase 0b: Foundation Work (Week 1-2)**
+- [ ] Complete Task #2 (Authentication refactoring)
+- [ ] Complete Task #7 (Security vulnerabilities)
+- [ ] Complete Task #3 (API integration centralization)
+- [ ] Enable TypeScript strict mode
+- [ ] Fix all TypeScript errors
+
+**Phase 1: Next.js Incremental Upgrade (Week 3-4)**
+- [ ] Upgrade Next.js 12.2 → 12.3.x (latest 12.x)
+- [ ] Test all pages and API routes
+- [ ] Fix any breaking changes
+- [ ] Upgrade Next.js 12.x → 13.5.x (stable 13.x)
+- [ ] Test with Pages Router (no App Router yet)
+- [ ] Fix breaking changes (middleware, next/image, etc.)
+- [ ] Update next.config.js for Next.js 13
+- [ ] Test all functionality
+
+**Phase 2: Next.js 14 & Modern Features (Week 5-6)**
+- [ ] Upgrade Next.js 13.x → 14.x (latest stable)
+- [ ] Test thoroughly with Pages Router
+- [ ] Update build configuration
+- [ ] Consider App Router migration plan (separate phase)
+- [ ] Test all pages and API routes
+- [ ] Performance benchmarking
+
+**Phase 3 (Optional): App Router Migration (Week 7+)**
+- [ ] Evaluate if App Router is needed
+- [ ] Create migration plan for specific routes
+- [ ] Migrate incrementally (start with simple pages)
+- [ ] Maintain Pages Router for complex pages initially
+- [ ] Use hybrid approach (Pages + App Router)
+
+**Why This Sequence?**
+1. **Stability First**: Foundation refactoring reduces risk
+2. **Incremental Safety**: Smaller upgrade steps = easier debugging
+3. **Type Safety**: TypeScript 5.x + strict mode before architectural changes
+4. **API Stability**: Centralized API client before Next.js changes
+5. **Auth Security**: Fixed auth before framework migration
+6. **Dependency Compatibility**: Other deps upgraded first for better Next.js compatibility
+
+**Files Affected:** `package.json`, `next.config.js`, `tsconfig.json`, potentially all pages if migrating to App Router
+
+**Critical Note:** Next.js upgrade should happen AFTER completing Tasks #2, #3, #7, and #1 (partial)
+
+**Dependencies:** 
+- Must complete before: Task #18 (URL structure refactoring)
+- Should complete first: Tasks #2, #3, #7, #1 (partial)
 
 ---
 
@@ -451,15 +513,29 @@
 
 ## Priority Recommendations
 
-### Phase 0 - Foundation (Critical - Start Immediately):
-1. **Next.js & Dependencies Upgrade (#17)** - Must be done first
-2. Authentication & Authorization System (#2)
-3. Security Vulnerabilities (#7)
+### Phase 0a - Pre-Foundation Dependencies (Week 1 - DO NOW):
+1. **Dependencies Upgrade - Part 1 (#17a)** - Everything EXCEPT Next.js
+   - TypeScript 4.7.4 → 5.6.3
+   - React 18.2.0 → 18.3.1
+   - Tailwind, axios, formik, yup, dev dependencies
+   - Test thoroughly after each group
 
-### Phase 1 - Core Refactoring (Before Season 2):
-4. **Tournament URL Structure Refactoring (#18)** - After upgrade
-5. API Integration & Error Handling (#3)
-6. TypeScript Migration (#1)
+### Phase 0b - Foundation (Week 2-3 - Critical):
+2. **Authentication & Authorization System (#2)** - Security critical
+3. **Security Vulnerabilities (#7)** - Fix before Next.js upgrade
+4. **API Integration & Error Handling (#3)** - Centralize before migration
+5. **TypeScript Migration (#1)** - Enable strict mode, fix errors
+
+### Phase 1 - Next.js Upgrade (Week 4-6):
+6. **Next.js Incremental Upgrade (#17b)**
+   - 12.2 → 12.3.x → 13.5.x → 14.x
+   - Test extensively between each step
+   - Update configuration progressively
+
+### Phase 2 - Core Refactoring (Week 7-10):
+7. **Tournament URL Structure Refactoring (#18)** - After Next.js stable
+8. **Data Fetching Strategy (#6)** - Use Next.js 14 patterns
+9. **Performance Optimization (#4)** - Leverage new Next.js features
 
 ### Phase 2 - Infrastructure (Early Season 2):
 7. Code Quality & Testing (#12) - Set up testing before more changes
