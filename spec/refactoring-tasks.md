@@ -511,47 +511,212 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 
 ---
 
-## Priority Recommendations
+## Integrated Implementation Roadmap
 
-### Phase 0a - Pre-Foundation Dependencies (Week 1 - DO NOW):
-1. **Dependencies Upgrade - Part 1 (#17a)** - Everything EXCEPT Next.js
-   - TypeScript 4.7.4 → 5.6.3
-   - React 18.2.0 → 18.3.1
-   - Tailwind, axios, formik, yup, dev dependencies
-   - Test thoroughly after each group
+### WEEK 1: Pre-Foundation Dependencies (Phase 0a)
 
-### Phase 0b - Foundation (Week 2-3 - Critical):
-2. **Authentication & Authorization System (#2)** - Security critical
-3. **Security Vulnerabilities (#7)** - Fix before Next.js upgrade
-4. **API Integration & Error Handling (#3)** - Centralize before migration
-5. **TypeScript Migration (#1)** - Enable strict mode, fix errors
+**Day 1-2: Initial Safe Updates**
+- [ ] Update browserslist database: `npx update-browserslist-db@latest`
+- [ ] Update Tailwind CSS 3.4.14 → 3.4.16: `npm update tailwindcss autoprefixer postcss`
+- [ ] Update @headlessui/react (verify already on 2.2.0)
+- [ ] Update @heroicons/react to latest 2.x
+- [ ] Update formik 2.4.2 → 2.4.6
+- [ ] Test: `npm run build` and verify UI components work
+- [ ] **Git commit:** "chore: update UI and build dependencies"
 
-### Phase 1 - Next.js Upgrade (Week 4-6):
-6. **Next.js Incremental Upgrade (#17b)**
-   - 12.2 → 12.3.x → 13.5.x → 14.x
-   - Test extensively between each step
-   - Update configuration progressively
+**Day 3: TypeScript 5.x Upgrade (Task #17 - Step 2)**
+- [ ] Install TypeScript 5.x: `npm install --save-dev typescript@latest`
+- [ ] Update type definitions: `npm install --save-dev @types/node@latest @types/react@latest @types/react-dom@latest`
+- [ ] Update [tsconfig.json](rag://rag_source_0) with modern settings:
+  - `"target": "ES2022"`
+  - `"lib": ["dom", "dom.iterable", "ES2022"]`
+  - `"moduleResolution": "bundler"`
+- [ ] Fix TypeScript compilation errors
+- [ ] Test: `npm run build`
+- [ ] **Git commit:** "chore: upgrade to TypeScript 5.x"
 
-### Phase 2 - Core Refactoring (Week 7-10):
-7. **Tournament URL Structure Refactoring (#18)** - After Next.js stable
-8. **Data Fetching Strategy (#6)** - Use Next.js 14 patterns
-9. **Performance Optimization (#4)** - Leverage new Next.js features
+**Day 4: React 18.3.1 Upgrade (Task #17 - Step 3)**
+- [ ] Update React: `npm install react@18.3.1 react-dom@18.3.1`
+- [ ] Test all interactive components, especially forms
+- [ ] Test admin dashboard
+- [ ] Test match center
+- [ ] **Git commit:** "chore: upgrade to React 18.3.1"
 
-### Phase 2 - Infrastructure (Early Season 2):
-7. Code Quality & Testing (#12) - Set up testing before more changes
-8. Performance Optimization (#4)
-9. Data Fetching Strategy (#6)
+**Day 5: Utility Libraries (Task #17 - Step 5)**
+- [ ] Update axios 1.6.1 → 1.7.9: `npm install axios@latest`
+- [ ] Update yup 1.2.0 → 1.6.0: `npm install yup@latest`
+- [ ] Test all API calls
+- [ ] Test all form validation
+- [ ] **Skip date-fns upgrade** (v4 has breaking changes - defer)
+- [ ] Update dev dependencies: `npm update eslint eslint-config-next`
+- [ ] Update type packages: `npm install --save-dev @types/cookie@latest @types/prismjs@latest`
+- [ ] **Git commit:** "chore: update utility and dev dependencies"
 
-### Phase 3 - Enhancement (Mid Season 2):
-10. Form Management (#5)
-11. Component Architecture (#8)
-12. State Management (#9)
+### WEEK 2-3: Foundation Refactoring (Phase 0b)
 
-### Phase 4 - Polish (Post Season 2):
-13. Image & Asset Management (#10)
-14. Documentation (#13)
-15. Accessibility (#14)
-16. Styling & UI Consistency (#15)
+**Week 2 Focus:**
+- [ ] **Task #1 (Partial): TypeScript Strict Mode**
+  - Enable `"strict": true` in tsconfig.json (already enabled)
+  - Fix all strict mode errors file by file
+  - Remove all `any` types
+  - Create proper type definitions for API responses
+  
+- [ ] **Task #2: Authentication & Authorization System**
+  - Implement HTTP-only cookies for JWT storage
+  - Add token refresh mechanism
+  - Centralize authorization logic in middleware
+  - Move permission validation to API layer
+  - Create RBAC utility functions
+  - **Git commit after each sub-task**
+
+**Week 3 Focus:**
+- [ ] **Task #7: Security Vulnerabilities**
+  - Implement server-side permission validation
+  - Add CSRF token handling
+  - Remove sensitive data from client bundle
+  - Sanitize rich text input/output
+  - Add security headers in next.config.js
+  - Implement rate limiting
+  
+- [ ] **Task #3: API Integration & Error Handling**
+  - Create centralized Axios instance with interceptors
+  - Implement global error handling strategy
+  - Add retry logic for network failures
+  - Create consistent loading/error state components
+  - Implement request cancellation
+  - **Git commit:** "refactor: centralize API integration"
+
+**End of Week 3:**
+- [ ] Full regression testing
+- [ ] Document all changes
+- [ ] **Git tag:** v1.1.0-foundation
+
+### WEEK 4-6: Next.js Incremental Upgrade (Phase 1)
+
+**Week 4: Next.js 12.3.x (Task #17 - Phase 1, Step 1)**
+- [ ] Backup current state
+- [ ] Update Next.js: `npm install next@12.3.4`
+- [ ] Test all pages
+- [ ] Test all API routes
+- [ ] Test middleware (if any)
+- [ ] **Git commit:** "chore: upgrade Next.js 12.2.0 → 12.3.4"
+
+**Week 5: Next.js 13.5.x (Task #17 - Phase 1, Step 2)**
+- [ ] Update Next.js: `npm install next@13.5.6`
+- [ ] Update [next.config.js](rag://rag_source_1):
+  - Enable `swcMinify: true`
+  - Update image configuration
+  - Verify i18n settings
+- [ ] Fix `next/image` breaking changes
+- [ ] Test font optimization
+- [ ] Update middleware API (if needed)
+- [ ] Full regression testing
+- [ ] **Git commit:** "chore: upgrade Next.js 12.x → 13.5.x"
+
+**Week 6: Next.js 14.x (Task #17 - Phase 1, Step 3)**
+- [ ] Update Next.js: `npm install next@latest` (14.x)
+- [ ] Update configuration for Next.js 14
+- [ ] Test all features
+- [ ] Performance benchmarking
+- [ ] **Git commit:** "chore: upgrade Next.js 13.x → 14.x"
+- [ ] **Git tag:** v1.2.0-nextjs14
+
+### WEEK 7-10: Core Refactoring (Phase 2)
+
+**Week 7-8: URL Structure & Data Fetching**
+- [ ] **Task #18: Tournament URL Structure Refactoring**
+  - Create new page structure with proper routes
+  - Implement breadcrumb navigation
+  - Add canonical URLs and meta tags
+  - Implement getStaticPaths for all levels
+  - Update all internal links
+  - Update sitemap generation
+  
+- [ ] **Task #6: Data Fetching Strategy**
+  - Define SSR vs SSG strategy per page type
+  - Migrate appropriate pages to SSG with ISR
+  - Implement error boundaries
+  - Add suspense boundaries
+  - Consider SWR or React Query
+
+**Week 9-10: Performance & Forms**
+- [ ] **Task #4: Performance Optimization**
+  - Re-enable SWC minification (now working with Next.js 14)
+  - Implement dynamic imports for heavy components
+  - Optimize bundle with tree-shaking
+  - Implement route-based code splitting
+  - Move tournament configs to database/API
+  - Add performance monitoring
+  
+- [ ] **Task #5: Form Management & Validation**
+  - Standardize on Formik + Yup
+  - Create reusable form components library
+  - Centralize validation schemas
+  - Implement consistent error display patterns
+  - **Git tag:** v1.3.0-core-refactoring
+
+### WEEK 11-14: Infrastructure & Quality (Phase 3)
+
+**Week 11-12: Testing & Code Quality**
+- [ ] **Task #12: Code Quality & Maintainability**
+  - Expand ESLint rules
+  - Add Prettier with pre-commit hook
+  - Set up Jest + React Testing Library
+  - Add E2E tests (Playwright/Cypress)
+  - Create CI/CD pipeline
+  
+**Week 13-14: Component Architecture**
+- [ ] **Task #8: Component Architecture**
+  - Refactor large components (>500 lines)
+  - Create shared component library
+  - Add JSDoc comments
+  - Create component testing strategy
+  - Standardize naming conventions
+  
+- [ ] **Task #9: State Management**
+  - Evaluate Redux/Zustand need
+  - Implement state persistence
+  - Add optimistic updates
+  - Implement cache invalidation
+
+### PHASE 4: Enhancement & Polish (Week 15+)
+
+**Enhancement Focus:**
+- [ ] **Task #10: Image & Asset Management**
+- [ ] **Task #11: Date & Time Handling** (including date-fns v4 upgrade)
+- [ ] **Task #13: Documentation**
+- [ ] **Task #14: Accessibility**
+- [ ] **Task #15: Styling & UI Consistency**
+- [ ] **Task #16: Build & Deployment**
+
+### Optional Future Phase: App Router Migration
+
+- [ ] Evaluate if App Router is needed for your use case
+- [ ] Create incremental migration plan
+- [ ] Start with simple pages
+- [ ] Maintain hybrid Pages + App Router approach
+- [ ] Migrate complex pages last
+
+---
+
+## Quick Reference: Task Dependencies
+
+**Must Complete Before Next.js Upgrade:**
+- Task #1 (Partial): TypeScript strict mode + type fixes
+- Task #2: Authentication refactoring
+- Task #3: API centralization
+- Task #7: Security fixes
+
+**Must Complete After Next.js Upgrade:**
+- Task #18: URL structure refactoring
+- Task #6: Modern data fetching patterns
+- Task #4: Performance optimization (leverage Next.js 14 features)
+
+**Can Be Done Anytime:**
+- Task #5: Form management
+- Task #8: Component architecture
+- Task #9: State management
+- Tasks #10-16: Polish and enhancement tasks
 
 ---
 
