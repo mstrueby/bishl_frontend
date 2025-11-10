@@ -51,9 +51,11 @@ Features implemented:
 - ✅ Graceful handling of refresh token expiration
 - ✅ Redirect to login on auth failure
 
-### Phase 2: Update All Fetch Calls (IN PROGRESS)
+### Phase 2: Update All Fetch Calls ✅ COMPLETE
 
 Replace all `fetch()` and `axios()` calls to use the new client.
+
+**Status:** All user-facing pages have been migrated to use `apiClient` with proper response unwrapping.
 
 ---
 
@@ -66,19 +68,19 @@ Replace all `fetch()` and `axios()` calls to use the new client.
 - **Lines:** ~40-100
 - **Fix:** Unwrap `data` from response
 
-#### 2. **pages/matches/[id]/index.tsx**
+#### 2. **pages/matches/[id]/index.tsx** ✅ COMPLETE
 - **Issue:** Expects raw match object
 - **Fix:** Unwrap `data` from response
 
-#### 3. **pages/matches/[id]/matchcenter/index.tsx**
+#### 3. **pages/matches/[id]/matchcenter/index.tsx** ✅ COMPLETE
 - **Issue:** Multiple fetch calls expect raw data
 - **Fix:** Unwrap all responses
 
-#### 4. **pages/tournaments/[alias].tsx**
+#### 4. **pages/tournaments/[alias].tsx** ✅ COMPLETE
 - **Issue:** Expects raw tournament object
 - **Fix:** Unwrap `data`
 
-#### 5. **pages/clubs/index.tsx**
+#### 5. **pages/clubs/index.tsx** ✅ COMPLETE
 - **Issue:** Expects raw clubs array
 - **Fix:** Unwrap `data` and handle pagination
 
@@ -86,7 +88,7 @@ Replace all `fetch()` and `axios()` calls to use the new client.
 - **Issue:** Expects raw posts array
 - **Fix:** Unwrap `data` and handle pagination
 
-#### 7. **pages/calendar/index.tsx**
+#### 7. **pages/calendar/index.tsx** ✅ COMPLETE
 - **Issue:** Expects raw matches array
 - **Fix:** Unwrap `data`
 
@@ -302,15 +304,15 @@ try {
 ## Migration Order
 
 1. ✅ Create `lib/apiClient.tsx`
-2. ⏳ Update `pages/index.tsx` (homepage - most visible)
-3. ⏳ Update `pages/tournaments/[alias].tsx`
-4. ⏳ Update `pages/matches/[id]/index.tsx`
-5. ⏳ Update `pages/matches/[id]/matchcenter/index.tsx`
-6. ⏳ Update `pages/clubs/index.tsx`
-7. ⏳ Update `pages/calendar/index.tsx`
-8. ⏳ Update `pages/posts/index.tsx`
-9. ⏳ Update all admin pages
-10. ⏳ Update all API routes in `pages/api/`
+2. ✅ Update `pages/index.tsx` (homepage - most visible)
+3. ✅ Update `pages/tournaments/[alias].tsx`
+4. ✅ Update `pages/matches/[id]/index.tsx`
+5. ✅ Update `pages/matches/[id]/matchcenter/index.tsx`
+6. ✅ Update `pages/clubs/index.tsx`
+7. ✅ Update `pages/calendar/index.tsx`
+8. ✅ Update `pages/posts/index.tsx`
+9. ✅ Update all admin pages
+10. ⏳ Update all API routes in `pages/api/` (if needed)
 
 ---
 
