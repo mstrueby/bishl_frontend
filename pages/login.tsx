@@ -22,28 +22,52 @@ const LoginPage = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const res = await fetch('/api/login', {
-      body: JSON.stringify({
-        email,
-        password
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      method: 'POST'
-    });
+    try {
+      // Step 1: Login and get tokens
+      const res = await fetch('/api/login', {
+        body: JSON.stringify({
+          email,
+          password
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'POST'
+      });
 
-    if (res.ok) {
-      const user = await res.json();
-      setUser(user);
-      router.push('/');
-    } else {
-      // Handle error here
-      const errData = await res.json();
-      console.log('Login error:', errData);
-      setError(errData.error || errData.detail || 'Login failed');
+      if (res.ok) {
+        const { access_token, refresh_token } = await res.json();
+        
+        // Step 2: Store tokens in localStorage
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('refresh_token', refresh_token);
+        
+        // Step 3: Fetch user info using access token
+        const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          headers: {
+            'Authorization': `Bearer ${access_token}`
+          }
+        });
+        
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser(userData);
+          router.push('/');
+        } else {
+          throw new Error('Failed to fetch user info');
+        }
+      } else {
+        // Handle error here
+        const errData = await res.json();
+        console.log('Login error:', errData);
+        setError(errData.error || errData.detail || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

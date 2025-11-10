@@ -169,16 +169,37 @@ const Header = () => {
   useEffect(() => {
     setLoading(true);
     (async () => {
-      const userData = await fetch("/api/user");
       try {
-        const user = await userData.json();
-        setUser(user);
+        const accessToken = localStorage.getItem('access_token');
+        
+        if (!accessToken) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        
+        const userData = await fetch("/api/user", {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        
+        if (userData.ok) {
+          const user = await userData.json();
+          setUser(user);
+        } else {
+          // Token might be expired, clear it
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          setUser(null);
+        }
       } catch (error) {
         setUser(null);
         setAuthError(error);
+      } finally {
+        setLoading(false);
       }
     })();
-    setLoading(false);
   }, [setLoading, setUser, setAuthError]);
 
   return (
