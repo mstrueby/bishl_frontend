@@ -8,8 +8,7 @@ import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/venues/';
+import apiClient from '../../../lib/apiClient';
 
 interface VenuesProps {
   jwt: string,
@@ -31,7 +30,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let venues = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await apiClient.get('/users/me', {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -47,12 +46,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await axios.get(BASE_URL, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const res = await apiClient.get('/venues/', {
+      params: {
+        page: 1,
+        page_size: 100
+      }
     });
-    venues = res.data;
+    venues = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching venues:', error);
@@ -68,12 +68,13 @@ const Venues: NextPage<VenuesProps> = ({ jwt, venues: initialVenues }) => {
 
   const fetchVenues = async () => {
     try {
-      const res = await axios.get(BASE_URL, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const res = await apiClient.get('/venues/', {
+        params: {
+          page: 1,
+          page_size: 100
+        }
       });
-      setVenues(res.data);
+      setVenues(res.data || []);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching venues:', error);
@@ -94,7 +95,7 @@ const Venues: NextPage<VenuesProps> = ({ jwt, venues: initialVenues }) => {
         formData.append('imageUrl', imageUrl);
       }
 
-      const response = await axios.patch(`${BASE_URL}${venueId}`, formData, {
+      const response = await apiClient.patch(`/venues/${venueId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
         },
@@ -118,7 +119,7 @@ const Venues: NextPage<VenuesProps> = ({ jwt, venues: initialVenues }) => {
   const deleteVenue = async (venueId: string) => {
     if (!venueId) return;
     try {
-      const response = await axios.delete(`${BASE_URL}${venueId}`, {
+      const response = await apiClient.delete(`/venues/${venueId}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

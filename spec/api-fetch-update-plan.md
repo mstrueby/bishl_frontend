@@ -87,8 +87,23 @@ Replace all `fetch()` and `axios()` calls to use the new client.
 
 ### Medium Priority (Admin Pages)
 
-#### 8. **pages/admin/clubs/index.tsx**
+#### 8. **pages/admin/clubs/index.tsx** ✅ COMPLETE
 - **Fix:** Unwrap `data`, add pagination support
+
+#### 8a. **pages/admin/clubs/add.tsx** ✅ COMPLETE
+- **Fix:** Use apiClient for POST requests
+
+#### 8b. **pages/admin/clubs/[cAlias]/edit.tsx** ✅ COMPLETE
+- **Fix:** Use apiClient for PATCH requests
+
+#### 8c. **pages/admin/venues/index.tsx** ✅ COMPLETE
+- **Fix:** Use apiClient, unwrap data, add pagination
+
+#### 8d. **pages/venues/index.tsx** ✅ COMPLETE
+- **Fix:** Use apiClient, unwrap data, add pagination
+
+#### 8e. **pages/documents/[category].tsx** ✅ COMPLETE
+- **Fix:** Use apiClient, unwrap data, add pagination
 
 #### 9. **pages/admin/players/index.tsx**
 - **Fix:** Unwrap `data`, add pagination support

@@ -5,8 +5,7 @@ import { VenueValues } from '../../types/VenueValues';
 import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import DataList from '../../components/ui/DataList';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/venues/';
+import apiClient from '../../lib/apiClient';
 
 interface VenuePageProps {
   venues: VenueValues[];
@@ -16,12 +15,14 @@ export const getServerSideProps: GetServerSideProps<VenuePageProps> = async (con
   let venues: VenueValues[] = [];
 
   try {
-    const res = await axios.get(BASE_URL + '?active=true', {
-      headers: {
-        'Content-Type': 'application/json',
+    const res = await apiClient.get('/venues/', {
+      params: {
+        active: true,
+        page: 1,
+        page_size: 100
       }
     });
-    venues = res.data;
+    venues = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching venues:', error);
