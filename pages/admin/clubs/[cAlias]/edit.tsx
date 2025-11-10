@@ -9,8 +9,7 @@ import Layout from '../../../../components/Layout';
 import SectionHeader from '../../../../components/admin/SectionHeader';
 import { ClubValues } from '../../../../types/ClubValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
+import apiClient from '../../../../lib/apiClient';
 
 interface EditProps {
   jwt: string,
@@ -33,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let club = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await apiClient.get('/users/me', {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -50,7 +49,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Fetch the existing club data
-    const response = await axios.get(BASE_URL + cAlias, {
+    const response = await apiClient.get(`/clubs/${cAlias}`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -94,7 +93,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
         console.log(pair[0] + ', ' + pair[1]);
       }
 
-      const response = await axios.patch(BASE_URL + club._id, formData, {
+      const response = await apiClient.patch(`/clubs/${club._id}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         }

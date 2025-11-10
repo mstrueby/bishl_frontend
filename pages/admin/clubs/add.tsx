@@ -8,8 +8,7 @@ import ClubForm from '../../../components/admin/ClubForm';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../components/ui/ErrorMessage';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/clubs/"
+import apiClient from '../../../lib/apiClient';
 
 interface AddProps {
   jwt: string;
@@ -29,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await apiClient.get('/users/me', {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
@@ -90,7 +89,7 @@ export default function Add({ jwt }: AddProps) {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await axios.post(BASE_URL, formData, {
+      const response = await apiClient.post('/clubs/', formData, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
