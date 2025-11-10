@@ -10,6 +10,7 @@ import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import { formatFileSize } from '../../../tools/utils';
 import DataList from '../../../components/admin/ui/DataList';
+import apiClient from '../../../lib/apiClient';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
 
@@ -29,7 +30,7 @@ export const getServerSideProps: GetServerSideProps<DocsProps> = async (context)
         'Authorization': `Bearer ${jwt}`
       }
     });
-    
+
     const user = userResponse.data;
     if (!user.roles?.includes('DOC_ADMIN') && !user.roles?.includes('ADMIN')) {
       return {
@@ -41,12 +42,13 @@ export const getServerSideProps: GetServerSideProps<DocsProps> = async (context)
     }
 
     // If authorized, fetch documents
-    const res = await axios.get(BASE_URL, {
-      headers: {
-        'Content-Type': 'application/json',
+    const res = await apiClient.get('/documents/', {
+      params: {
+        page: 1,
+        page_size: 1000
       }
     });
-    docs = res.data;
+    docs = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error:', error);
@@ -69,16 +71,15 @@ const Documents: NextPage<DocsProps> = ({ jwt, docs: initialDocs }) => {
 
   const fetchDocs = async () => {
     try {
-      const res = await axios.get(BASE_URL, {
-        headers: {
-          'Content-Type': 'application/json',
+      const res = await apiClient.get('/documents/', {
+        params: {
+          page: 1,
+          page_size: 1000
         }
       });
-      setDocs(res.data);
+      setDocs(res.data || []);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error fetching docs:', error);
-      }
+      console.error('Error fetching documents:', error);
     }
   };
 

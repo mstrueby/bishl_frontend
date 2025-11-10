@@ -11,6 +11,7 @@ import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 import Pagination from '../../../components/ui/Pagination';
 import SearchBox from '../../../components/ui/SearchBox';
+import apiClient from '../../../lib/apiClient';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -54,13 +55,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const page = parseInt(context.query.page as string) || 1;
 
-    const res = await axios.get(BASE_URL! + '/players/', {
+    const res = await apiClient.get('/players/', {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwt}`
       },
       params: {
-        page
+        page: page,
+        page_size: 1000 // Adjust page_size as needed, or handle it more dynamically
       }
     });
     players = res.data.results;
@@ -105,7 +107,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
 
   const handleSearch = async (query: string) => {
     try {
-      const res = await axios.get(`${BASE_URL}/players/`, {
+      const res = await apiClient.get('/players/', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
@@ -136,13 +138,14 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
 
   const fetchPlayers = async (page: number) => {
     try {
-      const res = await axios.get(`${BASE_URL}/players/`, {
+      const res = await apiClient.get('/players/', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
         },
         params: {
-          page
+          page: page,
+          page_size: 1000 // Ensure this is consistent or handled appropriately
         }
       });
       setPlayers(res.data.results);
@@ -164,39 +167,25 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
   const editPlayer = (id: string) => {
     router.push(`/admin/players/${id}/edit`);
   }
-  /*
-    const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
-      try {
-        const formData = new FormData();
-        formData.append('active', (!currentStatus).toString()); // Toggle the status
-        if (logoUrl) {
-          formData.append('logoUrl', logoUrl);
+
+  const deletePlayer = async (playerId: string) => {
+    if (!playerId) return;
+    try {
+      const res = await apiClient.delete(`/players/${playerId}`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`
         }
-        for (let pair of formData.entries()) {
-          console.log(pair[0] + ': ' + pair[1]);
-        }
-  
-        const response = await axios.patch(`${BASE_URL! + '/clubs/'}${clubId}`, formData, {
-          headers: {
-            Authorization: `Bearer ${jwt}`
-          },
-        });
-        if (response.status === 200) {
-          // Handle successful response
-          console.log(`Club ${clubId} successfully activated`);
-          await fetchClubs();
-        } else if (response.status === 304) {
-          // Handle not modified response
-          console.log('No changes were made to the club.');
-        } else {
-          // Handle error response
-          console.error('Failed to publish club.');
-        }
-      } catch (error) {
-        console.error('Error publishing club:', error);
+      });
+      if (res.status === 204) {
+        console.log(`Player ${playerId} successfully deleted.`);
+        await fetchPlayers(currentPage); // Fetch players for the current page
+      } else {
+        console.log(`Failed to delete player ${playerId}`);
       }
+    } catch (error) {
+      console.error('Error deleting player:', error);
     }
-  */
+  };
 
   useEffect(() => {
     if (router.query.message) {
@@ -265,6 +254,7 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       },
       menu: [
         { edit: { onClick: () => editPlayer(player._id) } },
+        { delete: { onClick: () => deletePlayer(player._id) } },
       ],
     };
   });
@@ -287,9 +277,9 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
 
       <div className="text-sm text-gray-600 my-4">
-        {`${(currentPage - 1) * 25 + 1}-${Math.min(currentPage * 25, totalPlayers)} von ${totalPlayers} insgesamt`}
+        {`${(currentPage - 1) * 1000 + 1}-${Math.min(currentPage * 1000, totalPlayers)} von ${totalPlayers} insgesamt`}
       </div>
-      
+
       <DataList
         items={dataLisItems}
         statuses={statuses}
@@ -310,6 +300,3 @@ const Players: NextPage<PlayersProps> = ({ jwt, players: initialPlayers, totalPl
 };
 
 export default Players;
-
-
-
