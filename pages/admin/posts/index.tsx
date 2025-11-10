@@ -10,8 +10,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import DataList from '../../../components/admin/ui/DataList';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
+import apiClient from '../../../lib/apiClient';
 
 interface PostsProps {
   jwt: string,
@@ -24,11 +23,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
+    const userResponse = await apiClient.get('/users/me');
     
     const user = userResponse.data;
     if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
@@ -40,18 +35,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await axios.get(BASE_URL, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const res = await apiClient.get('/posts/', {
+      params: {
+        page: 1,
+        page_size: 1000
+      }
     });
-    posts = res.data;
+    posts = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching posts:', error);
     }
   }
-  return posts ? { props: { jwt, posts } } : { props: { jwt } };
+  return { props: { jwt, posts } };
 };
 
 const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
@@ -61,12 +57,13 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get(BASE_URL, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const res = await apiClient.get('/posts/', {
+        params: {
+          page: 1,
+          page_size: 1000
+        }
       });
-      setPosts(res.data);
+      setPosts(res.data || []);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching posts:', error);
@@ -82,25 +79,18 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
   const togglePublished = async (postId: string, currentStatus: boolean, imageUrl: string | null) => {
     try {
       const formData = new FormData();
-      formData.append('published', (!currentStatus).toString()); // Toggle the status
+      formData.append('published', (!currentStatus).toString());
       if (imageUrl) {
         formData.append('imageUrl', imageUrl);
       }
 
-      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        },
-      });
+      const response = await apiClient.patch(`/posts/${postId}`, formData);
       if (response.status === 200) {
-        // Handle successful response
         console.log(`Post ${postId} published successfully.`);
         await fetchPosts();
       } else if (response.status === 304) {
-        // Handle not modified response
         console.log('No changes were made to the post.');
       } else {
-        // Handle error response
         console.error('Failed to publish the post.');
       }
     } catch (error) {
@@ -111,24 +101,17 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
   const toggleFeatured = async (postId: string, currentStatus: boolean, imageUrl: string | null) => {
     try {
       const formData = new FormData();
-      formData.append('featured', (!currentStatus).toString()); // Toggle the status
+      formData.append('featured', (!currentStatus).toString());
       if (imageUrl) {
         formData.append('imageUrl', imageUrl);
       }
-      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        },
-      });
+      const response = await apiClient.patch(`/posts/${postId}`, formData);
       if (response.status === 200) {
-        // Handle successful response
         console.log(`Post ${postId} featured successfully.`);
         await fetchPosts();
       } else if (response.status === 304) {
-        // Handle not modified response
         console.log('No changes were made to the post.');
       } else {
-        // Handle error response
         console.error('Failed to feature the post.');
       }
     } catch (error) {
@@ -140,24 +123,20 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     if (!postId) return;
     try {
       const formData = new FormData();
-      formData.append('deleted', 'true'); // Mark the post as deleted
+      formData.append('deleted', 'true');
 
-      const response = await axios.patch(`${BASE_URL}${postId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
+      const response = await apiClient.patch(`/posts/${postId}`, formData);
 
       if (response.status === 200) {
         console.log(`Post ${postId} successfully deleted.`);
-        await fetchPosts(); // Refresh posts
+        await fetchPosts();
       } else if (response.status === 304) {
         console.log('No changes were made to the post.');
       } else {
         console.error('Failed to delete post.');
       }
     } catch (error) {
-      console.error('Error mdeleting post:', error);
+      console.error('Error deleting post:', error);
     }
   };
 

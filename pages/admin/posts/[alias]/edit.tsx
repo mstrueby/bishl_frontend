@@ -8,8 +8,7 @@ import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import { PostValuesForm } from '../../../../types/PostValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
+import apiClient from '../../../../lib/apiClient';
 
 interface EditProps {
   jwt: string,
@@ -26,11 +25,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let post = null;
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
+    const userResponse = await apiClient.get('/users/me');
     
     const user = userResponse.data;
     if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
@@ -43,11 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Fetch the existing Post data
-    const response = await axios.get(BASE_URL + alias, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
+    const response = await apiClient.get(`/posts/${alias}`);
     post = response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -89,11 +80,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      const response = await axios.patch(BASE_URL + post._id, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
+      const response = await apiClient.patch(`/posts/${post._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: '/admin/posts',

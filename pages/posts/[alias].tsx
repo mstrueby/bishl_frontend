@@ -83,13 +83,27 @@ export default function Post({
   )
 }
 
+import apiClient from '../../lib/apiClient';
+import axios from 'axios';
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/`);
-  const allPostsData = await res.json();
-  const paths = allPostsData.map((post: PostValues) => ({
-    params: { alias: post.alias },
-  }));
-  return { paths, fallback: 'blocking' };
+  try {
+    const res = await apiClient.get('/posts/', {
+      params: {
+        published: true,
+        page: 1,
+        page_size: 1000
+      }
+    });
+    const allPostsData = res.data || [];
+    const paths = allPostsData.map((post: PostValues) => ({
+      params: { alias: post.alias },
+    }));
+    return { paths, fallback: 'blocking' };
+  } catch (error) {
+    console.error('Error fetching posts for paths:', error);
+    return { paths: [], fallback: 'blocking' };
+  }
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
@@ -100,8 +114,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${alias}`);
-    const postData = await res.json();
+    const res = await apiClient.get(`/posts/${alias}`);
+    const postData = res.data;
 
     if (!postData) {
       return { notFound: true };
@@ -111,10 +125,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       props: {
         post: postData
       },
-      revalidate: 10 // or your preferred revalidation time
+      revalidate: 10
     };
   } catch (error) {
-    console.error(error);
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching post:', error.message);
+    }
     return { notFound: true };
   }
 };
