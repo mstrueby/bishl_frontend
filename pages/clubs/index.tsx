@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { ClubValues } from '../../types/ClubValues';
 import axios from 'axios';
 import DataList from '../../components/ui/DataList';
+import apiClient from '../../lib/apiClient';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/clubs/';
 
@@ -15,12 +16,13 @@ export const getServerSideProps: GetServerSideProps<ClubPageProps> = async (cont
   let clubs: ClubValues[] = [];
 
   try {
-    const res = await axios.get(BASE_URL + '?active=true', {
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await apiClient.get('/clubs/', {
+      params: {
+        page: 1,
+        page_size: 100
       }
     });
-    clubs = res.data;
+    clubs = response.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching clubs:', error);
