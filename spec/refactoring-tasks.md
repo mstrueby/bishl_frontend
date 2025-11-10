@@ -49,22 +49,55 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 ### 2. Authentication & Authorization System
 **Impact:** High | **Risk:** High | **Effort:** Medium
 
-**Issues:**
-- Cookie-based JWT storage vulnerable to XSS
-- No token refresh mechanism
+**Backend Status:** ✅ Two-token system implemented (see `spec/token-refresh-implementation.md`)
+- Access token: 15 min (in Authorization header)
+- Refresh token: 7 days (for token renewal)
+
+**Frontend Issues:**
+- Still using old single-token cookie-based auth
+- Login API expects `{token: "..."}` but backend now returns `{access_token: "...", refresh_token: "..."}`
+- No token refresh interceptor implemented
+- Tokens stored in cookies instead of localStorage
+- No automatic retry on 401 errors
 - Authorization logic scattered across components
-- Permission calculations done client-side (can be manipulated)
-- No centralized role-based access control (RBAC)
 
 **Tasks:**
-- [ ] Implement HTTP-only cookies for JWT storage
-- [ ] Add token refresh mechanism
-- [ ] Centralize authorization logic in middleware
-- [ ] Move permission validation to API layer
-- [ ] Create comprehensive RBAC utility functions
-- [ ] Add session timeout handling
+- [ ] Update `/api/login.tsx` to handle new backend response format
+- [ ] Remove cookie-based token storage, use localStorage for both tokens
+- [ ] Implement Axios response interceptor for automatic token refresh on 401
+- [ ] Implement Axios request interceptor to add access token to headers
+- [ ] Update `AuthContext` to store both access_token and refresh_token
+- [ ] Add refresh token flow using `/users/refresh` endpoint
+- [ ] Handle refresh token expiration (redirect to login after 7 days)
+- [ ] Update `/api/logout.tsx` to clear both tokens
+- [ ] Update `/api/user.tsx` to use access token from localStorage
+- [ ] Remove HTTP-only cookie logic (no longer needed)
+- [ ] Test full auth flow: login → API calls → token refresh → logout
 
-**Files Affected:** `context/AuthContext.tsx`, `hooks/useAuth.tsx`, `pages/api/login.tsx`, `tools/utils.tsx`
+**Files Affected:** 
+- `pages/api/login.tsx` (update response handling)
+- `pages/api/logout.tsx` (clear localStorage)
+- `pages/api/user.tsx` (use localStorage token)
+- `context/AuthContext.tsx` (store both tokens)
+- `hooks/useAuth.tsx` (expose token management)
+- Create new: `lib/axiosInstance.tsx` (interceptors for token refresh)
+
+**Implementation Priority:**
+1. **First:** Create `lib/axiosInstance.tsx` with interceptors (reference: `spec/token-refresh-implementation.md`)
+2. **Second:** Update `pages/api/login.tsx` to parse new response structure
+3. **Third:** Update `AuthContext` to manage both tokens in localStorage
+4. **Fourth:** Update all API route handlers to use new token storage
+5. **Fifth:** Replace all `fetch()` calls with configured axios instance
+6. **Last:** Test complete auth flow end-to-end
+
+**Breaking Changes:**
+⚠️ **Users will need to re-login after deployment** (token format changed)
+
+**Security Improvements:**
+- ✅ Short-lived access tokens (15 min vs 60 min)
+- ✅ Separate refresh token for renewals
+- ✅ Different secrets for access/refresh tokens
+- ✅ Reduced attack window if token is compromisedx`
 
 ---
 
