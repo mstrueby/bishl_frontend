@@ -1,5 +1,4 @@
 
-import cookie from 'cookie'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -22,19 +21,16 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       if (result.ok) {
-        const jwt = data.token
-        res.status(200).setHeader('Set-Cookie', cookie.serialize(
-          'jwt', jwt, 
-          { 
-            path: '/', 
-            httpOnly: true,
-            sameSite: 'strict',
-            maxAge: 60 * parseInt(process.env['NEXT_PUBLIC_COOKIE_MAXAGE_MIN'] || '60', 10)
-          }
-        )).json({ 
-          'email': data['user']['email'],
-          'role': data['user']['role'],
-          'jwt': jwt
+        // Backend now returns: {access_token, refresh_token, token_type, expires_in}
+        const { access_token, refresh_token, token_type, expires_in } = data;
+        
+        // Return tokens to client for localStorage storage
+        // Client will also need to fetch user info separately using the access token
+        res.status(200).json({ 
+          access_token,
+          refresh_token,
+          token_type,
+          expires_in
         })
       } else {
         res.status(result.status).json({ error: data.detail || 'Authentication failed' })
