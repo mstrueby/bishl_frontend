@@ -105,7 +105,7 @@ Replace all `fetch()` and `axios()` calls to use the new client.
 #### 8e. **pages/documents/[category].tsx** ✅ COMPLETE
 - **Fix:** Use apiClient, unwrap data, add pagination
 
-#### 9. **pages/admin/players/index.tsx**
+#### 9. **pages/admin/players/index.tsx** ✅ COMPLETE
 - **Fix:** Unwrap `data`, add pagination support
 
 #### 10. **pages/admin/posts/index.tsx** ✅ COMPLETE
@@ -120,11 +120,14 @@ Replace all `fetch()` and `axios()` calls to use the new client.
 #### 10c. **pages/posts/[alias].tsx** ✅ COMPLETE
 - **Fix:** Use apiClient for GET requests
 
-#### 11. **pages/admin/myclub/index.tsx**
+#### 11. **pages/admin/myclub/index.tsx** ✅ COMPLETE
 - **Fix:** Unwrap `data`
 
-#### 12. **pages/admin/myref/index.tsx**
+#### 12. **pages/admin/myref/index.tsx** ✅ COMPLETE
 - **Fix:** Unwrap `data`
+
+#### 13. **pages/admin/documents/index.tsx** ✅ COMPLETE
+- **Fix:** Unwrap `data`, add pagination support
 
 ### All Files Pattern
 Search for: `fetch(.*?).then.*?json()` to find all fetch calls

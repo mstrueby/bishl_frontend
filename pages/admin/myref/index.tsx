@@ -10,6 +10,7 @@ import SectionHeader from '../../../components/admin/SectionHeader';
 import MatchCardRef from '../../../components/admin/MatchCardRef';
 import { UserValues } from "../../../types/UserValues";
 import { classNames } from "../../../tools/utils"
+import apiClient from '../../../lib/apiClient';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -45,9 +46,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has REFEREE role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    const userResponse = await apiClient.get('/users/me', {
       headers: {
-        'Authorization': `Bearer ${jwt}`
+        Authorization: `Bearer ${jwt}`
       }
     });
 
@@ -122,7 +123,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, user, initialMatches, initialAssignm
 
   const fetchData = async (filterParams: FilterState) => {
     try {
-      const userRes = await axios.get(`${BASE_URL}/users/me`, {
+      const userRes = await apiClient.get('/users/me', {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       const userId = userRes.data._id;
@@ -215,7 +216,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, user, initialMatches, initialAssignm
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${jwt}`,
                 },
-                body: JSON.stringify(body)
+                body: JSON.JSON.stringify(body)
               }).catch(() => null);
             });
 

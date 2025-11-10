@@ -10,6 +10,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 import { ageGroupConfig } from '../../../tools/consts';
+import apiClient from '../../../lib/apiClient';
 
 let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
 
@@ -33,9 +34,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
+    const userResponse = await apiClient.get('/users/me', {
       headers: {
-        'Authorization': `Bearer ${jwt}`
+        Authorization: `Bearer ${jwt}`
       }
     });
 
@@ -51,7 +52,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Get club by user's clubId
-    const res = await axios.get(`${BASE_URL}/clubs/id/${user.club.clubId}`, {
+    const res = await apiClient.get(`/clubs/id/${user.club.clubId}`, {
       headers: {
         'Content-Type': 'application/json',
       }
@@ -174,6 +175,3 @@ const MyClub: NextPage<ClubsProps> = ({ jwt, club: initialClub }) => {
 };
 
 export default MyClub;
-
-
-
