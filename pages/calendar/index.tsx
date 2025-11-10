@@ -27,6 +27,7 @@ import type { VenueValues } from '../../types/VenueValues';
 import type { ClubValues, TeamValues } from '../../types/ClubValues';
 import type { TournamentValues } from '../../types/TournamentValues';
 import axios from 'axios';
+import { apiClient } from '../../lib/api';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
@@ -39,30 +40,35 @@ interface CalendarProps {
 }
 export const getStaticProps: GetStaticProps = async () => {
   try {
-    const matchesRes = await axios(`${BASE_URL}/matches`, {
+    // Use apiClient for consistent response handling
+    const matchesRes = await apiClient('/matches', {
       params: {
         season: CURRENT_SEASON,
       }
     });
-    const matchesData: Match[] = matchesRes.data;
-    const venuesRes = await axios(`${BASE_URL}/venues`, {
+    const matchesData: Match[] = matchesRes.data || [];
+
+    const venuesRes = await apiClient('/venues', {
       params: {
         active: true,
       }
     });
-    const venuesData: VenueValues[] = venuesRes.data
-    const clubsRes = await axios(`${BASE_URL}/clubs`, {
+    const venuesData: VenueValues[] = venuesRes.data || [];
+
+    const clubsRes = await apiClient('/clubs', {
       params: {
         active: true
       }
     });
-    const clubsData: ClubValues[] = clubsRes.data;
-    const tournamentsRes = await axios(`${BASE_URL}/tournaments`, {
+    const clubsData: ClubValues[] = clubsRes.data || [];
+
+    const tournamentsRes = await apiClient('/tournaments', {
       params: {
         active: true
       }
     });
-    const tournamentsData: TournamentValues[] = tournamentsRes.data
+    const tournamentsData: TournamentValues[] = tournamentsRes.data || [];
+
     return {
       props: {
         matches: matchesData,
@@ -74,6 +80,7 @@ export const getStaticProps: GetStaticProps = async () => {
     };
   } catch (error) {
     console.error(error);
+    // Return notFound: true if any of the API calls fail
     return { notFound: true };
   }
 };
@@ -269,7 +276,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
               <button
                 type="button"
                 onClick={() => {
-                  document.getElementById('match-list')?.scrollIntoView({ 
+                  document.getElementById('match-list')?.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
                   });

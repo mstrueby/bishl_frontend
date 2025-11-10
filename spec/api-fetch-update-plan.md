@@ -37,7 +37,7 @@ const response = await fetch('/matches?page=1&page_size=10').then(r => r.json())
 
 ## Migration Strategy
 
-### Phase 1: Create API Client Helper (IMMEDIATE)
+### Phase 1: Create API Client Helper ✅ COMPLETE
 **File:** `lib/apiClient.tsx`
 
 Create a centralized API client that:
@@ -46,7 +46,7 @@ Create a centralized API client that:
 - Implements token refresh interceptor
 - Provides consistent error handling
 
-### Phase 2: Update All Fetch Calls (IMMEDIATE)
+### Phase 2: Update All Fetch Calls (IN PROGRESS)
 
 Replace all `fetch()` and `axios()` calls to use the new client.
 
@@ -56,18 +56,10 @@ Replace all `fetch()` and `axios()` calls to use the new client.
 
 ### High Priority (Breaks App - Fix First)
 
-#### 1. **pages/index.tsx**
+#### 1. **pages/index.tsx** ✅ COMPLETE
 - **Issue:** Expects raw arrays for tournaments/posts
 - **Lines:** ~40-100
 - **Fix:** Unwrap `data` from response
-```typescript
-// Before
-const tournaments = await fetch('/tournaments/').then(r => r.json());
-
-// After
-const response = await fetch('/tournaments/').then(r => r.json());
-const tournaments = response.data || [];
-```
 
 #### 2. **pages/matches/[id]/index.tsx**
 - **Issue:** Expects raw match object
@@ -85,7 +77,7 @@ const tournaments = response.data || [];
 - **Issue:** Expects raw clubs array
 - **Fix:** Unwrap `data` and handle pagination
 
-#### 6. **pages/posts/index.tsx**
+#### 6. **pages/posts/index.tsx** ✅ COMPLETE
 - **Issue:** Expects raw posts array
 - **Fix:** Unwrap `data` and handle pagination
 
@@ -101,8 +93,17 @@ const tournaments = response.data || [];
 #### 9. **pages/admin/players/index.tsx**
 - **Fix:** Unwrap `data`, add pagination support
 
-#### 10. **pages/admin/posts/index.tsx**
+#### 10. **pages/admin/posts/index.tsx** ✅ COMPLETE
 - **Fix:** Unwrap `data`, add pagination support
+
+#### 10a. **pages/admin/posts/add.tsx** ✅ COMPLETE
+- **Fix:** Use apiClient for POST requests
+
+#### 10b. **pages/admin/posts/[alias]/edit.tsx** ✅ COMPLETE
+- **Fix:** Use apiClient for PATCH requests
+
+#### 10c. **pages/posts/[alias].tsx** ✅ COMPLETE
+- **Fix:** Use apiClient for GET requests
 
 #### 11. **pages/admin/myclub/index.tsx**
 - **Fix:** Unwrap `data`

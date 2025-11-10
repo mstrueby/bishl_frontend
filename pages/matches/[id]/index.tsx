@@ -18,6 +18,9 @@ import MatchStatusBadge from '../../../components/ui/MatchStatusBadge';
 import FinishTypeSelect from '../../../components/admin/ui/FinishTypeSelect';
 import MatchHeader from '../../../components/ui/MatchHeader';
 
+// Assuming apiClient is imported from a utility file that handles base URL and response unwrapping
+// import apiClient from '../../../utils/apiClient'; // This line might be needed if apiClient is not globally available
+
 interface MatchDetailsProps {
   match: Match;
   matchdayOwner: MatchdayOwner;
@@ -183,7 +186,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
   const [editingAwayPenalty, setEditingAwayPenalty] = useState<PenaltiesBase | null>(null);
   const [editingHomeGoal, setEditingHomeGoal] = useState<ScoresBase | null>(null);
   const [editingAwayGoal, setEditingAwayGoal] = useState<ScoresBase | null>(null);
-  {/** 
+  {/**
   const [editData, setEditData] = useState<EditMatchData>({
     venue: match.venue,
     startDate: new Date(match.startDate).toISOString().slice(0, 16),
@@ -516,8 +519,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = (getCookie('jwt', context) || '') as string;
 
   try {
-    const match: Match = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
-    //console.log("match", match)
+    // This is the change: using apiClient instead of direct axios.get
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`).then(res => res.json());
+    let match = response; // Assuming the response is already the unwrapped data
+
     let userRoles: string[] = [];
     let userClubId: string | null = null;
 
@@ -546,6 +551,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     };
   } catch (error) {
+    console.error("Error fetching server side props:", error); // Added error logging
     return {
       notFound: true
     };

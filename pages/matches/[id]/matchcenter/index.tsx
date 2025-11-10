@@ -17,7 +17,8 @@ import {
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
 import { getCookie } from "cookies-next";
-import axios from "axios";
+import axios from 'axios';
+import apiClient from '../../../../lib/apiClient';
 
 let BASE_URL = process.env["NEXT_PUBLIC_API_URL"];
 import {
@@ -286,11 +287,8 @@ export default function MatchDetails({
 
     try {
       setIsRefreshing(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`,
-      );
-      const updatedMatch = await response.json();
-      setMatch(updatedMatch);
+      const response = await apiClient.get(`/matches/${id}`);
+      setMatch(response.data);
       setIsRefreshing(false);
     } catch (error) {
       console.error("Error refreshing match data:", error);
@@ -302,8 +300,8 @@ export default function MatchDetails({
   const updateSupplementaryField = async (fieldName: string, value: any) => {
     try {
       setSavingSupplementaryField(fieldName);
-      const response = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+      const response = await apiClient.patch(
+        `/matches/${match._id}`,
         {
           supplementarySheet: {
             ...match.supplementarySheet,
@@ -442,8 +440,8 @@ export default function MatchDetails({
                     onClick={async () => {
                       try {
                         setIsRefreshing(true);
-                        const response = await axios.patch(
-                          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+                        const response = await apiClient.patch(
+                          `/matches/${match._id}`,
                           {
                             matchStatus: {
                               key: "INPROGRESS",
@@ -772,8 +770,8 @@ export default function MatchDetails({
                 try {
                   setIsSavingMatchSheetComplete(true);
                   const newCompleteStatus = !match.matchSheetComplete;
-                  const response = await axios.patch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+                  const response = await apiClient.patch(
+                    `/matches/${match._id}`,
                     {
                       matchSheetComplete: newCompleteStatus,
                     },
@@ -925,7 +923,7 @@ export default function MatchDetails({
                         onClick={async () => {
                           try {
                             setIsRefreshing(true);
-                            const response = await axios.patch(
+                            const response = await apiClient.patch(
                               `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
                               {
                                 matchStatus: {
@@ -1082,10 +1080,73 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = (getCookie("jwt", context) || "") as string;
 
   try {
-    const match: Match = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`,
-    ).then((res) => res.json());
-    //console.log("match", match)
+    let match: Match;
+    let homeRoster: RosterPlayer[] = [];
+    let awayRoster: RosterPlayer[] = [];
+    let homeScores: ScoresBase[] = [];
+    let awayScores: ScoresBase[] = [];
+    let homePenalties: PenaltiesBase[] = [];
+    let awayPenalties: PenaltiesBase[] = [];
+
+    // Fetch match details
+    try {
+      const response = await apiClient.get(`/matches/${id}`);
+      match = response.data;
+    } catch (error) {
+      console.error('Error fetching match:', error);
+      // If match fetching fails, return notFound
+      return { notFound: true };
+    }
+
+    // Fetch home roster
+    try {
+      const response = await apiClient.get(`/matches/${id}/home/roster`);
+      homeRoster = response.data || [];
+    } catch (error) {
+      console.error('Error fetching home roster:', error);
+    }
+
+    // Fetch away roster
+    try {
+      const response = await apiClient.get(`/matches/${id}/away/roster`);
+      awayRoster = response.data || [];
+    } catch (error) {
+      console.error('Error fetching away roster:', error);
+    }
+
+    // Fetch home scores
+    try {
+      const response = await apiClient.get(`/matches/${id}/home/scores`);
+      homeScores = response.data || [];
+    } catch (error) {
+      console.error('Error fetching home scores:', error);
+    }
+
+    // Fetch away scores
+    try {
+      const response = await apiClient.get(`/matches/${id}/away/scores`);
+      awayScores = response.data || [];
+    } catch (error) {
+      console.error('Error fetching away scores:', error);
+    }
+
+    // Fetch home penalties
+    try {
+      const response = await apiClient.get(`/matches/${id}/home/penalties`);
+      homePenalties = response.data || [];
+    } catch (error) {
+      console.error('Error fetching home penalties:', error);
+    }
+
+    // Fetch away penalties
+    try {
+      const response = await apiClient.get(`/matches/${id}/away/penalties`);
+      awayPenalties = response.data || [];
+    } catch (error) {
+      console.error('Error fetching away penalties:', error);
+    }
+
+
     let userRoles: string[] = [];
     let userClubId: string | null = null;
 
@@ -1109,9 +1170,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`,
     ).then((res) => res.json());
 
+    // Ensure that match details are correctly assigned if they were fetched successfully
+    const finalMatch = {
+      ...match,
+      home: {
+        ...match.home,
+        roster: homeRoster,
+        scores: homeScores,
+        penalties: homePenalties,
+      },
+      away: {
+        ...match.away,
+        roster: awayRoster,
+        scores: awayScores,
+        penalties: awayPenalties,
+      },
+    };
+
+
     return {
       props: {
-        match,
+        match: finalMatch,
         matchdayOwner: matchday.owner,
         jwt,
         userRoles,
@@ -1119,6 +1198,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   } catch (error) {
+    console.error("Error in getServerSideProps:", error);
     return {
       notFound: true,
     };
