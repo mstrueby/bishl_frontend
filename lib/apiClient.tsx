@@ -26,6 +26,25 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Queue for pending requests during token refresh
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 // Response interceptor - unwrap standardized responses and handle token refresh
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
@@ -51,7 +70,24 @@ apiClient.interceptors.response.use(
     
     // Handle 401 Unauthorized - attempt token refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Queue this request while refresh is in progress
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
       
       const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
       
@@ -63,21 +99,32 @@ apiClient.interceptors.response.use(
             { refresh_token: refreshToken }
           );
           
-          // Extract new access token from standardized response
+          // Extract new tokens from standardized response
           const newAccessToken = response.data?.data?.access_token || response.data?.access_token;
+          const newRefreshToken = response.data?.data?.refresh_token || response.data?.refresh_token;
           
           if (newAccessToken && typeof window !== 'undefined') {
-            // Store new access token
+            // Store new tokens
             localStorage.setItem('access_token', newAccessToken);
+            if (newRefreshToken) {
+              localStorage.setItem('refresh_token', newRefreshToken);
+            }
             
             // Update Authorization header for retry
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            }
+            
+            // Process queued requests
+            processQueue(null, newAccessToken);
             
             // Retry original request
             return apiClient(originalRequest);
           }
         } catch (refreshError) {
           // Refresh token failed or expired - clear tokens and redirect to login
+          processQueue(refreshError, null);
+          
           if (typeof window !== 'undefined') {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
@@ -89,9 +136,12 @@ apiClient.interceptors.response.use(
           }
           
           return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
         }
       } else {
         // No refresh token available - redirect to login
+        isRefreshing = false;
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
           window.location.href = '/login';
         }
