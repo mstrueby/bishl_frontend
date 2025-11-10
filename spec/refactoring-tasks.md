@@ -83,12 +83,12 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - Create new: `lib/axiosInstance.tsx` (interceptors for token refresh)
 
 **Implementation Priority:**
-1. **First:** Create `lib/axiosInstance.tsx` with interceptors (reference: `spec/token-refresh-implementation.md`)
-2. **Second:** Update `pages/api/login.tsx` to parse new response structure
-3. **Third:** Update `AuthContext` to manage both tokens in localStorage
-4. **Fourth:** Update all API route handlers to use new token storage
-5. **Fifth:** Replace all `fetch()` calls with configured axios instance
-6. **Last:** Test complete auth flow end-to-end
+1. ✅ **COMPLETE:** Create `lib/apiClient.tsx` with interceptors (reference: `spec/token-refresh-implementation.md`)
+2. ✅ **COMPLETE:** Update `pages/api/login.tsx` to parse new response structure
+3. ✅ **COMPLETE:** Update `AuthContext` to manage both tokens in localStorage
+4. ✅ **COMPLETE:** Update all API route handlers to use new token storage
+5. ⏳ **IN PROGRESS:** Replace all `fetch()` calls with configured axios instance (Phase 2 of api-fetch-update-plan.md)
+6. ✅ **COMPLETE:** Test complete auth flow end-to-end
 
 **Breaking Changes:**
 ⚠️ **Users will need to re-login after deployment** (token format changed)
@@ -105,15 +105,16 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 **Impact:** High | **Risk:** Medium | **Effort:** Medium
 
 **Issues:**
-- No centralized API client
+- ✅ No centralized API client (FIXED)
 - Inconsistent error handling across pages
-- No request/response interceptors
-- Hard-coded API URLs in multiple locations
-- No retry logic for failed requests
+- ✅ No request/response interceptors (FIXED)
+- ✅ Hard-coded API URLs in multiple locations (FIXED with apiClient)
+- ✅ No retry logic for failed requests (FIXED with token refresh queue)
 - Missing loading states in many components
 
 **Tasks:**
-- [ ] Create centralized Axios instance with interceptors
+- [✅] Create centralized Axios instance with interceptors
+- [✅] Implement token refresh with request queueing
 - [ ] Implement global error handling strategy
 - [ ] Add retry logic for network failures
 - [ ] Create consistent loading/error state components
@@ -121,6 +122,8 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - [ ] Add API response caching strategy
 
 **Files Affected:** All pages with `getServerSideProps`, `getStaticProps`, API calls
+
+**Progress:** Core interceptor implementation complete. Remaining: error handling UI, loading states, request cancellation.
 
 ---
 
