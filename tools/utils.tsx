@@ -81,15 +81,23 @@ export function calculateMatchButtonPermissions(
   };
   if (!user) return permissions;
 
+  const matchDate = new Date(match.startDate).setHours(0, 0, 0, 0);
+  const today = new Date().setHours(0, 0, 0, 0);
+  const isMatchInPast = matchDate < today;
+  const isMatchDay = matchDate === today;
+  const isAdminOrLeagueAdmin = user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN");
+  
+  // For non-admins, deny all access to past matches (before today)
+  if (isMatchInPast && !isAdminOrLeagueAdmin) {
+    return permissions;
+  }
+
   const now = Date.now();
   const matchStartTime = new Date(match.startDate).getTime();
   const thirtyMinutesFromNow = now + 30 * 60 * 1000;
-  const isMatchToday =
-    new Date(match.startDate).setHours(0, 0, 0, 0) <=
-    new Date().setHours(0, 0, 0, 0);
 
-  // LEAGUE_ADMIN permissions
-  if (user.roles.includes("LEAGUE_ADMIN") || user.roles.includes("ADMIN")) {
+  // ADMIN/LEAGUE_ADMIN permissions - full access always
+  if (isAdminOrLeagueAdmin) {
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
 
@@ -102,12 +110,6 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonRosterHome = true;
       permissions.showButtonRosterAway = true;
       permissions.showButtonMatchCenter = true;
-      permissions.showButtonSupplementary = true;
-    }
-
-    if (match.matchStatus.key === "INPROGRESS") {
-      permissions.showButtonRosterHome = true;
-      permissions.showButtonRosterAway = true;
       permissions.showButtonSupplementary = true;
     }
   }
@@ -165,7 +167,7 @@ export function calculateMatchButtonPermissions(
     matchdayOwner &&
     user.club.clubId === matchdayOwner.clubId &&
     user.roles.includes("CLUB_ADMIN") &&
-    isMatchToday
+    isMatchDay
   ) {
     permissions.showButtonRosterHome = true;
     permissions.showButtonRosterAway = true;
@@ -183,36 +185,53 @@ export function calculateMatchButtonPermissions(
     match.matchStatus.key !== "INPROGRESS" &&
     match.matchStatus.key !== "SCHEDULED"
   ) {
-    permissions.showButtonEdit = false;
-    permissions.showButtonRosterHome = false;
-    permissions.showButtonRosterAway = false;
-    permissions.showButtonStatus = false;
-    permissions.showButtonMatchCenter = false;
-    permissions.showButtonSupplementary = false;
+    if (isAdminOrLeagueAdmin) {
+      // ADMIN/LEAGUE_ADMIN: grant full permissions for finished matches
+      permissions.showButtonEdit = true;
+      permissions.showButtonStatus = true;
+      permissions.showButtonMatchCenter = true;
 
-    if (isMatchCenter) {
-      permissions.showButtonEvents = false;
-    }
-  }
+      if (isMatchCenter) {
+        permissions.showButtonRosterHome = true;
+        permissions.showButtonRosterAway = true;
+        permissions.showButtonScoresHome = true;
+        permissions.showButtonScoresAway = true;
+        permissions.showButtonPenaltiesHome = true;
+        permissions.showButtonPenaltiesAway = true;
+        permissions.showButtonSupplementary = true;
+      }
+    } else {
+      // Non-admin users
+      const isHomeClubAdmin = user.club &&
+        user.club.clubId === match.home.clubId &&
+        user.roles.includes("CLUB_ADMIN");
 
-  // ADMIN/LEAGUE_ADMIN can edit finished matches
-  if (
-    (user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN")) &&
-    match.matchStatus.key !== "SCHEDULED" &&
-    match.matchStatus.key !== "INPROGRESS"
-  ) {
-    permissions.showButtonEdit = true;
-    permissions.showButtonStatus = true;
-    permissions.showButtonMatchCenter = true;
+      const isMatchdayOwnerAdmin = user.club &&
+        isValidMatchdayOwner(matchdayOwner) &&
+        matchdayOwner &&
+        user.club.clubId === matchdayOwner.clubId &&
+        user.roles.includes("CLUB_ADMIN");
 
-    if (isMatchCenter) {
-      permissions.showButtonRosterHome = true;
-      permissions.showButtonRosterAway = true;
-      permissions.showButtonScoresHome = true;
-      permissions.showButtonScoresAway = true;
-      permissions.showButtonPenaltiesHome = true;
-      permissions.showButtonPenaltiesAway = true;
-      permissions.showButtonSupplementary = true;
+      // Home club admin and matchday owner: keep permissions only on match day
+      if (isMatchDay && (isHomeClubAdmin || isMatchdayOwnerAdmin)) {
+        // grant scores and penalties permissions for finished matches
+        permissions.showButtonScoresHome = true;
+        permissions.showButtonScoresAway = true;
+        permissions.showButtonPenaltiesHome = true;
+        permissions.showButtonPenaltiesAway = true;
+      } else {
+        // Apply finished match restrictions for all other cases
+        permissions.showButtonEdit = false;
+        permissions.showButtonRosterHome = false;
+        permissions.showButtonRosterAway = false;
+        permissions.showButtonStatus = false;
+        permissions.showButtonMatchCenter = false;
+        permissions.showButtonSupplementary = false;
+
+        if (isMatchCenter) {
+          permissions.showButtonEvents = false;
+        }
+      }
     }
   }
 
