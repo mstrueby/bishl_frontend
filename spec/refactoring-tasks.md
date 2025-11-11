@@ -1,4 +1,3 @@
-
 # BISHL App - Refactoring & Improvement Tasks
 
 **Document Version:** 1.1  
