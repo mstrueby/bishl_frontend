@@ -1,0 +1,198 @@
+components/ui/ClubSelect.tsx:24:14 - error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+
+24     <Listbox value={selectedClubId} onChange={onClubChange}>
+                ~~~~~
+
+  node_modules/@headlessui/react/dist/components/listbox/listbox.d.ts:17:5
+    17     value?: TType;
+           ~~~~~
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & CleanProps<ExoticComponent<{ children?: ReactNode; }>, "defaultValue" | "onChange" | "form" | "name" | "by" | ... 5 more ... | "invalid"> & OurProps<...> & { ...; } & { ...; }'
+
+components/ui/SearchBox.tsx:29:32 - error TS2322: Type '(option: SearchOption) => void' is not assignable to type '(value: SearchOption | null) => void'.
+  Types of parameters 'option' and 'value' are incompatible.
+    Type 'SearchOption | null' is not assignable to type 'SearchOption'.
+      Type 'null' is not assignable to type 'SearchOption'.
+
+29     <Combobox value={selected} onChange={handleSelect}>
+                                  ~~~~~~~~
+
+  node_modules/@headlessui/react/dist/components/combobox/combobox.d.ts:21:5
+    21     onChange?: (value: TMultiple extends true ? EnsureArray<TValue> : TValue | null) => void;
+           ~~~~~~~~
+    The expected type comes from property 'onChange' which is declared here on type 'IntrinsicAttributes & CleanProps<ExoticComponent<{ children?: ReactNode; }>, "defaultValue" | "onChange" | "form" | "name" | "by" | ... 8 more ... | "virtual"> & OurProps<...> & { ...; } & { ...; }'
+
+components/ui/TeamFullNameSelect.tsx:27:14 - error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+
+27     <Listbox value={selectedTeamId} onChange={onTeamChange}>
+                ~~~~~
+
+  node_modules/@headlessui/react/dist/components/listbox/listbox.d.ts:17:5
+    17     value?: TType;
+           ~~~~~
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & CleanProps<ExoticComponent<{ children?: ReactNode; }>, "defaultValue" | "onChange" | "form" | "name" | "by" | ... 5 more ... | "invalid"> & OurProps<...> & { ...; } & { ...; }'
+
+components/ui/TeamSelect.tsx:46:14 - error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+
+46     <Listbox value={selectedTeamId} onChange={onTeamChange}>
+                ~~~~~
+
+  node_modules/@headlessui/react/dist/components/listbox/listbox.d.ts:17:5
+    17     value?: TType;
+           ~~~~~
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & CleanProps<ExoticComponent<{ children?: ReactNode; }>, "defaultValue" | "onChange" | "form" | "name" | "by" | ... 5 more ... | "invalid"> & OurProps<...> & { ...; } & { ...; }'
+
+components/ui/VenueSelect.tsx:24:14 - error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+
+24     <Listbox value={selectedVenueId} onChange={onVenueChange}>
+                ~~~~~
+
+  node_modules/@headlessui/react/dist/components/listbox/listbox.d.ts:17:5
+    17     value?: TType;
+           ~~~~~
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & CleanProps<ExoticComponent<{ children?: ReactNode; }>, "defaultValue" | "onChange" | "form" | "name" | "by" | ... 5 more ... | "invalid"> & OurProps<...> & { ...; } & { ...; }'
+
+components/ui/form/Listbox.tsx:51:9 - error TS2322: Type 'ListboxOption | null' is not assignable to type 'ListboxOption | undefined'.
+  Type 'null' is not assignable to type 'ListboxOption | undefined'.
+
+51         value={selected}
+           ~~~~~
+
+  node_modules/@headlessui/react/dist/components/listbox/listbox.d.ts:17:5
+    17     value?: TType;
+           ~~~~~
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & CleanProps<ExoticComponent<{ children?: ReactNode; }>, "defaultValue" | "onChange" | "form" | "name" | "by" | ... 5 more ... | "invalid"> & OurProps<...> & { ...; } & { ...; }'
+
+hooks/useApiRequest.tsx:33:42 - error TS2339: Property 'CancelToken' does not exist on type 'AxiosInstance'.
+
+33       cancelTokenRef.current = apiClient.CancelToken.source();
+                                            ~~~~~~~~~~~
+
+hooks/useApiRequest.tsx:38:22 - error TS18047: 'cancelTokenRef.current' is possibly 'null'.
+
+38         cancelToken: cancelTokenRef.current.token,
+                        ~~~~~~~~~~~~~~~~~~~~~~
+
+hooks/useApiRequest.tsx:46:21 - error TS2339: Property 'isCancel' does not exist on type 'AxiosInstance'.
+
+46       if (apiClient.isCancel(err)) {
+                       ~~~~~~~~
+
+lib/auth.ts:130:22 - error TS2551: Property 'role' does not exist on type 'UserValues'. Did you mean 'roles'?
+
+130   if (!user || !user.role) {
+                         ~~~~
+
+  types/UserValues.tsx:26:3
+    26   roles: []
+         ~~~~~
+    'roles' is declared here.
+
+lib/auth.ts:134:25 - error TS2551: Property 'role' does not exist on type 'UserValues'. Did you mean 'roles'?
+
+134   const userRole = user.role as UserRole;
+                            ~~~~
+
+  types/UserValues.tsx:26:3
+    26   roles: []
+         ~~~~~
+    'roles' is declared here.
+
+lib/auth.ts:157:22 - error TS2551: Property 'role' does not exist on type 'UserValues'. Did you mean 'roles'?
+
+157   if (!user || !user.role) {
+                         ~~~~
+
+  types/UserValues.tsx:26:3
+    26   roles: []
+         ~~~~~
+    'roles' is declared here.
+
+lib/auth.ts:160:15 - error TS2551: Property 'role' does not exist on type 'UserValues'. Did you mean 'roles'?
+
+160   return user.role === role;
+                  ~~~~
+
+  types/UserValues.tsx:26:3
+    26   roles: []
+         ~~~~~
+    'roles' is declared here.
+
+lib/auth.ts:185:17 - error TS2339: Property 'club_id' does not exist on type 'UserValues'.
+
+185     return user.club_id === clubId;
+                    ~~~~~~~
+
+lib/auth.ts:205:52 - error TS2339: Property 'team_ids' does not exist on type 'UserValues'.
+
+205   if (hasRole(user, UserRole.CLUB_MANAGER) && user.team_ids) {
+                                                       ~~~~~~~~
+
+lib/auth.ts:206:17 - error TS2339: Property 'team_ids' does not exist on type 'UserValues'.
+
+206     return user.team_ids.includes(teamId);
+                    ~~~~~~~~
+
+lib/auth.ts:223:22 - error TS2551: Property 'role' does not exist on type 'UserValues'. Did you mean 'roles'?
+
+223   if (!user || !user.role) {
+                         ~~~~
+
+  types/UserValues.tsx:26:3
+    26   roles: []
+         ~~~~~
+    'roles' is declared here.
+
+lib/auth.ts:227:25 - error TS2551: Property 'role' does not exist on type 'UserValues'. Did you mean 'roles'?
+
+227   const userRole = user.role as UserRole;
+                            ~~~~
+
+  types/UserValues.tsx:26:3
+    26   roles: []
+         ~~~~~
+    'roles' is declared here.
+
+pages/admin/myref/index.tsx:219:28 - error TS2339: Property 'JSON' does not exist on type 'JSON'.
+
+219                 body: JSON.JSON.stringify(body)
+                               ~~~~
+
+pages/calendar/index.tsx:30:27 - error TS2307: Cannot find module '../../lib/api' or its corresponding type declarations.
+
+30 import { apiClient } from '../../lib/api';
+                             ~~~~~~~~~~~~~~~
+
+pages/tournaments/[alias].tsx:292:22 - error TS2345: Argument of type 'AxiosResponse<any, any, {}>' is not assignable to parameter of type 'SetStateAction<Match[]>'.
+
+292           setMatches(data);
+                         ~~~~
+
+pages/tournaments/[alias].tsx:672:40 - error TS2345: Argument of type 'AxiosResponse<any, any, {}>' is not assignable to parameter of type 'SetStateAction<Match[]>'.
+
+672                             setMatches(matchesData);
+                                           ~~~~~~~~~~~
+
+pages/tournaments/[alias].tsx:708:36 - error TS2339: Property 'map' does not exist on type 'AxiosResponse<any, any, {}>'.
+
+708   const paths = allTournamentsData.map((tournament: Tournament) => ({
+                                       ~~~
+
+
+Found 23 errors in 11 files.
+
+Errors  Files
+     1  components/ui/ClubSelect.tsx:24
+     1  components/ui/SearchBox.tsx:29
+     1  components/ui/TeamFullNameSelect.tsx:27
+     1  components/ui/TeamSelect.tsx:46
+     1  components/ui/VenueSelect.tsx:24
+     1  components/ui/form/Listbox.tsx:51
+     3  hooks/useApiRequest.tsx:33
+     9  lib/auth.ts:130
+     1  pages/admin/myref/index.tsx:219
+     1  pages/calendar/index.tsx:30
+     3  pages/tournaments/[alias].tsx:292
