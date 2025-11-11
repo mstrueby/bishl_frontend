@@ -15,6 +15,9 @@ import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[m
 import { MatchdayValues } from '../../types/TournamentValues';
 import TeamFullNameSelect from '../../components/ui/TeamFullNameSelect';
 import { Team } from '../../types/MatchValues';
+import axios from 'axios';
+import apiClient from '../../lib/apiClient';
+
 
 interface StandingsTeam {
   fullName: string;
@@ -172,8 +175,7 @@ export default function Tournament({
       setIsLoadingRounds(true);
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
-        .then((response) => response.json())
+      apiClient.get(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`)
         .then((data) => {
           if (Array.isArray(data)) {
             const sortedData = data.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
@@ -197,8 +199,7 @@ export default function Tournament({
     if (selectedRound.name) {
       setIsLoadingMatchdays(true);
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
-        .then((response) => response.json())
+      apiClient.get(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/${selectedRound.alias}/matchdays/`)
         .then((data) => {
           if (Array.isArray(data)) {
             if (data.length === 0) {
@@ -286,8 +287,7 @@ export default function Tournament({
   useEffect(() => {
     if (selectedMatchday.name) {
       setIsLoadingMatches(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
-        .then((response) => response.json())
+      apiClient.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
         .then((data) => {
           setMatches(data);
 
@@ -655,8 +655,8 @@ export default function Tournament({
                           match={match}
                           onMatchUpdate={async () => {
                             // Refetch rounds to update standings
-                            const roundsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
-                            const roundsData = await roundsResponse.json();
+                            const roundsResponse = await apiClient.get(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${selectedSeason.alias}/rounds/`);
+                            const roundsData = roundsResponse;
                             if (Array.isArray(roundsData)) {
                               const sortedData = roundsData.sort((a: Round, b: Round) => a.sortOrder - b.sortOrder);
                               setRounds(sortedData);
@@ -667,8 +667,8 @@ export default function Tournament({
                             }
 
                             // Refetch matches
-                            const matchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
-                            const matchesData = await matchesResponse.json();
+                            const matchesResponse = await apiClient.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
+                            const matchesData = matchesResponse;
                             setMatches(matchesData);
                           }}
                           from="tournament"
@@ -704,8 +704,7 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
-  const allTournamentsData = await res.json();
+  const allTournamentsData = await apiClient.get('/tournaments/');
   const paths = allTournamentsData.map((tournament: Tournament) => ({
     params: { alias: tournament.alias },
   }));
@@ -719,22 +718,34 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return { notFound: true };
   }
 
+  let tournament;
+  let teams;
+  let standings;
+  let matches;
+
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${alias}`);
-    const tournamentData = await res.json();
-
-    if (!tournamentData) {
-      return { notFound: true };
-    }
-
-    return {
-      props: {
-        tournament: tournamentData
-      },
-      revalidate: 10 // or your preferred revalidation time
-    };
+    const response = await apiClient.get(`/tournaments/${alias}`);
+    tournament = response;
   } catch (error) {
-    console.error(error);
-    return { notFound: true };
+    console.error('Error fetching tournament:', error);
   }
-};
+
+  try {
+    const response = await apiClient.get(`/tournaments/${alias}/teams`);
+    teams = response || [];
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+  }
+
+  try {
+    const response = await apiClient.get(`/tournaments/${alias}/standings`);
+    standings = response || [];
+  } catch (error) {
+    console.error('Error fetching standings:', error);
+  }
+
+  try {
+    const response = await apiClient.get(`/tournaments/${alias}/matches`);
+    matches = response || [];
+</new_str>
+</changes>

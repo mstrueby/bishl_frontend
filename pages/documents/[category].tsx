@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { Fragment } from 'react';
 import axios from 'axios';
 import Layout from '../../components/Layout';
+import apiClient from '../../lib/apiClient';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { DocumentValues as DocumentValues } from '../../types/DocumentValues';
@@ -195,14 +196,18 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, docs }) => {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const category = context.params ? context.params.category : undefined;
-  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/documents/categories/${category}`, {
-    params: { published: true },
+  const res = await apiClient.get(`/documents/categories/${category}`, {
+    params: { 
+      published: true,
+      page: 1,
+      page_size: 100
+    },
   });
 
   return {
     props: {
       category,
-      docs: res.data,
+      docs: res.data || [],
     },
   };
 };

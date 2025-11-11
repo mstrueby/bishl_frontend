@@ -7,12 +7,11 @@ import { PostValues } from '../../types/PostValues';
 import Layout from "../..//components/Layout";
 import { getFuzzyDate } from '../../tools/dateUtils';
 import { CldImage } from 'next-cloudinary';
+import apiClient from '../../lib/apiClient';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
-
-let BASE_URL = (process.env.NEXT_PUBLIC_API_URL || '') + '/posts/';
 
 interface PostsProps {
   jwt: string,
@@ -23,21 +22,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const jwt = getCookie('jwt', context);
   let posts = null;
   try {
-    const res = await axios.get(BASE_URL, {
+    const res = await apiClient.get('/posts/', {
       params: {
-        published: true
-      },
-      headers: {
-        'Content-Type': 'application/json',
-      },
+        published: true,
+        page: 1,
+        page_size: 100
+      }
     });
-    posts = res.data;
+    posts = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching posts:', error);
     }
   }
-  return posts ? { props: { jwt, posts } } : { props: { jwt } };
+  return posts ? { props: { jwt, posts } } : { props: { jwt, posts: [] } };
 };
 
 const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {

@@ -19,9 +19,7 @@ import MatchStatusBadge from '../components/ui/MatchStatusBadge';
 import { classNames } from '../tools/utils';
 import { tournamentConfigs } from '../tools/consts';
 import Image from 'next/image';
-
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/posts/';
+import apiClient from '../lib/apiClient';
 
 interface PostsProps {
   jwt: string | null,
@@ -36,19 +34,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let posts = null;
   let todaysMatches = null;
   let tournaments = null;
-  const today = new Date().toISOString().split('T')[0];
+  let restOfWeekMatches = null;
 
+  // Fetch posts with pagination
   try {
-    const res = await axios.get(BASE_URL, {
+    const res = await apiClient.get('/posts/', {
       params: {
         published: true,
-        limit: 3
-      },
-      headers: {
-        'Content-Type': 'application/json',
+        page: 1,
+        page_size: 3
       }
     });
-    posts = res.data;
+    // Response is already unwrapped by interceptor
+    posts = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Error fetching posts:", error);
@@ -57,31 +55,29 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch today's matches
   try {
-    const matchesRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/today`, {
-
-    });
-    todaysMatches = matchesRes.data;
+    const matchesRes = await apiClient.get('/matches/today');
+    todaysMatches = matchesRes.data || [];
   } catch (error) {
     console.error("Error fetching today's matches:", error);
   }
 
-
-
   // Fetch matches for rest of the week
-  let restOfWeekMatches = null;
   try {
-    const restOfWeekRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/rest-of-week`, {
-
-    });
-    restOfWeekMatches = restOfWeekRes.data;
+    const restOfWeekRes = await apiClient.get('/matches/rest-of-week');
+    restOfWeekMatches = restOfWeekRes.data || [];
   } catch (error) {
     console.error("Error fetching rest of week matches:", error);
   }
 
   // Fetch tournaments
   try {
-    const tournamentsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
-    tournaments = tournamentsRes.data;
+    const tournamentsRes = await apiClient.get('/tournaments/', {
+      params: {
+        page: 1,
+        page_size: 100
+      }
+    });
+    tournaments = tournamentsRes.data || [];
   } catch (error) {
     console.error("Error fetching tournaments:", error);
   }

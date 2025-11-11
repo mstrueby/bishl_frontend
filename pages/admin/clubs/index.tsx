@@ -10,8 +10,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../components/ui/SuccessMessage';
 import DataList from '../../../components/admin/ui/DataList';
 import { string } from "yup";
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+import apiClient from '../../../lib/apiClient';
 
 interface ClubsProps {
   jwt: string,
@@ -33,14 +32,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
+    const userResponse = await apiClient.get('/users/me', {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
     });
     
     const user = userResponse.data;
-    //console.log("user:", user)
     if (!user.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role))) {
       return {
         redirect: {
@@ -50,13 +48,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await axios.get(BASE_URL! + '/clubs/', {
-      headers: {
-        'Content-Type': 'application/json',
+    const res = await apiClient.get('/clubs/', {
+      params: {
+        page: 1,
+        page_size: 100
       }
     });
-    clubs = res.data;
-    //console.log("clubs:", clubs)
+    clubs = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
       clubs = [];
@@ -93,12 +91,13 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
 
   const fetchClubs = async () => {
     try {
-      const res = await axios.get(BASE_URL! + '/clubs/', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const res = await apiClient.get('/clubs/', {
+        params: {
+          page: 1,
+          page_size: 100
+        }
       });
-      setClubs(res.data);
+      setClubs(res.data || []);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching clubs:', error);
@@ -117,7 +116,7 @@ const Clubs: NextPage<ClubsProps> = ({ jwt, clubs: initialClubs }) => {
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      const response = await axios.patch(`${BASE_URL! + '/clubs/'}${clubId}`, formData, {
+      const response = await apiClient.patch(`/clubs/${clubId}`, formData, {
         headers: {
           Authorization: `Bearer ${jwt}`
         },

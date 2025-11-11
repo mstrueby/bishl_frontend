@@ -8,8 +8,7 @@ import SectionHeader from "../../../components/admin/SectionHeader";
 import PostForm from '../../../components/admin/PostForm'
 import { PostValuesForm } from '../../../types/PostValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/posts/";
+import apiClient from '../../../lib/apiClient';
 
 interface AddProps {
   jwt: string;
@@ -28,11 +27,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let user = null
   
   try {
-    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
+    const userResponse = await apiClient.get('/users/me');
     user = userResponse.data;
     if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
       return {
@@ -86,11 +81,7 @@ export default function Add({ jwt, user }: AddProps) {
         }
       });
 
-      const response = await axios.post(BASE_URL, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
+      const response = await apiClient.post('/posts/', formData);
 
       if (response.status === 201) {
         router.push({
