@@ -1,9 +1,18 @@
 
 import { NextApiRequest, NextApiResponse } from 'next'
 
+import { withRateLimit } from '../../lib/rateLimit';
+import { withCSRF } from '../../lib/csrf';
+
 const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const { email, password } = req.body
+    
+    // Basic input validation
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+    
     try {
       const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
         method: 'POST',
@@ -45,4 +54,8 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default loginHandler;
+// Apply rate limiting: 5 login attempts per minute per IP
+export default withRateLimit(withCSRF(loginHandler), {
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 5, // 5 attempts
+});

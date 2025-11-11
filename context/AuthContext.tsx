@@ -12,6 +12,27 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
     setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    // Assume checkAuth is defined elsewhere and handles initial authentication check
+    // checkAuth(); 
+
+    // Fetch CSRF token
+    const fetchCSRFToken = async () => {
+      try {
+        const response = await fetch('/api/csrf-token');
+        const data = await response.json();
+        if (data.csrfToken) {
+          localStorage.setItem('csrf_token', data.csrfToken);
+        }
+      } catch (error) {
+        console.error('Failed to fetch CSRF token:', error);
+      }
+    };
+
+    fetchCSRFToken();
+  }, []);
+
+
   if (!isClient) {
     return null;
   }

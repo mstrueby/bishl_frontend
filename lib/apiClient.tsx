@@ -1,5 +1,5 @@
 
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
@@ -7,9 +7,44 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 second timeout
 });
 
-// Request interceptor - add authentication token
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+/**
+ * Determines if an error should be retried
+ */
+function shouldRetry(error: AxiosError): boolean {
+  // Retry on network errors
+  if (!error.response && error.code === 'ERR_NETWORK') {
+    return true;
+  }
+  
+  // Retry on timeout
+  if (error.code === 'ECONNABORTED') {
+    return true;
+  }
+  
+  // Retry on specific 5xx errors (but not 501, 505, 511)
+  if (error.response?.status && error.response.status >= 500) {
+    return [500, 502, 503, 504].includes(error.response.status);
+  }
+  
+  return false;
+}
+
+/**
+ * Delays execution for a specified time with exponential backoff
+ */
+function delay(retryCount: number): Promise<void> {
+  const backoffDelay = RETRY_DELAY * Math.pow(2, retryCount - 1);
+  return new Promise(resolve => setTimeout(resolve, backoffDelay));
+}
+
+// Request interceptor - add authentication token and CSRF token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Add access token to all requests
@@ -17,6 +52,15 @@ apiClient.interceptors.request.use(
     
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    
+    // Add CSRF token for state-changing requests
+    if (typeof window !== 'undefined' && 
+        ['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
+      const csrfToken = localStorage.getItem('csrf_token');
+      if (csrfToken && config.headers) {
+        config.headers['X-CSRF-Token'] = csrfToken;
+      }
     }
     
     return config;
@@ -148,8 +192,26 @@ apiClient.interceptors.response.use(
       }
     }
     
+    // Handle retryable errors
+    if (shouldRetry(error) && !originalRequest._retryCount) {
+      originalRequest._retryCount = 0;
+    }
+    
+    if (shouldRetry(error) && originalRequest._retryCount < MAX_RETRIES) {
+      originalRequest._retryCount++;
+      
+      console.log(`Retrying request (attempt ${originalRequest._retryCount}/${MAX_RETRIES})`);
+      
+      await delay(originalRequest._retryCount);
+      return apiClient(originalRequest);
+    }
+    
     return Promise.reject(error);
   }
 );
+
+// Export CancelToken for manual cancellation
+export const CancelToken = axios.CancelToken;
+export const isCancel = axios.isCancel;
 
 export default apiClient;

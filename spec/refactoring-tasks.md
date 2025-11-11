@@ -73,17 +73,20 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - [x] Update `/api/user.tsx` to use access token from localStorage
 - [x] Remove HTTP-only cookie logic (no longer needed)
 - [x] Test full auth flow: login → API calls → token refresh → logout
-- [ ] Centralize authorization logic (move from components to middleware/utilities)
-- [ ] Implement server-side permission validation in API routes
-- [ ] Create RBAC utility functions for role-based access control
+- [x] Centralize authorization logic (move from components to middleware/utilities)
+- [x] Implement server-side permission validation in API routes
+- [x] Create RBAC utility functions for role-based access control
 
 **Files Affected:** 
-- `pages/api/login.tsx` (update response handling)
-- `pages/api/logout.tsx` (clear localStorage)
-- `pages/api/user.tsx` (use localStorage token)
-- `context/AuthContext.tsx` (store both tokens)
-- `hooks/useAuth.tsx` (expose token management)
-- Create new: `lib/axiosInstance.tsx` (interceptors for token refresh)
+- ✅ `pages/api/login.tsx` (update response handling)
+- ✅ `pages/api/logout.tsx` (clear localStorage)
+- ✅ `pages/api/user.tsx` (use localStorage token)
+- ✅ `context/AuthContext.tsx` (store both tokens)
+- ✅ `hooks/useAuth.tsx` (expose token management)
+- ✅ `lib/apiClient.tsx` (interceptors for token refresh)
+- ✅ `lib/auth.ts` (RBAC utilities and permission checks)
+- ✅ `lib/serverAuth.ts` (server-side authentication middleware)
+- ✅ `hooks/usePermissions.tsx` (client-side permission hook)
 
 **Implementation Priority:**
 1. ✅ **COMPLETE:** Create `lib/apiClient.tsx` with interceptors (reference: `spec/token-refresh-implementation.md`)
@@ -92,7 +95,7 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 4. ✅ **COMPLETE:** Update all API route handlers to use new token storage
 5. ✅ **COMPLETE:** Replace all `fetch()` calls with configured axios instance (Phase 2 of api-fetch-update-plan.md)
 6. ✅ **COMPLETE:** Test complete auth flow end-to-end
-7. ⏳ **REMAINING:** Centralize authorization logic and implement RBAC utilities
+7. ✅ **COMPLETE:** Centralize authorization logic and implement RBAC utilities
 
 **Breaking Changes:**
 ⚠️ **Users will need to re-login after deployment** (token format changed)
@@ -117,17 +120,24 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - Missing loading states in many components
 
 **Tasks:**
-- [✅] Create centralized Axios instance with interceptors
-- [✅] Implement token refresh with request queueing
-- [ ] Implement global error handling strategy
-- [ ] Add retry logic for network failures
-- [ ] Create consistent loading/error state components
-- [ ] Implement request cancellation for component unmount
-- [ ] Add API response caching strategy
+- [x] Create centralized Axios instance with interceptors
+- [x] Implement token refresh with request queueing
+- [x] Implement global error handling strategy
+- [x] Add retry logic for network failures
+- [x] Create consistent loading/error state components
+- [x] Implement request cancellation for component unmount
+- [ ] Add API response caching strategy (optional - consider SWR/React Query in future)
 
-**Files Affected:** All pages with `getServerSideProps`, `getStaticProps`, API calls
+**Files Affected:** 
+- ✅ `lib/apiClient.tsx` (interceptors, retry logic, cancellation support)
+- ✅ `lib/errorHandler.ts` (centralized error handling)
+- ✅ `components/ui/LoadingState.tsx` (loading component)
+- ✅ `components/ui/ErrorState.tsx` (error component)
+- ✅ `components/ui/EmptyState.tsx` (empty state component)
+- ✅ `hooks/useApiRequest.tsx` (request hook with cancellation)
+- All pages with API calls
 
-**Progress:** Core interceptor implementation complete. Remaining: error handling UI, loading states, request cancellation.
+**Progress:** ✅ COMPLETE - Core API integration centralized. Optional: Implement SWR or React Query for advanced caching in Phase 2.
 
 ---
 
@@ -203,7 +213,7 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 
 ---
 
-### 7. Security Vulnerabilities
+### 7. Security Vulnerabilities ✅ COMPLETE
 **Impact:** Medium | **Risk:** High | **Effort:** Small
 
 **Issues:**
@@ -214,14 +224,23 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - Missing security headers
 
 **Tasks:**
-- [ ] Implement server-side permission validation
-- [ ] Add CSRF token handling
-- [ ] Remove sensitive data from client bundle
-- [ ] Sanitize all rich text input/output
-- [ ] Add security headers in next.config.js
-- [ ] Implement rate limiting
+- [x] Implement server-side permission validation
+- [x] Add CSRF token handling
+- [x] Remove sensitive data from client bundle (moved to server-side auth)
+- [x] Sanitize all rich text input/output (created lib/sanitize.ts)
+- [x] Add security headers in next.config.js
+- [x] Implement rate limiting
 
-**Files Affected:** `tools/utils.tsx`, API routes, form components
+**Files Affected:** 
+- ✅ `next.config.js` (security headers)
+- ✅ `lib/csrf.ts` (CSRF utilities)
+- ✅ `lib/rateLimit.ts` (rate limiting)
+- ✅ `lib/sanitize.ts` (input sanitization)
+- ✅ `pages/api/csrf-token.ts` (CSRF endpoint)
+- ✅ `pages/api/login.tsx` (rate limiting + CSRF)
+- ✅ `pages/api/user.tsx` (server-side auth)
+- ✅ `lib/apiClient.tsx` (CSRF token in requests)
+- ✅ `context/AuthContext.tsx` (CSRF token fetch)
 
 ---
 
@@ -443,19 +462,19 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 
 **RECOMMENDED UPGRADE SEQUENCE:**
 
-**Phase 0a: Pre-Foundation Dependencies (DO NOW)**
-- [ ] Update TypeScript to 5.x
-- [ ] Update React to 18.3.1
-- [ ] Update Tailwind CSS to latest 3.x
-- [ ] Update date-fns, axios, formik, yup (non-breaking)
-- [ ] Update development dependencies (eslint, etc.)
-- [ ] Test application thoroughly
-- [ ] **DO NOT upgrade Next.js yet**
+**Phase 0a: Pre-Foundation Dependencies ✅ COMPLETE**
+- [x] Update TypeScript to 5.x
+- [x] Update React to 18.3.1
+- [x] Update Tailwind CSS to latest 3.x
+- [x] Update date-fns, axios, formik, yup (non-breaking)
+- [x] Update development dependencies (eslint, etc.)
+- [x] Test application thoroughly
+- [x] **DO NOT upgrade Next.js yet**
 
-**Phase 0b: Foundation Work (Week 1-2)**
-- [ ] Complete Task #2 (Authentication refactoring)
-- [ ] Complete Task #7 (Security vulnerabilities)
-- [ ] Complete Task #3 (API integration centralization)
+**Phase 0b: Foundation Work (IN PROGRESS)**
+- [x] Complete Task #2 (Authentication refactoring) ✅
+- [x] Complete Task #7 (Security vulnerabilities) ✅
+- [x] Complete Task #3 (API integration centralization) ✅
 - [ ] Enable TypeScript strict mode
 - [ ] Fix all TypeScript errors
 
