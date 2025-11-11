@@ -24,7 +24,7 @@ const TeamFullNameSelect: React.FC<TeamFullNameSelectProps> = ({
   const selectedTeam = teams.find(team => team.fullName === selectedTeamId);
 
   return (
-    <Listbox value={selectedTeamId} onChange={onTeamChange}>
+    <Listbox value={selectedTeamId || undefined} onChange={onTeamChange}>
       <div className="relative mt-2">
         {label && (
           <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">

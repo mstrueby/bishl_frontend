@@ -48,7 +48,7 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ta
     <>
       <Listbox
         name={name}
-        value={selected}
+        value={selected || undefined}
         onChange={handleChange}
       >
         {({ open }) => (

@@ -288,8 +288,8 @@ export default function Tournament({
     if (selectedMatchday.name) {
       setIsLoadingMatches(true);
       apiClient.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`)
-        .then((data) => {
-          setMatches(data);
+        .then((response) => {
+          setMatches(response.data);
 
           // Only scroll to matches section if there's no matchday dropdown (single matchday)
           {/**
@@ -668,7 +668,7 @@ export default function Tournament({
 
                             // Refetch matches
                             const matchesResponse = await apiClient.get(`${process.env.NEXT_PUBLIC_API_URL}/matches/?tournament=${tournament.alias}&season=${selectedSeason.alias}&round=${selectedRound.alias}&matchday=${selectedMatchday.alias}`);
-                            const matchesData = matchesResponse;
+                            const matchesData = matchesResponse.data;
                             setMatches(matchesData);
                           }}
                           from="tournament"
@@ -704,7 +704,8 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const allTournamentsData = await apiClient.get('/tournaments/');
+  const response = await apiClient.get('/tournaments/');
+  const allTournamentsData = response.data;
   const paths = allTournamentsData.map((tournament: Tournament) => ({
     params: { alias: tournament.alias },
   }));
