@@ -27,7 +27,7 @@ import type { VenueValues } from '../../types/VenueValues';
 import type { ClubValues, TeamValues } from '../../types/ClubValues';
 import type { TournamentValues } from '../../types/TournamentValues';
 import axios from 'axios';
-import { apiClient } from '../../lib/api';
+import apiClient from '../../lib/apiClient';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;

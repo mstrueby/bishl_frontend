@@ -216,7 +216,7 @@ const MyRef: NextPage<MyRefProps> = ({ jwt, user, initialMatches, initialAssignm
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${jwt}`,
                 },
-                body: JSON.JSON.stringify(body)
+                body: JSON.stringify(body)
               }).catch(() => null);
             });
 
