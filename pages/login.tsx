@@ -55,6 +55,7 @@ const LoginPage = () => {
     try {
       // Step 1: Login and get tokens
       const res = await fetch('/api/login', {
+        method: 'POST',
         body: JSON.stringify({
           email,
           password
