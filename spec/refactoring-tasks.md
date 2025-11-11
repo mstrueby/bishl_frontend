@@ -73,17 +73,20 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - [x] Update `/api/user.tsx` to use access token from localStorage
 - [x] Remove HTTP-only cookie logic (no longer needed)
 - [x] Test full auth flow: login → API calls → token refresh → logout
-- [ ] Centralize authorization logic (move from components to middleware/utilities)
-- [ ] Implement server-side permission validation in API routes
-- [ ] Create RBAC utility functions for role-based access control
+- [x] Centralize authorization logic (move from components to middleware/utilities)
+- [x] Implement server-side permission validation in API routes
+- [x] Create RBAC utility functions for role-based access control
 
 **Files Affected:** 
-- `pages/api/login.tsx` (update response handling)
-- `pages/api/logout.tsx` (clear localStorage)
-- `pages/api/user.tsx` (use localStorage token)
-- `context/AuthContext.tsx` (store both tokens)
-- `hooks/useAuth.tsx` (expose token management)
-- Create new: `lib/axiosInstance.tsx` (interceptors for token refresh)
+- ✅ `pages/api/login.tsx` (update response handling)
+- ✅ `pages/api/logout.tsx` (clear localStorage)
+- ✅ `pages/api/user.tsx` (use localStorage token)
+- ✅ `context/AuthContext.tsx` (store both tokens)
+- ✅ `hooks/useAuth.tsx` (expose token management)
+- ✅ `lib/apiClient.tsx` (interceptors for token refresh)
+- ✅ `lib/auth.ts` (RBAC utilities and permission checks)
+- ✅ `lib/serverAuth.ts` (server-side authentication middleware)
+- ✅ `hooks/usePermissions.tsx` (client-side permission hook)
 
 **Implementation Priority:**
 1. ✅ **COMPLETE:** Create `lib/apiClient.tsx` with interceptors (reference: `spec/token-refresh-implementation.md`)
@@ -92,7 +95,7 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 4. ✅ **COMPLETE:** Update all API route handlers to use new token storage
 5. ✅ **COMPLETE:** Replace all `fetch()` calls with configured axios instance (Phase 2 of api-fetch-update-plan.md)
 6. ✅ **COMPLETE:** Test complete auth flow end-to-end
-7. ⏳ **REMAINING:** Centralize authorization logic and implement RBAC utilities
+7. ✅ **COMPLETE:** Centralize authorization logic and implement RBAC utilities
 
 **Breaking Changes:**
 ⚠️ **Users will need to re-login after deployment** (token format changed)
