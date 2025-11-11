@@ -747,5 +747,20 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   try {
     const response = await apiClient.get(`/tournaments/${alias}/matches`);
     matches = response || [];
+  } catch (error) {
+    console.error('Error fetching matches:', error);
+  }
+
+  if (!tournament) {
+    return { notFound: true };
+  }
+
+  return {
+    props: {
+      tournament,
+    },
+    revalidate: 60,
+  };
+};
 </new_str>
 </changes>
