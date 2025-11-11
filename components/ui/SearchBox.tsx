@@ -18,9 +18,11 @@ const SearchBox: React.FC<SearchBoxProps> = ({ placeholder, options, onSearch, o
   const [selected, setSelected] = useState<SearchOption | null>(null);
   const [query, setQuery] = useState('');
 
-  const handleSelect = (option: SearchOption) => {
-    setSelected(option);
-    onSelect(option);
+  const handleSelect = (option: SearchOption | null) => {
+    if (option) {
+      setSelected(option);
+      onSelect(option);
+    }
   };
 
   const filteredOptions = query === '' ? [] : options;

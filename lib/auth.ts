@@ -127,13 +127,16 @@ const rolePermissions: Record<UserRole, Permission[]> = {
  * Check if a user has a specific permission
  */
 export function hasPermission(user: UserValues | null, permission: Permission): boolean {
-  if (!user || !user.role) {
+  if (!user || !user.roles || user.roles.length === 0) {
     return false;
   }
   
-  const userRole = user.role as UserRole;
-  const permissions = rolePermissions[userRole] || [];
-  return permissions.includes(permission);
+  // Check if user has permission through any of their roles
+  return user.roles.some((role: string) => {
+    const userRole = role as UserRole;
+    const permissions = rolePermissions[userRole] || [];
+    return permissions.includes(permission);
+  });
 }
 
 /**
@@ -154,10 +157,10 @@ export function hasAllPermissions(user: UserValues | null, permissions: Permissi
  * Check if a user has a specific role
  */
 export function hasRole(user: UserValues | null, role: UserRole): boolean {
-  if (!user || !user.role) {
+  if (!user || !user.roles) {
     return false;
   }
-  return user.role === role;
+  return user.roles.includes(role);
 }
 
 /**
@@ -181,8 +184,8 @@ export function canManageClub(user: UserValues | null, clubId: number): boolean 
   }
   
   // Club managers can only manage their own club
-  if (hasRole(user, UserRole.CLUB_MANAGER)) {
-    return user.club_id === clubId;
+  if (hasRole(user, UserRole.CLUB_MANAGER) && user.club) {
+    return user.club.clubId === clubId.toString();
   }
   
   return false;
@@ -201,9 +204,10 @@ export function canManageTeamPlayers(user: UserValues | null, teamId: number): b
     return true;
   }
   
-  // Club managers can manage their club's teams
-  if (hasRole(user, UserRole.CLUB_MANAGER) && user.team_ids) {
-    return user.team_ids.includes(teamId);
+  // Club managers can manage their club's teams (note: need to add team associations to UserValues)
+  if (hasRole(user, UserRole.CLUB_MANAGER)) {
+    // TODO: Add team associations to UserValues type
+    return false;
   }
   
   return false;
@@ -220,12 +224,19 @@ export function isAuthenticated(user: UserValues | null): boolean {
  * Get user permissions
  */
 export function getUserPermissions(user: UserValues | null): Permission[] {
-  if (!user || !user.role) {
+  if (!user || !user.roles || user.roles.length === 0) {
     return [];
   }
   
-  const userRole = user.role as UserRole;
-  return rolePermissions[userRole] || [];
+  // Combine permissions from all roles
+  const allPermissions = new Set<Permission>();
+  user.roles.forEach((role: string) => {
+    const userRole = role as UserRole;
+    const permissions = rolePermissions[userRole] || [];
+    permissions.forEach(permission => allPermissions.add(permission));
+  });
+  
+  return Array.from(allPermissions);
 }
 
 /**

@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react';
-import { AxiosRequestConfig, CancelTokenSource } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import apiClient from '../lib/apiClient';
 import { getErrorMessage } from '../lib/errorHandler';
 
@@ -17,7 +17,7 @@ export function useApiRequest<T = any>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(options.autoFetch !== false);
   const [error, setError] = useState<string | null>(null);
-  const cancelTokenRef = useRef<CancelTokenSource | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const execute = async (overrideConfig?: AxiosRequestConfig) => {
     try {
@@ -25,17 +25,17 @@ export function useApiRequest<T = any>(
       setError(null);
 
       // Cancel previous request if exists
-      if (cancelTokenRef.current) {
-        cancelTokenRef.current.cancel('New request initiated');
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
-      // Create new cancel token
-      cancelTokenRef.current = apiClient.CancelToken.source();
+      // Create new abort controller
+      abortControllerRef.current = new AbortController();
 
       const response = await apiClient.request<T>({
         ...config,
         ...overrideConfig,
-        cancelToken: cancelTokenRef.current.token,
+        signal: abortControllerRef.current.signal,
       });
 
       setData(response.data);
@@ -43,7 +43,7 @@ export function useApiRequest<T = any>(
       
       return response.data;
     } catch (err: any) {
-      if (apiClient.isCancel(err)) {
+      if (err.name === 'AbortError' || err.name === 'CanceledError') {
         console.log('Request cancelled:', err.message);
         return;
       }
@@ -66,8 +66,8 @@ export function useApiRequest<T = any>(
 
     // Cleanup: cancel request on unmount
     return () => {
-      if (cancelTokenRef.current) {
-        cancelTokenRef.current.cancel('Component unmounted');
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
