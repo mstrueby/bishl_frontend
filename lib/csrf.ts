@@ -18,11 +18,17 @@ export function validateCSRFToken(token: string, sessionToken: string): boolean 
   
   // Use timing-safe comparison to prevent timing attacks
   try {
-    return crypto.timingSafeEqual(
-      Buffer.from(token, 'hex'),
-      Buffer.from(sessionToken, 'hex')
-    );
-  } catch {
+    // Ensure both tokens are the same length for timingSafeEqual
+    const tokenBuffer = Buffer.from(token, 'hex');
+    const sessionBuffer = Buffer.from(sessionToken, 'hex');
+    
+    if (tokenBuffer.length !== sessionBuffer.length) {
+      return false;
+    }
+    
+    return crypto.timingSafeEqual(tokenBuffer, sessionBuffer);
+  } catch (error) {
+    console.error('CSRF validation error:', error);
     return false;
   }
 }

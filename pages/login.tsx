@@ -16,11 +16,41 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isClient, setIsClient] = useState(false); // State to check if running on the client
 
   const { setUser } = useAuth();
   const router = useRouter();
 
+  // Moved CSRF token fetching into a useEffect hook to ensure it runs on the client
+  // and before the login attempt.
+  // Also, added a check for `isClient` to prevent server-side rendering issues.
+  useEffect(() => {
+    setIsClient(true);
+
+    // Fetch CSRF token on component mount
+    const fetchCSRFToken = async () => {
+      try {
+        const response = await fetch('/api/csrf-token');
+        const data = await response.json();
+        if (data.csrfToken) {
+          localStorage.setItem('csrf_token', data.csrfToken);
+        }
+      } catch (error) {
+        console.error('Failed to fetch CSRF token:', error);
+      }
+    };
+
+    fetchCSRFToken();
+  }, []);
+
+
   const handleSubmit = async () => {
+    // Only proceed if running on the client and CSRF token is available
+    if (!isClient || !localStorage.getItem('csrf_token')) {
+      setError('CSRF token not available. Please try again.');
+      return;
+    }
+
     setLoading(true);
     try {
       // Step 1: Login and get tokens
@@ -30,25 +60,25 @@ const LoginPage = () => {
           password
         }),
         headers: {
-          'Content-Type': 'application/json'
-        },
-        method: 'POST'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': localStorage.getItem('csrf_token') || '' // Include CSRF token
+        }
       });
 
       if (res.ok) {
         const { access_token, refresh_token } = await res.json();
-        
+
         // Step 2: Store tokens in localStorage
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
-        
+
         // Step 3: Fetch user info using access token
         const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
           headers: {
             'Authorization': `Bearer ${access_token}`
           }
         });
-        
+
         if (userRes.ok) {
           const userData = await userRes.json();
           setUser(userData);
@@ -132,7 +162,7 @@ const LoginPage = () => {
                 password: Yup.string().required('Bitte gib ein Passwort ein.')
               })
               */  
-              
+
               onSubmit={handleSubmit}
             >
               <Form className="space-y-6">
