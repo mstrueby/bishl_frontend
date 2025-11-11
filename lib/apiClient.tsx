@@ -9,7 +9,7 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor - add authentication token
+// Request interceptor - add authentication token and CSRF token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Add access token to all requests
@@ -17,6 +17,15 @@ apiClient.interceptors.request.use(
     
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    
+    // Add CSRF token for state-changing requests
+    if (typeof window !== 'undefined' && 
+        ['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
+      const csrfToken = localStorage.getItem('csrf_token');
+      if (csrfToken && config.headers) {
+        config.headers['X-CSRF-Token'] = csrfToken;
+      }
     }
     
     return config;
