@@ -23,5 +23,5 @@ export interface UserValues {
     logoUrl: string;
   };
   referee?: RefereeValues;
-  roles: []
+  roles: string[];
 }
