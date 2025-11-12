@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import apiClient, { CancelToken, isCancel } from '@/lib/apiClient';
@@ -26,11 +25,8 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Mock window.location - JSDOM compatible approach
-// Delete the JSDOM location and replace with a plain object
-const originalLocation = window.location;
-delete (window as any).location;
-
-const mockLocation = {
+// Create a mock location object with proper getters/setters to avoid JSDOM navigation
+const mockLocationData = {
   href: '',
   pathname: '/',
   search: '',
@@ -40,13 +36,38 @@ const mockLocation = {
   host: 'localhost:3000',
   hostname: 'localhost',
   port: '3000',
+};
+
+const mockLocation = {
+  ...mockLocationData,
   reload: jest.fn(),
   replace: jest.fn(),
   assign: jest.fn(),
-  toString: () => mockLocation.href,
+  toString: () => mockLocationData.href,
 };
 
-(window as any).location = mockLocation;
+// Define getters and setters for each property to avoid JSDOM interception
+Object.defineProperty(mockLocation, 'href', {
+  get: () => mockLocationData.href,
+  set: (value: string) => { mockLocationData.href = value; },
+  configurable: true,
+});
+
+Object.defineProperty(mockLocation, 'pathname', {
+  get: () => mockLocationData.pathname,
+  set: (value: string) => { mockLocationData.pathname = value; },
+  configurable: true,
+});
+
+// Delete the existing location property completely
+delete (window as any).location;
+
+// Define a new location property that returns our mock
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+  writable: true,
+  configurable: true,
+});
 
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
