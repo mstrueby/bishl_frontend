@@ -25,7 +25,7 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
-// Mock window.location using delete and assign (JSDOM-compatible)
+// Mock window.location using delete and direct assignment (JSDOM compatible)
 let mockHref = '';
 let mockPathname = '/';
 
@@ -53,8 +53,8 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock = new MockAdapter(apiClient);
     axiosMock = new MockAdapter(axios); // Mock base axios for refresh calls
     localStorageMock.clear();
-    mockPathname = '/';
     mockHref = '';
+    mockPathname = '/';
   });
 
   afterEach(() => {
@@ -300,18 +300,13 @@ describe('lib/apiClient.tsx - API Client', () => {
 
   describe('Retry Logic', () => {
     it('should retry on network errors up to MAX_RETRIES', async () => {
-      let callCount = 0;
-      mock.onGet('/test').reply(() => {
-        callCount++;
-        if (callCount < 3) {
-          return Promise.reject({ code: 'ECONNABORTED', message: 'Network Error' });
-        }
-        return [200, { success: true, data: { message: 'ok' } }];
-      });
+      mock.onGet('/test').networkErrorOnce();
+      mock.onGet('/test').networkErrorOnce();
+      mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
 
       const response = await apiClient.get('/test');
       expect(response.data).toEqual({ message: 'ok' });
-      expect(callCount).toBe(3);
+      expect(mock.history.get.length).toBe(3);
     });
 
     it('should retry on timeout errors', async () => {
@@ -359,9 +354,10 @@ describe('lib/apiClient.tsx - API Client', () => {
     });
 
     it('should fail after MAX_RETRIES attempts', async () => {
-      mock.onGet('/test').reply(() => {
-        return Promise.reject({ code: 'ECONNABORTED', message: 'Network Error' });
-      });
+      mock.onGet('/test').networkError();
+      mock.onGet('/test').networkError();
+      mock.onGet('/test').networkError();
+      mock.onGet('/test').networkError();
 
       await expect(apiClient.get('/test')).rejects.toThrow();
       expect(mock.history.get.length).toBe(4); // 1 initial + 3 retries

@@ -154,8 +154,11 @@
         at LocationImpl.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at /home/runner/workspace/lib/apiClient.tsx:178:35
+        at runNextTicks (node:internal/process/task_queues:60:5)
+        at listOnTimeout (node:internal/timers:538:9)
+        at processTimers (node:internal/timers:512:7)
         at Axios.request (/home/runner/workspace/node_modules/axios/lib/core/Axios.js:40:14)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:415:7) {
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:411:7) {
       type: 'not implemented'
     }
 
@@ -170,40 +173,40 @@
       at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
       at lib/apiClient.tsx:178:35
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:415:7)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:411:7)
 
-FAIL __tests__/lib/apiClient.test.ts (5.565 s)
+FAIL __tests__/lib/apiClient.test.ts (5.764 s)
   lib/apiClient.tsx - API Client
     Request Interceptor
-      ✓ should add Authorization header when access token exists (34 ms)
+      ✓ should add Authorization header when access token exists (8 ms)
       ✓ should not add Authorization header when no access token exists (3 ms)
-      ✓ should add CSRF token to POST requests (4 ms)
+      ✓ should add CSRF token to POST requests (2 ms)
       ✓ should add CSRF token to PUT, PATCH, DELETE requests (3 ms)
       ✓ should not add CSRF token to GET requests (2 ms)
     Response Interceptor - Unwrapping
-      ✓ should unwrap standardized success response (5 ms)
-      ✓ should preserve pagination metadata (2 ms)
-      ✓ should return response as-is if not standardized format (4 ms)
+      ✓ should unwrap standardized success response (3 ms)
+      ✓ should preserve pagination metadata (3 ms)
+      ✓ should return response as-is if not standardized format (3 ms)
     Token Refresh Logic
-      ✓ should refresh token on 401 error and retry original request (3 ms)
-      ✓ should queue multiple requests during token refresh (3 ms)
-      ✕ should redirect to login when refresh token fails (99 ms)
-      ✕ should redirect to login when no refresh token exists (5 ms)
-      ✓ should not redirect to login if already on login page (4 ms)
+      ✓ should refresh token on 401 error and retry original request (10 ms)
+      ✓ should queue multiple requests during token refresh (20 ms)
+      ✕ should redirect to login when refresh token fails (242 ms)
+      ✕ should redirect to login when no refresh token exists (15 ms)
+      ✓ should not redirect to login if already on login page (14 ms)
     Retry Logic
-      ✕ should retry on network errors up to MAX_RETRIES (1 ms)
-      ✓ should retry on timeout errors (1007 ms)
-      ✓ should retry on 500, 502, 503, 504 errors (4012 ms)
+      ✕ should retry on network errors up to MAX_RETRIES (2 ms)
+      ✓ should retry on timeout errors (1010 ms)
+      ✓ should retry on 500, 502, 503, 504 errors (4016 ms)
       ✓ should not retry on 501, 505, 511 errors (3 ms)
       ✓ should not retry on 400 errors (2 ms)
-      ✕ should fail after MAX_RETRIES attempts (3 ms)
+      ✕ should fail after MAX_RETRIES attempts (2 ms)
     Request Cancellation
       ✓ should support request cancellation (1 ms)
-      ✓ should export CancelToken and isCancel (3 ms)
+      ✓ should export CancelToken and isCancel
     Edge Cases
-      ✓ should handle response without data field (3 ms)
+      ✓ should handle response without data field (1 ms)
       ✓ should handle empty response (1 ms)
-      ✓ should not retry 401 errors more than once (token refresh only) (6 ms)
+      ✓ should not retry 401 errors more than once (token refresh only) (3 ms)
 
   ● lib/apiClient.tsx - API Client › Token Refresh Logic › should redirect to login when refresh token fails
 
@@ -241,21 +244,49 @@ FAIL __tests__/lib/apiClient.test.ts (5.565 s)
 
   ● lib/apiClient.tsx - API Client › Retry Logic › should retry on network errors up to MAX_RETRIES
 
-    TypeError: Cannot read properties of undefined (reading '_retryCount')
+    Network Error
 
-      194 |     
-      195 |     // Handle retryable errors
-    > 196 |     if (shouldRetry(error) && !originalRequest._retryCount) {
-          |                                                ^
-      197 |       originalRequest._retryCount = 0;
-      198 |     }
-      199 |     
+      305 |       mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
+      306 |
+    > 307 |       const response = await apiClient.get('/test');
+          |                        ^
+      308 |       expect(response.data).toEqual({ message: 'ok' });
+      309 |       expect(mock.history.get.length).toBe(3);
+      310 |     });
 
-      at _retryCount (lib/apiClient.tsx:196:48)
+      at Function.AxiosError.from (node_modules/axios/lib/core/AxiosError.js:96:14)
+      at Object.createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:29)
+      at node_modules/axios-mock-adapter/src/index.js:208:23
+      at makeResponse (node_modules/axios-mock-adapter/src/utils.js:123:52)
+      at Object.settle (node_modules/axios-mock-adapter/src/utils.js:142:24)
+      at handleRequest (node_modules/axios-mock-adapter/src/handle_request.js:61:20)
+      at node_modules/axios-mock-adapter/src/index.js:54:24
+      at Axios.dispatchRequest (node_modules/axios/lib/core/dispatchRequest.js:51:10)
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:312:24)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:307:24)
       at Axios.request (node_modules/axios/lib/core/Axios.js:45:41)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:312:24)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:307:24)
+
+    Cause:
+    Network Error
+
+      305 |       mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
+      306 |
+    > 307 |       const response = await apiClient.get('/test');
+          |                        ^
+      308 |       expect(response.data).toEqual({ message: 'ok' });
+      309 |       expect(mock.history.get.length).toBe(3);
+      310 |     });
+
+      at Object.createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:34)
+      at node_modules/axios-mock-adapter/src/index.js:208:23
+      at makeResponse (node_modules/axios-mock-adapter/src/utils.js:123:52)
+      at Object.settle (node_modules/axios-mock-adapter/src/utils.js:142:24)
+      at handleRequest (node_modules/axios-mock-adapter/src/handle_request.js:61:20)
+      at node_modules/axios-mock-adapter/src/index.js:54:24
+      at Axios.dispatchRequest (node_modules/axios/lib/core/dispatchRequest.js:51:10)
+      at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:307:24)
 
   ● lib/apiClient.tsx - API Client › Retry Logic › should fail after MAX_RETRIES attempts
 
@@ -264,18 +295,18 @@ FAIL __tests__/lib/apiClient.test.ts (5.565 s)
     Expected: 4
     Received: 1
 
-      365 |
-      366 |       await expect(apiClient.get('/test')).rejects.toThrow();
-    > 367 |       expect(mock.history.get.length).toBe(4); // 1 initial + 3 retries
+      361 |
+      362 |       await expect(apiClient.get('/test')).rejects.toThrow();
+    > 363 |       expect(mock.history.get.length).toBe(4); // 1 initial + 3 retries
           |                                       ^
-      368 |     });
-      369 |   });
-      370 |
+      364 |     });
+      365 |   });
+      366 |
 
-      at Object.toBe (__tests__/lib/apiClient.test.ts:367:39)
+      at Object.toBe (__tests__/lib/apiClient.test.ts:363:39)
 
 Test Suites: 1 failed, 1 total
 Tests:       4 failed, 20 passed, 24 total
 Snapshots:   0 total
-Time:        6.012 s
+Time:        6.242 s
 Ran all test suites matching __tests__/lib/apiClient.test.ts.
