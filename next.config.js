@@ -6,14 +6,7 @@ const nextConfig = {
   experimental: {
     forceSwcTransforms: false,
   },
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@swc/helpers/_/_class_private_field_get': '@swc/helpers/esm/_class_private_field_get',
-      '@swc/helpers/_/_class_private_field_set': '@swc/helpers/esm/_class_private_field_set',
-    };
-    return config;
-  },
+  
   images: {
     domains: ['res.cloudinary.com'],
   },
