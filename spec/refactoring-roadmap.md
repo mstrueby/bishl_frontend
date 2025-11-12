@@ -487,8 +487,8 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - Centralized API client with interceptors and error handling
 - TypeScript strict mode enabled with zero compilation errors
 - All foundation work completek #3 (API integration centralization) ✅
-- [ ] Enable TypeScript strict mode
-- [ ] Fix all TypeScript errors
+- Enable TypeScript strict mode
+- Fix all TypeScript errors
 
 **Phase 1: Next.js Incremental Upgrade (Week 3-4)**
 - [ ] Upgrade Next.js 12.2 → 12.3.x (latest 12.x)
