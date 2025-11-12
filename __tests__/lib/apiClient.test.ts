@@ -25,25 +25,31 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Mock window.location - JSDOM compatible approach
-// Instead of redefining window.location, we'll spy on it
 const mockLocationData = {
   href: '',
   pathname: '/',
 };
 
-// Store original location
-const originalLocation = window.location;
-
-// Use delete and redefine approach that works with JSDOM
+// Delete and redefine window.location for JSDOM
 delete (window as any).location;
-window.location = {
-  ...originalLocation,
-  href: mockLocationData.href,
-  pathname: mockLocationData.pathname,
-  reload: jest.fn(),
-  replace: jest.fn(),
-  assign: jest.fn(),
-} as any;
+Object.defineProperty(window, 'location', {
+  value: {
+    href: '',
+    pathname: '/',
+    search: '',
+    hash: '',
+    origin: 'http://localhost:3000',
+    protocol: 'http:',
+    host: 'localhost:3000',
+    hostname: 'localhost',
+    port: '3000',
+    reload: jest.fn(),
+    replace: jest.fn(),
+    assign: jest.fn(),
+  },
+  writable: true,
+  configurable: true,
+});
 
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
@@ -54,8 +60,6 @@ describe('lib/apiClient.tsx - API Client', () => {
     axiosMock = new MockAdapter(axios); // Mock base axios for refresh calls
     localStorageMock.clear();
     // Reset location mock
-    mockLocationData.href = '';
-    mockLocationData.pathname = '/';
     (window.location as any).href = '';
     (window.location as any).pathname = '/';
   });
