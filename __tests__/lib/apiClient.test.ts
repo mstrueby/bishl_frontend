@@ -25,31 +25,8 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Mock window.location - JSDOM compatible approach
-const mockLocationData = {
-  href: '',
-  pathname: '/',
-};
-
-// Delete and redefine window.location for JSDOM
-delete (window as any).location;
-Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-    pathname: '/',
-    search: '',
-    hash: '',
-    origin: 'http://localhost:3000',
-    protocol: 'http:',
-    host: 'localhost:3000',
-    hostname: 'localhost',
-    port: '3000',
-    reload: jest.fn(),
-    replace: jest.fn(),
-    assign: jest.fn(),
-  },
-  writable: true,
-  configurable: true,
-});
+// Store original location assign for restoration
+const originalAssign = window.location.assign;
 
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
@@ -59,9 +36,22 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock = new MockAdapter(apiClient);
     axiosMock = new MockAdapter(axios); // Mock base axios for refresh calls
     localStorageMock.clear();
-    // Reset location mock
-    (window.location as any).href = '';
-    (window.location as any).pathname = '/';
+    
+    // Mock location properties for each test
+    // JSDOM allows assignment to these properties
+    Object.defineProperty(window.location, 'href', {
+      writable: true,
+      value: '',
+    });
+    Object.defineProperty(window.location, 'pathname', {
+      writable: true,
+      value: '/',
+    });
+    
+    // Mock location methods
+    window.location.assign = jest.fn();
+    window.location.replace = jest.fn();
+    window.location.reload = jest.fn();
   });
 
   afterEach(() => {
@@ -69,6 +59,10 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock.restore();
     axiosMock.reset();
     axiosMock.restore();
+    
+    // Restore original location methods
+    window.location.assign = originalAssign;
+    jest.clearAllMocks();
   });
 
   describe('Request Interceptor', () => {
