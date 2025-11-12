@@ -13,7 +13,7 @@
     "test:ci": "jest --ci --coverage --maxWorkers=2"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.9",
+    "@headlessui/react": "^1.7.19",
     "@heroicons/react": "^2.1.5",
     "@react-pdf/renderer": "^4.3.0",
     "@swc/helpers": "^0.5.13",
@@ -47,6 +47,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "autoprefixer": "^10.4.13",
+    "axios-mock-adapter": "^2.1.0",
     "browserslist": "^4.27.0",
     "caniuse-lite": "^1.0.30001754",
     "eslint": "8.19.0",
