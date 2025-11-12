@@ -16,7 +16,7 @@
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.1.5",
     "@react-pdf/renderer": "^4.3.0",
-    "@swc/helpers": "^0.5.13",
+    "@swc/helpers": "^0.5.17",
     "@types/react-datepicker": "^7.0.0",
     "axios": "^1.13.2",
     "cloudinary": "^2.5.1",
