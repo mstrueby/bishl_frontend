@@ -3,12 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
   Menu,
-  MenuButton,
-  MenuItems,
-  MenuItem,
   Transition,
 } from "@headlessui/react";
 import {
@@ -171,19 +166,19 @@ const Header = () => {
     (async () => {
       try {
         const accessToken = localStorage.getItem('access_token');
-        
+
         if (!accessToken) {
           setUser(null);
           setLoading(false);
           return;
         }
-        
+
         const userData = await fetch("/api/user", {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
         });
-        
+
         if (userData.ok) {
           const user = await userData.json();
           setUser(user);
@@ -233,7 +228,7 @@ const Header = () => {
                       <a className={item}>Tag der Meister</a>
                     </Link>
                     <Menu as="div" className="relative inline-block text-left">
-                      <MenuButton className={item}>Herren</MenuButton>
+                      <Menu.Button className={item}>Herren</Menu.Button>
                       <Transition
                         as={Fragment}
                         enter="transition ease-out duration-300"
@@ -243,9 +238,9 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {men.map((item, index) => (
-                            <MenuItem key={index}>
+                            <Menu.Item key={index}>
                               {({ active }) => (
                                 <MyLink
                                   href={item.href}
@@ -265,13 +260,13 @@ const Header = () => {
                                   {item.name}
                                 </MyLink>
                               )}
-                            </MenuItem>
+                            </Menu.Item>
                           ))}
-                        </MenuItems>
+                        </Menu.Items>
                       </Transition>
                     </Menu>
                     <Menu as="div" className="relative inline-block text-left">
-                      <MenuButton className={item}>Nachwuchs</MenuButton>
+                      <Menu.Button className={item}>Nachwuchs</Menu.Button>
                       <Transition
                         as={Fragment}
                         enter="transition ease-out duration-100"
@@ -281,9 +276,9 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           {youth.map((item, index) => (
-                            <MenuItem key={index}>
+                            <Menu.Item key={index}>
                               {({ active }) => (
                                 <MyLink
                                   href={item.href}
@@ -303,9 +298,9 @@ const Header = () => {
                                   {item.name}
                                 </MyLink>
                               )}
-                            </MenuItem>
+                            </Menu.Item>
                           ))}
-                        </MenuItems>
+                        </Menu.Items>
                       </Transition>
                     </Menu>
                   </div>
@@ -331,14 +326,14 @@ const Header = () => {
                   {user !== null ? (
                     <Menu as="div" className="relative ml-3">
                       <div>
-                        <MenuButton className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                        <Menu.Button className="relative flex rounded-full text-gray-400 bg-gray-800 text-sm p-2 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                           <span className="absolute -inset-1.5" />
                           <span className="sr-only">Open user menu</span>
                           <UserIcon
                             className="block h-6 w-6"
                             aria-hidden="true"
                           />
-                        </MenuButton>
+                        </Menu.Button>
                       </div>
                       <Transition
                         as={Fragment}
@@ -349,7 +344,7 @@ const Header = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <MenuItems className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute right-0 z-60 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <p className="block px-4 py-2 text-sm font-bold text-gray-900 border-b border-gray-200">
                             Hallo {user.firstName}
                           </p>
@@ -358,7 +353,7 @@ const Header = () => {
                           {(user.roles?.includes("AUTHOR") ||
                             user.roles?.includes("ADMIN")) && (
                             <>
-                              <MenuItem>
+                              <Menu.Item>
                                 <MyLink
                                   href="/admin/posts"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -369,13 +364,13 @@ const Header = () => {
                                   />
                                   <span>Beiträge</span>
                                 </MyLink>
-                              </MenuItem>
+                              </Menu.Item>
                             </>
                           )}
                           {(user.roles?.includes("DOC_ADMIN") ||
                             user.roles?.includes("ADMIN")) && (
                             <>
-                              <MenuItem>
+                              <Menu.Item>
                                 <MyLink
                                   href="/admin/documents"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -386,7 +381,7 @@ const Header = () => {
                                   />
                                   <span>Dokumente</span>
                                 </MyLink>
-                              </MenuItem>
+                              </Menu.Item>
                             </>
                           )}
 
@@ -394,7 +389,7 @@ const Header = () => {
                           {(user.roles?.includes("REF_ADMIN") ||
                             user.roles?.includes("ADMIN")) && (
                             <>
-                              <MenuItem>
+                              <Menu.Item>
                                 <MyLink
                                   href="/admin/refadmin/referees"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -405,8 +400,8 @@ const Header = () => {
                                   />
                                   <span>Schiedsrichter</span>
                                 </MyLink>
-                              </MenuItem>
-                              <MenuItem>
+                              </Menu.Item>
+                              <Menu.Item>
                                 <MyLink
                                   href="/admin/refadmin"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -417,13 +412,13 @@ const Header = () => {
                                   />
                                   <span>Schiris einteilen</span>
                                 </MyLink>
-                              </MenuItem>
+                              </Menu.Item>
                             </>
                           )}
 
                           {/* Referee items - only for referees */}
                           {user.roles?.includes("REFEREE") && (
-                            <MenuItem>
+                            <Menu.Item>
                               <MyLink
                                 href="/admin/myref"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -434,13 +429,13 @@ const Header = () => {
                                 />
                                 <span>Meine Einsätze</span>
                               </MyLink>
-                            </MenuItem>
+                            </Menu.Item>
                           )}
 
                           {/* My Club administration */}
                           {(user.roles?.includes("CLUB_ADMIN") ||
                             user.roles?.includes("ADMIN")) && (
-                            <MenuItem>
+                            <Menu.Item>
                               <MyLink
                                 href="/admin/myclub"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -451,13 +446,13 @@ const Header = () => {
                                 />
                                 <span>Mein Verein</span>
                               </MyLink>
-                            </MenuItem>
+                            </Menu.Item>
                           )}
                           {/* LEAGUE_ADMIN items */}
                           {(user.roles?.includes("LEAGUE_ADMIN") ||
                             user.roles?.includes("ADMIN")) && (
                             <>
-                              <MenuItem>
+                              <Menu.Item>
                                 <MyLink
                                   href="/admin/clubs"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
@@ -468,14 +463,14 @@ const Header = () => {
                                   />
                                   <span>Vereine</span>
                                 </MyLink>
-                              </MenuItem>
+                              </Menu.Item>
                             </>
                           )}
                           {/* PLAYER_ADMIN items */}
                           {(user.roles?.includes("PLAYER_ADMIN") ||
                             user.roles?.includes("ADMIN")) && (
                             <>
-                              <MenuItem>
+                              <Menu.Item>
                                 <MyLink
                                   href="/admin/players"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -486,13 +481,13 @@ const Header = () => {
                                   />
                                   <span>Spieler</span>
                                 </MyLink>
-                              </MenuItem>
+                              </Menu.Item>
                             </>
                           )}
                           {/* ADMIN items - only for admins */}
                           {user.roles?.includes("ADMIN") && (
                             <>
-                              <MenuItem>
+                              <Menu.Item>
                                 <MyLink
                                   href="/admin/venues"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
@@ -503,20 +498,20 @@ const Header = () => {
                                   />
                                   <span>Spielflächen</span>
                                 </MyLink>
-                              </MenuItem>
-                              <MenuItem>
+                              </Menu.Item>
+                              <Menu.Item>
                                 <MyLink
                                   href="/leaguemanager"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                                 >
                                   Spielbetrieb
                                 </MyLink>
-                              </MenuItem>
+                              </Menu.Item>
                             </>
                           )}
 
                           {/* Profile - visible to all */}
-                          <MenuItem>
+                          <Menu.Item>
                             <MyLink
                               href="/admin/profile"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
@@ -527,10 +522,10 @@ const Header = () => {
                               />
                               <span>Mein Profil</span>
                             </MyLink>
-                          </MenuItem>
+                          </Menu.Item>
 
                           {/* Logout - visible to all */}
-                          <MenuItem>
+                          <Menu.Item>
                             <MyLink
                               href="/logout"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
@@ -541,8 +536,8 @@ const Header = () => {
                               />
                               <span>Abmelden</span>
                             </MyLink>
-                          </MenuItem>
-                        </MenuItems>
+                          </Menu.Item>
+                        </Menu.Items>
                       </Transition>
                     </Menu>
                   ) : (
