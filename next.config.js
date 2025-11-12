@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // SWC minification disabled - will re-enable after Next.js 13+ upgrade
   swcMinify: false,
   experimental: {
     forceSwcTransforms: false,
