@@ -3,13 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
   Menu,
-  MenuButton,
-  MenuItems,
-  MenuItem,
   Transition,
+  MenuItem,
+  MenuItems,
+  MenuButton,
 } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -171,19 +169,19 @@ const Header = () => {
     (async () => {
       try {
         const accessToken = localStorage.getItem('access_token');
-        
+
         if (!accessToken) {
           setUser(null);
           setLoading(false);
           return;
         }
-        
+
         const userData = await fetch("/api/user", {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
         });
-        
+
         if (userData.ok) {
           const user = await userData.json();
           setUser(user);
