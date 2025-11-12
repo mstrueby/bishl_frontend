@@ -13,7 +13,7 @@
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at Reflect.set (<anonymous>)
         at Window.set location [as location] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/browser/Window.js:424:15)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:30:16)
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:36:25)
         at Runtime._execModule (/home/runner/workspace/node_modules/jest-runtime/build/index.js:1268:24)
         at Runtime._loadModule (/home/runner/workspace/node_modules/jest-runtime/build/index.js:944:12)
         at Runtime.requireModule (/home/runner/workspace/node_modules/jest-runtime/build/index.js:832:12)
@@ -23,17 +23,17 @@
       type: 'not implemented'
     }
 
-      28 | // Mock window.location
-      29 | delete (window as any).location;
-    > 30 | window.location = { href: '', pathname: '' } as any;
-         |                ^
-      31 |
-      32 | describe('lib/apiClient.tsx - API Client', () => {
-      33 |   let mock: MockAdapter;
+      34 | // Delete and redefine location to avoid "Cannot redefine property" error
+      35 | delete (window as any).location;
+    > 36 | (window as any).location = mockLocation;
+         |                         ^
+      37 |
+      38 | describe('lib/apiClient.tsx - API Client', () => {
+      39 |   let mock: MockAdapter;
 
       at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
           at Reflect.set (<anonymous>)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:30:16)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:36:25)
 
   console.error
     Error: Not implemented: navigation (except hash changes)
@@ -45,9 +45,8 @@
         at LocationImpl.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at /home/runner/workspace/lib/apiClient.tsx:178:35
-        at processTicksAndRejections (node:internal/process/task_queues:95:5)
         at Axios.request (/home/runner/workspace/node_modules/axios/lib/core/Axios.js:40:14)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:186:24) {
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:197:24) {
       type: 'not implemented'
     }
 
@@ -62,7 +61,7 @@
       at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
       at lib/apiClient.tsx:178:35
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:186:24)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:197:24)
 
   console.error
     Error: Not implemented: navigation (except hash changes)
@@ -74,10 +73,9 @@
         at LocationImpl.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at /home/runner/workspace/lib/apiClient.tsx:178:35
-        at processTicksAndRejections (node:internal/process/task_queues:95:5)
         at Axios.request (/home/runner/workspace/node_modules/axios/lib/core/Axios.js:40:14)
         at async Promise.all (index 0)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:217:34) {
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:228:34) {
       type: 'not implemented'
     }
 
@@ -93,7 +91,7 @@
       at lib/apiClient.tsx:178:35
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
           at async Promise.all (index 0)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:217:34)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:228:34)
 
   console.error
     Error: Not implemented: navigation (except hash changes)
@@ -105,9 +103,8 @@
         at LocationImpl.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at /home/runner/workspace/lib/apiClient.tsx:178:35
-        at processTicksAndRejections (node:internal/process/task_queues:95:5)
         at Axios.request (/home/runner/workspace/node_modules/axios/lib/core/Axios.js:40:14)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:247:7) {
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:258:7) {
       type: 'not implemented'
     }
 
@@ -122,7 +119,7 @@
       at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
       at lib/apiClient.tsx:178:35
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:247:7)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:258:7)
 
   console.error
     Error: Not implemented: navigation (except hash changes)
@@ -134,9 +131,8 @@
         at LocationImpl.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at /home/runner/workspace/lib/apiClient.tsx:190:31
-        at processTicksAndRejections (node:internal/process/task_queues:95:5)
         at Axios.request (/home/runner/workspace/node_modules/axios/lib/core/Axios.js:40:14)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:261:7) {
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:272:7) {
       type: 'not implemented'
     }
 
@@ -151,46 +147,7 @@
       at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
       at lib/apiClient.tsx:190:31
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:261:7)
-
-  console.error
-    Error: Not implemented: navigation (except hash changes)
-        at module.exports (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
-        at navigateFetch (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
-        at exports.navigate (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
-        at LocationImpl._locationObjectNavigate (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
-        at LocationImpl._locationObjectSetterNavigate (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
-        at LocationImpl.set pathname [as pathname] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:146:10)
-        at Location.set pathname [as pathname] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:271:41)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:267:31)
-        at Promise.finally.completed (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
-        at new Promise (<anonymous>)
-        at callAsyncCircusFn (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
-        at _callCircusTest (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
-        at processTicksAndRejections (node:internal/process/task_queues:95:5)
-        at _runTest (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
-        at /home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:849:7
-        at _runTestsForDescribeBlock (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
-        at _runTestsForDescribeBlock (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
-        at _runTestsForDescribeBlock (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
-        at run (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
-        at runAndTransformResultsToJestFormat (/home/runner/workspace/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
-        at jestAdapter (/home/runner/workspace/node_modules/jest-circus/build/runner.js:101:19)
-        at runTestInternal (/home/runner/workspace/node_modules/jest-runner/build/index.js:275:16)
-        at runTest (/home/runner/workspace/node_modules/jest-runner/build/index.js:343:7) {
-      type: 'not implemented'
-    }
-
-      265 |
-      266 |     it('should not redirect to login if already on login page', async () => {
-    > 267 |       window.location.pathname = '/login';
-          |                               ^
-      268 |       const oldAccessToken = 'old-access-token';
-      269 |       localStorageMock.setItem('access_token', oldAccessToken);
-      270 |
-
-      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:267:31)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:272:7)
 
   console.error
     Error: Not implemented: navigation (except hash changes)
@@ -202,9 +159,8 @@
         at LocationImpl.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at /home/runner/workspace/lib/apiClient.tsx:190:31
-        at processTicksAndRejections (node:internal/process/task_queues:95:5)
         at Axios.request (/home/runner/workspace/node_modules/axios/lib/core/Axios.js:40:14)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:273:7) {
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:284:7) {
       type: 'not implemented'
     }
 
@@ -219,7 +175,7 @@
       at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
       at lib/apiClient.tsx:190:31
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:273:7)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:284:7)
 
   console.log
     Retrying request (attempt 1/3)
@@ -256,9 +212,8 @@
         at LocationImpl.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
         at Location.set href [as href] (/home/runner/workspace/node_modules/jest-environment-jsdom/node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
         at /home/runner/workspace/lib/apiClient.tsx:178:35
-        at processTicksAndRejections (node:internal/process/task_queues:95:5)
         at Axios.request (/home/runner/workspace/node_modules/axios/lib/core/Axios.js:40:14)
-        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:387:7) {
+        at Object.<anonymous> (/home/runner/workspace/__tests__/lib/apiClient.test.ts:398:7) {
       type: 'not implemented'
     }
 
@@ -273,44 +228,44 @@
       at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
       at lib/apiClient.tsx:178:35
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:387:7)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:398:7)
 
-FAIL __tests__/lib/apiClient.test.ts (5.754 s)
+FAIL __tests__/lib/apiClient.test.ts (5.487 s)
   lib/apiClient.tsx - API Client
     Request Interceptor
       ✓ should add Authorization header when access token exists (6 ms)
       ✓ should not add Authorization header when no access token exists (2 ms)
-      ✓ should add CSRF token to POST requests (1 ms)
+      ✓ should add CSRF token to POST requests (2 ms)
       ✓ should add CSRF token to PUT, PATCH, DELETE requests (2 ms)
-      ✓ should not add CSRF token to GET requests (2 ms)
+      ✓ should not add CSRF token to GET requests (1 ms)
     Response Interceptor - Unwrapping
-      ✓ should unwrap standardized success response (2 ms)
-      ✓ should preserve pagination metadata (2 ms)
-      ✓ should return response as-is if not standardized format (2 ms)
+      ✓ should unwrap standardized success response (1 ms)
+      ✓ should preserve pagination metadata (1 ms)
+      ✓ should return response as-is if not standardized format (3 ms)
     Token Refresh Logic
-      ✕ should refresh token on 401 error and retry original request (187 ms)
-      ✕ should queue multiple requests during token refresh (34 ms)
-      ✕ should redirect to login when refresh token fails (71 ms)
-      ✕ should redirect to login when no refresh token exists (4 ms)
-      ✕ should not redirect to login if already on login page (6 ms)
+      ✕ should refresh token on 401 error and retry original request (109 ms)
+      ✕ should queue multiple requests during token refresh (6 ms)
+      ✕ should redirect to login when refresh token fails (6 ms)
+      ✕ should redirect to login when no refresh token exists (5 ms)
+      ✓ should not redirect to login if already on login page (4 ms)
     Retry Logic
-      ✕ should retry on network errors up to MAX_RETRIES (2 ms)
-      ✓ should retry on timeout errors (1007 ms)
-      ✓ should retry on 500, 502, 503, 504 errors (4012 ms)
+      ✕ should retry on network errors up to MAX_RETRIES (3 ms)
+      ✓ should retry on timeout errors (1009 ms)
+      ✓ should retry on 500, 502, 503, 504 errors (4015 ms)
       ✓ should not retry on 501, 505, 511 errors (1 ms)
-      ✓ should not retry on 400 errors (1 ms)
+      ✓ should not retry on 400 errors (2 ms)
       ✕ should fail after MAX_RETRIES attempts (2 ms)
     Request Cancellation
-      ✓ should support request cancellation (2 ms)
-      ✓ should export CancelToken and isCancel
+      ✓ should support request cancellation (1 ms)
+      ✓ should export CancelToken and isCancel (1 ms)
     Edge Cases
-      ✓ should handle response without data field
+      ✓ should handle response without data field (1 ms)
       ✓ should handle empty response (1 ms)
-      ✕ should not retry 401 errors more than once (token refresh only) (30 ms)
+      ✕ should not retry 401 errors more than once (token refresh only) (4 ms)
 
   ● lib/apiClient.tsx - API Client › Token Refresh Logic › should refresh token on 401 error and retry original request
 
-    AxiosError: Request failed with status code 405
+    Request failed with status code 404
 
       139 |         try {
       140 |           // Call refresh endpoint
@@ -320,16 +275,25 @@ FAIL __tests__/lib/apiClient.test.ts (5.754 s)
       143 |             { refresh_token: refreshToken }
       144 |           );
 
-      at settle (node_modules/axios/lib/core/settle.js:19:12)
-      at XMLHttpRequest.onloadend (node_modules/axios/lib/adapters/xhr.js:59:7)
+      at Function.AxiosError.from (node_modules/axios/lib/core/AxiosError.js:96:14)
+      at createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:29)
+      at Object.settle (node_modules/axios-mock-adapter/src/utils.js:150:11)
       at Axios.request (node_modules/axios/lib/core/Axios.js:45:41)
       at lib/apiClient.tsx:141:28
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:186:24)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:197:24)
+      at Axios.request (node_modules/axios/lib/core/Axios.js:45:41)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:197:24)
+
+    Cause:
+    Request failed with status code 404
+
+      at createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:34)
+      at Object.settle (node_modules/axios-mock-adapter/src/utils.js:150:11)
 
   ● lib/apiClient.tsx - API Client › Token Refresh Logic › should queue multiple requests during token refresh
 
-    AxiosError: Request failed with status code 405
+    Request failed with status code 404
 
       139 |         try {
       140 |           // Call refresh endpoint
@@ -339,80 +303,70 @@ FAIL __tests__/lib/apiClient.test.ts (5.754 s)
       143 |             { refresh_token: refreshToken }
       144 |           );
 
-      at settle (node_modules/axios/lib/core/settle.js:19:12)
-      at XMLHttpRequest.onloadend (node_modules/axios/lib/adapters/xhr.js:59:7)
+      at Function.AxiosError.from (node_modules/axios/lib/core/AxiosError.js:96:14)
+      at createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:29)
+      at Object.settle (node_modules/axios-mock-adapter/src/utils.js:150:11)
       at Axios.request (node_modules/axios/lib/core/Axios.js:45:41)
       at lib/apiClient.tsx:141:28
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
           at async Promise.all (index 0)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:217:34)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:228:34)
       at Axios.request (node_modules/axios/lib/core/Axios.js:45:41)
           at async Promise.all (index 1)
       at Axios.request (node_modules/axios/lib/core/Axios.js:45:41)
           at async Promise.all (index 2)
+
+    Cause:
+    Request failed with status code 404
+
+      at createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:34)
+      at Object.settle (node_modules/axios-mock-adapter/src/utils.js:150:11)
 
   ● lib/apiClient.tsx - API Client › Token Refresh Logic › should redirect to login when refresh token fails
 
     expect(received).toBe(expected) // Object.is equality
 
     Expected: "/login"
-    Received: "http://localhost/"
+    Received: ""
 
-      249 |       expect(localStorageMock.getItem('access_token')).toBeNull();
-      250 |       expect(localStorageMock.getItem('refresh_token')).toBeNull();
-    > 251 |       expect(window.location.href).toBe('/login');
-          |                                    ^
-      252 |     });
-      253 |
-      254 |     it('should redirect to login when no refresh token exists', async () => {
+      260 |       expect(localStorageMock.getItem('access_token')).toBeNull();
+      261 |       expect(localStorageMock.getItem('refresh_token')).toBeNull();
+    > 262 |       expect(mockLocation.href).toBe('/login');
+          |                                 ^
+      263 |     });
+      264 |
+      265 |     it('should redirect to login when no refresh token exists', async () => {
 
-      at Object.toBe (__tests__/lib/apiClient.test.ts:251:36)
+      at Object.toBe (__tests__/lib/apiClient.test.ts:262:33)
 
   ● lib/apiClient.tsx - API Client › Token Refresh Logic › should redirect to login when no refresh token exists
 
     expect(received).toBe(expected) // Object.is equality
 
     Expected: "/login"
-    Received: "http://localhost/"
+    Received: ""
 
-      261 |       await expect(apiClient.get('/protected')).rejects.toThrow();
-      262 |
-    > 263 |       expect(window.location.href).toBe('/login');
-          |                                    ^
-      264 |     });
-      265 |
-      266 |     it('should not redirect to login if already on login page', async () => {
+      272 |       await expect(apiClient.get('/protected')).rejects.toThrow();
+      273 |
+    > 274 |       expect(mockLocation.href).toBe('/login');
+          |                                 ^
+      275 |     });
+      276 |
+      277 |     it('should not redirect to login if already on login page', async () => {
 
-      at Object.toBe (__tests__/lib/apiClient.test.ts:263:36)
-
-  ● lib/apiClient.tsx - API Client › Token Refresh Logic › should not redirect to login if already on login page
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: ""
-    Received: "http://localhost/"
-
-      274 |
-      275 |       // href should not be set again
-    > 276 |       expect(window.location.href).toBe('');
-          |                                    ^
-      277 |     });
-      278 |   });
-      279 |
-
-      at Object.toBe (__tests__/lib/apiClient.test.ts:276:36)
+      at Object.toBe (__tests__/lib/apiClient.test.ts:274:33)
 
   ● lib/apiClient.tsx - API Client › Retry Logic › should retry on network errors up to MAX_RETRIES
 
     Network Error
 
-      284 |       mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
-      285 |
-    > 286 |       const response = await apiClient.get('/test');
+      295 |       mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
+      296 |
+    > 297 |       const response = await apiClient.get('/test');
           |                        ^
-      287 |       expect(response.data).toEqual({ message: 'ok' });
-      288 |       expect(mock.history.get.length).toBe(3);
-      289 |     });
+      298 |       expect(response.data).toEqual({ message: 'ok' });
+      299 |       expect(mock.history.get.length).toBe(3);
+      300 |     });
 
       at Function.AxiosError.from (node_modules/axios/lib/core/AxiosError.js:96:14)
       at Object.createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:29)
@@ -423,18 +377,20 @@ FAIL __tests__/lib/apiClient.test.ts (5.754 s)
       at node_modules/axios-mock-adapter/src/index.js:54:24
       at Axios.dispatchRequest (node_modules/axios/lib/core/dispatchRequest.js:51:10)
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:286:24)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:297:24)
+      at Axios.request (node_modules/axios/lib/core/Axios.js:45:41)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:297:24)
 
     Cause:
     Network Error
 
-      284 |       mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
-      285 |
-    > 286 |       const response = await apiClient.get('/test');
+      295 |       mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
+      296 |
+    > 297 |       const response = await apiClient.get('/test');
           |                        ^
-      287 |       expect(response.data).toEqual({ message: 'ok' });
-      288 |       expect(mock.history.get.length).toBe(3);
-      289 |     });
+      298 |       expect(response.data).toEqual({ message: 'ok' });
+      299 |       expect(mock.history.get.length).toBe(3);
+      300 |     });
 
       at Object.createAxiosError (node_modules/axios-mock-adapter/src/utils.js:161:34)
       at node_modules/axios-mock-adapter/src/index.js:208:23
@@ -444,7 +400,7 @@ FAIL __tests__/lib/apiClient.test.ts (5.754 s)
       at node_modules/axios-mock-adapter/src/index.js:54:24
       at Axios.dispatchRequest (node_modules/axios/lib/core/dispatchRequest.js:51:10)
       at Axios.request (node_modules/axios/lib/core/Axios.js:40:14)
-      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:286:24)
+      at Object.<anonymous> (__tests__/lib/apiClient.test.ts:297:24)
 
   ● lib/apiClient.tsx - API Client › Retry Logic › should fail after MAX_RETRIES attempts
 
@@ -453,15 +409,15 @@ FAIL __tests__/lib/apiClient.test.ts (5.754 s)
     Expected: 4
     Received: 1
 
-      337 |
-      338 |       await expect(apiClient.get('/test')).rejects.toThrow();
-    > 339 |       expect(mock.history.get.length).toBe(4); // 1 initial + 3 retries
+      348 |
+      349 |       await expect(apiClient.get('/test')).rejects.toThrow();
+    > 350 |       expect(mock.history.get.length).toBe(4); // 1 initial + 3 retries
           |                                       ^
-      340 |     });
-      341 |   });
-      342 |
+      351 |     });
+      352 |   });
+      353 |
 
-      at Object.toBe (__tests__/lib/apiClient.test.ts:339:39)
+      at Object.toBe (__tests__/lib/apiClient.test.ts:350:39)
 
   ● lib/apiClient.tsx - API Client › Edge Cases › should not retry 401 errors more than once (token refresh only)
 
@@ -470,18 +426,18 @@ FAIL __tests__/lib/apiClient.test.ts (5.754 s)
     Expected: 1
     Received: 0
 
-      389 |       // Should only attempt refresh once
-      390 |       const refreshCalls = mock.history.post.filter((req) => req.url === '/users/refresh');
-    > 391 |       expect(refreshCalls.length).toBe(1);
+      400 |       // Should only attempt refresh once
+      401 |       const refreshCalls = axiosMock.history.post.filter((req) => req.url === '/users/refresh');
+    > 402 |       expect(refreshCalls.length).toBe(1);
           |                                   ^
-      392 |     });
-      393 |   });
-      394 | });
+      403 |     });
+      404 |   });
+      405 | });
 
-      at Object.toBe (__tests__/lib/apiClient.test.ts:391:35)
+      at Object.toBe (__tests__/lib/apiClient.test.ts:402:35)
 
 Test Suites: 1 failed, 1 total
-Tests:       8 failed, 16 passed, 24 total
+Tests:       7 failed, 17 passed, 24 total
 Snapshots:   0 total
-Time:        6.187 s, estimated 7 s
+Time:        5.952 s, estimated 6 s
 Ran all test suites matching __tests__/lib/apiClient.test.ts.
