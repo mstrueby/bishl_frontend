@@ -25,21 +25,33 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
+// Mock window.location before tests
+const mockLocation = {
+  href: 'http://localhost/',
+  pathname: '/',
+  search: '',
+  hash: '',
+  assign: jest.fn(),
+  reload: jest.fn(),
+  replace: jest.fn(),
+};
+
+delete (window as any).location;
+(window as any).location = mockLocation;
+
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
   let axiosMock: MockAdapter;
-  let locationAssignSpy: jest.SpyInstance;
-  
-  // Store original pathname
-  const originalPathname = window.location.pathname;
 
   beforeEach(() => {
     mock = new MockAdapter(apiClient);
     axiosMock = new MockAdapter(axios);
     localStorageMock.clear();
     
-    // Only spy on window.location.assign - don't try to mock the entire object
-    locationAssignSpy = jest.spyOn(window.location, 'assign').mockImplementation(() => {});
+    // Reset location mocks
+    mockLocation.href = 'http://localhost/';
+    mockLocation.pathname = '/';
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -47,8 +59,6 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock.restore();
     axiosMock.reset();
     axiosMock.restore();
-    locationAssignSpy.mockRestore();
-    jest.clearAllMocks();
   });
 
   describe('Request Interceptor', () => {
@@ -243,7 +253,7 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       expect(localStorageMock.getItem('access_token')).toBeNull();
       expect(localStorageMock.getItem('refresh_token')).toBeNull();
-      expect(locationAssignSpy).toHaveBeenCalledWith('/login');
+      expect(mockLocation.href).toBe('/login');
     });
 
     it('should redirect to login when no refresh token exists', async () => {
@@ -254,23 +264,21 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      expect(locationAssignSpy).toHaveBeenCalledWith('/login');
+      expect(mockLocation.href).toBe('/login');
     });
 
     it('should not redirect to login if already on login page', async () => {
-      // Since we can't easily change pathname, we'll skip this test for now
-      // or refactor the code to accept pathname as a parameter for testing
+      mockLocation.pathname = '/login';
+      
       const oldAccessToken = 'old-access-token';
       localStorageMock.setItem('access_token', oldAccessToken);
 
-      // Check if we're on login page - this test assumes we're not on /login
-      // In a real scenario, you'd need to refactor apiClient to be testable
       mock.onGet('/protected').replyOnce(401);
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      // This will call assign unless pathname is '/login'
-      // For proper testing, apiClient should accept a pathname parameter or use dependency injection
+      // Should not change href when already on login page
+      expect(mockLocation.href).toBe('http://localhost/');
     });
   });
 
