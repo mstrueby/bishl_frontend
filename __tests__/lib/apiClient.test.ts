@@ -59,10 +59,7 @@ Object.defineProperty(mockLocation, 'pathname', {
   configurable: true,
 });
 
-// Delete the existing location property completely
-delete (window as any).location;
-
-// Define a new location property that returns our mock
+// Replace window.location with our mock without deleting first
 Object.defineProperty(window, 'location', {
   value: mockLocation,
   writable: true,
