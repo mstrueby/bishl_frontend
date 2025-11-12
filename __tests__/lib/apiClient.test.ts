@@ -25,25 +25,32 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
-// Mock window.location using delete and assign (JSDOM-compatible)
-let mockHref = '';
-let mockPathname = '/';
+// Mock window.location using jest.spyOn to avoid JSDOM navigation errors
+const mockLocationHref = jest.fn();
+const mockLocationPathname = jest.fn();
 
-delete (window as any).location;
-(window as any).location = {
-  get href() {
-    return mockHref;
+Object.defineProperty(window, 'location', {
+  value: {
+    href: '',
+    pathname: '/',
+    ...window.location,
   },
-  set href(value: string) {
-    mockHref = value;
-  },
-  get pathname() {
-    return mockPathname;
-  },
-  set pathname(value: string) {
-    mockPathname = value;
-  },
-};
+  writable: true,
+  configurable: true,
+});
+
+// Spy on href setter
+Object.defineProperty(window.location, 'href', {
+  set: mockLocationHref,
+  get: () => mockLocationHref.mock.calls[mockLocationHref.mock.calls.length - 1]?.[0] || '',
+});
+
+// Spy on pathname getter
+Object.defineProperty(window.location, 'pathname', {
+  get: mockLocationPathname,
+  set: (value) => mockLocationPathname.mockReturnValue(value),
+  configurable: true,
+});
 
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
@@ -53,8 +60,8 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock = new MockAdapter(apiClient);
     axiosMock = new MockAdapter(axios); // Mock base axios for refresh calls
     localStorageMock.clear();
-    mockPathname = '/';
-    mockHref = '';
+    mockLocationHref.mockClear();
+    mockLocationPathname.mockReturnValue('/');
   });
 
   afterEach(() => {
@@ -269,7 +276,7 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       expect(localStorageMock.getItem('access_token')).toBeNull();
       expect(localStorageMock.getItem('refresh_token')).toBeNull();
-      expect(mockHref).toBe('/login');
+      expect(mockLocationHref).toHaveBeenCalledWith('/login');
     });
 
     it('should redirect to login when no refresh token exists', async () => {
@@ -281,11 +288,11 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      expect(mockHref).toBe('/login');
+      expect(mockLocationHref).toHaveBeenCalledWith('/login');
     });
 
     it('should not redirect to login if already on login page', async () => {
-      mockPathname = '/login';
+      mockLocationPathname.mockReturnValue('/login');
       const oldAccessToken = 'old-access-token';
       localStorageMock.setItem('access_token', oldAccessToken);
 
@@ -294,24 +301,19 @@ describe('lib/apiClient.tsx - API Client', () => {
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
       // href should not be set to /login
-      expect(mockHref).toBe('');
+      expect(mockLocationHref).not.toHaveBeenCalledWith('/login');
     });
   });
 
   describe('Retry Logic', () => {
     it('should retry on network errors up to MAX_RETRIES', async () => {
-      let callCount = 0;
-      mock.onGet('/test').reply(() => {
-        callCount++;
-        if (callCount < 3) {
-          return Promise.reject({ code: 'ECONNABORTED', message: 'Network Error' });
-        }
-        return [200, { success: true, data: { message: 'ok' } }];
-      });
+      mock.onGet('/test').networkErrorOnce();
+      mock.onGet('/test').networkErrorOnce();
+      mock.onGet('/test').reply(200, { success: true, data: { message: 'ok' } });
 
       const response = await apiClient.get('/test');
       expect(response.data).toEqual({ message: 'ok' });
-      expect(callCount).toBe(3);
+      expect(mock.history.get.length).toBe(3);
     });
 
     it('should retry on timeout errors', async () => {
@@ -359,9 +361,10 @@ describe('lib/apiClient.tsx - API Client', () => {
     });
 
     it('should fail after MAX_RETRIES attempts', async () => {
-      mock.onGet('/test').reply(() => {
-        return Promise.reject({ code: 'ECONNABORTED', message: 'Network Error' });
-      });
+      mock.onGet('/test').networkError();
+      mock.onGet('/test').networkError();
+      mock.onGet('/test').networkError();
+      mock.onGet('/test').networkError();
 
       await expect(apiClient.get('/test')).rejects.toThrow();
       expect(mock.history.get.length).toBe(4); // 1 initial + 3 retries
