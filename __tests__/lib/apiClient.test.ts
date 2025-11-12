@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import apiClient, { CancelToken, isCancel } from '@/lib/apiClient';
@@ -24,46 +25,25 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
-// Mock window.location - JSDOM compatible approach
-// Create a mock location object that we can modify
-const mockLocation = {
-  href: '',
-  pathname: '/',
-  search: '',
-  hash: '',
-  origin: 'http://localhost:3000',
-  protocol: 'http:',
-  host: 'localhost:3000',
-  hostname: 'localhost',
-  port: '3000',
-  assign: jest.fn(),
-  replace: jest.fn(),
-  reload: jest.fn(),
-};
-
-// Replace window.location using Object.defineProperty to avoid JSDOM navigation error
-delete (window as any).location;
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
-  configurable: true,
-});
-
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
-  let axiosMock: MockAdapter; // For intercepting refresh token calls
+  let axiosMock: MockAdapter;
+  let locationAssignSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mock = new MockAdapter(apiClient);
-    axiosMock = new MockAdapter(axios); // Mock base axios for refresh calls
+    axiosMock = new MockAdapter(axios);
     localStorageMock.clear();
     
-    // Reset location values for each test
-    mockLocation.href = '';
-    mockLocation.pathname = '/';
-    mockLocation.assign = jest.fn();
-    mockLocation.replace = jest.fn();
-    mockLocation.reload = jest.fn();
+    // Spy on window.location methods instead of trying to mock the entire object
+    locationAssignSpy = jest.spyOn(window.location, 'assign').mockImplementation(() => {});
+    
+    // Mock window.location.pathname for conditional checks
+    Object.defineProperty(window.location, 'pathname', {
+      writable: true,
+      configurable: true,
+      value: '/',
+    });
   });
 
   afterEach(() => {
@@ -71,6 +51,7 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock.restore();
     axiosMock.reset();
     axiosMock.restore();
+    locationAssignSpy.mockRestore();
     jest.clearAllMocks();
   });
 
@@ -197,18 +178,13 @@ describe('lib/apiClient.tsx - API Client', () => {
       localStorageMock.setItem('access_token', oldAccessToken);
       localStorageMock.setItem('refresh_token', refreshToken);
 
-      // First request fails with 401
       mock.onGet('/protected').replyOnce(401);
-
-      // Refresh token request succeeds (use axiosMock for base axios instance)
       axiosMock.onPost(`${process.env.NEXT_PUBLIC_API_URL}/users/refresh`).replyOnce(200, {
         data: {
           access_token: newAccessToken,
           refresh_token: 'new-refresh-token',
         },
       });
-
-      // Retry of original request succeeds
       mock.onGet('/protected').replyOnce(200, {
         success: true,
         data: { message: 'Protected data' },
@@ -229,22 +205,18 @@ describe('lib/apiClient.tsx - API Client', () => {
       localStorageMock.setItem('access_token', oldAccessToken);
       localStorageMock.setItem('refresh_token', refreshToken);
 
-      // All requests fail with 401 initially
       mock.onGet('/endpoint1').replyOnce(401);
       mock.onGet('/endpoint2').replyOnce(401);
       mock.onGet('/endpoint3').replyOnce(401);
 
-      // Refresh token request (use axiosMock)
       axiosMock.onPost(`${process.env.NEXT_PUBLIC_API_URL}/users/refresh`).replyOnce(200, {
         data: { access_token: newAccessToken, refresh_token: 'new-refresh-token' },
       });
 
-      // Retry requests succeed
       mock.onGet('/endpoint1').reply(200, { success: true, data: { id: 1 } });
       mock.onGet('/endpoint2').reply(200, { success: true, data: { id: 2 } });
       mock.onGet('/endpoint3').reply(200, { success: true, data: { id: 3 } });
 
-      // Make all requests simultaneously
       const [res1, res2, res3] = await Promise.all([
         apiClient.get('/endpoint1'),
         apiClient.get('/endpoint2'),
@@ -255,7 +227,6 @@ describe('lib/apiClient.tsx - API Client', () => {
       expect(res2.data).toEqual({ id: 2 });
       expect(res3.data).toEqual({ id: 3 });
 
-      // Refresh should only be called once
       const refreshCalls = axiosMock.history.post.filter((req) => req.url?.includes('/users/refresh'));
       expect(refreshCalls.length).toBe(1);
     });
@@ -267,10 +238,7 @@ describe('lib/apiClient.tsx - API Client', () => {
       localStorageMock.setItem('access_token', oldAccessToken);
       localStorageMock.setItem('refresh_token', refreshToken);
 
-      // Original request fails
       mock.onGet('/protected').replyOnce(401);
-
-      // Refresh fails (use axiosMock)
       axiosMock.onPost(`${process.env.NEXT_PUBLIC_API_URL}/users/refresh`).replyOnce(401, {
         error: 'Invalid refresh token',
       });
@@ -279,23 +247,27 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       expect(localStorageMock.getItem('access_token')).toBeNull();
       expect(localStorageMock.getItem('refresh_token')).toBeNull();
-      expect(window.location.href).toBe('/login');
+      expect(locationAssignSpy).toHaveBeenCalledWith('/login');
     });
 
     it('should redirect to login when no refresh token exists', async () => {
       const oldAccessToken = 'old-access-token';
       localStorageMock.setItem('access_token', oldAccessToken);
-      // No refresh token
 
       mock.onGet('/protected').replyOnce(401);
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      expect(window.location.href).toBe('/login');
+      expect(locationAssignSpy).toHaveBeenCalledWith('/login');
     });
 
     it('should not redirect to login if already on login page', async () => {
-      (window.location as any).pathname = '/login';
+      Object.defineProperty(window.location, 'pathname', {
+        writable: true,
+        configurable: true,
+        value: '/login',
+      });
+
       const oldAccessToken = 'old-access-token';
       localStorageMock.setItem('access_token', oldAccessToken);
 
@@ -303,8 +275,7 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      // href should not be set to /login
-      expect(window.location.href).toBe('');
+      expect(locationAssignSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -346,14 +317,14 @@ describe('lib/apiClient.tsx - API Client', () => {
       await apiClient.get('/test503');
       await apiClient.get('/test504');
 
-      expect(mock.history.get.length).toBe(8); // 4 failures + 4 retries
+      expect(mock.history.get.length).toBe(8);
     });
 
     it('should not retry on 501, 505, 511 errors', async () => {
       mock.onGet('/test501').reply(501);
 
       await expect(apiClient.get('/test501')).rejects.toThrow();
-      expect(mock.history.get.length).toBe(1); // No retry
+      expect(mock.history.get.length).toBe(1);
     });
 
     it('should not retry on 400 errors', async () => {
@@ -370,7 +341,7 @@ describe('lib/apiClient.tsx - API Client', () => {
       mock.onGet('/test').networkError();
 
       await expect(apiClient.get('/test')).rejects.toThrow();
-      expect(mock.history.get.length).toBe(4); // 1 initial + 3 retries
+      expect(mock.history.get.length).toBe(4);
     });
   });
 
@@ -420,7 +391,6 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      // Should only attempt refresh once
       const refreshCalls = axiosMock.history.post.filter((req) => req.url?.includes('/users/refresh'));
       expect(refreshCalls.length).toBe(1);
     });
