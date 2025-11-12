@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import apiClient, { CancelToken, isCancel } from '@/lib/apiClient';
@@ -26,10 +25,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Mock window.location - JSDOM compatible approach
-// Delete the JSDOM location and replace with a plain object
-const originalLocation = window.location;
-delete (window as any).location;
-
+// Create a mock location object that we can modify
 const mockLocation = {
   href: '',
   pathname: '/',
@@ -40,12 +36,13 @@ const mockLocation = {
   host: 'localhost:3000',
   hostname: 'localhost',
   port: '3000',
-  reload: jest.fn(),
-  replace: jest.fn(),
   assign: jest.fn(),
-  toString: () => mockLocation.href,
+  replace: jest.fn(),
+  reload: jest.fn(),
 };
 
+// Delete and replace window.location once
+delete (window as any).location;
 (window as any).location = mockLocation;
 
 describe('lib/apiClient.tsx - API Client', () => {
@@ -56,9 +53,13 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock = new MockAdapter(apiClient);
     axiosMock = new MockAdapter(axios); // Mock base axios for refresh calls
     localStorageMock.clear();
-    // Reset location mock
+    
+    // Reset location values for each test
     mockLocation.href = '';
     mockLocation.pathname = '/';
+    mockLocation.assign = jest.fn();
+    mockLocation.replace = jest.fn();
+    mockLocation.reload = jest.fn();
   });
 
   afterEach(() => {
@@ -66,6 +67,7 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock.restore();
     axiosMock.reset();
     axiosMock.restore();
+    jest.clearAllMocks();
   });
 
   describe('Request Interceptor', () => {
@@ -273,7 +275,7 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       expect(localStorageMock.getItem('access_token')).toBeNull();
       expect(localStorageMock.getItem('refresh_token')).toBeNull();
-      expect(mockLocation.href).toBe('/login');
+      expect(window.location.href).toBe('/login');
     });
 
     it('should redirect to login when no refresh token exists', async () => {
@@ -285,11 +287,11 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      expect(mockLocation.href).toBe('/login');
+      expect(window.location.href).toBe('/login');
     });
 
     it('should not redirect to login if already on login page', async () => {
-      mockLocation.pathname = '/login';
+      (window.location as any).pathname = '/login';
       const oldAccessToken = 'old-access-token';
       localStorageMock.setItem('access_token', oldAccessToken);
 
@@ -298,7 +300,7 @@ describe('lib/apiClient.tsx - API Client', () => {
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
       // href should not be set to /login
-      expect(mockLocation.href).toBe('');
+      expect(window.location.href).toBe('');
     });
   });
 
