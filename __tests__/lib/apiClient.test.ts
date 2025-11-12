@@ -25,16 +25,15 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
-// Mock window.location with a more JSDOM-friendly approach
+// Mock window.location with a JSDOM-compatible approach
 const mockLocation = {
   href: '',
   pathname: '',
 };
 
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
-});
+// Delete and redefine location to avoid "Cannot redefine property" error
+delete (window as any).location;
+(window as any).location = mockLocation;
 
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
