@@ -41,9 +41,13 @@ const mockLocation = {
   reload: jest.fn(),
 };
 
-// Delete and replace window.location once
+// Replace window.location using Object.defineProperty to avoid JSDOM navigation error
 delete (window as any).location;
-(window as any).location = mockLocation;
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+  writable: true,
+  configurable: true,
+});
 
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
