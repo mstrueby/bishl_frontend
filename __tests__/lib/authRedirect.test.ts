@@ -1,7 +1,55 @@
-
 import { redirectToLogin } from '@/lib/authRedirect';
 
+// Suppress jsdom navigation warnings
+const originalError = console.error;
+beforeAll(() => {
+  console.error = (...args: any[]) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Not implemented: navigation')
+    ) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
+
 describe('authRedirect.ts', () => {
+  let originalLocation: Location;
+  let mockLocationHref: string;
+
+  beforeEach(() => {
+    // Save original location
+    originalLocation = window.location;
+
+    // Clear localStorage
+    localStorage.clear();
+
+    // Mock window.location with href setter to avoid jsdom navigation error
+    mockLocationHref = 'http://localhost/some-page';
+    delete (window as any).location;
+    window.location = {
+      ...originalLocation,
+      pathname: '/some-page',
+      get href() {
+        return mockLocationHref;
+      },
+      set href(url: string) {
+        mockLocationHref = url;
+      },
+    } as Location;
+  });
+
+  // Restore original location after each test
+  afterEach(() => {
+    delete (window as any).location;
+    window.location = originalLocation;
+  });
+
   describe('redirectToLogin', () => {
     let mockLocation: Partial<Location>;
     let mockStorage: { [key: string]: string };
@@ -56,39 +104,40 @@ describe('authRedirect.ts', () => {
     });
 
     it('should redirect to login page when not already on login page', () => {
-      mockLocation.pathname = '/admin/dashboard';
-      const storage = createMockStorage(mockStorage);
-      
-      redirectToLogin(mockLocation as Location, storage);
+      window.location.pathname = '/dashboard';
+      mockLocationHref = 'http://localhost/dashboard';
 
-      expect(mockLocation.href).toBe('/login');
+      redirectToLogin();
+
+      expect(mockLocationHref).toBe('/login');
     });
 
     it('should not redirect when already on login page', () => {
-      mockLocation.pathname = '/login';
-      const storage = createMockStorage(mockStorage);
-      
-      redirectToLogin(mockLocation as Location, storage);
+      window.location.pathname = '/login';
+      mockLocationHref = 'http://localhost/login';
+      const initialHref = mockLocationHref;
 
-      expect(mockLocation.href).toBe('');
+      redirectToLogin();
+
+      expect(mockLocationHref).toBe(initialHref);
     });
 
     it('should not redirect when pathname contains login', () => {
-      mockLocation.pathname = '/admin/login-settings';
-      const storage = createMockStorage(mockStorage);
-      
-      redirectToLogin(mockLocation as Location, storage);
+      window.location.pathname = '/admin/login';
+      mockLocationHref = 'http://localhost/admin/login';
+      const initialHref = mockLocationHref;
 
-      expect(mockLocation.href).toBe('');
+      redirectToLogin();
+
+      expect(mockLocationHref).toBe(initialHref);
     });
 
     it('should handle empty pathname gracefully', () => {
-      mockLocation.pathname = '';
-      const storage = createMockStorage(mockStorage);
-      
-      expect(() => {
-        redirectToLogin(mockLocation as Location, storage);
-      }).not.toThrow();
+      window.location.pathname = '';
+      mockLocationHref = 'http://localhost/';
+
+      // Should not throw error
+      expect(() => redirectToLogin()).not.toThrow();
     });
 
     it('should clear all tokens even if some do not exist', () => {
@@ -101,36 +150,39 @@ describe('authRedirect.ts', () => {
     });
 
     it('should work with default parameters in browser environment', () => {
-      // This test verifies the function can be called without parameters
-      // in a browser environment (though JSDOM is our test environment)
-      expect(() => {
-        redirectToLogin();
-      }).not.toThrow();
+      // Simulate being on a protected page
+      window.location.pathname = '/admin/dashboard';
+      mockLocationHref = 'http://localhost/admin/dashboard';
+
+      // Call with no arguments (should use window.location and localStorage)
+      redirectToLogin();
+
+      expect(localStorage.getItem('access_token')).toBeNull();
+      expect(localStorage.getItem('refresh_token')).toBeNull();
+      expect(localStorage.getItem('csrf_token')).toBeNull();
+      expect(mockLocationHref).toBe('/login');
     });
 
     it('should redirect from various protected routes', () => {
-      const routes = [
-        '/admin/dashboard',
+      const protectedRoutes = [
         '/admin/clubs',
+        '/admin/players',
+        '/leaguemanager/tournaments',
         '/matches/123',
-        '/profile',
-        '/admin/posts/add',
       ];
 
-      routes.forEach((route) => {
-        const loc = { pathname: route, href: '' };
-        const storage = createMockStorage(mockStorage);
-        
-        redirectToLogin(loc as Location, storage);
-        
-        expect(loc.href).toBe('/login');
+      protectedRoutes.forEach(route => {
+        window.location.pathname = route;
+        mockLocationHref = `http://localhost${route}`;
+        redirectToLogin();
+        expect(mockLocationHref).toBe('/login');
       });
     });
 
     it('should clear tokens in correct order', () => {
       const removeOrder: string[] = [];
       const storage = createMockStorage(mockStorage);
-      
+
       const originalRemoveItem = storage.removeItem;
       storage.removeItem = (key: string) => {
         removeOrder.push(key);
