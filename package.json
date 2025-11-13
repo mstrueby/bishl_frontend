@@ -22,7 +22,7 @@
     "cloudinary": "^2.5.1",
     "cloudinary-build-url": "^0.2.4",
     "cloudinary-react": "^1.8.1",
-    "cookie": "^0.5.0",
+    "cookie": "^1.0.2",
     "cookies-next": "^4.0.0",
     "date-fns": "^2.30.0",
     "formik": "^2.4.2",
@@ -31,10 +31,10 @@
     "next-cloudinary": "^6.16.0",
     "prismjs": "^1.29.0",
     "react": "^18.3.1",
-    "react-datepicker": "^7.5.0",
+    "react-datepicker": "^8.9.0",
     "react-dom": "^18.3.1",
     "react-quill": "^2.0.0",
-    "react-spinners": "^0.14.1",
+    "react-spinners": "^0.17.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {
