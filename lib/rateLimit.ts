@@ -72,15 +72,25 @@ export function withRateLimit(
   const limiter = rateLimit(options);
   
   return async (req: any, res: any) => {
-    return new Promise((resolve, reject) => {
-      limiter(req, res, async () => {
-        try {
-          await handler(req, res);
-          resolve(undefined);
-        } catch (error) {
-          reject(error);
-        }
+    let rateLimitPassed = false;
+    
+    await new Promise<void>((resolve) => {
+      limiter(req, res, () => {
+        rateLimitPassed = true;
+        resolve();
       });
+      
+      // If rate limit middleware didn't call next (rate limit exceeded),
+      // resolve immediately since the response has already been sent
+      if (!rateLimitPassed) {
+        // Give a small delay to allow the response to be sent
+        setTimeout(() => resolve(), 0);
+      }
     });
+    
+    // Only call handler if rate limit check passed
+    if (rateLimitPassed) {
+      await handler(req, res);
+    }
   };
 }
