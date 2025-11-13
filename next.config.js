@@ -2,11 +2,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Re-enable SWC minification for Next.js 13
-  swcMinify: true,
   
   images: {
-    domains: ['res.cloudinary.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
   },
   staticPageGenerationTimeout: 1000,
   onDemandEntries: {
