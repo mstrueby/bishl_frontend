@@ -1,4 +1,3 @@
-
 import { ArrowLongLeftIcon, ArrowLongRightIcon } from '@heroicons/react/20/solid'
 import Link from 'next/link'
 
@@ -15,7 +14,7 @@ export default function Pagination({ totalItems, currentPage, onPageChange, base
   const pageCount = Math.ceil(totalItems / itemsPerPage);
 
   if (pageCount <= 1) return null;
-  
+
   const getVisiblePages = () => {
     const delta = 2;
     const range = [];
@@ -54,27 +53,25 @@ export default function Pagination({ totalItems, currentPage, onPageChange, base
     <nav className="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
       <div className="-mt-px flex w-0 flex-1">
         {currentPage > 1 && (
-          <Link href={`${basePath}?page=${currentPage - 1}`}>
-            <a className="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-              <ArrowLongLeftIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
-              Zurück
-            </a>
+          <Link href={`${basePath}?page=${currentPage - 1}`} className="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+            <ArrowLongLeftIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+            Zurück
           </Link>
         )}
       </div>
       <div className="hidden md:-mt-px md:flex">
         {pages.map((page, index) => (
           typeof page === 'number' ? (
-            <Link href={`${basePath}${page === 1 ? '' : `?page=${page}`}`} key={index}>
-              <a
-                onClick={(e) => {
-                  e.preventDefault();
-                  onPageChange(page);
-                }}
-                className={currentPage === page ? pageActive : pageInactive}
-              >
-                {page}
-              </a>
+            <Link
+              href={`${basePath}${page === 1 ? '' : `?page=${page}`}`}
+              key={index}
+              className={currentPage === page ? pageActive : pageInactive}
+              onClick={(e) => {
+                e.preventDefault();
+                onPageChange(page);
+              }}
+            >
+              {page}
             </Link>
           ) : (
             <span key={index} className="inline-flex items-center px-4 pt-4 text-sm font-medium text-gray-500">
@@ -85,11 +82,9 @@ export default function Pagination({ totalItems, currentPage, onPageChange, base
       </div>
       <div className="-mt-px flex w-0 flex-1 justify-end">
         {currentPage < pageCount && (
-          <Link href={`${basePath}?page=${currentPage + 1}`}>
-            <a className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-              Vor
-              <ArrowLongRightIcon className="ml-3 h-5 w-5 text-gray-400" aria-hidden="true" />
-            </a>
+          <Link href={`${basePath}?page=${currentPage + 1}`} className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+            Vor
+            <ArrowLongRightIcon className="ml-3 h-5 w-5 text-gray-400" aria-hidden="true" />
           </Link>
         )}
       </div>
