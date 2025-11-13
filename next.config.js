@@ -37,10 +37,10 @@ const nextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload'
           },
-          {
+          ...(process.env.NODE_ENV !== 'development' ? [{
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN'
-          },
+          }] : []),
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff'
@@ -66,7 +66,7 @@ const nextConfig = {
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' " + process.env.NEXT_PUBLIC_API_URL + (process.env.NODE_ENV === 'development' ? " webpack://* ws://* wss://*" : ""),
-              process.env.NODE_ENV === 'development' ? "frame-ancestors 'self' https://*.replit.dev https://*.repl.co" : "frame-ancestors 'self'",
+              process.env.NODE_ENV === 'development' ? "frame-ancestors *" : "frame-ancestors 'self'",
             ].join('; ')
           }
         ],
