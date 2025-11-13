@@ -11,6 +11,7 @@ message = "We see that you are using require(...) inside your code. We currently
 
 [nix]
 channel = "stable-21_11"
+packages = ["vim"]
 
 [env]
 XDG_CONFIG_HOME = "/home/runner/.config"
