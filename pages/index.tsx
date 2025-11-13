@@ -438,10 +438,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
             <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
             <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
           </div>
-          <Link href={`/matches/${match._id}`}>
-            <a className="text-indigo-600 hover:text-indigo-800 font-medium">
-              Spielbericht
-            </a>
+          <Link href={`/matches/${match._id}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
+            Spielbericht
           </Link>
         </div>
       </div>
@@ -509,7 +507,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-grid-cols-2 lg:grid-cols-3 gap-6">
                         {live.map((match) => (
                           <MatchCard key={match._id} match={match} />
                         ))}
@@ -627,28 +625,26 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                                     className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <Link href={`/matches/${match._id}`}>
-                                  <a className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer">
-                                    <span className="absolute inset-x-0 -top-px bottom-0" />
-                                    {match.matchStatus.key === 'FINISHED' ? (
-                                      <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-                                        {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
-                                        {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
-                                          <span className="text-xs font-medium text-gray-400 ml-1">
-                                            {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
-                                          </span>
-                                        )}
-                                      </p>
-                                    ) : (match.matchStatus.key === 'SCHEDULED' ? (
-                                      <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-                                        - : -
-                                      </p>
-                                    ) : (
-                                      <p className="text-xs font-medium text-gray-400 lowercase whitespace-nowrap text-center">
-                                        {match.matchStatus.value}
-                                      </p>
-                                    ))}
-                                  </a>
+                                <Link href={`/matches/${match._id}`} className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer">
+                                  <span className="absolute inset-x-0 -top-px bottom-0" />
+                                  {match.matchStatus.key === 'FINISHED' ? (
+                                    <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
+                                      {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+                                      {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
+                                        <span className="text-xs font-medium text-gray-400 ml-1">
+                                          {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
+                                        </span>
+                                      )}
+                                    </p>
+                                  ) : (match.matchStatus.key === 'SCHEDULED' ? (
+                                    <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
+                                      - : -
+                                    </p>
+                                  ) : (
+                                    <p className="text-xs font-medium text-gray-400 lowercase whitespace-nowrap text-center">
+                                      {match.matchStatus.value}
+                                    </p>
+                                  ))}
                                 </Link>
                                 <div className="flex-1 flex items-center gap-4">
                                   <Image
@@ -881,11 +877,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                     </div>
                     <div className="group relative">
                       <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                        <Link href={`/posts/${post.alias}`} passHref>
-                          <a>
-                            <span className="absolute inset-0" />
-                            {post.title}
-                          </a>
+                        <Link href={`/posts/${post.alias}`} className="absolute inset-0" passHref>
+                          {post.title}
                         </Link>
                       </h3>
                       <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
@@ -896,10 +889,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       </div>
                       <div className="text-sm/6">
                         <p className="font-extralight text-gray-900">
-                          <a href="#">
-                            <span className="absolute inset-0" />
+                          <Link href="#" className="absolute inset-0">
                             {post.author_firstname}
-                          </a>
+                          </Link>
                         </p>
                         {/*<p className="text-gray-600">{post.author.role}</p>*/}
                       </div>
@@ -910,11 +902,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
             </div>
             {postItems.length > 0 && (
               <div className="flex justify-center sm:justify-end w-full mt-20 sm:mt-12">
-                <Link href="/posts" passHref>
-                  <a className="inline-flex items-center justify-center w-full sm:w-auto rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 flex items-center gap-2">
-                    Weitere Artikel
-                    <ArrowLongRightIcon className="h-5 w-5" aria-hidden="true" />
-                  </a>
+                <Link href="/posts" className="inline-flex items-center justify-center w-full sm:w-auto rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 flex items-center gap-2">
+                  Weitere Artikel
+                  <ArrowLongRightIcon className="h-5 w-5" aria-hidden="true" />
                 </Link>
               </div>
             )}
