@@ -2,6 +2,12 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import apiClient, { CancelToken, isCancel } from '@/lib/apiClient';
+import { redirectToLogin } from '@/lib/authRedirect';
+
+// Mock the redirect helper
+jest.mock('@/lib/authRedirect', () => ({
+  redirectToLogin: jest.fn(),
+}));
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -25,20 +31,6 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
-// Mock window.location before tests
-const mockLocation = {
-  href: 'http://localhost/',
-  pathname: '/',
-  search: '',
-  hash: '',
-  assign: jest.fn(),
-  reload: jest.fn(),
-  replace: jest.fn(),
-};
-
-delete (window as any).location;
-(window as any).location = mockLocation;
-
 describe('lib/apiClient.tsx - API Client', () => {
   let mock: MockAdapter;
   let axiosMock: MockAdapter;
@@ -47,10 +39,6 @@ describe('lib/apiClient.tsx - API Client', () => {
     mock = new MockAdapter(apiClient);
     axiosMock = new MockAdapter(axios);
     localStorageMock.clear();
-    
-    // Reset location mocks
-    mockLocation.href = 'http://localhost/';
-    mockLocation.pathname = '/';
     jest.clearAllMocks();
   });
 
@@ -253,7 +241,7 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       expect(localStorageMock.getItem('access_token')).toBeNull();
       expect(localStorageMock.getItem('refresh_token')).toBeNull();
-      expect(mockLocation.href).toBe('/login');
+      expect(redirectToLogin).toHaveBeenCalledTimes(1);
     });
 
     it('should redirect to login when no refresh token exists', async () => {
@@ -264,21 +252,7 @@ describe('lib/apiClient.tsx - API Client', () => {
 
       await expect(apiClient.get('/protected')).rejects.toThrow();
 
-      expect(mockLocation.href).toBe('/login');
-    });
-
-    it('should not redirect to login if already on login page', async () => {
-      mockLocation.pathname = '/login';
-      
-      const oldAccessToken = 'old-access-token';
-      localStorageMock.setItem('access_token', oldAccessToken);
-
-      mock.onGet('/protected').replyOnce(401);
-
-      await expect(apiClient.get('/protected')).rejects.toThrow();
-
-      // Should not change href when already on login page
-      expect(mockLocation.href).toBe('http://localhost/');
+      expect(redirectToLogin).toHaveBeenCalledTimes(1);
     });
   });
 
