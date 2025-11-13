@@ -577,15 +577,15 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 - [x] Application running and tested
 - [x] All pages and API routes functional
 
-**Week 5: Next.js 13.5.x**
-- [ ] `npm install next@13.5.6`
-- [ ] Update next.config.js:
+**Week 5: Next.js 13.5.x** 🔄 IN PROGRESS
+- [x] `npm install next@13.5.6`
+- [x] Update next.config.js:
   - Enable `swcMinify: true`
-  - Update image configuration
-- [ ] Fix next/image breaking changes
-- [ ] Test middleware API changes
+  - Image configuration (already compatible)
+- [ ] Test all pages and API routes
+- [ ] Test middleware API changes (if applicable)
 - [ ] Full regression testing
-- [ ] **Git commit:** "chore: upgrade Next.js 12.x → 13.5.x"
+- [ ] **Git commit:** "chore: upgrade Next.js 12.3.4 → 13.5.6"
 
 **Week 6: Next.js 14.x**
 - [ ] `npm install next@latest`
