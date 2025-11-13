@@ -245,7 +245,7 @@ describe('lib/serverAuth', () => {
       await withPermission(
         mockReq as NextApiRequest,
         mockRes as NextApiResponse,
-        Permission.MANAGE_USERS,
+        Permission.MANAGE_TOURNAMENTS,
         handler
       );
 
@@ -271,14 +271,14 @@ describe('lib/serverAuth', () => {
       await withPermission(
         mockReq as NextApiRequest,
         mockRes as NextApiResponse,
-        Permission.MANAGE_USERS,
+        Permission.MANAGE_TOURNAMENTS,
         handler
       );
 
       expect(statusMock).toHaveBeenCalledWith(403);
       expect(jsonMock).toHaveBeenCalledWith({
         error: 'Forbidden',
-        message: 'Permission required: manage_users'
+        message: 'Permission required: manage_tournaments'
       });
       expect(handler).not.toHaveBeenCalled();
     });
