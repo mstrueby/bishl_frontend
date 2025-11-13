@@ -1,11 +1,9 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // SWC minification disabled - will re-enable after Next.js 13+ upgrade
-  swcMinify: false,
-  experimental: {
-    forceSwcTransforms: false,
-  },
+  // Re-enable SWC minification for Next.js 13
+  swcMinify: true,
   
   images: {
     domains: ['res.cloudinary.com'],
