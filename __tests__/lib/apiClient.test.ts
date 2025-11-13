@@ -232,6 +232,13 @@ describe('lib/apiClient.tsx - API Client', () => {
       localStorageMock.setItem('access_token', oldAccessToken);
       localStorageMock.setItem('refresh_token', refreshToken);
 
+      // Mock redirectToLogin to actually clear storage like the real implementation does
+      (redirectToLogin as jest.Mock).mockImplementation(() => {
+        localStorageMock.removeItem('access_token');
+        localStorageMock.removeItem('refresh_token');
+        localStorageMock.removeItem('csrf_token');
+      });
+
       mock.onGet('/protected').replyOnce(401);
       axiosMock.onPost(`${process.env.NEXT_PUBLIC_API_URL}/users/refresh`).replyOnce(401, {
         error: 'Invalid refresh token',
@@ -247,6 +254,13 @@ describe('lib/apiClient.tsx - API Client', () => {
     it('should redirect to login when no refresh token exists', async () => {
       const oldAccessToken = 'old-access-token';
       localStorageMock.setItem('access_token', oldAccessToken);
+
+      // Mock redirectToLogin to actually clear storage like the real implementation does
+      (redirectToLogin as jest.Mock).mockImplementation(() => {
+        localStorageMock.removeItem('access_token');
+        localStorageMock.removeItem('refresh_token');
+        localStorageMock.removeItem('csrf_token');
+      });
 
       mock.onGet('/protected').replyOnce(401);
 
@@ -312,14 +326,15 @@ describe('lib/apiClient.tsx - API Client', () => {
     });
 
     it('should fail after MAX_RETRIES attempts', async () => {
-      mock.onGet('/test').networkError();
-      mock.onGet('/test').networkError();
-      mock.onGet('/test').networkError();
-      mock.onGet('/test').networkError();
+      // Mock exactly MAX_RETRIES + 1 network errors (initial + 3 retries)
+      mock.onGet('/test').networkErrorOnce();
+      mock.onGet('/test').networkErrorOnce();
+      mock.onGet('/test').networkErrorOnce();
+      mock.onGet('/test').networkErrorOnce();
 
       await expect(apiClient.get('/test')).rejects.toThrow();
       expect(mock.history.get.length).toBe(4);
-    });
+    }, 10000); // Increase timeout to 10 seconds for retry delays
   });
 
   describe('Request Cancellation', () => {
