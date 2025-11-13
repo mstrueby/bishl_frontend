@@ -3,7 +3,7 @@ entrypoint = "index.js"
 hidden = [".config", ".next", ".swc"]
 
 run = "npm run dev"
-modules = ["nodejs-20:v33-20241111-9f8c28f"]
+modules = ["nodejs-20"]
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
