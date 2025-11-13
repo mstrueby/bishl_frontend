@@ -1,5 +1,6 @@
 
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
+import { redirectToLogin } from './authRedirect';
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
@@ -18,8 +19,8 @@ const RETRY_DELAY = 1000; // 1 second
  * Determines if an error should be retried
  */
 function shouldRetry(error: AxiosError): boolean {
-  // Retry on network errors
-  if (!error.response && error.code === 'ERR_NETWORK') {
+  // Retry on network errors (handle both real Axios and axios-mock-adapter formats)
+  if (!error.response && (error.code === 'ERR_NETWORK' || error.message === 'Network Error')) {
     return true;
   }
   
@@ -170,13 +171,7 @@ apiClient.interceptors.response.use(
           processQueue(refreshError, null);
           
           if (typeof window !== 'undefined') {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            
-            // Only redirect if not already on login page
-            if (!window.location.pathname.includes('/login')) {
-              window.location.href = '/login';
-            }
+            redirectToLogin();
           }
           
           return Promise.reject(refreshError);
@@ -186,8 +181,8 @@ apiClient.interceptors.response.use(
       } else {
         // No refresh token available - redirect to login
         isRefreshing = false;
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          redirectToLogin();
         }
       }
     }
