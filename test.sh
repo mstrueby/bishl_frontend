@@ -15,7 +15,7 @@ ARGUMENTS:
   test_pattern        Optional pattern to match test names (e.g., auth, apiClient)
 
 EXAMPLES:
-  ./test.sh                    # Run all tests
+  ./test.sh                   # Run all tests
   ./test.sh auth              # Run auth-related tests
   ./test.sh apiClient         # Run API client tests
   ./test.sh sanitize          # Run sanitize tests
