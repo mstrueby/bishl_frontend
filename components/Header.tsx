@@ -1,17 +1,20 @@
-import { Fragment, useEffect, forwardRef, ReactNode } from "react";
+
+import { Fragment, useEffect, ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
   Menu,
-  Transition,
+  MenuButton,
   MenuItem,
   MenuItems,
-  MenuButton,
+  Transition,
+  TransitionChild,
 } from "@headlessui/react";
 import {
   Bars3Icon,
-  BellIcon,
   XMarkIcon,
   UserIcon,
   DocumentIcon,
@@ -28,7 +31,6 @@ import {
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import useAuth from "../hooks/useAuth";
-// import { tournamentConfigs } from '../tools/consts'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -150,16 +152,18 @@ const item =
 const itemActive =
   "inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900";
 
-const MyLink = forwardRef<
-  HTMLAnchorElement,
-  { href: string; children: ReactNode; className?: string }
->(({ href, children, ...rest }, ref) => (
-  <Link href={href}>
-    <a ref={ref as any} {...rest}>
-      {children}
-    </a>
+// Modern MenuItem Link component for Next.js 13+
+interface MenuItemLinkProps {
+  href: string;
+  children: ReactNode;
+  className?: string;
+}
+
+const MenuItemLink = ({ href, children, className }: MenuItemLinkProps) => (
+  <Link href={href} className={className}>
+    {children}
   </Link>
-));
+);
 
 const Header = () => {
   const { user, setUser, authError, setAuthError, loading, setLoading } =
@@ -209,26 +213,23 @@ const Header = () => {
               {/* Navigation (tablet, desktop) */}
               <div className="flex items-center">
                 <div className="flex-shrink-0 flex items-center justify-center">
-                  <Link href="/">
-                    <div className="hover:cursor-pointer flex justify-center items-center">
-                      <Image
-                        src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
-                        alt="Logo"
-                        width={48}
-                        height={48}
-                        className="block h-8 w-auto flex flex-row items-center justify-center"
-                      />
-                    </div>
+                  <Link href="/" className="hover:cursor-pointer flex justify-center items-center">
+                    <Image
+                      src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
+                      alt="Logo"
+                      width={48}
+                      height={48}
+                      className="block h-8 w-auto flex flex-row items-center justify-center"
+                    />
                   </Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
-                    {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-                    <Link href="/calendar">
-                      <a className={item}>Kalender</a>
+                    <Link href="/calendar" className={item}>
+                      Kalender
                     </Link>
-                    <Link href="/tournaments/tag-der-meister">
-                      <a className={item}>Tag der Meister</a>
+                    <Link href="/tournaments/tag-der-meister" className={item}>
+                      Tag der Meister
                     </Link>
                     <Menu as="div" className="relative inline-block text-left">
                       <MenuButton className={item}>Herren</MenuButton>
@@ -245,7 +246,7 @@ const Header = () => {
                           {men.map((item, index) => (
                             <MenuItem key={index}>
                               {({ active }) => (
-                                <MyLink
+                                <MenuItemLink
                                   href={item.href}
                                   className={classNames(
                                     active ? "bg-gray-100" : "",
@@ -261,7 +262,7 @@ const Header = () => {
                                     {item.tiny_name}
                                   </span>
                                   {item.name}
-                                </MyLink>
+                                </MenuItemLink>
                               )}
                             </MenuItem>
                           ))}
@@ -283,7 +284,7 @@ const Header = () => {
                           {youth.map((item, index) => (
                             <MenuItem key={index}>
                               {({ active }) => (
-                                <MyLink
+                                <MenuItemLink
                                   href={item.href}
                                   className={classNames(
                                     active ? "bg-gray-100" : "",
@@ -299,7 +300,7 @@ const Header = () => {
                                     {item.tiny_name}
                                   </span>
                                   {item.name}
-                                </MyLink>
+                                </MenuItemLink>
                               )}
                             </MenuItem>
                           ))}
@@ -313,18 +314,6 @@ const Header = () => {
               {/* Search, Notification, Profile menu */}
               <div className="flex items-center block">
                 <div>
-                  {/*
-                  <button
-                    type="button"
-                    className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                  >
-                    <span className="absolute -inset-1.5" />
-                    <span className="sr-only">View notifications</span>
-                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
-                  */}
-
-                  {/* Profile dropdown */}
                   {loading ? <span>Loading...</span> : ""}
                   {user !== null ? (
                     <Menu as="div" className="relative ml-3">
@@ -357,7 +346,7 @@ const Header = () => {
                             user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/admin/posts"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                                 >
@@ -366,7 +355,7 @@ const Header = () => {
                                     aria-hidden="true"
                                   />
                                   <span>Beiträge</span>
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                             </>
                           )}
@@ -374,7 +363,7 @@ const Header = () => {
                             user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/admin/documents"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                                 >
@@ -383,7 +372,7 @@ const Header = () => {
                                     aria-hidden="true"
                                   />
                                   <span>Dokumente</span>
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                             </>
                           )}
@@ -393,7 +382,7 @@ const Header = () => {
                             user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/admin/refadmin/referees"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                                 >
@@ -402,10 +391,10 @@ const Header = () => {
                                     aria-hidden="true"
                                   />
                                   <span>Schiedsrichter</span>
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/admin/refadmin"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                                 >
@@ -414,7 +403,7 @@ const Header = () => {
                                     aria-hidden="true"
                                   />
                                   <span>Schiris einteilen</span>
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                             </>
                           )}
@@ -422,7 +411,7 @@ const Header = () => {
                           {/* Referee items - only for referees */}
                           {user.roles?.includes("REFEREE") && (
                             <MenuItem>
-                              <MyLink
+                              <MenuItemLink
                                 href="/admin/myref"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                               >
@@ -431,7 +420,7 @@ const Header = () => {
                                   aria-hidden="true"
                                 />
                                 <span>Meine Einsätze</span>
-                              </MyLink>
+                              </MenuItemLink>
                             </MenuItem>
                           )}
 
@@ -439,7 +428,7 @@ const Header = () => {
                           {(user.roles?.includes("CLUB_ADMIN") ||
                             user.roles?.includes("ADMIN")) && (
                             <MenuItem>
-                              <MyLink
+                              <MenuItemLink
                                 href="/admin/myclub"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                               >
@@ -448,7 +437,7 @@ const Header = () => {
                                   aria-hidden="true"
                                 />
                                 <span>Mein Verein</span>
-                              </MyLink>
+                              </MenuItemLink>
                             </MenuItem>
                           )}
                           {/* LEAGUE_ADMIN items */}
@@ -456,7 +445,7 @@ const Header = () => {
                             user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/admin/clubs"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
                                 >
@@ -465,7 +454,7 @@ const Header = () => {
                                     aria-hidden="true"
                                   />
                                   <span>Vereine</span>
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                             </>
                           )}
@@ -474,7 +463,7 @@ const Header = () => {
                             user.roles?.includes("ADMIN")) && (
                             <>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/admin/players"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                                 >
@@ -483,7 +472,7 @@ const Header = () => {
                                     aria-hidden="true"
                                   />
                                   <span>Spieler</span>
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                             </>
                           )}
@@ -491,7 +480,7 @@ const Header = () => {
                           {user.roles?.includes("ADMIN") && (
                             <>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/admin/venues"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
                                 >
@@ -500,22 +489,22 @@ const Header = () => {
                                     aria-hidden="true"
                                   />
                                   <span>Spielflächen</span>
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                               <MenuItem>
-                                <MyLink
+                                <MenuItemLink
                                   href="/leaguemanager"
                                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                                 >
                                   Spielbetrieb
-                                </MyLink>
+                                </MenuItemLink>
                               </MenuItem>
                             </>
                           )}
 
                           {/* Profile - visible to all */}
                           <MenuItem>
-                            <MyLink
+                            <MenuItemLink
                               href="/admin/profile"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center border-t border-gray-200"
                             >
@@ -524,12 +513,12 @@ const Header = () => {
                                 aria-hidden="true"
                               />
                               <span>Mein Profil</span>
-                            </MyLink>
+                            </MenuItemLink>
                           </MenuItem>
 
                           {/* Logout - visible to all */}
                           <MenuItem>
-                            <MyLink
+                            <MenuItemLink
                               href="/logout"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:no-underline flex items-center"
                             >
@@ -538,22 +527,21 @@ const Header = () => {
                                 aria-hidden="true"
                               />
                               <span>Abmelden</span>
-                            </MyLink>
+                            </MenuItemLink>
                           </MenuItem>
                         </MenuItems>
                       </Transition>
                     </Menu>
                   ) : (
                     /* Login Menu Link */
-                    <Link href="/login">
-                      <a
-                        className={classNames(
-                          "border-2 border-gray-100 hover:no-underline",
-                          item,
-                        )}
-                      >
-                        Anmelden
-                      </a>
+                    <Link
+                      href="/login"
+                      className={classNames(
+                        "border-2 border-gray-100 hover:no-underline",
+                        item,
+                      )}
+                    >
+                      Anmelden
                     </Link>
                   )}
                 </div>
@@ -561,7 +549,7 @@ const Header = () => {
                 {/* Mobile menu */}
                 <div className="-mr-2 ml-3 flex sm:hidden items-center">
                   {/* Mobile menu button */}
-                  <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                  <DisclosureButton className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                     <span className="absolute -inset-0.5" />
                     <span className="sr-only">Open main menu</span>
                     {open ? (
@@ -569,7 +557,7 @@ const Header = () => {
                     ) : (
                       <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
                     )}
-                  </Disclosure.Button>
+                  </DisclosureButton>
                 </div>
               </div>
             </div>
@@ -585,12 +573,10 @@ const Header = () => {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Disclosure.Panel className="sm:hidden">
+            <DisclosurePanel className="sm:hidden">
               <div className="space-y-1 px-2 pb-3 pt-2">
-                {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-                <Disclosure.Button
-                  as={MyLink}
-                  key="calendar"
+                <DisclosureButton
+                  as={Link}
                   href="/calendar"
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
                 >
@@ -601,12 +587,12 @@ const Header = () => {
                     />
                   </span>
                   Kalender
-                </Disclosure.Button>
+                </DisclosureButton>
                 {tournamentConfigs
                   .filter((config) => config.name === "Tag der Meister")
                   .map((item) => (
-                    <Disclosure.Button
-                      as={MyLink}
+                    <DisclosureButton
+                      as={Link}
                       key="tdm"
                       href="/tournaments/tag-der-meister"
                       className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
@@ -621,12 +607,12 @@ const Header = () => {
                         {item.tiny_name}
                       </span>
                       {item.name}
-                    </Disclosure.Button>
+                    </DisclosureButton>
                   ))}
 
                 {men.map((item, index) => (
-                  <Disclosure.Button
-                    as={MyLink}
+                  <DisclosureButton
+                    as={Link}
                     key={index}
                     href={item.href}
                     className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
@@ -640,12 +626,12 @@ const Header = () => {
                       {item.tiny_name}
                     </span>
                     {item.name}
-                  </Disclosure.Button>
+                  </DisclosureButton>
                 ))}
 
                 {youth.map((item, index) => (
-                  <Disclosure.Button
-                    as={MyLink}
+                  <DisclosureButton
+                    as={Link}
                     key={index}
                     href={item.href}
                     className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
@@ -659,10 +645,10 @@ const Header = () => {
                       {item.tiny_name}
                     </span>
                     {item.name}
-                  </Disclosure.Button>
+                  </DisclosureButton>
                 ))}
               </div>
-            </Disclosure.Panel>
+            </DisclosurePanel>
           </Transition>
         </>
       )}
@@ -670,7 +656,6 @@ const Header = () => {
   );
 };
 
-MyLink.displayName = "MyLink";
 Header.displayName = "Header";
 
 export default Header;

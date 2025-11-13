@@ -77,15 +77,13 @@ export default function Sidebar({
                         <ul role="list" className="-mx-2 space-y-1">
                           {NavData.map((item) => (
                             <li key={item.name}>
-                              <Link href={item.href} key={item.name}>
-                                <a className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
-                                  <HeroIcon
-                                    icon={item.icon}
-                                    className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
-                                    aria-hidden="true"
-                                  />
-                                  {item.name}
-                                </a>
+                              <Link href={item.href} className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
+                                <HeroIcon
+                                  icon={item.icon}
+                                  className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
+                                  aria-hidden="true"
+                                />
+                                {item.name}
                               </Link>
                             </li>
                           ))}
@@ -116,15 +114,13 @@ export default function Sidebar({
                 <ul role="list" className="-mx-2 space-y-1">
                   {NavData.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} key={item.name}>
-                        <a className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
-                          <HeroIcon
-                            icon={item.icon}
-                            className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </a>
+                      <Link href={item.href} className="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4">
+                        <HeroIcon
+                          icon={item.icon}
+                          className='text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6'
+                          aria-hidden="true"
+                        />
+                        {item.name}
                       </Link>
                     </li>
                   ))}

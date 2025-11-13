@@ -76,10 +76,8 @@ const Footer = () => {
                 <ul role="list" className="mt-6 space-y-4">
                   {navigation.bishl.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href}>
-                        <a className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
-                          {item.name}
-                        </a>
+                      <Link href={item.href} className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
+                        {item.name}
                       </Link>
                     </li>
                   ))}
@@ -90,10 +88,8 @@ const Footer = () => {
                 <ul role="list" className="mt-6 space-y-4">
                   {navigation.articles.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href}>
-                        <a className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
-                          {item.name}
-                        </a>
+                      <Link href={item.href} className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
+                        {item.name}
                       </Link>
                     </li>
                   ))}
@@ -118,10 +114,8 @@ const Footer = () => {
                 <ul role="list" className="mt-6 space-y-4">
                   {navigation.legal.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href}>
-                        <a className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
-                          {item.name}
-                        </a>
+                      <Link href={item.href} className="text-sm/6 text-gray-400 hover:text-white hover:no-underline">
+                        {item.name}
                       </Link>
                     </li>
                   ))}

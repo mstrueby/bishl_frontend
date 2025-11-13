@@ -14,12 +14,12 @@ function classNames(...classes: string[]) {
 }
 
 interface PostsProps {
-  jwt: string,
+  jwt: string | null,
   posts: PostValues[]
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = (getCookie('jwt', context) as string) || null;
   let posts = null;
   try {
     const res = await apiClient.get('/posts/', {
@@ -124,11 +124,9 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
                         </div>
                         <div className="group relative max-w-xl">
                           <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                            <Link href={`/posts/${post.alias}`} passHref>
-                              <a href="#">
-                                <span className="absolute inset-0" />
-                                {post.title}
-                              </a>
+                            <Link href={`/posts/${post.alias}`}>
+                              <span className="absolute inset-0" />
+                              {post.title}
                             </Link>
                           </h3>
                           <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>

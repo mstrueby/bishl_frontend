@@ -257,13 +257,12 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
         <Link
           href={`/tournaments/${match.tournament.alias}`}
           aria-label="Back to tournament"
+          className="flex items-center"
         >
-          <a className="flex items-center">
-            <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-            <span className="ml-2">
-              {tournamentConfigs[match.tournament.alias]?.name}
-            </span>
-          </a>
+          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+          <span className="ml-2">
+            {tournamentConfigs[match.tournament.alias]?.name}
+          </span>
         </Link>
 
         {(() => {
@@ -271,11 +270,10 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner, jwt, 
           return permissions.showButtonMatchCenter && (
             <Link
               href={`/matches/${match._id}/matchcenter/`}
+              className="flex items-center"
             >
-              <a className="flex items-center">
-                <span className="mr-2">Match Center</span>
-                <ChevronRightIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-              </a>
+              <span className="mr-2">Match Center</span>
+              <ChevronRightIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
             </Link>
           );
         })()}
