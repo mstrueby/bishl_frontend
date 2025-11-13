@@ -14,12 +14,12 @@ function classNames(...classes: string[]) {
 }
 
 interface PostsProps {
-  jwt: string,
+  jwt: string | null,
   posts: PostValues[]
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
+  const jwt = (getCookie('jwt', context) as string) || null;
   let posts = null;
   try {
     const res = await apiClient.get('/posts/', {
