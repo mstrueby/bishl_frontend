@@ -4,11 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
   Menu,
-  Transition,
+  MenuButton,
   MenuItem,
   MenuItems,
-  MenuButton,
+  Transition,
+  TransitionChild,
 } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -546,7 +549,7 @@ const Header = () => {
                 {/* Mobile menu */}
                 <div className="-mr-2 ml-3 flex sm:hidden items-center">
                   {/* Mobile menu button */}
-                  <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                  <DisclosureButton className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                     <span className="absolute -inset-0.5" />
                     <span className="sr-only">Open main menu</span>
                     {open ? (
@@ -554,7 +557,7 @@ const Header = () => {
                     ) : (
                       <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
                     )}
-                  </Disclosure.Button>
+                  </DisclosureButton>
                 </div>
               </div>
             </div>
@@ -570,9 +573,9 @@ const Header = () => {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Disclosure.Panel className="sm:hidden">
+            <DisclosurePanel className="sm:hidden">
               <div className="space-y-1 px-2 pb-3 pt-2">
-                <Disclosure.Button
+                <DisclosureButton
                   as={Link}
                   href="/calendar"
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
@@ -584,11 +587,11 @@ const Header = () => {
                     />
                   </span>
                   Kalender
-                </Disclosure.Button>
+                </DisclosureButton>
                 {tournamentConfigs
                   .filter((config) => config.name === "Tag der Meister")
                   .map((item) => (
-                    <Disclosure.Button
+                    <DisclosureButton
                       as={Link}
                       key="tdm"
                       href="/tournaments/tag-der-meister"
@@ -604,11 +607,11 @@ const Header = () => {
                         {item.tiny_name}
                       </span>
                       {item.name}
-                    </Disclosure.Button>
+                    </DisclosureButton>
                   ))}
 
                 {men.map((item, index) => (
-                  <Disclosure.Button
+                  <DisclosureButton
                     as={Link}
                     key={index}
                     href={item.href}
@@ -623,11 +626,11 @@ const Header = () => {
                       {item.tiny_name}
                     </span>
                     {item.name}
-                  </Disclosure.Button>
+                  </DisclosureButton>
                 ))}
 
                 {youth.map((item, index) => (
-                  <Disclosure.Button
+                  <DisclosureButton
                     as={Link}
                     key={index}
                     href={item.href}
@@ -642,10 +645,10 @@ const Header = () => {
                       {item.tiny_name}
                     </span>
                     {item.name}
-                  </Disclosure.Button>
+                  </DisclosureButton>
                 ))}
               </div>
-            </Disclosure.Panel>
+            </DisclosurePanel>
           </Transition>
         </>
       )}
