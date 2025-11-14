@@ -25,14 +25,26 @@ const Posts: NextPage = () => {
 
   // Auth check
   useEffect(() => {
-    if (!authLoading && !hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
-      router.push('/');
+    if (!authLoading && user) {
+      // Only redirect if we have a user and they don't have the required roles
+      if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+        router.push('/');
+      }
+    } else if (!authLoading && !user) {
+      // Redirect if not authenticated at all
+      router.push('/login');
     }
-  }, [user, authLoading, hasAnyRole, router]);
+  }, [authLoading, user, router]);
 
   // Fetch posts on mount
   useEffect(() => {
-    if (!user || !hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) return;
+    if (!user) return;
+    
+    // Check permissions before fetching
+    if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+      setDataLoading(false);
+      return;
+    }
 
     const fetchPosts = async () => {
       try {
@@ -50,7 +62,7 @@ const Posts: NextPage = () => {
     };
 
     fetchPosts();
-  }, [user, hasAnyRole]);
+  }, [user]);
 
   const fetchPosts = async () => {
     try {
