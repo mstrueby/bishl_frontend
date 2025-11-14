@@ -1,36 +1,45 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { GetServerSideProps, NextPage } from 'next';
-import Head from 'next/head';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import { getCookie } from 'cookies-next';
-import { PostValues } from '../types/PostValues';
-import { Match } from '../types/MatchValues';
-import { TournamentValues } from '../types/TournamentValues';
+import { GetServerSideProps, NextPage } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import axios from "axios";
+import { getCookie } from "cookies-next";
+import { PostValues } from "../types/PostValues";
+import { Match } from "../types/MatchValues";
+import { TournamentValues } from "../types/TournamentValues";
 import Layout from "../components/Layout";
-import { getFuzzyDate } from '../tools/dateUtils';
-import { ArrowLongRightIcon, ChevronRightIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid';
-import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
-import { CldImage } from 'next-cloudinary';
-import SuccessMessage from '../components/ui/SuccessMessage';
-import TournamentSelect from '../components/ui/TournamentSelect';
-import MatchStatusBadge from '../components/ui/MatchStatusBadge';
-import { classNames } from '../tools/utils';
-import { tournamentConfigs } from '../tools/consts';
-import Image from 'next/image';
-import apiClient from '../lib/apiClient';
+import { getFuzzyDate } from "../tools/dateUtils";
+import {
+  ArrowLongRightIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@heroicons/react/20/solid";
+import {
+  CalendarIcon,
+  MapPinIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/react/24/outline";
+import { CldImage } from "next-cloudinary";
+import SuccessMessage from "../components/ui/SuccessMessage";
+import TournamentSelect from "../components/ui/TournamentSelect";
+import MatchStatusBadge from "../components/ui/MatchStatusBadge";
+import { classNames } from "../tools/utils";
+import { tournamentConfigs } from "../tools/consts";
+import Image from "next/image";
+import apiClient from "../lib/apiClient";
 
 interface PostsProps {
-  jwt: string | null,
-  posts: PostValues[],
-  todaysMatches: Match[],
-  restOfWeekMatches: { date: string, dayName: string, matches: Match[] }[],
-  tournaments: TournamentValues[]
+  jwt: string | null;
+  posts: PostValues[];
+  todaysMatches: Match[];
+  restOfWeekMatches: { date: string; dayName: string; matches: Match[] }[];
+  tournaments: TournamentValues[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) || null;
+  const jwt = getCookie("jwt", context) || null;
   let posts = null;
   let todaysMatches = null;
   let tournaments = null;
@@ -38,12 +47,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch posts with pagination
   try {
-    const res = await apiClient.get('/posts/', {
+    const res = await apiClient.get("/posts/", {
       params: {
         published: true,
         page: 1,
-        page_size: 3
-      }
+        page_size: 3,
+      },
     });
     // Response is already unwrapped by interceptor
     posts = res.data || [];
@@ -55,7 +64,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch today's matches
   try {
-    const matchesRes = await apiClient.get('/matches/today');
+    const matchesRes = await apiClient.get("/matches/today");
     todaysMatches = matchesRes.data || [];
   } catch (error) {
     console.error("Error fetching today's matches:", error);
@@ -63,7 +72,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch matches for rest of the week
   try {
-    const restOfWeekRes = await apiClient.get('/matches/rest-of-week');
+    const restOfWeekRes = await apiClient.get("/matches/rest-of-week");
     restOfWeekMatches = restOfWeekRes.data || [];
   } catch (error) {
     console.error("Error fetching rest of week matches:", error);
@@ -71,11 +80,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch tournaments
   try {
-    const tournamentsRes = await apiClient.get('/tournaments/', {
+    const tournamentsRes = await apiClient.get("/tournaments/", {
       params: {
         page: 1,
-        page_size: 100
-      }
+        page_size: 100,
+      },
     });
     tournaments = tournamentsRes.data || [];
   } catch (error) {
@@ -88,27 +97,39 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       posts: posts || [],
       todaysMatches: todaysMatches || [],
       restOfWeekMatches: restOfWeekMatches || [],
-      tournaments: tournaments || []
-    }
+      tournaments: tournaments || [],
+    },
   };
-}
+};
 
-
-const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restOfWeekMatches = [], tournaments = [] }) => {
+const Home: NextPage<PostsProps> = ({
+  jwt,
+  posts = [],
+  todaysMatches = [],
+  restOfWeekMatches = [],
+  tournaments = [],
+}) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
-  const [filteredMatches, setFilteredMatches] = useState<Match[]>(todaysMatches);
+  const [selectedTournament, setSelectedTournament] =
+    useState<TournamentValues | null>(null);
+  const [filteredMatches, setFilteredMatches] =
+    useState<Match[]>(todaysMatches);
   const router = useRouter();
 
   // Use upcoming matches if no today's matches - memoize to prevent re-renders
   const displayMatches = useMemo(() => {
-    return todaysMatches.length > 0 ? todaysMatches : restOfWeekMatches.flatMap(day => day.matches);
+    return todaysMatches.length > 0
+      ? todaysMatches
+      : restOfWeekMatches.flatMap((day) => day.matches);
   }, [todaysMatches, restOfWeekMatches]);
 
-  const isShowingUpcoming = todaysMatches.length === 0 && restOfWeekMatches.length > 0;
+  const isShowingUpcoming =
+    todaysMatches.length === 0 && restOfWeekMatches.length > 0;
 
   // State to manage expanded tournaments
-  const [expandedTournaments, setExpandedTournaments] = useState<Set<string>>(new Set());
+  const [expandedTournaments, setExpandedTournaments] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Reset expanded tournaments when switching between display modes
   useEffect(() => {
@@ -122,17 +143,25 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       const currentPath = router.pathname;
       const currentQuery = { ...router.query };
       delete currentQuery.message;
-      router.replace({
-        pathname: currentPath,
-        query: currentQuery,
-      }, undefined, { shallow: true });
+      router.replace(
+        {
+          pathname: currentPath,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true },
+      );
     }
   }, [router.query.message, router]);
 
   // Filter matches by selected tournament
   useEffect(() => {
     if (selectedTournament) {
-      setFilteredMatches(displayMatches.filter(match => match.tournament.alias === selectedTournament.alias));
+      setFilteredMatches(
+        displayMatches.filter(
+          (match) => match.tournament.alias === selectedTournament.alias,
+        ),
+      );
     } else {
       setFilteredMatches(displayMatches);
     }
@@ -143,33 +172,47 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
     const hour = new Date(date).getHours();
 
     if (hour < 10) {
-      return { key: 'morning', label: 'Morgens', description: 'Vor 10 Uhr' };
+      return { key: "morning", label: "Morgens", description: "Vor 10 Uhr" };
     } else if (hour < 12) {
-      return { key: 'beforenoon', label: 'Vormittags', description: '10-12 Uhr' };
+      return {
+        key: "beforenoon",
+        label: "Vormittags",
+        description: "10-12 Uhr",
+      };
     } else if (hour < 14) {
-      return { key: 'noon', label: 'Mittags', description: '12-14 Uhr' };
+      return { key: "noon", label: "Mittags", description: "12-14 Uhr" };
     } else if (hour < 16) {
-      return { key: 'afternoon', label: 'Nachmittags', description: '14-16 Uhr' };
+      return {
+        key: "afternoon",
+        label: "Nachmittags",
+        description: "14-16 Uhr",
+      };
     } else if (hour < 18) {
-      return { key: 'lateafternoon', label: 'Später Nachmittag', description: '16-18 Uhr' };
+      return {
+        key: "lateafternoon",
+        label: "Später Nachmittag",
+        description: "16-18 Uhr",
+      };
     } else if (hour < 20) {
-      return { key: 'evening', label: 'Abends', description: '18-20 Uhr' };
+      return { key: "evening", label: "Abends", description: "18-20 Uhr" };
     } else {
-      return { key: 'night', label: 'Heute Nacht', description: 'Ab 20 Uhr' };
+      return { key: "night", label: "Heute Nacht", description: "Ab 20 Uhr" };
     }
   };
 
   // Group matches by time slots
   const groupMatchesByTimeSlot = (matches: Match[]) => {
-    const groups: { [key: string]: { label: string; description: string; matches: Match[] } } = {};
+    const groups: {
+      [key: string]: { label: string; description: string; matches: Match[] };
+    } = {};
 
-    matches.forEach(match => {
+    matches.forEach((match) => {
       const timeSlot = getTimeSlot(match.startDate);
       if (!groups[timeSlot.key]) {
         groups[timeSlot.key] = {
           label: timeSlot.label,
           description: timeSlot.description,
-          matches: []
+          matches: [],
         };
       }
       groups[timeSlot.key].matches.push(match);
@@ -177,7 +220,15 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
 
     // Sort groups by time order
     const sortedGroups = Object.entries(groups).sort(([keyA], [keyB]) => {
-      const order = ['morning', 'beforenoon', 'noon', 'afternoon', 'lateafternoon', 'evening', 'night'];
+      const order = [
+        "morning",
+        "beforenoon",
+        "noon",
+        "afternoon",
+        "lateafternoon",
+        "evening",
+        "night",
+      ];
       return order.indexOf(keyA) - order.indexOf(keyB);
     });
 
@@ -188,18 +239,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
   const categorizeMatches = (matches: Match[]) => {
     const now = new Date();
 
-    const live = matches.filter(match => {
+    const live = matches.filter((match) => {
       // Always include matches that are explicitly marked as INPROGRESS
-      if (match.matchStatus.key === 'INPROGRESS') {
+      if (match.matchStatus.key === "INPROGRESS") {
         return true;
       }
 
       // For scheduled matches, check if they could potentially be live based on start time and match length
-      if (match.matchStatus.key === 'SCHEDULED') {
+      if (match.matchStatus.key === "SCHEDULED") {
         const tournamentConfig = tournamentConfigs[match.tournament.alias];
         if (tournamentConfig) {
           const matchStart = new Date(match.startDate);
-          const matchEndEstimate = new Date(matchStart.getTime() + (tournamentConfig.matchLenMin * 60 * 1000));
+          const matchEndEstimate = new Date(
+            matchStart.getTime() + tournamentConfig.matchLenMin * 60 * 1000,
+          );
 
           // Include if current time is between match start and estimated end
           return now >= matchStart && now <= matchEndEstimate;
@@ -209,18 +262,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       return false;
     });
 
-    const finished = matches.filter(match => {
+    const finished = matches.filter((match) => {
       // Only include matches that are explicitly marked as FINISHED
-      if (match.matchStatus.key === 'FINISHED') {
+      if (match.matchStatus.key === "FINISHED") {
         return true;
       }
 
       // For scheduled matches, check if they should be considered finished based on estimated end time
-      if (match.matchStatus.key === 'SCHEDULED') {
+      if (match.matchStatus.key === "SCHEDULED") {
         const tournamentConfig = tournamentConfigs[match.tournament.alias];
         if (tournamentConfig) {
           const matchStart = new Date(match.startDate);
-          const matchEndEstimate = new Date(matchStart.getTime() + (tournamentConfig.matchLenMin * 60 * 1000));
+          const matchEndEstimate = new Date(
+            matchStart.getTime() + tournamentConfig.matchLenMin * 60 * 1000,
+          );
 
           // Include if current time is past the estimated end time
           return now > matchEndEstimate;
@@ -230,9 +285,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       return false;
     });
 
-    const upcoming = matches.filter(match => {
+    const upcoming = matches.filter((match) => {
       // Only include scheduled matches that haven't started yet and aren't considered finished
-      if (match.matchStatus.key === 'SCHEDULED') {
+      if (match.matchStatus.key === "SCHEDULED") {
         const matchStart = new Date(match.startDate);
         return now < matchStart;
       }
@@ -250,14 +305,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
 
   // Shared formatTime function
   const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(date).toLocaleTimeString("de-DE", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const toggleTournament = (tournamentAlias: string) => {
-    setExpandedTournaments(prev => {
+    setExpandedTournaments((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(tournamentAlias)) {
         newSet.delete(tournamentAlias);
@@ -269,7 +324,13 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
   };
 
   // TournamentCard component for grouped upcoming matches
-  const TournamentCard = ({ tournament, matches }: { tournament: TournamentValues, matches: Match[] }) => {
+  const TournamentCard = ({
+    tournament,
+    matches,
+  }: {
+    tournament: TournamentValues;
+    matches: Match[];
+  }) => {
     const tournamentConfig = tournamentConfigs[tournament.alias];
     const isExpanded = expandedTournaments.has(tournament.alias);
 
@@ -290,32 +351,42 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
     });
 
     const hasMoreThanThree = sortedMatches.length > 3;
-    const displayedMatches = hasMoreThanThree && !isExpanded
-      ? sortedMatches.slice(0, 3)
-      : sortedMatches;
+    const displayedMatches =
+      hasMoreThanThree && !isExpanded
+        ? sortedMatches.slice(0, 3)
+        : sortedMatches;
 
     // Calculate minimum height to maintain consistent card sizes (3 matches + toggle button space)
-    const minHeight = hasMoreThanThree ? '280px' : 'auto';
+    const minHeight = hasMoreThanThree ? "280px" : "auto";
 
     return (
-      <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col" style={{ minHeight }}>
+      <div
+        className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col"
+        style={{ minHeight }}
+      >
         <div className="p-4 border-b border-gray-900/5 bg-gray-50">
           {tournamentConfig && (
-            <span className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", tournamentConfig.bdgColLight)}>
+            <span
+              className={classNames(
+                "inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset",
+                tournamentConfig.bdgColLight,
+              )}
+            >
               {tournamentConfig.tinyName}
             </span>
           )}
         </div>
         <div className="space-y-3 flex-1 p-4">
           {displayedMatches.map((match) => (
-            <div key={match._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+            <div
+              key={match._id}
+              className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+            >
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-900">
                   {match.home.shortName} - {match.away.shortName}
                 </div>
-                <div className="text-xs text-gray-500">
-                  {match.venue.name}
-                </div>
+                <div className="text-xs text-gray-500">{match.venue.name}</div>
               </div>
               <div className="text-sm text-gray-400 font-medium">
                 {formatTime(match.startDate)}
@@ -336,7 +407,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                 </>
               ) : (
                 <>
-                  {sortedMatches.length - 3 === 1 ? '1 weiteres Spiel anzeigen' : `${sortedMatches.length - 3} weitere Spiele anzeigen`}
+                  {sortedMatches.length - 3 === 1
+                    ? "1 weiteres Spiel anzeigen"
+                    : `${sortedMatches.length - 3} weitere Spiele anzeigen`}
                   <ChevronDownIcon className="ml-1 h-3 w-3 text-indigo-600" />
                 </>
               )}
@@ -349,7 +422,6 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
 
   // MatchCard component for today's games
   const MatchCard = ({ match }: { match: Match }) => {
-
     // Determine border color based on match status and date
     const getBorderColor = () => {
       // Check if match is today
@@ -358,20 +430,22 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       const isToday = today === matchDate;
 
       switch (match.matchStatus.key) {
-        case 'INPROGRESS':
-          return 'border-l-red-500';
-        case 'SCHEDULED':
-          return isToday ? 'border-l-green-500' : ''; // Only show color for today's scheduled matches
-        case 'FINISHED':
-        case 'FORFEITED':
-          return 'border-l-gray-500';
+        case "INPROGRESS":
+          return "border-l-red-500";
+        case "SCHEDULED":
+          return isToday ? "border-l-green-500" : ""; // Only show color for today's scheduled matches
+        case "FINISHED":
+        case "FORFEITED":
+          return "border-l-gray-500";
         default:
-          return 'border-l-gray-300';
+          return "border-l-gray-300";
       }
     };
 
     return (
-      <div className={`bg-white rounded-lg shadow border border-gray-200 ${getBorderColor() ? `border-l-4 ${getBorderColor()}` : ''} p-4 hover:shadow-md transition-shadow`}>
+      <div
+        className={`bg-white rounded-lg shadow border border-gray-200 ${getBorderColor() ? `border-l-4 ${getBorderColor()}` : ""} p-4 hover:shadow-md transition-shadow`}
+      >
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-500 font-medium uppercase">
             {(() => {
@@ -380,15 +454,20 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                 return (
                   <span
                     key={item.tinyName}
-                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                    className={classNames(
+                      "inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset",
+                      item.bdgColLight,
+                    )}
                   >
-                    {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                    {item.tinyName}{" "}
+                    {match.round.name !== "Hauptrunde" &&
+                      `- ${match.round.name}`}
                   </span>
                 );
               }
             })()}
           </div>
-          {match.matchStatus.key === 'SCHEDULED' ? (
+          {match.matchStatus.key === "SCHEDULED" ? (
             <div className="text-sm text-gray-600 font-medium">
               {formatTime(match.startDate)}
             </div>
@@ -406,28 +485,72 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
           {/* home */}
           <div className="flex flex-row items-center w-full">
             <div className="flex-none">
-              <Image className="flex-none" src={match.home.logo ? match.home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.home.tinyName} objectFit="contain" height={32} width={32} />
+              <Image
+                className="flex-none"
+                src={
+                  match.home.logo
+                    ? match.home.logo
+                    : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                }
+                alt={match.home.tinyName}
+                objectFit="contain"
+                height={32}
+                width={32}
+              />
             </div>
             <div className="flex-auto ml-6 truncate text-ellipsis">
-              <p className={`block text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{match.home.shortName}</p>
+              <p
+                className={`block text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+              >
+                {match.home.shortName}
+              </p>
             </div>
-            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+            {!(
+              match.matchStatus.key === "SCHEDULED" ||
+              match.matchStatus.key === "CANCELLED"
+            ) && (
               <div className="flex-none w-10">
-                <p className={`text-lg sm:max-md:text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{match.home.stats.goalsFor}</p>
+                <p
+                  className={`text-lg sm:max-md:text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+                >
+                  {match.home.stats.goalsFor}
+                </p>
               </div>
             )}
           </div>
           {/* away */}
           <div className="flex flex-row items-center w-full">
             <div className="flex-none">
-              <Image className="flex-none" src={match.away.logo ? match.away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={match.away.tinyName} objectFit="contain" height={32} width={32} />
+              <Image
+                className="flex-none"
+                src={
+                  match.away.logo
+                    ? match.away.logo
+                    : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                }
+                alt={match.away.tinyName}
+                objectFit="contain"
+                height={32}
+                width={32}
+              />
             </div>
             <div className="flex-auto ml-6 w-full truncate">
-              <p className={`block text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{match.away.shortName}</p>
+              <p
+                className={`block text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+              >
+                {match.away.shortName}
+              </p>
             </div>
-            {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+            {!(
+              match.matchStatus.key === "SCHEDULED" ||
+              match.matchStatus.key === "CANCELLED"
+            ) && (
               <div className="flex-none w-10">
-                <p className={`text-lg sm:max-md:text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{match.away.stats.goalsFor}</p>
+                <p
+                  className={`text-lg sm:max-md:text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+                >
+                  {match.away.stats.goalsFor}
+                </p>
               </div>
             )}
           </div>
@@ -435,10 +558,18 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
 
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center truncate mr-4">
-            <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
-            <p className="text-xs uppercase font-light text-gray-700 truncate">{match.venue.name}</p>
+            <MapPinIcon
+              className="h-4 w-4 text-gray-400 mr-1"
+              aria-hidden="true"
+            />
+            <p className="text-xs uppercase font-light text-gray-700 truncate">
+              {match.venue.name}
+            </p>
           </div>
-          <Link href={`/matches/${match._id}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
+          <Link
+            href={`/matches/${match._id}`}
+            className="text-indigo-600 hover:text-indigo-800 font-medium"
+          >
             Spielbericht
           </Link>
         </div>
@@ -448,7 +579,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
 
   const postItems = posts
     .slice()
-    .sort((a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.createDate).getTime() - new Date(a.createDate).getTime(),
+    )
     .map((post: PostValues) => ({
       _id: post._id,
       title: post.title,
@@ -457,9 +591,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
       author_lastname: post.author.lastName,
       content: post.content,
       imageUrl: post.imageUrl,
-      createUser: post.createUser.firstName + ' ' + post.createUser.lastName,
+      createUser: post.createUser.firstName + " " + post.createUser.lastName,
       createDate: new Date(post.createDate).toISOString(),
-      updateUser: post.updateUser ? (post.updateUser.firstName + ' ' + post.updateUser.lastName) : '-',
+      updateUser: post.updateUser
+        ? post.updateUser.firstName + " " + post.updateUser.lastName
+        : "-",
       updateDate: new Date(post.updateDate).toISOString(),
       published: post.published,
       featured: post.featured,
@@ -471,7 +607,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
         <title>BISHL</title>
       </Head>
       <Layout>
-        {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+        {successMessage && (
+          <SuccessMessage
+            message={successMessage}
+            onClose={handleCloseSuccessMessage}
+          />
+        )}
 
         {/* Today's Games Section */}
         {todaysMatches.length > 0 && (
@@ -493,7 +634,8 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
 
             {(() => {
               // For today's matches, use existing logic
-              const { live, upcoming, finished } = categorizeMatches(filteredMatches);
+              const { live, upcoming, finished } =
+                categorizeMatches(filteredMatches);
 
               return (
                 <div className="space-y-20">
@@ -503,7 +645,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       <div className="min-w-0 flex-1">
                         <div className="border-b border-gray-200 pb-5 mb-6">
                           <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Live</h2>
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                              Live
+                            </h2>
                           </div>
                         </div>
                       </div>
@@ -521,7 +665,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       <div className="min-w-0 flex-1">
                         <div className="border-b border-gray-200 pb-5 mb-6">
                           <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Demnächst</h2>
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                              Demnächst
+                            </h2>
                           </div>
                         </div>
                       </div>
@@ -529,13 +675,21 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                         // Group by time slots when more than 6 matches
                         <div className="space-y-8">
                           {groupMatchesByTimeSlot(
-                            upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                            upcoming.sort(
+                              (a, b) =>
+                                new Date(a.startDate).getTime() -
+                                new Date(b.startDate).getTime(),
+                            ),
                           ).map((group, groupIndex) => (
                             <div key={groupIndex}>
                               <div className="mb-6 mt-8">
                                 <div className="flex flex-wrap items-baseline">
-                                  <h4 className="ml-2 text-base font-semibold text-gray-900">{group.label}</h4>
-                                  <p className="ml-2 truncate text-sm text-gray-500">{group.description}</p>
+                                  <h4 className="ml-2 text-base font-semibold text-gray-900">
+                                    {group.label}
+                                  </h4>
+                                  <p className="ml-2 truncate text-sm text-gray-500">
+                                    {group.description}
+                                  </p>
                                 </div>
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -550,7 +704,11 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                         // Show all matches without grouping when 6 or fewer
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {upcoming
-                            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                            .sort(
+                              (a, b) =>
+                                new Date(a.startDate).getTime() -
+                                new Date(b.startDate).getTime(),
+                            )
                             .map((match) => (
                               <MatchCard key={match._id} match={match} />
                             ))}
@@ -565,7 +723,9 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       <div className="min-w-0 flex-1">
                         <div className="border-b border-gray-200 pb-5 mb-6">
                           <div className="-mt-2 -ml-2 flex flex-wrap items-baseline">
-                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Beendet</h2>
+                            <h2 className="mt-2 ml-2 text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                              Beendet
+                            </h2>
                           </div>
                         </div>
                       </div>
@@ -577,27 +737,41 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                           {finished
                             .sort((a, b) => {
                               // First sort by tournament sortOrder
-                              const tournamentConfigA = tournamentConfigs[a.tournament.alias];
-                              const tournamentConfigB = tournamentConfigs[b.tournament.alias];
-                              const sortOrderA = tournamentConfigA?.sortOrder || 999;
-                              const sortOrderB = tournamentConfigB?.sortOrder || 999;
+                              const tournamentConfigA =
+                                tournamentConfigs[a.tournament.alias];
+                              const tournamentConfigB =
+                                tournamentConfigs[b.tournament.alias];
+                              const sortOrderA =
+                                tournamentConfigA?.sortOrder || 999;
+                              const sortOrderB =
+                                tournamentConfigB?.sortOrder || 999;
 
                               if (sortOrderA !== sortOrderB) {
                                 return sortOrderA - sortOrderB;
                               }
 
                               // Then sort by startDate (most recent first)
-                              return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+                              return (
+                                new Date(b.startDate).getTime() -
+                                new Date(a.startDate).getTime()
+                              );
                             })
                             .map((match) => (
-                              <li key={match._id} className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 border-b border-gray-100 last:border-b-0">
+                              <li
+                                key={match._id}
+                                className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 border-b border-gray-100 last:border-b-0"
+                              >
                                 <div className="flex-shrink-0 w-16">
                                   {(() => {
-                                    const item = tournamentConfigs[match.tournament.alias];
+                                    const item =
+                                      tournamentConfigs[match.tournament.alias];
                                     if (item) {
                                       return (
                                         <span
-                                          className={classNames("inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset", item.bdgColLight)}
+                                          className={classNames(
+                                            "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset",
+                                            item.bdgColLight,
+                                          )}
                                         >
                                           {item.tinyName}
                                         </span>
@@ -618,25 +792,36 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                                     </p>
                                   </div>
                                   <Image
-                                    src={match.home.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                    src={
+                                      match.home.logo ||
+                                      "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                                    }
                                     alt={match.home.tinyName}
                                     width={28}
                                     height={28}
                                     className="object-contain flex-shrink-0"
                                   />
                                 </div>
-                                <Link href={`/matches/${match._id}`} className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer">
+                                <Link
+                                  href={`/matches/${match._id}`}
+                                  className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer"
+                                >
                                   <span className="absolute inset-x-0 -top-px bottom-0" />
-                                  {match.matchStatus.key === 'FINISHED' ? (
+                                  {match.matchStatus.key === "FINISHED" ? (
                                     <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-                                      {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
-                                      {(match.finishType.key === 'SHOOTOUT' || match.finishType.key === 'OVERTIME') && (
+                                      {match.home.stats.goalsFor} :{" "}
+                                      {match.away.stats.goalsFor}
+                                      {(match.finishType.key === "SHOOTOUT" ||
+                                        match.finishType.key ===
+                                          "OVERTIME") && (
                                         <span className="text-xs font-medium text-gray-400 ml-1">
-                                          {match.finishType.key === 'SHOOTOUT' ? '(PS)' : '(V)'}
+                                          {match.finishType.key === "SHOOTOUT"
+                                            ? "(PS)"
+                                            : "(V)"}
                                         </span>
                                       )}
                                     </p>
-                                  ) : (match.matchStatus.key === 'SCHEDULED' ? (
+                                  ) : match.matchStatus.key === "SCHEDULED" ? (
                                     <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
                                       - : -
                                     </p>
@@ -644,11 +829,14 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                                     <p className="text-xs font-medium text-gray-400 lowercase whitespace-nowrap text-center">
                                       {match.matchStatus.value}
                                     </p>
-                                  ))}
+                                  )}
                                 </Link>
                                 <div className="flex-1 flex items-center gap-4">
                                   <Image
-                                    src={match.away.logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                    src={
+                                      match.away.logo ||
+                                      "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                                    }
                                     alt={match.away.tinyName}
                                     width={28}
                                     height={28}
@@ -667,7 +855,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0">
-                                  <ChevronRightIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+                                  <ChevronRightIcon
+                                    aria-hidden="true"
+                                    className="size-5 flex-none text-gray-400"
+                                  />
                                 </div>
                               </li>
                             ))}
@@ -681,8 +872,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       <p className="text-gray-500">
                         {selectedTournament
                           ? `Keine Spiele heute in ${selectedTournament.name}`
-                          : `Keine Spiele heute`
-                        }
+                          : `Keine Spiele heute`}
                       </p>
                     </div>
                   )}
@@ -693,7 +883,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
         )}
 
         {/* Rest of Week Matches Section */}
-        {restOfWeekMatches.some(day => day.matches.length > 0) && (
+        {restOfWeekMatches.some((day) => day.matches.length > 0) && (
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mt-12 mb-8">
               <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
@@ -708,64 +898,89 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                   {restOfWeekMatches.map((dayGroup, dayIndex) => {
                     // Filter matches for this day based on selected tournament
                     const dayFilteredMatches = selectedTournament
-                      ? dayGroup.matches.filter(match => match.tournament.alias === selectedTournament.alias)
+                      ? dayGroup.matches.filter(
+                          (match) =>
+                            match.tournament.alias === selectedTournament.alias,
+                        )
                       : dayGroup.matches;
 
                     if (dayFilteredMatches.length === 0) return null;
 
                     // Group matches by tournament for this day
-                    const matchesByTournament = dayFilteredMatches.reduce((acc, match) => {
-                      const tournamentAlias = match.tournament.alias;
-                      if (!acc[tournamentAlias]) {
-                        // Find the full tournament data from the tournaments array
-                        const fullTournament = tournaments.find(t => t.alias === tournamentAlias);
-                        acc[tournamentAlias] = {
-                          tournament: fullTournament || {
-                            _id: tournamentAlias,
-                            name: match.tournament.name,
-                            alias: match.tournament.alias,
-                            tinyName: match.tournament.alias,
-                            ageGroup: { key: '', value: '' },
-                            published: true,
-                            active: true,
-                            external: false,
-                            seasons: []
-                          },
-                          matches: []
-                        };
-                      }
-                      acc[tournamentAlias].matches.push(match);
-                      return acc;
-                    }, {} as Record<string, { tournament: TournamentValues, matches: Match[] }>);
+                    const matchesByTournament = dayFilteredMatches.reduce(
+                      (acc, match) => {
+                        const tournamentAlias = match.tournament.alias;
+                        if (!acc[tournamentAlias]) {
+                          // Find the full tournament data from the tournaments array
+                          const fullTournament = tournaments.find(
+                            (t) => t.alias === tournamentAlias,
+                          );
+                          acc[tournamentAlias] = {
+                            tournament: fullTournament || {
+                              _id: tournamentAlias,
+                              name: match.tournament.name,
+                              alias: match.tournament.alias,
+                              tinyName: match.tournament.alias,
+                              ageGroup: { key: "", value: "" },
+                              published: true,
+                              active: true,
+                              external: false,
+                              seasons: [],
+                            },
+                            matches: [],
+                          };
+                        }
+                        acc[tournamentAlias].matches.push(match);
+                        return acc;
+                      },
+                      {} as Record<
+                        string,
+                        { tournament: TournamentValues; matches: Match[] }
+                      >,
+                    );
 
                     return (
                       <div key={dayIndex}>
                         <div className="mb-6 mt-8">
                           <div className="flex flex-wrap items-baseline">
                             <h4 className="ml-2 text-base font-semibold text-gray-900">
-                              {new Date(dayGroup.date).toLocaleDateString('de-DE', {
-                                weekday: 'long'
-                              })}
+                              {new Date(dayGroup.date).toLocaleDateString(
+                                "de-DE",
+                                {
+                                  weekday: "long",
+                                },
+                              )}
                             </h4>
                             <p className="ml-2 truncate text-sm text-gray-500">
-                              {new Date(dayGroup.date).toLocaleDateString('de-DE', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
+                              {new Date(dayGroup.date).toLocaleDateString(
+                                "de-DE",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )}
                             </p>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {Object.values(matchesByTournament)
                             .sort((a, b) => {
-                              const sortOrderA = tournamentConfigs[a.tournament.alias]?.sortOrder || 999;
-                              const sortOrderB = tournamentConfigs[b.tournament.alias]?.sortOrder || 999;
+                              const sortOrderA =
+                                tournamentConfigs[a.tournament.alias]
+                                  ?.sortOrder || 999;
+                              const sortOrderB =
+                                tournamentConfigs[b.tournament.alias]
+                                  ?.sortOrder || 999;
                               return sortOrderA - sortOrderB;
                             })
                             .map(({ tournament, matches }) => (
-                            <TournamentCard key={tournament.alias} tournament={tournament} matches={matches} />
-                          ))}
+                              <TournamentCard
+                                key={tournament.alias}
+                                tournament={tournament}
+                                matches={matches}
+                              />
+                            ))}
                         </div>
                       </div>
                     );
@@ -845,17 +1060,24 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
               <p className="mt-2 text-lg/8 text-gray-600">Learn how to grow your business with our expert advice.</p>
               */}
             </div>
-            <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+            <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               {postItems.map((post) => (
-                <article key={post._id} className="flex flex-col items-start justify-between relative">
-                  <Link href={`/posts/${post.alias}`} className="absolute inset-0 z-0" passHref>
+                <article
+                  key={post._id}
+                  className="flex flex-col items-start justify-between relative"
+                >
+                  <Link href={`/posts/${post.alias}`} passHref>
                     <span className="sr-only">{post.title}</span>
                   </Link>
                   <div className="relative w-full">
                     <CldImage
                       alt="Post Thumbnail"
-                      src={post.imageUrl ? post.imageUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                      className="w-full rounded-2xl object-cover aspect-[16/9]"
+                      src={
+                        post.imageUrl
+                          ? post.imageUrl
+                          : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                      }
+                      className="w-full rounded-2xl object-cover aspect-[16/9] border border-gray-200 shadow-md"
                       layout="responsive"
                       width={1024}
                       height={576}
@@ -865,9 +1087,12 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       priority
                     />
                   </div>
-                  <div className="max-w-xl relative z-10">
+                  <div className="flex max-w-xl grow flex-col justify-between">
                     <div className="mt-8 flex items-center gap-x-4 text-xs">
-                      <time dateTime={post.createDate} className="text-gray-500">
+                      <time
+                        dateTime={post.createDate}
+                        className="text-gray-500"
+                      >
                         {getFuzzyDate(post.createDate)}
                       </time>
                       {/*<a
@@ -878,13 +1103,19 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       </a>
                       */}
                     </div>
-                    <div className="group relative">
+                    <div className="group relative grow">
                       <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                        {post.title}
+                        <Link href={`/posts/${post.alias}`} passHref>
+                          <span className="absolute inset-0"></span>
+                          {post.title}
+                        </Link>
                       </h3>
-                      <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                      <p
+                        className="mt-5 line-clamp-3 text-sm/6 text-gray-600"
+                        dangerouslySetInnerHTML={{ __html: post.content }}
+                      ></p>
                     </div>
-                    <div className="relative mt-8 flex items-center gap-x-4 pointer-events-none">
+                    <div className="relative mt-8 flex items-center gap-x-4 justify-self-end">
                       <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
                         {`${post.author_firstname[0]}${post.author_lastname[0]}`}
                       </div>
@@ -901,7 +1132,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
             </div>
             {postItems.length > 0 && (
               <div className="flex justify-center sm:justify-end w-full mt-20 sm:mt-12">
-                <Link href="/posts" className="inline-flex items-center justify-center w-full sm:w-auto rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 flex items-center gap-2">
+                <Link
+                  href="/posts"
+                  className="inline-flex items-center justify-center w-full sm:w-auto rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 flex items-center gap-2"
+                >
                   Weitere Artikel
                   <ArrowLongRightIcon className="h-5 w-5" aria-hidden="true" />
                 </Link>
@@ -911,7 +1145,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
         </div>
       </Layout>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
