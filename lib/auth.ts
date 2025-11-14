@@ -14,6 +14,7 @@ export enum UserRole {
   LEAGUE_MANAGER = 'league_manager',
   REFEREE = 'referee',
   CLUB_MANAGER = 'club_manager',
+  AUTHOR = 'author',
   USER = 'user'
 }
 
@@ -110,6 +111,15 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     Permission.VIEW_CLUBS,
     Permission.MANAGE_OWN_TEAM_PLAYERS,
     Permission.VIEW_PLAYERS,
+    Permission.VIEW_POSTS,
+    Permission.VIEW_DOCUMENTS
+  ],
+  [UserRole.AUTHOR]: [
+    Permission.VIEW_TOURNAMENTS,
+    Permission.VIEW_MATCHES,
+    Permission.VIEW_CLUBS,
+    Permission.VIEW_PLAYERS,
+    Permission.MANAGE_POSTS,
     Permission.VIEW_POSTS,
     Permission.VIEW_DOCUMENTS
   ],
