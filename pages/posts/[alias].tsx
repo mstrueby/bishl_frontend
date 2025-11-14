@@ -67,7 +67,7 @@ export default function Post({
             <CldImage src={post.imageUrl} alt="post image" width={768} height={432} aspectRatio="16:9"
               crop="fill"
               gravity="auto"
-              className="aspect-[16/9] w-full rounded-xl object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+              className="aspect-[16/9] w-full rounded-xl object-cover sm:aspect-[2/1] lg:aspect-[3/2] border border-gray-200 shadow-md"
             />
           )}
 
