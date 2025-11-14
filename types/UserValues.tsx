@@ -14,14 +14,13 @@ export interface RefereeValues {
 export interface UserValues {
   _id: string;
   email: string;
-  //password: string;
   firstName: string;
   lastName: string;
   club?: {
     clubId: string;
     clubName: string;
     logoUrl: string;
-  };
-  referee?: RefereeValues;
+  } | null;
+  referee?: RefereeValues | null;
   roles: string[];
 }
