@@ -64,6 +64,11 @@ apiClient.interceptors.request.use(
       }
     }
     
+    // Remove Content-Type header for FormData - let axios set it automatically with boundary
+    if (config.data instanceof FormData && config.headers) {
+      delete config.headers['Content-Type'];
+    }
+    
     return config;
   },
   (error) => {
