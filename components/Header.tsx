@@ -1,5 +1,5 @@
 
-import { Fragment, useEffect, ReactNode } from "react";
+import React, { Fragment, useEffect, ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -159,11 +159,15 @@ interface MenuItemLinkProps {
   className?: string;
 }
 
-const MenuItemLink = ({ href, children, className }: MenuItemLinkProps) => (
-  <Link href={href} className={className}>
-    {children}
-  </Link>
+const MenuItemLink = React.forwardRef<HTMLAnchorElement, MenuItemLinkProps>(
+  ({ href, children, className }, ref) => (
+    <Link href={href} className={className} ref={ref}>
+      {children}
+    </Link>
+  )
 );
+
+MenuItemLink.displayName = 'MenuItemLink';
 
 const Header = () => {
   const { user, setUser, authError, setAuthError, loading, setLoading } =
