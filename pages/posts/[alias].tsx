@@ -91,8 +91,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const res = await apiClient.get('/posts/', {
       params: {
         published: true,
-        page: 1,
-        page_size: 1000
+        page: 1
       }
     });
     const allPostsData = res.data || [];
