@@ -5,7 +5,7 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }: {children: ReactNode}) => {
   const [user, setUser] = useState(null);
   const [authError, setAuthError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -13,24 +13,43 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
   }, []);
 
   useEffect(() => {
-    // Assume checkAuth is defined elsewhere and handles initial authentication check
-    // checkAuth(); 
-
-    // Fetch CSRF token
-    const fetchCSRFToken = async () => {
+    const checkAuth = async () => {
       try {
-        const response = await fetch('/api/csrf-token');
-        const data = await response.json();
-        if (data.csrfToken) {
-          localStorage.setItem('csrf_token', data.csrfToken);
+        setLoading(true);
+        
+        // Fetch CSRF token first
+        const csrfResponse = await fetch('/api/csrf-token');
+        const csrfData = await csrfResponse.json();
+        if (csrfData.csrfToken) {
+          localStorage.setItem('csrf_token', csrfData.csrfToken);
+        }
+
+        // Fetch user data
+        const userResponse = await fetch('/api/user', {
+          credentials: 'include'
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUser(userData);
+          setAuthError(null);
+        } else {
+          setUser(null);
+          setAuthError(null);
         }
       } catch (error) {
-        console.error('Failed to fetch CSRF token:', error);
+        console.error('Auth check failed:', error);
+        setUser(null);
+        setAuthError(error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchCSRFToken();
-  }, []);
+    if (isClient) {
+      checkAuth();
+    }
+  }, [isClient]);
 
 
   if (!isClient) {

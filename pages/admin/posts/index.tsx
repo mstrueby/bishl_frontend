@@ -25,27 +25,29 @@ const Posts: NextPage = () => {
 
   // Auth check
   useEffect(() => {
-    if (!authLoading && user) {
-      // Only redirect if we have a user and they don't have the required roles
-      if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
-        router.push('/');
-      }
-    } else if (!authLoading && !user) {
-      // Redirect if not authenticated at all
+    if (authLoading) return; // Wait for auth to complete
+    
+    if (!user) {
+      // Not authenticated
       router.push('/login');
+      return;
+    }
+    
+    // Check if user has required role
+    const userRoles = user.roles || [];
+    const hasRequiredRole = userRoles.includes(UserRole.AUTHOR) || userRoles.includes(UserRole.ADMIN);
+    
+    if (!hasRequiredRole) {
+      router.push('/');
     }
   }, [authLoading, user, router]);
 
   // Fetch posts on mount
   useEffect(() => {
-    if (!user) return;
-    
-    // Check permissions before fetching
-    if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
-      setDataLoading(false);
+    if (authLoading || !user) {
       return;
     }
-
+    
     const fetchPosts = async () => {
       try {
         const res = await apiClient.get('/posts', {
@@ -62,7 +64,7 @@ const Posts: NextPage = () => {
     };
 
     fetchPosts();
-  }, [user]);
+  }, [authLoading, user]);
 
   const fetchPosts = async () => {
     try {
@@ -193,7 +195,7 @@ const Posts: NextPage = () => {
   }
 
   // Redirect if not authorized (render nothing while redirecting)
-  if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+  if (!user || (!user.roles?.includes(UserRole.AUTHOR) && !user.roles?.includes(UserRole.ADMIN))) {
     return null;
   }
 
