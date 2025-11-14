@@ -29,14 +29,21 @@ const Page = () => {
 
   // 1. Auth redirect check
   useEffect(() => {
-    if (!authLoading && !hasAnyRole([UserRole.REQUIRED])) {
+    if (authLoading) return; // Wait for auth to complete
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.REQUIRED])) {
       router.push('/');
     }
-  }, [user, authLoading, hasAnyRole, router]);
+  }, [authLoading, user, hasAnyRole, router]);
 
   // 2. Data fetching
   useEffect(() => {
-    if (!user || !hasAnyRole([UserRole.REQUIRED])) return;
+    if (authLoading || !user) return;
     
     const fetchData = async () => {
       try {
@@ -47,7 +54,7 @@ const Page = () => {
       }
     };
     fetchData();
-  }, [user, hasAnyRole]);
+  }, [authLoading, user]);
 
   // 3. Loading state
   if (authLoading || dataLoading) {

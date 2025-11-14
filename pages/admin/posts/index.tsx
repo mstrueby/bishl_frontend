@@ -34,13 +34,10 @@ const Posts: NextPage = () => {
     }
     
     // Check if user has required role
-    const userRoles = user.roles || [];
-    const hasRequiredRole = userRoles.includes(UserRole.AUTHOR) || userRoles.includes(UserRole.ADMIN);
-    
-    if (!hasRequiredRole) {
+    if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
       router.push('/');
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, hasAnyRole, router]);
 
   // Fetch posts on mount
   useEffect(() => {
@@ -195,7 +192,7 @@ const Posts: NextPage = () => {
   }
 
   // Redirect if not authorized (render nothing while redirecting)
-  if (!user || (!user.roles?.includes(UserRole.AUTHOR) && !user.roles?.includes(UserRole.ADMIN))) {
+  if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
     return null;
   }
 
