@@ -35,10 +35,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const res = await apiClient.get('/posts/', {
+    const res = await apiClient.get('/posts', {
       params: {
-        page: 1,
-        page_size: 1000
+        page: 1
       }
     });
     posts = res.data || [];
@@ -57,10 +56,9 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
 
   const fetchPosts = async () => {
     try {
-      const res = await apiClient.get('/posts/', {
+      const res = await apiClient.get('/posts', {
         params: {
-          page: 1,
-          page_size: 1000
+          page: 1
         }
       });
       setPosts(res.data || []);
