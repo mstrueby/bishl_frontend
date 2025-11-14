@@ -188,7 +188,7 @@ const Header = () => {
 
         if (userData.ok) {
           const user = await userData.json();
-          setUser(user);
+          setUser(user.data);
         } else {
           // Token might be expired, clear it
           localStorage.removeItem('access_token');
