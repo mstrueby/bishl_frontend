@@ -847,7 +847,10 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
             </div>
             <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               {postItems.map((post) => (
-                <article key={post._id} className="flex flex-col items-start justify-between">
+                <article key={post._id} className="flex flex-col items-start justify-between relative">
+                  <Link href={`/posts/${post.alias}`} className="absolute inset-0 z-0" passHref>
+                    <span className="sr-only">{post.title}</span>
+                  </Link>
                   <div className="relative w-full">
                     <CldImage
                       alt="Post Thumbnail"
@@ -862,7 +865,7 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                       priority
                     />
                   </div>
-                  <div className="max-w-xl">
+                  <div className="max-w-xl relative z-10">
                     <div className="mt-8 flex items-center gap-x-4 text-xs">
                       <time dateTime={post.createDate} className="text-gray-500">
                         {getFuzzyDate(post.createDate)}
@@ -877,21 +880,17 @@ const Home: NextPage<PostsProps> = ({ jwt, posts = [], todaysMatches = [], restO
                     </div>
                     <div className="group relative">
                       <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                        <Link href={`/posts/${post.alias}`} className="absolute inset-0" passHref>
-                          {post.title}
-                        </Link>
+                        {post.title}
                       </h3>
                       <div className="mt-5 line-clamp-3 text-sm/6 text-gray-600" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                     </div>
-                    <div className="relative mt-8 flex items-center gap-x-4">
+                    <div className="relative mt-8 flex items-center gap-x-4 pointer-events-none">
                       <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
                         {`${post.author_firstname[0]}${post.author_lastname[0]}`}
                       </div>
                       <div className="text-sm/6">
                         <p className="font-extralight text-gray-900">
-                          <Link href="#" className="absolute inset-0">
-                            {post.author_firstname}
-                          </Link>
+                          {post.author_firstname}
                         </p>
                         {/*<p className="text-gray-600">{post.author.role}</p>*/}
                       </div>
