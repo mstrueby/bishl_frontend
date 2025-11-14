@@ -80,7 +80,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
                         <CldImage
                           alt="Post Thumbnail"
                           src={post.imageUrl ? post.imageUrl : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
-                          className="w-full rounded-2xl object-cover aspect-[16/9]"
+                          className="w-full rounded-2xl object-cover aspect-[16/9] border border-gray-200 shadow-md"
                           layout="responsive"
                           width={1024}
                           height={576}

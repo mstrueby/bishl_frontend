@@ -109,7 +109,7 @@ author = 19449957
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "NODE_ENV=development npm run dev"
+args = "npm run dev -- -p 5000 -H 0.0.0.0"
 
 [[workflows.workflow]]
 name = "Build"

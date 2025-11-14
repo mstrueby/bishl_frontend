@@ -1,48 +1,50 @@
-import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
-import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
-import ProfileForm from '../../../components/admin/ProfileForm';
-import Layout from '../../../components/Layout';
+import { useState, useEffect } from "react";
+import { GetServerSideProps, NextPage } from "next";
+import { useRouter } from "next/router";
+import axios from "axios";
+import apiClient from "../../../lib/apiClient";
+import ProfileForm from "../../../components/admin/ProfileForm";
+import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
-import { UserValues } from '../../../types/UserValues';
-import ErrorMessage from '../../../components/ui/ErrorMessage';
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+import { UserValues } from "../../../types/UserValues";
+import ErrorMessage from "../../../components/ui/ErrorMessage";
 
 interface EditProps {
-  jwt: string,
-  profile: UserValues
+  profile: UserValues;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  if (!jwt) {
-    return { notFound: true };
-  }
-
-  let profile = null;
-  try {
-    // Get user data
-    const response = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    profile = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching profile:', error.message);
-    }
-  }
-  return profile ? { props: { jwt, profile } } : { notFound: true };
+  // Profile page relies on client-side authentication via apiClient
+  // We can't check auth server-side since tokens are in localStorage
+  // The page will handle auth checks client-side via AuthContext
+  return { props: {} };
 };
 
-const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
+const Profile: NextPage<EditProps> = () => {
+  const [profile, setProfile] = useState<UserValues | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const router = useRouter();
+
+  // Fetch profile on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await apiClient.get("/users/me");
+        setProfile(response.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          setError("Fehler beim Laden des Profils.");
+          console.error("Error fetching profile:", error);
+        }
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // Handler for form submission
   const onSubmit = async (values: UserValues) => {
@@ -50,10 +52,10 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
     setLoading(true);
 
     // Remove 'roles' from the values object
-    console.log('submitted values', values)
+    console.log("submitted values", values);
     const { roles, _id, club, ...filteredValues } = values;
-    
-    console.log('filtered values', filteredValues)
+
+    console.log("filtered values", filteredValues);
     try {
       const formData = new FormData();
       Object.entries(filteredValues).forEach(([key, value]) => {
@@ -62,41 +64,32 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
 
       // Debug FormData by logging key-value pairs to the console
       for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
+        console.log(pair[0] + ": " + pair[1]);
       }
-      
-      const response = await axios.patch(`${BASE_URL}/users/${profile._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
-      console.log("response", response.data)
-      if (response.status === 200 || response.status === 304) {
-        router.push({
-          pathname: '/',
-          query: {
-            message:
-              response.status === 304 
-                ? 'Es wurden keine Änderungen vorgenommen'
-                : 'Dein Profil wurde erfolgreich aktualisiert.'
-          }
-        }, `/`);
+
+      const response = await apiClient.patch(
+        `/users/${profile!._id}`,
+        formData,
+      );
+      console.log("response", response.data);
+      if (response.status === 200) {
+        router.push(
+          {
+            pathname: "/",
+            query: {
+              message:"Dein Profil wurde erfolgreich aktualisiert."
+            },
+          },
+          `/`,
+        );
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 304) {
-          // Handle when a 304 status is caught by error
-          router.push({
-            pathname: '/',
-            query: { message: `Es wurden keine Änderungen an deinem Profil vorgenommen.` }
-          }, `/`);
-        } else {
-          setError('Ein Fehler ist aufgetreten.');
-        }
+        setError("Ein Fehler ist aufgetreten.");
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } finally {
       setLoading(false);
@@ -104,8 +97,8 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
   };
 
   const handleCancel = () => {
-    router.push('/');
-  }
+    router.push("/");
+  };
 
   useEffect(() => {
     if (error) {
@@ -117,20 +110,40 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
     setError(null);
   };
 
+  const sectionTitle = "Mein Profil";
+
+  if (initialLoading) {
+    return (
+      <Layout>
+        <SectionHeader title={sectionTitle} />
+        <div className="flex justify-center items-center min-h-screen">
+          <div>Laden...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <Layout>
+        <SectionHeader title={sectionTitle} />
+        {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
+      </Layout>
+    );
+  }
+
   const intialValues: UserValues = {
     _id: profile._id,
     email: profile.email,
     firstName: profile.firstName,
     lastName: profile.lastName,
     club: {
-      clubId: profile.club ? profile.club.clubId : '',
-      clubName: profile.club ? profile.club.clubName : '',
-      logoUrl: profile.club ? profile.club.logoUrl : ''
+      clubId: profile.club ? profile.club.clubId : "",
+      clubName: profile.club ? profile.club.clubName : "",
+      logoUrl: profile.club ? profile.club.logoUrl : "",
     },
     roles: profile.roles,
   };
-
-  const sectionTitle = 'Mein Profil';
 
   return (
     <Layout>
@@ -145,9 +158,8 @@ const Profile: NextPage<EditProps> = ({ jwt, profile }) => {
         handleCancel={handleCancel}
         loading={loading}
       />
-
     </Layout>
-  )
+  );
 };
 
 export default Profile;

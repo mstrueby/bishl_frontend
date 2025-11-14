@@ -2,11 +2,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Re-enable SWC minification for Next.js 13
-  swcMinify: true,
   
   images: {
-    domains: ['res.cloudinary.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
   },
   staticPageGenerationTimeout: 1000,
   onDemandEntries: {
@@ -34,10 +37,10 @@ const nextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload'
           },
-          {
+          ...(process.env.NODE_ENV !== 'development' ? [{
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN'
-          },
+          }] : []),
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff'
@@ -63,7 +66,7 @@ const nextConfig = {
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' " + process.env.NEXT_PUBLIC_API_URL + (process.env.NODE_ENV === 'development' ? " webpack://* ws://* wss://*" : ""),
-              "frame-ancestors 'self'",
+              process.env.NODE_ENV === 'development' ? "frame-ancestors *" : "frame-ancestors 'self'",
             ].join('; ')
           }
         ],
