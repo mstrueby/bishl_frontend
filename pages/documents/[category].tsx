@@ -199,8 +199,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const res = await apiClient.get(`/documents/categories/${category}`, {
     params: { 
       published: true,
-      page: 1,
-      page_size: 100
+      page: 1
     },
   });
 
