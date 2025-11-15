@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { PlayerValues } from '../../../types/PlayerValues';
 import { ClubValues } from '../../../types/ClubValues';
@@ -9,71 +9,54 @@ import PlayerAdminForm from '../../../components/admin/PlayerAdminForm';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../components/ui/ErrorMessage';
+import LoadingState from '../../../components/ui/LoadingState';
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import { UserRole } from '../../../lib/auth';
+import apiClient from '../../../lib/apiClient';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface AddProps {
-  jwt: string;
-  clubs: ClubValues[];
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  let clubs: ClubValues[] = [];
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
-    const user = userResponse.data;
-    if (!user.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role))) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Get clubs
-    const clubsResponse = await axios.get(`${BASE_URL}/clubs`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      },
-      params: {
-        active: true
-      }
-    });
-    clubs = clubsResponse.data;
-
-    return { props: { jwt, clubs } };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-}
-
-export default function Add({ jwt, clubs }: AddProps) {
+const Add: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [clubs, setClubs] = useState<ClubValues[]>([]);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Data fetching
+  useEffect(() => {
+    if (authLoading || !user) return;
+    
+    const fetchClubs = async () => {
+      try {
+        const response = await apiClient.get('/clubs', {
+          params: { active: true }
+        });
+        setClubs(response.data);
+      } catch (error) {
+        console.error('Error fetching clubs:', error);
+        setError('Fehler beim Laden der Vereine.');
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    fetchClubs();
+  }, [authLoading, user]);
 
   const initialValues: PlayerValues = {
     _id: '',
@@ -92,7 +75,7 @@ export default function Add({ jwt, clubs }: AddProps) {
     sex: 'männlich',
     ageGroup: '',
     overAge: false,
-  };;
+  };
 
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
@@ -133,11 +116,7 @@ export default function Add({ jwt, clubs }: AddProps) {
 
       console.log('FormData entries:', Array.from(formData.entries()));
       
-      const response = await axios.post(`${BASE_URL}/players/`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
+      const response = await apiClient.post('/players/', formData);
       if (response.status === 201) {
         router.push({
           pathname: '/admin/players',
@@ -169,6 +148,20 @@ export default function Add({ jwt, clubs }: AddProps) {
     setError(null);
   };
 
+  // Loading state
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
+    return null;
+  }
+
   const sectionTitle = 'Spieler*in anlegen';
 
   return (
@@ -186,3 +179,5 @@ export default function Add({ jwt, clubs }: AddProps) {
     </Layout>
   );
 };
+
+export default Add;

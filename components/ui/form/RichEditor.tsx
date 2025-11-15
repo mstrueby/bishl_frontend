@@ -4,17 +4,35 @@ import 'react-quill/dist/quill.snow.css';
 import { useField } from 'formik';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css';
+import type ReactQuill from 'react-quill';
 
 interface RichEditorProps {
   name: string;
 }
 
-const DynamicEditor = dynamic(() => import('react-quill'), { ssr: false });
+const DynamicEditor = dynamic(() => import('react-quill'), { 
+  ssr: false,
+  loading: () => <div className="animate-pulse h-48 bg-gray-100 rounded-md" />
+});
 
 const RichEditor: React.FC<RichEditorProps> = ({ name }) => {
   const [field, meta, helpers] = useField(name);
   const [isCodeView, setIsCodeView] = useState(false);
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const quillRef = useRef<ReactQuill | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
+
+  // Monitor for Quill-related errors
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      if (event.message.includes('Quill') || event.message.includes('react-quill')) {
+        console.error('RichEditor error detected:', event.message);
+        setEditorError(event.message);
+      }
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   useEffect(() => {
     if (isCodeView && editorRef.current) {
@@ -39,6 +57,11 @@ const RichEditor: React.FC<RichEditorProps> = ({ name }) => {
 
   return (
     <div>
+      {editorError && (
+        <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+          Editor error: {editorError}
+        </div>
+      )}
       <div className="flex justify-end mb-2">
         <button
           type="button"
@@ -59,6 +82,7 @@ const RichEditor: React.FC<RichEditorProps> = ({ name }) => {
         />
       ) : (
         <DynamicEditor
+          ref={quillRef}
           theme="snow"
           value={field.value}
           onChange={(value: string) => helpers.setValue(value)}

@@ -25,7 +25,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         const response = await result.json();
         // Backend returns { success, data: UserValues, message }
         // Extract the actual user data
-        const userData = response.data || response; // If response.data is null or undefined, use the whole response.
+        const userData = response.data || response;
         res.status(200).json(userData);
       } else {
         const errorData = await result.json();

@@ -1,70 +1,39 @@
+
 import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import PostForm from '../../../components/admin/PostForm'
 import { PostValuesForm } from '../../../types/PostValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
+import LoadingState from '../../../components/ui/LoadingState';
 import apiClient from '../../../lib/apiClient';
+import useAuth from '../../../hooks/useAuth';
+import { UserRole } from '../../../lib/auth';
+import usePermissions from '../../../hooks/usePermissions';
 
-interface AddProps {
-  jwt: string;
-  user: {
-    firstName: string;
-    lastName: string;
-  }
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  if (!jwt) {
-    return { notFound: true };
-  }
-  
-  let user = null
-  
-  try {
-    const userResponse = await apiClient.get('/users/me');
-    user = userResponse.data;
-    if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-  }
-  return {
-    props: {
-      jwt,
-      user
-    }
-  }
-};
-
-export default function Add({ jwt, user }: AddProps) {
+const Add: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const initialValues: PostValuesForm = {
-    _id: '',
-    title: '',
-    alias: '',
-    content: '',
-    published: false,
-    featured: false,
-    author: {
-      firstName: user.firstName,
-      lastName: user.lastName,
-    },
-  };
+  // Auth check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
 
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
@@ -74,14 +43,13 @@ export default function Add({ jwt, user }: AddProps) {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         if (key === 'author') {
-          // Convert author object to JSON string before appending
           formData.append(key, JSON.stringify(value));
         } else {
-          formData.append(key, value as string); // Ensure value is of string type
+          formData.append(key, value as string);
         }
       });
 
-      const response = await apiClient.post('/posts/', formData);
+      const response = await apiClient.post('/posts', formData);
 
       if (response.status === 201) {
         router.push({
@@ -106,13 +74,39 @@ export default function Add({ jwt, user }: AddProps) {
 
   useEffect(() => {
     if (error) {
-      // Scroll to the top of the page to show the error message
       window.scrollTo(0, 0);
     }
   }, [error]);
 
   const handleCloseMessage = () => {
     setError(null);
+  };
+
+  // Show loading state during auth
+  if (authLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+    return null;
+  }
+
+  const initialValues: PostValuesForm = {
+    _id: '',
+    title: '',
+    alias: '',
+    content: '',
+    published: false,
+    featured: false,
+    author: {
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+    },
   };
 
   const sectionTitle = 'Beitrag erstellen';
@@ -131,5 +125,7 @@ export default function Add({ jwt, user }: AddProps) {
         loading={loading}
       />
     </Layout>
-  )
-};
+  );
+}
+
+export default Add;
