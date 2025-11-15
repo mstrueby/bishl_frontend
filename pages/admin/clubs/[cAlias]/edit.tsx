@@ -1,74 +1,63 @@
-// pages/leaguemanager/clubs/[alias]/edit.tsx
+
 import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import ClubForm from '../../../../components/admin/ClubForm';
 import Layout from '../../../../components/Layout';
 import SectionHeader from '../../../../components/admin/SectionHeader';
 import { ClubValues } from '../../../../types/ClubValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import useAuth from '../../../../hooks/useAuth';
+import usePermissions from '../../../../hooks/usePermissions';
+import { UserRole } from '../../../../lib/auth';
+import LoadingState from '../../../../components/ui/LoadingState';
 import apiClient from '../../../../lib/apiClient';
 
-interface EditProps {
-  jwt: string,
-  club: ClubValues,
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const { cAlias } = context.params as { cAlias: string };
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-  
-  let club = null;
-  try {
-    // First check if user has required role
-    const userResponse = await apiClient.get('/users/me', {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Fetch the existing club data
-    const response = await apiClient.get(`/clubs/${cAlias}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    club = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching club:', error.message);
-    }
-  }
-  return club ? { props: { jwt, club, cAlias } } : { notFound: true };
-};
-
-const Edit: NextPage<EditProps> = ({ jwt, club }) => {
+const Edit: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const [club, setClub] = useState<ClubValues | null>(null);
   const router = useRouter();
+  const { cAlias } = router.query;
 
-  // Handler for form submission
+  // 1. Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasRole(UserRole.ADMIN)) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasRole, router]);
+
+  // 2. Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !cAlias) return;
+    
+    const fetchData = async () => {
+      try {
+        const response = await apiClient.get(`/clubs/${cAlias}`);
+        setClub(response.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Error fetching club:', error.message);
+          setError('Fehler beim Laden des Vereins');
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    fetchData();
+  }, [authLoading, user, cAlias]);
+
   const onSubmit = async (values: ClubValues) => {
     setError(null);
     setLoading(true);
@@ -79,7 +68,6 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else {
-          // Handle imageUrl specifically to ensure it's only appended if not null
           if (key === 'logoUrl' && value !== null) {
             formData.append(key, value);
           } else if (key !== 'logoUrl') {
@@ -93,11 +81,7 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
         console.log(pair[0] + ', ' + pair[1]);
       }
 
-      const response = await apiClient.patch(`/clubs/${club._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
-      });
+      const response = await apiClient.patch(`/clubs/${club?._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: `/admin/clubs`,
@@ -134,30 +118,40 @@ const Edit: NextPage<EditProps> = ({ jwt, club }) => {
     setError(null);
   };
 
-  // Form initial values with existing club data
+  // 3. Loading state
+  if (authLoading || dataLoading) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  // 4. Auth guard
+  if (!hasRole(UserRole.ADMIN)) return null;
+
+  if (!club) {
+    return <Layout><ErrorMessage error="Verein nicht gefunden" onClose={() => router.push('/admin/clubs')} /></Layout>;
+  }
+
   const initialValues: ClubValues = {
-    _id: club?._id || '',
-    name: club?.name || '',
-    alias: club?.alias || '',
-    addressName: club?.addressName || '',
-    street: club?.street || '',
-    zipCode: club?.zipCode || '',
-    city: club?.city || '',
-    country: club?.country || '',
-    email: club?.email || '',
-    yearOfFoundation: club?.yearOfFoundation || '',
-    description: club?.description || '',
-    website: club?.website || '',
-    ishdId: club?.ishdId || '',
-    active: club?.active || false,
-    logoUrl: club?.logoUrl || '',
-    teams: club?.teams || [],
-    legacyId: club?.legacyId || '',
+    _id: club._id || '',
+    name: club.name || '',
+    alias: club.alias || '',
+    addressName: club.addressName || '',
+    street: club.street || '',
+    zipCode: club.zipCode || '',
+    city: club.city || '',
+    country: club.country || '',
+    email: club.email || '',
+    yearOfFoundation: club.yearOfFoundation || '',
+    description: club.description || '',
+    website: club.website || '',
+    ishdId: club.ishdId || '',
+    active: club.active || false,
+    logoUrl: club.logoUrl || '',
+    teams: club.teams || [],
+    legacyId: club.legacyId || '',
   };
 
   const sectionTitle = 'Verein bearbeiten';
 
-  // Render the form with initialValues and the edit-specific handlers
   return (
     <Layout>
       <SectionHeader title={sectionTitle} />
