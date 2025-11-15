@@ -25,17 +25,26 @@ const Posts: NextPage = () => {
 
   // Auth check
   useEffect(() => {
-    if (authLoading) return; // Wait for auth to complete
+    if (authLoading) {
+      console.log('Auth still loading...');
+      return; // Wait for auth to complete
+    }
+    
+    console.log('Auth check - User:', user ? 'authenticated' : 'not authenticated');
     
     if (!user) {
       // Not authenticated
+      console.log('No user found, redirecting to login');
       router.push('/login');
       return;
     }
     
     // Check if user has required role
     if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+      console.log('User does not have required role, redirecting to home');
       router.push('/');
+    } else {
+      console.log('User authorized, roles:', user.roles);
     }
   }, [authLoading, user, hasAnyRole, router]);
 

@@ -31,7 +31,10 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
         
         if (userResponse.ok) {
           const userData = await userResponse.json();
-          setUser(userData);
+          // The /api/user endpoint should already extract the data field,
+          // but handle both cases for safety
+          const user = userData.data || userData;
+          setUser(user);
           setAuthError(null);
         } else {
           setUser(null);
