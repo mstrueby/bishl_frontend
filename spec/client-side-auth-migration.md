@@ -70,21 +70,21 @@ const Page = () => {
 
 ## Pages Migration Status
 
-### ✅ Completed (1)
+### ✅ Completed (8)
 - [x] `pages/admin/posts/index.tsx` - AUTHOR/ADMIN
+- [x] `pages/admin/documents/index.tsx` - ADMIN
+- [x] `pages/admin/clubs/index.tsx` - ADMIN/LEAGUE_MANAGER
+- [x] `pages/admin/players/index.tsx` - ADMIN/LEAGUE_MANAGER
+- [x] `pages/admin/venues/index.tsx` - ADMIN
+- [x] `pages/admin/refadmin/index.tsx` - ADMIN
+- [x] `pages/admin/myref/index.tsx` - REFEREE
+- [x] `pages/admin/myclub/index.tsx` - CLUB_ADMIN/ADMIN
 
 ### 🔄 In Progress (0)
 
-### ⏳ Pending (9)
+### ⏳ Pending (2)
 
 #### High Priority - List Pages
-- [ ] `pages/admin/documents/index.tsx` - DOC_ADMIN/ADMIN
-- [ ] `pages/admin/clubs/index.tsx` - ADMIN/LEAGUE_ADMIN  
-- [ ] `pages/admin/players/index.tsx` - ADMIN/LEAGUE_ADMIN
-- [ ] `pages/admin/venues/index.tsx` - ADMIN
-- [ ] `pages/admin/refadmin/index.tsx` - REF_ADMIN/ADMIN
-- [ ] `pages/admin/myref/index.tsx` - REFEREE
-- [ ] `pages/admin/myclub/index.tsx` - CLUB_ADMIN/ADMIN
 
 #### Medium Priority - Edit Pages
 - [ ] `pages/admin/documents/[alias]/edit.tsx` - DOC_ADMIN/ADMIN
