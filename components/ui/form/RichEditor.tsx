@@ -4,17 +4,22 @@ import 'react-quill/dist/quill.snow.css';
 import { useField } from 'formik';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css';
+import type ReactQuill from 'react-quill';
 
 interface RichEditorProps {
   name: string;
 }
 
-const DynamicEditor = dynamic(() => import('react-quill'), { ssr: false });
+const DynamicEditor = dynamic(() => import('react-quill'), { 
+  ssr: false,
+  loading: () => <div className="animate-pulse h-48 bg-gray-100 rounded-md" />
+});
 
 const RichEditor: React.FC<RichEditorProps> = ({ name }) => {
   const [field, meta, helpers] = useField(name);
   const [isCodeView, setIsCodeView] = useState(false);
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const quillRef = useRef<ReactQuill | null>(null);
 
   useEffect(() => {
     if (isCodeView && editorRef.current) {
@@ -59,6 +64,7 @@ const RichEditor: React.FC<RichEditorProps> = ({ name }) => {
         />
       ) : (
         <DynamicEditor
+          ref={quillRef}
           theme="snow"
           value={field.value}
           onChange={(value: string) => helpers.setValue(value)}
