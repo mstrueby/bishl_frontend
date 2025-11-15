@@ -20,6 +20,19 @@ const RichEditor: React.FC<RichEditorProps> = ({ name }) => {
   const [isCodeView, setIsCodeView] = useState(false);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const quillRef = useRef<ReactQuill | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
+
+  // Monitor for Quill-related errors
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      if (event.message.includes('Quill') || event.message.includes('react-quill')) {
+        console.error('RichEditor error detected:', event.message);
+        setEditorError(event.message);
+      }
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   useEffect(() => {
     if (isCodeView && editorRef.current) {
@@ -44,6 +57,11 @@ const RichEditor: React.FC<RichEditorProps> = ({ name }) => {
 
   return (
     <div>
+      {editorError && (
+        <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+          Editor error: {editorError}
+        </div>
+      )}
       <div className="flex justify-end mb-2">
         <button
           type="button"
