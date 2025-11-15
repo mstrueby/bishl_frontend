@@ -1,64 +1,39 @@
+
 import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { ClubValues } from '../../../types/ClubValues';
 import ClubForm from '../../../components/admin/ClubForm';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../components/ui/ErrorMessage';
+import LoadingState from '../../../components/ui/LoadingState';
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import { UserRole } from '../../../lib/auth';
 import apiClient from '../../../lib/apiClient';
 
-interface AddProps {
-  jwt: string;
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  try {
-    // First check if user has required role
-    const userResponse = await apiClient.get('/users/me', {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    return { props: { jwt } };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-}
-
-export default function Add({ jwt }: AddProps) {
+const Add: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
 
   const initialValues: ClubValues = {
     _id: '',
@@ -89,11 +64,7 @@ export default function Add({ jwt }: AddProps) {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await apiClient.post('/clubs/', formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
+      const response = await apiClient.post('/clubs/', formData);
       if (response.status === 201) {
         router.push({
           pathname: '/admin/clubs',
@@ -125,6 +96,20 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
+  // Loading state
+  if (authLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN])) {
+    return null;
+  }
+
   const sectionTitle = 'Neuer Verein';
 
   return (
@@ -141,3 +126,5 @@ export default function Add({ jwt }: AddProps) {
     </Layout>
   );
 };
+
+export default Add;
