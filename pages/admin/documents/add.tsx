@@ -1,65 +1,39 @@
+
 import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import DocumentForm from '../../../components/admin/DocumentForm'
 import { DocumentValuesForm } from '../../../types/DocumentValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
+import LoadingState from '../../../components/ui/LoadingState';
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import { UserRole } from '../../../lib/auth';
+import apiClient from '../../../lib/apiClient';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/documents/"
-
-interface AddProps {
-  jwt: string;
-  user: {
-    firstName: string;
-    lastName: string;
-  }
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  if (!jwt) {
-    return { notFound: true };
-  }
-
-  let user = {
-    firstName: "",
-    lastName: "",
-    roles: []
-  };
-  try {
-    const userResponse = await axios.get(`${process.env['NEXT_PUBLIC_API_URL']}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    const user = userResponse.data;
-    if (!user.roles?.includes('DOC_ADMIN') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-  }
-  return {
-    props: {
-      jwt,
-      user
-    },
-  }
-};
-
-export default function Add({ jwt }: AddProps) {
+const Add: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.DOC_ADMIN, UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
 
   const initialValues: DocumentValuesForm = {
     _id: '',
@@ -70,19 +44,15 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const onSubmit = async (values: DocumentValuesForm) => {
-    setError(null)
-    setLoading(true)
-    console.log(values)
+    setError(null);
+    setLoading(true);
+    console.log(values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await axios.post(BASE_URL, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
-      });
+      const response = await apiClient.post('/documents/', formData);
       if (response.status === 201) {
         router.push({
           pathname: '/admin/documents',
@@ -114,6 +84,20 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
+  // Loading state
+  if (authLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.DOC_ADMIN, UserRole.ADMIN])) {
+    return null;
+  }
+
   const sectionTitle = 'Dokument hochladen';
 
   return (
@@ -128,5 +112,7 @@ export default function Add({ jwt }: AddProps) {
         loading={loading}
       />
     </Layout>
-  )
+  );
 }
+
+export default Add;

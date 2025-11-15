@@ -1,75 +1,60 @@
+
 import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import TeamForm from '../../../../../components/admin/TeamForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from "../../../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
+import LoadingState from '../../../../../components/ui/LoadingState';
+import useAuth from '../../../../../hooks/useAuth';
+import usePermissions from '../../../../../hooks/usePermissions';
+import { UserRole } from '../../../../../lib/auth';
+import apiClient from '../../../../../lib/apiClient';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface AddProps {
-  jwt: string;
-  club: ClubValues;
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const cAlias = context.params?.cAlias as string | undefined;
-  let club: ClubValues | null = null;
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Get club name
-    const clubResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/${cAlias}`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    club = clubResponse.data;
-
-    return { props: { jwt, club } };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-}
-
-export default function Add({ jwt, club }: AddProps) {
+const Add: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [club, setClub] = useState<ClubValues | null>(null);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { cAlias } = router.query;
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !cAlias) return;
+    
+    const fetchClub = async () => {
+      try {
+        const response = await apiClient.get(`/clubs/${cAlias}`);
+        setClub(response.data);
+      } catch (error) {
+        console.error('Error fetching club:', error);
+        setError('Fehler beim Laden des Vereins.');
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    fetchClub();
+  }, [authLoading, user, cAlias]);
 
   const initialValues: TeamValues = {
     _id: '',
@@ -88,20 +73,18 @@ export default function Add({ jwt, club }: AddProps) {
   };
 
   const onSubmit = async (values: TeamValues) => {
+    if (!club) return;
+    
     setError(null);
     setLoading(true);
-    console.log(values)
+    console.log(values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value?.toString() || '');
       });
 
-      const response = await axios.post(`${BASE_URL}/clubs/${club.alias}/teams/`, formData, {
-        headers: {
-          'Authorization': `Bearer ${jwt}`,
-        }
-      });
+      const response = await apiClient.post(`/clubs/${club.alias}/teams/`, formData);
 
       if (response.status === 201) {
         router.push({
@@ -124,7 +107,9 @@ export default function Add({ jwt, club }: AddProps) {
   };
 
   const handleCancel = () => {
-    router.push(`/admin/clubs/${club.alias}/teams`);
+    if (club) {
+      router.push(`/admin/clubs/${club.alias}/teams`);
+    }
   };
 
   useEffect(() => {
@@ -136,6 +121,28 @@ export default function Add({ jwt, club }: AddProps) {
   const handleCloseMessage = () => {
     setError(null);
   };
+
+  // Loading state
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN])) {
+    return null;
+  }
+
+  if (!club) {
+    return (
+      <Layout>
+        <ErrorMessage error="Verein nicht gefunden" onClose={() => router.push('/admin/clubs')} />
+      </Layout>
+    );
+  }
 
   const sectionTitle = 'Neue Mannschaft';
   const sectionDescription = club.name.toUpperCase();
@@ -157,3 +164,5 @@ export default function Add({ jwt, club }: AddProps) {
     </Layout>
   );
 };
+
+export default Add;

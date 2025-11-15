@@ -1,65 +1,39 @@
+
 import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import VenueForm from '../../../components/admin/VenueForm'
 import { VenueValues } from '../../../types/VenueValues';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
+import LoadingState from '../../../components/ui/LoadingState';
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import { UserRole } from '../../../lib/auth';
+import apiClient from '../../../lib/apiClient';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/venues/"
-
-interface AddProps {
-  jwt: string
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    return { props: { jwt } };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-}
-
-export default function Add({ jwt }: AddProps) {
+const Add: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
 
   const initialValues: VenueValues = {
     _id: '',
@@ -77,7 +51,7 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const onSubmit = async (values: VenueValues) => {
-    setError(null)
+    setError(null);
     setLoading(true);
     console.log('submitted values', values);
     try {
@@ -85,11 +59,7 @@ export default function Add({ jwt }: AddProps) {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await axios.post(BASE_URL, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
-      });
+      const response = await apiClient.post('/venues/', formData);
       if (response.status === 201) {
         router.push({
           pathname: '/admin/venues',
@@ -108,8 +78,8 @@ export default function Add({ jwt }: AddProps) {
   };
 
   const handleCancel = () => {
-    router.push('/admin/venues')
-  }
+    router.push('/admin/venues');
+  };
 
   useEffect(() => {
     if (error) {
@@ -121,6 +91,20 @@ export default function Add({ jwt }: AddProps) {
     setError(null);
   };
 
+  // Loading state
+  if (authLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN])) {
+    return null;
+  }
+
   const sectionTitle = 'Neue Spielfläche';
 
   return (
@@ -130,10 +114,12 @@ export default function Add({ jwt }: AddProps) {
       <VenueForm 
         initialValues={initialValues}
         onSubmit={onSubmit}
-        enableReinitialize= {true}
+        enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
       />
     </Layout>
-  )
+  );
 }
+
+export default Add;
