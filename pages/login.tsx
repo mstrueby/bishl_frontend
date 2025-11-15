@@ -9,6 +9,8 @@ import * as Yup from 'yup';
 import InputText from '../components/ui/form/InputText';
 import ButtonPrimary from '../components/ui/form/ButtonPrimary';
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import apiClient from '../lib/apiClient';
+import axios from 'axios';
 
 // Assign the arrow function to a variable
 const LoginPage = () => {
@@ -53,51 +55,33 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      // Step 1: Login and get tokens
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        body: JSON.stringify({
-          email,
-          password
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': localStorage.getItem('csrf_token') || '' // Include CSRF token
-        }
+      // Step 1: Login and get tokens using apiClient
+      const loginRes = await apiClient.post('/api/login', {
+        email,
+        password
       });
 
-      if (res.ok) {
-        const { access_token, refresh_token } = await res.json();
+      const { access_token, refresh_token } = loginRes.data;
 
-        // Step 2: Store tokens in localStorage
-        localStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);
+      // Step 2: Store tokens in localStorage
+      localStorage.setItem('access_token', access_token);
+      localStorage.setItem('refresh_token', refresh_token);
 
-        // Step 3: Fetch user info using access token
-        const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-          headers: {
-            'Authorization': `Bearer ${access_token}`
-          }
-        });
-
-        if (userRes.ok) {
-          const response = await userRes.json();
-          // Backend returns { success, data: UserValues, message }
-          const userData = response.data || response;
-          setUser(userData);
-          router.push('/');
-        } else {
-          throw new Error('Failed to fetch user info');
-        }
-      } else {
-        // Handle error here
-        const errData = await res.json();
-        console.log('Login error:', errData);
-        setError(errData.error || errData.detail || 'Login failed');
-      }
+      // Step 3: Fetch user info using apiClient (which automatically adds the token)
+      const userRes = await apiClient.get('/users/me');
+      
+      // apiClient unwraps the data field automatically
+      const userData = userRes.data;
+      setUser(userData);
+      router.push('/');
     } catch (error) {
       console.error('Login error:', error);
-      setError('Login failed. Please try again.');
+      if (axios.isAxiosError(error)) {
+        const errMsg = error.response?.data?.error || error.response?.data?.detail || 'Login failed';
+        setError(errMsg);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
