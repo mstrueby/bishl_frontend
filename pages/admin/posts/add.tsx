@@ -49,7 +49,7 @@ const Add: NextPage = () => {
         }
       });
 
-      const response = await apiClient.post('/posts/', formData);
+      const response = await apiClient.post('/posts', formData);
 
       if (response.status === 201) {
         router.push({
