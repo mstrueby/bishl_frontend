@@ -55,13 +55,22 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      // Step 1: Login and get tokens using apiClient
-      const loginRes = await apiClient.post('/api/login', {
-        email,
-        password
+      // Step 1: Login and get tokens - call Next.js API route directly
+      const loginRes = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': localStorage.getItem('csrf_token') || '',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      const { access_token, refresh_token } = loginRes.data;
+      if (!loginRes.ok) {
+        const errorData = await loginRes.json();
+        throw new Error(errorData.error || 'Login failed');
+      }
+
+      const { access_token, refresh_token } = await loginRes.json();
 
       // Step 2: Store tokens in localStorage
       localStorage.setItem('access_token', access_token);
