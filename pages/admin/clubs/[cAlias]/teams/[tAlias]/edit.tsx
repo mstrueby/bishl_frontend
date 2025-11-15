@@ -1,87 +1,73 @@
-// pages/leaguemanager/clubs/[alias]/edit.tsx
+
 import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
 import TeamForm from '../../../../../../components/admin/TeamForm';
 import Layout from '../../../../../../components/Layout';
 import SectionHeader from '../../../../../../components/admin/SectionHeader';
 import { ClubValues, TeamValues } from '../../../../../../types/ClubValues';
 import ErrorMessage from '../../../../../../components/ui/ErrorMessage';
+import LoadingState from '../../../../../../components/ui/LoadingState';
+import useAuth from '../../../../../../hooks/useAuth';
+import usePermissions from '../../../../../../hooks/usePermissions';
+import { UserRole } from '../../../../../../lib/auth';
+import apiClient from '../../../../../../lib/apiClient';
+import axios from 'axios';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface EditProps {
-  jwt: string,
-  club: ClubValues,
-  team: TeamValues,
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const { cAlias } = context.params as { cAlias: string };
-  const { tAlias } = context.params as { tAlias: string };
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  let club = null;
-  let team = null;
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
-    const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Fetch club data
-    const clubResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      }
-    });
-    club = clubResponse.data;
-
-    // Fetch the existing team data
-    const response = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams/${tAlias}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    team = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching club:', error.message);
-    }
-  }
-  return team ? { props: { jwt, team, club } } : { notFound: true };
-};
-
-const Edit: NextPage<EditProps> = ({ jwt, team, club }) => {
+const Edit: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const [club, setClub] = useState<ClubValues | null>(null);
+  const [team, setTeam] = useState<TeamValues | null>(null);
   const router = useRouter();
+  const { cAlias, tAlias } = router.query;
+
+  // 1. Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasRole(UserRole.ADMIN)) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasRole, router]);
+
+  // 2. Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !cAlias || !tAlias) return;
+    
+    const fetchData = async () => {
+      try {
+        // Fetch club data
+        const clubResponse = await apiClient.get(`/clubs/${cAlias}`);
+        setClub(clubResponse.data);
+
+        // Fetch team data
+        const teamResponse = await apiClient.get(`/clubs/${cAlias}/teams/${tAlias}`);
+        setTeam(teamResponse.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Error fetching data:', error.message);
+          router.push(`/admin/clubs/${cAlias}/teams/`);
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    fetchData();
+  }, [authLoading, user, cAlias, tAlias, router]);
 
   // Handler for form submission
   const onSubmit = async (values: TeamValues) => {
+    if (!club || !team) return;
+    
     setError(null);
     setLoading(true);
     console.log('submitted values', values);
@@ -104,11 +90,7 @@ const Edit: NextPage<EditProps> = ({ jwt, team, club }) => {
         console.log(pair[0] + ', ' + pair[1]);
       }
 
-      const response = await axios.patch(`${BASE_URL}/clubs/${club.alias}/teams/${team._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
-      });
+      const response = await apiClient.patch(`/clubs/${club.alias}/teams/${team._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: `/admin/clubs/${club.alias}/teams/`,
@@ -132,7 +114,9 @@ const Edit: NextPage<EditProps> = ({ jwt, team, club }) => {
   };
 
   const handleCancel = () => {
-    router.push(`/admin/clubs/${club.alias}/teams/`);
+    if (club) {
+      router.push(`/admin/clubs/${club.alias}/teams/`);
+    }
   };
 
   useEffect(() => {
@@ -145,26 +129,37 @@ const Edit: NextPage<EditProps> = ({ jwt, team, club }) => {
     setError(null);
   };
 
-  // Form initial values with existing club data
+  // 3. Loading state
+  if (authLoading || dataLoading) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  // 4. Auth guard
+  if (!hasRole(UserRole.ADMIN)) return null;
+
+  if (!team || !club) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  // Form initial values with existing team data
   const initialValues: TeamValues = {
-    _id: team?._id || '',
-    name: team?.name || '',
-    alias: team?.alias || '',
-    fullName: team?.fullName || '',
-    shortName: team?.shortName || '',
-    tinyName: team?.tinyName || '',
-    ageGroup: team?.ageGroup || '',
-    teamNumber: team?.teamNumber || 0,
-    active: team?.active || false,
-    external: team?.external || false,
-    logoUrl: team?.logoUrl || '',
-    ishdId: team?.ishdId || ''
+    _id: team._id,
+    name: team.name,
+    alias: team.alias,
+    fullName: team.fullName,
+    shortName: team.shortName,
+    tinyName: team.tinyName,
+    ageGroup: team.ageGroup,
+    teamNumber: team.teamNumber,
+    active: team.active,
+    external: team.external,
+    logoUrl: team.logoUrl,
+    ishdId: team.ishdId
   };
 
   const sectionTitle = 'Mannschaft bearbeiten';
   const sectionDescription = club.name.toUpperCase();
 
-  // Render the form with initialValues and the edit-specific handlers
   return (
     <Layout>
       <SectionHeader

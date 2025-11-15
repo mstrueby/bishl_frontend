@@ -1,8 +1,6 @@
-// pages/leaguemanager/clubs/[alias]/edit.tsx
 import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import PlayerAdminForm from '../../../../components/admin/PlayerAdminForm';
 import Layout from '../../../../components/Layout';
@@ -10,144 +8,102 @@ import SectionHeader from '../../../../components/admin/SectionHeader';
 import { PlayerValues } from '../../../../types/PlayerValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { ClubValues } from '../../../../types/ClubValues';
+import useAuth from '../../../../hooks/useAuth';
+import usePermissions from '../../../../hooks/usePermissions';
+import { UserRole } from '../../../../lib/auth';
+import LoadingState from '../../../../components/ui/LoadingState';
+import apiClient from '../../../../lib/apiClient';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface EditProps {
-  jwt: string,
-  clubs: ClubValues[],
-  player: PlayerValues,
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const { playerId } = context.params as { playerId: string };
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  let player = null;
-  let clubs = null;
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
-    const user = userResponse.data;
-    if (!user.roles?.some((role: string) => ['ADMIN', 'LEAGUE_ADMIN'].includes(role))) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Fetch the existing club data
-    const clubResponse = await axios.get(`${BASE_URL}/clubs`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      },
-      params: {
-        active: true
-      }
-    });
-    clubs = clubResponse.data;
-
-    // Fetch player data
-    const response = await axios.get(`${BASE_URL}/players/${playerId}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    player = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching player:', error.message);
-    }
-  }
-  return player ? { props: { jwt, clubs: clubs || [], player } } : { notFound: true };
-};
-
-const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
+const Edit: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const [clubs, setClubs] = useState<ClubValues[]>([]);
+  const [player, setPlayer] = useState<PlayerValues | null>(null);
   const router = useRouter();
+  const { playerId } = router.query;
 
-  // Handler for form submission
+  // 1. Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // 2. Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !playerId) return;
+
+    const fetchData = async () => {
+      try {
+        // Fetch clubs
+        const clubsResponse = await apiClient.get('/clubs', {
+          params: { active: true }
+        });
+        setClubs(clubsResponse.data);
+
+        // Fetch player
+        const playerResponse = await apiClient.get(`/players/${playerId}`);
+        setPlayer(playerResponse.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Error fetching data:', error.message);
+          setError('Fehler beim Laden der Daten');
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    fetchData();
+  }, [authLoading, user, playerId]);
+
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
-    values.birthdate = new Date(values.birthdate).toISOString();
     console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        const excludedFields = ['_id', 'stats', 'source', 'legacyId', 'createDate', 'displayFirstName', 'displayLastName'];
-        if (excludedFields.includes(key)) return;
-        if (key === 'image' && value instanceof File) {
-          formData.append('image', value);
-        } else if (value instanceof FileList) {
+        if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (typeof value === 'object' && key !== 'imageUrl') {
-          if (key === 'assignedTeams') {
-            const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
-              ...club,
-              teams: club.teams.map(team => {
-                if (team.jerseyNo === null) {
-                  const { jerseyNo, ...restTeam } = team;
-                  return restTeam;
-                }
-                return team;
-              })
-            }));
-            formData.append(key, JSON.stringify(cleanedTeams));
-          } else {
-            formData.append(key, JSON.stringify(value));
-          }
+        } else if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key, item));
+        } else if (typeof value === 'object' && value !== null) {
+          formData.append(key, JSON.stringify(value));
         } else {
-          // Handle imageUrl specifically to ensure it's only appended if not null
-          if (key === 'imageUrl' && value !== null) {
-            formData.append(key, value);
-          } else if (key !== 'imageUrl') {
-            formData.append(key, value);
-          }
+          formData.append(key, value);
         }
       });
 
-      console.log('FormData entries:', Array.from(formData.entries()));
-
-      const response = await axios.patch(`${BASE_URL}/players/${player._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
-      });
+      const response = await apiClient.patch(`/players/${player?._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: `/admin/players`,
-          query: { message: `Spieler*in <strong>${values.firstName} ${values.lastName} </strong> wurde erfolgreich aktualisiert.` }
+          query: { message: `Spieler <strong>${values.firstName} ${values.lastName}</strong> wurde erfolgreich aktualisiert.` }
         }, `/admin/players`);
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        // Assuming a 304 Not Modified response would redirect to the list page with a message
+        // If the error is not a 304, show the error message
         if (error.response?.status === 304) {
-          router.push({
-            pathname: `/admin/players`,
-            query: { message: `Keine Änderungen für Spieler*in <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
-          }, `/admin/players`);
+             router.push({
+               pathname: `/admin/players`,
+               query: { message: `Keine Änderungen für Spieler <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
+             }, `/admin/players`);
         } else {
-          setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
+             setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
         }
       } else {
         setError('Ein Fehler ist aufgetreten.');
@@ -171,29 +127,43 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
     setError(null);
   };
 
-  // Form initial values with existing club data
-  const initialValues: PlayerValues = {
-    _id: player?._id || '',
-    firstName: player?.firstName || '',
-    lastName: player?.lastName || '',
-    birthdate: player?.birthdate ? new Date(player.birthdate).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' }) : '',
-    displayFirstName: player?.displayFirstName || '',
-    displayLastName: player?.displayLastName || '',
-    nationality: player?.nationality || '',
-    fullFaceReq: player?.fullFaceReq || false,
-    assignedTeams: player?.assignedTeams || [],
-    imageUrl: player?.imageUrl || '',
-    imageVisible: player?.imageVisible || false,
-    source: player?.source || 'n/a',
-    ageGroup: player?.ageGroup || '?',
-    overAge: player?.overAge || false,
-    managedByISHD: player?.managedByISHD || false,
-    sex: player?.sex || 'männlich',
-  };
-  console.log("initial birthday", player.birthdate, new Date(player.birthdate).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' }), initialValues.birthdate)
-  const sectionTitle = 'Spieler*in bearbeiten';
+  // 3. Loading state
+  if (authLoading || dataLoading) {
+    return <Layout><LoadingState /></Layout>;
+  }
 
-  // Render the form with initialValues and the edit-specific handlers
+  // 4. Auth guard
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) return null;
+
+  if (!player) {
+    return <Layout><ErrorMessage error="Spieler nicht gefunden" onClose={() => router.push('/admin/players')} /></Layout>;
+  }
+
+  const initialValues: PlayerValues = {
+    _id: player._id || '',
+    firstName: player.firstName || '',
+    lastName: player.lastName || '',
+    birthdate: player.birthdate || '',
+    displayFirstName: player.displayFirstName || '',
+    displayLastName: player.displayLastName || '',
+    fullFaceReq: player.fullFaceReq || false,
+    source: player.source || '',
+    assignedTeams: player.assignedTeams || [],
+    stats: player.stats || [],
+    imageUrl: player.imageUrl || '',
+    imageVisible: player.imageVisible || false,
+    legacyId: player.legacyId || 0,
+    createDate: player.createDate || '',
+    nationality: player.nationality || '',
+    position: player.position || undefined,
+    ageGroup: player.ageGroup || '',
+    overAge: player.overAge || false,
+    managedByISHD: player.managedByISHD || false,
+    sex: player.sex || ''
+  };
+
+  const sectionTitle = 'Spieler bearbeiten';
+
   return (
     <Layout>
       <SectionHeader title={sectionTitle} />
@@ -202,11 +172,11 @@ const Edit: NextPage<EditProps> = ({ jwt, clubs, player }) => {
 
       <PlayerAdminForm
         initialValues={initialValues}
-        clubs={clubs}
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
+        clubs={clubs}
       />
     </Layout>
   );
