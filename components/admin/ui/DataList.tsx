@@ -92,14 +92,14 @@ const DataList: React.FC<DataListProps> = ({ items, statuses, categories, onDele
         <li key={item._id} className="flex items-center justify-between gap-x-6 py-5">
           {showThumbnails && (
             item.image ? (
-              <span className={`${!showThumbnailsOnMobiles ? 'hidden sm:block' : 'block'}`}><CldImage
+              <div className={`relative ${!showThumbnailsOnMobiles ? 'hidden sm:block' : 'block'}`}><CldImage
                 src={item.image.src}
                 alt="Thumbnail"
-                className={classNames(item.image.className, '')}
-                width={item.image.width} height={item.image.height}
+                className={classNames(item.image.className, 'w-[128px] h-[72px]')}
+                width={128} height={72}
                 gravity={item.image.gravity}
                 radius={item.image.radius}
-              /></span>
+              /></div>
             ) : (
               <div className={`${!showThumbnailsOnMobiles ? 'hidden sm:block' : 'block'} relative w-32 flex-none rounded-lg border bg-gray-50 sm:inline-block aspect-[16/9]`}></div>
             )
