@@ -40,29 +40,6 @@ const Posts: NextPage = () => {
   }, [authLoading, user, hasAnyRole, router]);
 
   // Fetch posts on mount
-  useEffect(() => {
-    if (authLoading || !user) {
-      return;
-    }
-    
-    const fetchPosts = async () => {
-      try {
-        const res = await apiClient.get('/posts', {
-          params: { page: 1 }
-        });
-        setPosts(res.data || []);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error('Error fetching posts:', error);
-        }
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, [authLoading, user]);
-
   const fetchPosts = async () => {
     try {
       const res = await apiClient.get('/posts', {
@@ -75,6 +52,19 @@ const Posts: NextPage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (authLoading || !user) {
+      return;
+    }
+    
+    const loadPosts = async () => {
+      await fetchPosts();
+      setDataLoading(false);
+    };
+
+    loadPosts();
+  }, [authLoading, user]);
 
 
   const editPost = (alias: string) => {
