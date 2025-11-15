@@ -85,8 +85,8 @@ const Page = () => {
 ### ⏳ Pending (7)
 
 #### High Priority - Edit Pages
-- [ ] `pages/admin/documents/[alias]/edit.tsx` - DOC_ADMIN/ADMIN
-- [ ] `pages/admin/posts/[alias]/edit.tsx` - AUTHOR/ADMIN
+- [x] `pages/admin/documents/[alias]/edit.tsx` - DOC_ADMIN/ADMIN
+- [x] `pages/admin/posts/[alias]/edit.tsx` - AUTHOR/ADMIN
 - [ ] `pages/admin/players/[playerId]/edit.tsx` - ADMIN/LEAGUE_MANAGER
 - [ ] `pages/admin/venues/[alias]/edit.tsx` - ADMIN
 - [ ] `pages/admin/clubs/[cAlias]/edit.tsx` - ADMIN
