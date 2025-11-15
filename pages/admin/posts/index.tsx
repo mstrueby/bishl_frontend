@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import React from "react";
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { getCookie } from 'cookies-next';
 import { PostValues } from '../../../types/PostValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
@@ -11,55 +10,63 @@ import SuccessMessage from '../../../components/ui/SuccessMessage';
 import { getFuzzyDate } from '../../../tools/dateUtils';
 import DataList from '../../../components/admin/ui/DataList';
 import apiClient from '../../../lib/apiClient';
+import useAuth from '../../../hooks/useAuth';
+import { UserRole } from '../../../lib/auth';
+import usePermissions from '../../../hooks/usePermissions';
+import LoadingState from '../../../components/ui/LoadingState';
 
-interface PostsProps {
-  jwt: string,
-  posts: PostValues[]
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
-  let posts: PostValues[] = [];
-
-  try {
-    // First check if user has required role
-    const userResponse = await apiClient.get('/users/me');
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    const res = await apiClient.get('/posts', {
-      params: {
-        page: 1
-      }
-    });
-    posts = res.data || [];
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching posts:', error);
-    }
-  }
-  return { props: { jwt, posts } };
-};
-
-const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
-  const [posts, setPosts] = useState<PostValues[]>(inittialPosts);
+const Posts: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [posts, setPosts] = useState<PostValues[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const router = useRouter();
+
+  // Auth check
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to complete
+    
+    if (!user) {
+      // Not authenticated
+      router.push('/login');
+      return;
+    }
+    
+    // Check if user has required role
+    if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Fetch posts on mount
+  useEffect(() => {
+    if (authLoading || !user) {
+      return;
+    }
+    
+    const fetchPosts = async () => {
+      try {
+        const res = await apiClient.get('/posts', {
+          params: { page: 1 }
+        });
+        setPosts(res.data || []);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Error fetching posts:', error);
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [authLoading, user]);
 
   const fetchPosts = async () => {
     try {
       const res = await apiClient.get('/posts', {
-        params: {
-          page: 1
-        }
+        params: { page: 1 }
       });
       setPosts(res.data || []);
     } catch (error) {
@@ -94,7 +101,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     } catch (error) {
       console.error('Error publishing the post:', error);
     }
-  }
+  };
 
   const toggleFeatured = async (postId: string, currentStatus: boolean, imageUrl: string | null) => {
     try {
@@ -115,7 +122,7 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
     } catch (error) {
       console.error('Error featuring the post:', error);
     }
-  }
+  };
 
   const deletePost = async (postId: string) => {
     if (!postId) return;
@@ -173,6 +180,21 @@ const Posts: NextPage<PostsProps> = ({ jwt, posts: inittialPosts }) => {
       published: post.published,
       featured: post.featured,
     }));
+
+  // Show loading state
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <SectionHeader title="Beiträge" />
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Redirect if not authorized (render nothing while redirecting)
+  if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+    return null;
+  }
 
   const sectionTitle = 'Beiträge';
   const newLink = '/admin/posts/add';
