@@ -82,13 +82,16 @@ const Page = () => {
 
 ### 🔄 In Progress (0)
 
-### ⏳ Pending (2)
+### ⏳ Pending (7)
 
-#### High Priority - List Pages
-
-#### Medium Priority - Edit Pages
+#### High Priority - Edit Pages
 - [ ] `pages/admin/documents/[alias]/edit.tsx` - DOC_ADMIN/ADMIN
+- [ ] `pages/admin/posts/[alias]/edit.tsx` - AUTHOR/ADMIN
+- [ ] `pages/admin/players/[playerId]/edit.tsx` - ADMIN/LEAGUE_MANAGER
+- [ ] `pages/admin/venues/[alias]/edit.tsx` - ADMIN
+- [ ] `pages/admin/clubs/[cAlias]/edit.tsx` - ADMIN
 - [ ] `pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx` - ADMIN
+- [ ] `pages/admin/refadmin/referees/[userId]/edit.tsx` - REF_ADMIN/ADMIN
 
 ### ✅ Already Client-Side (1)
 - `pages/admin/profile/index.tsx`
