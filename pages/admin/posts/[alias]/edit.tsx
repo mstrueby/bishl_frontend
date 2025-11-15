@@ -1,63 +1,65 @@
+
 import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
 import PostForm from '../../../../components/admin/PostForm';
 import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import { PostValuesForm } from '../../../../types/PostValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import LoadingState from '../../../../components/ui/LoadingState';
+import useAuth from '../../../../hooks/useAuth';
+import usePermissions from '../../../../hooks/usePermissions';
+import { UserRole } from '../../../../lib/auth';
 import apiClient from '../../../../lib/apiClient';
 
-interface EditProps {
-  jwt: string,
-  post: PostValuesForm
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const { alias } = context.params as { alias: string };
-  if (!jwt) {
-    return { notFound: true };
-  }
-  
-  let post = null;
-  try {
-    // First check if user has required role
-    const userResponse = await apiClient.get('/users/me');
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('AUTHOR') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Fetch the existing Post data
-    const response = await apiClient.get(`/posts/${alias}`);
-    post = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching post:', error.message);
-    }
-  }
-  return post ? { props: { jwt, post } } : { notFound: true };
-};
-
-const Edit: NextPage<EditProps> = ({ jwt, post }) => {
+const Edit: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [post, setPost] = useState<PostValuesForm | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { alias } = router.query as { alias: string };
 
-  // Handler for form submission
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !alias) return;
+    
+    const fetchPost = async () => {
+      try {
+        const response = await apiClient.get(`/posts/${alias}`);
+        setPost(response.data.data || response.data);
+      } catch (error) {
+        console.error('Error fetching post:', error);
+        router.push('/admin/posts');
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    
+    fetchPost();
+  }, [authLoading, user, alias, router]);
+
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values)
+    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -66,7 +68,6 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
         } else if (key === 'author') {
           formData.append(key, JSON.stringify(value));
         } else {
-          // Handle imageUrl specifically to ensure it's only appended if not null
           if (key === 'imageUrl' && value !== null) {
             formData.append(key, value);
           } else if (key !== 'imageUrl') {
@@ -75,12 +76,11 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
         }
       });
       
-      // Debug FormData by logging key-value pairs to the console
       for (let pair of formData.entries()) {
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      const response = await apiClient.patch(`/posts/${post._id}`, formData);
+      const response = await apiClient.patch(`/posts/${post?._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: '/admin/posts',
@@ -89,19 +89,14 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 304) {
-          // Handle when a 304 status is caught by error
-          router.push({
-            pathname: '/admin/posts',
-            query: { message: `Keine Änderungen am Beitrag <strong>${values.title}</strong> vorgenommen.` }
-          }, `/admin/posts`);
-        } else {
-          setError('Ein Fehler ist aufgetreten.');
-        }
+    } catch (error: any) {
+      if (error.response?.status === 304) {
+        router.push({
+          pathname: '/admin/posts',
+          query: { message: `Keine Änderungen am Beitrag <strong>${values.title}</strong> vorgenommen.` }
+        }, `/admin/posts`);
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError('Ein Fehler ist aufgetreten.');
       }
     } finally {
       setLoading(false);
@@ -110,7 +105,7 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
 
   const handleCancel = () => {
     router.push('/admin/posts');
-  }
+  };
 
   useEffect(() => {
     if (error) {
@@ -122,7 +117,19 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
     setError(null);
   };
 
-  const intialValues: PostValuesForm = {
+  // Loading state
+  if (authLoading || dataLoading) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.AUTHOR, UserRole.ADMIN])) return null;
+
+  if (!post) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  const initialValues: PostValuesForm = {
     _id: post._id,
     title: post.title,
     alias: post.alias,
@@ -145,16 +152,14 @@ const Edit: NextPage<EditProps> = ({ jwt, post }) => {
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
       <PostForm
-        initialValues={intialValues}
+        initialValues={initialValues}
         onSubmit={onSubmit}
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
       />
-
     </Layout>
-  )
+  );
 };
 
 export default Edit;
-

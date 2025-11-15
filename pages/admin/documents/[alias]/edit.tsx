@@ -1,71 +1,65 @@
+
 import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
 import DocumentForm from '../../../../components/admin/DocumentForm';
 import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import { DocumentValuesForm } from '../../../../types/DocumentValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
+import LoadingState from '../../../../components/ui/LoadingState';
+import useAuth from '../../../../hooks/useAuth';
+import usePermissions from '../../../../hooks/usePermissions';
+import { UserRole } from '../../../../lib/auth';
+import apiClient from '../../../../lib/apiClient';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + '/documents/';
-
-interface EditProps {
-  jwt: string;
-  doc: DocumentValuesForm;
-}
-
-export const getServerSideProps: GetServerSideProps<EditProps> = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const { alias } = context.params as { alias: string };
-  if (!jwt) {
-    return { notFound: true };
-  }
-
-  let doc = null
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    
-    const user = userResponse.data;
-    if (!user.roles?.includes('DOC_ADMIN') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-    
-    const response = await axios.get(BASE_URL + alias, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    doc = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching document:', error.message);
-    }
-  }
-
-  return doc ? { props: { jwt, doc } } : { notFound: true };
-};
-
-const Edit: NextPage<EditProps> = ({ jwt, doc }) => {
+const Edit: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [doc, setDoc] = useState<DocumentValuesForm | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { alias } = router.query as { alias: string };
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !alias) return;
+    
+    const fetchDocument = async () => {
+      try {
+        const response = await apiClient.get(`/documents/${alias}`);
+        setDoc(response.data.data || response.data);
+      } catch (error) {
+        console.error('Error fetching document:', error);
+        router.push('/admin/documents');
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    
+    fetchDocument();
+  }, [authLoading, user, alias, router]);
 
   const onSubmit = async (values: DocumentValuesForm) => {
-    setError(null)
-    setLoading(true)
-    console.log('submitted values', values)
+    setError(null);
+    setLoading(true);
+    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -76,11 +70,7 @@ const Edit: NextPage<EditProps> = ({ jwt, doc }) => {
         }
       });
 
-      const response = await axios.patch(BASE_URL + doc._id, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
-      });
+      const response = await apiClient.patch(`/documents/${doc?._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: '/admin/documents',
@@ -89,19 +79,14 @@ const Edit: NextPage<EditProps> = ({ jwt, doc }) => {
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 304) {
-          // Handle when a 304 status is caught by error
-          router.push({
-            pathname: '/admin/documents',
-            query: { message: `Keine Änderungen am Dokument <strong>${values.title}</strong> vorgenommen.` }
-          }, `/admin/documents`);
-        } else {
-          setError('Ein Fehler ist aufgetreten.');
-        }
+    } catch (error: any) {
+      if (error.response?.status === 304) {
+        router.push({
+          pathname: '/admin/documents',
+          query: { message: `Keine Änderungen am Dokument <strong>${values.title}</strong> vorgenommen.` }
+        }, `/admin/documents`);
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError('Ein Fehler ist aufgetreten.');
       }
     } finally {
       setLoading(false);
@@ -110,18 +95,29 @@ const Edit: NextPage<EditProps> = ({ jwt, doc }) => {
 
   const handleCancel = () => {
     router.push('/admin/documents');
-  }
+  };
 
   useEffect(() => {
     if (error) {
-      // Scroll to the top of the page to show the error message
       window.scrollTo(0, 0);
     }
   }, [error]);
 
   const handleCloseMessage = () => {
     setError(null);
-  }; 
+  };
+
+  // Loading state
+  if (authLoading || dataLoading) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN])) return null;
+
+  if (!doc) {
+    return <Layout><LoadingState /></Layout>;
+  }
 
   const initialValues: DocumentValuesForm = {
     _id: doc._id,
@@ -147,12 +143,12 @@ const Edit: NextPage<EditProps> = ({ jwt, doc }) => {
       <DocumentForm
         initialValues={initialValues}
         onSubmit={onSubmit}
-        enableReinitialize= {true}
-        handleCancel= {handleCancel}
+        enableReinitialize={true}
+        handleCancel={handleCancel}
         loading={loading}
       />
     </Layout>
-  )
+  );
 };
 
 export default Edit;
