@@ -81,7 +81,9 @@ const LoginPage = () => {
         });
 
         if (userRes.ok) {
-          const userData = await userRes.json();
+          const response = await userRes.json();
+          // Backend returns { success, data: UserValues, message }
+          const userData = response.data || response;
           setUser(userData);
           router.push('/');
         } else {

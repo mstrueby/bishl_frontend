@@ -25,9 +25,11 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         const response = await result.json();
         // Backend returns { success, data: UserValues, message }
         // Extract the actual user data
-        const userData = response.data || response; // If response.data is null or undefined, use the whole response.
+        const userData = response.data || response;
+        console.log('User data fetched successfully:', userData._id);
         res.status(200).json(userData);
       } else {
+        console.log('Failed to fetch user, status:', result.status);
         const errorData = await result.json();
         res.status(result.status).json({ error: errorData.detail || 'Failed to fetch user' });
       }
