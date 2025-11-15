@@ -70,7 +70,7 @@ const Page = () => {
 
 ## Pages Migration Status
 
-### ✅ Completed (18)
+### ✅ Completed (19)
 - [x] `pages/admin/posts/index.tsx` - AUTHOR/ADMIN
 - [x] `pages/admin/documents/index.tsx` - ADMIN
 - [x] `pages/admin/clubs/index.tsx` - ADMIN/LEAGUE_MANAGER
@@ -81,6 +81,7 @@ const Page = () => {
 - [x] `pages/admin/myclub/index.tsx` - CLUB_ADMIN/ADMIN
 - [x] `pages/admin/documents/[alias]/edit.tsx` - ADMIN
 - [x] `pages/admin/posts/[alias]/edit.tsx` - AUTHOR/ADMIN
+- [x] `pages/admin/posts/add.tsx` - AUTHOR/ADMIN
 - [x] `pages/admin/players/[playerId]/edit.tsx` - ADMIN/LEAGUE_MANAGER
 - [x] `pages/admin/venues/[alias]/edit.tsx` - ADMIN
 - [x] `pages/admin/clubs/[cAlias]/edit.tsx` - ADMIN
@@ -89,16 +90,14 @@ const Page = () => {
 
 ### 🔄 In Progress (0)
 
-### ⏳ Pending (0)
+### ⏳ Pending (5)
 
-#### High Priority - Edit Pages
-- [x] `pages/admin/documents/[alias]/edit.tsx` - DOC_ADMIN/ADMIN
-- [x] `pages/admin/posts/[alias]/edit.tsx` - AUTHOR/ADMIN
-- [x] `pages/admin/players/[playerId]/edit.tsx` - ADMIN/LEAGUE_MANAGER
-- [x] `pages/admin/venues/[alias]/edit.tsx` - ADMIN
-- [x] `pages/admin/clubs/[cAlias]/edit.tsx` - ADMIN
-- [x] `pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx` - ADMIN
-- [x] `pages/admin/refadmin/referees/[userId]/edit.tsx` - ADMIN
+#### High Priority - Add Pages (Create New Resources)
+- [ ] `pages/admin/documents/add.tsx` - DOC_ADMIN/ADMIN
+- [ ] `pages/admin/clubs/add.tsx` - ADMIN
+- [ ] `pages/admin/clubs/[cAlias]/teams/add.tsx` - ADMIN
+- [ ] `pages/admin/players/add.tsx` - ADMIN/LEAGUE_MANAGER
+- [ ] `pages/admin/venues/add.tsx` - ADMIN
 
 ### ✅ Already Client-Side (1)
 - `pages/admin/profile/index.tsx`
