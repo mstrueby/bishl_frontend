@@ -1,83 +1,75 @@
+
 import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
 import RefereeForm from '../../../../../components/admin/RefereeForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { UserValues } from '../../../../../types/UserValues';
-import { ClubValues } from '../../../../../types/ClubValues'
+import { ClubValues } from '../../../../../types/ClubValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
+import LoadingState from '../../../../../components/ui/LoadingState';
+import useAuth from '../../../../../hooks/useAuth';
+import usePermissions from '../../../../../hooks/usePermissions';
+import { UserRole } from '../../../../../lib/auth';
+import apiClient from '../../../../../lib/apiClient';
+import axios from 'axios';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface EditProps {
-  jwt: string,
-  referee: UserValues,
-  clubs: ClubValues[],
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const { userId } = context.params as { userId: string };
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-  let referee = null;
-  let clubs = null;
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    const user = userResponse.data;
-    if (!user.roles?.includes('REF_ADMIN') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-    // Fetch the existing referee data
-    const response = await axios.get(`${BASE_URL}/users/` + userId, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    referee = response.data;
-    // Fetch Clubs data
-    const clubsResponse = await axios.get(`${BASE_URL}/clubs/`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-      params: {
-        active: true
-      }
-    });
-    clubs = clubsResponse.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching referee:', error.message);
-    }
-  }
-  return referee ? { props: { jwt, referee, clubs } } : { notFound: true };
-};
-
-const Edit: NextPage<EditProps> = ({ jwt, referee, clubs }) => {
+const Edit: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const [referee, setReferee] = useState<UserValues | null>(null);
+  const [clubs, setClubs] = useState<ClubValues[]>([]);
   const router = useRouter();
+  const { userId } = router.query;
+
+  // 1. Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // 2. Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !userId) return;
+    
+    const fetchData = async () => {
+      try {
+        // Fetch referee data
+        const refereeResponse = await apiClient.get(`/users/${userId}`);
+        setReferee(refereeResponse.data);
+
+        // Fetch clubs data
+        const clubsResponse = await apiClient.get('/clubs', {
+          params: { active: true }
+        });
+        setClubs(clubsResponse.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Error fetching data:', error.message);
+          router.push('/admin/refadmin/referees');
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    fetchData();
+  }, [authLoading, user, userId, router]);
 
   const onSubmit = async (values: UserValues) => {
+    if (!referee) return;
+    
     setError(null);
     setLoading(true);
     console.log('submitted values', values);
@@ -96,11 +88,7 @@ const Edit: NextPage<EditProps> = ({ jwt, referee, clubs }) => {
       });
       console.log('FormData entries:', Array.from(formData.entries()));
 
-      const response = await axios.patch(`${BASE_URL}/users/` + referee._id, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
+      const response = await apiClient.patch(`/users/${referee._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: '/admin/refadmin/referees',
@@ -125,11 +113,11 @@ const Edit: NextPage<EditProps> = ({ jwt, referee, clubs }) => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
     router.push('/admin/refadmin/referees');
-  }
+  };
 
   useEffect(() => {
     if (error) {
@@ -141,13 +129,25 @@ const Edit: NextPage<EditProps> = ({ jwt, referee, clubs }) => {
     setError(null);
   };
 
+  // 3. Loading state
+  if (authLoading || dataLoading) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  // 4. Auth guard
+  if (!hasAnyRole([UserRole.ADMIN])) return null;
+
+  if (!referee) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
   const initialValues: UserValues = {
-    _id: referee?._id || '',
-    email: referee?.email || '',
-    firstName: referee?.firstName || '',
-    lastName: referee?.lastName || '',
-    referee: referee?.referee || undefined,
-    roles: referee?.roles || []
+    _id: referee._id,
+    email: referee.email,
+    firstName: referee.firstName,
+    lastName: referee.lastName,
+    referee: referee.referee || undefined,
+    roles: referee.roles
   };
 
   const sectionTitle = 'Schiedsrichter bearbeiten';
