@@ -12,7 +12,9 @@ Migrating all `pages/admin/*` from server-side `getServerSideProps` to client-si
 - Simpler code, no SSR complexity
 - Admin pages don't need SEO
 
-## Migration Pattern
+## Migration Patterns
+
+### Pattern A: List/Index Pages (e.g., index.tsx)
 
 ```typescript
 import useAuth from '../../../hooks/useAuth';
@@ -20,7 +22,7 @@ import usePermissions from '../../../hooks/usePermissions';
 import { UserRole } from '../../../lib/auth';
 import LoadingState from '../../../components/ui/LoadingState';
 
-const Page = () => {
+const IndexPage = () => {
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
   const [data, setData] = useState([]);
@@ -29,7 +31,150 @@ const Page = () => {
 
   // 1. Auth redirect check
   useEffect(() => {
-    if (authLoading) return; // Wait for auth to complete
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.REQUIRED])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // 2. Data fetching - separate function for reuse
+  const fetchData = async () => {
+    try {
+      const res = await apiClient.get('/endpoint');
+      setData(res.data || []);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Error fetching data:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+    
+    const loadData = async () => {
+      await fetchData();
+      setDataLoading(false);
+    };
+    loadData();
+  }, [authLoading, user]);
+
+  // 3. Loading state
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <SectionHeader title="Page Title" />
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // 4. Auth guard
+  if (!hasAnyRole([UserRole.REQUIRED])) return null;
+
+  return <Layout>{/* content */}</Layout>;
+};
+```
+
+### Pattern B: Add Pages (e.g., add.tsx)
+
+```typescript
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import { UserRole } from '../../../lib/auth';
+import LoadingState from '../../../components/ui/LoadingState';
+
+const AddPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+
+  // 1. Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.REQUIRED])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // 2. Submit handler
+  const onSubmit = async (values: FormValues) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      
+      const response = await apiClient.post('/endpoint', formData);
+      
+      if (response.status === 201) {
+        router.push({
+          pathname: '/admin/resource',
+          query: { message: `Success message` }
+        }, '/admin/resource');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError('An error occurred.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 3. Loading state (auth only)
+  if (authLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // 4. Auth guard
+  if (!hasAnyRole([UserRole.REQUIRED])) return null;
+
+  return <Layout>{/* form with onSubmit */}</Layout>;
+};
+```
+
+### Pattern C: Edit Pages (e.g., [id]/edit.tsx)
+
+```typescript
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import { UserRole } from '../../../lib/auth';
+import LoadingState from '../../../components/ui/LoadingState';
+
+const EditPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [data, setData] = useState<DataType | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+  const { id } = router.query as { id: string };
+
+  // 1. Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
     
     if (!user) {
       router.push('/login');
@@ -43,28 +188,69 @@ const Page = () => {
 
   // 2. Data fetching
   useEffect(() => {
-    if (authLoading || !user) return;
+    if (authLoading || !user || !id) return;
     
     const fetchData = async () => {
       try {
-        const res = await apiClient.get('/endpoint');
-        setData(res.data);
+        const response = await apiClient.get(`/endpoint/${id}`);
+        setData(response.data.data || response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        router.push('/admin/resource');
       } finally {
         setDataLoading(false);
       }
     };
+    
     fetchData();
-  }, [authLoading, user]);
+  }, [authLoading, user, id, router]);
 
-  // 3. Loading state
+  // 3. Submit handler
+  const onSubmit = async (values: FormValues) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        // Handle files, objects, etc.
+        formData.append(key, value as string);
+      });
+      
+      const response = await apiClient.patch(`/endpoint/${data?._id}`, formData);
+      
+      if (response.status === 200) {
+        router.push({
+          pathname: '/admin/resource',
+          query: { message: `Success message` }
+        }, '/admin/resource');
+      }
+    } catch (error: any) {
+      if (error.response?.status === 304) {
+        router.push({
+          pathname: '/admin/resource',
+          query: { message: `No changes message` }
+        }, '/admin/resource');
+      } else {
+        setError('An error occurred.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 4. Loading state
   if (authLoading || dataLoading) {
     return <Layout><LoadingState /></Layout>;
   }
 
-  // 4. Auth guard
+  // 5. Auth guard
   if (!hasAnyRole([UserRole.REQUIRED])) return null;
 
-  return <Layout>{/* content */}</Layout>;
+  if (!data) {
+    return <Layout><LoadingState /></Layout>;
+  }
+
+  return <Layout>{/* form with onSubmit */}</Layout>;
 };
 ```
 
