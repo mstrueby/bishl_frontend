@@ -36,25 +36,7 @@ const Clubs: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole, router]);
 
-  // Data fetching
-  useEffect(() => {
-    if (authLoading || !user) return;
-
-    const fetchClubs = async () => {
-      try {
-        const res = await apiClient.get('/clubs');
-        setClubs(res.data || []);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error('Error fetching clubs:', error);
-        }
-      } finally {
-        setDataLoading(false);
-      }
-    };
-    fetchClubs();
-  }, [authLoading, user]);
-
+  // Fetch clubs function for reuse
   const fetchClubs = async () => {
     try {
       const res = await apiClient.get('/clubs');
@@ -65,6 +47,17 @@ const Clubs: NextPage = () => {
       }
     }
   };
+
+  // Data fetching on mount
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    const loadClubs = async () => {
+      await fetchClubs();
+      setDataLoading(false);
+    };
+    loadClubs();
+  }, [authLoading, user]);
 
   const editClub = (alias: string) => {
     router.push(`/admin/clubs/${alias}/edit`);
