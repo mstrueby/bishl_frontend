@@ -46,7 +46,7 @@ export const getStaticProps: GetStaticProps = async () => {
         season: CURRENT_SEASON,
       }
     });
-    console.log('Matches Response:', JSON.stringify(matchesRes, null, 2));
+    console.log('Matches Response Data:', matchesRes.data);
     // Handle paginated response - data is wrapped in a 'data' attribute
     const matchesData: Match[] = Array.isArray(matchesRes.data) 
       ? matchesRes.data 
@@ -57,7 +57,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true,
       }
     });
-    console.log('Venues Response:', JSON.stringify(venuesRes, null, 2));
+    console.log('Venues Response Data:', venuesRes.data);
     const venuesData: VenueValues[] = Array.isArray(venuesRes.data)
       ? venuesRes.data
       : (venuesRes.data?.data || []);
@@ -67,7 +67,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true
       }
     });
-    console.log('Clubs Response:', JSON.stringify(clubsRes, null, 2));
+    console.log('Clubs Response Data:', clubsRes.data);
     const clubsData: ClubValues[] = Array.isArray(clubsRes.data)
       ? clubsRes.data
       : (clubsRes.data?.data || []);
@@ -77,7 +77,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true
       }
     });
-    console.log('Tournaments Response:', JSON.stringify(tournamentsRes, null, 2));
+    console.log('Tournaments Response Data:', tournamentsRes.data);
     const tournamentsData: TournamentValues[] = Array.isArray(tournamentsRes.data)
       ? tournamentsRes.data
       : (tournamentsRes.data?.data || []);
