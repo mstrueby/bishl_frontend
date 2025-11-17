@@ -64,6 +64,7 @@ const Add: NextPage = () => {
         // Skip _id field and empty values
         if (key === '_id') return;
         if (key === 'teams') return; // Skip teams array for club creation
+         // For other values, skip if empty
         if (value !== null && value !== undefined && value !== '') {
           formData.append(key, value.toString());
         }
