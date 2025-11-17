@@ -841,8 +841,8 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
 
                         <ClubSelect
                           clubs={clubs}
-                          selectedClubId={filterClub?._id || ''}
-                          onClubChange={(clubId) => setFilterClub(clubs.find(c => c._id === clubId) || null)}
+                          selectedClubId={filterClub?._id ?? ''}
+                          onClubChange={(clubId) => setFilterClub(clubId ? clubs.find(c => c._id === clubId) || null : null)}
                         />
 
                         {filterClub && (
