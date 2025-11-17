@@ -15,6 +15,7 @@ export enum UserRole {
   REFEREE = 'REFEREE',
   CLUB_MANAGER = 'CLUB_MANAGER',
   CLUB_ADMIN = 'CLUB_ADMIN', // Backend uses CLUB_ADMIN
+  DOC_ADMIN = 'DOC_ADMIN',
   AUTHOR = 'AUTHOR',
   USER = 'USER'
 }
