@@ -62,20 +62,22 @@ const Edit: NextPage = () => {
     setLoading(true);
     console.log('submitted values', values);
     try {
-      const response = await apiClient.patch(`/venues/${venue?._id}`, values);
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value.toString());
+        }
+      });
+
+      const response = await apiClient.patch(`/venues/${venue?._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: `/admin/venues`,
           query: { message: `Die Spielstätte <strong>${values.name}</strong> wurde erfolgreich aktualisiert.` }
         }, `/admin/venues`);
-      } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // Assuming a 304 or similar non-error might lead here, or a different error
-        // The original code specifically handled 304, this simplified version might need adjustment if that specific case is critical.
-        // For now, we'll assume any API error during patch results in this message.
+    } catch (error: any) {
+      if (error.response?.status === 304) {
         router.push({
           pathname: `/admin/venues`,
           query: { message: `Keine Änderungen für Spielstätte <strong>${values.name}</strong> vorgenommen.` }
@@ -118,11 +120,14 @@ const Edit: NextPage = () => {
     _id: venue._id || '',
     name: venue.name || '',
     alias: venue.alias || '',
+    shortName: venue.shortName || '',
     street: venue.street || '',
     zipCode: venue.zipCode || '',
     city: venue.city || '',
     country: venue.country || '',
-    googleMapsUrl: venue.googleMapsUrl || '',
+    latitude: venue.latitude || 0,
+    longitude: venue.longitude || 0,
+    imageUrl: venue.imageUrl || '',
     active: venue.active || false
   };
 
