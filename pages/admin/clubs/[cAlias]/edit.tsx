@@ -9,7 +9,7 @@ import { ClubValues } from '../../../../types/ClubValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import useAuth from '../../../../hooks/useAuth';
 import usePermissions from '../../../../hooks/usePermissions';
-import { UserRole } from '../../lib/auth';
+import { UserRole } from '../../../../lib/auth';
 import LoadingState from '../../../../components/ui/LoadingState';
 import apiClient from '../../../../lib/apiClient';
 
