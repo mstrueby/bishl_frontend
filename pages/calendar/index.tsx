@@ -41,7 +41,7 @@ interface CalendarProps {
 export const getStaticProps: GetStaticProps = async () => {
   try {
     // Use apiClient for consistent response handling
-    const matchesRes = await apiClient('/matches', {
+    const matchesRes = await apiClient('/matches/calendar', {
       params: {
         season: CURRENT_SEASON,
       }
@@ -57,7 +57,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true,
       }
     });
-    console.log('Venues Response Data:', venuesRes.data);
+    //console.log('Venues Response Data:', venuesRes.data);
     const venuesData: VenueValues[] = Array.isArray(venuesRes.data)
       ? venuesRes.data
       : (venuesRes.data?.data || []);
@@ -67,7 +67,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true
       }
     });
-    console.log('Clubs Response Data:', clubsRes.data);
+    //console.log('Clubs Response Data:', clubsRes.data);
     const clubsData: ClubValues[] = Array.isArray(clubsRes.data)
       ? clubsRes.data
       : (clubsRes.data?.data || []);
@@ -77,7 +77,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true
       }
     });
-    console.log('Tournaments Response Data:', tournamentsRes.data);
+    //console.log('Tournaments Response Data:', tournamentsRes.data);
     const tournamentsData: TournamentValues[] = Array.isArray(tournamentsRes.data)
       ? tournamentsRes.data
       : (tournamentsRes.data?.data || []);
