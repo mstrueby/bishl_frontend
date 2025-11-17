@@ -61,10 +61,23 @@ const Add: NextPage = () => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        // Skip _id field and empty values
+        // Skip _id field and teams array
         if (key === '_id') return;
-        if (key === 'teams') return; // Skip teams array for club creation
-         // For other values, skip if empty
+        if (key === 'teams') return;
+        
+        // Handle File objects (from ImageUpload)
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+        
+        // Handle boolean values - always include them
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+          return;
+        }
+        
+        // For other values, skip if empty
         if (value !== null && value !== undefined && value !== '') {
           formData.append(key, value.toString());
         }
