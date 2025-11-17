@@ -38,10 +38,10 @@ const Add: NextPage = () => {
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
-    console.log(values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
+        if (key === '_id') return;
         if (key === 'author') {
           formData.append(key, JSON.stringify(value));
         } else {
@@ -49,8 +49,13 @@ const Add: NextPage = () => {
         }
       });
 
-      const response = await apiClient.post('/posts', formData);
+      // Log filtered FormData fields
+      console.log('submitted values');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
 
+      const response = await apiClient.post('/posts', formData);
       if (response.status === 201) {
         router.push({
           pathname: '/admin/posts',
