@@ -43,7 +43,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
   });
 
   return (
-    <Listbox value={selectedTeamId || undefined} onChange={onTeamChange}>
+    <Listbox value={selectedTeamId || ''} onChange={onTeamChange}>
       {({ open }) => (
         <>
           {label && (
