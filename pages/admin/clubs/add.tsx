@@ -58,7 +58,6 @@ const Add: NextPage = () => {
   const onSubmit = async (values: ClubValues) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -69,6 +68,13 @@ const Add: NextPage = () => {
           formData.append(key, value.toString());
         }
       });
+      
+      // Log filtered FormData fields
+      console.log('submitted values');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
       const response = await apiClient.post('/clubs', formData);
       if (response.status === 201) {
         router.push({
