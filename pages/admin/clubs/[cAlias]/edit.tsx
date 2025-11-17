@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -27,12 +26,12 @@ const Edit: NextPage = () => {
   // 1. Auth redirect check
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       router.push('/login');
       return;
     }
-    
+
     if (!hasRole(UserRole.ADMIN)) {
       router.push('/');
     }
@@ -41,7 +40,7 @@ const Edit: NextPage = () => {
   // 2. Data fetching
   useEffect(() => {
     if (authLoading || !user || !cAlias) return;
-    
+
     const fetchData = async () => {
       try {
         const response = await apiClient.get(`/clubs/${cAlias}`);
@@ -64,17 +63,31 @@ const Edit: NextPage = () => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        // Skip _id field and empty values
+        // Skip _id field and teams array
         if (key === '_id') return;
-        if (key === 'teams') return; // Skip teams array for club update
-        
+        if (key === 'teams') return;
+
+        // Handle File objects (from ImageUpload)
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+
+        // Handle FileList (legacy support)
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else {
-          // For other values, skip if empty
-          if (value !== null && value !== undefined && value !== '') {
-            formData.append(key, value.toString());
-          }
+          return;
+        }
+
+        // Handle boolean values - always include them
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+          return;
+        }
+
+        // For other values, skip if empty
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value.toString());
         }
       });
 

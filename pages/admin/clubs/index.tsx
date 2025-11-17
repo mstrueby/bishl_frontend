@@ -58,31 +58,6 @@ const Clubs: NextPage = () => {
     loadClubs();
   }, [authLoading, user]);
 
-  const editClub = (alias: string) => {
-    router.push(`/admin/clubs/${alias}/edit`);
-  };
-
-  const deleteClub = async (clubId: string) => {
-    if (!clubId) return;
-    try {
-      const formData = new FormData();
-      formData.append("deleted", "true");
-
-      const response = await apiClient.patch(`/clubs/${clubId}`, formData);
-
-      if (response.status === 200) {
-        console.log(`Club ${clubId} successfully deleted.`);
-        await fetchClubs();
-      } else if (response.status === 304) {
-        console.log("No changes were made to the club.");
-      } else {
-        console.error("Failed to delete club.");
-      }
-    } catch (error) {
-      console.error("Error deleting club:", error);
-    }
-  };
-
   const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
     try {
       const formData = new FormData();
