@@ -15,13 +15,7 @@ export const getServerSideProps: GetServerSideProps<VenuePageProps> = async (con
   let venues: VenueValues[] = [];
 
   try {
-    const res = await apiClient.get('/venues/', {
-      params: {
-        active: true,
-        page: 1,
-        page_size: 100
-      }
-    });
+    const res = await apiClient.get('/venues');
     venues = res.data || [];
   } catch (error) {
     if (axios.isAxiosError(error)) {

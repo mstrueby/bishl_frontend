@@ -99,16 +99,11 @@ const Venues: NextPage = () => {
   const deleteVenue = async (venueId: string) => {
     if (!venueId) return;
     try {
-      const formData = new FormData();
-      formData.append('deleted', 'true');
+      const response = await apiClient.delete(`/venues/${venueId}`);
 
-      const response = await apiClient.patch(`/venues/${venueId}`, formData);
-
-      if (response.status === 200) {
+      if (response.status === 204) {
         console.log(`Venue ${venueId} successfully deleted.`);
         await fetchVenues();
-      } else if (response.status === 304) {
-        console.log('No changes were made to the venue.');
       } else {
         console.error('Failed to delete venue.');
       }

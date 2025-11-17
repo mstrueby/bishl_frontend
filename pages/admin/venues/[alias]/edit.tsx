@@ -60,15 +60,38 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: VenueValues) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
+        // Skip _id field
+        if (key === '_id') return;
+        // Handle File objects (from ImageUpload)
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+        // Handle FileList (legacy support)
+        if (value instanceof FileList) {
+          Array.from(value).forEach((file) => formData.append(key, file));
+          return;
+        }
+        // Handle boolean values - always include them
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+          return;
+        }
+        // For other values, skip if empty
         if (value !== null && value !== undefined) {
           formData.append(key, value.toString());
         }
       });
 
+      // Log filtered FormData fields
+      console.log('submitted values');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
       const response = await apiClient.patch(`/venues/${venue?._id}`, formData);
       if (response.status === 200) {
         router.push({
