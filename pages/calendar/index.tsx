@@ -46,28 +46,37 @@ export const getStaticProps: GetStaticProps = async () => {
         season: CURRENT_SEASON,
       }
     });
-    const matchesData: Match[] = matchesRes.data || [];
+    // Handle paginated response - data is wrapped in a 'data' attribute
+    const matchesData: Match[] = Array.isArray(matchesRes.data) 
+      ? matchesRes.data 
+      : (matchesRes.data?.data || []);
 
     const venuesRes = await apiClient('/venues', {
       params: {
         active: true,
       }
     });
-    const venuesData: VenueValues[] = venuesRes.data || [];
+    const venuesData: VenueValues[] = Array.isArray(venuesRes.data)
+      ? venuesRes.data
+      : (venuesRes.data?.data || []);
 
     const clubsRes = await apiClient('/clubs', {
       params: {
         active: true
       }
     });
-    const clubsData: ClubValues[] = clubsRes.data || [];
+    const clubsData: ClubValues[] = Array.isArray(clubsRes.data)
+      ? clubsRes.data
+      : (clubsRes.data?.data || []);
 
     const tournamentsRes = await apiClient('/tournaments', {
       params: {
         active: true
       }
     });
-    const tournamentsData: TournamentValues[] = tournamentsRes.data || [];
+    const tournamentsData: TournamentValues[] = Array.isArray(tournamentsRes.data)
+      ? tournamentsRes.data
+      : (tournamentsRes.data?.data || []);
 
     return {
       props: {
