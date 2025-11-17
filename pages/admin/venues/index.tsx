@@ -71,6 +71,31 @@ const Venues: NextPage = () => {
     router.push(`/admin/venues/${alias}/edit`);
   };
 
+  const toggleActive = async (venueId: string, currentStatus: boolean, imageUrl: string | null) => {
+    try {
+      const formData = new FormData();
+      formData.append('active', (!currentStatus).toString()); // Toggle the status
+      if (imageUrl) {
+        formData.append('imageUrl', imageUrl);
+      }
+
+      const response = await apiClient.patch(`/venues/${venueId}`, formData);
+      if (response.status === 200) {
+        // Handle successful response
+        console.log(`Venue ${venueId} successfully activated`);
+        await fetchVenues();
+      } else if (response.status === 304) {
+        // Handle not modified response
+        console.log('No changes were made to the venue.');
+      } else {
+        // Handle error response
+        console.error('Failed to publish venue.');
+      }
+    } catch (error) {
+      console.error('Error publishing venue:', error);
+    }
+  }
+
   const deleteVenue = async (venueId: string) => {
     if (!venueId) return;
     try {
@@ -122,33 +147,40 @@ const Venues: NextPage = () => {
   // Auth guard
   if (!hasAnyRole([UserRole.ADMIN])) return null;
 
-  const venue_values = venues
+  const venueValues = venues
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((venue: VenueValues) => ({
-      _id: venue._id,
-      name: venue.name,
-      alias: venue.alias,
-      address: venue.address,
-      city: venue.city,
-      createUser: venue.createUser?.firstName + ' ' + venue.createUser?.lastName,
-      createDate: new Date(new Date(venue.createDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
-      updateUser: venue.updateUser ? (venue.updateUser.firstName + ' ' + venue.updateUser.lastName) : '-',
-      updateDate: new Date(new Date(venue.updateDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
+      ...venue
     }));
 
   const sectionTitle = 'Spielstätten';
   const newLink = '/admin/venues/add';
+  const statuses = {
+    Published: 'text-green-500 bg-green-500/20',
+    Unpublished: 'text-gray-500 bg-gray-800/10',
+    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
+  }
 
-  const dataListItems = venue_values.map((venue) => {
+  const dataListItems = venueValues.map((venue: VenueValues) => {
     return {
       _id: venue._id,
       title: venue.name,
       alias: venue.alias,
-      description: [venue.address + ', ' + venue.city, getFuzzyDate(venue.updateDate)],
+      description: [venue.street, venue.zipCode + ' ' + venue.city],
+      image: venue.imageUrl ? {
+        src: venue.imageUrl,
+        width: 128,
+        height: 72,
+        gravity: 'auto',
+        className: "rounded-lg object-cover",
+        radius: 18,
+      } : undefined,
+      published: venue.active,
       menu: [
-        { edit: { onClick: () => editVenue(venue.alias) } },
-        { delete: { onClick: () => {} } },
+        { edit: { onClick: () => editVenue(venue.alias) } }, 
+        { active: { onClick: () => { toggleActive(venue._id, venue.active, venue.imageUrl || null) } } },
+        { delete: { onClick: () => { deleteVenue(venue._id) } } }, 
       ],
     };
   });
@@ -164,10 +196,13 @@ const Venues: NextPage = () => {
 
       <DataList
         items={dataListItems}
+        statuses={statuses}
         onDeleteConfirm={deleteVenue}
         deleteModalTitle="Spielstätte löschen"
         deleteModalDescription="Möchtest du die Spielstätte <strong>{{title}}</strong> wirklich löschen?"
         deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
+        showThumbnails
+        showStatusIndicator
       />
     </Layout>
   );
