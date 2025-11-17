@@ -61,24 +61,27 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: ClubValues) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
+        // Skip _id field and empty values
+        if (key === '_id') return;
+        if (key === 'teams') return; // Skip teams array for club update
+        
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else {
-          if (key === 'logoUrl' && value !== null) {
-            formData.append(key, value);
-          } else if (key !== 'logoUrl') {
-            formData.append(key, value);
+          // Only append non-empty values
+          if (value !== null && value !== undefined && value !== '') {
+            formData.append(key, value.toString());
           }
         }
       });
-      formData.delete('teams');
 
+      // Log filtered FormData fields
+      console.log('submitted values');
       for (let pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
+        console.log(pair[0] + ': ' + pair[1]);
       }
 
       const response = await apiClient.patch(`/clubs/${club?._id}`, formData);
