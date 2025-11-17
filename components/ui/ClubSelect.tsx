@@ -21,7 +21,7 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   return (
-    <Listbox value={selectedClubId || undefined} onChange={onClubChange}>
+    <Listbox value={selectedClubId || ''} onChange={onClubChange}>
       {({ open }) => (
         <>
           {label && (
