@@ -64,7 +64,7 @@ const Add: NextPage = () => {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value as string);
       });
-      const response = await apiClient.post('/clubs/', formData);
+      const response = await apiClient.post('/clubs', formData);
       if (response.status === 201) {
         router.push({
           pathname: '/admin/clubs',

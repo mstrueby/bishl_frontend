@@ -47,7 +47,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch posts with pagination
   try {
-    const res = await apiClient.get("/posts/", {
+    const res = await apiClient.get("/posts", {
       params: {
         published: true,
         page: 1,
@@ -80,7 +80,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Fetch tournaments
   try {
-    const tournamentsRes = await apiClient.get("/tournaments/", {
+    const tournamentsRes = await apiClient.get("/tournaments", {
       params: {
         page: 1,
         page_size: 100,

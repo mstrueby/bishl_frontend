@@ -95,19 +95,13 @@ const Documents: NextPage = () => {
   const deleteDocument = async (documentId: string) => {
     if (!documentId) return;
     try {
-      const formData = new FormData();
-      formData.append("deleted", "true");
-
-      const response = await apiClient.patch(
-        `/documents/${documentId}`,
-        formData,
+      const response = await apiClient.delete(
+        `/documents/${documentId}`
       );
 
-      if (response.status === 200) {
+      if (response.status === 204) {
         console.log(`Document ${documentId} successfully deleted.`);
         await fetchDocuments();
-      } else if (response.status === 304) {
-        console.log("No changes were made to the document.");
       } else {
         console.error("Failed to delete document.");
       }
@@ -171,7 +165,7 @@ const Documents: NextPage = () => {
     ).toISOString(),
     updateUser: doc.updateUser.firstName + " " + doc.updateUser.lastName,
     published: doc.published,
-  }));
+  })).sort((a, b) => a.title.localeCompare(b.title));
 
   const sectionTitle = "Dokumente";
   const newLink = "/admin/documents/add";
