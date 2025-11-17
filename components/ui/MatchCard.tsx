@@ -162,7 +162,7 @@ const MatchCard: React.FC<{
     clubAlias: string;
   } | null>(null);
   const [isLoadingOwner, setIsLoadingOwner] = useState(true);
-  
+
   const { home, away, venue, startDate } = match;
   const { user } = useAuth();
 
@@ -188,7 +188,7 @@ const MatchCard: React.FC<{
     fetchMatchdayOwner();
   }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
 
-  
+
 
   // Auto-refresh for in-progress matches
   useEffect(() => {
@@ -404,13 +404,49 @@ const MatchCard: React.FC<{
             const buttonClass = isLive || match.matchSheetComplete
               ? "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200/50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
-            
+
             return (
-              <Link href={`/matches/${match._id}`}>
-                <a className={buttonClass}>
-                  <span className="block sm:hidden md:block">Spielbericht</span>
-                  <span className="hidden sm:block md:hidden">Bericht</span>
-                </a>
+              <Link href={`/matches/${match._id}`} className={buttonClass}>
+                <div className="block hover:bg-gray-50">
+                  <div className="px-4 py-4 sm:px-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-indigo-600 truncate">
+                            {match.home.fullName}
+                          </p>
+                          <div className="ml-2 flex flex-shrink-0">
+                            <MatchStatusBadge
+                              statusKey={match.matchStatus.key}
+                              finishTypeKey={match.finishType.key}
+                              statusValue={match.matchStatus.value}
+                              finishTypeValue={match.finishType.value}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-2 sm:flex sm:justify-between">
+                          <div className="sm:flex">
+                            <p className="flex items-center text-sm text-gray-500">
+                              vs {match.away.fullName}
+                            </p>
+                          </div>
+                          <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p>
+                              {new Date(match.startDate).toLocaleString('de-DE', {
+                                timeZone: 'Europe/Berlin',
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </Link>
             );
           })()}
