@@ -71,7 +71,13 @@ const Edit: NextPage = () => {
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else {
-          // Only append non-empty values
+          // Handle boolean values - always include them
+          if (typeof value === 'boolean') {
+            formData.append(key, value.toString());
+            return;
+          }
+          
+          // For other values, skip if empty
           if (value !== null && value !== undefined && value !== '') {
             formData.append(key, value.toString());
           }
