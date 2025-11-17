@@ -1,0 +1,23 @@
+hook.js:608 The above error occurred in the <ForwardRef(LinkComponent)> component:
+
+    at LinkComponent (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit…ev/_next/static/chunks/node_modules_next_dist_client_561c55d5._.js:4404:19)
+    at div
+    at div
+    at div
+    at MatchCard (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/%5Broot-of-the-server%5D__1e9b35cb._.js:4368:29)
+    at div
+    at div
+    at main
+    at div
+    at Layout (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/%5Broot-of-the-server%5D__1e9b35cb._.js:2106:19)
+    at Calendar (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/%5Broot-of-the-server%5D__1e9b35cb._.js:5755:21)
+    at AuthProvider (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/%5Broot-of-the-server%5D__2ef30d3c._.js:480:25)
+    at MyApp (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/%5Broot-of-the-server%5D__2ef30d3c._.js:591:18)
+    at PathnameContextProviderAdapter (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit…next/static/chunks/node_modules_next_dist_shared_lib_9c8d739b._.js:5136:43)
+    at PagesDevOverlayErrorBoundary (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/node_modules_next_dist_6024eba3._.js:1142:9)
+    at PagesDevOverlayBridge (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/node_modules_next_dist_6024eba3._.js:1919:34)
+    at Container (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit.dev/_next/static/chunks/node_modules_next_dist_client_d0aa886c._.js:3049:1)
+    at AppContainer (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit…ev/_next/static/chunks/node_modules_next_dist_client_d0aa886c._.js:3172:25)
+    at Root (https://edb5f87a-96d3-4e4d-bbdc-d0f6bb20cbee-00-tvv5pawlom2r.janeway.replit…ev/_next/static/chunks/node_modules_next_dist_client_d0aa886c._.js:3385:17)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, PagesDevOverlayErrorBoundary.
