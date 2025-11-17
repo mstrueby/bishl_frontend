@@ -58,12 +58,23 @@ const Add: NextPage = () => {
   const onSubmit = async (values: ClubValues) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value as string);
+        // Skip _id field and empty values
+        if (key === '_id') return;
+        if (key === 'teams') return; // Skip teams array for club creation
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value.toString());
+        }
       });
+      
+      // Log filtered FormData fields
+      console.log('submitted values');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
       const response = await apiClient.post('/clubs', formData);
       if (response.status === 201) {
         router.push({
