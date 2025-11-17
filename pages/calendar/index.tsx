@@ -46,7 +46,7 @@ export const getStaticProps: GetStaticProps = async () => {
         season: CURRENT_SEASON,
       }
     });
-    console.log('Matches Response Data:', matchesRes.data);
+    console.log('Number of Matches:', matchesRes.data.length);
     // Handle paginated response - data is wrapped in a 'data' attribute
     const matchesData: Match[] = Array.isArray(matchesRes.data) 
       ? matchesRes.data 
@@ -57,7 +57,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true,
       }
     });
-    //console.log('Venues Response Data:', venuesRes.data);
+    console.log('Number of Venues:', venuesRes.data.length)
     const venuesData: VenueValues[] = Array.isArray(venuesRes.data)
       ? venuesRes.data
       : (venuesRes.data?.data || []);
@@ -67,7 +67,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true
       }
     });
-    //console.log('Clubs Response Data:', clubsRes.data);
+    console.log('Number of Clubs:', clubsRes.data.length)
     const clubsData: ClubValues[] = Array.isArray(clubsRes.data)
       ? clubsRes.data
       : (clubsRes.data?.data || []);
@@ -77,7 +77,7 @@ export const getStaticProps: GetStaticProps = async () => {
         active: true
       }
     });
-    //console.log('Tournaments Response Data:', tournamentsRes.data);
+    console.log('Number of Tournaments:', tournamentsRes.data.length)
     const tournamentsData: TournamentValues[] = Array.isArray(tournamentsRes.data)
       ? tournamentsRes.data
       : (tournamentsRes.data?.data || []);
@@ -664,68 +664,67 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                           paddingRight: '1px'
                         }}
                       >
-                        <Link href={`/matches/${event._id}`}>
-                          <a
-                            className={`group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
-                              switch (event.tournament.alias) {
-                                case 'regionalliga-ost':
-                                  return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
-                                case 'landesliga':
-                                  return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
-                                case 'hobbyliga':
-                                  return 'bg-stone-400/10 text-stone-600 border-stone-600/50 hover:bg-stone-300/50';
-                                case 'juniorenliga':
-                                case 'juniorenliga-p':
-                                  return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';
-                                case 'jugendliga':
-                                case 'jugendliga-lk2':
-                                case 'jugendliga-p':
-                                  return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
-                                case 'schuelerliga':
-                                case 'schuelerliga-lk2':
-                                case 'schuelerliga-p':
-                                  return 'bg-cyan-400/10 text-cyan-600 border-cyan-600/50 hover:bg-cyan-200/50';
-                                case 'bambini':
-                                case 'bambini-lk2':
-                                  return 'bg-purple-400/10 text-purple-600 border-purple-600 hover:bg-purple-200/50';
-                                case 'mini':
-                                  return 'bg-pink-400/10 text-pink-600 border-pink-600 hover:bg-pink-200/50';
-                                default:
-                                  return '';
-                              }
-                            })()}`}
-                          >
-                            <p className="block sm:hidden order-1 font-semibold truncate">
-                              {columnCount >= 2
-                                ? `${event.home.tinyName} - ${event.away.tinyName}`
-                                : `${event.home.shortName} - ${event.away.shortName}`}
-                            </p>
-                            <p className="hidden sm:block order-1 font-semibold truncate">
-                              {`${columnCount === 1
-                                ? event.home.fullName
+                        <Link
+                          href={`/matches/${event._id}`}
+                          className={`group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
+                            switch (event.tournament.alias) {
+                              case 'regionalliga-ost':
+                                return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
+                              case 'landesliga':
+                                return 'bg-gray-400/10 text-gray-600 border-gray-600/50 hover:bg-gray-300/50';
+                              case 'hobbyliga':
+                                return 'bg-stone-400/10 text-stone-600 border-stone-600/50 hover:bg-stone-300/50';
+                              case 'juniorenliga':
+                              case 'juniorenliga-p':
+                                return 'bg-green-400/10 text-green-600 border-green-600 hover:bg-green-200/50';
+                              case 'jugendliga':
+                              case 'jugendliga-lk2':
+                              case 'jugendliga-p':
+                                return 'bg-blue-400/10 text-blue-600 border-blue-600 hover:bg-blue-200/50';
+                              case 'schuelerliga':
+                              case 'schuelerliga-lk2':
+                              case 'schuelerliga-p':
+                                return 'bg-cyan-400/10 text-cyan-600 border-cyan-600/50 hover:bg-cyan-200/50';
+                              case 'bambini':
+                              case 'bambini-lk2':
+                                return 'bg-purple-400/10 text-purple-600 border-purple-600 hover:bg-purple-200/50';
+                              case 'mini':
+                                return 'bg-pink-400/10 text-pink-600 border-pink-600 hover:bg-pink-200/50';
+                              default:
+                                return '';
+                            }
+                          })()}`}
+                        >
+                          <p className="block sm:hidden order-1 font-semibold truncate">
+                            {columnCount >= 2
+                              ? `${event.home.tinyName} - ${event.away.tinyName}`
+                              : `${event.home.shortName} - ${event.away.shortName}`}
+                          </p>
+                          <p className="hidden sm:block order-1 font-semibold truncate">
+                            {`${columnCount === 1
+                              ? event.home.fullName
+                              : columnCount <= 3
+                                ? event.home.shortName
+                                : event.home.tinyName
+                              } - ${columnCount === 1
+                                ? event.away.fullName
                                 : columnCount <= 3
-                                  ? event.home.shortName
-                                  : event.home.tinyName
-                                } - ${columnCount === 1
-                                  ? event.away.fullName
-                                  : columnCount <= 3
-                                    ? event.away.shortName
-                                    : event.away.tinyName
-                                }`}
-                            </p>
-                            <p className="order-1 truncate">
-                              {event.venue.name}
-                            </p>
-                            <p className="flex items-center gap-x-1.5 truncate">
-                              <time dateTime={new Date(event.startDate).toISOString()}>
-                                {format(new Date(event.startDate), 'HH:mm', { locale: de })}
-                              </time>
-                              <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                                <circle r={1} cx={1} cy={1} />
-                              </svg>
-                              {tournamentConfigs[event.tournament.alias]?.tinyName || event.tournament.name}
-                            </p>
-                          </a>
+                                  ? event.away.shortName
+                                  : event.away.tinyName
+                              }`}
+                          </p>
+                          <p className="order-1 truncate">
+                            {event.venue.name}
+                          </p>
+                          <p className="flex items-center gap-x-1.5 truncate">
+                            <time dateTime={new Date(event.startDate).toISOString()}>
+                              {format(new Date(event.startDate), 'HH:mm', { locale: de })}
+                            </time>
+                            <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                              <circle r={1} cx={1} cy={1} />
+                            </svg>
+                            {tournamentConfigs[event.tournament.alias]?.tinyName || event.tournament.name}
+                          </p>
                         </Link>
                       </li>
                     );
