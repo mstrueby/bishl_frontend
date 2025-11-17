@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -36,25 +37,7 @@ const Documents: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole, router]);
 
-  // Data fetching
-  useEffect(() => {
-    if (authLoading || !user) return;
-
-    const fetchDocuments = async () => {
-      try {
-        const res = await apiClient.get('/documents');
-        setDocuments(res.data || []);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error('Error fetching documents:', error);
-        }
-      } finally {
-        setDataLoading(false);
-      }
-    };
-    fetchDocuments();
-  }, [authLoading, user]);
-
+  // Data fetching - separate function for reuse
   const fetchDocuments = async () => {
     try {
       const res = await apiClient.get('/documents');
@@ -65,6 +48,17 @@ const Documents: NextPage = () => {
       }
     }
   };
+
+  // Initial data load
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    const loadData = async () => {
+      await fetchDocuments();
+      setDataLoading(false);
+    };
+    loadData();
+  }, [authLoading, user]);
 
   const editDocument = (alias: string) => {
     router.push(`/admin/documents/${alias}/edit`);
