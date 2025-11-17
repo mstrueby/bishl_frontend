@@ -33,8 +33,12 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ta
       const index = options.findIndex(option => option.value === field.value);
       if (index > -1) {
         setSelected(options[index]);
+      } else {
+        // If field has a value but no matching option, keep selected as null
+        setSelected(null);
       }
     } else {
+      // Always set to null, never undefined
       setSelected(null);
     }
   }, [field.value, options]);
@@ -48,7 +52,7 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ta
     <>
       <Listbox
         name={name}
-        value={selected || undefined}
+        value={selected}
         onChange={handleChange}
       >
         {({ open }) => (
