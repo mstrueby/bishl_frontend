@@ -848,14 +848,14 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                         {filterClub && (
                           <TeamSelect
                             teams={filterClub.teams}
-                            selectedTeamId={filterTeam?._id || ''}
-                            onTeamChange={(teamId) => setFilterTeam(filterClub.teams.find(t => t._id === teamId) || null)}
+                            selectedTeamId={filterTeam?._id ?? ''}
+                            onTeamChange={(teamId) => setFilterTeam(teamId ? filterClub.teams.find(t => t._id === teamId) || null : null)}
                           />
                         )}
                         <VenueSelect
                           venues={venues}
-                          selectedVenueId={filterVenue?._id || ''}
-                          onVenueChange={(venueId) => setFilterVenue(venues.find(v => v._id === venueId) || null)}
+                          selectedVenueId={filterVenue?._id ?? ''}
+                          onVenueChange={(venueId) => setFilterVenue(venueId ? venues.find(v => v._id === venueId) || null : null)}
                         />
                       </div>
                       <div className="mt-6 flex justify-end items-center space-x-3">
