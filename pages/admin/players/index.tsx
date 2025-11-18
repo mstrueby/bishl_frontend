@@ -58,7 +58,6 @@ const Players: NextPage = () => {
     }
     
     try {
-     
       const res = await apiClient.get("/players", {
         params: {
           search: query,
@@ -66,7 +65,10 @@ const Players: NextPage = () => {
         },
       });
       
-      const searchResults = (res.data || []).map((player: PlayerValues) => {
+      // Handle the response structure: res.data.data contains the array of players
+      const playersData = res.data?.data || res.data || [];
+      
+      const searchResults = playersData.map((player: PlayerValues) => {
         const labelComponents = [`${player.firstName} ${player.lastName}`];
         if (
           player.displayFirstName !== player.firstName ||
@@ -84,6 +86,7 @@ const Players: NextPage = () => {
 
       setSearchOptions(searchResults);
     } catch (error) {
+      console.error("Error searching players:", error);
       setSearchOptions([]);
     }
   };
