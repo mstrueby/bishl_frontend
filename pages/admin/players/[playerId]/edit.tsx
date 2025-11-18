@@ -69,20 +69,66 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
-    console.log("submitted values", values);
+    values.birthdate = new Date(values.birthdate).toISOString();
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
+        const excludedFields = [
+          "_id",
+          "stats",
+          "source",
+          "legacyId",
+          "createDate",
+          "displayFirstName",
+          "displayLastName",
+          "ageGroup",
+          "overAge",
+        ];
+        if (excludedFields.includes(key)) return;
+        // Handle File objects (from ImageUpload)
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+        // Handle FileList (legacy support)
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(key, item));
-        } else if (typeof value === "object" && value !== null) {
-          formData.append(key, JSON.stringify(value));
+          return;
+        }
+        if (typeof value === "object" && key !== "imageUrl") {
+          if (key === "assignedTeams") {
+            const cleanedTeams = value.map(
+              (club: {
+                teams: { jerseyNo: number | null; [key: string]: any }[];
+              }) => ({
+                ...club,
+                teams: club.teams.map((team) => {
+                  if (team.jerseyNo === null) {
+                    const { jerseyNo, ...restTeam } = team;
+                    return restTeam;
+                  }
+                  return team;
+                }),
+              }),
+            );
+            formData.append(key, JSON.stringify(cleanedTeams));
+          } else {
+            formData.append(key, JSON.stringify(value));
+          }
         } else {
-          formData.append(key, value);
+          // Handle imageUrl specifically to ensure it's only appended if not null
+          if (key === "imageUrl" && value !== null && value.length > 0) {
+            formData.append(key, value);
+          } else if (key !== "imageUrl") {
+            formData.append(key, value);
+          }
         }
       });
+      // log formData fields
+      console.log("submitted values");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
 
       const response = await apiClient.patch(
         `/players/${player?._id}`,
@@ -103,24 +149,6 @@ const Edit: NextPage = () => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // Assuming a 304 Not Modified response would redirect to the list page with a message
-        // If the error is not a 304, show the error message
-        if (error.response?.status === 304) {
-          router.push(
-            {
-              pathname: `/admin/players`,
-              query: {
-                message: `Keine Änderungen für Spieler <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.`,
-              },
-            },
-            `/admin/players`,
-          );
-        } else {
-          setError(
-            error.response?.data?.detail || "Ein Fehler ist aufgetreten.",
-          );
-        }
-      } else {
         setError("Ein Fehler ist aufgetreten.");
       }
     } finally {

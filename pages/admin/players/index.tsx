@@ -60,7 +60,7 @@ const Players: NextPage = () => {
     try {
       const res = await apiClient.get("/players", {
         params: {
-          q: query,
+          search: query,
           limit: 100, // Return up to 100 search results
         },
       });
