@@ -52,14 +52,24 @@ const Players: NextPage = () => {
   };
 
   const handleSearch = async (query: string) => {
-    if (!user) return;
+    console.log('🔍 handleSearch called with query:', query);
+    console.log('🔍 User authenticated:', !!user);
+    console.log('🔍 Query trimmed:', query.trim());
+    
+    if (!user || !query.trim()) {
+      setSearchOptions([]);
+      return;
+    }
     
     try {
+     
       const res = await apiClient.get("/players", {
         params: {
-          q: query,
+          search: query,
+          limit: 100, // Return up to 100 search results
         },
       });
+      
       const searchResults = (res.data || []).map((player: PlayerValues) => {
         const labelComponents = [`${player.firstName} ${player.lastName}`];
         if (
@@ -75,9 +85,10 @@ const Players: NextPage = () => {
           label: labelComponents.join(" "),
         };
       });
+
       setSearchOptions(searchResults);
     } catch (error) {
-      console.error("Error searching players:", error);
+      setSearchOptions([]);
     }
   };
 
