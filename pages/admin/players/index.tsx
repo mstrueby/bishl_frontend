@@ -37,11 +37,11 @@ const Players: NextPage = () => {
         params: {
           page,
           limit: 25,
-          sortby: 'lastName'
+          sortby: 'firstName'
         }
       });
       setPlayers(res.data || []);
-      setTotalPlayers(res.pagination?.total || 0);
+      setTotalPlayers(res.pagination?.total_items || 0);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Error fetching players:", error);
