@@ -152,7 +152,7 @@ const DataList: React.FC<DataListProps> = ({
               )}
               {item.ageGroup && (
                 <p
-                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset 
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
                   ${
                     item.ageGroup.color === "red"
                       ? "bg-red-50 text-red-700 ring-red-700/10"
@@ -176,24 +176,19 @@ const DataList: React.FC<DataListProps> = ({
             </div>
 
             {item.description && (
-              <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500">
-                {item.description.map(
-                  (descItem: string, index: number, array: string[]) => (
-                    <React.Fragment key={`${item._id}-${index}`}>
-                      <span key={index} className="whitespace-nowrap truncate">
-                        {descItem}
-                      </span>
-                      {index < array.length - 1 && (
-                        <svg
-                          viewBox="0 0 2 2"
-                          className="h-0.5 w-0.5 fill-current"
-                        >
-                          <circle r={1} cx={1} cy={1} />
-                        </svg>
-                      )}
-                    </React.Fragment>
-                  ),
-                )}
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-gray-500">
+                {item.description.map((descItem: string, index: number, array: string[]) => (
+                  <React.Fragment key={`${item._id}-desc-${index}`}>
+                    <span className="whitespace-nowrap truncate">
+                      {descItem}
+                    </span>
+                    {index < array.length - 1 && (
+                      <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                        <circle r={1} cx={1} cy={1} />
+                      </svg>
+                    )}
+                  </React.Fragment>
+                ))}
               </div>
             )}
           </div>
