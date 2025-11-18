@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import { PlayerValues } from '../../../types/PlayerValues';
+import { NextPage } from "next";
+import { useRouter } from "next/router";
+import axios from "axios";
+import { PlayerValues } from "../../../types/PlayerValues";
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
-import SuccessMessage from '../../../components/ui/SuccessMessage';
-import { getFuzzyDate } from '../../../tools/dateUtils';
-import DataList from '../../../components/admin/ui/DataList';
-import apiClient from '../../../lib/apiClient';
-import useAuth from '../../../hooks/useAuth';
-import { UserRole } from '../../../lib/auth';
-import usePermissions from '../../../hooks/usePermissions';
-import LoadingState from '../../../components/ui/LoadingState';
+import SuccessMessage from "../../../components/ui/SuccessMessage";
+import DataList from "../../../components/admin/ui/DataList";
+import apiClient from "../../../lib/apiClient";
+import useAuth from "../../../hooks/useAuth";
+import { UserRole } from "../../../lib/auth";
+import usePermissions from "../../../hooks/usePermissions";
+import LoadingState from "../../../components/ui/LoadingState";
+import Pagination from "../../../components/ui/Pagination";
+import SearchBox from "../../../components/ui/SearchBox";
 
 const Players: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -20,19 +21,67 @@ const Players: NextPage = () => {
   const [players, setPlayers] = useState<PlayerValues[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
+  const [searchOptions, setSearchOptions] = useState<
+    Array<{ id: string; label: string }>
+  >([]);
   const router = useRouter();
+  const currentPage = parseInt(router.query.page as string) || 1;
+
+  const handleSearch = async (query: string) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/players/`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt}`,
+        },
+        params: {
+          q: query,
+        },
+      });
+      const searchResults = res.data.results.map((player: PlayerValues) => {
+        const labelComponents = [`${player.firstName} ${player.lastName}`];
+        if (
+          player.displayFirstName !== player.firstName ||
+          player.displayLastName !== player.lastName
+        ) {
+          labelComponents.push(
+            `(${player.displayFirstName} ${player.displayLastName})`,
+          );
+        }
+        return {
+          id: player._id,
+          label: labelComponents.join(" "),
+        };
+      });
+      setSearchOptions(searchResults);
+    } catch (error) {
+      console.error("Error searching players:", error);
+    }
+  };
+
+  const handlePageChange = async (page: number) => {
+    await router.push({
+      pathname: router.pathname,
+      query: { ...router.query, page },
+    });
+    await fetchPlayers(page);
+  };
+
+  const handleSelect = (option: { id: string; label: string }) => {
+    router.push(`/admin/players/${option.id}/edit`);
+  };
 
   // Auth redirect check
   useEffect(() => {
     if (authLoading) return;
 
     if (!user) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
     if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) {
-      router.push('/');
+      router.push("/");
     }
   }, [authLoading, user, hasAnyRole, router]);
 
@@ -42,11 +91,11 @@ const Players: NextPage = () => {
 
     const fetchPlayers = async () => {
       try {
-        const res = await apiClient.get('/players');
+        const res = await apiClient.get("/players");
         setPlayers(res.data || []);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.error('Error fetching players:', error);
+          console.error("Error fetching players:", error);
         }
       } finally {
         setDataLoading(false);
@@ -55,40 +104,8 @@ const Players: NextPage = () => {
     fetchPlayers();
   }, [authLoading, user]);
 
-  const fetchPlayers = async () => {
-    try {
-      const res = await apiClient.get('/players');
-      setPlayers(res.data || []);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error fetching players:', error);
-      }
-    }
-  };
-
   const editPlayer = (playerId: string) => {
     router.push(`/admin/players/${playerId}/edit`);
-  };
-
-  const deletePlayer = async (playerId: string) => {
-    if (!playerId) return;
-    try {
-      const formData = new FormData();
-      formData.append('deleted', 'true');
-
-      const response = await apiClient.patch(`/players/${playerId}`, formData);
-
-      if (response.status === 200) {
-        console.log(`Player ${playerId} successfully deleted.`);
-        await fetchPlayers();
-      } else if (response.status === 304) {
-        console.log('No changes were made to the player.');
-      } else {
-        console.error('Failed to delete player.');
-      }
-    } catch (error) {
-      console.error('Error deleting player:', error);
-    }
   };
 
   useEffect(() => {
@@ -97,10 +114,14 @@ const Players: NextPage = () => {
       const currentPath = router.pathname;
       const currentQuery = { ...router.query };
       delete currentQuery.message;
-      router.replace({
-        pathname: currentPath,
-        query: currentQuery,
-      }, undefined, { shallow: true });
+      router.replace(
+        {
+          pathname: currentPath,
+          query: currentQuery,
+        },
+        undefined,
+        { shallow: true },
+      );
     }
   }, [router]);
 
@@ -121,34 +142,55 @@ const Players: NextPage = () => {
   // Auth guard
   if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) return null;
 
-  const player_values = players
+  const playerValues = players
     .slice()
-    .sort((a, b) => a.lastName.localeCompare(b.lastName))
+    //.sort((a, b) => a.firstName.localeCompare(b.firstName))
     .map((player: PlayerValues) => ({
       _id: player._id,
       firstName: player.firstName,
       lastName: player.lastName,
-      number: player.number,
-      team: player.team ? player.team.name : '-',
-      createUser: player.createUser?.firstName + ' ' + player.createUser?.lastName,
-      createDate: new Date(new Date(player.createDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
-      updateUser: player.updateUser ? (player.updateUser.firstName + ' ' + player.updateUser.lastName) : '-',
-      updateDate: new Date(new Date(player.updateDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
+      birthdate: player.birthdate,
+      displayFirstName: player.displayFirstName,
+      displayLastName: player.displayLastName,
+      nationality: player.nationality,
+      position: player.position,
+      fullFaceReq: player.fullFaceReq,
+      source: player.source,
+      assignedTeams: player.assignedTeams,
+      imageUrl: player.imageUrl,
+      imageVisible: player.imageVisible,
+      ageGroup: player.ageGroup,
+      overAge: player.overAge,
+      sex: player.sex,
     }));
 
-  const sectionTitle = 'Spieler';
-  const newLink = '/admin/players/add';
+  const sectionTitle = "Spieler";
+  const newLink = "/admin/players/add";
+  const statuses = {
+    Published: "text-green-500 bg-green-500/20",
+    Unpublished: "text-gray-500 bg-gray-800/10",
+    Archived: "text-yellow-800 bg-yellow-50 ring-yellow-600/20",
+  };
 
-  const dataListItems = player_values.map((player) => {
+  const dataListItems = playerValues.map((player: PlayerValues) => {
+    const clubNames = player.assignedTeams?.map((team) => team.clubName) || [];
+
     return {
       _id: player._id,
-      title: `${player.firstName} ${player.lastName} (#${player.number})`,
+      title: `${player.firstName} ${player.lastName}`,
       alias: player._id,
-      description: [player.team, getFuzzyDate(player.updateDate)],
-      menu: [
-        { edit: { onClick: () => editPlayer(player._id) } },
-        { delete: { onClick: () => {} } },
-      ],
+      description: clubNames,
+      image: {
+        src:
+          player.imageUrl ||
+          "https://res.cloudinary.com/dajtykxvp/image/upload/w_36,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png",
+        width: 46,
+        height: 46,
+        gravity: "center",
+        className: "object-contain rounded-full",
+        radius: 0,
+      },
+      menu: [{ edit: { onClick: () => editPlayer(player._id) } }],
     };
   });
 
@@ -157,19 +199,43 @@ const Players: NextPage = () => {
       <SectionHeader
         title={sectionTitle}
         newLink={newLink}
+        searchBox={
+          <SearchBox
+            placeholder="Name, Pass-Nr."
+            options={searchOptions}
+            onSearch={handleSearch}
+            onSelect={handleSelect}
+          />
+        }
       />
 
-      {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+      {successMessage && (
+        <SuccessMessage
+          message={successMessage}
+          onClose={handleCloseSuccessMessage}
+        />
+      )}
+
+      <div className="text-sm text-gray-600 my-4">
+        {`${(currentPage - 1) * 25 + 1}-${Math.min(currentPage * 25, totalPlayers)} von ${totalPlayers} insgesamt`}
+      </div>
 
       <DataList
         items={dataListItems}
-        onDeleteConfirm={deletePlayer}
-        deleteModalTitle="Spieler löschen"
-        deleteModalDescription="Möchtest du den Spieler <strong>{{title}}</strong> wirklich löschen?"
-        deleteModalDescriptionSubText="Dies kann nicht rückgängig gemacht werden."
+        statuses={statuses}
+        showThumbnails
+        showThumbnailsOnMobiles
       />
+      <div className="mt-8">
+        <Pagination
+          totalItems={totalPlayers}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          basePath="/admin/players"
+        />
+      </div>
     </Layout>
   );
-}
+};
 
 export default Players;

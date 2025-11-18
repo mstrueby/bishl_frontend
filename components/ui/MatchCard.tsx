@@ -1,19 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Fragment } from 'react';
-import { Match } from '../../types/MatchValues';
-import { CalendarIcon, MapPinIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
-import useAuth from '../../hooks/useAuth';
-import { Menu, Transition } from '@headlessui/react';
-import { tournamentConfigs } from '../../tools/consts';
-import { classNames, calculateMatchButtonPermissions, MatchButtonPermissions } from '../../tools/utils';
-import MatchEdit from '../admin/ui/MatchEdit';
-import MatchStatus from '../admin/ui/MatchStatus';
-import { useRouter } from 'next/router';
-import MatchStatusBadge from './MatchStatusBadge';
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Fragment } from "react";
+import { Match } from "../../types/MatchValues";
+import {
+  CalendarIcon,
+  MapPinIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/react/24/outline";
+import useAuth from "../../hooks/useAuth";
+import { Menu, Transition } from "@headlessui/react";
+import { tournamentConfigs } from "../../tools/consts";
+import {
+  classNames,
+  calculateMatchButtonPermissions,
+  MatchButtonPermissions,
+} from "../../tools/utils";
+import MatchEdit from "../admin/ui/MatchEdit";
+import MatchStatus from "../admin/ui/MatchStatus";
+import { useRouter } from "next/router";
+import MatchStatusBadge from "./MatchStatusBadge";
 
-const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { match: Match, setMatch: React.Dispatch<React.SetStateAction<Match>>, permissions: MatchButtonPermissions, onMatchUpdate?: () => Promise<void>, from: string }) => {
+const StatusMenu = ({
+  match,
+  setMatch,
+  permissions,
+  onMatchUpdate,
+  from,
+}: {
+  match: Match;
+  setMatch: React.Dispatch<React.SetStateAction<Match>>;
+  permissions: MatchButtonPermissions;
+  onMatchUpdate?: () => Promise<void>;
+  from: string;
+}) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
@@ -44,8 +64,8 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
                     <button
                       onClick={() => setIsEditOpen(true)}
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block w-full text-left px-4 py-2 text-sm'
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700",
+                        "block w-full text-left px-4 py-2 text-sm",
                       )}
                     >
                       Ansetzung
@@ -59,8 +79,8 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
                     <button
                       onClick={() => setIsStatusOpen(true)}
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block w-full text-left px-4 py-2 text-sm'
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700",
+                        "block w-full text-left px-4 py-2 text-sm",
                       )}
                     >
                       Ergebnis
@@ -72,10 +92,14 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/matchcenter?from=${from}`)}
+                      onClick={() =>
+                        router.push(
+                          `/matches/${match._id}/matchcenter?from=${from}`,
+                        )
+                      }
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block w-full text-left px-4 py-2 text-sm'
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700",
+                        "block w-full text-left px-4 py-2 text-sm",
                       )}
                     >
                       Match Center
@@ -87,10 +111,14 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/home/roster?from=${from}`)}
+                      onClick={() =>
+                        router.push(
+                          `/matches/${match._id}/home/roster?from=${from}`,
+                        )
+                      }
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block w-full text-left px-4 py-2 text-sm'
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700",
+                        "block w-full text-left px-4 py-2 text-sm",
                       )}
                     >
                       Aufstellung {match.home.tinyName}
@@ -102,10 +130,14 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => router.push(`/matches/${match._id}/away/roster?from=${from}`)}
+                      onClick={() =>
+                        router.push(
+                          `/matches/${match._id}/away/roster?from=${from}`,
+                        )
+                      }
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block w-full text-left px-4 py-2 text-sm'
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700",
+                        "block w-full text-left px-4 py-2 text-sm",
                       )}
                     >
                       Aufstellung {match.away.tinyName}
@@ -122,7 +154,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
         match={match}
-        jwt={user?.jwt || ''}
+        jwt={user?.jwt || ""}
         onSuccess={async (updatedMatch) => {
           setMatch({ ...match, ...updatedMatch });
           if (onMatchUpdate) {
@@ -136,7 +168,7 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
         isOpen={isStatusOpen}
         onClose={() => setIsStatusOpen(false)}
         match={match}
-        jwt={user?.jwt || ''}
+        jwt={user?.jwt || ""}
         onSuccess={async (updatedMatch) => {
           setMatch({ ...match, ...updatedMatch });
           if (onMatchUpdate) {
@@ -150,9 +182,9 @@ const StatusMenu = ({ match, setMatch, permissions, onMatchUpdate, from }: { mat
 };
 
 const MatchCard: React.FC<{
-  match: Match,
-  onMatchUpdate?: () => Promise<void>,
-  from?: string
+  match: Match;
+  onMatchUpdate?: () => Promise<void>;
+  from?: string;
 }> = ({ match: initialMatch, onMatchUpdate, from }) => {
   const [match, setMatch] = useState(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -172,23 +204,26 @@ const MatchCard: React.FC<{
       try {
         setIsLoadingOwner(true);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
+          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
         );
         if (response.ok) {
           const matchdayData = await response.json();
           setMatchdayOwner(matchdayData.owner || null);
         }
       } catch (error) {
-        console.error('Error fetching matchday owner:', error);
+        console.error("Error fetching matchday owner:", error);
       } finally {
         setIsLoadingOwner(false);
       }
     };
 
     fetchMatchdayOwner();
-  }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
-
-
+  }, [
+    match.tournament.alias,
+    match.season.alias,
+    match.round.alias,
+    match.matchday.alias,
+  ]);
 
   // Auto-refresh for in-progress matches
   useEffect(() => {
@@ -199,20 +234,22 @@ const MatchCard: React.FC<{
 
       try {
         setIsRefreshing(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+        );
         const updatedMatch = await response.json();
         setMatch(updatedMatch);
         if (onMatchUpdate) {
           await onMatchUpdate();
         }
       } catch (error) {
-        console.error('Error refreshing match:', error);
+        console.error("Error refreshing match:", error);
       } finally {
         setIsRefreshing(false);
       }
     };
 
-    if (match.matchStatus.key === 'INPROGRESS') {
+    if (match.matchStatus.key === "INPROGRESS") {
       interval = setInterval(refreshMatch, 30000); // Refresh every 30 seconds
     }
 
@@ -221,14 +258,21 @@ const MatchCard: React.FC<{
     };
   }, [match._id, match.matchStatus.key, onMatchUpdate, isRefreshing]);
 
-  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner || undefined, false);
-  {/**
+  const permissions = calculateMatchButtonPermissions(
+    user,
+    match,
+    matchdayOwner || undefined,
+    false,
+  );
+  {
+    /**
   const showButtonEdit = permissions.showButtonEdit;
   const showButtonStatus = permissions.showButtonStatus;
   const showButtonRosterHome = permissions.showButtonRosterHome;
   const showButtonRosterAway = permissions.showButtonRosterAway;
   const showButtonMatchCenter = permissions.showButtonMatchCenter;
-  */}
+  */
+  }
 
   // Feature-Switch
   //if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
@@ -236,7 +280,10 @@ const MatchCard: React.FC<{
   //}
 
   return (
-    <div id={`match-${match._id}`} className="flex flex-col sm:flex-row gap-y-2 p-4 border-2 rounded-xl shadow-md">
+    <div
+      id={`match-${match._id}`}
+      className="flex flex-col sm:flex-row gap-y-2 p-4 border-2 rounded-xl shadow-md"
+    >
       {/* 1 tournament, status (mobile), date, venue */}
       <div className="flex flex-col sm:flex-none sm:w-1/3">
         {/* 1-1 tournament, status (mobile) */}
@@ -249,9 +296,14 @@ const MatchCard: React.FC<{
                 return (
                   <span
                     key={item.tinyName}
-                    className={classNames("inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full", item.bdgColLight)}
+                    className={classNames(
+                      "inline-flex items-center justify-start rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset w-full",
+                      item.bdgColLight,
+                    )}
                   >
-                    {item.tinyName} {match.round.name !== 'Hauptrunde' && `- ${match.round.name}`}
+                    {item.tinyName}{" "}
+                    {match.round.name !== "Hauptrunde" &&
+                      `- ${match.round.name}`}
                   </span>
                 );
               }
@@ -260,13 +312,17 @@ const MatchCard: React.FC<{
           {/* status */}
           <div className="sm:hidden">
             <div className="flex items-center">
-              {(permissions.showButtonEdit || permissions.showButtonStatus || permissions.showButtonMatchCenter || permissions.showButtonRosterHome || permissions.showButtonRosterAway) && (
+              {(permissions.showButtonEdit ||
+                permissions.showButtonStatus ||
+                permissions.showButtonMatchCenter ||
+                permissions.showButtonRosterHome ||
+                permissions.showButtonRosterAway) && (
                 <StatusMenu
                   match={match}
                   setMatch={setMatch}
                   permissions={permissions}
                   onMatchUpdate={onMatchUpdate}
-                  from={from ?? ''}
+                  from={from ?? ""}
                 />
               )}
               <MatchStatusBadge
@@ -282,42 +338,63 @@ const MatchCard: React.FC<{
         <div className="flex flex-row sm:flex-col justify-between sm:justify-end mt-3 sm:mt-0 sm:pr-4 sm:gap-y-2 sm:h-full">
           {/* date */}
           <div className="flex items-center truncate">
-            <CalendarIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" /> {/* Icon for Date */}
+            <CalendarIcon
+              className="h-4 w-4 text-gray-400 mr-1"
+              aria-hidden="true"
+            />{" "}
+            {/* Icon for Date */}
             <p className="block md:hidden text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={
-                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
-              }>
-                {startDate ? new Date(startDate).toLocaleString('de-DE', {
-                  timeZone: 'Europe/Berlin',
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'numeric',
-                  year: undefined,
-                  hour: '2-digit',
-                  minute: '2-digit'
-                }) : 'offen'}
+              <time
+                dateTime={
+                  startDate
+                    ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+                    : ""
+                }
+              >
+                {startDate
+                  ? new Date(startDate).toLocaleString("de-DE", {
+                      timeZone: "Europe/Berlin",
+                      weekday: "short",
+                      day: "numeric",
+                      month: "numeric",
+                      year: undefined,
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "offen"}
               </time>
             </p>
             <p className="hidden md:block text-xs uppercase font-light text-gray-700 my-0">
-              <time dateTime={
-                startDate ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}` : ''
-              }>
-                {startDate ? new Date(startDate).toLocaleString('de-DE', {
-                  timeZone: 'Europe/Berlin',
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'short',
-                  year: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                }) : 'offen'}
+              <time
+                dateTime={
+                  startDate
+                    ? `${new Date(startDate).toDateString()}T${new Date(startDate).toTimeString()}`
+                    : ""
+                }
+              >
+                {startDate
+                  ? new Date(startDate).toLocaleString("de-DE", {
+                      timeZone: "Europe/Berlin",
+                      weekday: "long",
+                      day: "numeric",
+                      month: "short",
+                      year: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "offen"}
               </time>
             </p>
           </div>
           {/* venue */}
           <div className="flex items-center truncate">
-            <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" aria-hidden="true" />
-            <p className="text-xs uppercase font-light text-gray-700 truncate">{venue.name}</p>
+            <MapPinIcon
+              className="h-4 w-4 text-gray-400 mr-1"
+              aria-hidden="true"
+            />
+            <p className="text-xs uppercase font-light text-gray-700 truncate">
+              {venue.name}
+            </p>
           </div>
         </div>
       </div>
@@ -326,30 +403,82 @@ const MatchCard: React.FC<{
         {/* home */}
         <div className="flex flex-row items-center w-full">
           <div className="flex-none">
-            <Image className="flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={32} width={32} />
+            <Image
+              className="flex-none"
+              src={
+                home.logo
+                  ? home.logo
+                  : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+              }
+              alt={home.tinyName}
+              objectFit="contain"
+              height={32}
+              width={32}
+            />
           </div>
           <div className="flex-auto ml-6 truncate text-ellipsis">
-            <p className={`block md:hidden sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.shortName}</p>
-            <p className={`hidden md:block sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{home.fullName}</p>
+            <p
+              className={`block md:hidden sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+            >
+              {home.shortName}
+            </p>
+            <p
+              className={`hidden md:block sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+            >
+              {home.fullName}
+            </p>
           </div>
-          {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+          {!(
+            match.matchStatus.key === "SCHEDULED" ||
+            match.matchStatus.key === "CANCELLED"
+          ) && (
             <div className="flex-none w-10">
-              <p className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{home.stats.goalsFor}</p>
+              <p
+                className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+              >
+                {home.stats.goalsFor}
+              </p>
             </div>
           )}
         </div>
         {/* away */}
         <div className="flex flex-row items-center w-full">
           <div className="flex-none">
-            <Image className="flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
+            <Image
+              className="flex-none"
+              src={
+                away.logo
+                  ? away.logo
+                  : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+              }
+              alt={away.tinyName}
+              objectFit="contain"
+              height={32}
+              width={32}
+            />
           </div>
           <div className="flex-auto ml-6 w-full truncate">
-            <p className={`block md:hidden sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.shortName}</p>
-            <p className={`hidden md:block sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'}`}>{away.fullName}</p>
+            <p
+              className={`block md:hidden sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+            >
+              {away.shortName}
+            </p>
+            <p
+              className={`hidden md:block sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+            >
+              {away.fullName}
+            </p>
           </div>
-          {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED') && (
+          {!(
+            match.matchStatus.key === "SCHEDULED" ||
+            match.matchStatus.key === "CANCELLED"
+          ) && (
             <div className="flex-none w-10">
-              <p className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? 'text-gray-800' : 'text-gray-500'} text-right mx-2`}>{away.stats.goalsFor}</p>
+              <p
+                className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+              >
+                {away.stats.goalsFor}
+              </p>
             </div>
           )}
         </div>
@@ -359,7 +488,8 @@ const MatchCard: React.FC<{
             {match.referee1 && (
               <div className="flex items-center">
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                  {match.referee1.firstName.charAt(0)}{match.referee1.lastName.charAt(0)}
+                  {match.referee1.firstName.charAt(0)}
+                  {match.referee1.lastName.charAt(0)}
                 </div>
                 <span className="text-xs text-gray-600 ml-2 truncate">
                   {match.referee1.firstName} {match.referee1.lastName.charAt(0)}
@@ -369,7 +499,8 @@ const MatchCard: React.FC<{
             {match.referee2 && (
               <div className="flex items-center">
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                  {match.referee2.firstName.charAt(0)}{match.referee2.lastName.charAt(0)}
+                  {match.referee2.firstName.charAt(0)}
+                  {match.referee2.lastName.charAt(0)}
                 </div>
                 <span className="text-xs text-gray-600 ml-2 truncate">
                   {match.referee2.firstName} {match.referee2.lastName.charAt(0)}
@@ -382,13 +513,17 @@ const MatchCard: React.FC<{
       {/* 3 button Spielbericht, status (tablet) */}
       <div className="flex flex-col justify-between sm:flex-none mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
         <div className="sm:flex hidden flex-row justify-end">
-          {(permissions.showButtonEdit || permissions.showButtonStatus || permissions.showButtonMatchCenter || permissions.showButtonRosterHome || permissions.showButtonRosterAway) && (
+          {(permissions.showButtonEdit ||
+            permissions.showButtonStatus ||
+            permissions.showButtonMatchCenter ||
+            permissions.showButtonRosterHome ||
+            permissions.showButtonRosterAway) && (
             <StatusMenu
               match={match}
               setMatch={setMatch}
               permissions={permissions}
               onMatchUpdate={onMatchUpdate}
-              from={from ?? ''}
+              from={from ?? ""}
             />
           )}
           <MatchStatusBadge
@@ -399,62 +534,31 @@ const MatchCard: React.FC<{
           />
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          {!(match.matchStatus.key === 'SCHEDULED' || match.matchStatus.key === 'CANCELLED' || match.matchStatus.key === 'FORFEITED') && (() => {
-            const isLive = match.matchStatus.key === 'INPROGRESS';
-            const buttonClass = isLive || match.matchSheetComplete
-              ? "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200/50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
+          {!(
+            match.matchStatus.key === "SCHEDULED" ||
+            match.matchStatus.key === "CANCELLED" ||
+            match.matchStatus.key === "FORFEITED"
+          ) &&
+            (() => {
+              const isLive = match.matchStatus.key === "INPROGRESS";
+              const buttonClass =
+                isLive || match.matchSheetComplete
+                  ? "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200/50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
 
-            return (
-              <Link href={`/matches/${match._id}`} className={buttonClass}>
-                <div className="block hover:bg-gray-50">
-                  <div className="px-4 py-4 sm:px-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-indigo-600 truncate">
-                            {match.home.fullName}
-                          </p>
-                          <div className="ml-2 flex flex-shrink-0">
-                            <MatchStatusBadge
-                              statusKey={match.matchStatus.key}
-                              finishTypeKey={match.finishType.key}
-                              statusValue={match.matchStatus.value}
-                              finishTypeValue={match.finishType.value}
-                            />
-                          </div>
-                        </div>
-                        <div className="mt-2 sm:flex sm:justify-between">
-                          <div className="sm:flex">
-                            <p className="flex items-center text-sm text-gray-500">
-                              vs {match.away.fullName}
-                            </p>
-                          </div>
-                          <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <p>
-                              {new Date(match.startDate).toLocaleString('de-DE', {
-                                timeZone: 'Europe/Berlin',
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })()}
+              return (
+                <Link href={`/matches/${match._id}`} className={buttonClass}>
+                  <span className="block sm:hidden md:block">
+                    Spielbericht
+                  </span>
+                  <span className="hidden sm:block md:hidden">Bericht</span>
+                </Link>
+              );
+            })()}
         </div>
-
       </div>
     </div>
   );
 };
 
-export default MatchCard
+export default MatchCard;
