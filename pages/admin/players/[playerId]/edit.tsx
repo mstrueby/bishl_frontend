@@ -85,6 +85,20 @@ const Edit: NextPage = () => {
           "overAge",
         ];
         if (excludedFields.includes(key)) return;
+
+        // Handle image/imageUrl specially
+        if (key === 'image' || key === 'imageUrl') {
+          if (value instanceof File) {
+            // New file upload
+            formData.append('image', value);
+          } else if (value === null) {
+            // Image was removed - signal backend to delete
+            formData.append('imageUrl', '');
+          }
+          // If value is a string (existing URL), don't append anything - backend keeps existing
+          return;
+        }
+
         // Handle File objects (from ImageUpload)
         if (value instanceof File) {
           formData.append(key, value);
@@ -95,7 +109,7 @@ const Edit: NextPage = () => {
           Array.from(value).forEach((file) => formData.append(key, file));
           return;
         }
-        if (typeof value === "object" && key !== "imageUrl") {
+        if (typeof value === "object") {
           if (key === "assignedTeams") {
             const cleanedTeams = value.map(
               (club: {
@@ -116,12 +130,7 @@ const Edit: NextPage = () => {
             formData.append(key, JSON.stringify(value));
           }
         } else {
-          // Handle imageUrl specifically to ensure it's only appended if not null
-          if (key === "imageUrl" && value !== null && value.length > 0) {
-            formData.append(key, value);
-          } else if (key !== "imageUrl") {
-            formData.append(key, value);
-          }
+          formData.append(key, value);
         }
       });
       // log formData fields
