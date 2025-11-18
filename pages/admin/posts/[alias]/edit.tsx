@@ -59,7 +59,6 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
