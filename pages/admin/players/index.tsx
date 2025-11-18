@@ -51,11 +51,7 @@ const Players: NextPage = () => {
     }
   };
 
-  const handleSearch = async (query: string) => {
-    console.log('🔍 handleSearch called with query:', query);
-    console.log('🔍 User authenticated:', !!user);
-    console.log('🔍 Query trimmed:', query.trim());
-    
+  const handleSearch = async (query: string) => {  
     if (!user || !query.trim()) {
       setSearchOptions([]);
       return;
