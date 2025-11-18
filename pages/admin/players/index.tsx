@@ -19,6 +19,7 @@ const Players: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
   const [players, setPlayers] = useState<PlayerValues[]>([]);
+  const [totalPlayers, setTotalPlayers] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [searchOptions, setSearchOptions] = useState<
@@ -27,18 +28,39 @@ const Players: NextPage = () => {
   const router = useRouter();
   const currentPage = parseInt(router.query.page as string) || 1;
 
-  const handleSearch = async (query: string) => {
+  const fetchPlayers = async (page: number) => {
+    if (!user) return;
+    
     try {
-      const res = await axios.get(`${BASE_URL}/players/`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
+      setDataLoading(true);
+      const res = await apiClient.get("/players", {
+        params: {
+          page,
+          limit: 25,
+          sortby: 'firstName'
+        }
+      });
+      setPlayers(res.data || []);
+      setTotalPlayers(res.pagination?.total_items || 0);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error fetching players:", error);
+      }
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const handleSearch = async (query: string) => {
+    if (!user) return;
+    
+    try {
+      const res = await apiClient.get("/players", {
         params: {
           q: query,
         },
       });
-      const searchResults = res.data.results.map((player: PlayerValues) => {
+      const searchResults = (res.data || []).map((player: PlayerValues) => {
         const labelComponents = [`${player.firstName} ${player.lastName}`];
         if (
           player.displayFirstName !== player.firstName ||
@@ -63,8 +85,7 @@ const Players: NextPage = () => {
     await router.push({
       pathname: router.pathname,
       query: { ...router.query, page },
-    });
-    await fetchPlayers(page);
+    }, undefined, { shallow: true });
   };
 
   const handleSelect = (option: { id: string; label: string }) => {
@@ -85,24 +106,12 @@ const Players: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole, router]);
 
-  // Data fetching
+  // Fetch players when page changes or user loads
   useEffect(() => {
     if (authLoading || !user) return;
-
-    const fetchPlayers = async () => {
-      try {
-        const res = await apiClient.get("/players");
-        setPlayers(res.data || []);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error("Error fetching players:", error);
-        }
-      } finally {
-        setDataLoading(false);
-      }
-    };
-    fetchPlayers();
-  }, [authLoading, user]);
+    
+    fetchPlayers(currentPage);
+  }, [authLoading, user, currentPage]);
 
   const editPlayer = (playerId: string) => {
     router.push(`/admin/players/${playerId}/edit`);
