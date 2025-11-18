@@ -57,29 +57,17 @@ const Players: NextPage = () => {
     console.log('🔍 Query trimmed:', query.trim());
     
     if (!user || !query.trim()) {
-      console.log('⚠️ Search aborted - no user or empty query');
       setSearchOptions([]);
       return;
     }
     
     try {
-      console.log('📡 Making API request to /players with params:', {
-        q: query,
-        limit: 100
-      });
-      
+     
       const res = await apiClient.get("/players", {
         params: {
-          q: query,
+          search: query,
           limit: 100, // Return up to 100 search results
         },
-      });
-      
-      console.log('✅ API Response received:', {
-        status: res.status,
-        dataLength: res.data?.length,
-        data: res.data,
-        pagination: res.pagination
       });
       
       const searchResults = (res.data || []).map((player: PlayerValues) => {
@@ -97,25 +85,9 @@ const Players: NextPage = () => {
           label: labelComponents.join(" "),
         };
       });
-      
-      console.log('🎯 Search results mapped:', searchResults.length, 'results');
-      console.log('🎯 First 3 results:', searchResults.slice(0, 3));
-      
+
       setSearchOptions(searchResults);
     } catch (error) {
-      console.error("❌ Error searching players:", error);
-      if (axios.isAxiosError(error)) {
-        console.error('❌ Axios error details:', {
-          message: error.message,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          config: {
-            url: error.config?.url,
-            params: error.config?.params
-          }
-        });
-      }
       setSearchOptions([]);
     }
   };
