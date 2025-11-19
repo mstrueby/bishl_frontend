@@ -115,7 +115,7 @@ const RefereeForm: React.FC<RefereeFormProps> = ({
               />
               <div className="mt-4 flex justify-end py-4">
                 <ButtonLight onClick={handleCancel} name="btnLight" type="button" label="Abbrechen" />
-                <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" loading={loading} />
+                <ButtonPrimary name="btnPrimary" type="submit" label="Speichern" isLoading={loading} />
               </div>
             </Form>
           );
