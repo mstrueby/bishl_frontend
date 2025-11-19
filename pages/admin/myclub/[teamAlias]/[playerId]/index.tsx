@@ -1,81 +1,64 @@
-// pages/leaguemanager/clubs/[alias]/edit.tsx
+
 import { useState, useEffect } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
 import PlayerForm from '../../../../../components/admin/PlayerFrom';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { PlayerValues } from '../../../../../types/PlayerValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
+import LoadingState from '../../../../../components/ui/LoadingState';
+import useAuth from '../../../../../hooks/useAuth';
+import usePermissions from '../../../../../hooks/usePermissions';
+import apiClient from '../../../../../lib/apiClient';
+import axios from 'axios';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
+const Edit: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { isAuthenticated, hasAnyRole } = usePermissions();
+  const router = useRouter();
+  const { teamAlias, playerId } = router.query;
 
-interface EditProps {
-  jwt: string,
-  player: PlayerValues,
-  clubId: string,
-  clubName: string,
-  teamAlias: string,
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context) as string | undefined;
-  const { playerId } = context.params as { playerId: string };
-  const { teamAlias } = context.params as { teamAlias: string };
-
-  if (!jwt) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  let player = null;
-  let clubId = null;
-  let clubName = null;
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
-    const user = userResponse.data;
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('CLUB_ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-    clubId = user.club.clubId;
-    clubName = user.club.clubName;
-
-    // Fetch the existing player data
-    const response = await axios.get(`${BASE_URL}/players/${playerId}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    player = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching player:', error.message);
-    }
-  }
-  return player ? { props: { jwt, player, clubId, clubName, teamAlias } } : { notFound: true };
-};
-
-const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias }) => {
+  const [player, setPlayer] = useState<PlayerValues | null>(null);
+  const [clubId, setClubId] = useState<string>('');
+  const [clubName, setClubName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const router = useRouter();
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
+
+  // Redirect if not authenticated or authorized
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/');
+    } else if (!authLoading && isAuthenticated && !hasAnyRole(['ADMIN', 'CLUB_ADMIN'])) {
+      router.push('/');
+    }
+  }, [authLoading, isAuthenticated, hasAnyRole, router]);
+
+  // Fetch player data
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user && playerId && typeof playerId === 'string') {
+      const fetchPlayer = async () => {
+        try {
+          setDataLoading(true);
+          setClubId(user.club.clubId);
+          setClubName(user.club.clubName);
+
+          const response = await apiClient.get(`/players/${playerId}`);
+          setPlayer(response.data);
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error('Error fetching player:', error.message);
+            setError('Fehler beim Laden des Spielers.');
+          }
+        } finally {
+          setDataLoading(false);
+        }
+      };
+
+      fetchPlayer();
+    }
+  }, [authLoading, isAuthenticated, user, playerId]);
 
   // Handler for form submission
   const onSubmit = async (values: PlayerValues) => {
@@ -116,18 +99,12 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
           }
         }
       });
-      //formData.delete('teams');
 
       for (let pair of formData.entries()) {
         console.log(pair[0] + ', ' + pair[1]);
       }
 
-      const response = await axios.patch(`${BASE_URL}/players/${player._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-          "Content-Type": "multipart/form-data"
-        }
-      });
+      const response = await apiClient.patch(`/players/${player?._id}`, formData);
       if (response.status === 200) {
         router.push({
           pathname: `/admin/myclub/${teamAlias}`,
@@ -164,32 +141,46 @@ const Edit: NextPage<EditProps> = ({ jwt, player, clubId, clubName, teamAlias })
     setError(null);
   };
 
-  // Form initial values with existing club data
+  // Show loading state while checking auth or fetching data
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard (shouldn't reach here due to redirect, but just in case)
+  if (!isAuthenticated || !hasAnyRole(['ADMIN', 'CLUB_ADMIN']) || !player) {
+    return null;
+  }
+
+  // Form initial values with existing player data
   const initialValues: PlayerValues = {
-    _id: player?._id || '',
-    firstName: player?.firstName || '',
-    lastName: player?.lastName || '',
-    birthdate: player?.birthdate || '',
-    displayFirstName: player?.displayFirstName || '',
-    displayLastName: player?.displayLastName || '',
-    fullFaceReq: player?.fullFaceReq || false,
-    source: player?.source || '', // Added missing property
-    assignedTeams: player?.assignedTeams || [],
-    stats: player?.stats || [], // Added missing property
-    imageUrl: player?.imageUrl || '',
-    imageVisible: player?.imageVisible || false, 
-    legacyId: player?.legacyId || 0,
-    createDate: player?.createDate || '',
-    nationality: player?.nationality || '', // Added missing property
-    position: player?.position || undefined, // Added missing property
-    ageGroup: player?.ageGroup || '', // Added missing property
-    overAge: player?.overAge || false, // Added missing property
-    managedByISHD: player?.managedByISHD || false, // Added missing property
-    sex: player.sex || '' // Added missing property
+    _id: player._id || '',
+    firstName: player.firstName || '',
+    lastName: player.lastName || '',
+    birthdate: player.birthdate || '',
+    displayFirstName: player.displayFirstName || '',
+    displayLastName: player.displayLastName || '',
+    fullFaceReq: player.fullFaceReq || false,
+    source: player.source || '',
+    assignedTeams: player.assignedTeams || [],
+    stats: player.stats || [],
+    imageUrl: player.imageUrl || '',
+    imageVisible: player.imageVisible || false, 
+    legacyId: player.legacyId || 0,
+    createDate: player.createDate || '',
+    nationality: player.nationality || '',
+    position: player.position || undefined,
+    ageGroup: player.ageGroup || '',
+    overAge: player.overAge || false,
+    managedByISHD: player.managedByISHD || false,
+    sex: player.sex || ''
   };
 
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;
-  // Render the form with initialValues and the edit-specific handlers
+
   return (
     <Layout>
       <SectionHeader title={sectionTitle.toUpperCase()} description={clubName.toUpperCase()} />
