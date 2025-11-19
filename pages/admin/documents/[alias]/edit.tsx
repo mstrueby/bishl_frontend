@@ -59,7 +59,6 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: DocumentValuesForm) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -69,6 +68,9 @@ const Edit: NextPage = () => {
           formData.append(key, value as string);
         }
       });
+
+      // Log filtered FormData fields
+      console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(`/documents/${doc?._id}`, formData);
       if (response.status === 200) {
