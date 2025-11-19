@@ -72,7 +72,6 @@ const Edit: NextPage = () => {
     
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
