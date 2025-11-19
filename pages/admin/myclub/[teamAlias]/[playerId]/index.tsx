@@ -68,7 +68,7 @@ const Edit: NextPage = () => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality'];
+        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality', 'overage', 'ageGroup', 'managedByISHD'];
         if (excludedFields.includes(key)) return;
         if (key === 'image' && value instanceof File) {
           formData.append('image', value);
