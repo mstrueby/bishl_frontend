@@ -2,20 +2,40 @@ import { useState, useEffect } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import axios from 'axios';
+import { buildUrl } from 'cloudinary-build-url';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
+import SuccessMessage from '../../../components/ui/SuccessMessage';
+import DataList from '../../../components/admin/ui/DataList';
 import apiClient from '../../../lib/apiClient';
 import useAuth from '../../../hooks/useAuth';
 import { UserRole } from '../../../lib/auth';
 import usePermissions from '../../../hooks/usePermissions';
 import LoadingState from '../../../components/ui/LoadingState';
+import { ageGroupConfig } from '../../../tools/consts';
+import { ClubValues, TeamValues } from '../../../types/ClubValues';
 
 const MyClub: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
-  const [teams, setTeams] = useState<any[]>([]);
+  const [club, setClub] = useState<ClubValues | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const router = useRouter();
+
+  // Success message handling
+  useEffect(() => {
+    if (router.query.message) {
+      setSuccessMessage(router.query.message as string);
+      const currentPath = router.pathname;
+      const currentQuery = { ...router.query };
+      delete currentQuery.message;
+      router.replace({
+        pathname: currentPath,
+        query: currentQuery,
+      }, undefined, { shallow: true });
+    }
+  }, [router]);
 
   // Auth redirect check
   useEffect(() => {
@@ -35,7 +55,7 @@ const MyClub: NextPage = () => {
   useEffect(() => {
     if (authLoading || !user) return;
 
-    const fetchTeams = async () => {
+    const fetchClub = async () => {
       try {
         if (!user.club?.clubId) {
           setDataLoading(false);
@@ -43,16 +63,16 @@ const MyClub: NextPage = () => {
         }
 
         const res = await apiClient.get(`/clubs/id/${user.club.clubId}`);
-        setTeams(res.data?.data?.teams || []);
+        setClub(res.data?.data || null);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.error('Error fetching teams:', error);
+          console.error('Error fetching club:', error);
         }
       } finally {
         setDataLoading(false);
       }
     };
-    fetchTeams();
+    fetchClub();
   }, [authLoading, user]);
 
   // Loading state
@@ -77,28 +97,72 @@ const MyClub: NextPage = () => {
     );
   }
 
+  const handleCloseSuccessMessage = () => {
+    setSuccessMessage(null);
+  };
+
+  const sectionTitle = club?.name || user.club.clubName || 'Mein Verein';
+  const sectionDescription = 'MANNSCHAFTEN';
+  
+  const statuses = {
+    Published: 'text-green-500 bg-green-500/20',
+    Unpublished: 'text-gray-500 bg-gray-800/10',
+    Archived: 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
+  };
+
+  // Sort and transform teams
+  const teamValues = club?.teams
+    ? club.teams
+        .slice()
+        .sort((a, b) => {
+          const aGroup = ageGroupConfig.find(ag => ag.key === a.ageGroup);
+          const bGroup = ageGroupConfig.find(ag => ag.key === b.ageGroup);
+          const sortOrderDiff = (aGroup?.sortOrder || 0) - (bGroup?.sortOrder || 0);
+          return sortOrderDiff !== 0 ? sortOrderDiff : (a.teamNumber || 0) - (b.teamNumber || 0);
+        })
+    : [];
+
+  const dataListItems = teamValues.map((team: TeamValues) => {
+    const logoUrl = team.logoUrl || club?.logoUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.svg';
+    
+    return {
+      _id: team._id,
+      title: team.name,
+      description: [team.ageGroup, team.fullName],
+      alias: team.alias,
+      image: {
+        src: logoUrl,
+        width: 48,
+        height: 48,
+        gravity: 'center',
+        className: 'object-contain',
+        radius: 0,
+      },
+      published: team.active,
+      menu: [
+        { players: { onClick: () => router.push(`/admin/myclub/${team.alias}`) } },
+      ],
+    };
+  });
+
   return (
     <Layout>
-      <SectionHeader title={user.club.clubName} />
+      <SectionHeader
+        title={sectionTitle}
+        description={sectionDescription}
+      />
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Teams</h2>
-        {teams.length === 0 ? (
-          <p className="text-gray-500">Keine Teams gefunden.</p>
-        ) : (
-          <div className="space-y-2">
-            {teams.map((team) => (
-              <div
-                key={team._id}
-                className="p-4 bg-white rounded-lg shadow cursor-pointer hover:shadow-md transition"
-                onClick={() => router.push(`/admin/myclub/${team.alias}`)}
-              >
-                <h3 className="font-medium">{team.name}</h3>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {successMessage && (
+        <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />
+      )}
+
+      <DataList
+        items={dataListItems}
+        statuses={statuses}
+        showStatusIndicator
+        showThumbnails
+        showThumbnailsOnMobiles
+      />
     </Layout>
   );
 }
