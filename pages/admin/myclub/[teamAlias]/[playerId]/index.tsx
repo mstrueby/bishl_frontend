@@ -68,41 +68,75 @@ const Edit: NextPage = () => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        const excludedFields = ['_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq', 'source', 'legacyId', 'createDate', 'nationality', 'overage', 'ageGroup', 'managedByISHD'];
+        const excludedFields = [
+          '_id',
+          'stats',
+          'firstName',
+          'lastName',
+          'birthdate',
+          'fullFaceReq',
+          'source',
+          'legacyId',
+          'createDate',
+          'displayFirstName',
+          'displayLastName',
+          'ageGroup',
+          'overAge',
+          'nationality',
+          'managedByISHD'
+        ];
         if (excludedFields.includes(key)) return;
-        if (key === 'image' && value instanceof File) {
-          formData.append('image', value);
-        } else if (value instanceof FileList) {
+
+        // Handle image/imageUrl specially
+        if (key === 'image' || key === 'imageUrl') {
+          if (value instanceof File) {
+            // New file upload
+            formData.append('image', value);
+          } else if (value === null) {
+            // Image was removed - signal backend to delete
+            formData.append('imageUrl', '');
+          }
+          // If value is a string (existing URL), don't append anything - backend keeps existing
+          return;
+        }
+
+        // Handle File objects (from ImageUpload)
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+        // Handle FileList (legacy support)
+        if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (typeof value === 'object' && key !== 'imageUrl') {
+          return;
+        }
+        if (typeof value === 'object') {
           if (key === 'assignedTeams') {
-            const cleanedTeams = value.map((club: { teams: { jerseyNo: number | null, [key: string]: any }[] }) => ({
-              ...club,
-              teams: club.teams.map(team => {
-                if (team.jerseyNo === null) {
-                  const { jerseyNo, ...restTeam } = team;
-                  return restTeam;
-                }
-                return team;
-              })
-            }));
+            const cleanedTeams = value.map(
+              (club: {
+                teams: { jerseyNo: number | null; [key: string]: any }[];
+              }) => ({
+                ...club,
+                teams: club.teams.map((team) => {
+                  if (team.jerseyNo === null) {
+                    const { jerseyNo, ...restTeam } = team;
+                    return restTeam;
+                  }
+                  return team;
+                }),
+              }),
+            );
             formData.append(key, JSON.stringify(cleanedTeams));
           } else {
             formData.append(key, JSON.stringify(value));
           }
         } else {
-          // Handle imageUrl specifically to ensure it's only appended if not null
-          if (key === 'imageUrl' && value !== null) {
-            formData.append(key, value);
-          } else if (key !== 'imageUrl') {
-            formData.append(key, value);
-          }
+          formData.append(key, value);
         }
       });
 
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
+      // Log formData fields
+      console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(`/players/${player?._id}`, formData);
       if (response.status === 200) {
