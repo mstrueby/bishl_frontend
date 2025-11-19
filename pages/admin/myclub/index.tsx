@@ -61,9 +61,8 @@ const MyClub: NextPage = () => {
           setDataLoading(false);
           return;
         }
-
         const res = await apiClient.get(`/clubs/id/${user.club.clubId}`);
-        setClub(res.data?.data || null);
+        setClub(res.data || null);
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error('Error fetching club:', error);
