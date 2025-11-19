@@ -43,7 +43,7 @@ const MyClub: NextPage = () => {
         }
 
         const res = await apiClient.get(`/clubs/id/${user.club.clubId}`);
-        setTeams(res.data || []);
+        setTeams(res.data?.data?.teams || []);
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error('Error fetching teams:', error);
