@@ -73,7 +73,7 @@ const Referees: NextPage = () => {
       };
       const formData = new FormData();
       formData.append('referee', JSON.stringify(updatedRefereeDoc));
-      console.log(updatedRefereeDoc)
+      //console.log(updatedRefereeDoc)
       
       const response = await apiClient.patch(`/users/${refereeId}`, formData);
 
