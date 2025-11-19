@@ -86,6 +86,8 @@ const Edit: NextPage = () => {
           formData.append(key, value);
         }
       });
+
+      // Log filtered FormData fields
       console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(`/users/${referee._id}`, formData);
@@ -146,7 +148,21 @@ const Edit: NextPage = () => {
     email: referee.email,
     firstName: referee.firstName,
     lastName: referee.lastName,
-    referee: referee.referee || undefined,
+    referee: referee.referee ? {
+      ...referee.referee,
+      passNo: referee.referee.passNo || '',
+      ishdLevel: referee.referee.ishdLevel || '',
+      level: referee.referee.level || 'n/a',
+      active: referee.referee.active ?? false,
+      points: referee.referee.points ?? 0,
+      club: referee.referee.club || undefined
+    } : {
+      level: 'n/a',
+      passNo: '',
+      ishdLevel: '',
+      active: false,
+      points: 0
+    },
     roles: referee.roles
   };
 

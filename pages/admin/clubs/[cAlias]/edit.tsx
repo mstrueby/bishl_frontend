@@ -101,10 +101,7 @@ const Edit: NextPage = () => {
         }
       });
       // Log filtered FormData fields
-      console.log('submitted values');
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
+      console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(`/clubs/${club?._id}`, formData);
       if (response.status === 200) {
