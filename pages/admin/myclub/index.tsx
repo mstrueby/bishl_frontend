@@ -42,7 +42,7 @@ const MyClub: NextPage = () => {
           return;
         }
 
-        const res = await apiClient.get(`/clubs/${user.club.clubId}/teams`);
+        const res = await apiClient.get(`/clubs/id/${user.club.clubId}`);
         setTeams(res.data || []);
       } catch (error) {
         if (axios.isAxiosError(error)) {
