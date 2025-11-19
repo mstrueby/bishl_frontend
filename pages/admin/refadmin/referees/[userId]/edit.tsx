@@ -86,6 +86,8 @@ const Edit: NextPage = () => {
           formData.append(key, value);
         }
       });
+
+      // Log filtered FormData fields
       console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(`/users/${referee._id}`, formData);

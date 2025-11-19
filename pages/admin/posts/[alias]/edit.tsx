@@ -103,10 +103,9 @@ const Edit: NextPage = () => {
           formData.append(key, value.toString());
         }
       });
-      
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
+
+      // Log filtered FormData fields
+      console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(`/posts/${post?._id}`, formData);
       if (response.status === 200) {

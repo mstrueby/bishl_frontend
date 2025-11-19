@@ -134,10 +134,7 @@ const Edit: NextPage = () => {
         }
       });
       // log formData fields
-      console.log("submitted values");
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ": " + pair[1]);
-      }
+      console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(
         `/players/${player?._id}`,
