@@ -76,13 +76,25 @@ const Edit: NextPage = () => {
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
+        // Skip _id field
+        if (key === '_id') return;
+
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
         } else if (Array.isArray(value)) {
           value.forEach((item) => formData.append(key, item));
         } else if (typeof value === 'object' && value !== null) {
-          formData.append(key, JSON.stringify(value));
-        } else {
+          // Clean up referee object - remove empty strings for numeric fields
+          if (key === 'referee') {
+            const cleanedReferee = { ...value };
+            // Remove empty strings for fields that should be numbers or omitted
+            if (cleanedReferee.passNo === '') delete cleanedReferee.passNo;
+            if (cleanedReferee.ishdLevel === '') delete cleanedReferee.ishdLevel;
+            formData.append(key, JSON.stringify(cleanedReferee));
+          } else {
+            formData.append(key, JSON.stringify(value));
+          }
+        } else if (value !== null && value !== undefined && value !== '') {
           formData.append(key, value);
         }
       });
