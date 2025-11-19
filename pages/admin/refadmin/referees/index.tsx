@@ -1,75 +1,65 @@
+
 import { useState, useEffect } from "react";
 import React from "react";
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { getCookie } from 'cookies-next';
 import { UserValues, RefereeValues } from '../../../../types/UserValues';
 import Layout from "../../../../components/Layout";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
-import { getFuzzyDate } from '../../../../tools/dateUtils';
 import { refereeLevels } from '../../../../tools/consts'
 import DataList from '../../../../components/admin/ui/DataList';
+import apiClient from "../../../../lib/apiClient";
+import useAuth from "../../../../hooks/useAuth";
+import { UserRole } from "../../../../lib/auth";
+import usePermissions from "../../../../hooks/usePermissions";
+import LoadingState from "../../../../components/ui/LoadingState";
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface RefereesProps {
-  jwt: string,
-  referees: UserValues[],
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
-  let referees: UserValues[] = [];
-  try {
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    const user = userResponse.data;
-    if (!user.roles?.includes('REF_ADMIN') && !user.roles?.includes('ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      }
-    };
-    const res = await axios.get(`${BASE_URL}/users/referees`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    referees = res.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching referees:', error);
-    }
-  }
-  return referees ? { props: { jwt, referees } } : { props: { jwt } };
-};
-
-const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) => {
-  const [referees, setReferees] = useState<UserValues[]>(initialReferees);
+const Referees: NextPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [referees, setReferees] = useState<UserValues[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const router = useRouter();
 
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) {
+      router.push("/");
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Fetch referees function for reuse
   const fetchReferees = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/users/referees`, {
-        headers: {
-          'Authorization': `Bearer ${jwt}`
-        }
-      });
-      setReferees(res.data);
+      const res = await apiClient.get("/users/referees");
+      setReferees(res.data || []);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching referees:', error);
       }
     }
   };
+
+  // Data fetching on mount
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    const loadReferees = async () => {
+      await fetchReferees();
+      setDataLoading(false);
+    };
+    loadReferees();
+  }, [authLoading, user]);
 
   const editReferee = (id: string) => {
     router.push(`/admin/refadmin/referees/${id}/edit`);
@@ -79,16 +69,13 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
     try {
       const updatedRefereeDoc = {
         ...refereeDoc,
-        active: refereeDoc ? !refereeDoc.active : false, // Toggle the active status
+        active: refereeDoc ? !refereeDoc.active : false,
       };
       const formData = new FormData();
       formData.append('referee', JSON.stringify(updatedRefereeDoc));
-      console.log(updatedRefereeDoc)
-      const response = await axios.patch(`${BASE_URL}/users/${refereeId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        },
-      });
+      //console.log(updatedRefereeDoc)
+      
+      const response = await apiClient.patch(`/users/${refereeId}`, formData);
 
       if (response.status === 200) {
         console.log(`Referee ${refereeId} active status updated successfully.`);
@@ -115,6 +102,19 @@ const Referees: NextPage<RefereesProps> = ({ jwt, referees: initialReferees }) =
       }, undefined, { shallow: true });
     }
   }, [router]);
+
+  // Loading state
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <SectionHeader title="Schiedsrichter" />
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) return null;
 
   const sectionTitle = 'Schiedsrichter';
   const newLink = '/admin/refadmin/referees/add';

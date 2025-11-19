@@ -66,6 +66,20 @@ const Edit: NextPage = () => {
         // Skip _id field and teams array
         if (key === '_id') return;
         if (key === 'teams') return;
+
+        // Handle logo/logoUrl specially
+        if (key === 'logo' || key === 'logoUrl') {
+          if (value instanceof File) {
+            // New file upload
+            formData.append('logo', value);
+          } else if (value === null) {
+            // Image was removed - signal backend to delete
+            formData.append('logoUrl', '');
+          }
+          // If value is a string (existing URL), don't append anything - backend keeps existing
+          return;
+        }
+
         // Handle File objects (from ImageUpload)
         if (value instanceof File) {
           formData.append(key, value);

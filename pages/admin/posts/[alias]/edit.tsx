@@ -59,20 +59,48 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: PostValuesForm) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
+        // Skip _id field
+        if (key === '_id') return;
+
+        // Handle image/imageUrl specially
+        if (key === 'image' || key === 'imageUrl') {
+          if (value instanceof File) {
+            // New file upload
+            formData.append('image', value);
+          } else if (value === null) {
+            // Image was removed - signal backend to delete
+            formData.append('imageUrl', '');
+          }
+          // If value is a string (existing URL), don't append anything - backend keeps existing
+          return;
+        }
+
+        // Handle File objects (from ImageUpload)
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+        // Handle FileList (legacy support)
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
-        } else if (key === 'author') {
+          return;
+        }
+        // Handle author object
+        if (key === 'author') {
           formData.append(key, JSON.stringify(value));
-        } else {
-          if (key === 'imageUrl' && value !== null) {
-            formData.append(key, value);
-          } else if (key !== 'imageUrl') {
-            formData.append(key, value);
-          }
+          return;
+        }
+        // Handle boolean values - always include them
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+          return;
+        }
+        // For other values, skip if empty
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value.toString());
         }
       });
       
