@@ -46,7 +46,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
                   className="ml-1.5 mr-3 h-6 w-6 object-contain"
                 />
               )}
-              <span className="ml-2">{description}</span>
+              <span>{description}</span>
             </div>
           </div>
         )}
