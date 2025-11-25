@@ -94,7 +94,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       setTempShowUnassignedOnly(showUnassignedOnly);
       setTempDateRange(dateRange);
     }
-  }, [isOpen]);
+  }, [isOpen, selectedTournament, showUnassignedOnly, dateRange]);
 
   const handleCancel = () => {
     // Reset temp states to applied states
@@ -126,21 +126,27 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setIsOpen(false);
   };
 
-  // Check if any filter is applied (using a simpler approach)
-  const hasActiveTournamentFilter = selectedTournament !== null;
-  const hasActiveUnassignedFilter = showUnassignedOnly === true;
-  const hasActiveEndDateFilter = endDate !== null;
-  
-  // Check if start date is different from today
-  const hasActiveStartDateFilter = (() => {
-    if (!startDate) return false;
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const startDateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
-    return startDateStr !== todayStr;
+  // Check if any filter is applied - use applied states not temp states
+  const isFilterApplied = (() => {
+    // Tournament filter
+    if (selectedTournament !== null) return true;
+    
+    // Unassigned filter
+    if (showUnassignedOnly === true) return true;
+    
+    // End date filter
+    if (endDate !== null) return true;
+    
+    // Start date filter (different from today)
+    if (startDate) {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const startDateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+      if (startDateStr !== todayStr) return true;
+    }
+    
+    return false;
   })();
-  
-  const isFilterApplied = hasActiveTournamentFilter || hasActiveUnassignedFilter || hasActiveEndDateFilter || hasActiveStartDateFilter;
 
   return (
     <>
