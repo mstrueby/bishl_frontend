@@ -161,18 +161,17 @@ const RefAdmin: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole]);
 
-  // Initial data fetch
+  // Data fetch when filter changes
   useEffect(() => {
     if (authLoading || !user) return;
     if (!hasAnyRole([UserRole.ADMIN, UserRole.REF_ADMIN])) return;
 
     fetchData(filter);
-  }, [authLoading, user, hasAnyRole, fetchData, filter]);
+  }, [authLoading, user, hasAnyRole, filter, fetchData]);
 
   const handleFilterChange = useCallback((newFilter: FilterState) => {
     setFilter(newFilter);
-    fetchData(newFilter);
-  }, [fetchData]);
+  }, []);
 
   // Loading state
   if (authLoading || dataLoading) {
@@ -193,7 +192,6 @@ const RefAdmin: NextPage = () => {
         title="Schiedsrichter Administration"
         filter="true"
         onFilterChange={handleFilterChange}
-        tournaments={tournaments}
       />
 
       <div className="mt-8 space-y-4">
