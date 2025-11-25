@@ -161,17 +161,41 @@ const RefAdmin: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole]);
 
-  // Initial data fetch
+  // Initial data fetch and filter change handler
   useEffect(() => {
     if (authLoading || !user) return;
     if (!hasAnyRole([UserRole.ADMIN, UserRole.REF_ADMIN])) return;
 
     fetchData(filter);
-  }, [authLoading, user, hasAnyRole, fetchData, filter]);
+  }, [authLoading, user, hasAnyRole, filter]);
 
   const handleFilterChange = (newFilter: FilterState) => {
     setFilter(newFilter);
-    fetchData(newFilter);
+  };
+
+  const handleBulkUpdate = async (status: string) => {
+    try {
+      // Get all match IDs from the filtered matches
+      const matchIds = matches.map(match => match._id);
+      
+      if (matchIds.length === 0) {
+        console.warn('No matches to update');
+        return false;
+      }
+
+      // Call bulk update API endpoint with filtered match IDs
+      await apiClient.post('/assignments/bulk-update', {
+        matchIds,
+        status
+      });
+
+      // Refresh data after successful update
+      await fetchData(filter);
+      return true;
+    } catch (error) {
+      console.error('Error in bulk update:', error);
+      return false;
+    }
   };
 
   // Loading state
@@ -193,6 +217,7 @@ const RefAdmin: NextPage = () => {
         title="Schiedsrichter Administration"
         filter="true"
         onFilterChange={handleFilterChange}
+        onBulkUpdate={handleBulkUpdate}
         tournaments={tournaments}
       />
 
