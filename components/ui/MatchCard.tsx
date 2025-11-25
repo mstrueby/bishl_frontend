@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
+import { CldImage } from 'next-cloudinary';
 import { Match } from "../../types/MatchValues";
 import {
   CalendarIcon,
@@ -403,17 +403,18 @@ const MatchCard: React.FC<{
         {/* home */}
         <div className="flex flex-row items-center w-full">
           <div className="flex-none">
-            <Image
-              className="flex-none"
+            <CldImage
+              className="flex-none object-contain"
               src={
                 home.logo
                   ? home.logo
                   : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
               }
               alt={home.tinyName}
-              objectFit="contain"
-              height={32}
               width={32}
+              height={32}
+              crop="fit"
+              gravity="center"
             />
           </div>
           <div className="flex-auto ml-6 truncate text-ellipsis">
@@ -444,17 +445,18 @@ const MatchCard: React.FC<{
         {/* away */}
         <div className="flex flex-row items-center w-full">
           <div className="flex-none">
-            <Image
-              className="flex-none"
+            <CldImage
+              className="flex-none object-contain"
               src={
                 away.logo
                   ? away.logo
                   : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
               }
               alt={away.tinyName}
-              objectFit="contain"
-              height={32}
               width={32}
+              height={32}
+              crop="fit"
+              gravity="center"
             />
           </div>
           <div className="flex-auto ml-6 w-full truncate">
