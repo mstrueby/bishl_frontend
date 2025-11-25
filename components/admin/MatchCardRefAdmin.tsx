@@ -226,11 +226,11 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
           {/* home */}
           <div className="flex flex-row items-center w-full">
             <CldImage 
-              className="h-10 w-10 flex-none object-contain" 
+              className="h-8 w-8 flex-none object-contain" 
               src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
               alt={home.tinyName} 
-              width={40} 
-              height={40}
+              width={32} 
+              height={32}
               crop="fit"
               gravity="center"
             />
@@ -241,11 +241,11 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
           {/* away */}
           <div className="flex flex-row items-center w-full">
             <CldImage 
-              className="h-10 w-10 flex-none object-contain" 
+              className="h-8 w-8 flex-none object-contain" 
               src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
               alt={away.tinyName} 
-              width={40} 
-              height={40}
+              width={32} 
+              height={32}
               crop="fit"
               gravity="center"
             />
