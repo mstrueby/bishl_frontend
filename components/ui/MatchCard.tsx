@@ -404,7 +404,7 @@ const MatchCard: React.FC<{
         <div className="flex flex-row items-center w-full">
           <div className="flex-none">
             <CldImage
-              className="flex-none object-contain"
+              className="h-8 w-8 flex-none object-contain"
               src={
                 home.logo
                   ? home.logo
@@ -446,7 +446,7 @@ const MatchCard: React.FC<{
         <div className="flex flex-row items-center w-full">
           <div className="flex-none">
             <CldImage
-              className="flex-none object-contain"
+              className="h-8 w-8 flex-none object-contain"
               src={
                 away.logo
                   ? away.logo
