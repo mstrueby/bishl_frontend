@@ -169,10 +169,10 @@ const RefAdmin: NextPage = () => {
     fetchData(filter);
   }, [authLoading, user, hasAnyRole, fetchData, filter]);
 
-  const handleFilterChange = (newFilter: FilterState) => {
+  const handleFilterChange = useCallback((newFilter: FilterState) => {
     setFilter(newFilter);
     fetchData(newFilter);
-  };
+  }, [fetchData]);
 
   // Loading state
   if (authLoading || dataLoading) {
