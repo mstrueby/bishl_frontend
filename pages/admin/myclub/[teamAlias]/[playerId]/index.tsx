@@ -64,7 +64,6 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
-    console.log('submitted values', values);
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
@@ -78,12 +77,11 @@ const Edit: NextPage = () => {
           'source',
           'legacyId',
           'createDate',
-          'displayFirstName',
-          'displayLastName',
           'ageGroup',
           'overAge',
           'nationality',
-          'managedByISHD'
+          'managedByISHD',
+          'sex'
         ];
         if (excludedFields.includes(key)) return;
 
