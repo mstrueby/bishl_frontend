@@ -49,16 +49,18 @@ const RefAdmin: NextPage = () => {
           apiClient.get('/assignments')
         ]);
         
-        const matchesData = matchesRes.data || [];
-        const assignmentsData = assignmentsRes.data || [];
+        const matchesData = Array.isArray(matchesRes?.data) ? matchesRes.data : [];
+        const assignmentsData = Array.isArray(assignmentsRes?.data) ? assignmentsRes.data : [];
         
         setMatches(matchesData);
         setFilteredMatches(matchesData);
         setAssignments(assignmentsData);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error('Error fetching data:', error);
-        }
+        console.error('Error fetching data:', error);
+        // Set empty arrays on error to prevent UI crashes
+        setMatches([]);
+        setFilteredMatches([]);
+        setAssignments([]);
       } finally {
         setDataLoading(false);
       }
