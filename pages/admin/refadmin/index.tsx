@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import { MatchValues } from '../../../types/MatchValues';
 import { AssignmentValues } from '../../../types/AssignmentValues';
+import { TournamentValues } from '../../../types/TournamentValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import MatchCardRefAdmin from "../../../components/admin/MatchCardRefAdmin";
@@ -27,6 +28,7 @@ const RefAdmin: NextPage = () => {
   const { hasAnyRole } = usePermissions();
   const [matches, setMatches] = useState<MatchValues[]>([]);
   const [matchAssignments, setMatchAssignments] = useState<{ [key: string]: AssignmentValues[] }>({});
+  const [tournaments, setTournaments] = useState<TournamentValues[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [filter, setFilter] = useState<FilterState>({ 
     tournament: 'all', 
@@ -139,6 +141,26 @@ const RefAdmin: NextPage = () => {
     }
   }, []);
 
+  // Fetch tournaments on mount
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      try {
+        const response = await apiClient.get('/tournaments', {
+          params: { active: true }
+        });
+        const tournamentsData = Array.isArray(response.data) ? response.data : [];
+        setTournaments(tournamentsData);
+      } catch (error) {
+        console.error('Error fetching tournaments:', error);
+        setTournaments([]);
+      }
+    };
+
+    if (!authLoading && user && hasAnyRole([UserRole.ADMIN, UserRole.REF_ADMIN])) {
+      fetchTournaments();
+    }
+  }, [authLoading, user, hasAnyRole]);
+
   // Initial data fetch
   useEffect(() => {
     if (authLoading || !user) return;
@@ -171,6 +193,7 @@ const RefAdmin: NextPage = () => {
         title="Schiedsrichter Administration"
         filter="true"
         onFilterChange={handleFilterChange}
+        tournaments={tournaments}
       />
 
       <div className="mt-8 space-y-4">
