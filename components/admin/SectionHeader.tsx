@@ -14,15 +14,17 @@ interface FilterChangeParams {
   date_to?: string;
 }
 
-interface SectionHeaderProps {
-  title: string;
-  newLink?: string;
-  filter?: string;
-  onFilterChange?: (filter: FilterChangeParams) => void;
-  tournaments?: TournamentValues[];
-}
-
-export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox, tournaments }: SectionHeaderProps) {
+export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox }: {
+  title: string,
+  filter?: string,
+  newLink?: string,
+  onFilterChange?: (filter: FilterChangeParams) => void,
+  onBulkUpdate?: (status: string) => void,
+  description?: string,
+  descriptionLogoUrl?: string,
+  backLink?: string
+  searchBox?: React.ReactNode
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const router = useRouter();
@@ -54,7 +56,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
         {searchBox && <div className="w-64">{searchBox}</div>}
         {filter && (
           <>
-            <RefMatchFilter onFilterChange={onFilterChange!} tournaments={tournaments} />
+            <RefMatchFilter onFilterChange={onFilterChange!} />
             {onBulkUpdate && (
               <button
                 type="button"
