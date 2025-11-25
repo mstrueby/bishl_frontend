@@ -124,12 +124,34 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setIsOpen(false);
   };
 
+  // Check if any filter is applied
+  const isFilterApplied = () => {
+    // Check if tournament is selected
+    if (selectedTournament !== null) return true;
+    
+    // Check if unassigned only is enabled
+    if (showUnassignedOnly) return true;
+    
+    // Check if end date is set
+    if (endDate) return true;
+    
+    // Check if start date is different from today
+    if (startDate) {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const startDateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+      if (startDateStr !== todayStr) return true;
+    }
+    
+    return false;
+  };
+
   // Debug logs
   console.log('RefMatchFilter - selectedTournament:', selectedTournament);
   console.log('RefMatchFilter - showUnassignedOnly:', showUnassignedOnly);
   console.log('RefMatchFilter - startDate:', startDate);
   console.log('RefMatchFilter - endDate:', endDate);
-  console.log('RefMatchFilter - today comparison:', startDate ? startDate.toISOString().split("T")[0] : null, 'vs', new Date().toISOString().split("T")[0]);
+  console.log('RefMatchFilter - isFilterApplied:', isFilterApplied());
 
   return (
     <>
@@ -137,12 +159,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
         onClick={() => setIsOpen(true)}
         className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
-        {selectedTournament ||
-        showUnassignedOnly ||
-        endDate ||
-        (startDate &&
-          startDate.toISOString().split("T")[0] !==
-            new Date().toISOString().split("T")[0]) ? (
+        {isFilterApplied() ? (
           <FunnelIconSolid
             className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400"
             aria-hidden="true"
