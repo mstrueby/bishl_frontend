@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Image from 'next/image';
-import { PlusCircleIcon } from '@heroicons/react/24/solid';
-import { ArrowPathIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { PlusCircleIcon, FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid';
+import { ArrowPathIcon, ArrowUturnLeftIcon, FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline';
 import RefMatchFilter from './RefMatchFilter';
 import BulkStatusDialog from './BulkStatusDialog';
 import { TournamentValues } from '../../types/TournamentValues';
@@ -25,6 +25,7 @@ interface SectionHeaderProps {
 export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox, tournaments }: SectionHeaderProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [hasActiveFilters, setHasActiveFilters] = useState(false);
   const router = useRouter();
 
   return (
@@ -54,7 +55,11 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
         {searchBox && <div className="w-64">{searchBox}</div>}
         {filter && (
           <>
-            <RefMatchFilter onFilterChange={onFilterChange!} tournaments={tournaments} />
+            <RefMatchFilter 
+              onFilterChange={onFilterChange!} 
+              tournaments={tournaments}
+              onFilterStateChange={setHasActiveFilters}
+            />
             {onBulkUpdate && (
               <button
                 type="button"
