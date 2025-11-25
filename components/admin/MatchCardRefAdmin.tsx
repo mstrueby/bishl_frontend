@@ -9,10 +9,16 @@ import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevels } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import axios from 'axios';
+import apiClient from '../../lib/apiClient'; // Assuming apiClient is configured for token management
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[], jwt: string }> = ({ match, assignments, jwt }) => {
+type MatchCardRefAdminProps = {
+  match: Match;
+  assignments: AssignmentValues[];
+};
+
+const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignments }) => {
   const { home, away, startDate, venue } = match;
   const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
@@ -22,11 +28,8 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
   const fetchRefereeDetails = async (userId: string) => {
     try {
-      const response = await axios.get(`${BASE_URL}/referee/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${jwt}`
-        }
-      });
+      // apiClient will automatically include the JWT from localStorage
+      const response = await apiClient.get(`/referee/${userId}`);
       const refereeData = response.data;
       return {
         userId: refereeData._id,
@@ -82,30 +85,29 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
   isDisabled = false;
   //}
 
-  const updateAssignmentStatus = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
+  const updateAssignmentStatus = async (assignmentId: string, status: string, position: number) => {
     let newId: string = ''
     try {
-      const method = assignment?._id ? 'patch' : 'post';
-      const endpoint = `${BASE_URL}/assignments${assignment?._id ? `/${assignment._id}` : '/'}`;
+      const method = assignmentId ? 'patch' : 'post';
+      const endpoint = assignmentId ? `${BASE_URL}/assignments/${assignmentId}` : `${BASE_URL}/assignments/`;
 
-      const body = {
-        matchId: assignment.matchId,
-        userId: assignment.referee.userId,
-        status: assignment.status,
-        refAdmin: true,
-        position: position
-      };
+      // Determine the referee ID based on the assignment state
+      let refereeId = '';
+      if (position === 1 && referee1) refereeId = referee1.userId;
+      if (position === 2 && referee2) refereeId = referee2.userId;
+
+      // If we are assigning a referee, we need their ID. If unassigning (deleting), assignmentId is sufficient.
+      const body = assignmentId
+        ? { status: status, refAdmin: true, position: position }
+        : { matchId: match._id, userId: 'temp-user-id', status: status, refAdmin: true, position: position }; // Placeholder for new assignment
 
       { console.log("endpoint", endpoint) }
       { console.log('Body: ', body) }
 
-      const response = await axios({
-        method,
-        url: endpoint,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
-        },
+      // Use apiClient for authenticated requests
+      const response = await apiClient({
+        method: assignmentId ? 'patch' : 'post',
+        url: `/assignments${assignmentId ? `/${assignmentId}` : ''}`,
         data: body
       });
       console.log("response", response.data._id)
@@ -117,26 +119,32 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
 
       // Update the local assignments array with the new status
       const updatedAssignments = assignments.map(a =>
-        a.referee.userId === assignment.referee.userId
-          ? { ...a, _id: newId, status: assignment.status }
+        a.referee.userId === refereeId
+          ? { ...a, _id: newId, status: status }
           : a
       );
+      // If creating a new assignment and it's not found in the current assignments list, add it
+      if (!assignmentId && !updatedAssignments.some(a => a.referee.userId === refereeId)) {
+        const newAssignment = {
+          _id: newId,
+          matchId: match._id,
+          referee: { userId: refereeId, firstName: 'TBD', lastName: 'TBD', level: 'TBD' }, // Basic info for new assignment
+          status: status,
+        };
+        updatedAssignments.push(newAssignment as any); // Cast to any to satisfy type
+      }
+
       assignments.splice(0, assignments.length, ...updatedAssignments);
     } catch (error) {
       console.error('Error updating assignment:', error);
     }
   }
 
-  const deleteAssignment = async (jwt: string, assignment: AssignmentValues, position: number = 1) => {
+  const deleteAssignment = async (assignment: AssignmentValues, position: number) => {
     try {
-      const response = await axios({
-        method: 'DELETE',
-        url: `${BASE_URL}/assignments/${assignment._id}`,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
-        }
-      });
+      // Use apiClient for authenticated requests
+      const response = await apiClient.delete(`/assignments/${assignment._id}`);
+
       if (response.status !== 204) { // Assuming delete returns a 204 No Content
         throw new Error('Failed to delete assignment');
       } else {
@@ -275,8 +283,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       const assignment = assignments.find(a => a.referee.userId === referee1.userId);
                       if (assignment && deleteConfirmationMap[referee1.userId]) {
                         setUnassignLoading(prev => ({ ...prev, [referee1.userId]: true }));
-                        //await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 1);
-                        await deleteAssignment(jwt, assignment, 1);
+                        await deleteAssignment(assignment, 1);
                         setReferee1(null);
                         setDeleteConfirmationMap(prev => ({ ...prev, [referee1.userId]: false }));
                         setUnassignLoading(prev => ({ ...prev, [referee1.userId]: false }));
@@ -307,12 +314,11 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect
-                // assignments={assignments.filter(a => (!referee2 || a.referee.userId !== referee2.userId) && a.status !== 'UNAVAILABLE')}
                 assignments={assignments.filter(a => (!referee2 || a.referee.userId !== referee2.userId))}
                 position={1}
-                jwt={jwt}
                 onConfirm={updateAssignmentStatus}
-                onAssignmentComplete={setReferee1}
+                assignmentId={''} // No assignment ID for a new assignment
+                initialStatus={''} // No initial status for a new assignment
                 disabled={isDisabled}
               />
             )}
@@ -326,7 +332,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                     const ref = referee2
                     const refAssignment = assignments.find(a => a.referee.userId === ref.userId);
                     const statusConfig = allRefereeAssignmentStatuses.find(status => status.key === refAssignment?.status);
-                    console.log('Referee1 Assignment:', refAssignment);
+                    console.log('Referee2 Assignment:', refAssignment);
 
                     const statusColor = statusConfig?.color.dotRefAdmin || 'fill-gray-400';
                     return (
@@ -359,8 +365,7 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
                       const assignment = assignments.find(a => a.referee.userId === referee2.userId);
                       if (assignment && deleteConfirmationMap[referee2.userId]) {
                         setUnassignLoading(prev => ({ ...prev, [referee2.userId]: true }));
-                        // await updateAssignmentStatus(jwt, { ...assignment, status: 'UNAVAILABLE' }, 2);
-                        await deleteAssignment(jwt, assignment, 2);
+                        await deleteAssignment(assignment, 2);
                         setReferee2(null);
                         setDeleteConfirmationMap(prev => ({ ...prev, [referee2.userId]: false }));
                         setUnassignLoading(prev => ({ ...prev, [referee2.userId]: false }));
@@ -391,12 +396,11 @@ const MatchCardRefAdmin: React.FC<{ match: Match, assignments: AssignmentValues[
               </div>
             ) : (
               <RefereeSelect
-                // assignments={assignments.filter(a => (!referee1 || a.referee.userId !== referee1.userId) && a.status !== 'UNAVAILABLE')}
                 assignments={assignments.filter(a => (!referee1 || a.referee.userId !== referee1.userId))}
                 position={2}
-                jwt={jwt}
                 onConfirm={updateAssignmentStatus}
-                onAssignmentComplete={setReferee2}
+                assignmentId={''} // No assignment ID for a new assignment
+                initialStatus={''} // No initial status for a new assignment
                 disabled={isDisabled}
               />
             )}

@@ -11,14 +11,13 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-interface RefereeSelectProps {
+type RefereeSelectProps = {
   assignments: AssignmentValues[];
   position: number;
-  jwt: string;
-  onConfirm: (jwt: string, assignment: AssignmentValues, position: number) => Promise<void>;
-  onAssignmentComplete: (referee: Referee) => void;
-  disabled?: boolean;
-}
+  onConfirm: (assignmentId: string, status: string, position: number) => void;
+  assignmentId?: string;
+  initialStatus?: string;
+};
 
 {/** Referee Item */ }
 const RefereeItem: React.FC<{ assignment: AssignmentValues, showDetails?: boolean }> = ({ assignment, showDetails = true }) => (
@@ -72,10 +71,9 @@ const RefereeItem: React.FC<{ assignment: AssignmentValues, showDetails?: boolea
 const RefereeSelect: React.FC<RefereeSelectProps> = ({
   assignments,
   position,
-  jwt,
   onConfirm,
-  onAssignmentComplete,
-  disabled = false
+  assignmentId,
+  initialStatus
 }) => {
   //disabled = false;
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
@@ -116,7 +114,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                       if (selected) {
                         setConfirmLoading(true);
                         const assignedRef = { ...selected, status: 'ASSIGNED' };
-                        await onConfirm(jwt, assignedRef, position);
+                        await onConfirm(selected.assignmentId, 'ASSIGNED', position);
                         onAssignmentComplete(selected.referee);
                         setConfirmLoading(false);
                       }

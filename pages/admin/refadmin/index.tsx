@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { MatchValues } from '../../../types/MatchValues';
+import { AssignmentValues } from '../../../types/AssignmentValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import MatchCardRefAdmin from "../../../components/admin/MatchCardRefAdmin";
@@ -18,6 +19,7 @@ const RefAdmin: NextPage = () => {
   const { hasAnyRole } = usePermissions();
   const [matches, setMatches] = useState<MatchValues[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<MatchValues[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentValues[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const router = useRouter();
 
@@ -39,21 +41,29 @@ const RefAdmin: NextPage = () => {
   useEffect(() => {
     if (authLoading || !user) return;
 
-    const fetchMatches = async () => {
+    const fetchData = async () => {
       try {
-        const res = await apiClient.get('/matches');
-        const matchesData = res.data || [];
+        // Fetch matches and assignments in parallel
+        const [matchesRes, assignmentsRes] = await Promise.all([
+          apiClient.get('/matches'),
+          apiClient.get('/assignments')
+        ]);
+        
+        const matchesData = matchesRes.data || [];
+        const assignmentsData = assignmentsRes.data || [];
+        
         setMatches(matchesData);
         setFilteredMatches(matchesData);
+        setAssignments(assignmentsData);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.error('Error fetching matches:', error);
+          console.error('Error fetching data:', error);
         }
       } finally {
         setDataLoading(false);
       }
     };
-    fetchMatches();
+    fetchData();
   }, [authLoading, user]);
 
   const handleFilterChange = (filtered: MatchValues[]) => {
@@ -83,9 +93,16 @@ const RefAdmin: NextPage = () => {
       />
 
       <div className="mt-8 space-y-4">
-        {filteredMatches.map((match) => (
-          <MatchCardRefAdmin key={match._id} match={match} />
-        ))}
+        {filteredMatches.map((match) => {
+          const matchAssignments = assignments.filter(a => a.matchId === match._id);
+          return (
+            <MatchCardRefAdmin 
+              key={match._id} 
+              match={match} 
+              assignments={matchAssignments}
+            />
+          );
+        })}
       </div>
     </Layout>
   );
