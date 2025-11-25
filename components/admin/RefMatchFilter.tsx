@@ -11,24 +11,26 @@ import de from 'date-fns/locale/de';
 registerLocale('de', de);
 
 interface RefMatchFilterProps {
-  onFilterChange: (filter: { tournament: string; showUnassignedOnly: boolean; date_from?: string; date_to?: string }) => void;
+  onFilterChange: (filter: any) => void;
+  tournaments?: TournamentValues[];
 }
 
-const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
+const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange, tournaments = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [tournaments, setTournaments] = useState<TournamentValues[]>([]);
+  // const [tournaments, setTournaments] = useState<TournamentValues[]>([]); // This line is removed as tournaments are now passed as a prop
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
   const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [startDate, endDate] = dateRange;
 
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`)
-      .then(response => response.json())
-      .then(data => setTournaments(data))
-      .catch(error => console.error('Error fetching tournaments:', error));
-  }, []);
+  // useEffect for fetching tournaments is removed as tournaments are now passed as a prop
+  // useEffect(() => {
+  //   fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`)
+  //     .then(response => response.json())
+  //     .then(data => setTournaments(data))
+  //     .catch(error => console.error('Error fetching tournaments:', error));
+  // }, []);
 
   const handleApplyFilter = () => {
     console.log('Date Range:', { startDate, endDate });
@@ -95,8 +97,8 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setSelectedTournament(null);
     setShowUnassignedOnly(false);
     setDateRange([null, null]);
-    onFilterChange({ 
-      tournament: 'all', 
+    onFilterChange({
+      tournament: 'all',
       showUnassignedOnly: false,
       date_from: new Date().toISOString().split('T')[0]
     });
@@ -135,7 +137,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
                   <Dialog.Title as="h3" className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
                     Spiele filtern
                   </Dialog.Title>
-                  
+
                   <TournamentSelect
                     selectedTournament={tempSelectedTournament}
                     onTournamentChange={setTempSelectedTournament}
