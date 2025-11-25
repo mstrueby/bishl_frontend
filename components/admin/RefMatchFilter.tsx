@@ -94,7 +94,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       setTempShowUnassignedOnly(showUnassignedOnly);
       setTempDateRange(dateRange);
     }
-  }, [isOpen, selectedTournament, dateRange, showUnassignedOnly]);
+  }, [isOpen]);
 
   const handleCancel = () => {
     // Reset temp states to applied states
@@ -141,17 +141,6 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
   })();
   
   const isFilterApplied = hasActiveTournamentFilter || hasActiveUnassignedFilter || hasActiveEndDateFilter || hasActiveStartDateFilter;
-
-  // Debug logs
-  console.log('RefMatchFilter - selectedTournament:', selectedTournament);
-  console.log('RefMatchFilter - showUnassignedOnly:', showUnassignedOnly);
-  console.log('RefMatchFilter - startDate:', startDate);
-  console.log('RefMatchFilter - endDate:', endDate);
-  console.log('RefMatchFilter - hasActiveTournamentFilter:', hasActiveTournamentFilter);
-  console.log('RefMatchFilter - hasActiveUnassignedFilter:', hasActiveUnassignedFilter);
-  console.log('RefMatchFilter - hasActiveEndDateFilter:', hasActiveEndDateFilter);
-  console.log('RefMatchFilter - hasActiveStartDateFilter:', hasActiveStartDateFilter);
-  console.log('RefMatchFilter - isFilterApplied:', isFilterApplied);
 
   return (
     <>
