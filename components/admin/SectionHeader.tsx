@@ -56,7 +56,9 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
         {searchBox && <div className="w-64">{searchBox}</div>}
         {filter && (
           <>
-            <RefMatchFilter onFilterChange={onFilterChange!} />
+            <RefMatchFilter
+            onFilterChange={onFilterChange}
+          />
             {onBulkUpdate && (
               <button
                 type="button"

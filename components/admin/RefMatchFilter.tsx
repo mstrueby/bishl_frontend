@@ -17,7 +17,6 @@ registerLocale("de", de);
 
 interface RefMatchFilterProps {
   onFilterChange: (filter: any) => void;
-  tournaments?: TournamentValues[];
 }
 
 const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
