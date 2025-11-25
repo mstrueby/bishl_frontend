@@ -10,6 +10,7 @@ import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevels } from '
 import { classNames } from '../../tools/utils';
 import axios from 'axios';
 import apiClient from '../../lib/apiClient'; // Assuming apiClient is configured for token management
+import { CldImage } from 'next-cloudinary';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -232,7 +233,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
           </div>
           {/* away */}
           <div className="flex flex-row items-center w-full">
-            <Image className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
+            <CldImage className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
             <div className="flex-auto ml-6">
               <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.shortName}</p>
             </div>
