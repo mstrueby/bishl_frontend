@@ -67,21 +67,19 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
                 Status
               </button>
             )}
-            {onBulkUpdate && (
-              <BulkStatusDialog
-                isOpen={isDialogOpen}
-                onClose={() => setIsDialogOpen(false)}
-                isLoading={isUpdating}
-                onConfirm={async (status) => {
-                  setIsUpdating(true);
-                  const success = await onBulkUpdate(status);
-                  setIsUpdating(false);
-                  if (success) {
-                    setIsDialogOpen(false);
-                  }
-                }}
-              />
-            )}
+            <BulkStatusDialog
+              isOpen={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+              isLoading={isUpdating}
+              onConfirm={async (status) => {
+                setIsUpdating(true);
+                const success = await onBulkUpdate?.(status);
+                setIsUpdating(false);
+                if (success) {
+                  setIsDialogOpen(false);
+                }
+              }}
+            />
           </>
         )}
         {backLink && (
