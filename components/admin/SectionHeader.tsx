@@ -5,7 +5,7 @@ import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import RefMatchFilter from './RefMatchFilter';
 import BulkStatusDialog from './BulkStatusDialog';
-import { TournamentValues } from '../types/domain';
+import { TournamentValues } from '../../types/TournamentValues';
 
 interface FilterChangeParams {
   tournament: string;
