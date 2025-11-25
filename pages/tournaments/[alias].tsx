@@ -704,7 +704,7 @@ export default function Tournament({
 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const response = await apiClient.get('/tournaments/');
+  const response = await apiClient.get('/tournaments');
   const allTournamentsData = response.data;
   const paths = allTournamentsData.map((tournament: Tournament) => ({
     params: { alias: tournament.alias },
