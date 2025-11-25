@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import Image from 'next/image';
 import { Match } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { Referee } from '../../types/MatchValues';
@@ -226,14 +225,30 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
         <div className="flex flex-col gap-y-2 sm:gap-x-2 justify-between mt-3 sm:mt-0 w-full sm:w-1/3">
           {/* home */}
           <div className="flex flex-row items-center w-full">
-            <Image className="h-10 w-10 flex-none" src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={home.tinyName} objectFit="contain" height={32} width={32} />
+            <CldImage 
+              className="h-8 w-8 flex-none object-contain" 
+              src={home.logo ? home.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+              alt={home.tinyName} 
+              width={32} 
+              height={32}
+              crop="fit"
+              gravity="center"
+            />
             <div className="flex-auto ml-6">
               <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{home.shortName}</p>
             </div>
           </div>
           {/* away */}
           <div className="flex flex-row items-center w-full">
-            <CldImage className="h-10 w-10 flex-none" src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={away.tinyName} objectFit="contain" height={32} width={32} />
+            <CldImage 
+              className="h-8 w-8 flex-none object-contain" 
+              src={away.logo ? away.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+              alt={away.tinyName} 
+              width={32} 
+              height={32}
+              crop="fit"
+              gravity="center"
+            />
             <div className="flex-auto ml-6">
               <p className={`text-lg sm:max-md:text-base font-medium text-gray-600`}>{away.shortName}</p>
             </div>
