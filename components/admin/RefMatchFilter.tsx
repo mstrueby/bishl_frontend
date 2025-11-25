@@ -17,12 +17,18 @@ interface RefMatchFilterProps {
 
 const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange, tournaments = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // const [tournaments, setTournaments] = useState<TournamentValues[]>([]); // This line is removed as tournaments are now passed as a prop
+  
+  // Applied filter states (these are what's actually active)
   const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
-  const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([new Date(), null]);
   const [startDate, endDate] = dateRange;
+  
+  // Temporary filter states (for the modal)
+  const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
+  const [tempShowUnassignedOnly, setTempShowUnassignedOnly] = useState(false);
+  const [tempDateRange, setTempDateRange] = useState<[Date | null, Date | null]>([new Date(), null]);
+  const [tempStartDate, tempEndDate] = tempDateRange;
 
   // useEffect for fetching tournaments is removed as tournaments are now passed as a prop
   // useEffect(() => {
@@ -33,7 +39,6 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange, tournam
   // }, []);
 
   const handleApplyFilter = () => {
-    console.log('Date Range:', { startDate, endDate });
     const formatDateToYMD = (date: Date | null) => {
         if (!date) return undefined;
         try {
@@ -48,59 +53,59 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange, tournam
     };
 
     const today = new Date();
-    const dateFrom = formatDateToYMD(startDate) || formatDateToYMD(today);
-    const adjustedEndDate = endDate ? new Date(endDate.getTime() + (24 * 60 * 60 * 1000)) : null;
-    const dateTo = endDate ? formatDateToYMD(adjustedEndDate) : undefined;
-    console.log('dateFrom:', dateFrom);
-    console.log('dateTo:', dateTo);
+    const dateFrom = formatDateToYMD(tempStartDate) || formatDateToYMD(today);
+    const adjustedEndDate = tempEndDate ? new Date(tempEndDate.getTime() + (24 * 60 * 60 * 1000)) : null;
+    const dateTo = tempEndDate ? formatDateToYMD(adjustedEndDate) : undefined;
+    
+    // Update applied states
     setSelectedTournament(tempSelectedTournament);
+    setShowUnassignedOnly(tempShowUnassignedOnly);
+    setDateRange(tempDateRange);
+    
     onFilterChange({
       tournament: tempSelectedTournament?.alias || 'all',
-      showUnassignedOnly,
+      showUnassignedOnly: tempShowUnassignedOnly,
       date_from: dateFrom,
       date_to: dateTo
     });
     setIsOpen(false);
   };
 
-  // Store initial values when opening the modal
-  const [initialValues, setInitialValues] = useState<{
-    tournament: TournamentValues | null;
-    dateRange: [Date | null, Date | null];
-    showUnassignedOnly: boolean;
-  }>({
-    tournament: null,
-    dateRange: [new Date(), null],
-    showUnassignedOnly: false
-  });
-
+  // When modal opens, sync temp states with applied states
   useEffect(() => {
     if (isOpen) {
-      setInitialValues({
-        tournament: selectedTournament,
-        dateRange: dateRange,
-        showUnassignedOnly: showUnassignedOnly
-      });
       setTempSelectedTournament(selectedTournament);
+      setTempShowUnassignedOnly(showUnassignedOnly);
+      setTempDateRange(dateRange);
     }
   }, [isOpen, selectedTournament, dateRange, showUnassignedOnly]);
 
   const handleCancel = () => {
-    setTempSelectedTournament(initialValues.tournament);
-    setDateRange(initialValues.dateRange);
-    setShowUnassignedOnly(initialValues.showUnassignedOnly);
+    // Reset temp states to applied states
+    setTempSelectedTournament(selectedTournament);
+    setTempShowUnassignedOnly(showUnassignedOnly);
+    setTempDateRange(dateRange);
     setIsOpen(false);
   };
 
   const handleResetFilter = () => {
+    const today = new Date();
+    const resetDateRange: [Date | null, Date | null] = [today, null];
+    
+    // Reset temp states
     setTempSelectedTournament(null);
+    setTempShowUnassignedOnly(false);
+    setTempDateRange(resetDateRange);
+    
+    // Reset applied states
     setSelectedTournament(null);
     setShowUnassignedOnly(false);
-    setDateRange([null, null]);
+    setDateRange(resetDateRange);
+    
     onFilterChange({
       tournament: 'all',
       showUnassignedOnly: false,
-      date_from: new Date().toISOString().split('T')[0]
+      date_from: today.toISOString().split('T')[0]
     });
     setIsOpen(false);
   };
@@ -146,17 +151,17 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange, tournam
 
                   <div className="mt-4 flex items-center">
                     <Switch
-                      checked={showUnassignedOnly}
-                      onChange={setShowUnassignedOnly}
+                      checked={tempShowUnassignedOnly}
+                      onChange={setTempShowUnassignedOnly}
                       className={`${
-                        showUnassignedOnly ? 'bg-indigo-600' : 'bg-gray-200'
+                        tempShowUnassignedOnly ? 'bg-indigo-600' : 'bg-gray-200'
                       } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
                     >
                       <span className="sr-only">Nur offene Spiele</span>
                       <span
                         aria-hidden="true"
                         className={`${
-                          showUnassignedOnly ? 'translate-x-5' : 'translate-x-0'
+                          tempShowUnassignedOnly ? 'translate-x-5' : 'translate-x-0'
                         } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
                       />
                     </Switch>
@@ -164,7 +169,6 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange, tournam
                   </div>
 
                   <div className="mt-4">
-                    {/* <label className="text-gray-700 text-sm font-bold mb-2">Datumsbereich:</label> */}
                     <div className="mt-1">
                       <DatePicker
                         showIcon={false}
@@ -173,9 +177,9 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange, tournam
                           <CalendarDateRangeIcon className="pointer-events-none mr-2 size-5 self-center text-gray-400" />
                         }
                         selectsRange={true}
-                        startDate={startDate || undefined}
-                        endDate={endDate || undefined}
-                        onChange={(update) => setDateRange(update)}
+                        startDate={tempStartDate || undefined}
+                        endDate={tempEndDate || undefined}
+                        onChange={(update) => setTempDateRange(update)}
                         dateFormat="dd.MM.yyyy"
                         isClearable={true}
                         className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
