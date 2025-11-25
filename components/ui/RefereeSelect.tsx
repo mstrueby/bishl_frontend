@@ -17,6 +17,7 @@ type RefereeSelectProps = {
   onConfirm: (assignmentId: string, status: string, position: number) => void;
   assignmentId?: string;
   initialStatus?: string;
+  disabled?: boolean;
 };
 
 {/** Referee Item */ }
@@ -73,9 +74,9 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
   position,
   onConfirm,
   assignmentId,
-  initialStatus
+  initialStatus,
+  disabled = false
 }) => {
-  //disabled = false;
   const [selected, setSelected] = useState<AssignmentValues | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
@@ -113,9 +114,8 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                     onClick={async () => {
                       if (selected) {
                         setConfirmLoading(true);
-                        const assignedRef = { ...selected, status: 'ASSIGNED' };
-                        await onConfirm(selected.assignmentId, 'ASSIGNED', position);
-                        onAssignmentComplete(selected.referee);
+                        await onConfirm(selected._id, 'ASSIGNED', position);
+                        setSelected(null);
                         setConfirmLoading(false);
                       }
                     }}
