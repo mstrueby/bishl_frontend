@@ -124,6 +124,13 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setIsOpen(false);
   };
 
+  // Debug logs
+  console.log('RefMatchFilter - selectedTournament:', selectedTournament);
+  console.log('RefMatchFilter - showUnassignedOnly:', showUnassignedOnly);
+  console.log('RefMatchFilter - startDate:', startDate);
+  console.log('RefMatchFilter - endDate:', endDate);
+  console.log('RefMatchFilter - today comparison:', startDate ? startDate.toISOString().split("T")[0] : null, 'vs', new Date().toISOString().split("T")[0]);
+
   return (
     <>
       <button
