@@ -121,7 +121,9 @@ export default function TournamentOverview({
                   <div className="focus:outline-none">
                     <span className="absolute inset-0" aria-hidden="true" />
                     <p className="text-lg font-medium text-gray-900">
-                      {season.name}
+                      {typeof season.name === 'object' && season.name !== null && 'value' in season.name 
+                        ? season.name.value 
+                        : season.name}
                     </p>
                     <div className="mt-2 flex items-center">
                       {season.published ? (
