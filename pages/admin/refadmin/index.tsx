@@ -191,6 +191,8 @@ const RefAdmin: NextPage = () => {
       <SectionHeader 
         title="Schiedsrichter Administration"
         filter="true"
+        currentFilter={filter}
+        tournaments={tournaments}
         onFilterChange={handleFilterChange}
       />
 
