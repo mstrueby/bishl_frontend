@@ -508,16 +508,16 @@ Auth-dependent features (context menus, edit buttons) render client-side after h
   - [x] Meta tags: title, description, canonical URL
   - [x] Client-side: No auth needed (public page)
 
-**Day 5-7: Round Overview Page**
-- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/index.tsx` - round overview
-  - SSG with `getStaticProps` (fetch round + matchdays list + standings)
-  - Display round details (name, dates, type)
-  - Show round standings table (if applicable)
-  - List all matchdays as cards/links (show date, venue for tournament-style)
-  - Breadcrumb: Home > Tournaments > {Tournament} > {Season} > {Round}
-  - ISR revalidation: 180s (3 min)
-  - Meta tags: title, description, canonical URL
-  - Client-side: No auth needed (public page)
+**Day 5-7: Round Overview Page** ✅ COMPLETE
+- [x] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/index.tsx` - round overview
+  - [x] SSG with `getStaticProps` (fetch round + matchdays list + standings)
+  - [x] Display round details (name, dates, type)
+  - [x] Show round standings table (if applicable)
+  - [x] List all matchdays as cards/links (show date, venue for tournament-style)
+  - [x] Breadcrumb: Home > Tournaments > {Tournament} > {Season} > {Round}
+  - [x] ISR revalidation: 180s (3 min)
+  - [x] Meta tags: title, description, canonical URL
+  - [x] Client-side: No auth needed (public page)
 
 **Day 8-10: Matchday Detail Page (Main View)**
 - [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/index.tsx` - matchday detail
