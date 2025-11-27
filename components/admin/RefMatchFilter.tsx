@@ -17,7 +17,6 @@ registerLocale("de", de);
 
 interface RefMatchFilterProps {
   onFilterChange: (filter: any) => void;
-  tournaments?: TournamentValues[];
 }
 
 const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
@@ -71,17 +70,19 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       : null;
     const dateTo = tempEndDate ? formatDateToYMD(adjustedEndDate) : undefined;
 
-    // Update applied states
+    // Update applied states first
     setSelectedTournament(tempSelectedTournament);
     setShowUnassignedOnly(tempShowUnassignedOnly);
     setDateRange(tempDateRange);
 
+    // Call onFilterChange with the temp values (they will become applied)
     onFilterChange({
       tournament: tempSelectedTournament?.alias || "all",
       showUnassignedOnly: tempShowUnassignedOnly,
       date_from: dateFrom,
       date_to: dateTo,
     });
+    
     setIsOpen(false);
   };
 
@@ -92,7 +93,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
       setTempShowUnassignedOnly(showUnassignedOnly);
       setTempDateRange(dateRange);
     }
-  }, [isOpen, selectedTournament, dateRange, showUnassignedOnly]);
+  }, [isOpen, selectedTournament, showUnassignedOnly, dateRange]);
 
   const handleCancel = () => {
     // Reset temp states to applied states
@@ -124,18 +125,35 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ onFilterChange }) => {
     setIsOpen(false);
   };
 
+  // Check if any filter is applied - use applied states not temp states
+  const isFilterApplied = (() => {
+    // Tournament filter
+    if (selectedTournament !== null) return true;
+    
+    // Unassigned filter
+    if (showUnassignedOnly === true) return true;
+    
+    // End date filter
+    if (endDate !== null) return true;
+    
+    // Start date filter (different from today)
+    if (startDate) {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const startDateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+      if (startDateStr !== todayStr) return true;
+    }
+    
+    return false;
+  })();
+
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
         className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
-        {selectedTournament ||
-        showUnassignedOnly ||
-        endDate ||
-        (startDate &&
-          startDate.toISOString().split("T")[0] !==
-            new Date().toISOString().split("T")[0]) ? (
+        {isFilterApplied ? (
           <FunnelIconSolid
             className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400"
             aria-hidden="true"
