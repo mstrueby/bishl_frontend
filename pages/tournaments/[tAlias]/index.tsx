@@ -7,34 +7,16 @@ import { tournamentConfigs } from '../../../tools/consts';
 import apiClient from '../../../lib/apiClient';
 import Link from 'next/link';
 import { CheckIcon } from '@heroicons/react/20/solid';
-
-interface Season {
-  name: string;
-  alias: string;
-  published: boolean;
-}
-
-interface Tournament {
-  _id: string;
-  name: string;
-  alias: string;
-  tinyName: string;
-  ageGroup: string;
-  published: boolean;
-  active: boolean;
-  external: boolean;
-  website: string;
-  seasons: Season[];
-}
+import { TournamentValues, SeasonValues } from '../../../types/TournamentValues';
 
 export default function TournamentOverview({
   tournament
 }: {
-  tournament: Tournament
+  tournament: TournamentValues
 }) {
   const sortedSeasons = tournament.seasons
     .slice()
-    .sort((a, b) => b.name.localeCompare(a.name));
+    .sort((a, b) => b.alias.localeCompare(a.alias));
 
   return (
     <Layout>
@@ -79,7 +61,7 @@ export default function TournamentOverview({
           </h2>
           {tournament.ageGroup && (
             <p className="mt-1 text-sm text-gray-500">
-              Altersklasse: {tournament.ageGroup}
+              Altersklasse: {tournament.ageGroup.value}
             </p>
           )}
         </div>
@@ -121,9 +103,7 @@ export default function TournamentOverview({
                   <div className="focus:outline-none">
                     <span className="absolute inset-0" aria-hidden="true" />
                     <p className="text-lg font-medium text-gray-900">
-                      {typeof season.name === 'object' && season.name !== null && 'value' in season.name 
-                        ? season.name.value 
-                        : season.name}
+                      {season.name}
                     </p>
                     <div className="mt-2 flex items-center">
                       {season.published ? (
@@ -174,7 +154,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const response = await apiClient.get('/tournaments');
     const allTournamentsData = response.data;
-    const paths = allTournamentsData.map((tournament: Tournament) => ({
+    const paths = allTournamentsData.map((tournament: TournamentValues) => ({
       params: { tAlias: tournament.alias },
     }));
     return { paths, fallback: 'blocking' };
