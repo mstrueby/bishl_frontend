@@ -5,6 +5,7 @@ import Head from 'next/head';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import Layout from '../../../../components/Layout';
 import { SeasonValues } from '../../../../types/TournamentValues';
+import apiClient from '../../../../lib/apiClient';
 
 interface SeasonOverviewProps {
   season: SeasonValues;
@@ -104,13 +105,6 @@ export default function SeasonOverview({
                       {round.name}
                     </p>
                     
-                    {/* Round Type */}
-                    {round.type && (
-                      <p className="mt-1 text-sm text-gray-500">
-                        {round.type}
-                      </p>
-                    )}
-                    
                     {/* Round Dates */}
                     {(round.startDate || round.endDate) && (
                       <p className="mt-2 text-sm text-gray-600">
@@ -161,7 +155,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   }
 
   try {
-    // Fetch season data
+    // Fetch season data using native fetch (apiClient cannot be used in getStaticProps)
     const seasonRes = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}`
     );
@@ -171,21 +165,36 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       return { notFound: true };
     }
     
-    const seasonData = await seasonRes.json();
+    const seasonResponse = await seasonRes.json();
+    // Handle standardized API response
+    const seasonData = seasonResponse?.data || seasonResponse;
 
     // Fetch tournament data for breadcrumb
     const tournamentRes = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}`
     );
     
-    const tournamentData = tournamentRes.ok ? await tournamentRes.json() : null;
+    if (tournamentRes.ok) {
+      const tournamentResponse = await tournamentRes.json();
+      const tournamentData = tournamentResponse?.data || tournamentResponse;
+      
+      return {
+        props: {
+          season: seasonData,
+          tAlias,
+          sAlias,
+          tournamentName: tournamentData?.name || tAlias,
+        },
+        revalidate: 300, // 5 minutes
+      };
+    }
 
     return {
       props: {
         season: seasonData,
         tAlias,
         sAlias,
-        tournamentName: tournamentData?.name || tAlias,
+        tournamentName: tAlias,
       },
       revalidate: 300, // 5 minutes
     };
@@ -198,7 +207,12 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 export async function getStaticPaths() {
   try {
     const tournamentsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`);
-    const tournaments = await tournamentsRes.json();
+    const tournamentsData = await tournamentsRes.json();
+    
+    // Handle standardized API response format
+    const tournaments = Array.isArray(tournamentsData) 
+      ? tournamentsData 
+      : (tournamentsData?.data || []);
     
     let paths: { params: { tAlias: string; sAlias: string } }[] = [];
 
@@ -206,7 +220,12 @@ export async function getStaticPaths() {
       const seasonsRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`
       );
-      const seasons = await seasonsRes.json();
+      const seasonsData = await seasonsRes.json();
+      
+      // Handle standardized API response format
+      const seasons = Array.isArray(seasonsData) 
+        ? seasonsData 
+        : (seasonsData?.data || []);
       
       const tournamentPaths = seasons.map((season: SeasonValues) => ({
         params: { tAlias: tournament.alias, sAlias: season.alias },
