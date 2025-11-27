@@ -1,4 +1,3 @@
-
 import React, { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition, Switch } from "@headlessui/react";
 import {
@@ -28,10 +27,10 @@ interface RefMatchFilterProps {
   onFilterChange?: (filter: FilterState) => void;
 }
 
-const RefMatchFilter: React.FC<RefMatchFilterProps> = ({ 
-  filter, 
+const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
+  filter,
   tournaments,
-  onFilterChange 
+  onFilterChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -53,21 +52,29 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
   };
 
   // Applied filter states - derived from filter prop
-  const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(null);
+  const [selectedTournament, setSelectedTournament] =
+    useState<TournamentValues | null>(null);
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(false);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([new Date(), null]);
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    new Date(),
+    null,
+  ]);
 
   // Temporary filter states (for the modal)
-  const [tempSelectedTournament, setTempSelectedTournament] = useState<TournamentValues | null>(null);
+  const [tempSelectedTournament, setTempSelectedTournament] =
+    useState<TournamentValues | null>(null);
   const [tempShowUnassignedOnly, setTempShowUnassignedOnly] = useState(false);
-  const [tempDateRange, setTempDateRange] = useState<[Date | null, Date | null]>([new Date(), null]);
+  const [tempDateRange, setTempDateRange] = useState<
+    [Date | null, Date | null]
+  >([new Date(), null]);
 
   // Sync applied state from filter prop
   useEffect(() => {
     if (!filter) return;
 
     // Sync tournament
-    const tournament = tournaments.find(t => t.alias === filter.tournament) || null;
+    const tournament =
+      tournaments.find((t) => t.alias === filter.tournament) || null;
     setSelectedTournament(tournament);
 
     // Sync unassigned only
@@ -76,7 +83,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
     // Sync date range
     const startDate = parseDate(filter.date_from) || new Date();
     let endDate: Date | null = null;
-    
+
     if (filter.date_to) {
       // Subtract one day from date_to since we added one day when applying
       const endDateParsed = parseDate(filter.date_to);
@@ -84,7 +91,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
         endDate = new Date(endDateParsed.getTime() - 24 * 60 * 60 * 1000);
       }
     }
-    
+
     setDateRange([startDate, endDate]);
   }, [filter, tournaments]);
 
@@ -114,7 +121,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
     const [tempStartDate, tempEndDate] = tempDateRange;
     const today = new Date();
     const dateFrom = formatDateToYMD(tempStartDate) || formatDateToYMD(today);
-    
+
     // Add one day to end date for backend query (to include the end date)
     const adjustedEndDate = tempEndDate
       ? new Date(tempEndDate.getTime() + 24 * 60 * 60 * 1000)
@@ -138,7 +145,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
     if (onFilterChange) {
       onFilterChange(newFilter);
     }
-    
+
     setIsOpen(false);
   };
 
@@ -174,7 +181,7 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
     if (onFilterChange) {
       onFilterChange(resetFilter);
     }
-    
+
     setIsOpen(false);
   };
 
@@ -182,22 +189,22 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
   const isFilterApplied = (() => {
     const [startDate, endDate] = dateRange;
     const todayStr = getTodayString();
-    
+
     // Tournament filter
     if (selectedTournament !== null) return true;
-    
+
     // Unassigned filter
     if (showUnassignedOnly === true) return true;
-    
+
     // End date filter
     if (endDate !== null) return true;
-    
+
     // Start date filter (different from today)
     if (startDate) {
-      const startDateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+      const startDateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, "0")}-${String(startDate.getDate()).padStart(2, "0")}`;
       if (startDateStr !== todayStr) return true;
     }
-    
+
     return false;
   })();
 
@@ -240,63 +247,63 @@ const RefMatchFilter: React.FC<RefMatchFilterProps> = ({
                 <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
+                    className="text-lg text-center font-bold leading-6 text-gray-900"
                   >
                     Spiele filtern
                   </Dialog.Title>
 
-                  <TournamentSelect
-                    selectedTournament={tempSelectedTournament}
-                    onTournamentChange={setTempSelectedTournament}
-                    allTournamentsData={tournaments}
-                  />
+                  <div className="mt-10 space-y-6">
+                    <TournamentSelect
+                      selectedTournament={tempSelectedTournament}
+                      onTournamentChange={setTempSelectedTournament}
+                      allTournamentsData={tournaments}
+                    />
 
-                  <div className="mt-4 flex items-center">
-                    <Switch
-                      checked={tempShowUnassignedOnly}
-                      onChange={setTempShowUnassignedOnly}
-                      className={`${
-                        tempShowUnassignedOnly ? "bg-indigo-600" : "bg-gray-200"
-                      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-                    >
-                      <span className="sr-only">Nur offene Spiele</span>
-                      <span
-                        aria-hidden="true"
+                    <div className="flex items-center">
+                      <Switch
+                        checked={tempShowUnassignedOnly}
+                        onChange={setTempShowUnassignedOnly}
                         className={`${
                           tempShowUnassignedOnly
-                            ? "translate-x-5"
-                            : "translate-x-0"
-                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                      />
-                    </Switch>
-                    <span className="ml-3 text-sm text-gray-900">
-                      Nur offene Spiele
-                    </span>
-                  </div>
-
-                  <div className="mt-4">
-                    <div className="mt-1">
-                      <DatePicker
-                        showIcon={false}
-                        toggleCalendarOnIconClick={true}
-                        icon={
-                          <CalendarDateRangeIcon className="pointer-events-none mr-2 size-5 self-center text-gray-400" />
-                        }
-                        selectsRange={true}
-                        startDate={tempStartDate || undefined}
-                        endDate={tempEndDate || undefined}
-                        onChange={(update) => setTempDateRange(update)}
-                        dateFormat="dd.MM.yyyy"
-                        isClearable={true}
-                        className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                        placeholderText="(Zeitraum auswählen)"
-                        locale="de"
-                        calendarStartDay={1}
-                      />
+                            ? "bg-indigo-600"
+                            : "bg-gray-200"
+                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                      >
+                        <span className="sr-only">Nur offene Spiele</span>
+                        <span
+                          aria-hidden="true"
+                          className={`${
+                            tempShowUnassignedOnly
+                              ? "translate-x-5"
+                              : "translate-x-0"
+                          } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                        />
+                      </Switch>
+                      <span className="ml-3 text-sm text-gray-900">
+                        Nur offene Spiele
+                      </span>
                     </div>
+
+                    <DatePicker
+                      showIcon={false}
+                      toggleCalendarOnIconClick={true}
+                      icon={
+                        <CalendarDateRangeIcon className="pointer-events-none mr-2 size-5 self-center text-gray-400" />
+                      }
+                      selectsRange={true}
+                      startDate={tempStartDate || undefined}
+                      endDate={tempEndDate || undefined}
+                      onChange={(update) => setTempDateRange(update)}
+                      dateFormat="dd.MM.yyyy"
+                      isClearable={true}
+                      className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                      placeholderText="(Zeitraum auswählen)"
+                      locale="de"
+                      calendarStartDay={1}
+                    />
                   </div>
 
-                  <div className="mt-6 flex justify-end items-center">
+                  <div className="mt-10 flex justify-end items-center">
                     <button
                       type="button"
                       className="text-sm text-indigo-600 hover:underline mr-3"

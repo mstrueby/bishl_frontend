@@ -164,7 +164,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
   }
 
   return (
-    <div id={`match-${match._id}`} className={classNames('my-10 px-4 pt-4 border-2 rounded-xl shadow-md', isDisabled ? '' : 'pb-4')}>
+    <div id={`match-${match._id}`} className={classNames('px-4 pt-4 border-2 rounded-xl shadow-md', isDisabled ? '' : 'pb-4')}>
       <div className="flex flex-col sm:flex-row gap-y-2">
         {/* 1 tournament, status (mobile), date, venue */}
         <div className="flex flex-col sm:w-1/3">
