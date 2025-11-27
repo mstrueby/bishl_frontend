@@ -106,6 +106,28 @@ export default function Tournament({
 }: {
   tournament: Tournament
 }) {
+  const router = useRouter();
+
+  // Redirect to new URL structure
+  useEffect(() => {
+    if (tournament && tournament.seasons.length > 0) {
+      const latestSeason = tournament.seasons.sort((a, b) => b.name.localeCompare(a.name))[0];
+      router.replace(`/tournaments/${tournament.alias}/${latestSeason.alias}`);
+    }
+  }, [tournament, router]);
+
+  // Show loading while redirecting
+  if (router.isFallback || isLoadingInitial) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="spinner-container">
+          <ClipLoader color={"#4f46e5"} loading={true} size={150} />
+        </div>
+      </div>
+    );
+  }
+
+  return null;
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [isLoadingMatchdays, setIsLoadingMatchdays] = useState(true);
