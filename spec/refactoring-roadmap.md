@@ -487,16 +487,16 @@ Auth-dependent features (context menus, edit buttons) render client-side after h
 
 **Tasks:**
 
-**Day 1-2: Tournament Overview Page**
-- [x] ~~Delete old redirect file `pages/tournaments/[alias].tsx`~~ (COMPLETE)
-- [ ] Create `/tournaments/[tAlias]/index.tsx` - tournament overview
-  - SSG with `getStaticProps` (fetch tournament + seasons list)
-  - Display tournament details (name, ageGroup, description)
-  - List all seasons as cards/links
-  - Breadcrumb: Home > Tournaments > {Tournament}
-  - ISR revalidation: 300s (5 min)
-  - Meta tags: title, description, canonical URL
-  - Client-side: No auth needed (public page)
+**Day 1-2: Tournament Overview Page** ✅ COMPLETE
+- [x] Delete old redirect file `pages/tournaments/[alias].tsx` (COMPLETE)
+- [x] Create `/tournaments/[tAlias]/index.tsx` - tournament overview
+  - [x] SSG with `getStaticProps` (fetch tournament + seasons list)
+  - [x] Display tournament details (name, ageGroup, description)
+  - [x] List all seasons as cards/links
+  - [x] Breadcrumb: Home > Tournaments > {Tournament}
+  - [x] ISR revalidation: 300s (5 min)
+  - [x] Meta tags: title, description, canonical URL
+  - [x] Client-side: No auth needed (public page)
 
 **Day 3-4: Season Overview Page**
 - [ ] Create `/tournaments/[tAlias]/[sAlias]/index.tsx` - season overview
