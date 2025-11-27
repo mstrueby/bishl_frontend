@@ -466,33 +466,131 @@ See `spec/dependency-upgrade-plan.md` for detailed execution plan.
 
 **Target Structure:**
 ```
-/tournaments/landesliga
-/tournaments/landesliga/2024-2025
-/tournaments/landesliga/2024-2025/hauptrunde
-/tournaments/landesliga/2024-2025/hauptrunde/matchday-1
-/tournaments/landesliga/2024-2025/hauptrunde/matchday-1/standings
-/tournaments/landesliga/2024-2025/hauptrunde/matchday-1/stats
-/matches/[matchId] (for individual matches)
+/tournaments/landesliga                                    → Tournament overview (list seasons)
+/tournaments/landesliga/2024-2025                         → Season overview (list rounds)
+/tournaments/landesliga/2024-2025/hauptrunde              → Round overview (list matchdays)
+/tournaments/landesliga/2024-2025/hauptrunde/matchday-1   → Matchday matches + standings + stats (tabs)
+/matches/[matchId]                                        → Individual match (existing)
 ```
 
+**Rendering Strategy: SSG + Client-Side Auth Hydration**
+
+All pages use `getStaticProps` with ISR for:
+- SEO optimization (Google sees full content)
+- Fast initial page load
+- Data freshness via revalidation
+
+Auth-dependent features (context menus, edit buttons) render client-side after hydration:
+- Use `useAuth()` + `usePermissions()` hooks
+- Context menus appear only for authenticated users
+- No SEO impact (context menus not needed for indexing)
+
 **Tasks:**
+
+**Day 1-2: Tournament Overview Page**
+- [x] ~~Delete old redirect file `pages/tournaments/[alias].tsx`~~ (COMPLETE)
 - [ ] Create `/tournaments/[tAlias]/index.tsx` - tournament overview
+  - SSG with `getStaticProps` (fetch tournament + seasons list)
+  - Display tournament details (name, ageGroup, description)
+  - List all seasons as cards/links
+  - Breadcrumb: Home > Tournaments > {Tournament}
+  - ISR revalidation: 300s (5 min)
+  - Meta tags: title, description, canonical URL
+  - Client-side: No auth needed (public page)
+
+**Day 3-4: Season Overview Page**
 - [ ] Create `/tournaments/[tAlias]/[sAlias]/index.tsx` - season overview
+  - SSG with `getStaticProps` (fetch season + rounds list)
+  - Display season details (name, dates)
+  - List all rounds as cards/links (show round type, dates, status)
+  - Breadcrumb: Home > Tournaments > {Tournament} > {Season}
+  - ISR revalidation: 300s (5 min)
+  - Meta tags: title, description, canonical URL
+  - Client-side: No auth needed (public page)
+
+**Day 5-7: Round Overview Page**
 - [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/index.tsx` - round overview
-- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/index.tsx` - matchday matches
-- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/standings.tsx` - matchday standings
-- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/stats.tsx` - matchday stats
-- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/standings.tsx` - round standings
-- [ ] Implement proper breadcrumb navigation
-- [ ] Add canonical URLs and meta tags
-- [ ] Implement proper getStaticPaths for all levels
-- [ ] Update all internal links to use new URL structure
-- [ ] Add redirects from old structure (if needed)
-- [ ] Update sitemap generation
+  - SSG with `getStaticProps` (fetch round + matchdays list + standings)
+  - Display round details (name, dates, type)
+  - Show round standings table (if applicable)
+  - List all matchdays as cards/links (show date, venue for tournament-style)
+  - Breadcrumb: Home > Tournaments > {Tournament} > {Season} > {Round}
+  - ISR revalidation: 180s (3 min)
+  - Meta tags: title, description, canonical URL
+  - Client-side: No auth needed (public page)
 
-**Files Affected:** New page files, existing tournament page, navigation components, `sitemap.xml.tsx`
+**Day 8-10: Matchday Detail Page (Main View)**
+- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/index.tsx` - matchday detail
+  - SSG with `getStaticProps` (fetch matchday + matches + standings + stats)
+  - **Tab-based UI**: Matches (default), Standings, Stats
+  - **Matches Tab**: 
+    - Use existing `MatchCard` component (already has client-side auth)
+    - Context menus appear after hydration for logged-in users
+    - Pass `from` prop for back navigation
+    - Group by date if multiple dates
+  - **Standings Tab**:
+    - Show standings table for this matchday
+    - Use existing `Standings` component
+  - **Stats Tab**:
+    - Top scorers, penalty leaders (if available)
+  - Breadcrumb: Home > Tournaments > {Tournament} > {Season} > {Round} > {Matchday}
+  - ISR revalidation: 60s (1 min) - more frequent for live matches
+  - Meta tags: title, description, canonical URL
+  - Client-side: `useAuth()` for match card context menus
 
-**Dependencies:** Should be done after #17 (Next.js upgrade)
+**Day 11-12: Navigation & Integration**
+- [ ] Implement proper breadcrumb navigation component
+  - Reusable across all tournament pages
+  - Schema.org BreadcrumbList markup for SEO
+- [ ] Update Header/Sidebar navigation
+  - Update tournament links to point to new structure
+  - Add "Current Season" quick link (if applicable)
+- [ ] Update all internal links throughout app
+  - Update links in existing match cards, team pages, etc.
+  - Search codebase for `/tournaments/[alias]` references
+- [ ] Add canonical URLs to all tournament pages
+  - Use Next.js `Head` component
+  - Implement in each page's component
+- [ ] Update `sitemap.xml.tsx` generation
+  - Add all new tournament hierarchy URLs
+  - Set appropriate priorities and changefreq
+
+**Day 13-14: Testing & Refinement**
+- [ ] Test SSG build for all tournament pages
+  - Verify `getStaticPaths` generates all paths correctly
+  - Check build output for missing paths
+- [ ] Test ISR revalidation
+  - Update data on backend, verify page updates after revalidation
+- [ ] Test client-side auth functionality
+  - Login/logout cycles, verify context menus appear/disappear
+  - Test different permission levels (ADMIN, LEAGUE_MANAGER, CLUB_MANAGER, REFEREE)
+- [ ] Test navigation flow
+  - Breadcrumbs work correctly
+  - Back navigation from match detail pages
+- [ ] Performance testing
+  - Lighthouse scores for each page type
+  - Check bundle sizes
+- [ ] SEO validation
+  - Google Search Console preview
+  - Verify meta tags, structured data
+
+**Files Affected:** 
+- NEW: `pages/tournaments/[tAlias]/index.tsx`
+- NEW: `pages/tournaments/[tAlias]/[sAlias]/index.tsx`
+- NEW: `pages/tournaments/[tAlias]/[sAlias]/[rAlias]/index.tsx`
+- NEW: `pages/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/index.tsx`
+- UPDATE: `components/Header.tsx` (navigation links)
+- UPDATE: `components/ui/MatchCard.tsx` (already auth-ready, just verify)
+- UPDATE: `pages/sitemap.xml.tsx` (add new URLs)
+- EXISTING: `components/ui/Standings.tsx` (reuse)
+- EXISTING: `components/ui/MatchCard.tsx` (reuse with auth)
+
+**Dependencies:** 
+- ✅ Phase 1 Complete (Next.js 16.0.3)
+- ✅ Client-side auth working (`useAuth`, `usePermissions`)
+- ✅ Match card context menus working
+
+**Note**: This refactoring maintains the same visual layout and functionality as the existing `pages/tournaments/[alias].tsx`, just split into logical hierarchy. Match cards keep their context menus with client-side auth.
 
 ---
 
