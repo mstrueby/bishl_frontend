@@ -275,8 +275,11 @@ export default function MatchdayDetail({
         {/* Standings Tab */}
         {activeTab === "standings" && (
           <section>
-            {matchday.createStandings && standings && standings.length > 0 ? (
-              <Standings standings={standings} />
+            {matchday.createStandings && matchday.standings ? (
+              <Standings
+                standingsData={matchday.standings}
+                matchSettings={matchday.matchSettings}
+              />
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-500">Keine Tabelle verfügbar</p>
