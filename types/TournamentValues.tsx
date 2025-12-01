@@ -29,6 +29,16 @@ export interface MatchdayOwner {
   clubAlias: string;
 }
 
+export interface MatchSettings {
+  numOfPeriods: number;
+  periodLengthMin: number;
+  overtime: boolean;
+  numOfPeriodsOvertime: number;
+  periodLengthMinOvertime: number;
+  shootout: boolean;
+  refereePoints: number
+}
+
 // Define a Matchday interface
 export interface MatchdayValues {
   _id?: string;
@@ -43,13 +53,13 @@ export interface MatchdayValues {
   createStandings: boolean;
   createStats: boolean;
   published: boolean;
+  matchSettings: MatchSettings;
   matches: MatchValues[];
   owner?: MatchdayOwner;
   links?: {
     self: string;
     matches: string;
-    standings?: string;
-    stats?: string;
+    round: string;
   };
 }
 
@@ -71,11 +81,11 @@ export interface RoundValues {
     key: string;
     value: string;
   };
+  matchSettings: MatchSettings;
   links?: {
     self: string;
     matchdays: string;
-    standings?: string;
-    stats?: string;
+    sesaon: string;
   };
 }
 
@@ -88,6 +98,7 @@ export interface SeasonValues {
   links?: {
     self: string;
     rounds: string;
+    tournament: string;
   };
 }
 
