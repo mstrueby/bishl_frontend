@@ -4,11 +4,12 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import Layout from '../../../../components/Layout';
-import { SeasonValues } from '../../../../types/TournamentValues';
+import { SeasonValues, RoundValues } from '../../../../types/TournamentValues';
 import apiClient from '../../../../lib/apiClient';
 
-interface SeasonOverviewProps {
+interface SeasonOverviewPropsUpdated {
   season: SeasonValues;
+  rounds: RoundValues[];
   tAlias: string;
   sAlias: string;
   tournamentName: string;
@@ -16,12 +17,13 @@ interface SeasonOverviewProps {
 
 export default function SeasonOverview({
   season,
+  rounds,
   tAlias,
   sAlias,
   tournamentName
-}: SeasonOverviewProps) {
+}: SeasonOverviewPropsUpdated) {
   // Sort rounds by alias (most recent first)
-  const sortedRounds = season.rounds
+  const sortedRounds = rounds
     .slice()
     .sort((a, b) => b.alias.localeCompare(a.alias));
 
@@ -155,7 +157,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   }
 
   try {
-    // Fetch season data using native fetch (apiClient cannot be used in getStaticProps)
+    // Fetch season data
     const seasonRes = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}`
     );
@@ -166,8 +168,20 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     }
     
     const seasonResponse = await seasonRes.json();
-    // Handle standardized API response
     const seasonData = seasonResponse?.data || seasonResponse;
+
+    // Fetch rounds separately
+    const roundsRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}/rounds`
+    );
+    
+    let rounds: RoundValues[] = [];
+    if (roundsRes.ok) {
+      const roundsResponse = await roundsRes.json();
+      rounds = Array.isArray(roundsResponse)
+        ? roundsResponse
+        : (roundsResponse?.data || []);
+    }
 
     // Fetch tournament data for breadcrumb
     const tournamentRes = await fetch(
@@ -181,6 +195,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       return {
         props: {
           season: seasonData,
+          rounds,
           tAlias,
           sAlias,
           tournamentName: tournamentData?.name || tAlias,
@@ -192,6 +207,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     return {
       props: {
         season: seasonData,
+        rounds,
         tAlias,
         sAlias,
         tournamentName: tAlias,
