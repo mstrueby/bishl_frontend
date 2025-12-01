@@ -114,10 +114,13 @@ export default function RoundOverview({
       </div>
 
       {/* Standings Section */}
-      {round.createStandings && round.standings.length > 0 && (
+      {round.createStandings && round.standings && (
         <section className="mt-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Tabelle</h2>
-          <Standings standingsData={standings} />
+          <Standings 
+            standingsData={round.standings} 
+            matchSettings={round.matchSettings}
+          />
         </section>
       )}
 
