@@ -1,18 +1,18 @@
-
-import { GetStaticPropsContext } from 'next';
-import { useState } from 'react';
-import Link from 'next/link';
-import Head from 'next/head';
-import { CheckIcon } from '@heroicons/react/20/solid';
-import Layout from '../../../../../../components/Layout';
-import { MatchdayValues } from '../../../../../../types/TournamentValues';
-import MatchCard from '../../../../../../components/ui/MatchCard';
-import Standings from '../../../../../../components/ui/Standings';
-import apiClient from '../../../../../../lib/apiClient';
+import { GetStaticPropsContext } from "next";
+import { useState } from "react";
+import Link from "next/link";
+import Head from "next/head";
+import { CheckIcon } from "@heroicons/react/20/solid";
+import Layout from "../../../../../../components/Layout";
+import { MatchdayValues } from "../../../../../../types/TournamentValues";
+import { MatchValues } from "../../../../../../types/MatchValues";
+import MatchCard from "../../../../../../components/ui/MatchCard";
+import Standings from "../../../../../../components/ui/Standings";
+import apiClient from "../../../../../../lib/apiClient";
 
 interface MatchdayDetailProps {
   matchday: MatchdayValues;
-  matches: any[]; // TODO: Add proper match type from MatchValues
+  matches: MatchValues[];
   tAlias: string;
   sAlias: string;
   rAlias: string;
@@ -20,11 +20,9 @@ interface MatchdayDetailProps {
   tournamentName: string;
   seasonName: string;
   roundName: string;
-  standings?: any; // TODO: Add proper standings type
-  stats?: any; // TODO: Add proper stats type
 }
 
-type TabKey = 'matches' | 'standings' | 'stats';
+type TabKey = "matches" | "standings" | "stats";
 
 export default function MatchdayDetail({
   matchday,
@@ -36,47 +34,54 @@ export default function MatchdayDetail({
   tournamentName,
   seasonName,
   roundName,
-  standings,
-  stats
 }: MatchdayDetailProps) {
-  const [activeTab, setActiveTab] = useState<TabKey>('matches');
+  const [activeTab, setActiveTab] = useState<TabKey>("matches");
 
   // Sort matches by start time
   const sortedMatches = matches
     ? matches
         .slice()
-        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+        .sort(
+          (a, b) =>
+            new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+        )
     : [];
 
   // Group matches by date
-  const matchesByDate = sortedMatches.reduce((acc, match) => {
-    const dateKey = new Date(match.startTime).toLocaleDateString('de-DE', {
-      weekday: 'long',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(match);
-    return acc;
-  }, {} as Record<string, typeof sortedMatches>);
+  const matchesByDate = sortedMatches.reduce(
+    (acc, match) => {
+      const dateKey = new Date(match.startTime).toLocaleDateString("de-DE", {
+        weekday: "long",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(match);
+      return acc;
+    },
+    {} as Record<string, typeof sortedMatches>,
+  );
 
   const tabs = [
-    { key: 'matches' as TabKey, caption: 'Spiele' },
-    { key: 'standings' as TabKey, caption: 'Tabelle' },
-    { key: 'stats' as TabKey, caption: 'Statistiken' }
+    { key: "matches" as TabKey, caption: "Spiele" },
+    { key: "standings" as TabKey, caption: "Tabelle" },
+    { key: "stats" as TabKey, caption: "Statistiken" },
   ];
 
   function classNames(...classes: string[]): string {
-    return classes.filter(Boolean).join(' ');
+    return classes.filter(Boolean).join(" ");
   }
 
   return (
     <Layout>
       <Head>
-        <title>{matchday.name} - {roundName} - {seasonName} - {tournamentName} | BISHL</title>
+        <title>
+          {matchday.name} - {roundName} - {seasonName} - {tournamentName} |
+          BISHL
+        </title>
         <meta
           name="description"
           content={`${matchday.name} im ${roundName} der Saison ${seasonName} (${tournamentName}). Spiele, Tabelle und Statistiken.`}
@@ -103,19 +108,28 @@ export default function MatchdayDetail({
           </li>
           <li>/</li>
           <li>
-            <Link href={`/tournaments/${tAlias}`} className="hover:text-gray-700">
+            <Link
+              href={`/tournaments/${tAlias}`}
+              className="hover:text-gray-700"
+            >
               {tournamentName}
             </Link>
           </li>
           <li>/</li>
           <li>
-            <Link href={`/tournaments/${tAlias}/${sAlias}`} className="hover:text-gray-700">
+            <Link
+              href={`/tournaments/${tAlias}/${sAlias}`}
+              className="hover:text-gray-700"
+            >
               {seasonName}
             </Link>
           </li>
           <li>/</li>
           <li>
-            <Link href={`/tournaments/${tAlias}/${sAlias}/${rAlias}`} className="hover:text-gray-700">
+            <Link
+              href={`/tournaments/${tAlias}/${sAlias}/${rAlias}`}
+              className="hover:text-gray-700"
+            >
               {roundName}
             </Link>
           </li>
@@ -137,25 +151,25 @@ export default function MatchdayDetail({
 
         {/* Matchday Type */}
         {matchday.type && (
-          <p className="mt-2 text-sm text-gray-500">
-            {matchday.type.value}
-          </p>
+          <p className="mt-2 text-sm text-gray-500">{matchday.type.value}</p>
         )}
-        
+
         {/* Matchday Dates */}
         {(matchday.startDate || matchday.endDate) && (
           <p className="mt-2 text-sm text-gray-500">
-            {matchday.startDate && new Date(matchday.startDate).toLocaleDateString('de-DE', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            })}
-            {matchday.startDate && matchday.endDate && ' - '}
-            {matchday.endDate && new Date(matchday.endDate).toLocaleDateString('de-DE', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            })}
+            {matchday.startDate &&
+              new Date(matchday.startDate).toLocaleDateString("de-DE", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+            {matchday.startDate && matchday.endDate && " - "}
+            {matchday.endDate &&
+              new Date(matchday.endDate).toLocaleDateString("de-DE", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
           </p>
         )}
 
@@ -195,18 +209,21 @@ export default function MatchdayDetail({
           </select>
         </div>
         <div className="hidden sm:block">
-          <nav className="flex space-x-4 border-b border-gray-200" aria-label="Tabs">
+          <nav
+            className="flex space-x-4 border-b border-gray-200"
+            aria-label="Tabs"
+          >
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={classNames(
                   tab.key === activeTab
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                  'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium'
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
                 )}
-                aria-current={tab.key === activeTab ? 'page' : undefined}
+                aria-current={tab.key === activeTab ? "page" : undefined}
               >
                 {tab.caption}
               </button>
@@ -218,7 +235,7 @@ export default function MatchdayDetail({
       {/* Tab Content */}
       <div className="mt-8">
         {/* Matches Tab */}
-        {activeTab === 'matches' && (
+        {activeTab === "matches" && (
           <section>
             {sortedMatches.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -234,7 +251,7 @@ export default function MatchdayDetail({
                         {date}
                       </h2>
                     )}
-                    
+
                     {/* Match Cards */}
                     <div className="space-y-4">
                       {matches.map((match) => (
@@ -256,22 +273,20 @@ export default function MatchdayDetail({
         )}
 
         {/* Standings Tab */}
-        {activeTab === 'standings' && (
+        {activeTab === "standings" && (
           <section>
             {matchday.createStandings && standings && standings.length > 0 ? (
               <Standings standings={standings} />
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500">
-                  Keine Tabelle verfügbar
-                </p>
+                <p className="text-sm text-gray-500">Keine Tabelle verfügbar</p>
               </div>
             )}
           </section>
         )}
 
         {/* Stats Tab */}
-        {activeTab === 'stats' && (
+        {activeTab === "stats" && (
           <section>
             {matchday.createStats && stats ? (
               <div className="space-y-8">
@@ -285,37 +300,51 @@ export default function MatchdayDetail({
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                           <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               Rang
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               Spieler
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               Team
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               Tore
                             </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {stats.topScorers.map((scorer: any, index: number) => (
-                            <tr key={index}>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {index + 1}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {scorer.playerName}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {scorer.teamName}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {scorer.goals}
-                              </td>
-                            </tr>
-                          ))}
+                          {stats.topScorers.map(
+                            (scorer: any, index: number) => (
+                              <tr key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {index + 1}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  {scorer.playerName}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {scorer.teamName}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {scorer.goals}
+                                </td>
+                              </tr>
+                            ),
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -332,37 +361,51 @@ export default function MatchdayDetail({
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                           <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               Rang
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               Spieler
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               Team
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
                               PIM
                             </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {stats.penaltyLeaders.map((leader: any, index: number) => (
-                            <tr key={index}>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {index + 1}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {leader.playerName}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {leader.teamName}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {leader.penaltyMinutes}
-                              </td>
-                            </tr>
-                          ))}
+                          {stats.penaltyLeaders.map(
+                            (leader: any, index: number) => (
+                              <tr key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {index + 1}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  {leader.playerName}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {leader.teamName}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {leader.penaltyMinutes}
+                                </td>
+                              </tr>
+                            ),
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -370,14 +413,15 @@ export default function MatchdayDetail({
                 )}
 
                 {/* No Stats Available */}
-                {(!stats.topScorers || stats.topScorers.length === 0) && 
-                 (!stats.penaltyLeaders || stats.penaltyLeaders.length === 0) && (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-500">
-                      Keine Statistiken verfügbar
-                    </p>
-                  </div>
-                )}
+                {(!stats.topScorers || stats.topScorers.length === 0) &&
+                  (!stats.penaltyLeaders ||
+                    stats.penaltyLeaders.length === 0) && (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-500">
+                        Keine Statistiken verfügbar
+                      </p>
+                    </div>
+                  )}
               </div>
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -399,41 +443,54 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   const rAlias = context.params?.rAlias;
   const mdAlias = context.params?.mdAlias;
 
-  if (typeof tAlias !== 'string' || typeof sAlias !== 'string' || typeof rAlias !== 'string' || typeof mdAlias !== 'string') {
+  if (
+    typeof tAlias !== "string" ||
+    typeof sAlias !== "string" ||
+    typeof rAlias !== "string" ||
+    typeof mdAlias !== "string"
+  ) {
     return { notFound: true };
   }
 
   try {
     // Fetch matchday data using apiClient
-    const matchdayResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`);
+    const matchdayResponse = await apiClient.get(
+      `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`,
+    );
     const matchdayData = matchdayResponse.data;
 
     // Fetch matches for this matchday using apiClient
     let matches = [];
     try {
-      const matchesResponse = await apiClient.get(`/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`);
+      const matchesResponse = await apiClient.get(
+        `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
+      );
       matches = matchesResponse.data || [];
     } catch (error) {
-      console.error('Error fetching matches:', error);
+      console.error("Error fetching matches:", error);
       // Continue without matches
     }
 
     // Fetch round data for breadcrumb using apiClient
     let roundName = rAlias;
     try {
-      const roundResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`);
+      const roundResponse = await apiClient.get(
+        `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
+      );
       roundName = roundResponse.data?.name || rAlias;
     } catch (error) {
-      console.error('Error fetching round:', error);
+      console.error("Error fetching round:", error);
     }
 
     // Fetch season data for breadcrumb using apiClient
     let seasonName = sAlias;
     try {
-      const seasonResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`);
+      const seasonResponse = await apiClient.get(
+        `/tournaments/${tAlias}/seasons/${sAlias}`,
+      );
       seasonName = seasonResponse.data?.name || sAlias;
     } catch (error) {
-      console.error('Error fetching season:', error);
+      console.error("Error fetching season:", error);
     }
 
     // Fetch tournament data for breadcrumb using apiClient
@@ -442,31 +499,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       const tournamentResponse = await apiClient.get(`/tournaments/${tAlias}`);
       tournamentName = tournamentResponse.data?.name || tAlias;
     } catch (error) {
-      console.error('Error fetching tournament:', error);
-    }
-
-    // Fetch standings if applicable using apiClient
-    let standings = null;
-    if (matchdayData.createStandings) {
-      try {
-        const standingsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}/standings`);
-        standings = standingsResponse.data;
-      } catch (error) {
-        console.error('Error fetching standings:', error);
-        // Continue without standings
-      }
-    }
-
-    // Fetch stats if applicable using apiClient
-    let stats = null;
-    if (matchdayData.createStats) {
-      try {
-        const statsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}/stats`);
-        stats = statsResponse.data;
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-        // Continue without stats
-      }
+      console.error("Error fetching tournament:", error);
     }
 
     return {
@@ -480,56 +513,73 @@ export async function getStaticProps(context: GetStaticPropsContext) {
         tournamentName,
         seasonName,
         roundName,
-        standings,
-        stats,
       },
       revalidate: 60, // 1 minute for live matches
     };
   } catch (error) {
-    console.error('Failed to fetch matchday data:', error);
+    console.error("Failed to fetch matchday data:", error);
     return { notFound: true };
   }
 }
 
 export async function getStaticPaths() {
   try {
-    const tournamentsResponse = await apiClient.get('/tournaments');
+    const tournamentsResponse = await apiClient.get("/tournaments");
     const tournaments = tournamentsResponse.data || [];
-    
-    let paths: { params: { tAlias: string; sAlias: string; rAlias: string; mdAlias: string } }[] = [];
+
+    let paths: {
+      params: {
+        tAlias: string;
+        sAlias: string;
+        rAlias: string;
+        mdAlias: string;
+      };
+    }[] = [];
 
     for (const tournament of tournaments) {
       try {
-        const seasonsResponse = await apiClient.get(`/tournaments/${tournament.alias}/seasons`);
+        const seasonsResponse = await apiClient.get(
+          `/tournaments/${tournament.alias}/seasons`,
+        );
         const seasons = seasonsResponse.data || [];
 
         for (const season of seasons) {
           try {
-            const roundsResponse = await apiClient.get(`/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`);
+            const roundsResponse = await apiClient.get(
+              `/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`,
+            );
             const rounds = roundsResponse.data || [];
 
             for (const round of rounds) {
               try {
-                const matchdaysResponse = await apiClient.get(`/tournaments/${tournament.alias}/seasons/${season.alias}/rounds/${round.alias}/matchdays`);
+                const matchdaysResponse = await apiClient.get(
+                  `/tournaments/${tournament.alias}/seasons/${season.alias}/rounds/${round.alias}/matchdays`,
+                );
                 const matchdays = matchdaysResponse.data || [];
 
                 const matchdayPaths = matchdays.map((matchday: any) => ({
-                  params: { 
-                    tAlias: tournament.alias, 
+                  params: {
+                    tAlias: tournament.alias,
                     sAlias: season.alias,
                     rAlias: round.alias,
-                    mdAlias: matchday.alias
+                    mdAlias: matchday.alias,
                   },
                 }));
-                
+
                 paths = paths.concat(matchdayPaths);
               } catch (error) {
-                console.error(`Error fetching matchdays for ${tournament.alias}/${season.alias}/${round.alias}:`, error);
+                console.error(
+                  `Error fetching matchdays for ${tournament.alias}/${season.alias}/${round.alias}:`,
+                  error,
+                );
                 // Continue with other rounds
               }
             }
           } catch (error) {
-            console.error(`Error fetching rounds for ${tournament.alias}/${season.alias}:`, error);
+            console.error(
+              `Error fetching rounds for ${tournament.alias}/${season.alias}:`,
+              error,
+            );
             // Continue with other seasons
           }
         }
@@ -541,13 +591,13 @@ export async function getStaticPaths() {
 
     return {
       paths,
-      fallback: 'blocking',
+      fallback: "blocking",
     };
   } catch (error) {
-    console.error('Failed to generate static paths:', error);
+    console.error("Failed to generate static paths:", error);
     return {
       paths: [],
-      fallback: 'blocking',
+      fallback: "blocking",
     };
   }
 }

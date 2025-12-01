@@ -1,4 +1,3 @@
-
 // Define a Team interface
 export interface Team {
   fullName: string;
@@ -23,6 +22,25 @@ export interface MatchValues {
   published: boolean;
 }
 
+export interface StandingsTeam {
+  fullName: string;
+  shortName: string;
+  tinyName: string;
+  logo: string;
+  gamesPlayed: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  points: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  otWins: number;
+  otLosses: number;
+  soWins: number;
+  soLosses: number;
+  streak: string[];
+}
+
 export interface MatchdayOwner {
   clubId: string;
   clubName: string;
@@ -36,7 +54,7 @@ export interface MatchSettings {
   numOfPeriodsOvertime: number;
   periodLengthMinOvertime: number;
   shootout: boolean;
-  refereePoints: number
+  refereePoints: number;
 }
 
 // Define a Matchday interface
@@ -54,6 +72,7 @@ export interface MatchdayValues {
   createStats: boolean;
   published: boolean;
   matchSettings: MatchSettings;
+  standings?: StandingsTeam[];
   owner?: MatchdayOwner;
   links?: {
     self: string;
@@ -81,6 +100,7 @@ export interface RoundValues {
     value: string;
   };
   matchSettings: MatchSettings;
+  standings?: StandingsTeam[];
   links?: {
     self: string;
     matchdays: string;
