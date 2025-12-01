@@ -159,34 +159,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   try {
-    // Fetch tournament data
-    const tournamentRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}`
-    );
-    
-    if (!tournamentRes.ok) {
-      console.error('Error fetching tournament:', tournamentRes.statusText);
-      return { notFound: true };
-    }
-    
-    const tournamentResponse = await tournamentRes.json();
-    const tournament = tournamentResponse?.data || tournamentResponse;
+    // Fetch tournament data using apiClient
+    const tournamentResponse = await apiClient.get(`/tournaments/${tAlias}`);
+    const tournament = tournamentResponse.data;
 
     if (!tournament) {
       return { notFound: true };
     }
 
-    // Fetch seasons separately
-    const seasonsRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons`
-    );
-    
+    // Fetch seasons separately using apiClient
     let seasons: SeasonValues[] = [];
-    if (seasonsRes.ok) {
-      const seasonsResponse = await seasonsRes.json();
-      seasons = Array.isArray(seasonsResponse)
-        ? seasonsResponse
-        : (seasonsResponse?.data || []);
+    try {
+      const seasonsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons`);
+      seasons = seasonsResponse.data || [];
+    } catch (error) {
+      console.error('Error fetching seasons:', error);
+      // Continue with empty seasons array
     }
 
     return {

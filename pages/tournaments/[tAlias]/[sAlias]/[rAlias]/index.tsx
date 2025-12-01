@@ -217,57 +217,44 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   }
 
   try {
-    // Fetch round data
-    const roundRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`
-    );
-    
-    if (!roundRes.ok) {
-      console.error('Error fetching round:', roundRes.statusText);
-      return { notFound: true };
-    }
-    
-    const roundResponse = await roundRes.json();
-    const roundData = roundResponse?.data || roundResponse;
+    // Fetch round data using apiClient
+    const roundResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`);
+    const roundData = roundResponse.data;
 
-    // Fetch matchdays separately
-    const matchdaysRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`
-    );
-    
+    // Fetch matchdays separately using apiClient
     let matchdays: MatchdayValues[] = [];
-    if (matchdaysRes.ok) {
-      const matchdaysResponse = await matchdaysRes.json();
-      matchdays = Array.isArray(matchdaysResponse)
-        ? matchdaysResponse
-        : (matchdaysResponse?.data || []);
+    try {
+      const matchdaysResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`);
+      matchdays = matchdaysResponse.data || [];
+    } catch (error) {
+      console.error('Error fetching matchdays:', error);
+      // Continue with empty matchdays array
     }
 
-    // Fetch season data for breadcrumb
-    const seasonRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}`
-    );
-    const seasonResponse = seasonRes.ok ? await seasonRes.json() : null;
-    const seasonData = seasonResponse?.data || seasonResponse;
+    // Fetch season data for breadcrumb using apiClient
+    let seasonName = sAlias;
+    try {
+      const seasonResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`);
+      seasonName = seasonResponse.data?.name || sAlias;
+    } catch (error) {
+      console.error('Error fetching season:', error);
+    }
 
-    // Fetch tournament data for breadcrumb
-    const tournamentRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}`
-    );
-    const tournamentResponse = tournamentRes.ok ? await tournamentRes.json() : null;
-    const tournamentData = tournamentResponse?.data || tournamentResponse;
+    // Fetch tournament data for breadcrumb using apiClient
+    let tournamentName = tAlias;
+    try {
+      const tournamentResponse = await apiClient.get(`/tournaments/${tAlias}`);
+      tournamentName = tournamentResponse.data?.name || tAlias;
+    } catch (error) {
+      console.error('Error fetching tournament:', error);
+    }
 
-    // Fetch standings if applicable
+    // Fetch standings if applicable using apiClient
     let standings = null;
     if (roundData.createStandings) {
       try {
-        const standingsRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/standings`
-        );
-        if (standingsRes.ok) {
-          const standingsResponse = await standingsRes.json();
-          standings = standingsResponse?.data || standingsResponse;
-        }
+        const standingsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/standings`);
+        standings = standingsResponse.data;
       } catch (error) {
         console.error('Error fetching standings:', error);
         // Continue without standings
@@ -281,8 +268,8 @@ export async function getStaticProps(context: GetStaticPropsContext) {
         tAlias,
         sAlias,
         rAlias,
-        tournamentName: tournamentData?.name || tAlias,
-        seasonName: seasonData?.name || sAlias,
+        tournamentName,
+        seasonName,
         standings,
       },
       revalidate: 180, // 3 minutes
@@ -295,42 +282,38 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 
 export async function getStaticPaths() {
   try {
-    const tournamentsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`);
-    const tournamentsData = await tournamentsRes.json();
-    
-    const tournaments = Array.isArray(tournamentsData) 
-      ? tournamentsData 
-      : (tournamentsData?.data || []);
+    const tournamentsResponse = await apiClient.get('/tournaments');
+    const tournaments = tournamentsResponse.data || [];
     
     let paths: { params: { tAlias: string; sAlias: string; rAlias: string } }[] = [];
 
     for (const tournament of tournaments) {
-      const seasonsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons`
-      );
-      const seasonsData = await seasonsRes.json();
-      const seasons = Array.isArray(seasonsData) 
-        ? seasonsData 
-        : (seasonsData?.data || []);
+      try {
+        const seasonsResponse = await apiClient.get(`/tournaments/${tournament.alias}/seasons`);
+        const seasons = seasonsResponse.data || [];
 
-      for (const season of seasons) {
-        const roundsRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`
-        );
-        const roundsData = await roundsRes.json();
-        const rounds = Array.isArray(roundsData) 
-          ? roundsData 
-          : (roundsData?.data || []);
+        for (const season of seasons) {
+          try {
+            const roundsResponse = await apiClient.get(`/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`);
+            const rounds = roundsResponse.data || [];
 
-        const seasonPaths = rounds.map((round: RoundValues) => ({
-          params: { 
-            tAlias: tournament.alias, 
-            sAlias: season.alias,
-            rAlias: round.alias 
-          },
-        }));
-        
-        paths = paths.concat(seasonPaths);
+            const seasonPaths = rounds.map((round: RoundValues) => ({
+              params: { 
+                tAlias: tournament.alias, 
+                sAlias: season.alias,
+                rAlias: round.alias 
+              },
+            }));
+            
+            paths = paths.concat(seasonPaths);
+          } catch (error) {
+            console.error(`Error fetching rounds for ${tournament.alias}/${season.alias}:`, error);
+            // Continue with other seasons
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching seasons for ${tournament.alias}:`, error);
+        // Continue with other tournaments
       }
     }
 
