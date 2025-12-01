@@ -49,8 +49,8 @@ export default function RoundOverview({
   const teams = Array.from(
     new Set(
       matches.flatMap(m => [
-        m.homeTeam.shortName,
-        m.awayTeam.shortName
+        m.home.shortName,
+        m.away.shortName
       ])
     )
   ).sort();
@@ -58,7 +58,7 @@ export default function RoundOverview({
   // Filter matches by selected team
   const filteredMatches = selectedTeam
     ? matches.filter(m =>
-        m.homeTeam.shortName === selectedTeam || m.awayTeam.shortName === selectedTeam
+        m.home.shortName === selectedTeam || m.away.shortName === selectedTeam
       )
     : matches;
 
@@ -345,7 +345,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     if (matchdays.length === 1) {
       try {
         const matchesResponse = await apiClient.get(
-          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${matchdays[0].alias}/matches`
+          `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${matchdays[0].alias}`
         );
         matches = matchesResponse.data || [];
       } catch (error) {

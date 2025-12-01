@@ -405,10 +405,10 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     const allMatchdays = allMatchdaysResponse.data || [];
 
     // Fetch matches for this matchday using apiClient
-    let matches = [];
+    let matches: MatchValues[] = [];
     try {
       const matchesResponse = await apiClient.get(
-        `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}/matches`,
+        `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
       );
       matches = matchesResponse.data || [];
     } catch (error) {
