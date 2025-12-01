@@ -503,7 +503,7 @@ export async function getStaticPaths() {
 
     for (const tournament of tournaments) {
       const seasonsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`
+        `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons`
       );
       const seasonsData = await seasonsRes.json();
       const seasons = Array.isArray(seasonsData) 
@@ -512,7 +512,7 @@ export async function getStaticPaths() {
 
       for (const season of seasons) {
         const roundsRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds/`
+          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`
         );
         const roundsData = await roundsRes.json();
         const rounds = Array.isArray(roundsData) 
@@ -521,7 +521,7 @@ export async function getStaticPaths() {
 
         for (const round of rounds) {
           const matchdaysRes = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds/${round.alias}/matchdays/`
+            `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds/${round.alias}/matchdays`
           );
           const matchdaysData = await matchdaysRes.json();
           const matchdays = Array.isArray(matchdaysData) 

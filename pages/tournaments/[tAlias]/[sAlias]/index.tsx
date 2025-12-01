@@ -218,7 +218,7 @@ export async function getStaticPaths() {
 
     for (const tournament of tournaments) {
       const seasonsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`
+        `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons`
       );
       const seasonsData = await seasonsRes.json();
       
