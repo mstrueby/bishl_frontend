@@ -1,7 +1,9 @@
+
 import { GetStaticPropsContext } from "next";
 import { useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import Layout from "../../../../../../components/Layout";
 import { MatchdayValues } from "../../../../../../types/TournamentValues";
@@ -12,6 +14,7 @@ import apiClient from "../../../../../../lib/apiClient";
 
 interface MatchdayDetailProps {
   matchday: MatchdayValues;
+  allMatchdays: MatchdayValues[];
   matches: MatchValues[];
   tAlias: string;
   sAlias: string;
@@ -22,10 +25,11 @@ interface MatchdayDetailProps {
   roundName: string;
 }
 
-type TabKey = "matches" | "standings" | "stats";
+type TabKey = "matches" | "standings";
 
 export default function MatchdayDetail({
   matchday,
+  allMatchdays,
   matches,
   tAlias,
   sAlias,
@@ -35,7 +39,9 @@ export default function MatchdayDetail({
   seasonName,
   roundName,
 }: MatchdayDetailProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>("matches");
+  const [selectedTeam, setSelectedTeam] = useState<string>("");
 
   // Sort matches by start time
   const sortedMatches = matches
@@ -43,14 +49,33 @@ export default function MatchdayDetail({
         .slice()
         .sort(
           (a, b) =>
-            new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+            new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
         )
     : [];
 
+  // Get unique teams for filter
+  const teams = Array.from(
+    new Set(
+      sortedMatches.flatMap((m) => [
+        m.home.shortName,
+        m.away.shortName,
+      ])
+    )
+  ).sort();
+
+  // Filter matches by selected team
+  const filteredMatches = selectedTeam
+    ? sortedMatches.filter(
+        (m) =>
+          m.home.shortName === selectedTeam ||
+          m.away.shortName === selectedTeam
+      )
+    : sortedMatches;
+
   // Group matches by date
-  const matchesByDate = sortedMatches.reduce(
+  const matchesByDate = filteredMatches.reduce(
     (acc, match) => {
-      const dateKey = new Date(match.startTime).toLocaleDateString("de-DE", {
+      const dateKey = new Date(match.startDate).toLocaleDateString("de-DE", {
         weekday: "long",
         day: "2-digit",
         month: "2-digit",
@@ -65,15 +90,22 @@ export default function MatchdayDetail({
     {} as Record<string, typeof sortedMatches>,
   );
 
-  const tabs = [
-    { key: "matches" as TabKey, caption: "Spiele" },
-    { key: "standings" as TabKey, caption: "Tabelle" },
-    { key: "stats" as TabKey, caption: "Statistiken" },
-  ];
+  const showTabs = matchday.createStandings;
+
+  const tabs = showTabs
+    ? [
+        { key: "matches" as TabKey, caption: "Spiele" },
+        { key: "standings" as TabKey, caption: "Tabelle" },
+      ]
+    : [];
 
   function classNames(...classes: string[]): string {
     return classes.filter(Boolean).join(" ");
   }
+
+  const handleMatchdayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    router.push(`/tournaments/${tAlias}/${sAlias}/${rAlias}/${e.target.value}`);
+  };
 
   return (
     <Layout>
@@ -140,18 +172,39 @@ export default function MatchdayDetail({
         </ol>
       </nav>
 
-      {/* Matchday Header */}
-      <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-          {matchday.name}
-        </h1>
-        <p className="mt-2 text-lg text-gray-600">
-          {roundName} · {seasonName} · {tournamentName}
-        </p>
+      {/* Header with Matchday Selector */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            {matchday.name}
+          </h1>
+          <p className="mt-2 text-lg text-gray-600">
+            {roundName} · {seasonName} · {tournamentName}
+          </p>
+        </div>
 
+        {allMatchdays.length > 1 && (
+          <div className="mt-4 sm:mt-0">
+            <select
+              value={mdAlias}
+              onChange={handleMatchdayChange}
+              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+            >
+              {allMatchdays.map((md) => (
+                <option key={md.alias} value={md.alias}>
+                  {md.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* Matchday Details */}
+      <div className="border-b border-gray-200 pb-6">
         {/* Matchday Type */}
         {matchday.type && (
-          <p className="mt-2 text-sm text-gray-500">{matchday.type.value}</p>
+          <p className="text-sm text-gray-500">{matchday.type.value}</p>
         )}
 
         {/* Matchday Dates */}
@@ -188,58 +241,89 @@ export default function MatchdayDetail({
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="mt-8">
-        <div className="sm:hidden">
-          <label htmlFor="tabs" className="sr-only">
-            Wähle einen Tab
-          </label>
-          <select
-            id="tabs"
-            name="tabs"
-            className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-            value={activeTab}
-            onChange={(e) => setActiveTab(e.target.value as TabKey)}
-          >
-            {tabs.map((tab) => (
-              <option key={tab.key} value={tab.key}>
-                {tab.caption}
-              </option>
-            ))}
-          </select>
+      {/* Tabs (only if standings exist) */}
+      {showTabs && (
+        <div className="mt-8">
+          <div className="sm:hidden">
+            <label htmlFor="tabs" className="sr-only">
+              Wähle einen Tab
+            </label>
+            <select
+              id="tabs"
+              name="tabs"
+              className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as TabKey)}
+            >
+              {tabs.map((tab) => (
+                <option key={tab.key} value={tab.key}>
+                  {tab.caption}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="hidden sm:block">
+            <nav
+              className="flex space-x-4 border-b border-gray-200"
+              aria-label="Tabs"
+            >
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={classNames(
+                    tab.key === activeTab
+                      ? "border-indigo-500 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                    "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
+                  )}
+                  aria-current={tab.key === activeTab ? "page" : undefined}
+                >
+                  {tab.caption}
+                </button>
+              ))}
+            </nav>
+          </div>
         </div>
-        <div className="hidden sm:block">
-          <nav
-            className="flex space-x-4 border-b border-gray-200"
-            aria-label="Tabs"
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={classNames(
-                  tab.key === activeTab
-                    ? "border-indigo-500 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
-                )}
-                aria-current={tab.key === activeTab ? "page" : undefined}
-              >
-                {tab.caption}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
+      )}
 
       {/* Tab Content */}
       <div className="mt-8">
-        {/* Matches Tab */}
-        {activeTab === "matches" && (
+        {/* Matches Tab (or standalone if no tabs) */}
+        {(!showTabs || activeTab === "matches") && (
           <section>
-            {sortedMatches.length === 0 ? (
+            {/* Team Filter */}
+            {teams.length > 0 && (
+              <div className="mb-6">
+                <label
+                  htmlFor="team-filter"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Nach Team filtern
+                </label>
+                <select
+                  id="team-filter"
+                  value={selectedTeam}
+                  onChange={(e) => setSelectedTeam(e.target.value)}
+                  className="block w-full max-w-xs rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                >
+                  <option value="">Alle Teams</option>
+                  {teams.map((team) => (
+                    <option key={team} value={team}>
+                      {team}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {filteredMatches.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500">Keine Spiele verfügbar</p>
+                <p className="text-sm text-gray-500">
+                  {selectedTeam
+                    ? "Keine Spiele für dieses Team"
+                    : "Keine Spiele verfügbar"}
+                </p>
               </div>
             ) : (
               <div className="space-y-8">
@@ -273,7 +357,7 @@ export default function MatchdayDetail({
         )}
 
         {/* Standings Tab */}
-        {activeTab === "standings" && (
+        {showTabs && activeTab === "standings" && (
           <section>
             {matchday.createStandings && matchday.standings ? (
               <Standings
@@ -283,154 +367,6 @@ export default function MatchdayDetail({
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-500">Keine Tabelle verfügbar</p>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Stats Tab */}
-        {activeTab === "stats" && (
-          <section>
-            {matchday.createStats && stats ? (
-              <div className="space-y-8">
-                {/* Top Scorers */}
-                {stats.topScorers && stats.topScorers.length > 0 && (
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                      Torschützen
-                    </h2>
-                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Rang
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Spieler
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Team
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Tore
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {stats.topScorers.map(
-                            (scorer: any, index: number) => (
-                              <tr key={index}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {index + 1}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                  {scorer.playerName}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {scorer.teamName}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {scorer.goals}
-                                </td>
-                              </tr>
-                            ),
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* Penalty Leaders */}
-                {stats.penaltyLeaders && stats.penaltyLeaders.length > 0 && (
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                      Strafminuten
-                    </h2>
-                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Rang
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Spieler
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Team
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              PIM
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {stats.penaltyLeaders.map(
-                            (leader: any, index: number) => (
-                              <tr key={index}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {index + 1}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                  {leader.playerName}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {leader.teamName}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {leader.penaltyMinutes}
-                                </td>
-                              </tr>
-                            ),
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* No Stats Available */}
-                {(!stats.topScorers || stats.topScorers.length === 0) &&
-                  (!stats.penaltyLeaders ||
-                    stats.penaltyLeaders.length === 0) && (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">
-                        Keine Statistiken verfügbar
-                      </p>
-                    </div>
-                  )}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500">
-                  Keine Statistiken verfügbar
-                </p>
               </div>
             )}
           </section>
@@ -462,11 +398,17 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     );
     const matchdayData = matchdayResponse.data;
 
+    // Fetch all matchdays for the dropdown
+    const allMatchdaysResponse = await apiClient.get(
+      `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
+    );
+    const allMatchdays = allMatchdaysResponse.data || [];
+
     // Fetch matches for this matchday using apiClient
     let matches = [];
     try {
       const matchesResponse = await apiClient.get(
-        `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
+        `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}/matches`,
       );
       matches = matchesResponse.data || [];
     } catch (error) {
@@ -508,6 +450,14 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     return {
       props: {
         matchday: matchdayData,
+        allMatchdays: allMatchdays
+          .filter((md: MatchdayValues) => md.published)
+          .sort((a: MatchdayValues, b: MatchdayValues) => {
+            if (a.startDate && b.startDate) {
+              return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+            }
+            return b.alias.localeCompare(a.alias);
+          }),
         matches,
         tAlias,
         sAlias,
