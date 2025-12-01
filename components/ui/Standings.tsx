@@ -1,7 +1,7 @@
 // components/ui/Standings.tsx
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import { CldImage } from 'next-cloudinary';
 import { StandingsTeam } from '../../../types/TournamentValues';
 
 // Inside your component
@@ -82,7 +82,14 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
                         <td className="whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8">
-                              <Image className="h-8 w-8" src={team.logo ? team.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} alt={team.tinyName} objectFit="contain" height={32} width={32} />
+                              <CldImage 
+                                src={team.logo ? team.logo : 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'} 
+                                alt={team.tinyName} 
+                                width={32} 
+                                height={32}
+                                crop="fit"
+                                className="h-8 w-8 object-contain"
+                              />
                             </div>
                             <div className="ml-4">
                               <div className="text-base font-medium text-gray-900">
