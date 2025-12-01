@@ -54,7 +54,6 @@ export interface MatchdayValues {
   createStats: boolean;
   published: boolean;
   matchSettings: MatchSettings;
-  matches: MatchValues[];
   owner?: MatchdayOwner;
   links?: {
     self: string;

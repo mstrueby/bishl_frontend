@@ -8,6 +8,7 @@ import Layout from '../../../../../../components/Layout';
 import { MatchdayValues } from '../../../../../../types/TournamentValues';
 import MatchCard from '../../../../../../components/ui/MatchCard';
 import Standings from '../../../../../../components/ui/Standings';
+import apiClient from '../../../../../../lib/apiClient';
 
 interface MatchdayDetailProps {
   matchday: MatchdayValues;
