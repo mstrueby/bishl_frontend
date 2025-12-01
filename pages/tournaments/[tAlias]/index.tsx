@@ -7,34 +7,16 @@ import { tournamentConfigs } from '../../../tools/consts';
 import apiClient from '../../../lib/apiClient';
 import Link from 'next/link';
 import { CheckIcon } from '@heroicons/react/20/solid';
-
-interface Season {
-  name: string;
-  alias: string;
-  published: boolean;
-}
-
-interface Tournament {
-  _id: string;
-  name: string;
-  alias: string;
-  tinyName: string;
-  ageGroup: string;
-  published: boolean;
-  active: boolean;
-  external: boolean;
-  website: string;
-  seasons: Season[];
-}
+import { TournamentValues, SeasonValues } from '../../../types/TournamentValues';
 
 export default function TournamentOverview({
   tournament
 }: {
-  tournament: Tournament
+  tournament: TournamentValues
 }) {
   const sortedSeasons = tournament.seasons
     .slice()
-    .sort((a, b) => b.name.localeCompare(a.name));
+    .sort((a, b) => b.alias.localeCompare(a.alias));
 
   return (
     <Layout>
@@ -79,7 +61,7 @@ export default function TournamentOverview({
           </h2>
           {tournament.ageGroup && (
             <p className="mt-1 text-sm text-gray-500">
-              Altersklasse: {tournament.ageGroup}
+              Altersklasse: {tournament.ageGroup.value}
             </p>
           )}
         </div>
@@ -147,23 +129,6 @@ export default function TournamentOverview({
           </div>
         )}
       </section>
-
-      {/* External Website Link */}
-      {tournament.external && tournament.website && (
-        <div className="mt-8 border-t border-gray-200 pt-8">
-          <a
-            href={tournament.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Externe Website besuchen
-            <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-        </div>
-      )}
     </Layout>
   );
 }
@@ -172,7 +137,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const response = await apiClient.get('/tournaments');
     const allTournamentsData = response.data;
-    const paths = allTournamentsData.map((tournament: Tournament) => ({
+    const paths = allTournamentsData.map((tournament: TournamentValues) => ({
       params: { tAlias: tournament.alias },
     }));
     return { paths, fallback: 'blocking' };

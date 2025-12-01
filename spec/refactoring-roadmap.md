@@ -487,37 +487,37 @@ Auth-dependent features (context menus, edit buttons) render client-side after h
 
 **Tasks:**
 
-**Day 1-2: Tournament Overview Page**
-- [x] ~~Delete old redirect file `pages/tournaments/[alias].tsx`~~ (COMPLETE)
-- [ ] Create `/tournaments/[tAlias]/index.tsx` - tournament overview
-  - SSG with `getStaticProps` (fetch tournament + seasons list)
-  - Display tournament details (name, ageGroup, description)
-  - List all seasons as cards/links
-  - Breadcrumb: Home > Tournaments > {Tournament}
-  - ISR revalidation: 300s (5 min)
-  - Meta tags: title, description, canonical URL
-  - Client-side: No auth needed (public page)
+**Day 1-2: Tournament Overview Page** ✅ COMPLETE
+- [x] Delete old redirect file `pages/tournaments/[alias].tsx` (COMPLETE)
+- [x] Create `/tournaments/[tAlias]/index.tsx` - tournament overview
+  - [x] SSG with `getStaticProps` (fetch tournament + seasons list)
+  - [x] Display tournament details (name, ageGroup, description)
+  - [x] List all seasons as cards/links
+  - [x] Breadcrumb: Home > Tournaments > {Tournament}
+  - [x] ISR revalidation: 300s (5 min)
+  - [x] Meta tags: title, description, canonical URL
+  - [x] Client-side: No auth needed (public page)
 
-**Day 3-4: Season Overview Page**
-- [ ] Create `/tournaments/[tAlias]/[sAlias]/index.tsx` - season overview
-  - SSG with `getStaticProps` (fetch season + rounds list)
-  - Display season details (name, dates)
-  - List all rounds as cards/links (show round type, dates, status)
-  - Breadcrumb: Home > Tournaments > {Tournament} > {Season}
-  - ISR revalidation: 300s (5 min)
-  - Meta tags: title, description, canonical URL
-  - Client-side: No auth needed (public page)
+**Day 3-4: Season Overview Page** ✅ COMPLETE
+- [x] Create `/tournaments/[tAlias]/[sAlias]/index.tsx` - season overview
+  - [x] SSG with `getStaticProps` (fetch season + rounds list)
+  - [x] Display season details (name, dates)
+  - [x] List all rounds as cards/links (show round type, dates, status)
+  - [x] Breadcrumb: Home > Tournaments > {Tournament} > {Season}
+  - [x] ISR revalidation: 300s (5 min)
+  - [x] Meta tags: title, description, canonical URL
+  - [x] Client-side: No auth needed (public page)
 
-**Day 5-7: Round Overview Page**
-- [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/index.tsx` - round overview
-  - SSG with `getStaticProps` (fetch round + matchdays list + standings)
-  - Display round details (name, dates, type)
-  - Show round standings table (if applicable)
-  - List all matchdays as cards/links (show date, venue for tournament-style)
-  - Breadcrumb: Home > Tournaments > {Tournament} > {Season} > {Round}
-  - ISR revalidation: 180s (3 min)
-  - Meta tags: title, description, canonical URL
-  - Client-side: No auth needed (public page)
+**Day 5-7: Round Overview Page** ✅ COMPLETE
+- [x] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/index.tsx` - round overview
+  - [x] SSG with `getStaticProps` (fetch round + matchdays list + standings)
+  - [x] Display round details (name, dates, type)
+  - [x] Show round standings table (if applicable)
+  - [x] List all matchdays as cards/links (show date, venue for tournament-style)
+  - [x] Breadcrumb: Home > Tournaments > {Tournament} > {Season} > {Round}
+  - [x] ISR revalidation: 180s (3 min)
+  - [x] Meta tags: title, description, canonical URL
+  - [x] Client-side: No auth needed (public page)
 
 **Day 8-10: Matchday Detail Page (Main View)**
 - [ ] Create `/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]/index.tsx` - matchday detail
