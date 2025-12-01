@@ -1,23 +1,21 @@
 
-import { GetStaticPropsContext } from 'next';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Head from 'next/head';
+import { GetStaticPaths, GetStaticProps } from 'next';
+import { Fragment, useState } from 'react';
 import { useRouter } from 'next/router';
-import { CheckIcon } from '@heroicons/react/20/solid';
+import { Tab } from '@headlessui/react';
 import Layout from '../../../../../components/Layout';
-import { RoundValues, MatchdayValues } from '../../../../../types/TournamentValues';
-import { MatchValues } from '../../../../../types/MatchValues';
+import apiClient from '../../../../../lib/apiClient';
+import Link from 'next/link';
+import { RoundValues, MatchdayValues, MatchValues } from '../../../../../types/TournamentValues';
 import Standings from '../../../../../components/ui/Standings';
 import MatchCard from '../../../../../components/ui/MatchCard';
-import TeamSelect from '../../../../../components/ui/TeamSelect';
-import apiClient from '../../../../../lib/apiClient';
 
 interface RoundOverviewProps {
   round: RoundValues;
   matchdays: MatchdayValues[];
-  initialMatches: MatchValues[];
-  currentMatchdayAlias: string | null;
+  matches: MatchValues[];
+  allRounds: RoundValues[];
   tAlias: string;
   sAlias: string;
   rAlias: string;
@@ -25,88 +23,48 @@ interface RoundOverviewProps {
   seasonName: string;
 }
 
-type TabKey = 'matches' | 'standings';
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 export default function RoundOverview({
   round,
   matchdays,
-  initialMatches,
-  currentMatchdayAlias,
+  matches,
+  allRounds,
   tAlias,
   sAlias,
   rAlias,
   tournamentName,
-  seasonName,
+  seasonName
 }: RoundOverviewProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabKey>('matches');
-  const [selectedMatchdayAlias, setSelectedMatchdayAlias] = useState<string | null>(currentMatchdayAlias);
-  const [matches, setMatches] = useState<MatchValues[]>(initialMatches);
-  const [selectedTeam, setSelectedTeam] = useState<string>('all');
-  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
-  
-  // Sort matchdays by alias (most recent first)
-  const sortedMatchdays = matchdays
-    .slice()
-    .sort((a, b) => b.alias.localeCompare(a.alias));
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
 
-  // Fetch matches when matchday changes
-  useEffect(() => {
-    if (!selectedMatchdayAlias) return;
-    
-    const fetchMatches = async () => {
-      setIsLoadingMatches(true);
-      try {
-        const response = await apiClient.get(
-          `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${selectedMatchdayAlias}`
-        );
-        setMatches(response.data || []);
-      } catch (error) {
-        console.error('Error fetching matches:', error);
-        setMatches([]);
-      } finally {
-        setIsLoadingMatches(false);
-      }
-    };
+  const hasStandings = round.createStandings && round.standings && round.standings.length > 0;
+  const hasSingleMatchday = matchdays.length === 1;
+  const showTabs = hasSingleMatchday || hasStandings;
 
-    fetchMatches();
-  }, [selectedMatchdayAlias, tAlias, sAlias, rAlias]);
+  // Get unique teams for filter
+  const teams = Array.from(
+    new Set(
+      matches.flatMap(m => [
+        m.homeTeam.shortName,
+        m.awayTeam.shortName
+      ])
+    )
+  ).sort();
 
-  // Filter matches by team
-  const filteredMatches = matches.filter(match => {
-    if (selectedTeam === 'all') return true;
-    return match.home.fullName === selectedTeam || match.away.fullName === selectedTeam;
-  });
+  // Filter matches by selected team
+  const filteredMatches = selectedTeam
+    ? matches.filter(m =>
+        m.homeTeam.shortName === selectedTeam || m.awayTeam.shortName === selectedTeam
+      )
+    : matches;
 
-  // Sort and group matches by date
-  const sortedMatches = filteredMatches
-    .slice()
-    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-
-  const matchesByDate = sortedMatches.reduce((acc, match) => {
-    const dateKey = new Date(match.startTime).toLocaleDateString('de-DE', {
-      weekday: 'long',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(match);
-    return acc;
-  }, {} as Record<string, typeof sortedMatches>);
-
-  // Determine if tabs are needed
-  const showTabs = round.createStandings && round.standings;
-  
-  // Tabs configuration
-  const tabs = showTabs
-    ? [
-        { key: 'matches' as TabKey, caption: 'Spiele' },
-        { key: 'standings' as TabKey, caption: 'Tabelle' },
-      ]
-    : [];
+  const handleRoundChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    router.push(`/tournaments/${tAlias}/${sAlias}/${e.target.value}`);
+  };
 
   return (
     <Layout>
@@ -114,7 +72,7 @@ export default function RoundOverview({
         <title>{round.name} - {seasonName} - {tournamentName} | BISHL</title>
         <meta
           name="description"
-          content={`${round.name} der Saison ${seasonName} im ${tournamentName}. Spieltage, Tabelle und Statistiken.`}
+          content={`${round.name} der Saison ${seasonName} im ${tournamentName}. Spielplan und Tabelle.`}
         />
         <link
           rel="canonical"
@@ -122,353 +80,274 @@ export default function RoundOverview({
         />
       </Head>
 
-      {/* Breadcrumb Navigation */}
-      <nav className="mb-6" aria-label="Breadcrumb">
-        <ol className="flex items-center space-x-2 text-sm text-gray-500">
-          <li>
-            <Link href="/" className="hover:text-gray-700">
+      {/* Breadcrumb */}
+      <nav className="flex mb-6" aria-label="Breadcrumb">
+        <ol className="inline-flex items-center space-x-1 md:space-x-3">
+          <li className="inline-flex items-center">
+            <Link href="/" className="text-sm font-medium text-gray-700 hover:text-indigo-600">
               Home
             </Link>
           </li>
-          <li>/</li>
           <li>
-            <Link href="/tournaments" className="hover:text-gray-700">
-              Wettbewerbe
-            </Link>
+            <div className="flex items-center">
+              <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <Link href="/tournaments" className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600">
+                Wettbewerbe
+              </Link>
+            </div>
           </li>
-          <li>/</li>
           <li>
-            <Link href={`/tournaments/${tAlias}`} className="hover:text-gray-700">
-              {tournamentName}
-            </Link>
+            <div className="flex items-center">
+              <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <Link href={`/tournaments/${tAlias}`} className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600">
+                {tournamentName}
+              </Link>
+            </div>
           </li>
-          <li>/</li>
           <li>
-            <Link href={`/tournaments/${tAlias}/${sAlias}`} className="hover:text-gray-700">
-              {seasonName}
-            </Link>
+            <div className="flex items-center">
+              <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <Link href={`/tournaments/${tAlias}/${sAlias}`} className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600">
+                {seasonName}
+              </Link>
+            </div>
           </li>
-          <li>/</li>
-          <li className="font-medium text-gray-900" aria-current="page">
-            {round.name}
+          <li aria-current="page">
+            <div className="flex items-center">
+              <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <span className="ml-1 text-sm font-medium text-gray-500">{round.name}</span>
+            </div>
           </li>
         </ol>
       </nav>
 
-      {/* Round Header */}
-      <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+      {/* Header with Round Selector */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-8">
+        <h2 className="text-2xl font-medium uppercase text-gray-900 sm:text-3xl tracking-wider">
           {round.name}
-        </h1>
-        <p className="mt-2 text-lg text-gray-600">
-          {seasonName} · {tournamentName}
-        </p>
+        </h2>
         
-        {/* Round Dates */}
-        {(round.startDate || round.endDate) && (
-          <p className="mt-2 text-sm text-gray-500">
-            {round.startDate && new Date(round.startDate).toLocaleDateString('de-DE', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            })}
-            {round.startDate && round.endDate && ' - '}
-            {round.endDate && new Date(round.endDate).toLocaleDateString('de-DE', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            })}
-          </p>
-        )}
-
-        {round.published && (
-          <span className="mt-3 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-            <CheckIcon className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Veröffentlicht
-          </span>
-        )}
-      </div>
-
-      {/* Matchday Navigation (only show if multiple matchdays) */}
-      {sortedMatchdays.length > 1 && (
-        <section className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <label className="text-sm font-medium text-gray-700">Spieltag:</label>
-          </div>
-          <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Spieltage">
-            {sortedMatchdays.map((matchday) => (
-              <button
-                key={matchday.alias}
-                onClick={() => setSelectedMatchdayAlias(matchday.alias)}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium border-2 transition-all whitespace-nowrap ${
-                  selectedMatchdayAlias === matchday.alias
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-gray-300 text-gray-700 hover:border-indigo-400'
-                }`}
-              >
-                {matchday.name}
-              </button>
-            ))}
-          </nav>
-        </section>
-      )}
-
-      {/* Tab Navigation (only if standings exist) */}
-      {showTabs && (
-        <div className="mt-8">
-          <div className="sm:hidden">
+        {allRounds.length > 1 && (
+          <div className="mt-4 sm:mt-0">
             <select
-              value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value as TabKey)}
-              className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+              value={rAlias}
+              onChange={handleRoundChange}
+              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              {tabs.map((tab) => (
-                <option key={tab.key} value={tab.key}>
-                  {tab.caption}
+              {allRounds.map((r) => (
+                <option key={r.alias} value={r.alias}>
+                  {r.name}
                 </option>
               ))}
             </select>
           </div>
-          <div className="hidden sm:block">
-            <nav className="flex space-x-4 border-b border-gray-200" aria-label="Tabs">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`${
-                    tab.key === activeTab
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
-                >
-                  {tab.caption}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-      )}
-
-      {/* Content Area */}
-      <div className="mt-8">
-        {/* Matches Tab (default) */}
-        {(!showTabs || activeTab === 'matches') && (
-          <section>
-            {/* Team Filter */}
-            <div className="mb-6 flex items-center gap-4">
-              <label htmlFor="team-filter" className="text-sm font-medium text-gray-700">
-                Team Filter:
-              </label>
-              <select
-                id="team-filter"
-                value={selectedTeam}
-                onChange={(e) => setSelectedTeam(e.target.value)}
-                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              >
-                <option value="all">Alle Teams</option>
-                {Array.from(new Set(matches.flatMap(m => [m.home.fullName, m.away.fullName])))
-                  .sort()
-                  .map(team => (
-                    <option key={team} value={team}>{team}</option>
-                  ))}
-              </select>
-            </div>
-
-            {/* Matches List */}
-            {isLoadingMatches ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500">Lade Spiele...</p>
-              </div>
-            ) : filteredMatches.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500">Keine Spiele verfügbar</p>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {Object.entries(matchesByDate).map(([date, matches]) => (
-                  <div key={date}>
-                    {Object.keys(matchesByDate).length > 1 && (
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        {date}
-                      </h3>
-                    )}
-                    <div className="space-y-4">
-                      {matches.map((match) => (
-                        <MatchCard
-                          key={match._id || match.matchId}
-                          match={match}
-                          from={`/tournaments/${tAlias}/${sAlias}/${rAlias}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Link to full matchday view */}
-            {selectedMatchdayAlias && (
-              <div className="mt-6 text-center">
-                <Link
-                  href={`/tournaments/${tAlias}/${sAlias}/${rAlias}/${selectedMatchdayAlias}`}
-                  className="text-sm text-indigo-600 hover:text-indigo-800"
-                >
-                  Vollständige Spieltag-Ansicht →
-                </Link>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Standings Tab */}
-        {showTabs && activeTab === 'standings' && (
-          <section>
-            <Standings 
-              standingsData={round.standings!} 
-              matchSettings={round.matchSettings}
-            />
-            {/* Link to dedicated standings page */}
-            <div className="mt-6 text-center">
-              <Link
-                href={`/tournaments/${tAlias}/${sAlias}/${rAlias}/standings`}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
-              >
-                Tabelle teilen →
-              </Link>
-            </div>
-          </section>
         )}
       </div>
+
+      {/* Content with conditional tabs */}
+      {!showTabs ? (
+        // No tabs - just show matchdays list
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">Spieltage</h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {matchdays.map((matchday) => (
+              <Link
+                key={matchday.alias}
+                href={`/tournaments/${tAlias}/${sAlias}/${rAlias}/${matchday.alias}`}
+                className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md transition-all"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-lg font-medium text-gray-900">{matchday.name}</p>
+                  {matchday.startDate && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      {new Date(matchday.startDate).toLocaleDateString('de-DE')}
+                    </p>
+                  )}
+                </div>
+                <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : (
+        // Show tabs
+        <Tab.Group>
+          <Tab.List className="flex space-x-1 rounded-xl bg-indigo-100 p-1 mb-8">
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                  'ring-white ring-opacity-60 ring-offset-2 ring-offset-indigo-400 focus:outline-none focus:ring-2',
+                  selected
+                    ? 'bg-white shadow text-indigo-700'
+                    : 'text-indigo-600 hover:bg-white/[0.12] hover:text-indigo-800'
+                )
+              }
+            >
+              {hasSingleMatchday ? 'Spiele' : 'Spieltage'}
+            </Tab>
+            {hasStandings && (
+              <Tab
+                className={({ selected }) =>
+                  classNames(
+                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                    'ring-white ring-opacity-60 ring-offset-2 ring-offset-indigo-400 focus:outline-none focus:ring-2',
+                    selected
+                      ? 'bg-white shadow text-indigo-700'
+                      : 'text-indigo-600 hover:bg-white/[0.12] hover:text-indigo-800'
+                  )
+                }
+              >
+                Tabelle
+              </Tab>
+            )}
+          </Tab.List>
+          <Tab.Panels>
+            <Tab.Panel>
+              {hasSingleMatchday ? (
+                // Show matches directly
+                <div>
+                  {teams.length > 0 && (
+                    <div className="mb-6">
+                      <label htmlFor="team-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                        Nach Team filtern
+                      </label>
+                      <select
+                        id="team-filter"
+                        value={selectedTeam}
+                        onChange={(e) => setSelectedTeam(e.target.value)}
+                        className="block w-full max-w-xs rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                      >
+                        <option value="">Alle Teams</option>
+                        {teams.map((team) => (
+                          <option key={team} value={team}>
+                            {team}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-4">
+                    {filteredMatches.map((match) => (
+                      <MatchCard key={match.matchId} match={match} />
+                    ))}
+                  </div>
+                  
+                  {filteredMatches.length === 0 && (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-500">
+                        {selectedTeam ? 'Keine Spiele für dieses Team' : 'Keine Spiele verfügbar'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Show matchdays list
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {matchdays.map((matchday) => (
+                    <Link
+                      key={matchday.alias}
+                      href={`/tournaments/${tAlias}/${sAlias}/${rAlias}/${matchday.alias}`}
+                      className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md transition-all"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-lg font-medium text-gray-900">{matchday.name}</p>
+                        {matchday.startDate && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            {new Date(matchday.startDate).toLocaleDateString('de-DE')}
+                          </p>
+                        )}
+                      </div>
+                      <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                      </svg>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Tab.Panel>
+            
+            {hasStandings && (
+              <Tab.Panel>
+                <div className="mb-4">
+                  <Link
+                    href={`/tournaments/${tAlias}/${sAlias}/${rAlias}/standings`}
+                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    Tabelle teilen →
+                  </Link>
+                </div>
+                <Standings standings={round.standings!} />
+              </Tab.Panel>
+            )}
+          </Tab.Panels>
+        </Tab.Group>
+      )}
     </Layout>
   );
 }
 
-export async function getStaticProps(context: GetStaticPropsContext) {
-  const tAlias = context.params?.tAlias;
-  const sAlias = context.params?.sAlias;
-  const rAlias = context.params?.rAlias;
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths: any[] = [];
+  return { paths, fallback: 'blocking' };
+};
 
-  if (typeof tAlias !== 'string' || typeof sAlias !== 'string' || typeof rAlias !== 'string') {
-    return { notFound: true };
-  }
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { tAlias, sAlias, rAlias } = params as { tAlias: string; sAlias: string; rAlias: string };
 
   try {
-    // Fetch round data using apiClient
-    const roundResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`);
-    const roundData = roundResponse.data;
+    const [roundResponse, matchdaysResponse, allRoundsResponse, tournamentResponse, seasonResponse] = await Promise.all([
+      apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`),
+      apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`),
+      apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds`),
+      apiClient.get(`/tournaments/${tAlias}`),
+      apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`)
+    ]);
 
-    // Fetch matchdays separately using apiClient
-    let matchdays: MatchdayValues[] = [];
-    try {
-      const matchdaysResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`);
-      matchdays = matchdaysResponse.data || [];
-    } catch (error) {
-      console.error('Error fetching matchdays:', error);
-    }
+    const round = roundResponse.data;
+    const matchdays = matchdaysResponse.data || [];
+    const allRounds = allRoundsResponse.data || [];
 
-    // Determine current/most recent matchday
-    const sortedMatchdays = matchdays
-      .slice()
-      .sort((a, b) => b.alias.localeCompare(a.alias));
-    const currentMatchdayAlias = sortedMatchdays.length > 0 ? sortedMatchdays[0].alias : null;
-
-    // Fetch initial matches for current matchday
-    let initialMatches: MatchValues[] = [];
-    if (currentMatchdayAlias) {
+    // If single matchday, fetch matches
+    let matches: MatchValues[] = [];
+    if (matchdays.length === 1) {
       try {
         const matchesResponse = await apiClient.get(
-          `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${currentMatchdayAlias}`
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${matchdays[0].alias}/matches`
         );
-        initialMatches = matchesResponse.data || [];
+        matches = matchesResponse.data || [];
       } catch (error) {
         console.error('Error fetching matches:', error);
       }
     }
 
-    // Fetch season data for breadcrumb using apiClient
-    let seasonName = sAlias;
-    try {
-      const seasonResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`);
-      seasonName = seasonResponse.data?.name || sAlias;
-    } catch (error) {
-      console.error('Error fetching season:', error);
-    }
-
-    // Fetch tournament data for breadcrumb using apiClient
-    let tournamentName = tAlias;
-    try {
-      const tournamentResponse = await apiClient.get(`/tournaments/${tAlias}`);
-      tournamentName = tournamentResponse.data?.name || tAlias;
-    } catch (error) {
-      console.error('Error fetching tournament:', error);
-    }
-
     return {
       props: {
-        round: roundData,
+        round,
         matchdays,
-        initialMatches,
-        currentMatchdayAlias,
+        matches,
+        allRounds: allRounds.filter((r: RoundValues) => r.published).sort((a: RoundValues, b: RoundValues) => b.alias.localeCompare(a.alias)),
         tAlias,
         sAlias,
         rAlias,
-        tournamentName,
-        seasonName
+        tournamentName: tournamentResponse.data?.name || tAlias,
+        seasonName: seasonResponse.data?.name || sAlias,
       },
-      revalidate: 180, // 3 minutes
+      revalidate: 300,
     };
   } catch (error) {
-    console.error('Failed to fetch round data:', error);
+    console.error('Error fetching round data:', error);
     return { notFound: true };
   }
-}
-
-export async function getStaticPaths() {
-  try {
-    const tournamentsResponse = await apiClient.get('/tournaments');
-    const tournaments = tournamentsResponse.data || [];
-    
-    let paths: { params: { tAlias: string; sAlias: string; rAlias: string } }[] = [];
-
-    for (const tournament of tournaments) {
-      try {
-        const seasonsResponse = await apiClient.get(`/tournaments/${tournament.alias}/seasons`);
-        const seasons = seasonsResponse.data || [];
-
-        for (const season of seasons) {
-          try {
-            const roundsResponse = await apiClient.get(`/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`);
-            const rounds = roundsResponse.data || [];
-
-            const seasonPaths = rounds.map((round: RoundValues) => ({
-              params: { 
-                tAlias: tournament.alias, 
-                sAlias: season.alias,
-                rAlias: round.alias 
-              },
-            }));
-            
-            paths = paths.concat(seasonPaths);
-          } catch (error) {
-            console.error(`Error fetching rounds for ${tournament.alias}/${season.alias}:`, error);
-            // Continue with other seasons
-          }
-        }
-      } catch (error) {
-        console.error(`Error fetching seasons for ${tournament.alias}:`, error);
-        // Continue with other tournaments
-      }
-    }
-
-    return {
-      paths,
-      fallback: 'blocking',
-    };
-  } catch (error) {
-    console.error('Failed to generate static paths:', error);
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-}
+};
