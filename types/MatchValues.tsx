@@ -140,7 +140,7 @@ export interface SupplementarySheet {
   isSaved?: boolean;
 }
 
-export interface Match {
+export interface MatchValues {
   _id: string;
   matchId: number;
   tournament: {

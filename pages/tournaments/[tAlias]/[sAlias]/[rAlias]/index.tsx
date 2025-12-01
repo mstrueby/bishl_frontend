@@ -16,7 +16,6 @@ interface RoundOverviewProps {
   rAlias: string;
   tournamentName: string;
   seasonName: string;
-  standings?: any; // TODO: Add proper standings type
 }
 
 export default function RoundOverview({
@@ -27,7 +26,6 @@ export default function RoundOverview({
   rAlias,
   tournamentName,
   seasonName,
-  standings
 }: RoundOverviewProps) {
   // Sort matchdays by alias
   const sortedMatchdays = matchdays
@@ -116,10 +114,10 @@ export default function RoundOverview({
       </div>
 
       {/* Standings Section */}
-      {round.createStandings && standings && standings.length > 0 && (
+      {round.createStandings && round.standings.length > 0 && (
         <section className="mt-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Tabelle</h2>
-          <Standings standings={standings} />
+          <Standings standingsData={standings} />
         </section>
       )}
 
@@ -175,7 +173,7 @@ export default function RoundOverview({
                     {/* Owner (for tournament-style matchdays) */}
                     {matchday.owner && (
                       <p className="mt-2 text-sm text-gray-500">
-                        Austragungsort: {matchday.owner.clubName}
+                        Veranstalter: {matchday.owner.clubName}
                       </p>
                     )}
                     
@@ -250,18 +248,6 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       console.error('Error fetching tournament:', error);
     }
 
-    // Fetch standings if applicable using apiClient
-    let standings = null;
-    if (roundData.createStandings) {
-      try {
-        const standingsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/standings`);
-        standings = standingsResponse.data;
-      } catch (error) {
-        console.error('Error fetching standings:', error);
-        // Continue without standings
-      }
-    }
-
     return {
       props: {
         round: roundData,
@@ -270,8 +256,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
         sAlias,
         rAlias,
         tournamentName,
-        seasonName,
-        standings,
+        seasonName
       },
       revalidate: 180, // 3 minutes
     };

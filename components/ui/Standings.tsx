@@ -2,27 +2,10 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { StandingsTeam } from '../../../types/TournamentValues';
 
 // Inside your component
 
-interface StandingsTeam {
-  fullName: string;
-  shortName: string;
-  tinyName: string;
-  logo: string;
-  gamesPlayed: number;
-  goalsFor: number;
-  goalsAgainst: number;
-  points: number;
-  wins: number;
-  losses: number;
-  draws: number;
-  otWins: number;
-  otLosses: number;
-  soWins: number;
-  soLosses: number;
-  streak: string[];
-}
 
 interface StandingsProps {
   standingsData: Record<string, StandingsTeam>;

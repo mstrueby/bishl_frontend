@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Fragment } from "react";
 import { CldImage } from 'next-cloudinary';
-import { Match } from "../../types/MatchValues";
+import { MatchValues } from "../../types/MatchValues";
 import {
   CalendarIcon,
   MapPinIcon,
@@ -28,8 +28,8 @@ const StatusMenu = ({
   onMatchUpdate,
   from,
 }: {
-  match: Match;
-  setMatch: React.Dispatch<React.SetStateAction<Match>>;
+  match: MatchValues;
+  setMatch: React.Dispatch<React.SetStateAction<MatchValues>>;
   permissions: MatchButtonPermissions;
   onMatchUpdate?: () => Promise<void>;
   from: string;
@@ -182,7 +182,7 @@ const StatusMenu = ({
 };
 
 const MatchCard: React.FC<{
-  match: Match;
+  match: MatchValues;
   onMatchUpdate?: () => Promise<void>;
   from?: string;
 }> = ({ match: initialMatch, onMatchUpdate, from }) => {
