@@ -1,0 +1,33 @@
+you are a UX/UI developer and have to refactor the usability of the tournament tree in @.. and subpages.
+The main goal is to create a modern intuitively easy to navigate tournament area.
+The main challenge is to create a generic approach for different tournament data structures: see @...
+- tournaments always consists of seasons > rounds > matchdays > matches
+- Standings could be created for rounds and/or matchdays
+
+What is good right now from my perspective:
+- All necessary information is available. do not modify Api fetches.
+- Bread Crumb navigation is useful for this data structure with different kind of data sets.
+- unique URLs for better SEO
+
+Main requirements:
+- to much clicks to show matches because of data tree
+- show matches and standings on different tabs. only show tab "standings" if createStandings is true. if only tab "matches" would be visible hide navigation at all.
+- create separate page for standings with regards to SEO and URL-sharing.
+- create a new page tournaments/index.tsx to as an overview page to list all currently published tournaments
+
+- when accessing url /tournaments/[tAlias] forward automatically to current season page
+- when accessing url /tournaments/[tAlias]/[sAlias] forward automatically to latest round page
+- when accessing url /tournaments/[tAlias]/[sAlias]/[rAlias] forward automatically to latest matchday page
+
+- at page /tournaments/[tAlias]/[sAlias]/[rAlias]:
+-- add a dropdown at top right for rounds (if there are more than one round) to quickly change round for one given tournament/season combination
+-- if only one matchday exists for this round then tab nav with two options: a) to list all matches of this one matchday, b) to show standings if createStandings for round is true. if false hide entire tab navigation. in this case a link to matchday page is not necessary.
+-- if more then one matchday then tab nav to list all matchdays and to show standings if createStandings for round is true. if false hide entire tab navigation.
+
+- at page  /tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]:
+-- add a dropdown to select different matchdays at top right
+-- tab navigation list all matches and show standings if matchday.createStandings is true. if false hide entire tab nav.
+
+- add a filter to select team for a any given match list.
+
+as an UX/UI expert outline different approaches to think about and make a proposal and recommendation.
