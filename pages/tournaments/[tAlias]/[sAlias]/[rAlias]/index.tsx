@@ -319,6 +319,27 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     const matchdays = matchdaysResponse.data || [];
     const allRounds = allRoundsResponse.data || [];
 
+    // Auto-redirect to latest matchday if multiple matchdays exist
+    if (matchdays.length > 1) {
+      const sortedMatchdays = matchdays
+        .filter((md: MatchdayValues) => md.published)
+        .sort((a: MatchdayValues, b: MatchdayValues) => {
+          if (a.startDate && b.startDate) {
+            return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+          }
+          return b.alias.localeCompare(a.alias);
+        });
+
+      if (sortedMatchdays.length > 0) {
+        return {
+          redirect: {
+            destination: `/tournaments/${tAlias}/${sAlias}/${rAlias}/${sortedMatchdays[0].alias}`,
+            permanent: false,
+          },
+        };
+      }
+    }
+
     // If single matchday, fetch matches
     let matches: MatchValues[] = [];
     if (matchdays.length === 1) {
