@@ -12,6 +12,7 @@ import apiClient from '../../../../../../lib/apiClient';
 
 interface MatchdayDetailProps {
   matchday: MatchdayValues;
+  matches: any[]; // TODO: Add proper match type from MatchValues
   tAlias: string;
   sAlias: string;
   rAlias: string;
@@ -27,6 +28,7 @@ type TabKey = 'matches' | 'standings' | 'stats';
 
 export default function MatchdayDetail({
   matchday,
+  matches,
   tAlias,
   sAlias,
   rAlias,
@@ -40,8 +42,8 @@ export default function MatchdayDetail({
   const [activeTab, setActiveTab] = useState<TabKey>('matches');
 
   // Sort matches by start time
-  const sortedMatches = matchday.matches
-    ? matchday.matches
+  const sortedMatches = matches
+    ? matches
         .slice()
         .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
     : [];
@@ -406,6 +408,16 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     const matchdayResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`);
     const matchdayData = matchdayResponse.data;
 
+    // Fetch matches for this matchday using apiClient
+    let matches = [];
+    try {
+      const matchesResponse = await apiClient.get(`/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`);
+      matches = matchesResponse.data || [];
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+      // Continue without matches
+    }
+
     // Fetch round data for breadcrumb using apiClient
     let roundName = rAlias;
     try {
@@ -460,6 +472,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     return {
       props: {
         matchday: matchdayData,
+        matches,
         tAlias,
         sAlias,
         rAlias,
