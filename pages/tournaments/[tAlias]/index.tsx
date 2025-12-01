@@ -9,12 +9,16 @@ import Link from 'next/link';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { TournamentValues, SeasonValues } from '../../../types/TournamentValues';
 
+interface TournamentOverviewProps {
+  tournament: TournamentValues;
+  seasons: SeasonValues[];
+}
+
 export default function TournamentOverview({
-  tournament
-}: {
-  tournament: TournamentValues
-}) {
-  const sortedSeasons = tournament.seasons
+  tournament,
+  seasons
+}: TournamentOverviewProps) {
+  const sortedSeasons = seasons
     .slice()
     .sort((a, b) => b.alias.localeCompare(a.alias));
 
@@ -155,16 +159,40 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   try {
-    const response = await apiClient.get(`/tournaments/${tAlias}`);
-    const tournament = response.data || response;
+    // Fetch tournament data
+    const tournamentRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}`
+    );
+    
+    if (!tournamentRes.ok) {
+      console.error('Error fetching tournament:', tournamentRes.statusText);
+      return { notFound: true };
+    }
+    
+    const tournamentResponse = await tournamentRes.json();
+    const tournament = tournamentResponse?.data || tournamentResponse;
 
     if (!tournament) {
       return { notFound: true };
     }
 
+    // Fetch seasons separately
+    const seasonsRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons`
+    );
+    
+    let seasons: SeasonValues[] = [];
+    if (seasonsRes.ok) {
+      const seasonsResponse = await seasonsRes.json();
+      seasons = Array.isArray(seasonsResponse)
+        ? seasonsResponse
+        : (seasonsResponse?.data || []);
+    }
+
     return {
       props: {
         tournament,
+        seasons,
       },
       revalidate: 300, // 5 minutes ISR
     };

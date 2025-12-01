@@ -4,11 +4,12 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import Layout from '../../../../../components/Layout';
-import { RoundValues, SeasonValues } from '../../../../../types/TournamentValues';
+import { RoundValues, MatchdayValues } from '../../../../../types/TournamentValues';
 import Standings from '../../../../../components/ui/Standings';
 
 interface RoundOverviewProps {
   round: RoundValues;
+  matchdays: MatchdayValues[];
   tAlias: string;
   sAlias: string;
   rAlias: string;
@@ -19,6 +20,7 @@ interface RoundOverviewProps {
 
 export default function RoundOverview({
   round,
+  matchdays,
   tAlias,
   sAlias,
   rAlias,
@@ -27,7 +29,7 @@ export default function RoundOverview({
   standings
 }: RoundOverviewProps) {
   // Sort matchdays by alias
-  const sortedMatchdays = round.matchdays
+  const sortedMatchdays = matchdays
     .slice()
     .sort((a, b) => a.alias.localeCompare(b.alias));
 
@@ -228,6 +230,19 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     const roundResponse = await roundRes.json();
     const roundData = roundResponse?.data || roundResponse;
 
+    // Fetch matchdays separately
+    const matchdaysRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`
+    );
+    
+    let matchdays: MatchdayValues[] = [];
+    if (matchdaysRes.ok) {
+      const matchdaysResponse = await matchdaysRes.json();
+      matchdays = Array.isArray(matchdaysResponse)
+        ? matchdaysResponse
+        : (matchdaysResponse?.data || []);
+    }
+
     // Fetch season data for breadcrumb
     const seasonRes = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tAlias}/seasons/${sAlias}`
@@ -262,6 +277,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     return {
       props: {
         round: roundData,
+        matchdays,
         tAlias,
         sAlias,
         rAlias,
