@@ -2,6 +2,7 @@
 import { GetStaticPropsContext } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import Layout from '../../../../components/Layout';
 import { SeasonValues, RoundValues } from '../../../../types/TournamentValues';
@@ -22,6 +23,8 @@ export default function SeasonOverview({
   sAlias,
   tournamentName
 }: SeasonOverviewPropsUpdated) {
+  const router = useRouter();
+  
   // Sort rounds by alias (most recent first)
   const sortedRounds = rounds
     .slice()
@@ -84,66 +87,71 @@ export default function SeasonOverview({
         )}
       </div>
 
-      {/* Rounds Section */}
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Runden</h2>
-        
-        {sortedRounds.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500">Keine Runden verfügbar</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Tournament/Season Selector and Archive Link */}
+      <section className="mt-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <label htmlFor="season-select" className="text-sm font-medium text-gray-700">
+            Saison:
+          </label>
+          <select
+            id="season-select"
+            value={sAlias}
+            onChange={(e) => router.push(`/tournaments/${tAlias}/${e.target.value}`)}
+            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          >
+            {/* This will be populated with all seasons - needs server data */}
+            <option value={sAlias}>{season.name}</option>
+          </select>
+        </div>
+        <Link
+          href={`/tournaments/${tAlias}/archive`}
+          className="text-sm text-indigo-600 hover:text-indigo-800"
+        >
+          Ältere Saisons →
+        </Link>
+      </section>
+
+      {/* Round Navigation (Pills) */}
+      {sortedRounds.length > 0 && (
+        <section className="mt-8">
+          <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Runden">
             {sortedRounds.map((round) => (
               <Link
                 key={round.alias}
                 href={`/tournaments/${tAlias}/${sAlias}/${round.alias}`}
-                className="relative flex flex-col space-y-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md transition-all"
+                className="flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium border-2 border-gray-300 text-gray-700 hover:border-indigo-400 hover:text-indigo-600 transition-all whitespace-nowrap"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="focus:outline-none">
-                    <span className="absolute inset-0" aria-hidden="true" />
-                    <p className="text-lg font-medium text-gray-900">
-                      {round.name}
-                    </p>
-                    
-                    {/* Round Dates */}
-                    {(round.startDate || round.endDate) && (
-                      <p className="mt-2 text-sm text-gray-600">
-                        {round.startDate && new Date(round.startDate).toLocaleDateString('de-DE', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })}
-                        {round.startDate && round.endDate && ' - '}
-                        {round.endDate && new Date(round.endDate).toLocaleDateString('de-DE', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })}
-                      </p>
-                    )}
-                    
-                    {/* Published Status */}
-                    <div className="mt-3 flex items-center">
-                      {round.published ? (
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                          <CheckIcon className="mr-1 h-3 w-3" aria-hidden="true" />
-                          Veröffentlicht
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                          Entwurf
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                {round.name}
               </Link>
             ))}
+          </nav>
+        </section>
+      )}
+
+      {/* Default View: Show current/latest round details */}
+      {sortedRounds.length > 0 && (
+        <section className="mt-8">
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-4">
+              Wählen Sie eine Runde aus, um Spiele und Tabellen anzuzeigen
+            </p>
+            <Link
+              href={`/tournaments/${tAlias}/${sAlias}/${sortedRounds[0].alias}`}
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Aktuelle Runde: {sortedRounds[0].name}
+            </Link>
           </div>
-        )}
-      </section>
+        </section>
+      )}
+
+      {sortedRounds.length === 0 && (
+        <section className="mt-8">
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-500">Keine Runden verfügbar</p>
+          </div>
+        </section>
+      )}
     </Layout>
   );
 }
