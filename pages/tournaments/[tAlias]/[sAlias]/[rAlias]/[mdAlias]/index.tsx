@@ -6,7 +6,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import Layout from "../../../../../../components/Layout";
-import { MatchdayValues } from "../../../../../../types/TournamentValues";
+import { MatchdayValues, SeasonValues, RoundValues } from "../../../../../../types/TournamentValues";
 import { MatchValues } from "../../../../../../types/MatchValues";
 import MatchCard from "../../../../../../components/ui/MatchCard";
 import Standings from "../../../../../../components/ui/Standings";
@@ -15,6 +15,8 @@ import apiClient from "../../../../../../lib/apiClient";
 interface MatchdayDetailProps {
   matchday: MatchdayValues;
   allMatchdays: MatchdayValues[];
+  allSeasons: SeasonValues[];
+  allRounds: RoundValues[];
   matches: MatchValues[];
   tAlias: string;
   sAlias: string;
@@ -30,6 +32,8 @@ type TabKey = "matches" | "standings";
 export default function MatchdayDetail({
   matchday,
   allMatchdays,
+  allSeasons,
+  allRounds,
   matches,
   tAlias,
   sAlias,
@@ -103,6 +107,14 @@ export default function MatchdayDetail({
     return classes.filter(Boolean).join(" ");
   }
 
+  const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    router.push(`/tournaments/${tAlias}/${e.target.value}`);
+  };
+
+  const handleRoundChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    router.push(`/tournaments/${tAlias}/${sAlias}/${e.target.value}`);
+  };
+
   const handleMatchdayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${sAlias}/${rAlias}/${e.target.value}`);
   };
@@ -172,7 +184,7 @@ export default function MatchdayDetail({
         </ol>
       </nav>
 
-      {/* Header with Matchday Selector */}
+      {/* Header with Season, Round, and Matchday Selectors */}
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -183,21 +195,55 @@ export default function MatchdayDetail({
           </p>
         </div>
 
-        {allMatchdays.length > 1 && (
-          <div className="mt-4 sm:mt-0">
-            <select
-              value={mdAlias}
-              onChange={handleMatchdayChange}
-              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            >
-              {allMatchdays.map((md) => (
-                <option key={md.alias} value={md.alias}>
-                  {md.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div className="mt-4 sm:mt-0 flex gap-2">
+          {allSeasons.length > 1 && (
+            <div>
+              <select
+                value={sAlias}
+                onChange={handleSeasonChange}
+                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              >
+                {allSeasons.map((season) => (
+                  <option key={season.alias} value={season.alias}>
+                    {season.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {allRounds.length > 1 && (
+            <div>
+              <select
+                value={rAlias}
+                onChange={handleRoundChange}
+                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              >
+                {allRounds.map((round) => (
+                  <option key={round.alias} value={round.alias}>
+                    {round.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {allMatchdays.length > 1 && (
+            <div>
+              <select
+                value={mdAlias}
+                onChange={handleMatchdayChange}
+                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              >
+                {allMatchdays.map((md) => (
+                  <option key={md.alias} value={md.alias}>
+                    {md.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Matchday Details */}
@@ -398,6 +444,18 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     );
     const matchdayData = matchdayResponse.data;
 
+    // Fetch all seasons for the dropdown
+    const allSeasonsResponse = await apiClient.get(
+      `/tournaments/${tAlias}/seasons`,
+    );
+    const allSeasons = allSeasonsResponse.data || [];
+
+    // Fetch all rounds for the dropdown
+    const allRoundsResponse = await apiClient.get(
+      `/tournaments/${tAlias}/seasons/${sAlias}/rounds`,
+    );
+    const allRounds = allRoundsResponse.data || [];
+
     // Fetch all matchdays for the dropdown
     const allMatchdaysResponse = await apiClient.get(
       `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
@@ -450,6 +508,17 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     return {
       props: {
         matchday: matchdayData,
+        allSeasons: allSeasons
+          .filter((s: SeasonValues) => s.published)
+          .sort((a: SeasonValues, b: SeasonValues) => b.alias.localeCompare(a.alias)),
+        allRounds: allRounds
+          .filter((r: RoundValues) => r.published)
+          .sort((a: RoundValues, b: RoundValues) => {
+            if (a.startDate && b.startDate) {
+              return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+            }
+            return a.alias.localeCompare(b.alias);
+          }),
         allMatchdays: allMatchdays
           .filter((md: MatchdayValues) => md.published)
           .sort((a: MatchdayValues, b: MatchdayValues) => {
