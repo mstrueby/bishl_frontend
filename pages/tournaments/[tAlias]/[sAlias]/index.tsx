@@ -47,6 +47,9 @@ export default function SeasonHub({
   const [selectedRound, setSelectedRound] = useState<string>(rAlias || '');
   const [selectedMatchday, setSelectedMatchday] = useState<string>(mdAlias || '');
   const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(selectedRoundMatchdays);
+  
+  // Tab state for matches view
+  const [activeMatchTab, setActiveMatchTab] = useState<string>('');
 
   // Update local state when route changes
   useEffect(() => {
@@ -252,25 +255,34 @@ export default function SeasonHub({
             </select>
           </div>
 
-          {/* Matchday Selector - Only enabled when round is selected */}
+          {/* Matchday Selector - Only shown when round has multiple matchdays */}
           <div>
             <label htmlFor="matchday-select" className="block text-sm font-medium text-gray-700 mb-2">
               Spieltag
             </label>
-            <select
-              id="matchday-select"
-              value={selectedMatchday}
-              onChange={handleMatchdayChange}
-              disabled={!selectedRound}
-              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="">Alle Spieltage</option>
-              {matchdaysForRound.map((md) => (
-                <option key={md.alias} value={md.alias}>
-                  {md.name}
-                </option>
-              ))}
-            </select>
+            {!selectedRound ? (
+              <div className="block w-full rounded-md border border-gray-300 bg-gray-100 py-2 pl-3 pr-10 text-base text-gray-400 sm:text-sm">
+                Alle Spieltage
+              </div>
+            ) : matchdaysForRound.length === 1 ? (
+              <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
+                {matchdaysForRound[0].alias === 'all_games' ? 'Alle Spiele' : matchdaysForRound[0].name}
+              </div>
+            ) : (
+              <select
+                id="matchday-select"
+                value={selectedMatchday}
+                onChange={handleMatchdayChange}
+                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              >
+                <option value="">Alle Spieltage</option>
+                {matchdaysForRound.map((md) => (
+                  <option key={md.alias} value={md.alias}>
+                    {md.alias === 'ALL_GAMES' ? 'Alle Spiele' : md.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
       </div>
@@ -278,16 +290,83 @@ export default function SeasonHub({
       {/* Live & Upcoming Matches or Matches Display */}
       {!rAlias && liveAndUpcomingMatches.length > 0 ? (
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
-          <div className="space-y-4">
-            {liveAndUpcomingMatches.map((match) => (
-              <MatchCard
-                key={match._id || match.matchId}
-                match={match}
-                from={`/tournaments/${tAlias}/${sAlias}`}
-              />
-            ))}
-          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Spiele</h2>
+          
+          {(() => {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const pastMatches = liveAndUpcomingMatches.filter((match) => {
+              const matchDate = new Date(match.startDate);
+              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              return matchDay < today;
+            });
+            
+            const todayMatches = liveAndUpcomingMatches.filter((match) => {
+              const matchDate = new Date(match.startDate);
+              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              return matchDay.getTime() === today.getTime();
+            });
+            
+            const nextMatches = liveAndUpcomingMatches.filter((match) => {
+              const matchDate = new Date(match.startDate);
+              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              return matchDay >= tomorrow;
+            });
+            
+            const tabs = [
+              { key: 'past', label: 'Vergangene', matches: pastMatches },
+              { key: 'today', label: 'Heute', matches: todayMatches },
+              { key: 'next', label: 'Kommende', matches: nextMatches }
+            ].filter(tab => tab.matches.length > 0);
+            
+            // Set default tab on first render
+            const defaultTab = todayMatches.length > 0 ? 'today' : (nextMatches.length > 0 ? 'next' : tabs[0]?.key || 'today');
+            if (!activeMatchTab && tabs.length > 0) {
+              setActiveMatchTab(defaultTab);
+            }
+            
+            const currentTab = activeMatchTab || defaultTab;
+            const activeMatches = tabs.find(tab => tab.key === currentTab)?.matches || [];
+            
+            return (
+              <>
+                {tabs.length > 1 && (
+                  <div className="border-b border-gray-200 mb-6">
+                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                      {tabs.map((tab) => (
+                        <button
+                          key={tab.key}
+                          onClick={() => setActiveMatchTab(tab.key)}
+                          className={`
+                            ${currentTab === tab.key
+                              ? 'border-indigo-500 text-indigo-600'
+                              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                            }
+                            whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium
+                          `}
+                        >
+                          {tab.label} ({tab.matches.length})
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                )}
+                
+                <div className="space-y-4">
+                  {activeMatches.map((match) => (
+                    <MatchCard
+                      key={match._id || match.matchId}
+                      match={match}
+                      from={`/tournaments/${tAlias}/${sAlias}`}
+                    />
+                  ))}
+                </div>
+              </>
+            );
+          })()}
         </div>
       ) : displayMatches.length > 0 ? (
         <div className="space-y-4">
