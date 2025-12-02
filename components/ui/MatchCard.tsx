@@ -195,8 +195,18 @@ const MatchCard: React.FC<{
   } | null>(null);
   const [isLoadingOwner, setIsLoadingOwner] = useState(true);
 
-  const { home, away, venue, startDate } = match;
   const { user } = useAuth();
+
+  // Defensive checks for incomplete match data
+  if (!match || !match.home || !match.away) {
+    return (
+      <div className="p-4 border-2 rounded-xl shadow-md bg-gray-50">
+        <p className="text-sm text-gray-500">Unvollständige Spieldaten</p>
+      </div>
+    );
+  }
+
+  const { home, away, venue, startDate } = match;
 
   // Fetch matchday owner
   useEffect(() => {
@@ -205,7 +215,9 @@ const MatchCard: React.FC<{
       !match?.tournament?.alias ||
       !match?.season?.alias ||
       !match?.round?.alias ||
-      !match?.matchday?.alias
+      !match?.matchday?.alias ||
+      !match?.home ||
+      !match?.away
     ) {
       return;
     }
@@ -240,7 +252,7 @@ const MatchCard: React.FC<{
     let interval: NodeJS.Timeout | null = null;
 
     const refreshMatch = async () => {
-      if (isRefreshing) return;
+      if (isRefreshing || !match._id) return;
 
       try {
         setIsRefreshing(true);
@@ -248,9 +260,11 @@ const MatchCard: React.FC<{
           `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
         );
         const updatedMatch = await response.json();
-        setMatch(updatedMatch);
-        if (onMatchUpdate) {
-          await onMatchUpdate();
+        if (updatedMatch && updatedMatch.home && updatedMatch.away) {
+          setMatch(updatedMatch);
+          if (onMatchUpdate) {
+            await onMatchUpdate();
+          }
         }
       } catch (error) {
         console.error("Error refreshing match:", error);
@@ -259,7 +273,7 @@ const MatchCard: React.FC<{
       }
     };
 
-    if (match.matchStatus.key === "INPROGRESS") {
+    if (match?.matchStatus?.key === "INPROGRESS" && match._id) {
       interval = setInterval(refreshMatch, 30000); // Refresh every 30 seconds
     }
 
@@ -301,7 +315,7 @@ const MatchCard: React.FC<{
           {/* tournament */}
           <div className="">
             {(() => {
-              const item = tournamentConfigs[match.tournament?.alias];
+              const item = match?.tournament?.alias ? tournamentConfigs[match.tournament.alias] : null;
               if (item) {
                 return (
                   <span
@@ -312,7 +326,7 @@ const MatchCard: React.FC<{
                     )}
                   >
                     {item.tinyName}{" "}
-                    {match.round.name !== "Hauptrunde" &&
+                    {match?.round?.name && match.round.name !== "Hauptrunde" &&
                       `- ${match.round.name}`}
                   </span>
                 );
@@ -336,10 +350,10 @@ const MatchCard: React.FC<{
                 />
               )}
               <MatchStatusBadge
-                statusKey={match.matchStatus?.key}
-                finishTypeKey={match.finishType?.key}
-                statusValue={match.matchStatus?.value}
-                finishTypeValue={match.finishType?.value}
+                statusKey={match?.matchStatus?.key || "SCHEDULED"}
+                finishTypeKey={match?.finishType?.key || ""}
+                statusValue={match?.matchStatus?.value || "Angesetzt"}
+                finishTypeValue={match?.finishType?.value || ""}
               />
             </div>
           </div>
@@ -416,11 +430,10 @@ const MatchCard: React.FC<{
             <CldImage
               className="h-8 w-8 flex-none object-contain"
               src={
-                home.logo
-                  ? home.logo
-                  : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                home?.logo ||
+                "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
               }
-              alt={home.tinyName}
+              alt={home?.tinyName || "Home Team"}
               width={32}
               height={32}
               crop="fit"
@@ -429,25 +442,25 @@ const MatchCard: React.FC<{
           </div>
           <div className="flex-auto ml-6 truncate text-ellipsis">
             <p
-              className={`block md:hidden sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+              className={`block md:hidden sm:max-md:text-base font-medium ${(home?.stats?.goalsFor || 0) > (away?.stats?.goalsFor || 0) ? "text-gray-800" : "text-gray-500"}`}
             >
-              {home.shortName}
+              {home?.shortName || "TBD"}
             </p>
             <p
-              className={`hidden md:block sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+              className={`hidden md:block sm:max-md:text-base font-medium ${(home?.stats?.goalsFor || 0) > (away?.stats?.goalsFor || 0) ? "text-gray-800" : "text-gray-500"}`}
             >
-              {home.fullName}
+              {home?.fullName || "TBD"}
             </p>
           </div>
           {!(
-            match.matchStatus.key === "SCHEDULED" ||
-            match.matchStatus.key === "CANCELLED"
+            match?.matchStatus?.key === "SCHEDULED" ||
+            match?.matchStatus?.key === "CANCELLED"
           ) && (
             <div className="flex-none w-10">
               <p
-                className={`text-lg sm:max-md:text-base font-medium ${home.stats.goalsFor > away.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+                className={`text-lg sm:max-md:text-base font-medium ${(home?.stats?.goalsFor || 0) > (away?.stats?.goalsFor || 0) ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
               >
-                {home.stats.goalsFor}
+                {home?.stats?.goalsFor ?? 0}
               </p>
             </div>
           )}
@@ -458,11 +471,10 @@ const MatchCard: React.FC<{
             <CldImage
               className="h-8 w-8 flex-none object-contain"
               src={
-                away?.logo
-                  ? away.logo
-                  : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                away?.logo ||
+                "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
               }
-              alt={away.tinyName}
+              alt={away?.tinyName || "Away Team"}
               width={32}
               height={32}
               crop="fit"
@@ -471,25 +483,25 @@ const MatchCard: React.FC<{
           </div>
           <div className="flex-auto ml-6 w-full truncate">
             <p
-              className={`block md:hidden sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+              className={`block md:hidden sm:max-md:text-base font-medium ${(away?.stats?.goalsFor || 0) > (home?.stats?.goalsFor || 0) ? "text-gray-800" : "text-gray-500"}`}
             >
-              {away.shortName}
+              {away?.shortName || "TBD"}
             </p>
             <p
-              className={`hidden md:block sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+              className={`hidden md:block sm:max-md:text-base font-medium ${(away?.stats?.goalsFor || 0) > (home?.stats?.goalsFor || 0) ? "text-gray-800" : "text-gray-500"}`}
             >
-              {away.fullName}
+              {away?.fullName || "TBD"}
             </p>
           </div>
           {!(
-            match.matchStatus.key === "SCHEDULED" ||
-            match.matchStatus.key === "CANCELLED"
+            match?.matchStatus?.key === "SCHEDULED" ||
+            match?.matchStatus?.key === "CANCELLED"
           ) && (
             <div className="flex-none w-10">
               <p
-                className={`text-lg sm:max-md:text-base font-medium ${away.stats.goalsFor > home.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+                className={`text-lg sm:max-md:text-base font-medium ${(away?.stats?.goalsFor || 0) > (home?.stats?.goalsFor || 0) ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
               >
-                {away.stats.goalsFor}
+                {away?.stats?.goalsFor ?? 0}
               </p>
             </div>
           )}
@@ -539,22 +551,22 @@ const MatchCard: React.FC<{
             />
           )}
           <MatchStatusBadge
-            statusKey={match.matchStatus.key}
-            finishTypeKey={match.finishType.key}
-            statusValue={match.matchStatus.value}
-            finishTypeValue={match.finishType.value}
+            statusKey={match?.matchStatus?.key || "SCHEDULED"}
+            finishTypeKey={match?.finishType?.key || ""}
+            statusValue={match?.matchStatus?.value || "Angesetzt"}
+            finishTypeValue={match?.finishType?.value || ""}
           />
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          {!(
-            match.matchStatus.key === "SCHEDULED" ||
-            match.matchStatus.key === "CANCELLED" ||
-            match.matchStatus.key === "FORFEITED"
+          {match?._id && !(
+            match?.matchStatus?.key === "SCHEDULED" ||
+            match?.matchStatus?.key === "CANCELLED" ||
+            match?.matchStatus?.key === "FORFEITED"
           ) &&
             (() => {
-              const isLive = match.matchStatus.key === "INPROGRESS";
+              const isLive = match?.matchStatus?.key === "INPROGRESS";
               const buttonClass =
-                isLive || match.matchSheetComplete
+                isLive || match?.matchSheetComplete
                   ? "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200/50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
 
