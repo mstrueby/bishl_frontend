@@ -390,10 +390,7 @@ export default function SeasonHub({
             <div className="mb-12">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">Tabelle</h2>
               <Standings 
-                standingsData={selectedMatchday.standings.reduce((acc, team) => {
-                  acc[team.tinyName] = team;
-                  return acc;
-                }, {} as Record<string, typeof selectedMatchday.standings[0]>)}
+                standingsData={selectedMatchday.standings}
                 matchSettings={selectedMatchday.matchSettings}
               />
             </div>
