@@ -9,6 +9,7 @@ import apiClient from '../../../../lib/apiClient';
 import { SeasonValues, RoundValues, MatchdayValues } from '../../../../types/TournamentValues';
 import { MatchValues } from '../../../../types/MatchValues';
 import MatchCard from '../../../../components/ui/MatchCard';
+import Standings from '../../../../components/ui/Standings';
 
 interface SeasonHubProps {
   season: SeasonValues;
@@ -18,6 +19,7 @@ interface SeasonHubProps {
   selectedRoundMatches: MatchValues[];
   selectedMatchdayMatches: MatchValues[];
   selectedRoundMatchdays: MatchdayValues[];
+  selectedMatchday?: MatchdayValues | null;
   tAlias: string;
   sAlias: string;
   rAlias?: string;
@@ -35,6 +37,7 @@ export default function SeasonHub({
   selectedRoundMatches,
   selectedMatchdayMatches,
   selectedRoundMatchdays,
+  selectedMatchday,
   tAlias,
   sAlias,
   rAlias,
@@ -45,7 +48,7 @@ export default function SeasonHub({
 }: SeasonHubProps) {
   const router = useRouter();
   const [selectedRound, setSelectedRound] = useState<string>(rAlias || '');
-  const [selectedMatchday, setSelectedMatchday] = useState<string>(mdAlias || '');
+  const [selectedMatchdayAlias, setSelectedMatchdayAlias] = useState<string>(mdAlias || '');
   const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(selectedRoundMatchdays);
   
   // Tab state for matches view
@@ -54,7 +57,7 @@ export default function SeasonHub({
   // Update local state when route changes
   useEffect(() => {
     setSelectedRound(rAlias || '');
-    setSelectedMatchday(mdAlias || '');
+    setSelectedMatchdayAlias(mdAlias || '');
   }, [rAlias, mdAlias]);
 
   // Fetch matchdays when round changes
@@ -271,7 +274,7 @@ export default function SeasonHub({
             ) : (
               <select
                 id="matchday-select"
-                value={selectedMatchday}
+                value={selectedMatchdayAlias}
                 onChange={handleMatchdayChange}
                 className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               >
@@ -369,15 +372,30 @@ export default function SeasonHub({
           })()}
         </div>
       ) : displayMatches.length > 0 ? (
-        <div className="space-y-4">
-          {displayMatches.map((match) => (
-            <MatchCard
-              key={match._id || match.matchId}
-              match={match}
-              from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`}
-            />
-          ))}
-        </div>
+        <>
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Spiele</h2>
+            <div className="space-y-4">
+              {displayMatches.map((match) => (
+                <MatchCard
+                  key={match._id || match.matchId}
+                  match={match}
+                  from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`}
+                />
+              ))}
+            </div>
+          </div>
+          
+          {mdAlias && selectedMatchday?.createStandings && selectedMatchday?.standings && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Tabelle</h2>
+              <Standings 
+                standingsData={selectedMatchday.standings}
+                matchSettings={selectedMatchday.matchSettings}
+              />
+            </div>
+          )}
+        </>
       ) : rAlias ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-sm text-gray-500">
@@ -463,6 +481,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     // Fetch matches for selected matchday
     let selectedMatchdayMatches: MatchValues[] = [];
+    let selectedMatchday: MatchdayValues | null = null;
     let roundName: string | undefined;
     let matchdayName: string | undefined;
     
@@ -474,6 +493,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`)
         ]);
         selectedMatchdayMatches = matchesResponse.data || [];
+        selectedMatchday = matchdayResponse.data || null;
         roundName = roundResponse.data?.name;
         matchdayName = matchdayResponse.data?.name;
       } catch (error) {
@@ -513,6 +533,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
             }
             return a.alias.localeCompare(b.alias);
           }),
+        selectedMatchday,
         tAlias,
         sAlias,
         rAlias: rAlias || null,
