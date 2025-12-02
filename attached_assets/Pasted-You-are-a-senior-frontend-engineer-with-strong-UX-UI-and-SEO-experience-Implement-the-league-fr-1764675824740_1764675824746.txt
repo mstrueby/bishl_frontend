@@ -1,0 +1,92 @@
+You are a senior frontend engineer with strong UX, UI, and SEO experience.  
+Implement the league frontend for a hockey association with the following requirements:
+
+## Domain model & URL structure
+
+The league hierarchy is:
+
+1. Tournament (e.g. Regionalliga, Landesliga, U19, U13, …)  
+2. Season (e.g. 2025, 2024, …)  
+3. Round (e.g. Hauptrunde, Playoffs, …)  
+4. Matchday (e.g. Spieltag 1, Halbfinale, Finale, or a all_games matchday if no real matchdays are used)  
+5. Match
+
+Each entity must be reachable via a unique, SEO-friendly URL:
+
+- Tournament overview (current season hub):  
+  - `/regionalliga` should resolve to the *current season* of that tournament (e.g. 2025).  
+  - Either redirect `/regionalliga` to `/regionalliga/2025` or render the same content with a canonical URL set to `/regionalliga/2025`.  
+- Season hub:  
+  - `/regionalliga/2025`  
+- Round view (within season):  
+  - `/regionalliga/2025/hauptrunde`  
+- Matchday view (within round):  
+  - `/regionalliga/2025/hauptrunde/spieltag-1`  
+- Optional: a special “all matches in this round” view instead of a visible dummy matchday:  
+  - `/regionalliga/2025/hauptrunde/alle-spiele`
+
+All these URLs should render the *same Season Hub layout* (one main page component) that adapts based on the route parameters.
+
+## Season Hub layout & “Current & next matches” block
+
+The Season Hub layout is used for:
+
+- `/[tournament]` (resolved to current season)  
+- `/[tournament]/[season]`  
+- `/[tournament]/[season]/[round]`  
+- `/[tournament]/[season]/[round]/[matchday]`
+
+On both `/regionalliga` and `/regionalliga/2025`:
+
+- Render a prominent block at the top: **“Current & next matches”**  
+  - Show live matches and upcoming matches (today + near future) of the *current season* for that tournament.  
+  - This block is the same conceptually on `/regionalliga` and `/regionalliga/2025`; `/regionalliga` just resolves which season is “current” server-side or via config.
+
+Below that, implement:
+
+- A “Season selector” (e.g. dropdown or cards) for switching between seasons (`2025`, `2024`, …).
+
+## Cascading filters: Round and Matchday
+
+On the Season Hub (Games view):
+
+- Add a filter bar with two cascading dropdowns or selects:
+
+  1. **Round select** (Hauptrunde, Playoffs, …)  
+  2. **Matchday select** (values depend on the selected round)
+
+Behavior and routing:
+
+- When the user selects a **Round**:
+  - Immediately update the URL to the round-level URL, e.g.  
+    - `/regionalliga/2025/hauptrunde`
+  - Keep the user on the same Season Hub layout (same page component).  
+  - Load and display:
+    - All matches within that round (optionally grouped by matchday), or
+    - A default “All matches in this round” state when no matchday is selected.
+  - Do **not** automatically redirect to an “active/current matchday” when just the round changes. The user should stay at the generic round view until they explicitly choose a matchday.
+
+- After a round has been chosen, populate the **Matchday select** with all matchdays belonging to that round:
+  - Example values: `Spieltag 1`, `Spieltag 2`, `Halbfinale`, `Finale`, or a special option like `All matches`.
+
+- When the user selects a **Matchday**:
+  - Update the URL to the specific matchday URL, e.g.  
+    - `/regionalliga/2025/hauptrunde/spieltag-1`
+  - Still use the same Season Hub layout; the route parameters now include `round` and `matchday`.
+  - Render the list of matches for this specific matchday and context header like “Regionalliga 2025 – Hauptrunde – 1. Spieltag”.
+
+- Optional: Provide a separate, explicit action (e.g. a button “Go to current matchday”) that, when clicked, may navigate to the currently active matchday URL. This should be a deliberate user action, not an automatic redirect after round selection.
+
+## Technical expectations
+
+- Implement a route structure that allows a single page/layout component to handle all these route variants, reading route parameters and rendering the correct state.  
+- Ensure:
+  - SEO-friendly head tags (titles, meta descriptions) at tournament, season, round, and matchday URL levels.
+  - Clean internal linking (breadcrumbs, links between levels) to help both users and crawlers.
+  - Good mobile UX for the filter bar (e.g. sticky or easily reachable on small screens).
+
+## Deliverables
+
+1. Describe your approach in clear steps (routing design, data fetching strategy, state management for filters, SEO considerations).  
+2. Implement necessary file structure and files
+3. Keep explanations minimal and focus on clean, production-ready code and clear comments.

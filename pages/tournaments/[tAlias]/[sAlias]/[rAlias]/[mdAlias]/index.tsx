@@ -509,10 +509,10 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       props: {
         matchday: matchdayData,
         allSeasons: allSeasons
-          .filter((s: SeasonValues) => s.published)
+          //.filter((s: SeasonValues) => s.published)
           .sort((a: SeasonValues, b: SeasonValues) => b.alias.localeCompare(a.alias)),
         allRounds: allRounds
-          .filter((r: RoundValues) => r.published)
+          //.filter((r: RoundValues) => r.published)
           .sort((a: RoundValues, b: RoundValues) => {
             if (a.startDate && b.startDate) {
               return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
@@ -520,7 +520,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
             return a.alias.localeCompare(b.alias);
           }),
         allMatchdays: allMatchdays
-          .filter((md: MatchdayValues) => md.published)
+          //.filter((md: MatchdayValues) => md.published)
           .sort((a: MatchdayValues, b: MatchdayValues) => {
             if (a.startDate && b.startDate) {
               return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
