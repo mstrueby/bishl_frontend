@@ -204,7 +204,7 @@ export default function SeasonHub({
           {contextHeader}
         </h1>
         
-        {allSeasons.length > 1 && (
+        {allSeasons.length > 1 && !rAlias && (
           <div className="mt-4 sm:mt-0">
             <select
               value={sAlias}
@@ -220,22 +220,6 @@ export default function SeasonHub({
           </div>
         )}
       </div>
-
-      {/* Live & Upcoming Matches Block - Only show when no round/matchday selected */}
-      {!rAlias && liveAndUpcomingMatches.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
-          <div className="space-y-4">
-            {liveAndUpcomingMatches.map((match) => (
-              <MatchCard
-                key={match._id || match.matchId}
-                match={match}
-                from={`/tournaments/${tAlias}/${sAlias}`}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Cascading Filters Bar */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8 sticky top-16 z-40">
@@ -282,9 +266,22 @@ export default function SeasonHub({
           </div>
         </div>
       </div>
-
-      {/* Matches Display */}
-      {displayMatches.length > 0 ? (
+      
+      {/* Live & Upcoming Matches or Matches Display */}
+      {!rAlias && liveAndUpcomingMatches.length > 0 ? (
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
+          <div className="space-y-4">
+            {liveAndUpcomingMatches.map((match) => (
+              <MatchCard
+                key={match._id || match.matchId}
+                match={match}
+                from={`/tournaments/${tAlias}/${sAlias}`}
+              />
+            ))}
+          </div>
+        </div>
+      ) : displayMatches.length > 0 ? (
         <div className="space-y-4">
           {displayMatches.map((match) => (
             <MatchCard
