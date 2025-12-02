@@ -5,7 +5,7 @@ import { CldImage } from 'next-cloudinary';
 import { StandingsTeam, MatchSettings } from '../../types/TournamentValues';
 
 interface StandingsProps {
-  standingsData: Record<string, StandingsTeam>;
+  standingsData: StandingsTeam[];
   matchSettings: MatchSettings;
 }
 
@@ -69,10 +69,9 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {Object.keys(standingsData).map((teamKey, index) => {
-                    const team = standingsData[teamKey];
+                  {standingsData.map((team, index) => {
                     return (
-                      <tr key={teamKey}>
+                      <tr key={team.tinyName || index}>
                         <td className="whitespace-nowrap py-4 px-2 text-center text-xs sm:px-3">
                           {index + 1}
                         </td>
