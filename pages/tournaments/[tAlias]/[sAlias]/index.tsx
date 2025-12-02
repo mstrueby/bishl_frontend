@@ -9,7 +9,6 @@ import apiClient from '../../../../lib/apiClient';
 import { SeasonValues, RoundValues, MatchdayValues } from '../../../../types/TournamentValues';
 import { MatchValues } from '../../../../types/MatchValues';
 import MatchCard from '../../../../components/ui/MatchCard';
-import Standings from '../../../../components/ui/Standings';
 
 interface SeasonHubProps {
   season: SeasonValues;
@@ -19,7 +18,6 @@ interface SeasonHubProps {
   selectedRoundMatches: MatchValues[];
   selectedMatchdayMatches: MatchValues[];
   selectedRoundMatchdays: MatchdayValues[];
-  selectedMatchday?: MatchdayValues;
   tAlias: string;
   sAlias: string;
   rAlias?: string;
@@ -37,7 +35,6 @@ export default function SeasonHub({
   selectedRoundMatches,
   selectedMatchdayMatches,
   selectedRoundMatchdays,
-  selectedMatchday,
   tAlias,
   sAlias,
   rAlias,
@@ -372,31 +369,15 @@ export default function SeasonHub({
           })()}
         </div>
       ) : displayMatches.length > 0 ? (
-        <>
-          <div className="space-y-4 mb-12">
-            {displayMatches.map((match) => (
-              <MatchCard
-                key={match._id || match.matchId}
-                match={match}
-                from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`}
-              />
-            ))}
-          </div>
-          
-          {/* Show standings if matchday is selected and has standings */}
-          {mdAlias && selectedMatchday?.createStandings && selectedMatchday?.standings && (
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Tabelle</h2>
-              <Standings 
-                standingsData={selectedMatchday.standings.reduce((acc, team) => {
-                  acc[team.tinyName] = team;
-                  return acc;
-                }, {} as Record<string, typeof selectedMatchday.standings[0]>)}
-                matchSettings={selectedMatchday.matchSettings}
-              />
-            </div>
-          )}
-        </>
+        <div className="space-y-4">
+          {displayMatches.map((match) => (
+            <MatchCard
+              key={match._id || match.matchId}
+              match={match}
+              from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`}
+            />
+          ))}
+        </div>
       ) : rAlias ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-sm text-gray-500">
@@ -482,7 +463,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     // Fetch matches for selected matchday
     let selectedMatchdayMatches: MatchValues[] = [];
-    let selectedMatchday: MatchdayValues | undefined;
     let roundName: string | undefined;
     let matchdayName: string | undefined;
     
@@ -494,7 +474,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`)
         ]);
         selectedMatchdayMatches = matchesResponse.data || [];
-        selectedMatchday = matchdayResponse.data;
         roundName = roundResponse.data?.name;
         matchdayName = matchdayResponse.data?.name;
       } catch (error) {
@@ -534,7 +513,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
             }
             return a.alias.localeCompare(b.alias);
           }),
-        selectedMatchday: selectedMatchday || null,
         tAlias,
         sAlias,
         rAlias: rAlias || null,
