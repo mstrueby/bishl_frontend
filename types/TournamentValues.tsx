@@ -72,7 +72,7 @@ export interface MatchdayValues {
   createStats: boolean;
   published: boolean;
   matchSettings: MatchSettings;
-  standings?: StandingsTeam[];
+  standings?: Record<string, StandingsTeam>;
   owner?: MatchdayOwner;
   links?: {
     self: string;
@@ -100,7 +100,7 @@ export interface RoundValues {
     value: string;
   };
   matchSettings: MatchSettings;
-  standings?: StandingsTeam[];
+  standings?: Record<string, StandingsTeam>;
   links?: {
     self: string;
     matchdays: string;
