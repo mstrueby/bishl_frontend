@@ -204,7 +204,7 @@ export default function SeasonHub({
           {contextHeader}
         </h1>
         
-        {allSeasons.length > 1 && (
+        {allSeasons.length > 1 && !rAlias && (
           <div className="mt-4 sm:mt-0">
             <select
               value={sAlias}
