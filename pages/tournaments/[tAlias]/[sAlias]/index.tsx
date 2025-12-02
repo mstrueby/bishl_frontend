@@ -47,6 +47,9 @@ export default function SeasonHub({
   const [selectedRound, setSelectedRound] = useState<string>(rAlias || '');
   const [selectedMatchday, setSelectedMatchday] = useState<string>(mdAlias || '');
   const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(selectedRoundMatchdays);
+  
+  // Tab state for matches view
+  const [activeMatchTab, setActiveMatchTab] = useState<string>('');
 
   // Update local state when route changes
   useEffect(() => {
@@ -310,10 +313,14 @@ export default function SeasonHub({
               { key: 'next', label: 'Kommende', matches: nextMatches }
             ].filter(tab => tab.matches.length > 0);
             
-            // Default to 'today' if exists, otherwise 'next', otherwise first available
+            // Set default tab on first render
             const defaultTab = todayMatches.length > 0 ? 'today' : (nextMatches.length > 0 ? 'next' : tabs[0]?.key || 'today');
-            const [activeTab, setActiveTab] = useState(defaultTab);
-            const activeMatches = tabs.find(tab => tab.key === activeTab)?.matches || [];
+            if (!activeMatchTab && tabs.length > 0) {
+              setActiveMatchTab(defaultTab);
+            }
+            
+            const currentTab = activeMatchTab || defaultTab;
+            const activeMatches = tabs.find(tab => tab.key === currentTab)?.matches || [];
             
             return (
               <>
@@ -323,9 +330,9 @@ export default function SeasonHub({
                       {tabs.map((tab) => (
                         <button
                           key={tab.key}
-                          onClick={() => setActiveTab(tab.key)}
+                          onClick={() => setActiveMatchTab(tab.key)}
                           className={`
-                            ${activeTab === tab.key
+                            ${currentTab === tab.key
                               ? 'border-indigo-500 text-indigo-600'
                               : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                             }
