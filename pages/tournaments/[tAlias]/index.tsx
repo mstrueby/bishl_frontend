@@ -170,7 +170,9 @@ export default function TournamentOverview({
               { key: 'next', label: 'Kommende', matches: nextMatches }
             ].filter(tab => tab.matches.length > 0);
             
-            const [activeTab, setActiveTab] = useState(tabs[0]?.key || 'today');
+            // Default to 'today' if exists, otherwise 'next', otherwise first available
+            const defaultTab = todayMatches.length > 0 ? 'today' : (nextMatches.length > 0 ? 'next' : tabs[0]?.key || 'today');
+            const [activeTab, setActiveTab] = useState(defaultTab);
             const activeMatches = tabs.find(tab => tab.key === activeTab)?.matches || [];
             
             return (
