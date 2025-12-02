@@ -255,25 +255,34 @@ export default function SeasonHub({
             </select>
           </div>
 
-          {/* Matchday Selector - Only enabled when round is selected */}
+          {/* Matchday Selector - Only shown when round has multiple matchdays */}
           <div>
             <label htmlFor="matchday-select" className="block text-sm font-medium text-gray-700 mb-2">
               Spieltag
             </label>
-            <select
-              id="matchday-select"
-              value={selectedMatchday}
-              onChange={handleMatchdayChange}
-              disabled={!selectedRound}
-              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="">Alle Spieltage</option>
-              {matchdaysForRound.map((md) => (
-                <option key={md.alias} value={md.alias}>
-                  {md.name}
-                </option>
-              ))}
-            </select>
+            {!selectedRound ? (
+              <div className="block w-full rounded-md border border-gray-300 bg-gray-100 py-2 pl-3 pr-10 text-base text-gray-400 sm:text-sm">
+                Alle Spieltage
+              </div>
+            ) : matchdaysForRound.length === 1 ? (
+              <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
+                {matchdaysForRound[0].name}
+              </div>
+            ) : (
+              <select
+                id="matchday-select"
+                value={selectedMatchday}
+                onChange={handleMatchdayChange}
+                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              >
+                <option value="">Alle Spieltage</option>
+                {matchdaysForRound.map((md) => (
+                  <option key={md.alias} value={md.alias}>
+                    {md.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
       </div>
