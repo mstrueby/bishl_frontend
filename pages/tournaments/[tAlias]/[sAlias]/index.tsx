@@ -266,7 +266,7 @@ export default function SeasonHub({
               </div>
             ) : matchdaysForRound.length === 1 ? (
               <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
-                {matchdaysForRound[0].name}
+                {matchdaysForRound[0].alias === 'ALL_GAMES' ? 'Alle Spiele' : matchdaysForRound[0].name}
               </div>
             ) : (
               <select
@@ -278,7 +278,7 @@ export default function SeasonHub({
                 <option value="">Alle Spieltage</option>
                 {matchdaysForRound.map((md) => (
                   <option key={md.alias} value={md.alias}>
-                    {md.name}
+                    {md.alias === 'ALL_GAMES' ? 'Alle Spiele' : md.name}
                   </option>
                 ))}
               </select>
