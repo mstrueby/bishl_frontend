@@ -266,7 +266,7 @@ const MatchCard: React.FC<{
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [match._id, match.matchStatus.key, onMatchUpdate, isRefreshing]);
+  }, [match._id, match.matchStatus?.key, onMatchUpdate, isRefreshing]);
 
   const permissions = calculateMatchButtonPermissions(
     user,
@@ -301,7 +301,7 @@ const MatchCard: React.FC<{
           {/* tournament */}
           <div className="">
             {(() => {
-              const item = tournamentConfigs[match.tournament.alias];
+              const item = tournamentConfigs[match.tournament?.alias];
               if (item) {
                 return (
                   <span
@@ -336,10 +336,10 @@ const MatchCard: React.FC<{
                 />
               )}
               <MatchStatusBadge
-                statusKey={match.matchStatus.key}
-                finishTypeKey={match.finishType.key}
-                statusValue={match.matchStatus.value}
-                finishTypeValue={match.finishType.value}
+                statusKey={match.matchStatus?.key}
+                finishTypeKey={match.finishType?.key}
+                statusValue={match.matchStatus?.value}
+                finishTypeValue={match.finishType?.value}
               />
             </div>
           </div>

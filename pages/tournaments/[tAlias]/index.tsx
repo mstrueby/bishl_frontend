@@ -138,7 +138,7 @@ export default function TournamentOverview({
       {/* Live & Upcoming Matches */}
       {liveAndUpcomingMatches.length > 0 && (
         <div className="mt-14 mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Spiele</h2>
           
           {(() => {
             const now = new Date();
