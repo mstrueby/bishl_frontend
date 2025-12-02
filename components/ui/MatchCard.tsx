@@ -403,7 +403,7 @@ const MatchCard: React.FC<{
               aria-hidden="true"
             />
             <p className="text-xs uppercase font-light text-gray-700 truncate">
-              {venue.name}
+              {venue?.name}
             </p>
           </div>
         </div>
@@ -458,7 +458,7 @@ const MatchCard: React.FC<{
             <CldImage
               className="h-8 w-8 flex-none object-contain"
               src={
-                away.logo
+                away?.logo
                   ? away.logo
                   : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
               }
