@@ -109,45 +109,9 @@ export default function TournamentOverview({
         )}
       </div>
 
-      {/* Live & Upcoming Matches */}
-      {liveAndUpcomingMatches.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
-          <div className="space-y-4">
-            {liveAndUpcomingMatches.map((match) => (
-              <MatchCard
-                key={match._id || match.matchId}
-                match={match}
-                from={`/tournaments/${tournament.alias}`}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Quick Round Navigation */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
-        <label htmlFor="quick-round-select" className="block text-sm font-medium text-gray-700 mb-2">
-          Schnellnavigation zu einer Runde
-        </label>
-        <select
-          id="quick-round-select"
-          value={selectedRound}
-          onChange={handleRoundChange}
-          className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-        >
-          <option value="">Runde wählen...</option>
-          {allRounds.map((round) => (
-            <option key={round.alias} value={round.alias}>
-              {round.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {/* All Rounds Overview */}
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Runden - Saison {currentSeason.name}</h2>
+        {/**<h2 className="text-2xl font-semibold text-gray-900 mb-6">Runden - Saison {currentSeason.name}</h2> */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {allRounds.map((round) => (
             <Link
@@ -170,6 +134,46 @@ export default function TournamentOverview({
           ))}
         </div>
       </div>
+
+      {/* Live & Upcoming Matches */}
+      {liveAndUpcomingMatches.length > 0 && (
+        <div className="mt-14 mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
+          <div className="space-y-4">
+            {liveAndUpcomingMatches.map((match) => (
+              <MatchCard
+                key={match._id || match.matchId}
+                match={match}
+                from={`/tournaments/${tournament.alias}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Round Navigation */}
+      {/**
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
+        <label htmlFor="quick-round-select" className="block text-sm font-medium text-gray-700 mb-2">
+          Schnellnavigation zu einer Runde
+        </label>
+        <select
+          id="quick-round-select"
+          value={selectedRound}
+          onChange={handleRoundChange}
+          className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+        >
+          <option value="">Runde wählen...</option>
+          {allRounds.map((round) => (
+            <option key={round.alias} value={round.alias}>
+              {round.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      */}
+
+
     </Layout>
   );
 }
