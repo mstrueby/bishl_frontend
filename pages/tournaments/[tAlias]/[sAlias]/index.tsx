@@ -117,6 +117,14 @@ export default function SeasonHub({
       ? `${tournamentName} ${season.name} – ${roundName}`
       : `${tournamentName} ${season.name}`;
 
+  // Determine if this is the current season (for canonical URL)
+  const isCurrentSeason = allSeasons.length > 0 && allSeasons[0].alias === sAlias;
+  
+  // Set canonical URL to tournament root if this is the current season and no round/matchday selected
+  const canonicalUrl = !rAlias && !mdAlias && isCurrentSeason
+    ? `${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tAlias}`
+    : `${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`;
+
   return (
     <Layout>
       <Head>
@@ -127,7 +135,7 @@ export default function SeasonHub({
         />
         <link
           rel="canonical"
-          href={`${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`}
+          href={canonicalUrl}
         />
       </Head>
 
