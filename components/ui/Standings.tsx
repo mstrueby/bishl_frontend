@@ -5,7 +5,7 @@ import { CldImage } from 'next-cloudinary';
 import { StandingsTeam, MatchSettings } from '../../types/TournamentValues';
 
 interface StandingsProps {
-  standingsData: StandingsTeam[];
+  standingsData: Record<string, StandingsTeam>;
   matchSettings: MatchSettings;
 }
 
