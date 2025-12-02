@@ -2,14 +2,11 @@
 
 import React, { useState } from 'react';
 import { CldImage } from 'next-cloudinary';
-import { StandingsTeam } from '../../../types/TournamentValues';
-
-// Inside your component
-
+import { StandingsTeam, MatchSettings } from '../../types/TournamentValues';
 
 interface StandingsProps {
   standingsData: Record<string, StandingsTeam>;
-  matchSettings: Record<string, string>;
+  matchSettings: MatchSettings;
 }
 
 const streakColorMap = {
