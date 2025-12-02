@@ -14,10 +14,10 @@ interface SeasonHubProps {
   season: SeasonValues;
   allSeasons: SeasonValues[];
   allRounds: RoundValues[];
-  allMatchdays: MatchdayValues[];
   liveAndUpcomingMatches: MatchValues[];
   selectedRoundMatches: MatchValues[];
   selectedMatchdayMatches: MatchValues[];
+  selectedRoundMatchdays: MatchdayValues[];
   tAlias: string;
   sAlias: string;
   rAlias?: string;
@@ -31,10 +31,10 @@ export default function SeasonHub({
   season,
   allSeasons,
   allRounds,
-  allMatchdays,
   liveAndUpcomingMatches,
   selectedRoundMatches,
   selectedMatchdayMatches,
+  selectedRoundMatchdays,
   tAlias,
   sAlias,
   rAlias,
@@ -46,7 +46,7 @@ export default function SeasonHub({
   const router = useRouter();
   const [selectedRound, setSelectedRound] = useState<string>(rAlias || '');
   const [selectedMatchday, setSelectedMatchday] = useState<string>(mdAlias || '');
-  const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(allMatchdays);
+  const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(selectedRoundMatchdays);
 
   // Update local state when route changes
   useEffect(() => {
@@ -54,19 +54,26 @@ export default function SeasonHub({
     setSelectedMatchday(mdAlias || '');
   }, [rAlias, mdAlias]);
 
-  // Filter matchdays when round changes
+  // Fetch matchdays when round changes
   useEffect(() => {
-    if (selectedRound) {
-      const filtered = allMatchdays.filter(md => {
-        // Match matchdays that belong to the selected round
-        // Assuming matchday has roundAlias or similar field
-        return md.roundAlias === selectedRound || allMatchdays.includes(md);
-      });
-      setMatchdaysForRound(filtered);
-    } else {
-      setMatchdaysForRound([]);
-    }
-  }, [selectedRound, allMatchdays]);
+    const fetchMatchdaysForRound = async () => {
+      if (selectedRound) {
+        try {
+          const response = await apiClient.get(
+            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound}/matchdays`
+          );
+          setMatchdaysForRound(response.data || []);
+        } catch (error) {
+          console.error('Error fetching matchdays for round:', error);
+          setMatchdaysForRound([]);
+        }
+      } else {
+        setMatchdaysForRound([]);
+      }
+    };
+
+    fetchMatchdaysForRound();
+  }, [selectedRound, tAlias, sAlias]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
@@ -331,20 +338,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     const allRoundsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds`);
     const allRounds = allRoundsResponse.data || [];
 
-    // Fetch all matchdays for this season (we'll filter client-side)
-    let allMatchdays: MatchdayValues[] = [];
-    for (const round of allRounds) {
+    // Fetch matchdays only if a round is selected
+    let selectedRoundMatchdays: MatchdayValues[] = [];
+    if (rAlias) {
       try {
         const matchdaysResponse = await apiClient.get(
-          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${round.alias}/matchdays`
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`
         );
-        const roundMatchdays = (matchdaysResponse.data || []).map((md: MatchdayValues) => ({
-          ...md,
-          roundAlias: round.alias
-        }));
-        allMatchdays = [...allMatchdays, ...roundMatchdays];
+        selectedRoundMatchdays = matchdaysResponse.data || [];
       } catch (error) {
-        console.error(`Error fetching matchdays for round ${round.alias}:`, error);
+        console.error(`Error fetching matchdays for round ${rAlias}:`, error);
       }
     }
 
@@ -415,10 +418,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
             }
             return a.alias.localeCompare(b.alias);
           }),
-        allMatchdays,
         liveAndUpcomingMatches,
         selectedRoundMatches,
         selectedMatchdayMatches,
+        selectedRoundMatchdays: selectedRoundMatchdays
+          .filter((md: MatchdayValues) => md.published)
+          .sort((a: MatchdayValues, b: MatchdayValues) => {
+            if (a.startDate && b.startDate) {
+              return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+            }
+            return a.alias.localeCompare(b.alias);
+          }),
         tAlias,
         sAlias,
         rAlias: rAlias || null,
