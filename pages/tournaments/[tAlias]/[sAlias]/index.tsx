@@ -408,7 +408,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       props: {
         season,
         allSeasons: allSeasons
-          .filter((s: SeasonValues) => s.published)
+          //.filter((s: SeasonValues) => s.published)
           .sort((a: SeasonValues, b: SeasonValues) => b.alias.localeCompare(a.alias)),
         allRounds: allRounds
           .filter((r: RoundValues) => r.published)
