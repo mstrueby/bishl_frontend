@@ -48,7 +48,7 @@ export default function SeasonHub({
 }: SeasonHubProps) {
   const router = useRouter();
   const [selectedRound, setSelectedRound] = useState<string>(rAlias || '');
-  const [selectedMatchday, setSelectedMatchday] = useState<string>(mdAlias || '');
+  const [selectedMatchdayAlias, setSelectedMatchdayAlias] = useState<string>(mdAlias || '');
   const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(selectedRoundMatchdays);
   
   // Tab state for matches view
@@ -57,7 +57,7 @@ export default function SeasonHub({
   // Update local state when route changes
   useEffect(() => {
     setSelectedRound(rAlias || '');
-    setSelectedMatchday(mdAlias || '');
+    setSelectedMatchdayAlias(mdAlias || '');
   }, [rAlias, mdAlias]);
 
   // Fetch matchdays when round changes
@@ -274,7 +274,7 @@ export default function SeasonHub({
             ) : (
               <select
                 id="matchday-select"
-                value={selectedMatchday}
+                value={selectedMatchdayAlias}
                 onChange={handleMatchdayChange}
                 className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               >
