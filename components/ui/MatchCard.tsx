@@ -200,6 +200,16 @@ const MatchCard: React.FC<{
 
   // Fetch matchday owner
   useEffect(() => {
+    // Safety check: ensure all required properties exist
+    if (
+      !match?.tournament?.alias ||
+      !match?.season?.alias ||
+      !match?.round?.alias ||
+      !match?.matchday?.alias
+    ) {
+      return;
+    }
+
     const fetchMatchdayOwner = async () => {
       try {
         setIsLoadingOwner(true);
@@ -219,10 +229,10 @@ const MatchCard: React.FC<{
 
     fetchMatchdayOwner();
   }, [
-    match.tournament.alias,
-    match.season.alias,
-    match.round.alias,
-    match.matchday.alias,
+    match?.tournament?.alias,
+    match?.season?.alias,
+    match?.round?.alias,
+    match?.matchday?.alias,
   ]);
 
   // Auto-refresh for in-progress matches
