@@ -278,16 +278,79 @@ export default function SeasonHub({
       {/* Live & Upcoming Matches or Matches Display */}
       {!rAlias && liveAndUpcomingMatches.length > 0 ? (
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
-          <div className="space-y-4">
-            {liveAndUpcomingMatches.map((match) => (
-              <MatchCard
-                key={match._id || match.matchId}
-                match={match}
-                from={`/tournaments/${tAlias}/${sAlias}`}
-              />
-            ))}
-          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Spiele</h2>
+          
+          {(() => {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const pastMatches = liveAndUpcomingMatches.filter((match) => {
+              const matchDate = new Date(match.startDate);
+              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              return matchDay < today;
+            });
+            
+            const todayMatches = liveAndUpcomingMatches.filter((match) => {
+              const matchDate = new Date(match.startDate);
+              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              return matchDay.getTime() === today.getTime();
+            });
+            
+            const nextMatches = liveAndUpcomingMatches.filter((match) => {
+              const matchDate = new Date(match.startDate);
+              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              return matchDay >= tomorrow;
+            });
+            
+            const tabs = [
+              { key: 'past', label: 'Vergangene', matches: pastMatches },
+              { key: 'today', label: 'Heute', matches: todayMatches },
+              { key: 'next', label: 'Kommende', matches: nextMatches }
+            ].filter(tab => tab.matches.length > 0);
+            
+            // Default to 'today' if exists, otherwise 'next', otherwise first available
+            const defaultTab = todayMatches.length > 0 ? 'today' : (nextMatches.length > 0 ? 'next' : tabs[0]?.key || 'today');
+            const [activeTab, setActiveTab] = useState(defaultTab);
+            const activeMatches = tabs.find(tab => tab.key === activeTab)?.matches || [];
+            
+            return (
+              <>
+                {tabs.length > 1 && (
+                  <div className="border-b border-gray-200 mb-6">
+                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                      {tabs.map((tab) => (
+                        <button
+                          key={tab.key}
+                          onClick={() => setActiveTab(tab.key)}
+                          className={`
+                            ${activeTab === tab.key
+                              ? 'border-indigo-500 text-indigo-600'
+                              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                            }
+                            whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium
+                          `}
+                        >
+                          {tab.label} ({tab.matches.length})
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                )}
+                
+                <div className="space-y-4">
+                  {activeMatches.map((match) => (
+                    <MatchCard
+                      key={match._id || match.matchId}
+                      match={match}
+                      from={`/tournaments/${tAlias}/${sAlias}`}
+                    />
+                  ))}
+                </div>
+              </>
+            );
+          })()}
         </div>
       ) : displayMatches.length > 0 ? (
         <div className="space-y-4">
