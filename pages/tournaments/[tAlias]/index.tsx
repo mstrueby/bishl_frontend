@@ -1,37 +1,57 @@
+
 import Head from 'next/head';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
 import apiClient from '../../../lib/apiClient';
-import { TournamentValues, SeasonValues } from '../../../types/TournamentValues';
+import { TournamentValues, SeasonValues, RoundValues, MatchdayValues } from '../../../types/TournamentValues';
+import { MatchValues } from '../../../types/MatchValues';
+import MatchCard from '../../../components/ui/MatchCard';
 
 interface TournamentOverviewProps {
   tournament: TournamentValues;
-  seasons: SeasonValues[];
-  currentSeasonAlias: string | null;
+  currentSeason: SeasonValues;
+  allSeasons: SeasonValues[];
+  allRounds: RoundValues[];
+  liveAndUpcomingMatches: MatchValues[];
 }
 
 export default function TournamentOverview({
   tournament,
-  currentSeasonAlias
+  currentSeason,
+  allSeasons,
+  allRounds,
+  liveAndUpcomingMatches
 }: TournamentOverviewProps) {
   const router = useRouter();
+  const [selectedRound, setSelectedRound] = useState<string>('');
 
-  useEffect(() => {
-    // Auto-redirect to current season
-    if (currentSeasonAlias) {
-      router.replace(`/tournaments/${tournament.alias}/${currentSeasonAlias}`);
+  const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    router.push(`/tournaments/${tournament.alias}/${e.target.value}`);
+  };
+
+  const handleRoundChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRound = e.target.value;
+    if (newRound) {
+      router.push(`/tournaments/${tournament.alias}/${currentSeason.alias}/${newRound}`);
     }
-  }, [currentSeasonAlias, tournament.alias, router]);
+    setSelectedRound(newRound);
+  };
 
   return (
     <Layout>
       <Head>
         <title>{tournament.name} | BISHL</title>
-        <meta name="description" content={`${tournament.name} - ${tournament.ageGroup?.value || ''}`} />
-        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tournament.alias}`} />
+        <meta 
+          name="description" 
+          content={`${tournament.name} - Aktuelle Saison ${currentSeason.name}. Spielplan, Ergebnisse und Tabelle.`} 
+        />
+        <link 
+          rel="canonical" 
+          href={`${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tournament.alias}/${currentSeason.alias}`} 
+        />
       </Head>
 
       {/* Breadcrumb */}
@@ -63,10 +83,91 @@ export default function TournamentOverview({
         </ol>
       </nav>
 
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Lade aktuelle Saison...</p>
+      {/* Header with Season Selector */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            {tournament.name}
+          </h1>
+          <p className="mt-2 text-lg text-gray-600">Saison {currentSeason.name}</p>
+        </div>
+        
+        {allSeasons.length > 1 && (
+          <div className="mt-4 sm:mt-0">
+            <select
+              value={currentSeason.alias}
+              onChange={handleSeasonChange}
+              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+            >
+              {allSeasons.map((s) => (
+                <option key={s.alias} value={s.alias}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* Live & Upcoming Matches */}
+      {liveAndUpcomingMatches.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Aktuelle & kommende Spiele</h2>
+          <div className="space-y-4">
+            {liveAndUpcomingMatches.map((match) => (
+              <MatchCard
+                key={match._id || match.matchId}
+                match={match}
+                from={`/tournaments/${tournament.alias}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Round Navigation */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
+        <label htmlFor="quick-round-select" className="block text-sm font-medium text-gray-700 mb-2">
+          Schnellnavigation zu einer Runde
+        </label>
+        <select
+          id="quick-round-select"
+          value={selectedRound}
+          onChange={handleRoundChange}
+          className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+        >
+          <option value="">Runde wählen...</option>
+          {allRounds.map((round) => (
+            <option key={round.alias} value={round.alias}>
+              {round.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* All Rounds Overview */}
+      <div>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Runden - Saison {currentSeason.name}</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {allRounds.map((round) => (
+            <Link
+              key={round.alias}
+              href={`/tournaments/${tournament.alias}/${currentSeason.alias}/${round.alias}`}
+              className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md transition-all"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-lg font-medium text-gray-900">{round.name}</p>
+                {round.startDate && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    {new Date(round.startDate).toLocaleDateString('de-DE')}
+                  </p>
+                )}
+              </div>
+              <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+              </svg>
+            </Link>
+          ))}
         </div>
       </div>
     </Layout>
@@ -76,9 +177,9 @@ export default function TournamentOverview({
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const response = await apiClient.get('/tournaments');
-    const allTournamentsData = response.data;
-    const paths = allTournamentsData.map((tournament: TournamentValues) => ({
-      params: { tAlias: tournament.alias },
+    const tournaments = response.data || [];
+    const paths = tournaments.map((t: TournamentValues) => ({
+      params: { tAlias: t.alias },
     }));
     return { paths, fallback: 'blocking' };
   } catch (error) {
@@ -88,47 +189,65 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const tAlias = params?.tAlias;
+  const tAlias = params?.tAlias as string;
 
-  if (!tAlias || typeof tAlias !== 'string') {
+  if (!tAlias) {
     return { notFound: true };
   }
 
   try {
-    const tournamentResponse = await apiClient.get(`/tournaments/${tAlias}`);
-    const tournament = tournamentResponse.data;
+    const [tournamentResponse, seasonsResponse] = await Promise.all([
+      apiClient.get(`/tournaments/${tAlias}`),
+      apiClient.get(`/tournaments/${tAlias}/seasons`)
+    ]);
 
-    if (!tournament) {
+    const tournament = tournamentResponse.data;
+    const allSeasons = seasonsResponse.data || [];
+
+    // Find current season (most recent published)
+    const publishedSeasons = allSeasons
+      .filter((s: SeasonValues) => s.published)
+      .sort((a: SeasonValues, b: SeasonValues) => b.alias.localeCompare(a.alias));
+
+    if (publishedSeasons.length === 0) {
       return { notFound: true };
     }
 
-    // Fetch seasons to find current one
-    let seasons: SeasonValues[] = [];
-    let currentSeasonAlias: string | null = null;
+    const currentSeason = publishedSeasons[0];
 
+    // Fetch rounds for current season
+    const roundsResponse = await apiClient.get(
+      `/tournaments/${tAlias}/seasons/${currentSeason.alias}/rounds`
+    );
+    const allRounds = roundsResponse.data || [];
+
+    // Fetch live and upcoming matches
+    let liveAndUpcomingMatches: MatchValues[] = [];
     try {
-      const seasonsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons`);
-      seasons = seasonsResponse.data || [];
-
-      // Find current season (most recent published season)
-      const publishedSeasons = seasons
-        .filter(s => s.published)
-        .sort((a, b) => b.alias.localeCompare(a.alias));
-
-      if (publishedSeasons.length > 0) {
-        currentSeasonAlias = publishedSeasons[0].alias;
-      }
+      const matchesResponse = await apiClient.get(
+        `/matches?tournament=${tAlias}&season=${currentSeason.alias}&status=live,upcoming&limit=10`
+      );
+      liveAndUpcomingMatches = matchesResponse.data || [];
     } catch (error) {
-      console.error('Error fetching seasons:', error);
+      console.error('Error fetching live/upcoming matches:', error);
     }
 
     return {
       props: {
         tournament,
-        seasons,
-        currentSeasonAlias,
+        currentSeason,
+        allSeasons: publishedSeasons,
+        allRounds: allRounds
+          .filter((r: RoundValues) => r.published)
+          .sort((a: RoundValues, b: RoundValues) => {
+            if (a.startDate && b.startDate) {
+              return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+            }
+            return a.alias.localeCompare(b.alias);
+          }),
+        liveAndUpcomingMatches,
       },
-      revalidate: 300,
+      revalidate: 60,
     };
   } catch (error) {
     console.error('Error fetching tournament:', error);
