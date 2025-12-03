@@ -322,9 +322,9 @@ export default function SeasonHub({
         {/* Drop-Down SEASON */}
         {allSeasons.length > 1 && !rAlias && (
           <Listbox
-            value={season}
-            onChange={(selectedSeason) => {
-              router.push(`/tournaments/${tAlias}/${selectedSeason.alias}`);
+            value={season.alias}
+            onChange={(selectedAlias) => {
+              router.push(`/tournaments/${tAlias}/${selectedAlias}`);
             }}
           >
             {({ open }) => (
@@ -360,7 +360,7 @@ export default function SeasonHub({
                               "relative cursor-default select-none py-2 pl-3 pr-9",
                             )
                           }
-                          value={s}
+                          value={s.alias}
                         >
                           {({ selected, active }) => (
                             <>
