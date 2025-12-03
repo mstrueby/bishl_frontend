@@ -416,8 +416,8 @@ export default function SeasonHub({
                   </Listbox.Label>
                   <div className="relative">
                     <div className="inline-flex w-full divide-x divide-indigo-700 rounded-md shadow-sm">
-                      <div className="inline-flex flex-1 items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
-                        <p className="sm:text-sm font-semibold text-white uppercase truncate">
+                      <div className="inline-flex flex-1 items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 shadow-sm">
+                        <p className="text-sm font-semibold text-white uppercase truncate">
                           {selectedRound?.name || "Alle Runden"}
                         </p>
                       </div>
@@ -451,7 +451,7 @@ export default function SeasonHub({
                         >
                           {({ selected, active }) => (
                             <div className="flex flex-col">
-                              <div className="flex justify-between">
+                              <div className="flex justify-between text-xs sm:text-sm ">
                                 <p
                                   className={classNames(
                                     selected ? "font-semibold" : "font-normal",
@@ -579,8 +579,8 @@ export default function SeasonHub({
                       Spieltag auswählen
                     </Listbox.Label>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
-                        <span className="sm:text-sm inline-flex w-full truncate">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-2 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:leading-6">
+                        <span className="text-sm inline-flex w-full truncate">
                           <span className="truncate uppercase font-semibold">
                             {selectedMatchdayAlias
                               ? matchdaysForRound.find(
@@ -621,7 +621,7 @@ export default function SeasonHub({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                       >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-xs sm:text-sm">
                           <Listbox.Option
                             key="all-matchdays"
                             className={({ active }) =>
