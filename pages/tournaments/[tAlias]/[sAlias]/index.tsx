@@ -82,7 +82,9 @@ export default function SeasonHub({
       const round = allRounds.find((r) => r.alias === rAlias);
       setSelectedRound(round || null);
     } else {
+      // Explicitly set to null for season view
       setSelectedRound(null);
+      setMatchdaysForRound([]);
     }
     setSelectedMatchdayAlias(mdAlias || "");
   }, [rAlias, mdAlias, allRounds]);
@@ -90,6 +92,11 @@ export default function SeasonHub({
   // Fetch matchdays when round changes (only if not already loaded from SSG)
   useEffect(() => {
     const fetchMatchdaysForRound = async () => {
+      // Skip if no rAlias in URL (viewing season, not round)
+      if (!rAlias) {
+        return;
+      }
+      
       // Skip if no round selected or if we already have matchdays from SSG
       if (!selectedRound?.alias || (rAlias === selectedRound.alias && matchdaysForRound.length > 0)) {
         return;
@@ -107,7 +114,7 @@ export default function SeasonHub({
     };
 
     fetchMatchdaysForRound();
-  }, [selectedRound?.alias, tAlias, sAlias]);
+  }, [selectedRound?.alias, tAlias, sAlias, rAlias]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
