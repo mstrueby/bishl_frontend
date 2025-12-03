@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import {
   CheckIcon,
+  ChevronDownIcon,
   ChevronRightIcon,
   ChevronUpDownIcon,
   HomeIcon
@@ -58,7 +59,7 @@ export default function SeasonHub({
   matchdayName,
 }: SeasonHubProps) {
   const router = useRouter();
-  const [selectedRound, setSelectedRound] = useState<string>(rAlias || "");
+  const [selectedRound, setSelectedRound] = useState<RoundValues | null>(null);
   const [selectedMatchdayAlias, setSelectedMatchdayAlias] = useState<string>(
     mdAlias || "",
   );
@@ -71,17 +72,22 @@ export default function SeasonHub({
 
   // Update local state when route changes
   useEffect(() => {
-    setSelectedRound(rAlias || "");
+    if (rAlias) {
+      const round = allRounds.find(r => r.alias === rAlias);
+      setSelectedRound(round || null);
+    } else {
+      setSelectedRound(null);
+    }
     setSelectedMatchdayAlias(mdAlias || "");
-  }, [rAlias, mdAlias]);
+  }, [rAlias, mdAlias, allRounds]);
 
   // Fetch matchdays when round changes
   useEffect(() => {
     const fetchMatchdaysForRound = async () => {
-      if (selectedRound) {
+      if (selectedRound?.alias) {
         try {
           const response = await apiClient.get(
-            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound}/matchdays`,
+            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound.alias}/matchdays`,
           );
           setMatchdaysForRound(response.data || []);
         } catch (error) {
@@ -100,24 +106,32 @@ export default function SeasonHub({
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
   };
 
-  const handleRoundChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newRound = e.target.value;
-    if (newRound) {
-      router.push(`/tournaments/${tAlias}/${sAlias}/${newRound}`);
-    } else {
-      router.push(`/tournaments/${tAlias}/${sAlias}`);
-    }
-  };
+  
 
   const handleMatchdayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMatchday = e.target.value;
-    if (newMatchday && selectedRound) {
+    if (newMatchday && selectedRound?.alias) {
       router.push(
-        `/tournaments/${tAlias}/${sAlias}/${selectedRound}/${newMatchday}`,
+        `/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}/${newMatchday}`,
       );
-    } else if (selectedRound) {
-      router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound}`);
+    } else if (selectedRound?.alias) {
+      router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}`);
     }
+  };
+
+  // Helper function to format date range
+  const formatDate = (startDate?: string, endDate?: string) => {
+    if (!startDate && !endDate) return '';
+    
+    const formatSingleDate = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+    
+    if (startDate && endDate) {
+      return `${formatSingleDate(startDate)} - ${formatSingleDate(endDate)}`;
+    }
+    return startDate ? formatSingleDate(startDate) : endDate ? formatSingleDate(endDate) : '';
   };
 
   // Determine which matches to display
@@ -349,30 +363,106 @@ export default function SeasonHub({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
           <div>
-            <label
-              htmlFor="round-select"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Runde
             </label>
-            <select
-              id="round-select"
-              value={selectedRound}
-              onChange={handleRoundChange}
-              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+            <Listbox 
+              value={selectedRound} 
+              onChange={(round: RoundValues | null) => {
+                if (round?.alias) {
+                  router.push(`/tournaments/${tAlias}/${sAlias}/${round.alias}`);
+                } else {
+                  router.push(`/tournaments/${tAlias}/${sAlias}`);
+                }
+              }}
             >
-              <option value="">Alle Runden</option>
-              {allRounds.map((round) => (
-                <option key={round.alias} value={round.alias}>
-                  {round.name}
-                </option>
-              ))}
-            </select>
+              {({ open }) => (
+                <>
+                  <Listbox.Label className="sr-only">Runde auswählen</Listbox.Label>
+                  <div className="relative">
+                    <div className="inline-flex w-full divide-x divide-indigo-700 rounded-md shadow-sm">
+                      <div className="inline-flex flex-1 items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
+                        <p className="text-sm font-semibold text-white uppercase truncate">
+                          {selectedRound?.name || "Alle Runden"}
+                        </p>
+                      </div>
+                      <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
+                        <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
+                      </Listbox.Button>
+                    </div>
+
+                    <Transition
+                      show={open}
+                      as={Fragment}
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <Listbox.Options className="absolute left-0 z-10 mt-2 w-full origin-top-left divide-y divide-gray-200 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Listbox.Option
+                          key="all-rounds"
+                          className={({ active }) =>
+                            classNames(
+                              active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                              'cursor-default select-none p-4 text-sm uppercase'
+                            )
+                          }
+                          value={null}
+                        >
+                          {({ selected, active }) => (
+                            <div className="flex flex-col">
+                              <div className="flex justify-between">
+                                <p className={classNames(selected ? 'font-semibold' : 'font-normal', active ? 'text-white' : 'text-gray-900')}>
+                                  Alle Runden
+                                </p>
+                                {selected ? (
+                                  <span className={active ? 'text-white' : 'text-indigo-600'}>
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                          )}
+                        </Listbox.Option>
+                        {allRounds.map((round) => (
+                          <Listbox.Option
+                            key={round.alias}
+                            className={({ active }) =>
+                              classNames(
+                                active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                'cursor-default select-none p-4 text-sm uppercase'
+                              )
+                            }
+                            value={round}
+                          >
+                            {({ selected, active }) => (
+                              <div className="flex flex-col">
+                                <div className="flex justify-between">
+                                  <p className={classNames(selected ? 'font-semibold' : 'font-normal', active ? 'text-white' : 'text-gray-900')}>
+                                    {round.name}
+                                  </p>
+                                  {selected ? (
+                                    <span className={active ? 'text-white' : 'text-indigo-600'}>
+                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                  ) : null}
+                                </div>
+                                {(round.startDate || round.endDate) && (
+                                  <p className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'mt-2')}>
+                                    {formatDate(round.startDate, round.endDate)}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Transition>
+                  </div>
+                </>
+              )}
+            </Listbox>
           </div>
-
-
-
-          
 
           {/* Matchday Selector - Only shown when round has multiple matchdays */}
           <div>
@@ -382,7 +472,7 @@ export default function SeasonHub({
             >
               Spieltag
             </label>
-            {!selectedRound ? (
+            {!selectedRound?.alias ? (
               <div className="block w-full rounded-md border border-gray-300 bg-gray-100 py-2 pl-3 pr-10 text-base text-gray-400 sm:text-sm">
                 Alle Spieltage
               </div>
