@@ -66,7 +66,7 @@ export default function SeasonHub({
     mdAlias || "",
   );
   const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(
-    rAlias ? selectedRoundMatchdays : [],
+    selectedRoundMatchdays,
   );
 
   // Determine page context/mode
@@ -82,39 +82,31 @@ export default function SeasonHub({
       const round = allRounds.find((r) => r.alias === rAlias);
       setSelectedRound(round || null);
     } else {
-      // Explicitly set to null for season view
       setSelectedRound(null);
-      setMatchdaysForRound([]);
     }
     setSelectedMatchdayAlias(mdAlias || "");
   }, [rAlias, mdAlias, allRounds]);
 
-  // Fetch matchdays when round changes (only if not already loaded from SSG)
+  // Fetch matchdays when round changes
   useEffect(() => {
     const fetchMatchdaysForRound = async () => {
-      // Skip if no rAlias in URL (viewing season, not round)
-      if (!rAlias) {
-        return;
-      }
-      
-      // Skip if no round selected or if we already have matchdays from SSG
-      if (!selectedRound?.alias || (rAlias === selectedRound.alias && matchdaysForRound.length > 0)) {
-        return;
-      }
-
-      try {
-        const response = await apiClient.get(
-          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound.alias}/matchdays`,
-        );
-        setMatchdaysForRound(response.data || []);
-      } catch (error) {
-        console.error("Error fetching matchdays for round:", error);
+      if (selectedRound?.alias) {
+        try {
+          const response = await apiClient.get(
+            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound.alias}/matchdays`,
+          );
+          setMatchdaysForRound(response.data || []);
+        } catch (error) {
+          console.error("Error fetching matchdays for round:", error);
+          setMatchdaysForRound([]);
+        }
+      } else {
         setMatchdaysForRound([]);
       }
     };
 
     fetchMatchdaysForRound();
-  }, [selectedRound?.alias, tAlias, sAlias, rAlias]);
+  }, [selectedRound, tAlias, sAlias]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
@@ -806,30 +798,39 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   };
 
   try {
-    // Base data needed for all page levels
-    const [seasonResponse, allSeasonsResponse, tournamentResponse, allRoundsResponse] =
+    // Fetch season data
+    const [seasonResponse, allSeasonsResponse, tournamentResponse] =
       await Promise.all([
         apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`),
         apiClient.get(`/tournaments/${tAlias}/seasons`),
         apiClient.get(`/tournaments/${tAlias}`),
-        apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds`),
       ]);
 
     const season = seasonResponse.data;
     const allSeasons = allSeasonsResponse.data || [];
     const tournament = tournamentResponse.data;
+
+    // Fetch all rounds for this season
+    const allRoundsResponse = await apiClient.get(
+      `/tournaments/${tAlias}/seasons/${sAlias}/rounds`,
+    );
     const allRounds = allRoundsResponse.data || [];
 
-    // Initialize all optional data
+    // Fetch matchdays only if a round is selected
     let selectedRoundMatchdays: MatchdayValues[] = [];
-    let selectedSeasonMatches: MatchValues[] = [];
-    let selectedRoundMatches: MatchValues[] = [];
-    let selectedMatchdayMatches: MatchValues[] = [];
-    let selectedMatchday: MatchdayValues | null = null;
-    let roundName: string | undefined;
-    let matchdayName: string | undefined;
+    if (rAlias) {
+      try {
+        const matchdaysResponse = await apiClient.get(
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
+        );
+        selectedRoundMatchdays = matchdaysResponse.data || [];
+      } catch (error) {
+        console.error(`Error fetching matchdays for round ${rAlias}:`, error);
+      }
+    }
 
-    // LEVEL 1: Season view (no rAlias) - fetch season matches only
+    // Fetch matches for the season (only if no round selected)
+    let selectedSeasonMatches: MatchValues[] = [];
     if (!rAlias) {
       try {
         const matchesResponse = await apiClient.get(
@@ -837,58 +838,58 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         );
         selectedSeasonMatches = matchesResponse.data || [];
       } catch (error) {
-        console.error("Error fetching season matches:", error);
+        console.error("Error fetching live/upcoming matches:", error);
       }
     }
 
-    // LEVEL 2: Round view (rAlias but no mdAlias) - fetch round data, matchdays, and round matches
-    else if (rAlias && !mdAlias) {
+    // Fetch matches for selected round
+    let selectedRoundMatches: MatchValues[] = [];
+    if (rAlias && !mdAlias) {
       try {
-        const [roundResponse, matchdaysResponse, matchesResponse] =
-          await Promise.all([
-            apiClient.get(
-              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
-            ),
-            apiClient.get(
-              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
-            ),
-            apiClient.get(
-              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`,
-            ),
-          ]);
-        roundName = roundResponse.data?.name;
-        selectedRoundMatchdays = matchdaysResponse.data || [];
+        const matchesResponse = await apiClient.get(
+          `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`,
+        );
         selectedRoundMatches = matchesResponse.data || [];
       } catch (error) {
-        console.error("Error fetching round data:", error);
+        console.error("Error fetching round matches:", error);
       }
     }
 
-    // LEVEL 3: Matchday view (both rAlias and mdAlias) - fetch all matchday-specific data
-    else if (rAlias && mdAlias) {
+    // Fetch matches for selected matchday
+    let selectedMatchdayMatches: MatchValues[] = [];
+    let selectedMatchday: MatchdayValues | null = null;
+    let roundName: string | undefined;
+    let matchdayName: string | undefined;
+
+    if (rAlias && mdAlias) {
       try {
-        const [roundResponse, matchdaysResponse, matchdayResponse, matchesResponse] =
+        const [matchesResponse, roundResponse, matchdayResponse] =
           await Promise.all([
             apiClient.get(
-              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
+              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
             ),
             apiClient.get(
-              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
+              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
             ),
             apiClient.get(
               `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`,
             ),
-            apiClient.get(
-              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
-            ),
           ]);
-        roundName = roundResponse.data?.name;
-        selectedRoundMatchdays = matchdaysResponse.data || [];
-        selectedMatchday = matchdayResponse.data || null;
-        matchdayName = matchdayResponse.data?.name;
         selectedMatchdayMatches = matchesResponse.data || [];
+        selectedMatchday = matchdayResponse.data || null;
+        roundName = roundResponse.data?.name;
+        matchdayName = matchdayResponse.data?.name;
       } catch (error) {
         console.error("Error fetching matchday data:", error);
+      }
+    } else if (rAlias) {
+      try {
+        const roundResponse = await apiClient.get(
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
+        );
+        roundName = roundResponse.data?.name;
+      } catch (error) {
+        console.error("Error fetching round data:", error);
       }
     }
 
