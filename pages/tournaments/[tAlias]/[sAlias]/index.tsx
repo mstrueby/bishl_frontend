@@ -66,7 +66,7 @@ export default function SeasonHub({
     mdAlias || "",
   );
   const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(
-    selectedRoundMatchdays,
+    rAlias ? selectedRoundMatchdays : [],
   );
 
   // Determine page context/mode
@@ -87,26 +87,27 @@ export default function SeasonHub({
     setSelectedMatchdayAlias(mdAlias || "");
   }, [rAlias, mdAlias, allRounds]);
 
-  // Fetch matchdays when round changes
+  // Fetch matchdays when round changes (only if not already loaded from SSG)
   useEffect(() => {
     const fetchMatchdaysForRound = async () => {
-      if (selectedRound?.alias) {
-        try {
-          const response = await apiClient.get(
-            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound.alias}/matchdays`,
-          );
-          setMatchdaysForRound(response.data || []);
-        } catch (error) {
-          console.error("Error fetching matchdays for round:", error);
-          setMatchdaysForRound([]);
-        }
-      } else {
+      // Skip if no round selected or if we already have matchdays from SSG
+      if (!selectedRound?.alias || (rAlias === selectedRound.alias && matchdaysForRound.length > 0)) {
+        return;
+      }
+
+      try {
+        const response = await apiClient.get(
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound.alias}/matchdays`,
+        );
+        setMatchdaysForRound(response.data || []);
+      } catch (error) {
+        console.error("Error fetching matchdays for round:", error);
         setMatchdaysForRound([]);
       }
     };
 
     fetchMatchdaysForRound();
-  }, [selectedRound, tAlias, sAlias]);
+  }, [selectedRound?.alias, tAlias, sAlias]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
@@ -816,7 +817,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     );
     const allRounds = allRoundsResponse.data || [];
 
-    // Fetch matchdays only if a round is selected
+    // Fetch matchdays only if a round is selected (not for season view)
     let selectedRoundMatchdays: MatchdayValues[] = [];
     if (rAlias) {
       try {
