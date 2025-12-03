@@ -603,13 +603,7 @@ export default function SeasonHub({
       {displayMatches.length > 0 ? (
         <>
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              {pageMode === 'MATCHDAY' 
-                ? 'Spiele' 
-                : pageMode === 'ROUND' 
-                ? 'Spiele' 
-                : 'Spiele'}
-            </h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Spiele</h2>
             <MatchList
               matches={displayMatches}
               matchdays={pageMode === 'ROUND' ? matchdaysForRound : []}
@@ -633,19 +627,12 @@ export default function SeasonHub({
               </div>
             )}
         </>
-      ) : pageMode === 'SEASON' ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-lg text-gray-700 mb-2">
-            Wähle eine Runde, um Spiele anzuzeigen
-          </p>
-          <p className="text-sm text-gray-500">
-            Verwende die Filter oben, um Spiele zu durchsuchen
-          </p>
-        </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-500">
-            {pageMode === 'MATCHDAY'
+        <div className="text-center py-12">
+          <p className={`text-sm text-gray-500 mb-0`}>
+            {pageMode === 'SEASON'
+              ? "Keine Spiele für diese Saison"
+              : pageMode === 'MATCHDAY'
               ? "Keine Spiele für diesen Spieltag"
               : "Keine Spiele für diese Runde"}
           </p>
