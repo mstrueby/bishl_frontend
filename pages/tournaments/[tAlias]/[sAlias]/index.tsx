@@ -359,13 +359,10 @@ export default function SeasonHub({
       </div>
 
       {/* Cascading Filters Bar */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8 sticky top-16">
+      <div className="py-4 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Runde
-            </label>
             <Listbox 
               value={selectedRound} 
               onChange={(round: RoundValues | null) => {
@@ -463,12 +460,8 @@ export default function SeasonHub({
               )}
             </Listbox>
           </div>
-
           {/* Matchday Selector - Only shown when round has multiple matchdays */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Spieltag
-            </label>
             {!selectedRound?.alias ? (
               <div className="block w-full rounded-md border border-gray-300 bg-gray-100 py-2 pl-3 pr-10 text-base text-gray-400 sm:text-sm">
                 Alle Spieltage
@@ -476,7 +469,7 @@ export default function SeasonHub({
             ) : matchdaysForRound.length === 1 ? (
               <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
                 {matchdaysForRound[0].alias === "all_games"
-                  ? "Alle Spiele"
+                  ? <span className="text-gray-500">Alle Spiele</span>
                   : matchdaysForRound[0].name}
               </div>
             ) : (
