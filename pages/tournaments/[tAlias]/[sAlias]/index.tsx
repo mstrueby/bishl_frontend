@@ -11,6 +11,8 @@ import {
   HomeIcon
 } from "@heroicons/react/20/solid";
 import { Listbox, Transition } from "@headlessui/react";
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 import Layout from "../../../../components/Layout";
 import apiClient from "../../../../lib/apiClient";
 import {
@@ -128,15 +130,15 @@ export default function SeasonHub({
   const formatDate = (startDate?: string, endDate?: string) => {
     if (!startDate && !endDate) return '';
     
-    const formatSingleDate = (dateStr: string) => {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    };
-    
     if (startDate && endDate) {
-      return `${formatSingleDate(startDate)} - ${formatSingleDate(endDate)}`;
+      const dateFrom = new Date(startDate);
+      const dateTo = new Date(endDate);
+      return `${format(dateFrom, 'd. LLL', { locale: de })}` +
+        `${dateTo.getDate() !== dateFrom.getDate() ? " - " + format(dateTo, 'd. LLL', { locale: de }) : ""}`;
     }
-    return startDate ? formatSingleDate(startDate) : endDate ? formatSingleDate(endDate) : '';
+    
+    return startDate ? format(new Date(startDate), 'd. LLL', { locale: de }) : 
+           endDate ? format(new Date(endDate), 'd. LLL', { locale: de }) : '';
   };
 
   // Determine which matches to display based on page mode
