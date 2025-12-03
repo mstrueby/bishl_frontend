@@ -39,7 +39,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
         </h2>
         {description && (
           <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
-            <div className="mt-2 flex items-center text-sm text-gray-500">
+            <div className="mt-2 flex items-center text-md text-gray-500">
               {descriptionLogoUrl && (
                 <Image
                   src={descriptionLogoUrl}
