@@ -806,39 +806,30 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   };
 
   try {
-    // Fetch season data
-    const [seasonResponse, allSeasonsResponse, tournamentResponse] =
+    // Base data needed for all page levels
+    const [seasonResponse, allSeasonsResponse, tournamentResponse, allRoundsResponse] =
       await Promise.all([
         apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`),
         apiClient.get(`/tournaments/${tAlias}/seasons`),
         apiClient.get(`/tournaments/${tAlias}`),
+        apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds`),
       ]);
 
     const season = seasonResponse.data;
     const allSeasons = allSeasonsResponse.data || [];
     const tournament = tournamentResponse.data;
-
-    // Fetch all rounds for this season
-    const allRoundsResponse = await apiClient.get(
-      `/tournaments/${tAlias}/seasons/${sAlias}/rounds`,
-    );
     const allRounds = allRoundsResponse.data || [];
 
-    // Fetch matchdays only if a round is selected (not for season view)
+    // Initialize all optional data
     let selectedRoundMatchdays: MatchdayValues[] = [];
-    if (rAlias) {
-      try {
-        const matchdaysResponse = await apiClient.get(
-          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
-        );
-        selectedRoundMatchdays = matchdaysResponse.data || [];
-      } catch (error) {
-        console.error(`Error fetching matchdays for round ${rAlias}:`, error);
-      }
-    }
-
-    // Fetch matches for the season (only if no round selected)
     let selectedSeasonMatches: MatchValues[] = [];
+    let selectedRoundMatches: MatchValues[] = [];
+    let selectedMatchdayMatches: MatchValues[] = [];
+    let selectedMatchday: MatchdayValues | null = null;
+    let roundName: string | undefined;
+    let matchdayName: string | undefined;
+
+    // LEVEL 1: Season view (no rAlias) - fetch season matches only
     if (!rAlias) {
       try {
         const matchesResponse = await apiClient.get(
@@ -846,58 +837,58 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         );
         selectedSeasonMatches = matchesResponse.data || [];
       } catch (error) {
-        console.error("Error fetching live/upcoming matches:", error);
+        console.error("Error fetching season matches:", error);
       }
     }
 
-    // Fetch matches for selected round
-    let selectedRoundMatches: MatchValues[] = [];
-    if (rAlias && !mdAlias) {
+    // LEVEL 2: Round view (rAlias but no mdAlias) - fetch round data, matchdays, and round matches
+    else if (rAlias && !mdAlias) {
       try {
-        const matchesResponse = await apiClient.get(
-          `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`,
-        );
-        selectedRoundMatches = matchesResponse.data || [];
-      } catch (error) {
-        console.error("Error fetching round matches:", error);
-      }
-    }
-
-    // Fetch matches for selected matchday
-    let selectedMatchdayMatches: MatchValues[] = [];
-    let selectedMatchday: MatchdayValues | null = null;
-    let roundName: string | undefined;
-    let matchdayName: string | undefined;
-
-    if (rAlias && mdAlias) {
-      try {
-        const [matchesResponse, roundResponse, matchdayResponse] =
+        const [roundResponse, matchdaysResponse, matchesResponse] =
           await Promise.all([
-            apiClient.get(
-              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
-            ),
             apiClient.get(
               `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
             ),
             apiClient.get(
-              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`,
+              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
+            ),
+            apiClient.get(
+              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`,
             ),
           ]);
-        selectedMatchdayMatches = matchesResponse.data || [];
-        selectedMatchday = matchdayResponse.data || null;
         roundName = roundResponse.data?.name;
-        matchdayName = matchdayResponse.data?.name;
-      } catch (error) {
-        console.error("Error fetching matchday data:", error);
-      }
-    } else if (rAlias) {
-      try {
-        const roundResponse = await apiClient.get(
-          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
-        );
-        roundName = roundResponse.data?.name;
+        selectedRoundMatchdays = matchdaysResponse.data || [];
+        selectedRoundMatches = matchesResponse.data || [];
       } catch (error) {
         console.error("Error fetching round data:", error);
+      }
+    }
+
+    // LEVEL 3: Matchday view (both rAlias and mdAlias) - fetch all matchday-specific data
+    else if (rAlias && mdAlias) {
+      try {
+        const [roundResponse, matchdaysResponse, matchdayResponse, matchesResponse] =
+          await Promise.all([
+            apiClient.get(
+              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
+            ),
+            apiClient.get(
+              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
+            ),
+            apiClient.get(
+              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`,
+            ),
+            apiClient.get(
+              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
+            ),
+          ]);
+        roundName = roundResponse.data?.name;
+        selectedRoundMatchdays = matchdaysResponse.data || [];
+        selectedMatchday = matchdayResponse.data || null;
+        matchdayName = matchdayResponse.data?.name;
+        selectedMatchdayMatches = matchesResponse.data || [];
+      } catch (error) {
+        console.error("Error fetching matchday data:", error);
       }
     }
 
