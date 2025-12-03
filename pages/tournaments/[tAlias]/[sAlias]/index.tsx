@@ -71,10 +71,10 @@ export default function SeasonHub({
   );
 
   // Determine page context/mode
-  const pageMode: 'SEASON' | 'ROUND' | 'MATCHDAY' = mdAlias 
-    ? 'MATCHDAY' 
-    : rAlias 
-    ? 'ROUND' 
+  const pageMode: 'SEASON' | 'ROUND' | 'MATCHDAY' = mdAlias
+    ? 'MATCHDAY'
+    : rAlias
+    ? 'ROUND'
     : 'SEASON';
 
   // Update local state when route changes
@@ -113,7 +113,7 @@ export default function SeasonHub({
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
   };
 
-  
+
 
   const handleMatchdayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMatchday = e.target.value;
@@ -129,15 +129,15 @@ export default function SeasonHub({
   // Helper function to format date range
   const formatDate = (startDate?: string, endDate?: string) => {
     if (!startDate && !endDate) return '';
-    
+
     if (startDate && endDate) {
       const dateFrom = new Date(startDate);
       const dateTo = new Date(endDate);
       return `${format(dateFrom, 'd. LLL', { locale: de })}` +
         `${dateTo.getDate() !== dateFrom.getDate() ? " - " + format(dateTo, 'd. LLL', { locale: de }) : ""}`;
     }
-    
-    return startDate ? format(new Date(startDate), 'd. LLL', { locale: de }) : 
+
+    return startDate ? format(new Date(startDate), 'd. LLL', { locale: de }) :
            endDate ? format(new Date(endDate), 'd. LLL', { locale: de }) : '';
   };
 
@@ -320,9 +320,7 @@ export default function SeasonHub({
                           key={s.alias}
                           className={({ active }) =>
                             classNames(
-                              active
-                                ? "bg-indigo-600 text-white"
-                                : "text-gray-900",
+                              active ? "bg-indigo-600 text-white" : "text-gray-900",
                               "relative cursor-default select-none py-2 pl-3 pr-9",
                             )
                           }
@@ -370,8 +368,8 @@ export default function SeasonHub({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
           <div>
-            <Listbox 
-              value={selectedRound} 
+            <Listbox
+              value={selectedRound}
               onChange={(round: RoundValues | null) => {
                 if (round?.alias) {
                   router.push(`/tournaments/${tAlias}/${sAlias}/${round.alias}`);
@@ -408,7 +406,7 @@ export default function SeasonHub({
                           className={({ active }) =>
                             classNames(
                               active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                              'cursor-default select-none p-4 text-sm uppercase'
+                              'cursor-default select-none p-4 text-xs sm:text-sm uppercase'
                             )
                           }
                           value={null}
@@ -434,7 +432,7 @@ export default function SeasonHub({
                             className={({ active }) =>
                               classNames(
                                 active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                'cursor-default select-none p-4 text-sm uppercase'
+                                'cursor-default select-none p-4 text-xs sm:text-sm uppercase'
                               )
                             }
                             value={round}
@@ -452,7 +450,7 @@ export default function SeasonHub({
                                   ) : null}
                                 </div>
                                 {(round.startDate || round.endDate) && (
-                                  <p className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'mt-2')}>
+                                  <p className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'mt-1 text-[10px] sm:text-xs')}>
                                     {formatDate(round.startDate, round.endDate)}
                                   </p>
                                 )}
@@ -480,7 +478,7 @@ export default function SeasonHub({
                   : matchdaysForRound[0].name}
               </div>
             ) : (
-              <Listbox 
+              <Listbox
                 value={matchdaysForRound.find(md => md.alias === selectedMatchdayAlias) || null}
                 onChange={(matchday: MatchdayValues | null) => {
                   if (matchday?.alias && selectedRound?.alias) {
@@ -497,7 +495,7 @@ export default function SeasonHub({
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                         <span className="sm:text-sm inline-flex w-full truncate">
                           <span className="truncate uppercase font-semibold">
-                            {selectedMatchdayAlias 
+                            {selectedMatchdayAlias
                               ? matchdaysForRound.find(md => md.alias === selectedMatchdayAlias)?.name || "Alle Spieltage"
                               : "Alle Spieltage"}
                           </span>
