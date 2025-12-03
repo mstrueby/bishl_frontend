@@ -8,6 +8,7 @@ function classNames(...classes: string[]) {
 
 const navigation = {
   bishl: [
+    { name: 'Wettbewerbe', href: '/tournaments' },
     { name: 'Vereine', href: '/clubs' },
     { name: 'Spielstätten', href: '/venues' },
     //{ name: 'Schiedsrichterwesen', href: '#' },
