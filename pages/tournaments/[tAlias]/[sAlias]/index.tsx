@@ -167,9 +167,9 @@ export default function SeasonHub({
       </Head>
 
       {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="flex mb-8">
-        <ol role="list" className="flex items-center space-x-4">
-          <li>
+      <nav aria-label="Breadcrumb" className="mb-8 overflow-x-auto scrollbar-hide">
+        <ol role="list" className="flex items-center space-x-2 sm:space-x-4 min-w-max">
+          <li className="flex-shrink-0">
             <div>
               <Link
                 href="/"
@@ -180,33 +180,34 @@ export default function SeasonHub({
               </Link>
             </div>
           </li>
-          <li>
+          <li className="flex-shrink-0">
             <div className="flex items-center">
               <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
               <Link
                 href="/tournaments"
-                className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
+                className="ml-2 sm:ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap"
               >
                 Wettbewerbe
               </Link>
             </div>
           </li>
-          <li>
+          <li className="flex-shrink-0">
             <div className="flex items-center">
               <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
               <Link
                 href={`/tournaments/${tAlias}`}
-                className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
+                className="ml-2 sm:ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 truncate max-w-[120px] sm:max-w-none"
+                title={tournamentName}
               >
                 {tournamentName}
               </Link>
             </div>
           </li>
-          <li>
+          <li className="flex-shrink-0">
             <div className="flex items-center">
               <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
               <span
-                className={`ml-4 text-sm font-medium text-gray-500 ${rAlias ? "hover:text-gray-700" : ""}`}
+                className={`ml-2 sm:ml-4 text-sm font-medium text-gray-500 ${rAlias ? "hover:text-gray-700" : ""} whitespace-nowrap`}
               >
                 {!rAlias ? (
                   season.name
@@ -219,11 +220,12 @@ export default function SeasonHub({
             </div>
           </li>
           {roundName && (
-            <li>
+            <li className="flex-shrink-0">
               <div className="flex items-center">
                 <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
                 <span
-                  className={`ml-4 text-sm font-medium text-gray-500 ${mdAlias ? "hover:text-gray-700" : ""}`}
+                  className={`ml-2 sm:ml-4 text-sm font-medium text-gray-500 ${mdAlias ? "hover:text-gray-700" : ""} truncate max-w-[120px] sm:max-w-none`}
+                  title={roundName}
                 >
                   {!mdAlias ? (
                     roundName
@@ -237,10 +239,10 @@ export default function SeasonHub({
             </li>
           )}
           {matchdayName && (
-            <li aria-current="page">
+            <li aria-current="page" className="flex-shrink-0">
               <div className="flex items-center">
                 <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
-                <span className="ml-4 text-sm font-medium text-gray-500">
+                <span className="ml-2 sm:ml-4 text-sm font-medium text-gray-500 truncate max-w-[120px] sm:max-w-none" title={matchdayName}>
                   {matchdayName}
                 </span>
               </div>
