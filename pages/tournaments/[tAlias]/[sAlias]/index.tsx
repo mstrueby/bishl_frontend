@@ -29,7 +29,7 @@ interface SeasonHubProps {
   season: SeasonValues;
   allSeasons: SeasonValues[];
   allRounds: RoundValues[];
-  liveAndUpcomingMatches: MatchValues[];
+  selectedSeasonMatches: MatchValues[];
   selectedRoundMatches: MatchValues[];
   selectedMatchdayMatches: MatchValues[];
   selectedRoundMatchdays: MatchdayValues[];
@@ -47,7 +47,7 @@ export default function SeasonHub({
   season,
   allSeasons,
   allRounds,
-  liveAndUpcomingMatches,
+  selectedSeasonMatches,
   selectedRoundMatches,
   selectedMatchdayMatches,
   selectedRoundMatchdays,
@@ -149,7 +149,7 @@ export default function SeasonHub({
       ? selectedMatchdayMatches
       : pageMode === "ROUND"
         ? selectedRoundMatches
-        : liveAndUpcomingMatches;
+        : selectedSeasonMatches;
 
   // Build page title
   const titleParts = [tournamentName, season.name];
@@ -392,7 +392,7 @@ export default function SeasonHub({
         )}
       </div>
 
-      {/* Cascading Filters Bar */}
+      {/* Cascading Filters Bar for ROUND, MATCHDAY */}
       <div className="py-4 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
@@ -829,14 +829,14 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       }
     }
 
-    // Fetch live and upcoming matches for the season (only if no round selected)
-    let liveAndUpcomingMatches: MatchValues[] = [];
+    // Fetch matches for the season (only if no round selected)
+    let selectedSeasonMatches: MatchValues[] = [];
     if (!rAlias) {
       try {
         const matchesResponse = await apiClient.get(
-          `/matches?tournament=${tAlias}&season=${sAlias}&status=live,upcoming&limit=10`,
+          `/matches?tournament=${tAlias}&season=${sAlias}`,
         );
-        liveAndUpcomingMatches = matchesResponse.data || [];
+        selectedSeasonMatches = matchesResponse.data || [];
       } catch (error) {
         console.error("Error fetching live/upcoming matches:", error);
       }
@@ -912,7 +912,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
             }
             return a.alias.localeCompare(b.alias);
           }),
-        liveAndUpcomingMatches,
+        selectedSeasonMatches,
         selectedRoundMatches,
         selectedMatchdayMatches,
         selectedRoundMatchdays: selectedRoundMatchdays
