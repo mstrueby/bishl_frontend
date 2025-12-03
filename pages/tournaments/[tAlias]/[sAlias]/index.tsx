@@ -359,13 +359,10 @@ export default function SeasonHub({
       </div>
 
       {/* Cascading Filters Bar */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8 sticky top-16">
+      <div className="py-4 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Runde
-            </label>
             <Listbox 
               value={selectedRound} 
               onChange={(round: RoundValues | null) => {
@@ -463,15 +460,8 @@ export default function SeasonHub({
               )}
             </Listbox>
           </div>
-
           {/* Matchday Selector - Only shown when round has multiple matchdays */}
           <div>
-            <label
-              htmlFor="matchday-select"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Spieltag
-            </label>
             {!selectedRound?.alias ? (
               <div className="block w-full rounded-md border border-gray-300 bg-gray-100 py-2 pl-3 pr-10 text-base text-gray-400 sm:text-sm">
                 Alle Spieltage
@@ -479,23 +469,126 @@ export default function SeasonHub({
             ) : matchdaysForRound.length === 1 ? (
               <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
                 {matchdaysForRound[0].alias === "all_games"
-                  ? "Alle Spiele"
+                  ? <span className="text-gray-500">Alle Spiele</span>
                   : matchdaysForRound[0].name}
               </div>
             ) : (
-              <select
-                id="matchday-select"
-                value={selectedMatchdayAlias}
-                onChange={handleMatchdayChange}
-                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              <Listbox 
+                value={matchdaysForRound.find(md => md.alias === selectedMatchdayAlias) || null}
+                onChange={(matchday: MatchdayValues | null) => {
+                  if (matchday?.alias && selectedRound?.alias) {
+                    router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}/${matchday.alias}`);
+                  } else if (selectedRound?.alias) {
+                    router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}`);
+                  }
+                }}
               >
-                <option value="">Alle Spieltage</option>
-                {matchdaysForRound.map((md) => (
-                  <option key={md.alias} value={md.alias}>
-                    {md.alias === "ALL_GAMES" ? "Alle Spiele" : md.name}
-                  </option>
-                ))}
-              </select>
+                {({ open }) => (
+                  <>
+                    <Listbox.Label className="sr-only">Spieltag auswählen</Listbox.Label>
+                    <div className="relative">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        <span className="inline-flex w-full truncate">
+                          <span className="truncate uppercase font-semibold">
+                            {selectedMatchdayAlias 
+                              ? matchdaysForRound.find(md => md.alias === selectedMatchdayAlias)?.name || "Alle Spieltage"
+                              : "Alle Spieltage"}
+                          </span>
+                          {selectedMatchdayAlias && (() => {
+                            const currentMd = matchdaysForRound.find(md => md.alias === selectedMatchdayAlias);
+                            return currentMd?.startDate && currentMd?.endDate && (
+                              <span className="ml-2 truncate text-indigo-100">
+                                {formatDate(currentMd.startDate, currentMd.endDate)}
+                              </span>
+                            );
+                          })()}
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
+                        </span>
+                      </Listbox.Button>
+
+                      <Transition
+                        show={open}
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          <Listbox.Option
+                            key="all-matchdays"
+                            className={({ active }) =>
+                              classNames(
+                                active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                'relative cursor-default select-none py-2 pl-3 pr-9'
+                              )
+                            }
+                            value={null}
+                          >
+                            {({ selected, active }) => (
+                              <>
+                                <div className="flex">
+                                  <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate uppercase')}>
+                                    Alle Spieltage
+                                  </span>
+                                </div>
+                                {selected ? (
+                                  <span
+                                    className={classNames(
+                                      active ? 'text-white' : 'text-indigo-600',
+                                      'absolute inset-y-0 right-0 flex items-center pr-4'
+                                    )}
+                                  >
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Listbox.Option>
+                          {matchdaysForRound.map((matchday) => (
+                            <Listbox.Option
+                              key={matchday.alias}
+                              className={({ active }) =>
+                                classNames(
+                                  active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                                  'relative cursor-default select-none py-2 pl-3 pr-9'
+                                )
+                              }
+                              value={matchday}
+                            >
+                              {({ selected, active }) => (
+                                <>
+                                  <div className="flex">
+                                    <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate uppercase')}>
+                                      {matchday.alias === "ALL_GAMES" ? "Alle Spiele" : matchday.name}
+                                    </span>
+                                    {matchday.startDate && matchday.endDate && (
+                                      <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
+                                        {formatDate(matchday.startDate, matchday.endDate)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {selected ? (
+                                    <span
+                                      className={classNames(
+                                        active ? 'text-white' : 'text-indigo-600',
+                                        'absolute inset-y-0 right-0 flex items-center pr-4'
+                                      )}
+                                    >
+                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                  ) : null}
+                                </>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </>
+                )}
+              </Listbox>
             )}
           </div>
         </div>
