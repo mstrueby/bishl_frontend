@@ -90,23 +90,30 @@ export default function SeasonHub({
   // Fetch matchdays when round changes
   useEffect(() => {
     const fetchMatchdaysForRound = async () => {
-      if (selectedRound?.alias) {
-        try {
-          const response = await apiClient.get(
-            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound.alias}/matchdays`,
-          );
-          setMatchdaysForRound(response.data || []);
-        } catch (error) {
-          console.error("Error fetching matchdays for round:", error);
-          setMatchdaysForRound([]);
-        }
-      } else {
+      // Skip if no rAlias in URL (season view)
+      if (!rAlias) {
+        setMatchdaysForRound([]);
+        return;
+      }
+
+      // Skip if selectedRound doesn't match rAlias (stale state during navigation)
+      if (!selectedRound?.alias || selectedRound.alias !== rAlias) {
+        return;
+      }
+
+      try {
+        const response = await apiClient.get(
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound.alias}/matchdays`,
+        );
+        setMatchdaysForRound(response.data || []);
+      } catch (error) {
+        console.error("Error fetching matchdays for round:", error);
         setMatchdaysForRound([]);
       }
     };
 
     fetchMatchdaysForRound();
-  }, [selectedRound, tAlias, sAlias]);
+  }, [selectedRound, tAlias, sAlias, rAlias]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
