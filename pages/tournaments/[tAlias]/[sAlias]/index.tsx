@@ -8,11 +8,11 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   ChevronUpDownIcon,
-  HomeIcon
+  HomeIcon,
 } from "@heroicons/react/20/solid";
 import { Listbox, Transition } from "@headlessui/react";
-import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 import Layout from "../../../../components/Layout";
 import apiClient from "../../../../lib/apiClient";
 import {
@@ -21,7 +21,6 @@ import {
   MatchdayValues,
 } from "../../../../types/TournamentValues";
 import { MatchValues } from "../../../../types/MatchValues";
-import MatchCard from "../../../../components/ui/MatchCard";
 import MatchList from "../../../../components/ui/MatchList";
 import Standings from "../../../../components/ui/Standings";
 import { classNames } from "../../../../tools/utils";
@@ -71,16 +70,16 @@ export default function SeasonHub({
   );
 
   // Determine page context/mode
-  const pageMode: 'SEASON' | 'ROUND' | 'MATCHDAY' = mdAlias
-    ? 'MATCHDAY'
+  const pageMode: "SEASON" | "ROUND" | "MATCHDAY" = mdAlias
+    ? "MATCHDAY"
     : rAlias
-    ? 'ROUND'
-    : 'SEASON';
+      ? "ROUND"
+      : "SEASON";
 
   // Update local state when route changes
   useEffect(() => {
     if (rAlias) {
-      const round = allRounds.find(r => r.alias === rAlias);
+      const round = allRounds.find((r) => r.alias === rAlias);
       setSelectedRound(round || null);
     } else {
       setSelectedRound(null);
@@ -113,8 +112,6 @@ export default function SeasonHub({
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
   };
 
-
-
   const handleMatchdayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMatchday = e.target.value;
     if (newMatchday && selectedRound?.alias) {
@@ -128,25 +125,31 @@ export default function SeasonHub({
 
   // Helper function to format date range
   const formatDate = (startDate?: string, endDate?: string) => {
-    if (!startDate && !endDate) return '';
+    if (!startDate && !endDate) return "";
 
     if (startDate && endDate) {
       const dateFrom = new Date(startDate);
       const dateTo = new Date(endDate);
-      return `${format(dateFrom, 'd. LLL', { locale: de })}` +
-        `${dateTo.getDate() !== dateFrom.getDate() ? " - " + format(dateTo, 'd. LLL', { locale: de }) : ""}`;
+      return (
+        `${format(dateFrom, "d. LLL", { locale: de })}` +
+        `${dateTo.getDate() !== dateFrom.getDate() ? " - " + format(dateTo, "d. LLL", { locale: de }) : ""}`
+      );
     }
 
-    return startDate ? format(new Date(startDate), 'd. LLL', { locale: de }) :
-           endDate ? format(new Date(endDate), 'd. LLL', { locale: de }) : '';
+    return startDate
+      ? format(new Date(startDate), "d. LLL", { locale: de })
+      : endDate
+        ? format(new Date(endDate), "d. LLL", { locale: de })
+        : "";
   };
 
   // Determine which matches to display based on page mode
-  const displayMatches = pageMode === 'MATCHDAY'
-    ? selectedMatchdayMatches
-    : pageMode === 'ROUND'
-      ? selectedRoundMatches
-      : liveAndUpcomingMatches;
+  const displayMatches =
+    pageMode === "MATCHDAY"
+      ? selectedMatchdayMatches
+      : pageMode === "ROUND"
+        ? selectedRoundMatches
+        : liveAndUpcomingMatches;
 
   // Build page title
   const titleParts = [tournamentName, season.name];
@@ -188,8 +191,14 @@ export default function SeasonHub({
       </Head>
 
       {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="mb-8 overflow-x-auto scrollbar-hide">
-        <ol role="list" className="flex items-center space-x-2 sm:space-x-4 min-w-max">
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-8 overflow-x-auto scrollbar-hide"
+      >
+        <ol
+          role="list"
+          className="flex items-center space-x-2 sm:space-x-4 min-w-max"
+        >
           <li className="flex-shrink-0">
             <div>
               <Link
@@ -203,7 +212,10 @@ export default function SeasonHub({
           </li>
           <li className="flex-shrink-0">
             <div className="flex items-center">
-              <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
+              <ChevronRightIcon
+                aria-hidden="true"
+                className="size-5 shrink-0 text-gray-400"
+              />
               <Link
                 href="/tournaments"
                 className="ml-2 sm:ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap"
@@ -214,7 +226,10 @@ export default function SeasonHub({
           </li>
           <li className="flex-shrink-0">
             <div className="flex items-center">
-              <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
+              <ChevronRightIcon
+                aria-hidden="true"
+                className="size-5 shrink-0 text-gray-400"
+              />
               <Link
                 href={`/tournaments/${tAlias}`}
                 className="ml-2 sm:ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 truncate max-w-[120px] sm:max-w-none"
@@ -226,7 +241,10 @@ export default function SeasonHub({
           </li>
           <li className="flex-shrink-0">
             <div className="flex items-center">
-              <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
+              <ChevronRightIcon
+                aria-hidden="true"
+                className="size-5 shrink-0 text-gray-400"
+              />
               <span
                 className={`ml-2 sm:ml-4 text-sm font-medium text-gray-500 ${rAlias ? "hover:text-gray-700" : ""} whitespace-nowrap`}
               >
@@ -243,7 +261,10 @@ export default function SeasonHub({
           {roundName && (
             <li className="flex-shrink-0">
               <div className="flex items-center">
-                <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
+                <ChevronRightIcon
+                  aria-hidden="true"
+                  className="size-5 shrink-0 text-gray-400"
+                />
                 <span
                   className={`ml-2 sm:ml-4 text-sm font-medium text-gray-500 ${mdAlias ? "hover:text-gray-700" : ""} truncate max-w-[120px] sm:max-w-none`}
                   title={roundName}
@@ -262,8 +283,14 @@ export default function SeasonHub({
           {matchdayName && (
             <li aria-current="page" className="flex-shrink-0">
               <div className="flex items-center">
-                <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
-                <span className="ml-2 sm:ml-4 text-sm font-medium text-gray-500 truncate max-w-[120px] sm:max-w-none" title={matchdayName}>
+                <ChevronRightIcon
+                  aria-hidden="true"
+                  className="size-5 shrink-0 text-gray-400"
+                />
+                <span
+                  className="ml-2 sm:ml-4 text-sm font-medium text-gray-500 truncate max-w-[120px] sm:max-w-none"
+                  title={matchdayName}
+                >
                   {matchdayName}
                 </span>
               </div>
@@ -320,7 +347,9 @@ export default function SeasonHub({
                           key={s.alias}
                           className={({ active }) =>
                             classNames(
-                              active ? "bg-indigo-600 text-white" : "text-gray-900",
+                              active
+                                ? "bg-indigo-600 text-white"
+                                : "text-gray-900",
                               "relative cursor-default select-none py-2 pl-3 pr-9",
                             )
                           }
@@ -372,7 +401,9 @@ export default function SeasonHub({
               value={selectedRound}
               onChange={(round: RoundValues | null) => {
                 if (round?.alias) {
-                  router.push(`/tournaments/${tAlias}/${sAlias}/${round.alias}`);
+                  router.push(
+                    `/tournaments/${tAlias}/${sAlias}/${round.alias}`,
+                  );
                 } else {
                   router.push(`/tournaments/${tAlias}/${sAlias}`);
                 }
@@ -380,7 +411,9 @@ export default function SeasonHub({
             >
               {({ open }) => (
                 <>
-                  <Listbox.Label className="sr-only">Runde auswählen</Listbox.Label>
+                  <Listbox.Label className="sr-only">
+                    Runde auswählen
+                  </Listbox.Label>
                   <div className="relative">
                     <div className="inline-flex w-full divide-x divide-indigo-700 rounded-md shadow-sm">
                       <div className="inline-flex flex-1 items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
@@ -389,7 +422,10 @@ export default function SeasonHub({
                         </p>
                       </div>
                       <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
-                        <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
+                        <ChevronDownIcon
+                          className="h-5 w-5 text-white"
+                          aria-hidden="true"
+                        />
                       </Listbox.Button>
                     </div>
 
@@ -405,8 +441,10 @@ export default function SeasonHub({
                           key="all-rounds"
                           className={({ active }) =>
                             classNames(
-                              active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                              'cursor-default select-none p-4 text-xs sm:text-sm uppercase'
+                              active
+                                ? "bg-indigo-600 text-white"
+                                : "text-gray-900",
+                              "cursor-default select-none p-4 text-xs sm:text-sm uppercase",
                             )
                           }
                           value={null}
@@ -414,12 +452,24 @@ export default function SeasonHub({
                           {({ selected, active }) => (
                             <div className="flex flex-col">
                               <div className="flex justify-between">
-                                <p className={classNames(selected ? 'font-semibold' : 'font-normal', active ? 'text-white' : 'text-gray-900')}>
+                                <p
+                                  className={classNames(
+                                    selected ? "font-semibold" : "font-normal",
+                                    active ? "text-white" : "text-gray-900",
+                                  )}
+                                >
                                   Alle Runden
                                 </p>
                                 {selected ? (
-                                  <span className={active ? 'text-white' : 'text-indigo-600'}>
-                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  <span
+                                    className={
+                                      active ? "text-white" : "text-indigo-600"
+                                    }
+                                  >
+                                    <CheckIcon
+                                      className="h-5 w-5"
+                                      aria-hidden="true"
+                                    />
                                   </span>
                                 ) : null}
                               </div>
@@ -431,8 +481,10 @@ export default function SeasonHub({
                             key={round.alias}
                             className={({ active }) =>
                               classNames(
-                                active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                'cursor-default select-none p-4 text-xs sm:text-sm uppercase'
+                                active
+                                  ? "bg-indigo-600 text-white"
+                                  : "text-gray-900",
+                                "cursor-default select-none p-4 text-xs sm:text-sm uppercase",
                               )
                             }
                             value={round}
@@ -440,17 +492,40 @@ export default function SeasonHub({
                             {({ selected, active }) => (
                               <div className="flex flex-col">
                                 <div className="flex justify-between">
-                                  <p className={classNames(selected ? 'font-semibold' : 'font-normal', active ? 'text-white' : 'text-gray-900')}>
+                                  <p
+                                    className={classNames(
+                                      selected
+                                        ? "font-semibold"
+                                        : "font-normal",
+                                      active ? "text-white" : "text-gray-900",
+                                    )}
+                                  >
                                     {round.name}
                                   </p>
                                   {selected ? (
-                                    <span className={active ? 'text-white' : 'text-indigo-600'}>
-                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    <span
+                                      className={
+                                        active
+                                          ? "text-white"
+                                          : "text-indigo-600"
+                                      }
+                                    >
+                                      <CheckIcon
+                                        className="h-5 w-5"
+                                        aria-hidden="true"
+                                      />
                                     </span>
                                   ) : null}
                                 </div>
                                 {(round.startDate || round.endDate) && (
-                                  <p className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'mt-1 text-[10px] sm:text-xs')}>
+                                  <p
+                                    className={classNames(
+                                      active
+                                        ? "text-indigo-200"
+                                        : "text-gray-500",
+                                      "mt-1 text-[10px] sm:text-xs",
+                                    )}
+                                  >
                                     {formatDate(round.startDate, round.endDate)}
                                   </p>
                                 )}
@@ -473,43 +548,69 @@ export default function SeasonHub({
               </div>
             ) : matchdaysForRound.length === 1 ? (
               <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
-                {matchdaysForRound[0].alias === "all_games"
-                  ? <span className="text-gray-500">Alle Spiele</span>
-                  : matchdaysForRound[0].name}
+                {matchdaysForRound[0].alias === "all_games" ? (
+                  <span className="text-gray-500">Alle Spiele</span>
+                ) : (
+                  matchdaysForRound[0].name
+                )}
               </div>
             ) : (
               <Listbox
-                value={matchdaysForRound.find(md => md.alias === selectedMatchdayAlias) || null}
+                value={
+                  matchdaysForRound.find(
+                    (md) => md.alias === selectedMatchdayAlias,
+                  ) || null
+                }
                 onChange={(matchday: MatchdayValues | null) => {
                   if (matchday?.alias && selectedRound?.alias) {
-                    router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}/${matchday.alias}`);
+                    router.push(
+                      `/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}/${matchday.alias}`,
+                    );
                   } else if (selectedRound?.alias) {
-                    router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}`);
+                    router.push(
+                      `/tournaments/${tAlias}/${sAlias}/${selectedRound.alias}`,
+                    );
                   }
                 }}
               >
                 {({ open }) => (
                   <>
-                    <Listbox.Label className="sr-only">Spieltag auswählen</Listbox.Label>
+                    <Listbox.Label className="sr-only">
+                      Spieltag auswählen
+                    </Listbox.Label>
                     <div className="relative">
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                         <span className="sm:text-sm inline-flex w-full truncate">
                           <span className="truncate uppercase font-semibold">
                             {selectedMatchdayAlias
-                              ? matchdaysForRound.find(md => md.alias === selectedMatchdayAlias)?.name || "Alle Spieltage"
+                              ? matchdaysForRound.find(
+                                  (md) => md.alias === selectedMatchdayAlias,
+                                )?.name || "Alle Spieltage"
                               : "Alle Spieltage"}
                           </span>
-                          {selectedMatchdayAlias && (() => {
-                            const currentMd = matchdaysForRound.find(md => md.alias === selectedMatchdayAlias);
-                            return currentMd?.startDate && currentMd?.endDate && (
-                              <span className="ml-2 truncate text-indigo-100">
-                                {formatDate(currentMd.startDate, currentMd.endDate)}
-                              </span>
-                            );
-                          })()}
+                          {selectedMatchdayAlias &&
+                            (() => {
+                              const currentMd = matchdaysForRound.find(
+                                (md) => md.alias === selectedMatchdayAlias,
+                              );
+                              return (
+                                currentMd?.startDate &&
+                                currentMd?.endDate && (
+                                  <span className="ml-2 truncate text-indigo-100">
+                                    {formatDate(
+                                      currentMd.startDate,
+                                      currentMd.endDate,
+                                    )}
+                                  </span>
+                                )
+                              );
+                            })()}
                         </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
+                          <ChevronUpDownIcon
+                            className="h-5 w-5 text-white"
+                            aria-hidden="true"
+                          />
                         </span>
                       </Listbox.Button>
 
@@ -525,8 +626,10 @@ export default function SeasonHub({
                             key="all-matchdays"
                             className={({ active }) =>
                               classNames(
-                                active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                'relative cursor-default select-none py-2 pl-3 pr-9'
+                                active
+                                  ? "bg-indigo-600 text-white"
+                                  : "text-gray-900",
+                                "relative cursor-default select-none py-2 pl-3 pr-9",
                               )
                             }
                             value={null}
@@ -534,18 +637,28 @@ export default function SeasonHub({
                             {({ selected, active }) => (
                               <>
                                 <div className="flex">
-                                  <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate uppercase')}>
+                                  <span
+                                    className={classNames(
+                                      selected
+                                        ? "font-semibold"
+                                        : "font-normal",
+                                      "truncate uppercase",
+                                    )}
+                                  >
                                     Alle Spieltage
                                   </span>
                                 </div>
                                 {selected ? (
                                   <span
                                     className={classNames(
-                                      active ? 'text-white' : 'text-indigo-600',
-                                      'absolute inset-y-0 right-0 flex items-center pr-4'
+                                      active ? "text-white" : "text-indigo-600",
+                                      "absolute inset-y-0 right-0 flex items-center pr-4",
                                     )}
                                   >
-                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    <CheckIcon
+                                      className="h-5 w-5"
+                                      aria-hidden="true"
+                                    />
                                   </span>
                                 ) : null}
                               </>
@@ -556,8 +669,10 @@ export default function SeasonHub({
                               key={matchday.alias}
                               className={({ active }) =>
                                 classNames(
-                                  active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                  'relative cursor-default select-none py-2 pl-3 pr-9'
+                                  active
+                                    ? "bg-indigo-600 text-white"
+                                    : "text-gray-900",
+                                  "relative cursor-default select-none py-2 pl-3 pr-9",
                                 )
                               }
                               value={matchday}
@@ -565,23 +680,47 @@ export default function SeasonHub({
                               {({ selected, active }) => (
                                 <>
                                   <div className="flex">
-                                    <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'truncate uppercase')}>
-                                      {matchday.alias === "ALL_GAMES" ? "Alle Spiele" : matchday.name}
+                                    <span
+                                      className={classNames(
+                                        selected
+                                          ? "font-semibold"
+                                          : "font-normal",
+                                        "truncate uppercase",
+                                      )}
+                                    >
+                                      {matchday.alias === "ALL_GAMES"
+                                        ? "Alle Spiele"
+                                        : matchday.name}
                                     </span>
                                     {matchday.startDate && matchday.endDate && (
-                                      <span className={classNames(active ? 'text-indigo-200' : 'text-gray-500', 'ml-2 truncate')}>
-                                        {formatDate(matchday.startDate, matchday.endDate)}
+                                      <span
+                                        className={classNames(
+                                          active
+                                            ? "text-indigo-200"
+                                            : "text-gray-500",
+                                          "ml-2 truncate",
+                                        )}
+                                      >
+                                        {formatDate(
+                                          matchday.startDate,
+                                          matchday.endDate,
+                                        )}
                                       </span>
                                     )}
                                   </div>
                                   {selected ? (
                                     <span
                                       className={classNames(
-                                        active ? 'text-white' : 'text-indigo-600',
-                                        'absolute inset-y-0 right-0 flex items-center pr-4'
+                                        active
+                                          ? "text-white"
+                                          : "text-indigo-600",
+                                        "absolute inset-y-0 right-0 flex items-center pr-4",
                                       )}
                                     >
-                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      <CheckIcon
+                                        className="h-5 w-5"
+                                        aria-hidden="true"
+                                      />
                                     </span>
                                   ) : null}
                                 </>
@@ -604,18 +743,20 @@ export default function SeasonHub({
         <>
           <div className="mb-12">
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              {(matchdaysForRound.length > 1 && pageMode === 'ROUND') ? "Spieltage" : "Spiele"}
+              {matchdaysForRound.length > 1 && pageMode === "ROUND"
+                ? "Spieltage"
+                : "Spiele"}
             </h2>
             <MatchList
               matches={displayMatches}
-              matchdays={pageMode === 'ROUND' ? matchdaysForRound : []}
+              matchdays={pageMode === "ROUND" ? matchdaysForRound : []}
               mode={pageMode}
               from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`}
             />
           </div>
 
           {/* Standings - Only for matchday mode with standings */}
-          {pageMode === 'MATCHDAY' &&
+          {pageMode === "MATCHDAY" &&
             selectedMatchday?.createStandings &&
             selectedMatchday?.standings && (
               <div className="mb-12">
@@ -632,11 +773,11 @@ export default function SeasonHub({
       ) : (
         <div className="text-center py-12">
           <p className={`text-sm text-gray-500 mb-0`}>
-            {pageMode === 'SEASON'
+            {pageMode === "SEASON"
               ? "Keine Spiele für diese Saison"
-              : pageMode === 'MATCHDAY'
-              ? "Keine Spiele für diesen Spieltag"
-              : "Keine Spiele für diese Runde"}
+              : pageMode === "MATCHDAY"
+                ? "Keine Spiele für diesen Spieltag"
+                : "Keine Spiele für diese Runde"}
           </p>
         </div>
       )}
