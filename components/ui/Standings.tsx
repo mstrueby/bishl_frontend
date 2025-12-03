@@ -72,7 +72,7 @@ const Standings: React.FC<StandingsProps> = ({ standingsData, matchSettings }) =
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {standingsData.map((team, index) => {
+                  {standingsArray.map((team, index) => {
                     return (
                       <tr key={team.tinyName || index}>
                         <td className="whitespace-nowrap py-4 px-2 text-center text-xs sm:px-3">

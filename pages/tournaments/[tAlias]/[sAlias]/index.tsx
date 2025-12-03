@@ -1,15 +1,21 @@
-
-import Head from 'next/head';
-import { GetStaticPaths, GetStaticProps } from 'next';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import Layout from '../../../../components/Layout';
-import apiClient from '../../../../lib/apiClient';
-import { SeasonValues, RoundValues, MatchdayValues } from '../../../../types/TournamentValues';
-import { MatchValues } from '../../../../types/MatchValues';
-import MatchCard from '../../../../components/ui/MatchCard';
-import Standings from '../../../../components/ui/Standings';
+import Head from "next/head";
+import { GetStaticPaths, GetStaticProps } from "next";
+import { useState, useEffect, Fragment } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { Listbox, Transition } from '@headlessui/react'
+import Layout from "../../../../components/Layout";
+import apiClient from "../../../../lib/apiClient";
+import {
+  SeasonValues,
+  RoundValues,
+  MatchdayValues,
+} from "../../../../types/TournamentValues";
+import { MatchValues } from "../../../../types/MatchValues";
+import MatchCard from "../../../../components/ui/MatchCard";
+import Standings from "../../../../components/ui/Standings";
+import { classNames } from "../../../../tools/utils";
 
 interface SeasonHubProps {
   season: SeasonValues;
@@ -44,20 +50,24 @@ export default function SeasonHub({
   mdAlias,
   tournamentName,
   roundName,
-  matchdayName
+  matchdayName,
 }: SeasonHubProps) {
   const router = useRouter();
-  const [selectedRound, setSelectedRound] = useState<string>(rAlias || '');
-  const [selectedMatchdayAlias, setSelectedMatchdayAlias] = useState<string>(mdAlias || '');
-  const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(selectedRoundMatchdays);
-  
+  const [selectedRound, setSelectedRound] = useState<string>(rAlias || "");
+  const [selectedMatchdayAlias, setSelectedMatchdayAlias] = useState<string>(
+    mdAlias || "",
+  );
+  const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(
+    selectedRoundMatchdays,
+  );
+
   // Tab state for matches view
-  const [activeMatchTab, setActiveMatchTab] = useState<string>('');
+  const [activeMatchTab, setActiveMatchTab] = useState<string>("");
 
   // Update local state when route changes
   useEffect(() => {
-    setSelectedRound(rAlias || '');
-    setSelectedMatchdayAlias(mdAlias || '');
+    setSelectedRound(rAlias || "");
+    setSelectedMatchdayAlias(mdAlias || "");
   }, [rAlias, mdAlias]);
 
   // Fetch matchdays when round changes
@@ -66,11 +76,11 @@ export default function SeasonHub({
       if (selectedRound) {
         try {
           const response = await apiClient.get(
-            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound}/matchdays`
+            `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${selectedRound}/matchdays`,
           );
           setMatchdaysForRound(response.data || []);
         } catch (error) {
-          console.error('Error fetching matchdays for round:', error);
+          console.error("Error fetching matchdays for round:", error);
           setMatchdaysForRound([]);
         }
       } else {
@@ -97,39 +107,48 @@ export default function SeasonHub({
   const handleMatchdayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMatchday = e.target.value;
     if (newMatchday && selectedRound) {
-      router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound}/${newMatchday}`);
+      router.push(
+        `/tournaments/${tAlias}/${sAlias}/${selectedRound}/${newMatchday}`,
+      );
     } else if (selectedRound) {
       router.push(`/tournaments/${tAlias}/${sAlias}/${selectedRound}`);
     }
   };
 
   // Determine which matches to display
-  const displayMatches = mdAlias 
-    ? selectedMatchdayMatches 
-    : rAlias 
-      ? selectedRoundMatches 
+  const displayMatches = mdAlias
+    ? selectedMatchdayMatches
+    : rAlias
+      ? selectedRoundMatches
       : [];
 
   // Build page title
   const titleParts = [tournamentName, season.name];
   if (roundName) titleParts.push(roundName);
   if (matchdayName) titleParts.push(matchdayName);
-  const pageTitle = titleParts.join(' - ') + ' | BISHL';
+  const pageTitle = titleParts.join(" - ") + " | BISHL";
 
   // Build context header
-  const contextHeader = matchdayName 
-    ? `${tournamentName} ${season.name} – ${roundName} – ${matchdayName}`
+  const contextHeader = matchdayName
+    ? `${tournamentName} ${season.name} – ${roundName}`
     : roundName
       ? `${tournamentName} ${season.name} – ${roundName}`
       : `${tournamentName} ${season.name}`;
+  const contextDescription = matchdayName
+    ? `${matchdayName}`
+    : roundName
+      ? `Spielplan, Tabelle und Statistiken`
+      : `Spielplan`;
 
   // Determine if this is the current season (for canonical URL)
-  const isCurrentSeason = allSeasons.length > 0 && allSeasons[0].alias === sAlias;
-  
+  const isCurrentSeason =
+    allSeasons.length > 0 && allSeasons[0].alias === sAlias;
+
   // Set canonical URL to tournament root if this is the current season and no round/matchday selected
-  const canonicalUrl = !rAlias && !mdAlias && isCurrentSeason
-    ? `${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tAlias}`
-    : `${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`;
+  const canonicalUrl =
+    !rAlias && !mdAlias && isCurrentSeason
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tAlias}`
+      : `${process.env.NEXT_PUBLIC_BASE_URL}/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`;
 
   return (
     <Layout>
@@ -139,48 +158,90 @@ export default function SeasonHub({
           name="description"
           content={`${contextHeader}. Spielplan, Ergebnisse und Tabelle.`}
         />
-        <link
-          rel="canonical"
-          href={canonicalUrl}
-        />
+        <link rel="canonical" href={canonicalUrl} />
       </Head>
 
       {/* Breadcrumb */}
       <nav className="flex mb-6" aria-label="Breadcrumb">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
-            <Link href="/" className="text-sm font-medium text-gray-700 hover:text-indigo-600">
+            <Link
+              href="/"
+              className="text-sm font-medium text-gray-700 hover:text-indigo-600"
+            >
               Home
             </Link>
           </li>
           <li>
             <div className="flex items-center">
-              <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+              <svg
+                className="w-3 h-3 text-gray-400 mx-1"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 9 4-4-4-4"
+                />
               </svg>
-              <Link href="/tournaments" className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600">
+              <Link
+                href="/tournaments"
+                className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600"
+              >
                 Wettbewerbe
               </Link>
             </div>
           </li>
           <li>
             <div className="flex items-center">
-              <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+              <svg
+                className="w-3 h-3 text-gray-400 mx-1"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 9 4-4-4-4"
+                />
               </svg>
-              <Link href={`/tournaments/${tAlias}`} className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600">
+              <Link
+                href={`/tournaments/${tAlias}`}
+                className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600"
+              >
                 {tournamentName}
               </Link>
             </div>
           </li>
           <li>
             <div className="flex items-center">
-              <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+              <svg
+                className="w-3 h-3 text-gray-400 mx-1"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 9 4-4-4-4"
+                />
               </svg>
-              <span className={`ml-1 text-sm font-medium ${!rAlias ? 'text-gray-500' : 'text-gray-700 hover:text-indigo-600'}`}>
-                {!rAlias ? season.name : (
-                  <Link href={`/tournaments/${tAlias}/${sAlias}`}>{season.name}</Link>
+              <span
+                className={`ml-1 text-sm font-medium ${!rAlias ? "text-gray-500" : "text-gray-700 hover:text-indigo-600"}`}
+              >
+                {!rAlias ? (
+                  season.name
+                ) : (
+                  <Link href={`/tournaments/${tAlias}/${sAlias}`}>
+                    {season.name}
+                  </Link>
                 )}
               </span>
             </div>
@@ -188,12 +249,28 @@ export default function SeasonHub({
           {roundName && (
             <li>
               <div className="flex items-center">
-                <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+                <svg
+                  className="w-3 h-3 text-gray-400 mx-1"
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m1 9 4-4-4-4"
+                  />
                 </svg>
-                <span className={`ml-1 text-sm font-medium ${!mdAlias ? 'text-gray-500' : 'text-gray-700 hover:text-indigo-600'}`}>
-                  {!mdAlias ? roundName : (
-                    <Link href={`/tournaments/${tAlias}/${sAlias}/${rAlias}`}>{roundName}</Link>
+                <span
+                  className={`ml-1 text-sm font-medium ${!mdAlias ? "text-gray-500" : "text-gray-700 hover:text-indigo-600"}`}
+                >
+                  {!mdAlias ? (
+                    roundName
+                  ) : (
+                    <Link href={`/tournaments/${tAlias}/${sAlias}/${rAlias}`}>
+                      {roundName}
+                    </Link>
                   )}
                 </span>
               </div>
@@ -202,10 +279,22 @@ export default function SeasonHub({
           {matchdayName && (
             <li aria-current="page">
               <div className="flex items-center">
-                <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
+                <svg
+                  className="w-3 h-3 text-gray-400 mx-1"
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m1 9 4-4-4-4"
+                  />
                 </svg>
-                <span className="ml-1 text-sm font-medium text-gray-500">{matchdayName}</span>
+                <span className="ml-1 text-sm font-medium text-gray-500">
+                  {matchdayName}
+                </span>
               </div>
             </li>
           )}
@@ -213,11 +302,17 @@ export default function SeasonHub({
       </nav>
 
       {/* Header with Season Selector */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-          {contextHeader}
-        </h1>
-        
+      <div className="sm:flex sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-6">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+            {contextHeader}
+          </h1>
+          <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
+            <div className="mt-2 flex items-center text-md text-gray-500">
+              <span>{contextDescription}</span>
+            </div>
+          </div>
+        </div>
         {allSeasons.length > 1 && !rAlias && (
           <div className="mt-4 sm:mt-0">
             <select
@@ -232,6 +327,65 @@ export default function SeasonHub({
               ))}
             </select>
           </div>
+
+      {/* Drop-Down SEASON */}
+      <Listbox value={selectedSeason} onChange={setSelectedSeason}>
+        {({ open }) => (
+          <>
+            <Listbox.Label className="sr-only">Change Season</Listbox.Label>
+            <div className="relative mt-2">
+              <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                <span className="block truncate">{selectedSeason.name}</span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </span>
+              </Listbox.Button>
+
+              <Transition
+                show={open}
+                as={Fragment}
+                leave="transition ease-in duration-100"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <Listbox.Options className="absolute right-0 z-10 mt-1 max-h-60 w-28 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  {seasons.map((season, index) => (
+                    <Listbox.Option
+                      key={index}
+                      className={({ active }) =>
+                        classNames(
+                          active ? 'bg-indigo-600 text-white' : 'text-gray-900',
+                          'relative cursor-default select-none py-2 pl-3 pr-9'
+                        )
+                      }
+                      value={season}
+                    >
+                      {({ selected, active }) => (
+                        <>
+                          <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                            {season.name}
+                          </span>
+
+                          {selected ? (
+                            <span
+                              className={classNames(
+                                active ? 'text-white' : 'text-indigo-600',
+                                'absolute inset-y-0 right-0 flex items-center pr-4'
+                              )}
+                            >
+                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                            </span>
+                          ) : null}
+                        </>
+                      )}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </Transition>
+            </div>
+          </>
+        )}
+      </Listbox>
         )}
       </div>
 
@@ -240,7 +394,10 @@ export default function SeasonHub({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
           <div>
-            <label htmlFor="round-select" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="round-select"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Runde
             </label>
             <select
@@ -260,7 +417,10 @@ export default function SeasonHub({
 
           {/* Matchday Selector - Only shown when round has multiple matchdays */}
           <div>
-            <label htmlFor="matchday-select" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="matchday-select"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Spieltag
             </label>
             {!selectedRound ? (
@@ -269,7 +429,9 @@ export default function SeasonHub({
               </div>
             ) : matchdaysForRound.length === 1 ? (
               <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
-                {matchdaysForRound[0].alias === 'all_games' ? 'Alle Spiele' : matchdaysForRound[0].name}
+                {matchdaysForRound[0].alias === "all_games"
+                  ? "Alle Spiele"
+                  : matchdaysForRound[0].name}
               </div>
             ) : (
               <select
@@ -281,7 +443,7 @@ export default function SeasonHub({
                 <option value="">Alle Spieltage</option>
                 {matchdaysForRound.map((md) => (
                   <option key={md.alias} value={md.alias}>
-                    {md.alias === 'ALL_GAMES' ? 'Alle Spiele' : md.name}
+                    {md.alias === "ALL_GAMES" ? "Alle Spiele" : md.name}
                   </option>
                 ))}
               </select>
@@ -289,51 +451,73 @@ export default function SeasonHub({
           </div>
         </div>
       </div>
-      
+
       {/* Live & Upcoming Matches or Matches Display */}
       {!rAlias && liveAndUpcomingMatches.length > 0 ? (
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Spiele</h2>
-          
+
           {(() => {
             const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const today = new Date(
+              now.getFullYear(),
+              now.getMonth(),
+              now.getDate(),
+            );
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
-            
+
             const pastMatches = liveAndUpcomingMatches.filter((match) => {
               const matchDate = new Date(match.startDate);
-              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              const matchDay = new Date(
+                matchDate.getFullYear(),
+                matchDate.getMonth(),
+                matchDate.getDate(),
+              );
               return matchDay < today;
             });
-            
+
             const todayMatches = liveAndUpcomingMatches.filter((match) => {
               const matchDate = new Date(match.startDate);
-              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              const matchDay = new Date(
+                matchDate.getFullYear(),
+                matchDate.getMonth(),
+                matchDate.getDate(),
+              );
               return matchDay.getTime() === today.getTime();
             });
-            
+
             const nextMatches = liveAndUpcomingMatches.filter((match) => {
               const matchDate = new Date(match.startDate);
-              const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+              const matchDay = new Date(
+                matchDate.getFullYear(),
+                matchDate.getMonth(),
+                matchDate.getDate(),
+              );
               return matchDay >= tomorrow;
             });
-            
+
             const tabs = [
-              { key: 'past', label: 'Vergangene', matches: pastMatches },
-              { key: 'today', label: 'Heute', matches: todayMatches },
-              { key: 'next', label: 'Kommende', matches: nextMatches }
-            ].filter(tab => tab.matches.length > 0);
-            
+              { key: "past", label: "Vergangene", matches: pastMatches },
+              { key: "today", label: "Heute", matches: todayMatches },
+              { key: "next", label: "Kommende", matches: nextMatches },
+            ].filter((tab) => tab.matches.length > 0);
+
             // Set default tab on first render
-            const defaultTab = todayMatches.length > 0 ? 'today' : (nextMatches.length > 0 ? 'next' : tabs[0]?.key || 'today');
+            const defaultTab =
+              todayMatches.length > 0
+                ? "today"
+                : nextMatches.length > 0
+                  ? "next"
+                  : tabs[0]?.key || "today";
             if (!activeMatchTab && tabs.length > 0) {
               setActiveMatchTab(defaultTab);
             }
-            
+
             const currentTab = activeMatchTab || defaultTab;
-            const activeMatches = tabs.find(tab => tab.key === currentTab)?.matches || [];
-            
+            const activeMatches =
+              tabs.find((tab) => tab.key === currentTab)?.matches || [];
+
             return (
               <>
                 {tabs.length > 1 && (
@@ -344,9 +528,10 @@ export default function SeasonHub({
                           key={tab.key}
                           onClick={() => setActiveMatchTab(tab.key)}
                           className={`
-                            ${currentTab === tab.key
-                              ? 'border-indigo-500 text-indigo-600'
-                              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                            ${
+                              currentTab === tab.key
+                                ? "border-indigo-500 text-indigo-600"
+                                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                             }
                             whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium
                           `}
@@ -357,7 +542,7 @@ export default function SeasonHub({
                     </nav>
                   </div>
                 )}
-                
+
                 <div className="space-y-4">
                   {activeMatches.map((match) => (
                     <MatchCard
@@ -374,38 +559,50 @@ export default function SeasonHub({
       ) : displayMatches.length > 0 ? (
         <>
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Spiele</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              Spiele
+            </h2>
             <div className="space-y-4">
               {displayMatches.map((match) => (
                 <MatchCard
                   key={match._id || match.matchId}
                   match={match}
-                  from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ''}${mdAlias ? `/${mdAlias}` : ''}`}
+                  from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`}
                 />
               ))}
             </div>
           </div>
-          
-          {mdAlias && selectedMatchday?.createStandings && selectedMatchday?.standings && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Tabelle</h2>
-              <Standings 
-                standingsData={selectedMatchday.standings}
-                matchSettings={selectedMatchday.matchSettings}
-              />
-            </div>
-          )}
+
+          {mdAlias &&
+            selectedMatchday?.createStandings &&
+            selectedMatchday?.standings && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                  Tabelle
+                </h2>
+                <Standings
+                  standingsData={selectedMatchday.standings}
+                  matchSettings={selectedMatchday.matchSettings}
+                />
+              </div>
+            )}
         </>
       ) : rAlias ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-sm text-gray-500">
-            {mdAlias ? 'Keine Spiele für diesen Spieltag' : 'Keine Spiele für diese Runde'}
+            {mdAlias
+              ? "Keine Spiele für diesen Spieltag"
+              : "Keine Spiele für diese Runde"}
           </p>
         </div>
       ) : (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-lg text-gray-700 mb-2">Wähle eine Runde, um Spiele anzuzeigen</p>
-          <p className="text-sm text-gray-500">Verwende die Filter oben, um Spiele zu durchsuchen</p>
+          <p className="text-lg text-gray-700 mb-2">
+            Wähle eine Runde, um Spiele anzuzeigen
+          </p>
+          <p className="text-sm text-gray-500">
+            Verwende die Filter oben, um Spiele zu durchsuchen
+          </p>
         </div>
       )}
     </Layout>
@@ -413,31 +610,34 @@ export default function SeasonHub({
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [], fallback: 'blocking' };
+  return { paths: [], fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const { tAlias, sAlias, rAlias, mdAlias } = params as { 
-    tAlias: string; 
-    sAlias: string; 
+  const { tAlias, sAlias, rAlias, mdAlias } = params as {
+    tAlias: string;
+    sAlias: string;
     rAlias?: string;
     mdAlias?: string;
   };
 
   try {
     // Fetch season data
-    const [seasonResponse, allSeasonsResponse, tournamentResponse] = await Promise.all([
-      apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`),
-      apiClient.get(`/tournaments/${tAlias}/seasons`),
-      apiClient.get(`/tournaments/${tAlias}`)
-    ]);
+    const [seasonResponse, allSeasonsResponse, tournamentResponse] =
+      await Promise.all([
+        apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}`),
+        apiClient.get(`/tournaments/${tAlias}/seasons`),
+        apiClient.get(`/tournaments/${tAlias}`),
+      ]);
 
     const season = seasonResponse.data;
     const allSeasons = allSeasonsResponse.data || [];
     const tournament = tournamentResponse.data;
 
     // Fetch all rounds for this season
-    const allRoundsResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds`);
+    const allRoundsResponse = await apiClient.get(
+      `/tournaments/${tAlias}/seasons/${sAlias}/rounds`,
+    );
     const allRounds = allRoundsResponse.data || [];
 
     // Fetch matchdays only if a round is selected
@@ -445,7 +645,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     if (rAlias) {
       try {
         const matchdaysResponse = await apiClient.get(
-          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
         );
         selectedRoundMatchdays = matchdaysResponse.data || [];
       } catch (error) {
@@ -458,11 +658,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     if (!rAlias) {
       try {
         const matchesResponse = await apiClient.get(
-          `/matches?tournament=${tAlias}&season=${sAlias}&status=live,upcoming&limit=10`
+          `/matches?tournament=${tAlias}&season=${sAlias}&status=live,upcoming&limit=10`,
         );
         liveAndUpcomingMatches = matchesResponse.data || [];
       } catch (error) {
-        console.error('Error fetching live/upcoming matches:', error);
+        console.error("Error fetching live/upcoming matches:", error);
       }
     }
 
@@ -471,11 +671,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     if (rAlias && !mdAlias) {
       try {
         const matchesResponse = await apiClient.get(
-          `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`
+          `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`,
         );
         selectedRoundMatches = matchesResponse.data || [];
       } catch (error) {
-        console.error('Error fetching round matches:', error);
+        console.error("Error fetching round matches:", error);
       }
     }
 
@@ -484,27 +684,36 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     let selectedMatchday: MatchdayValues | null = null;
     let roundName: string | undefined;
     let matchdayName: string | undefined;
-    
+
     if (rAlias && mdAlias) {
       try {
-        const [matchesResponse, roundResponse, matchdayResponse] = await Promise.all([
-          apiClient.get(`/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`),
-          apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`),
-          apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`)
-        ]);
+        const [matchesResponse, roundResponse, matchdayResponse] =
+          await Promise.all([
+            apiClient.get(
+              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
+            ),
+            apiClient.get(
+              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
+            ),
+            apiClient.get(
+              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${mdAlias}`,
+            ),
+          ]);
         selectedMatchdayMatches = matchesResponse.data || [];
         selectedMatchday = matchdayResponse.data || null;
         roundName = roundResponse.data?.name;
         matchdayName = matchdayResponse.data?.name;
       } catch (error) {
-        console.error('Error fetching matchday data:', error);
+        console.error("Error fetching matchday data:", error);
       }
     } else if (rAlias) {
       try {
-        const roundResponse = await apiClient.get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`);
+        const roundResponse = await apiClient.get(
+          `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}`,
+        );
         roundName = roundResponse.data?.name;
       } catch (error) {
-        console.error('Error fetching round data:', error);
+        console.error("Error fetching round data:", error);
       }
     }
 
@@ -513,12 +722,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         season,
         allSeasons: allSeasons
           //.filter((s: SeasonValues) => s.published)
-          .sort((a: SeasonValues, b: SeasonValues) => b.alias.localeCompare(a.alias)),
+          .sort((a: SeasonValues, b: SeasonValues) =>
+            b.alias.localeCompare(a.alias),
+          ),
         allRounds: allRounds
           .filter((r: RoundValues) => r.published)
           .sort((a: RoundValues, b: RoundValues) => {
             if (a.startDate && b.startDate) {
-              return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+              return (
+                new Date(a.startDate).getTime() -
+                new Date(b.startDate).getTime()
+              );
             }
             return a.alias.localeCompare(b.alias);
           }),
@@ -529,7 +743,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           .filter((md: MatchdayValues) => md.published)
           .sort((a: MatchdayValues, b: MatchdayValues) => {
             if (a.startDate && b.startDate) {
-              return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+              return (
+                new Date(a.startDate).getTime() -
+                new Date(b.startDate).getTime()
+              );
             }
             return a.alias.localeCompare(b.alias);
           }),
@@ -545,7 +762,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       revalidate: 60,
     };
   } catch (error) {
-    console.error('Failed to fetch season hub data:', error);
+    console.error("Failed to fetch season hub data:", error);
     return { notFound: true };
   }
 };
