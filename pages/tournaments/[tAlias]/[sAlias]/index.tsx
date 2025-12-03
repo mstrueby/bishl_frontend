@@ -4,11 +4,10 @@ import { useState, useEffect, Fragment } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import {
-  BarsArrowUpIcon,
   CheckIcon,
-  ChevronDownIcon,
+  ChevronRightIcon,
   ChevronUpDownIcon,
-  MagnifyingGlassIcon,
+  HomeIcon
 } from "@heroicons/react/20/solid";
 import { Listbox, Transition } from "@headlessui/react";
 import Layout from "../../../../components/Layout";
@@ -143,7 +142,7 @@ export default function SeasonHub({
   const contextDescription = matchdayName
     ? `${matchdayName}`
     : roundName
-      ? `Spielplan, Tabelle und Statistiken`
+      ? `Spielplan und Tabelle`
       : `Spielplan`;
 
   // Determine if this is the current season (for canonical URL)
@@ -168,34 +167,25 @@ export default function SeasonHub({
       </Head>
 
       {/* Breadcrumb */}
-      <nav className="flex mb-6" aria-label="Breadcrumb">
-        <ol className="inline-flex items-center space-x-1 md:space-x-3">
-          <li className="inline-flex items-center">
-            <Link
-              href="/"
-              className="text-sm font-medium text-gray-700 hover:text-indigo-600"
-            >
-              Home
-            </Link>
+      <nav aria-label="Breadcrumb" className="flex mb-8">
+        <ol role="list" className="flex items-center space-x-4">
+          <li>
+            <div>
+              <Link
+                href="/"
+                className="text-sm font-medium text-gray-400 hover:text-gray-500"
+              >
+                <HomeIcon aria-hidden="true" className="size-5 shrink-0" />
+                <span className="sr-only">Home</span>
+              </Link>
+            </div>
           </li>
           <li>
             <div className="flex items-center">
-              <svg
-                className="w-3 h-3 text-gray-400 mx-1"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m1 9 4-4-4-4"
-                />
-              </svg>
+              <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
               <Link
                 href="/tournaments"
-                className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600"
+                className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
               >
                 Wettbewerbe
               </Link>
@@ -203,22 +193,10 @@ export default function SeasonHub({
           </li>
           <li>
             <div className="flex items-center">
-              <svg
-                className="w-3 h-3 text-gray-400 mx-1"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m1 9 4-4-4-4"
-                />
-              </svg>
+              <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
               <Link
                 href={`/tournaments/${tAlias}`}
-                className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600"
+                className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
               >
                 {tournamentName}
               </Link>
@@ -226,21 +204,9 @@ export default function SeasonHub({
           </li>
           <li>
             <div className="flex items-center">
-              <svg
-                className="w-3 h-3 text-gray-400 mx-1"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m1 9 4-4-4-4"
-                />
-              </svg>
+              <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
               <span
-                className={`ml-1 text-sm font-medium ${!rAlias ? "text-gray-500" : "text-gray-700 hover:text-indigo-600"}`}
+                className={`ml-4 text-sm font-medium text-gray-500 ${rAlias ? "hover:text-gray-700" : ""}`}
               >
                 {!rAlias ? (
                   season.name
@@ -255,21 +221,9 @@ export default function SeasonHub({
           {roundName && (
             <li>
               <div className="flex items-center">
-                <svg
-                  className="w-3 h-3 text-gray-400 mx-1"
-                  fill="none"
-                  viewBox="0 0 6 10"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 9 4-4-4-4"
-                  />
-                </svg>
+                <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
                 <span
-                  className={`ml-1 text-sm font-medium ${!mdAlias ? "text-gray-500" : "text-gray-700 hover:text-indigo-600"}`}
+                  className={`ml-4 text-sm font-medium text-gray-500 ${mdAlias ? "hover:text-gray-700" : ""}`}
                 >
                   {!mdAlias ? (
                     roundName
@@ -285,20 +239,8 @@ export default function SeasonHub({
           {matchdayName && (
             <li aria-current="page">
               <div className="flex items-center">
-                <svg
-                  className="w-3 h-3 text-gray-400 mx-1"
-                  fill="none"
-                  viewBox="0 0 6 10"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 9 4-4-4-4"
-                  />
-                </svg>
-                <span className="ml-1 text-sm font-medium text-gray-500">
+                <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
+                <span className="ml-4 text-sm font-medium text-gray-500">
                   {matchdayName}
                 </span>
               </div>
@@ -315,22 +257,23 @@ export default function SeasonHub({
           </h1>
           <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
             <div className="mt-2 flex items-center text-md text-gray-500">
-              <span>{contextDescription}</span>
+              <p>{contextDescription}</p>
             </div>
           </div>
         </div>
+
         {/* Drop-Down SEASON */}
         {allSeasons.length > 1 && !rAlias && (
           <Listbox
-            value={season}
-            onChange={(selectedSeason) => {
-              router.push(`/tournaments/${tAlias}/${selectedSeason.alias}`);
+            value={season.alias}
+            onChange={(selectedAlias) => {
+              router.push(`/tournaments/${tAlias}/${selectedAlias}`);
             }}
           >
             {({ open }) => (
               <>
                 <Listbox.Label className="sr-only">Change Season</Listbox.Label>
-                <div className="relative mt-2">
+                <div>
                   <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     <span className="block truncate">{season.name}</span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -360,7 +303,7 @@ export default function SeasonHub({
                               "relative cursor-default select-none py-2 pl-3 pr-9",
                             )
                           }
-                          value={s}
+                          value={s.alias}
                         >
                           {({ selected, active }) => (
                             <>
