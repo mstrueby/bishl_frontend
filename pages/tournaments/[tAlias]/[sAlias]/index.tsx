@@ -68,6 +68,15 @@ export default function SeasonHub({
   const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(
     selectedRoundMatchdays,
   );
+  const [roundMatches, setRoundMatches] = useState<MatchValues[]>(
+    selectedRoundMatches,
+  );
+  const [seasonMatches, setSeasonMatches] = useState<MatchValues[]>(
+    selectedSeasonMatches,
+  );
+  const [matchdayMatches, setMatchdayMatches] = useState<MatchValues[]>(
+    selectedMatchdayMatches,
+  );
 
   // Determine page context/mode
   const pageMode: "SEASON" | "ROUND" | "MATCHDAY" = mdAlias
@@ -115,6 +124,54 @@ export default function SeasonHub({
     fetchMatchdaysForRound();
   }, [selectedRound, tAlias, sAlias, rAlias]);
 
+  // Fetch matches based on page mode
+  useEffect(() => {
+    const fetchMatches = async () => {
+      if (mdAlias) {
+        // MATCHDAY mode - fetch matchday matches
+        if (!selectedRound?.alias || selectedRound.alias !== rAlias) {
+          return;
+        }
+        try {
+          const response = await apiClient.get(
+            `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
+          );
+          setMatchdayMatches(response.data || []);
+        } catch (error) {
+          console.error("Error fetching matchday matches:", error);
+          setMatchdayMatches([]);
+        }
+      } else if (rAlias) {
+        // ROUND mode - fetch round matches
+        if (!selectedRound?.alias || selectedRound.alias !== rAlias) {
+          return;
+        }
+        try {
+          const response = await apiClient.get(
+            `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`,
+          );
+          setRoundMatches(response.data || []);
+        } catch (error) {
+          console.error("Error fetching round matches:", error);
+          setRoundMatches([]);
+        }
+      } else {
+        // SEASON mode - fetch season matches
+        try {
+          const response = await apiClient.get(
+            `/matches?tournament=${tAlias}&season=${sAlias}`,
+          );
+          setSeasonMatches(response.data || []);
+        } catch (error) {
+          console.error("Error fetching season matches:", error);
+          setSeasonMatches([]);
+        }
+      }
+    };
+
+    fetchMatches();
+  }, [tAlias, sAlias, rAlias, mdAlias, selectedRound]);
+
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
   };
@@ -153,10 +210,10 @@ export default function SeasonHub({
   // Determine which matches to display based on page mode
   const displayMatches =
     pageMode === "MATCHDAY"
-      ? selectedMatchdayMatches
+      ? matchdayMatches
       : pageMode === "ROUND"
-        ? selectedRoundMatches
-        : selectedSeasonMatches;
+        ? roundMatches
+        : seasonMatches;
 
   // Build page title
   const titleParts = [tournamentName, season.name];
