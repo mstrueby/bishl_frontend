@@ -29,7 +29,7 @@ interface SeasonHubProps {
   season: SeasonValues;
   allSeasons: SeasonValues[];
   allRounds: RoundValues[];
-  liveAndUpcomingMatches: MatchValues[];
+  selectedSeasonMatches: MatchValues[];
   selectedRoundMatches: MatchValues[];
   selectedMatchdayMatches: MatchValues[];
   selectedRoundMatchdays: MatchdayValues[];
@@ -47,7 +47,7 @@ export default function SeasonHub({
   season,
   allSeasons,
   allRounds,
-  liveAndUpcomingMatches,
+  selectedSeasonMatches,
   selectedRoundMatches,
   selectedMatchdayMatches,
   selectedRoundMatchdays,
@@ -149,7 +149,7 @@ export default function SeasonHub({
       ? selectedMatchdayMatches
       : pageMode === "ROUND"
         ? selectedRoundMatches
-        : liveAndUpcomingMatches;
+        : selectedSeasonMatches;
 
   // Build page title
   const titleParts = [tournamentName, season.name];
@@ -324,14 +324,14 @@ export default function SeasonHub({
               <>
                 <Listbox.Label className="sr-only">Change Season</Listbox.Label>
                 <div>
-                  <Listbox.Button className="mt-2 sm:mt-0 relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                    <span className="block truncate">{season.name}</span>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                      <ChevronUpDownIcon
-                        className="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
+                  <Listbox.Button className="grid w-28 cursor-default grid-cols-1 rounded-md bg-white py-1.5 pl-3 pr-2 text-left text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm/6">
+                    <span className="col-start-1 row-start-1 truncate pr-6">
+                      {season.name}
                     </span>
+                    <ChevronUpDownIcon
+                      className="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 sm:size-4 dark:text-gray-400"
+                      aria-hidden="true"
+                    />
                   </Listbox.Button>
 
                   <Transition
@@ -341,7 +341,7 @@ export default function SeasonHub({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                   >
-                    <Listbox.Options className="absolute right-0 z-10 mt-1 max-h-60 w-28 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-28 overflow-auto rounded-md bg-white py-1 text-base shadow-lg outline outline-1 outline-black/5 data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in sm:text-sm">
                       {allSeasons.map((s) => (
                         <Listbox.Option
                           key={s.alias}
@@ -350,7 +350,7 @@ export default function SeasonHub({
                               active
                                 ? "bg-indigo-600 text-white"
                                 : "text-gray-900",
-                              "relative cursor-default select-none py-2 pl-3 pr-9",
+                              "group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none dark:text-white dark:data-[focus]:bg-indigo-500",
                             )
                           }
                           value={s.alias}
@@ -392,7 +392,7 @@ export default function SeasonHub({
         )}
       </div>
 
-      {/* Cascading Filters Bar */}
+      {/* Cascading Filters Bar for ROUND, MATCHDAY */}
       <div className="py-4 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
@@ -416,8 +416,8 @@ export default function SeasonHub({
                   </Listbox.Label>
                   <div className="relative">
                     <div className="inline-flex w-full divide-x divide-indigo-700 rounded-md shadow-sm">
-                      <div className="inline-flex flex-1 items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 text-white shadow-sm">
-                        <p className="sm:text-sm font-semibold text-white uppercase truncate">
+                      <div className="inline-flex flex-1 items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 shadow-sm">
+                        <p className="text-sm font-semibold text-white uppercase truncate">
                           {selectedRound?.name || "Alle Runden"}
                         </p>
                       </div>
@@ -451,7 +451,7 @@ export default function SeasonHub({
                         >
                           {({ selected, active }) => (
                             <div className="flex flex-col">
-                              <div className="flex justify-between">
+                              <div className="flex justify-between text-xs sm:text-sm ">
                                 <p
                                   className={classNames(
                                     selected ? "font-semibold" : "font-normal",
@@ -579,8 +579,8 @@ export default function SeasonHub({
                       Spieltag auswählen
                     </Listbox.Label>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
-                        <span className="sm:text-sm inline-flex w-full truncate">
+                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-2 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:leading-6">
+                        <span className="text-sm inline-flex w-full truncate">
                           <span className="truncate uppercase font-semibold">
                             {selectedMatchdayAlias
                               ? matchdaysForRound.find(
@@ -621,7 +621,7 @@ export default function SeasonHub({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                       >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-xs sm:text-sm">
                           <Listbox.Option
                             key="all-matchdays"
                             className={({ active }) =>
@@ -829,14 +829,14 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       }
     }
 
-    // Fetch live and upcoming matches for the season (only if no round selected)
-    let liveAndUpcomingMatches: MatchValues[] = [];
+    // Fetch matches for the season (only if no round selected)
+    let selectedSeasonMatches: MatchValues[] = [];
     if (!rAlias) {
       try {
         const matchesResponse = await apiClient.get(
-          `/matches?tournament=${tAlias}&season=${sAlias}&status=live,upcoming&limit=10`,
+          `/matches?tournament=${tAlias}&season=${sAlias}`,
         );
-        liveAndUpcomingMatches = matchesResponse.data || [];
+        selectedSeasonMatches = matchesResponse.data || [];
       } catch (error) {
         console.error("Error fetching live/upcoming matches:", error);
       }
@@ -912,7 +912,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
             }
             return a.alias.localeCompare(b.alias);
           }),
-        liveAndUpcomingMatches,
+        selectedSeasonMatches,
         selectedRoundMatches,
         selectedMatchdayMatches,
         selectedRoundMatchdays: selectedRoundMatchdays
