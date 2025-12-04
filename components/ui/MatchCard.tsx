@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Fragment } from "react";
 import { CldImage } from 'next-cloudinary';
 import { MatchValues } from "../../types/MatchValues";
+import useSWR from "swr";
 import {
   CalendarIcon,
   MapPinIcon,
@@ -21,6 +22,8 @@ import MatchStatus from "../admin/ui/MatchStatus";
 import { useRouter } from "next/router";
 import MatchStatusBadge from "./MatchStatusBadge";
 
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
 const StatusMenu = ({
   match,
   setMatch,
@@ -38,8 +41,6 @@ const StatusMenu = ({
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
-
-  //const { showLinkEdit, showLinkStatus, showLinkHome, showLinkAway } = permissions;
 
   return (
     <>
@@ -185,20 +186,33 @@ const MatchCard: React.FC<{
   match: MatchValues;
   onMatchUpdate?: () => Promise<void>;
   from?: string;
-}> = ({ match: initialMatch, onMatchUpdate, from }) => {
-  const [match, setMatch] = useState(initialMatch);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [matchdayOwner, setMatchdayOwner] = useState<{
+  matchdayOwner?: {
     clubId: string;
     clubName: string;
     clubAlias: string;
-  } | null>(null);
-  const [isLoadingOwner, setIsLoadingOwner] = useState(true);
-
+  } | null;
+}> = ({ match: initialMatch, onMatchUpdate, from, matchdayOwner }) => {
+  const [match, setMatch] = useState(initialMatch);
   const { user } = useAuth();
 
+  // Use SWR for real-time match data (deduplicates requests automatically)
+  const { data: liveMatch } = useSWR(
+    match?._id && match?.matchStatus?.key === "INPROGRESS"
+      ? `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`
+      : null,
+    fetcher,
+    {
+      refreshInterval: 0, // Disabled - centralized refresh handles this
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
+
+  // Update local state when live data arrives
+  const displayMatch = liveMatch || match;
+
   // Defensive checks for incomplete match data
-  if (!match || !match.home || !match.away) {
+  if (!displayMatch || !displayMatch.home || !displayMatch.away) {
     return (
       <div className="p-4 border-2 rounded-xl shadow-md bg-gray-50">
         <p className="text-sm text-gray-500">Unvollständige Spieldaten</p>
@@ -206,106 +220,18 @@ const MatchCard: React.FC<{
     );
   }
 
-  const { home, away, venue, startDate } = match;
-
-  // Fetch matchday owner
-  useEffect(() => {
-    // Safety check: ensure all required properties exist
-    if (
-      !match?.tournament?.alias ||
-      !match?.season?.alias ||
-      !match?.round?.alias ||
-      !match?.matchday?.alias ||
-      !match?.home ||
-      !match?.away
-    ) {
-      return;
-    }
-
-    const fetchMatchdayOwner = async () => {
-      try {
-        setIsLoadingOwner(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
-        );
-        if (response.ok) {
-          const matchdayData = await response.json();
-          setMatchdayOwner(matchdayData.owner || null);
-        }
-      } catch (error) {
-        console.error("Error fetching matchday owner:", error);
-      } finally {
-        setIsLoadingOwner(false);
-      }
-    };
-
-    fetchMatchdayOwner();
-  }, [
-    match?.tournament?.alias,
-    match?.season?.alias,
-    match?.round?.alias,
-    match?.matchday?.alias,
-  ]);
-
-  // Auto-refresh for in-progress matches
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    const refreshMatch = async () => {
-      if (isRefreshing || !match._id) return;
-
-      try {
-        setIsRefreshing(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
-        );
-        const updatedMatch = await response.json();
-        if (updatedMatch && updatedMatch.home && updatedMatch.away) {
-          setMatch(updatedMatch);
-          if (onMatchUpdate) {
-            await onMatchUpdate();
-          }
-        }
-      } catch (error) {
-        console.error("Error refreshing match:", error);
-      } finally {
-        setIsRefreshing(false);
-      }
-    };
-
-    if (match?.matchStatus?.key === "INPROGRESS" && match._id) {
-      interval = setInterval(refreshMatch, 30000); // Refresh every 30 seconds
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [match._id, match.matchStatus?.key, onMatchUpdate, isRefreshing]);
+  const { home, away, venue, startDate } = displayMatch;
 
   const permissions = calculateMatchButtonPermissions(
     user,
-    match,
+    displayMatch,
     matchdayOwner || undefined,
     false,
   );
-  {
-    /**
-  const showButtonEdit = permissions.showButtonEdit;
-  const showButtonStatus = permissions.showButtonStatus;
-  const showButtonRosterHome = permissions.showButtonRosterHome;
-  const showButtonRosterAway = permissions.showButtonRosterAway;
-  const showButtonMatchCenter = permissions.showButtonMatchCenter;
-  */
-  }
-
-  // Feature-Switch
-  //if (process.env.NODE_ENV === 'production' && !user?.roles.includes('ADMIN')) {
-  //  showMatchSheet = false;
-  //}
 
   return (
     <div
-      id={`match-${match._id}`}
+      id={`match-${displayMatch._id}`}
       className="flex flex-col sm:flex-row gap-y-2 p-4 border-2 rounded-xl shadow-md"
     >
       {/* 1 tournament, status (mobile), date, venue */}
@@ -315,7 +241,7 @@ const MatchCard: React.FC<{
           {/* tournament */}
           <div className="">
             {(() => {
-              const item = match?.tournament?.alias ? tournamentConfigs[match.tournament.alias] : null;
+              const item = displayMatch?.tournament?.alias ? tournamentConfigs[displayMatch.tournament.alias] : null;
               if (item) {
                 return (
                   <span
@@ -326,8 +252,8 @@ const MatchCard: React.FC<{
                     )}
                   >
                     {item.tinyName}{" "}
-                    {match?.round?.name && match.round.name !== "Hauptrunde" &&
-                      `- ${match.round.name}`}
+                    {displayMatch?.round?.name && displayMatch.round.name !== "Hauptrunde" &&
+                      `- ${displayMatch.round.name}`}
                   </span>
                 );
               }
@@ -342,7 +268,7 @@ const MatchCard: React.FC<{
                 permissions.showButtonRosterHome ||
                 permissions.showButtonRosterAway) && (
                 <StatusMenu
-                  match={match}
+                  match={displayMatch}
                   setMatch={setMatch}
                   permissions={permissions}
                   onMatchUpdate={onMatchUpdate}
@@ -350,10 +276,10 @@ const MatchCard: React.FC<{
                 />
               )}
               <MatchStatusBadge
-                statusKey={match?.matchStatus?.key || "SCHEDULED"}
-                finishTypeKey={match?.finishType?.key || ""}
-                statusValue={match?.matchStatus?.value || "Angesetzt"}
-                finishTypeValue={match?.finishType?.value || ""}
+                statusKey={displayMatch?.matchStatus?.key || "SCHEDULED"}
+                finishTypeKey={displayMatch?.finishType?.key || ""}
+                statusValue={displayMatch?.matchStatus?.value || "Angesetzt"}
+                finishTypeValue={displayMatch?.finishType?.value || ""}
               />
             </div>
           </div>
@@ -453,8 +379,8 @@ const MatchCard: React.FC<{
             </p>
           </div>
           {!(
-            match?.matchStatus?.key === "SCHEDULED" ||
-            match?.matchStatus?.key === "CANCELLED"
+            displayMatch?.matchStatus?.key === "SCHEDULED" ||
+            displayMatch?.matchStatus?.key === "CANCELLED"
           ) && (
             <div className="flex-none w-10">
               <p
@@ -494,8 +420,8 @@ const MatchCard: React.FC<{
             </p>
           </div>
           {!(
-            match?.matchStatus?.key === "SCHEDULED" ||
-            match?.matchStatus?.key === "CANCELLED"
+            displayMatch?.matchStatus?.key === "SCHEDULED" ||
+            displayMatch?.matchStatus?.key === "CANCELLED"
           ) && (
             <div className="flex-none w-10">
               <p
@@ -507,27 +433,27 @@ const MatchCard: React.FC<{
           )}
         </div>
         {/* Referees section */}
-        {(match.referee1 || match.referee2) && (
+        {(displayMatch.referee1 || displayMatch.referee2) && (
           <div className="flex flex-row gap-x-4 mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
-            {match.referee1 && (
+            {displayMatch.referee1 && (
               <div className="flex items-center">
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                  {match.referee1.firstName.charAt(0)}
-                  {match.referee1.lastName.charAt(0)}
+                  {displayMatch.referee1.firstName.charAt(0)}
+                  {displayMatch.referee1.lastName.charAt(0)}
                 </div>
                 <span className="text-xs text-gray-600 ml-2 truncate">
-                  {match.referee1.firstName} {match.referee1.lastName.charAt(0)}
+                  {displayMatch.referee1.firstName} {displayMatch.referee1.lastName.charAt(0)}
                 </span>
               </div>
             )}
-            {match.referee2 && (
+            {displayMatch.referee2 && (
               <div className="flex items-center">
                 <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                  {match.referee2.firstName.charAt(0)}
-                  {match.referee2.lastName.charAt(0)}
+                  {displayMatch.referee2.firstName.charAt(0)}
+                  {displayMatch.referee2.lastName.charAt(0)}
                 </div>
                 <span className="text-xs text-gray-600 ml-2 truncate">
-                  {match.referee2.firstName} {match.referee2.lastName.charAt(0)}
+                  {displayMatch.referee2.firstName} {displayMatch.referee2.lastName.charAt(0)}
                 </span>
               </div>
             )}
@@ -543,7 +469,7 @@ const MatchCard: React.FC<{
             permissions.showButtonRosterHome ||
             permissions.showButtonRosterAway) && (
             <StatusMenu
-              match={match}
+              match={displayMatch}
               setMatch={setMatch}
               permissions={permissions}
               onMatchUpdate={onMatchUpdate}
@@ -551,27 +477,27 @@ const MatchCard: React.FC<{
             />
           )}
           <MatchStatusBadge
-            statusKey={match?.matchStatus?.key || "SCHEDULED"}
-            finishTypeKey={match?.finishType?.key || ""}
-            statusValue={match?.matchStatus?.value || "Angesetzt"}
-            finishTypeValue={match?.finishType?.value || ""}
+            statusKey={displayMatch?.matchStatus?.key || "SCHEDULED"}
+            finishTypeKey={displayMatch?.finishType?.key || ""}
+            statusValue={displayMatch?.matchStatus?.value || "Angesetzt"}
+            finishTypeValue={displayMatch?.finishType?.value || ""}
           />
         </div>
         <div className="flex flex-col sm:flex-none justify-center sm:items-end">
-          {match?._id && !(
-            match?.matchStatus?.key === "SCHEDULED" ||
-            match?.matchStatus?.key === "CANCELLED" ||
-            match?.matchStatus?.key === "FORFEITED"
+          {displayMatch?._id && !(
+            displayMatch?.matchStatus?.key === "SCHEDULED" ||
+            displayMatch?.matchStatus?.key === "CANCELLED" ||
+            displayMatch?.matchStatus?.key === "FORFEITED"
           ) &&
             (() => {
-              const isLive = match?.matchStatus?.key === "INPROGRESS";
+              const isLive = displayMatch?.matchStatus?.key === "INPROGRESS";
               const buttonClass =
-                isLive || match?.matchSheetComplete
+                isLive || displayMatch?.matchSheetComplete
                   ? "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   : "inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-1 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200/50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2";
 
               return (
-                <Link href={`/matches/${match._id}`} className={buttonClass}>
+                <Link href={`/matches/${displayMatch._id}`} className={buttonClass}>
                   <span className="block sm:hidden md:block">
                     Spielbericht
                   </span>

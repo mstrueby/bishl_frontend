@@ -1,7 +1,7 @@
 
 import Head from "next/head";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { useMemo, Fragment } from "react";
+import { useMemo, Fragment, useCallback } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import {
@@ -25,6 +25,8 @@ import { MatchValues } from "../../../../types/MatchValues";
 import MatchList from "../../../../components/ui/MatchList";
 import Standings from "../../../../components/ui/Standings";
 import { classNames } from "../../../../tools/utils";
+import { MatchRefreshProvider } from "../../../../context/MatchRefreshContext";
+import { mutate } from "swr";
 
 interface SeasonHubProps {
   season: SeasonValues;
@@ -35,6 +37,11 @@ interface SeasonHubProps {
   selectedMatchdayMatches: MatchValues[];
   selectedRoundMatchdays: MatchdayValues[];
   selectedMatchday?: MatchdayValues | null;
+  matchdayOwner?: {
+    clubId: string;
+    clubName: string;
+    clubAlias: string;
+  } | null;
   tAlias: string;
   sAlias: string;
   rAlias?: string;
@@ -53,6 +60,7 @@ export default function SeasonHub({
   selectedMatchdayMatches,
   selectedRoundMatchdays,
   selectedMatchday,
+  matchdayOwner,
   tAlias,
   sAlias,
   rAlias,
@@ -101,6 +109,20 @@ export default function SeasonHub({
         return selectedSeasonMatches;
     }
   }, [pageMode, selectedMatchdayMatches, selectedRoundMatches, selectedSeasonMatches]);
+
+  // Track in-progress matches for centralized refresh
+  const inProgressMatchIds = useMemo(() => {
+    return displayMatches
+      .filter(match => match?.matchStatus?.key === "INPROGRESS")
+      .map(match => match._id)
+      .filter(Boolean) as string[];
+  }, [displayMatches]);
+
+  // Memoized callback for match updates
+  const handleMatchUpdate = useCallback(async () => {
+    // Trigger revalidation of the page data
+    await mutate(`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`);
+  }, [tAlias, sAlias, rAlias, mdAlias]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
@@ -733,12 +755,16 @@ export default function SeasonHub({
                 ? "Spieltage"
                 : "Spiele"}
             </h2>
-            <MatchList
-              matches={displayMatches}
-              matchdays={pageMode === "ROUND" ? matchdaysForRound : []}
-              mode={pageMode}
-              from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`}
-            />
+            <MatchRefreshProvider inProgressMatchIds={inProgressMatchIds}>
+              <MatchList
+                matches={displayMatches}
+                matchdays={pageMode === "ROUND" ? matchdaysForRound : []}
+                mode={pageMode}
+                from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`}
+                onMatchUpdate={handleMatchUpdate}
+                matchdayOwner={matchdayOwner}
+              />
+            </MatchRefreshProvider>
           </div>
 
           {/* Standings - Only for matchday mode with standings */}
@@ -846,6 +872,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     let selectedMatchday: MatchdayValues | null = null;
     let roundName: string | undefined;
     let matchdayName: string | undefined;
+    let matchdayOwner: { clubId: string; clubName: string; clubAlias: string } | null = null;
 
     if (rAlias && mdAlias) {
       try {
@@ -863,6 +890,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           ]);
         selectedMatchdayMatches = matchesResponse.data || [];
         selectedMatchday = matchdayResponse.data || null;
+        matchdayOwner = matchdayResponse.data?.owner || null;
         roundName = roundResponse.data?.name;
         matchdayName = matchdayResponse.data?.name;
       } catch (error) {
@@ -913,6 +941,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
             return a.alias.localeCompare(b.alias);
           }),
         selectedMatchday,
+        matchdayOwner: matchdayOwner || null,
         tAlias,
         sAlias,
         rAlias: rAlias || null,
