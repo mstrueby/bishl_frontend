@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import {
   Disclosure,
   DisclosureButton,
@@ -169,8 +170,10 @@ const MenuItemLink = React.forwardRef<HTMLAnchorElement, MenuItemLinkProps>(
 MenuItemLink.displayName = 'MenuItemLink';
 
 const Header = () => {
+  const router = useRouter();
   const { user, setUser, authError, setAuthError, loading, setLoading } =
     useAuth();
+  
   useEffect(() => {
     setLoading(true);
     (async () => {
@@ -235,80 +238,90 @@ const Header = () => {
                       Tag der Meister
                     </Link>
                     <Menu as="div" className="relative inline-block text-left">
-                      <MenuButton className={item}>Herren</MenuButton>
-                      <Transition
-                        as={Fragment}
-                        enter="transition ease-out duration-300"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-300"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
-                      >
-                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          {men.map((item, index) => (
-                            <MenuItem key={index}>
-                              {({ active }) => (
-                                <MenuItemLink
-                                  href={item.href}
-                                  className={classNames(
-                                    active ? "bg-gray-100" : "",
-                                    "block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900",
+                      {({ close }) => (
+                        <>
+                          <MenuButton className={item}>Herren</MenuButton>
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-300"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-300"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
+                          >
+                            <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              {men.map((item, index) => (
+                                <MenuItem key={index}>
+                                  {({ active }) => (
+                                    <Link
+                                      href={item.href}
+                                      onClick={() => close()}
+                                      className={classNames(
+                                        active ? "bg-gray-100" : "",
+                                        "block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900",
+                                      )}
+                                    >
+                                      <span
+                                        className={classNames(
+                                          "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14",
+                                          item.bdg_col_light,
+                                        )}
+                                      >
+                                        {item.tiny_name}
+                                      </span>
+                                      {item.name}
+                                    </Link>
                                   )}
-                                >
-                                  <span
-                                    className={classNames(
-                                      "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14",
-                                      item.bdg_col_light,
-                                    )}
-                                  >
-                                    {item.tiny_name}
-                                  </span>
-                                  {item.name}
-                                </MenuItemLink>
-                              )}
-                            </MenuItem>
-                          ))}
-                        </MenuItems>
-                      </Transition>
+                                </MenuItem>
+                              ))}
+                            </MenuItems>
+                          </Transition>
+                        </>
+                      )}
                     </Menu>
                     <Menu as="div" className="relative inline-block text-left">
-                      <MenuButton className={item}>Nachwuchs</MenuButton>
-                      <Transition
-                        as={Fragment}
-                        enter="transition ease-out duration-100"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
-                      >
-                        <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          {youth.map((item, index) => (
-                            <MenuItem key={index}>
-                              {({ active }) => (
-                                <MenuItemLink
-                                  href={item.href}
-                                  className={classNames(
-                                    active ? "bg-gray-100" : "",
-                                    "block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900",
+                      {({ close }) => (
+                        <>
+                          <MenuButton className={item}>Nachwuchs</MenuButton>
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-100"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-75"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
+                          >
+                            <MenuItems className="absolute left-0 z-60 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              {youth.map((item, index) => (
+                                <MenuItem key={index}>
+                                  {({ active }) => (
+                                    <Link
+                                      href={item.href}
+                                      onClick={() => close()}
+                                      className={classNames(
+                                        active ? "bg-gray-100" : "",
+                                        "block px-4 py-2 text-sm font-medium text-gray-600 hover:no-underline hover:text-gray-900",
+                                      )}
+                                    >
+                                      <span
+                                        className={classNames(
+                                          "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14",
+                                          item.bdg_col_light,
+                                        )}
+                                      >
+                                        {item.tiny_name}
+                                      </span>
+                                      {item.name}
+                                    </Link>
                                   )}
-                                >
-                                  <span
-                                    className={classNames(
-                                      "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-14",
-                                      item.bdg_col_light,
-                                    )}
-                                  >
-                                    {item.tiny_name}
-                                  </span>
-                                  {item.name}
-                                </MenuItemLink>
-                              )}
-                            </MenuItem>
-                          ))}
-                        </MenuItems>
-                      </Transition>
+                                </MenuItem>
+                              ))}
+                            </MenuItems>
+                          </Transition>
+                        </>
+                      )}
                     </Menu>
                   </div>
                 </div>
