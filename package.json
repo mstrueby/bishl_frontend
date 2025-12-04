@@ -35,6 +35,7 @@
     "react-dom": "^18.3.1",
     "react-quill": "^2.0.0",
     "react-spinners": "^0.17.0",
+    "swr": "^2.3.7",
     "yup": "^1.7.1"
   },
   "devDependencies": {

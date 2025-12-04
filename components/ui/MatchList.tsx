@@ -11,6 +11,11 @@ interface MatchListProps {
   mode: 'SEASON' | 'ROUND' | 'MATCHDAY';
   from: string;
   onMatchUpdate?: () => Promise<void>;
+  matchdayOwner?: {
+    clubId: string;
+    clubName: string;
+    clubAlias: string;
+  } | null;
 }
 
 const MatchList: React.FC<MatchListProps> = ({
@@ -19,6 +24,7 @@ const MatchList: React.FC<MatchListProps> = ({
   mode,
   from,
   onMatchUpdate,
+  matchdayOwner,
 }) => {
   const [activeTab, setActiveTab] = useState<string>('');
 
@@ -86,6 +92,7 @@ const MatchList: React.FC<MatchListProps> = ({
             match={match}
             from={from}
             onMatchUpdate={onMatchUpdate}
+            matchdayOwner={matchdayOwner}
           />
         ))}
       </div>
@@ -141,6 +148,7 @@ const MatchList: React.FC<MatchListProps> = ({
               match={match}
               from={from}
               onMatchUpdate={onMatchUpdate}
+              matchdayOwner={matchdayOwner}
             />
           ))}
         </div>
@@ -209,6 +217,7 @@ const MatchList: React.FC<MatchListProps> = ({
                         match={match}
                         from={from}
                         onMatchUpdate={onMatchUpdate}
+                        matchdayOwner={matchdayOwner}
                       />
                     ))}
                   </div>
@@ -224,6 +233,7 @@ const MatchList: React.FC<MatchListProps> = ({
                 match={match}
                 from={from}
                 onMatchUpdate={onMatchUpdate}
+                matchdayOwner={matchdayOwner}
               />
             ))}
           </div>
