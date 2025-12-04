@@ -1,4 +1,3 @@
-
 import Head from "next/head";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { useMemo, Fragment, useCallback } from "react";
@@ -11,7 +10,6 @@ import {
   ChevronUpDownIcon,
   HomeIcon,
 } from "@heroicons/react/20/solid";
-import { ChevronDownIcon as ChevronDownIcon16 } from "@heroicons/react/16/solid";
 import { Listbox, Transition } from "@headlessui/react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -71,7 +69,7 @@ export default function SeasonHub({
   matchdayName,
 }: SeasonHubProps) {
   const router = useRouter();
-  
+
   // Determine page context/mode directly from URL params
   const pageMode: "SEASON" | "ROUND" | "MATCHDAY" = mdAlias
     ? "MATCHDAY"
@@ -82,7 +80,7 @@ export default function SeasonHub({
   // Find current round from URL (derived state)
   const currentRound = useMemo(
     () => (rAlias ? allRounds.find((r) => r.alias === rAlias) || null : null),
-    [rAlias, allRounds]
+    [rAlias, allRounds],
   );
 
   // Derive sorted matchdays from props
@@ -109,20 +107,27 @@ export default function SeasonHub({
       default:
         return selectedSeasonMatches;
     }
-  }, [pageMode, selectedMatchdayMatches, selectedRoundMatches, selectedSeasonMatches]);
+  }, [
+    pageMode,
+    selectedMatchdayMatches,
+    selectedRoundMatches,
+    selectedSeasonMatches,
+  ]);
 
   // Track in-progress matches for centralized refresh
   const inProgressMatchIds = useMemo(() => {
     return displayMatches
-      .filter(match => match?.matchStatus?.key === "INPROGRESS")
-      .map(match => match._id)
+      .filter((match) => match?.matchStatus?.key === "INPROGRESS")
+      .map((match) => match._id)
       .filter(Boolean) as string[];
   }, [displayMatches]);
 
   // Memoized callback for match updates
   const handleMatchUpdate = useCallback(async () => {
     // Trigger revalidation of the page data
-    await mutate(`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`);
+    await mutate(
+      `/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`,
+    );
   }, [tAlias, sAlias, rAlias, mdAlias]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -402,7 +407,7 @@ export default function SeasonHub({
       </div>
 
       {/* Cascading Filters Bar for ROUND, MATCHDAY */}
-      <div className="py-4 mb-8">
+      <div className="py-4 mb-6 sm:mb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
           <div>
@@ -566,9 +571,7 @@ export default function SeasonHub({
             ) : (
               <Listbox
                 value={
-                  matchdaysForRound.find(
-                    (md) => md.alias === mdAlias,
-                  ) || null
+                  matchdaysForRound.find((md) => md.alias === mdAlias) || null
                 }
                 onChange={(matchday: MatchdayValues | null) => {
                   if (matchday?.alias && currentRound?.alias) {
@@ -748,69 +751,71 @@ export default function SeasonHub({
       </div>
 
       {/* Tab Menu for ROUND mode with standings */}
-      {pageMode === "ROUND" && currentRound?.createStandings && currentRound?.standings && (
-        <div className="mb-8">
-          <div className="grid grid-cols-1 sm:hidden">
-            <select
-              value={router.query.tab as string || "spielplan"}
-              onChange={(e) => {
-                const newQuery = { ...router.query };
-                if (e.target.value === "spielplan") {
-                  delete newQuery.tab;
-                } else {
-                  newQuery.tab = e.target.value;
-                }
-                router.push({ pathname: router.pathname, query: newQuery }, undefined, { shallow: true });
-              }}
-              aria-label="Select a tab"
-              className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-2 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
-            >
-              <option value="spielplan">Spielplan</option>
-              <option value="tabelle">Tabelle</option>
-            </select>
-            <ChevronDownIcon16
-              aria-hidden="true"
-              className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
-            />
-          </div>
-          <div className="hidden sm:block">
+      {pageMode === "ROUND" &&
+        currentRound?.createStandings &&
+        currentRound?.standings && (
+          <div className="mb-8 sm:mb-10">
             <nav aria-label="Tabs" className="flex space-x-4">
               <button
                 onClick={() => {
                   const newQuery = { ...router.query };
                   delete newQuery.tab;
-                  router.push({ pathname: router.pathname, query: newQuery }, undefined, { shallow: true });
+                  router.push(
+                    { pathname: router.pathname, query: newQuery },
+                    undefined,
+                    { shallow: true },
+                  );
                 }}
-                aria-current={(!router.query.tab || router.query.tab === "spielplan") ? 'page' : undefined}
+                aria-current={
+                  !router.query.tab || router.query.tab === "spielplan"
+                    ? "page"
+                    : undefined
+                }
                 className={classNames(
-                  (!router.query.tab || router.query.tab === "spielplan") ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
-                  'rounded-md px-3 py-2 text-sm font-medium',
+                  !router.query.tab || router.query.tab === "spielplan"
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "text-gray-500 hover:text-gray-700",
+                  "rounded-md px-3 py-2 text-sm font-medium",
                 )}
               >
                 Spielplan
               </button>
               <button
                 onClick={() => {
-                  router.push({ pathname: router.pathname, query: { ...router.query, tab: 'tabelle' } }, undefined, { shallow: true });
+                  router.push(
+                    {
+                      pathname: router.pathname,
+                      query: { ...router.query, tab: "tabelle" },
+                    },
+                    undefined,
+                    { shallow: true },
+                  );
                 }}
-                aria-current={router.query.tab === 'tabelle' ? 'page' : undefined}
+                aria-current={
+                  router.query.tab === "tabelle" ? "page" : undefined
+                }
                 className={classNames(
-                  router.query.tab === 'tabelle' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
-                  'rounded-md px-3 py-2 text-sm font-medium',
+                  router.query.tab === "tabelle"
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "text-gray-500 hover:text-gray-700",
+                  "rounded-md px-3 py-2 text-sm font-medium",
                 )}
               >
                 Tabelle
               </button>
             </nav>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Matches Display - Context-aware based on page mode */}
       {displayMatches.length > 0 ? (
         <>
           {/* Show match list when not in ROUND mode with standings, or when tab is "spielplan" */}
-          {(pageMode !== "ROUND" || !currentRound?.createStandings || !currentRound?.standings || !router.query.tab || router.query.tab === "spielplan") && (
+          {(pageMode !== "ROUND" ||
+            !currentRound?.createStandings ||
+            !currentRound?.standings ||
+            !router.query.tab ||
+            router.query.tab === "spielplan") && (
             <div className="mb-12">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                 {matchdaysForRound.length > 1 && pageMode === "ROUND"
@@ -831,17 +836,20 @@ export default function SeasonHub({
           )}
 
           {/* Show standings when in ROUND mode with standings and tab is "tabelle" */}
-          {pageMode === "ROUND" && currentRound?.createStandings && currentRound?.standings && router.query.tab === "tabelle" && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Tabelle
-              </h2>
-              <Standings
-                standingsData={currentRound.standings}
-                matchSettings={currentRound.matchSettings}
-              />
-            </div>
-          )}
+          {pageMode === "ROUND" &&
+            currentRound?.createStandings &&
+            currentRound?.standings &&
+            router.query.tab === "tabelle" && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                  Tabelle
+                </h2>
+                <Standings
+                  standingsData={currentRound.standings}
+                  matchSettings={currentRound.matchSettings}
+                />
+              </div>
+            )}
 
           {/* Standings - Only for matchday mode with standings */}
           {pageMode === "MATCHDAY" &&
@@ -948,7 +956,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     let selectedMatchday: MatchdayValues | null = null;
     let roundName: string | undefined;
     let matchdayName: string | undefined;
-    let matchdayOwner: { clubId: string; clubName: string; clubAlias: string } | null = null;
+    let matchdayOwner: {
+      clubId: string;
+      clubName: string;
+      clubAlias: string;
+    } | null = null;
 
     if (rAlias && mdAlias) {
       try {
