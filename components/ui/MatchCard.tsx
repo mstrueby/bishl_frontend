@@ -432,8 +432,8 @@ const MatchCard: React.FC<{
             </div>
           )}
         </div>
-        {/* Referees section */}
-        {(displayMatch.referee1 || displayMatch.referee2) && (
+        {/* Referees section - only show for SCHEDULED matches */}
+        {displayMatch?.matchStatus?.key === "SCHEDULED" && (displayMatch.referee1 || displayMatch.referee2) && (
           <div className="flex flex-row gap-x-4 mt-3 sm:mt-0 sm:w-1/4 md:w-1/5">
             {displayMatch.referee1 && (
               <div className="flex items-center">
