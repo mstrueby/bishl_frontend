@@ -1,6 +1,7 @@
+
 import Head from "next/head";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { useState, useEffect, Fragment } from "react";
+import { useMemo, Fragment } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import {
@@ -62,104 +63,44 @@ export default function SeasonHub({
 }: SeasonHubProps) {
   const router = useRouter();
   
-  // Determine page context/mode directly from URL params (no state needed)
+  // Determine page context/mode directly from URL params
   const pageMode: "SEASON" | "ROUND" | "MATCHDAY" = mdAlias
     ? "MATCHDAY"
     : rAlias
       ? "ROUND"
       : "SEASON";
 
-  // Find current round from URL (derived state, not separate state)
-  const currentRound = rAlias 
-    ? allRounds.find((r) => r.alias === rAlias) || null 
-    : null;
-
-  // Initialize state from props (SSG data)
-  const [matchdaysForRound, setMatchdaysForRound] = useState<MatchdayValues[]>(
-    selectedRoundMatchdays,
-  );
-  const [displayMatches, setDisplayMatches] = useState<MatchValues[]>(
-    pageMode === "MATCHDAY"
-      ? selectedMatchdayMatches
-      : pageMode === "ROUND"
-        ? selectedRoundMatches
-        : selectedSeasonMatches,
+  // Find current round from URL (derived state)
+  const currentRound = useMemo(
+    () => (rAlias ? allRounds.find((r) => r.alias === rAlias) || null : null),
+    [rAlias, allRounds]
   );
 
-  // Single effect: Sync state when URL params change
-  useEffect(() => {
-    let isCancelled = false;
-
-    const fetchData = async () => {
-      // SEASON MODE: Use props data (already fetched in getStaticProps)
-      if (!rAlias && !mdAlias) {
-        if (!isCancelled) {
-          setMatchdaysForRound([]);
-          setDisplayMatches(selectedSeasonMatches);
+  // Derive sorted matchdays from props
+  const matchdaysForRound = useMemo(() => {
+    return selectedRoundMatchdays
+      .filter((md: MatchdayValues) => md.published)
+      .sort((a: MatchdayValues, b: MatchdayValues) => {
+        if (a.startDate && b.startDate) {
+          return (
+            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+          );
         }
-        return;
-      }
+        return a.alias.localeCompare(b.alias);
+      });
+  }, [selectedRoundMatchdays]);
 
-      // Validate round exists
-      const round = allRounds.find((r) => r.alias === rAlias);
-      if (!round) {
-        console.error(`Round ${rAlias} not found`);
-        if (!isCancelled) {
-          setMatchdaysForRound([]);
-          setDisplayMatches([]);
-        }
-        return;
-      }
-
-      try {
-        // ROUND MODE: Fetch matchdays + round matches
-        if (rAlias && !mdAlias) {
-          const [matchdaysRes, matchesRes] = await Promise.all([
-            apiClient.get(
-              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
-            ),
-            apiClient.get(
-              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}`,
-            ),
-          ]);
-
-          if (!isCancelled) {
-            setMatchdaysForRound(matchdaysRes.data || []);
-            setDisplayMatches(matchesRes.data || []);
-          }
-        }
-        // MATCHDAY MODE: Fetch matchdays (for dropdown) + matchday matches
-        else if (rAlias && mdAlias) {
-          const [matchdaysRes, matchesRes] = await Promise.all([
-            apiClient.get(
-              `/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays`,
-            ),
-            apiClient.get(
-              `/matches?tournament=${tAlias}&season=${sAlias}&round=${rAlias}&matchday=${mdAlias}`,
-            ),
-          ]);
-
-          if (!isCancelled) {
-            setMatchdaysForRound(matchdaysRes.data || []);
-            setDisplayMatches(matchesRes.data || []);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        if (!isCancelled) {
-          setMatchdaysForRound([]);
-          setDisplayMatches([]);
-        }
-      }
-    };
-
-    fetchData();
-
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      isCancelled = true;
-    };
-  }, [tAlias, sAlias, rAlias, mdAlias, allRounds, selectedSeasonMatches]);
+  // Derive display matches from props based on page mode
+  const displayMatches = useMemo((): MatchValues[] => {
+    switch (pageMode) {
+      case "MATCHDAY":
+        return selectedMatchdayMatches;
+      case "ROUND":
+        return selectedRoundMatches;
+      default:
+        return selectedSeasonMatches;
+    }
+  }, [pageMode, selectedMatchdayMatches, selectedRoundMatches, selectedSeasonMatches]);
 
   const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/tournaments/${tAlias}/${e.target.value}`);
