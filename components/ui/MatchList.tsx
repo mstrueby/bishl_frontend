@@ -227,7 +227,7 @@ const MatchList: React.FC<MatchListProps> = ({
                   <span
                     className={classNames(
                       currentTab === tab.key ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-900',
-                      'ml-3 hidden rounded-full px-2.5 py-0.5 text-xs font-medium md:inline-block'
+                      'ml-3 rounded-full px-2.5 py-0.5 text-xs font-medium md:inline-block'
                     )}
                   >
                     {tab.matches.length}

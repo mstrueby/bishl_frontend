@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps<ClubPageProps> = async (cont
   let clubs: ClubValues[] = [];
 
   try {
-    const response = await apiClient.get('/clubs/', {
+    const response = await apiClient.get('/clubs', {
       params: {
         page: 1,
         page_size: 100

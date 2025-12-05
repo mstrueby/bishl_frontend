@@ -61,7 +61,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 
     // Get teams
-    const res = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams/`, {
+    const res = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams`, {
       headers: {
         'Content-Type': 'application/json',
       }
