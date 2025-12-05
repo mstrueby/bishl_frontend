@@ -11,7 +11,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
-import axios from 'axios';
+import { getErrorMessage } from '../../../../../lib/errorHandler';
 
 const Add: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -94,12 +94,8 @@ const Add: NextPage = () => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.detail || 'Ein Fehler ist aufgetreten.';
-        setError(errorMessage);
-      } else {
-        setError('Ein Fehler ist aufgetreten.');
-      }
+      const errorMessage = getErrorMessage(error);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
