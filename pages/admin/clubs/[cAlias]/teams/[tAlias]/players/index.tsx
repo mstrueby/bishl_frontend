@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { GetServerSideProps, NextPage } from 'next';
-import axios from 'axios';
-import { getCookie } from 'cookies-next';
+
+import { useState, useEffect, useCallback } from "react";
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
 import { PlayerValues } from '../../../../../../../types/PlayerValues';
@@ -10,109 +9,102 @@ import SectionHeader from "../../../../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../../../../components/ui/SuccessMessage';
 import DataList from '../../../../../../../components/admin/ui/DataList';
 import { getDataListItems } from '../../../../../../../tools/playerItems';
-import { ta } from "date-fns/locale";
 import { TeamValues } from "../../../../../../../types/ClubValues";
+import LoadingState from '../../../../../../../components/ui/LoadingState';
+import useAuth from '../../../../../../../hooks/useAuth';
+import usePermissions from '../../../../../../../hooks/usePermissions';
+import { UserRole } from '../../../../../../../lib/auth';
+import apiClient from '../../../../../../../lib/apiClient';
+import axios from 'axios';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface PlayersProps {
-  jwt: string,
-  cAlias: string,
-  clubName: string,
-  team: TeamValues,
-  players: PlayerValues[],
-  totalPlayers: number,
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie('jwt', context);
-  const { cAlias } = context.params as { cAlias: string };
-  const { tAlias } = context.params as { tAlias: string };
-  let clubName = null;
-  let team = {};
-  let players: PlayerValues[] = [];
-  let totalPlayers = 0;
-
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
-    const user = userResponse.data;
-    //console.log("user:", user)
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Get club infos
-    const clubResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    clubName = clubResponse.data.name;
-
-    // Get team infos
-    const teamResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams/${tAlias}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    team = teamResponse.data;
-    
-    // Get players
-    const res = await axios.get(`${BASE_URL}/players/clubs/${cAlias}/teams/${tAlias}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwt}`
-      },
-      params: {
-        sortby: 'lastName',
-        all: 'true'
-      }
-    });
-    players = res.data.results;
-    totalPlayers = res.data.total;
-    
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(error?.response?.data.detail || 'Error fetching players.');
-    }
-  }
-  return {
-    props: {
-      jwt, cAlias, clubName, team, players: players || [], totalPlayers: totalPlayers || 0
-    }
-  };
-};
+interface PlayersProps {}
 
 const transformedUrl = (id: string) => buildUrl(id, {
   cloud: {
     cloudName: 'dajtykxvp',
   },
-  transformations: {
-    //effect: {
-    //  name: 'grayscale',
-    //},
-    //effect: {
-    //  name: 'tint',
-    //  value: '60:blue:white'
-    //}
-  }
+  transformations: {}
 });
 
-const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, team, players: initialPlayers, totalPlayers }) => {
-  const [players, setPlayers] = useState<PlayerValues[]>(initialPlayers);
+const Players: NextPage<PlayersProps> = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [players, setPlayers] = useState<PlayerValues[]>([]);
+  const [team, setTeam] = useState<TeamValues | null>(null);
+  const [clubName, setClubName] = useState<string>('');
+  const [totalPlayers, setTotalPlayers] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const router = useRouter();
+  const { cAlias, tAlias } = router.query;
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Data fetching
+  const fetchData = useCallback(async () => {
+    if (authLoading || !user || !cAlias || !tAlias) return;
+
+    try {
+      setDataLoading(true);
+
+      // Get club infos
+      const clubResponse = await apiClient.get(`/clubs/${cAlias}`);
+      setClubName(clubResponse.data?.name || '');
+
+      // Get team infos
+      const teamResponse = await apiClient.get(`/clubs/${cAlias}/teams/${tAlias}`);
+      setTeam(teamResponse.data || null);
+
+      // Get players
+      const playersResponse = await apiClient.get(`/players/clubs/${cAlias}/teams/${tAlias}`, {
+        params: {
+          sortby: 'lastName',
+          all: 'true'
+        }
+      });
+
+      setPlayers(playersResponse.data?.results || playersResponse.data || []);
+      setTotalPlayers(playersResponse.data?.total || 0);
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Error fetching data:', error.message);
+      }
+    } finally {
+      setDataLoading(false);
+    }
+  }, [authLoading, user, cAlias, tAlias]);
+
+  useEffect(() => {
+    if (!authLoading && user && cAlias && tAlias) {
+      fetchData();
+    }
+  }, [authLoading, user, cAlias, tAlias, fetchData]);
+
+  const editPlayer = (teamAlias: string, playerId: string) => {
+    router.push(`/admin/myclub/${teamAlias}/${playerId}`);
+  }
+
+  const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, imageUrl: string | null) => {
+    return null;
+  }
+
+  // Handler to close the success message
+  const handleCloseSuccessMessage = () => {
+    setSuccessMessage(null);
+  };
 
   useEffect(() => {
     if (router.query.message) {
@@ -128,17 +120,28 @@ const Players: NextPage<PlayersProps> = ({ jwt, cAlias, clubName, team, players:
     }
   }, [router]);
 
-  const editPlayer = (teamAlias: string, PlayerId: string) => {
-    router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
+  // Show loading state while checking auth or fetching data
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
   }
 
-  const toggleActive = async (playerId: string, teamId: string, assignedTeams: any, imageUrl: string | null) => {
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
     return null;
   }
-  // Handler to close the success message
-  const handleCloseSuccessMessage = () => {
-    setSuccessMessage(null);
-  };
+
+  // Data guard
+  if (!team) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
 
   const sectionTitle = team.name;
   const description = clubName.toUpperCase();
