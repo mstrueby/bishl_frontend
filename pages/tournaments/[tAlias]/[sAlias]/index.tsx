@@ -429,13 +429,13 @@ export default function SeasonHub({
                     Runde auswählen
                   </Listbox.Label>
                   <div className="relative">
-                    <div className="inline-flex w-full divide-x divide-indigo-700 rounded-md shadow-sm">
+                    <div className="inline-flex w-full divide-x divide-indigo-700 h-10 rounded-md shadow-sm">
                       <div className="inline-flex flex-1 items-center gap-x-1.5 rounded-l-md bg-indigo-600 px-3 py-2 shadow-sm">
                         <p className="text-sm font-semibold text-white uppercase truncate">
                           {currentRound?.name || "Alle Runden"}
                         </p>
                       </div>
-                      <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-50">
+                      <Listbox.Button className="inline-flex items-center rounded-l-none rounded-r-md bg-indigo-600 p-2 hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-400">
                         <ChevronDownIcon
                           className="h-5 w-5 text-white"
                           aria-hidden="true"
@@ -557,11 +557,11 @@ export default function SeasonHub({
           {/* Matchday Selector - Only shown when round has multiple matchdays */}
           <div>
             {!currentRound?.alias ? (
-              <div className="block w-full rounded-md border border-gray-300 bg-gray-100 py-2 pl-3 pr-10 text-base text-gray-400 sm:text-sm">
+              <div className="block w-full h-10 rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
                 Alle Spieltage
               </div>
             ) : matchdaysForRound.length === 1 ? (
-              <div className="block w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
+              <div className="block w-full h-10 rounded-md border border-gray-200 bg-gray-50 py-2 pl-3 pr-10 text-base text-gray-900 sm:text-sm">
                 {matchdaysForRound[0].alias === "all_games" ? (
                   <span className="text-gray-500">Alle Spiele</span>
                 ) : (
@@ -591,40 +591,42 @@ export default function SeasonHub({
                       Spieltag auswählen
                     </Listbox.Label>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md bg-indigo-600 py-2 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:leading-6">
-                        <span className="text-sm inline-flex w-full truncate">
-                          <span className="truncate uppercase font-semibold">
-                            {mdAlias
-                              ? matchdaysForRound.find(
+                      <div className="inline-flex w-full divide-x divide-indigo-700 rounded-md shadow-sm">
+                        <Listbox.Button className="w-full h-10 cursor-default rounded-md bg-indigo-600 py-2 pl-3 pr-10 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-400">
+                          <span className="text-sm inline-flex w-full truncate">
+                            <span className="truncate uppercase font-semibold text-white">
+                              {mdAlias
+                                ? matchdaysForRound.find(
+                                    (md) => md.alias === mdAlias,
+                                  )?.name || "Alle Spieltage"
+                                : "Alle Spieltage"}
+                            </span>
+                            {mdAlias &&
+                              (() => {
+                                const currentMd = matchdaysForRound.find(
                                   (md) => md.alias === mdAlias,
-                                )?.name || "Alle Spieltage"
-                              : "Alle Spieltage"}
+                                );
+                                return (
+                                  currentMd?.startDate &&
+                                  currentMd?.endDate && (
+                                    <span className="ml-2 truncate text-indigo-100">
+                                      {formatDate(
+                                        currentMd.startDate,
+                                        currentMd.endDate,
+                                      )}
+                                    </span>
+                                  )
+                                );
+                              })()}
                           </span>
-                          {mdAlias &&
-                            (() => {
-                              const currentMd = matchdaysForRound.find(
-                                (md) => md.alias === mdAlias,
-                              );
-                              return (
-                                currentMd?.startDate &&
-                                currentMd?.endDate && (
-                                  <span className="ml-2 truncate text-indigo-100">
-                                    {formatDate(
-                                      currentMd.startDate,
-                                      currentMd.endDate,
-                                    )}
-                                  </span>
-                                )
-                              );
-                            })()}
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon
-                            className="h-5 w-5 text-white"
-                            aria-hidden="true"
-                          />
-                        </span>
-                      </Listbox.Button>
+                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <ChevronUpDownIcon
+                              className="h-5 w-5 text-white"
+                              aria-hidden="true"
+                            />
+                          </span>
+                        </Listbox.Button>
+                      </div>
 
                       <Transition
                         show={open}

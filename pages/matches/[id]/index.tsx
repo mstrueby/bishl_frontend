@@ -151,7 +151,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
 };
 
 export default function MatchDetails({ match: initialMatch, matchdayOwner }: MatchDetailsProps) {
-  const [match, setMatch] = useState<Match>(initialMatch);
+  const [match, setMatch] = useState<MatchValues>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
