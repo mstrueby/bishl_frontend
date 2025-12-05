@@ -84,7 +84,7 @@ const Add: NextPage = () => {
         formData.append(key, value?.toString() || '');
       });
 
-      const response = await apiClient.post(`/clubs/${club.alias}/teams/`, formData);
+      const response = await apiClient.post(`/clubs/${club.alias}/teams`, formData);
 
       if (response.status === 201) {
         router.push({
