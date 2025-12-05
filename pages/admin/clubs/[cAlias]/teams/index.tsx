@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { GetServerSideProps, NextPage } from 'next';
-import axios from 'axios';
-import { getCookie } from 'cookies-next';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
@@ -10,80 +8,14 @@ import SectionHeader from "../../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import DataList from '../../../../../components/admin/ui/DataList';
 import { ageGroupConfig } from '../../../../../tools/consts';
+import LoadingState from '../../../../../components/ui/LoadingState';
+import useAuth from '../../../../../hooks/useAuth';
+import usePermissions from '../../../../../hooks/usePermissions';
+import { UserRole } from '../../../../../lib/auth';
+import apiClient from '../../../../../lib/apiClient';
+import axios from 'axios';
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
-interface TeamsProps {
-  jwt: string,
-  club: ClubValues,
-  teams: TeamValues[]
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const jwt = getCookie('jwt', context);
-    const { cAlias } = context.params as { cAlias: string };
-
-    if (!jwt || !cAlias) {
-      return {
-        notFound: true
-      };
-    }
-
-    let club: ClubValues | null = null;
-    let teams: TeamValues[] = [];
-
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
-    const user = userResponse.data;
-    //console.log("user:", user)
-    if (!user.roles?.includes('ADMIN') && !user.roles?.includes('LEAGUE_ADMIN')) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      };
-    }
-
-    // Get club infos
-    const clubResponse = await axios.get(`${BASE_URL}/clubs/${cAlias}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    club = clubResponse.data;
-
-
-    // Get teams
-    const res = await axios.get(`${BASE_URL}/clubs/${cAlias}/teams`, {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    teams = res.data;
-    return {
-      props: {
-        jwt, club, teams
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching data in getServerSideProps:', error);
-    // Return a valid default props structure in case of error
-    return {
-      props: {
-        jwt: '',
-        club: null,
-        teams: []
-      }
-    };
-  }
-};
+interface TeamsProps {}
 
 const transformedUrl = (id: string) => buildUrl(id, {
   cloud: {
@@ -100,19 +32,63 @@ const transformedUrl = (id: string) => buildUrl(id, {
   }
 });
 
-const Teams: NextPage<TeamsProps> = ({ jwt, club, teams: initialTeams }) => {
-  const [teams, setTeams] = useState<TeamValues[]>(initialTeams);
+const Teams: NextPage<TeamsProps> = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [teams, setTeams] = useState<TeamValues[]>([]);
+  const [club, setClub] = useState<ClubValues | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const router = useRouter();
+  const { cAlias } = router.query;
+
+  // Auth redirect check
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+
+  // Data fetching
+  useEffect(() => {
+    if (authLoading || !user || !cAlias) return;
+
+    const fetchData = async () => {
+      try {
+        setDataLoading(true);
+        
+        // Fetch club data
+        const clubResponse = await apiClient.get(`/clubs/${cAlias}`);
+        setClub(clubResponse.data);
+
+        // Fetch teams data
+        const teamsResponse = await apiClient.get(`/clubs/${cAlias}/teams`);
+        setTeams(teamsResponse.data || []);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Error fetching data:', error.message);
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [authLoading, user, cAlias]);
 
   const fetchTeams = async () => {
+    if (!club) return;
+    
     try {
-      const res = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/`, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      setTeams(res.data);
+      const response = await apiClient.get(`/clubs/${club.alias}/teams`);
+      setTeams(response.data || []);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('TEAMS: Error fetching teams:', error);
@@ -123,32 +99,22 @@ const Teams: NextPage<TeamsProps> = ({ jwt, club, teams: initialTeams }) => {
   const toggleActive = async (clubAlias: string, teamId: string, currentStatus: boolean, logoUrl: string | null) => {
     try {
       const formData = new FormData();
-      formData.append('active', (!currentStatus).toString()); // Toggle the status
+      formData.append('active', (!currentStatus).toString());
       if (logoUrl) {
         formData.append('logoUrl', logoUrl);
       }
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
 
-      const response = await axios.patch(`${BASE_URL}/clubs/${clubAlias}/teams/${teamId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        },
-      });
+      const response = await apiClient.patch(`/clubs/${clubAlias}/teams/${teamId}`, formData);
       if (response.status === 200) {
-        // Handle successful response
         console.log(`Team ${teamId} successfully activated`);
         await fetchTeams();
       } else if (response.status === 304) {
-        // Handle not modified response
         console.log('No changes were made to the team.');
       } else {
-        // Handle error response
         console.error('Failed to activate team.');
       }
     } catch (error) {
-      console.error('Error activating club:', error);
+      console.error('Error activating team:', error);
     }
   };
 
@@ -170,6 +136,29 @@ const Teams: NextPage<TeamsProps> = ({ jwt, club, teams: initialTeams }) => {
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+
+  // Show loading state while checking auth or fetching data
+  if (authLoading || dataLoading) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  // Auth guard
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
+    return null;
+  }
+
+  // Data guard
+  if (!club) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
 
   const teamValues = teams
     .slice()
