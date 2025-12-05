@@ -1,8 +1,6 @@
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import TeamForm from '../../../../../components/admin/TeamForm';
 import Layout from '../../../../../components/Layout';
@@ -13,6 +11,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
+import axios from 'axios';
 
 const Add: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -27,12 +26,12 @@ const Add: NextPage = () => {
   // Auth redirect check
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       router.push('/login');
       return;
     }
-    
+
     if (!hasAnyRole([UserRole.ADMIN])) {
       router.push('/');
     }
@@ -41,7 +40,7 @@ const Add: NextPage = () => {
   // Data fetching
   useEffect(() => {
     if (authLoading || !user || !cAlias) return;
-    
+
     const fetchClub = async () => {
       try {
         const response = await apiClient.get(`/clubs/${cAlias}`);
@@ -74,7 +73,7 @@ const Add: NextPage = () => {
 
   const onSubmit = async (values: TeamValues) => {
     if (!club) return;
-    
+
     setError(null);
     setLoading(true);
     console.log(values);

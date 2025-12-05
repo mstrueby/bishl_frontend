@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -28,12 +27,12 @@ const Edit: NextPage = () => {
   // 1. Auth redirect check
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       router.push('/login');
       return;
     }
-    
+
     if (!hasRole(UserRole.ADMIN)) {
       router.push('/');
     }
@@ -42,7 +41,7 @@ const Edit: NextPage = () => {
   // 2. Data fetching
   useEffect(() => {
     if (authLoading || !user || !cAlias || !tAlias) return;
-    
+
     const fetchData = async () => {
       try {
         // Fetch club data
@@ -67,7 +66,7 @@ const Edit: NextPage = () => {
   // Handler for form submission
   const onSubmit = async (values: TeamValues) => {
     if (!club || !team) return;
-    
+
     setError(null);
     setLoading(true);
     console.log('submitted values', values);
