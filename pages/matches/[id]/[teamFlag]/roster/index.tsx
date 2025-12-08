@@ -5,7 +5,7 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
-import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
+import { MatchValues, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import apiClient from '../../../../../lib/apiClient';
 import { getErrorMessage } from '../../../../../lib/errorHandler';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
@@ -27,9 +27,6 @@ import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { tournamentConfigs } from '../../../../../tools/consts';
 
 
-
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'];
-
 interface AvailablePlayer {
   _id: string,
   firstName: string,
@@ -49,7 +46,7 @@ interface AvailablePlayer {
 }
 
 interface RosterPageProps {
-  match: Match;
+  match: MatchValues;
   matchTeam: Team;
   club: ClubValues;
   team: TeamValues;
@@ -68,7 +65,7 @@ interface RosterPageProps {
   teamFlag: string;
   availablePlayers: AvailablePlayer[];
   allAvailablePlayers: AvailablePlayer[];
-  matches: Match[];
+  matches: MatchValues[];
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -77,13 +74,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { notFound: true };
 
   try {
-    // First check if user has required role
-    const userResponse = await apiClient.get(`/users/me`);
-    const user = userResponse.data;
-
     // Fetch match data
     const matchResponse = await apiClient.get(`/matches/${id}`);
-    const match: Match = matchResponse.data;
+    const match: MatchValues = matchResponse.data;
 
     // Determine which team's roster to fetch
     const matchTeam: Team = teamFlag === 'home' ? match.home : match.away;
@@ -295,7 +288,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         team: matchTeam.teamAlias
       },
     });
-    const matches: Match[] = matchesResponse.data;
+    const matches: MatchValues[] = matchesResponse.data;
 
 
 
