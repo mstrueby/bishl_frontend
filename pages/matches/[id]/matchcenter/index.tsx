@@ -348,10 +348,8 @@ export default function MatchDetails({
               Sie haben keine Berechtigung, die Match Center für dieses Spiel
               aufzurufen.
             </p>
-            <Link href={`/matches/${match._id}`}>
-              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Zurück zum Spiel
-              </a>
+            <Link href={`/matches/${match._id}`} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Zurück zum Spiel
             </Link>
           </div>
         </div>
@@ -368,30 +366,26 @@ export default function MatchDetails({
       </Head>
       <Layout>
         <div className="flex items-center justify-between text-gray-500 hover:text-gray-700 text-sm font-base">
-          <Link href={backLink}>
-            <a className="flex items-center">
-              <ChevronLeftIcon
-                aria-hidden="true"
-                className="h-3 w-3 text-gray-400"
-              />
-              <span className="ml-2">
-                {backLink.includes("/matchcenter")
-                  ? "Match Center"
-                  : backLink.includes("/calendar")
-                    ? "Kalender"
-                    : tournamentConfigs[match.tournament.alias]?.name}
-              </span>
-            </a>
+          <Link href={backLink} className="flex items-center">
+            <ChevronLeftIcon
+              aria-hidden="true"
+              className="h-3 w-3 text-gray-400"
+            />
+            <span className="ml-2">
+              {backLink.includes("/matchcenter")
+                ? "Match Center"
+                : backLink.includes("/calendar")
+                  ? "Kalender"
+                  : tournamentConfigs[match.tournament.alias]?.name}
+            </span>
           </Link>
 
-          <Link href={`/matches/${match._id}`}>
-            <a className="flex items-center">
-              <span className="mr-2">Spielbericht</span>
-              <ChevronRightIcon
-                aria-hidden="true"
-                className="h-3 w-3 text-gray-400"
-              />
-            </a>
+          <Link href={`/matches/${match._id}`} className="flex items-center">
+            <span className="mr-2">Spielbericht</span>
+            <ChevronRightIcon
+              aria-hidden="true"
+              className="h-3 w-3 text-gray-400"
+            />
           </Link>
         </div>
 
