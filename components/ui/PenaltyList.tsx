@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { PenaltiesBase } from '../../types/MatchValues';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import apiClient from '../../lib/apiClient';
+import { getErrorMessage } from '../../lib/errorHandler';
 
 interface PenaltyListProps {
-  jwt: string;
   teamName: string;
   matchId: string;
   teamFlag: string;
@@ -20,7 +20,6 @@ interface PenaltyListProps {
 }
 
 const PenaltyList: React.FC<PenaltyListProps> = ({
-  jwt,
   teamName,
   matchId,
   teamFlag,
@@ -44,22 +43,12 @@ const PenaltyList: React.FC<PenaltyListProps> = ({
     if (!penaltyToDelete) return;
     try {
       setIsDeleting(true);
-      const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/penalties/${penaltyToDelete._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      if (response.status === 200 || response.status === 204) {
-        if (refreshMatchData) {
-          refreshMatchData();
-        }
-      }
+      await apiClient.delete(`/matches/${matchId}/${teamFlag}/penalties/${penaltyToDelete._id}`);
       refreshMatchData();
     } catch (error) {
-      console.error('Error deleting penalty:', error);
+      const errorMessage = getErrorMessage(error);
+      console.error('Error deleting penalty:', errorMessage);
+      // Optionally show error to user
     } finally {
       setIsDeleting(false);
       setIsDeleteModalOpen(false);
