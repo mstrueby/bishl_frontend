@@ -1159,9 +1159,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     }
 
-    const matchday = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
-    ).then((res) => res.json());
+    // Fetch matchday owner data
+    let matchdayOwner: MatchdayOwner | null = null;
+    try {
+      const matchdayResponse = await apiClient.get(
+        `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`
+      );
+      matchdayOwner = matchdayResponse.data?.owner || null;
+    } catch (error) {
+      console.error('Error fetching matchday owner:', error);
+    }
 
     // Ensure that match details are correctly assigned if they were fetched successfully
     const finalMatch = {
@@ -1184,7 +1191,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: {
         match: finalMatch,
-        matchdayOwner: matchday.owner,
+        matchdayOwner,
         jwt,
         userRoles,
         userClubId: userClubId || null,
