@@ -1160,7 +1160,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const matchday = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
     ).then((res) => res.json());
 
     // Ensure that match details are correctly assigned if they were fetched successfully
