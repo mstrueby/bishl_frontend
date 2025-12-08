@@ -1157,7 +1157,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     let matchdayOwner: MatchdayOwner | null = null;
     try {
       const matchdayResponse = await apiClient.get(
-        `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`
+        `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
       );
       matchdayOwner = matchdayResponse.data?.owner || null;
     } catch (error) {
