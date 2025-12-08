@@ -17,8 +17,8 @@ import {
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
 import { getCookie } from "cookies-next";
-import axios from 'axios';
 import apiClient from '../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../lib/errorHandler';
 
 let BASE_URL = process.env["NEXT_PUBLIC_API_URL"];
 import {
@@ -203,13 +203,8 @@ export default function MatchDetails({
 
       const statsPromises = calledPlayers.map(async (player) => {
         try {
-          const response = await axios.get(
-            `${BASE_URL}/players/${player.player.playerId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${jwt}`,
-              },
-            },
+          const response = await apiClient.get(
+            `/players/${player.player.playerId}`
           );
 
           const playerData = response.data;
@@ -617,7 +612,6 @@ export default function MatchDetails({
             <div className="py-4">
               <GoalsTab
                 match={match}
-                jwt={jwt || ""}
                 permissions={{
                   showButtonScoresHome: permissions.showButtonScoresHome ?? false,
                   showButtonScoresAway: permissions.showButtonScoresAway ?? false,
@@ -636,7 +630,6 @@ export default function MatchDetails({
             <div className="py-4">
               <PenaltiesTab
                 match={match}
-                jwt={jwt || ""}
                 permissions={{
                   showButtonPenaltiesHome: permissions.showButtonPenaltiesHome ?? false,
                   showButtonPenaltiesAway: permissions.showButtonPenaltiesAway ?? false,
@@ -1167,7 +1160,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const matchday = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
     ).then((res) => res.json());
 
     // Ensure that match details are correctly assigned if they were fetched successfully
