@@ -49,7 +49,6 @@ interface AvailablePlayer {
 }
 
 interface RosterPageProps {
-  jwt: string;
   match: Match;
   matchTeam: Team;
   club: ClubValues;
@@ -74,26 +73,16 @@ interface RosterPageProps {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id, teamFlag } = context.params as { id: string; teamFlag: string };
-  const jwt = getCookie('jwt', context);
-  if (!jwt || !id || !teamFlag)
+  if (!id || !teamFlag)
     return { notFound: true };
 
   try {
     // First check if user has required role
-    const userResponse = await apiClient.get(`/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
+    const userResponse = await apiClient.get(`/users/me`);
     const user = userResponse.data;
 
     // Fetch match data
-    const matchResponse = await apiClient.get(`/matches/${id}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
+    const matchResponse = await apiClient.get(`/matches/${id}`);
     const match: Match = matchResponse.data;
 
     // Determine which team's roster to fetch
@@ -112,9 +101,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Fetch available players from the current team
     const teamPlayerResponse = await apiClient.get(
       `/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
       params: {
         sortby: 'lastName',
         // No active param - we'll fetch all players and filter on the client
@@ -149,9 +135,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             // Get the players from the partnership team
             const playersResponse = await apiClient.get(
               `/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`, {
-              headers: {
-                Authorization: `Bearer ${jwt}`,
-              },
               params: {
                 sortby: 'lastName',
                 // No active param - we'll fetch all players and filter on the client
@@ -303,9 +286,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // Fetch other matches of the same matchday
     const matchesResponse = await apiClient.get(`/matches`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
       params: {
         matchday: match.matchday.alias,
         round: match.round.alias,
@@ -321,7 +301,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     return {
       props: {
-        jwt,
         match,
         matchTeam,
         club,
@@ -355,7 +334,7 @@ const playerPositions = [
   { key: 'G', value: 'Goalie' },
 ];
 
-const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, coach, staff, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
+const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, coach, staff, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -474,11 +453,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Filter teams from the same club with the same age group and a lower team number, but not the current team
       const fetchTeams = async () => {
         try {
-          const teamsResponse = await apiClient.get(`/clubs/${club.alias}/teams`, {
-            headers: {
-              Authorization: `Bearer ${jwt}`,
-            }
-          });
+          const teamsResponse = await apiClient.get(`/clubs/${club.alias}/teams`);
           const filteredTeams = teamsResponse.data.filter((t: TeamValues) =>
             t.ageGroup === team.ageGroup && t._id !== team._id && t.active && t.teamNumber > team.teamNumber
           );
@@ -491,7 +466,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
       fetchTeams();
     }
-  }, [isCallUpModalOpen, club, team, jwt]);
+  }, [isCallUpModalOpen, club, team]);
 
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = React.useCallback((rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -618,11 +593,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       const calledPlayers = rosterList.filter(player => player.called);
       const statsPromises = calledPlayers.map(async (player) => {
         try {
-          const response = await apiClient.get(`/players/${player.player.playerId}`, {
-            headers: {
-              Authorization: `Bearer ${jwt}`,
-            }
-          });
+          const response = await apiClient.get(`/players/${player.player.playerId}`);
 
           const playerData = response.data;
           if (playerData.stats && Array.isArray(playerData.stats)) {
@@ -664,7 +635,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     if (rosterList.some(player => player.called)) {
       fetchPlayerStats();
     }
-  }, [rosterList, jwt, match.season.alias, match.tournament.alias, matchTeam.name]);
+  }, [rosterList, match.season.alias, match.tournament.alias, matchTeam.name]);
 
   // Fetch players when a team is selected
   useEffect(() => {
@@ -673,9 +644,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
         try {
           const playersResponse = await apiClient.get(
             `/players/clubs/${club.alias}/teams/${selectedCallUpTeam.alias}`, {
-            headers: {
-              Authorization: `Bearer ${jwt}`,
-            },
             params: {
               sortby: 'lastName',
               // If includeInactivePlayers is true, don't specify active param to get all players
@@ -730,7 +698,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       setCallUpPlayers([]);
       setSelectedCallUpPlayer(null);
     }
-  }, [selectedCallUpTeam, club, jwt, rosterList, includeInactivePlayers]);
+  }, [selectedCallUpTeam, club, rosterList, includeInactivePlayers]);
 
   // Check if user has permission to access roster - after all hooks
   if (!hasRosterPermission) {
@@ -1031,12 +999,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
     try {
       // Make the API call to save the roster for the main match
-      const rosterResponse = await apiClient.put(`/matches/${match._id}/${teamFlag}/roster`, rosterData.roster, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const rosterResponse = await apiClient.put(`/matches/${match._id}/${teamFlag}/roster`, rosterData.roster);
       console.log('Roster successfully saved:', rosterResponse.data);
 
       // Update match details (published status, coach, and staff) in a single API call
@@ -1046,10 +1009,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             rosterPublished: rosterData.published,
             coach: rosterData.coach,
             staff: rosterData.staff
-          }
-        }, {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
           }
         });
         console.log('Match details updated successfully (published status, coach, and staff)');
@@ -1071,13 +1030,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           // Save roster for this match
           const rosterResponse = await apiClient.put(
             `/matches/${m._id}/${matchTeamFlag}/roster`,
-            rosterData.roster,
-            {
-              headers: {
-                Authorization: `Bearer ${jwt}`,
-                'Content-Type': 'application/json'
-              }
-            }
+            rosterData.roster
           );
           console.log(`Roster successfully saved for match ${m._id} as ${matchTeamFlag} team:`, rosterResponse.data);
           cntAdditionalMatches += 1;
@@ -1089,10 +1042,6 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
                 rosterPublished: rosterData.published,
                 coach: rosterData.coach,
                 staff: rosterData.staff
-              }
-            }, {
-              headers: {
-                Authorization: `Bearer ${jwt}`,
               }
             });
             console.log(`Match details updated for match ${m._id} as ${matchTeamFlag} team (published status, coach, and staff)`);
