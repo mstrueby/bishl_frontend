@@ -105,10 +105,8 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({
           Zusatzblatt
         </h3>
         {permissions.showButtonSupplementary && (
-          <Link href={`/matches/${match._id}/supplementary`}>
-            <a className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              Bearbeiten
-            </a>
+          <Link href={`/matches/${match._id}/supplementary`} className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Bearbeiten
           </Link>
         )}
       </div>
