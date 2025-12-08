@@ -474,7 +474,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Filter teams from the same club with the same age group and a lower team number, but not the current team
       const fetchTeams = async () => {
         try {
-          const teamsResponse = await apiClient.get(`/clubs/${club.alias}/teams/`, {
+          const teamsResponse = await apiClient.get(`/clubs/${club.alias}/teams`, {
             headers: {
               Authorization: `Bearer ${jwt}`,
             }
@@ -1031,7 +1031,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
     try {
       // Make the API call to save the roster for the main match
-      const rosterResponse = await apiClient.put(`/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
+      const rosterResponse = await apiClient.put(`/matches/${match._id}/${teamFlag}/roster`, rosterData.roster, {
         headers: {
           Authorization: `Bearer ${jwt}`,
           'Content-Type': 'application/json'
@@ -1070,7 +1070,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
           // Save roster for this match
           const rosterResponse = await apiClient.put(
-            `/matches/${m._id}/${matchTeamFlag}/roster/`,
+            `/matches/${m._id}/${matchTeamFlag}/roster`,
             rosterData.roster,
             {
               headers: {
