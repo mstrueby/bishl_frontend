@@ -3,10 +3,11 @@ import useAuth from '../../../../../hooks/useAuth';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
-import axios from 'axios';
 import Layout from '../../../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import { Match, RosterPlayer, Team } from '../../../../../types/MatchValues';
+import apiClient from '../../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../../lib/errorHandler';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch, Dialog } from '@headlessui/react';
@@ -79,40 +80,38 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
+    const userResponse = await apiClient.get(`/users/me`, {
       headers: {
         'Authorization': `Bearer ${jwt}`
       }
     });
 
     const user = userResponse.data;
-    // console.log("user:", user)
 
     // Fetch match data
-    const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
+    const matchResponse = await apiClient.get(`/matches/${id}`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
     });
-    //console.log("match", matchResponse.data)
-    const match: Match = await matchResponse.data;
+    const match: Match = matchResponse.data;
 
     // Determine which team's roster to fetch
     const matchTeam: Team = teamFlag === 'home' ? match.home : match.away;
 
     // get club object
-    const clubResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}`);
-    const club: ClubValues = await clubResponse.data;
+    const clubResponse = await apiClient.get(`/clubs/${matchTeam.clubAlias}`);
+    const club: ClubValues = clubResponse.data;
 
     // get team object
-    const teamResponse = await axios.get(`${BASE_URL}/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
-    const team: TeamValues = await teamResponse.data;
+    const teamResponse = await apiClient.get(`/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
+    const team: TeamValues = teamResponse.data;
     //console.log(team)
     const teamAgeGroup = team.ageGroup;
 
     // Fetch available players from the current team
-    const teamPlayerResponse = await axios.get(
-      `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
+    const teamPlayerResponse = await apiClient.get(
+      `/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -139,8 +138,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
           try {
             // Get the team details first to add to additionalTeamsIds
-            const partnerTeamResponse = await axios.get(
-              `${BASE_URL}/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`
+            const partnerTeamResponse = await apiClient.get(
+              `/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`
             );
             const partnerTeam = partnerTeamResponse.data;
             if (partnerTeam && partnerTeam._id) {
@@ -148,8 +147,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
 
             // Get the players from the partnership team
-            const playersResponse = await axios.get(
-              `${BASE_URL}/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`, {
+            const playersResponse = await apiClient.get(
+              `/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`, {
               headers: {
                 Authorization: `Bearer ${jwt}`,
               },
@@ -166,7 +165,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
             additionalPlayers = [...additionalPlayers, ...partnershipPlayers];
           } catch (error) {
-            console.error(`Error fetching players from partnership ${partnership.clubAlias}/${partnership.teamAlias}:`, error);
+            console.error(`Error fetching players from partnership ${partnership.clubAlias}/${partnership.teamAlias}:`, getErrorMessage(error));
           }
         }
       }
@@ -303,7 +302,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
 
     // Fetch other matches of the same matchday
-    const matchesResponse = await axios.get(`${BASE_URL}/matches`, {
+    const matchesResponse = await apiClient.get(`/matches`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -475,7 +474,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Filter teams from the same club with the same age group and a lower team number, but not the current team
       const fetchTeams = async () => {
         try {
-          const teamsResponse = await axios.get(`${BASE_URL}/clubs/${club.alias}/teams/`, {
+          const teamsResponse = await apiClient.get(`/clubs/${club.alias}/teams/`, {
             headers: {
               Authorization: `Bearer ${jwt}`,
             }
@@ -485,7 +484,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           );
           setCallUpTeams(filteredTeams);
         } catch (error) {
-          console.error('Error fetching teams:', error);
+          console.error('Error fetching teams:', getErrorMessage(error));
           setCallUpModalError('Fehler beim Laden der Teams');
         }
       };
@@ -619,7 +618,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       const calledPlayers = rosterList.filter(player => player.called);
       const statsPromises = calledPlayers.map(async (player) => {
         try {
-          const response = await axios.get(`${BASE_URL}/players/${player.player.playerId}`, {
+          const response = await apiClient.get(`/players/${player.player.playerId}`, {
             headers: {
               Authorization: `Bearer ${jwt}`,
             }
@@ -645,7 +644,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
             calledMatches: 0
           };
         } catch (error) {
-          console.error(`Error fetching stats for player ${player.player.playerId}:`, error);
+          console.error(`Error fetching stats for player ${player.player.playerId}:`, getErrorMessage(error));
           return {
             playerId: player.player.playerId,
             calledMatches: 0
@@ -672,8 +671,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
     if (selectedCallUpTeam) {
       const fetchPlayers = async () => {
         try {
-          const playersResponse = await axios.get(
-            `${BASE_URL}/players/clubs/${club.alias}/teams/${selectedCallUpTeam.alias}`, {
+          const playersResponse = await apiClient.get(
+            `/players/clubs/${club.alias}/teams/${selectedCallUpTeam.alias}`, {
             headers: {
               Authorization: `Bearer ${jwt}`,
             },
@@ -720,7 +719,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
           setCallUpPlayers(filteredPlayers);
         } catch (error) {
-          console.error('Error fetching players:', error);
+          console.error('Error fetching players:', getErrorMessage(error));
           setCallUpModalError('Fehler beim Laden der Spieler');
           setCallUpPlayers([]);
         }
@@ -741,10 +740,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           <div className="text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
             <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Aufstellung für diese Mannschaft zu bearbeiten.</p>
-            <Link href={`/matches/${match._id}`}>
-              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Zurück zum Spiel
-              </a>
+            <Link href={`/matches/${match._id}`} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Zurück zum Spiel
             </Link>
           </div>
         </div>
@@ -1034,7 +1031,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
     try {
       // Make the API call to save the roster for the main match
-      const rosterResponse = await axios.put(`${BASE_URL}/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
+      const rosterResponse = await apiClient.put(`/matches/${match._id}/${teamFlag}/roster/`, rosterData.roster, {
         headers: {
           Authorization: `Bearer ${jwt}`,
           'Content-Type': 'application/json'
@@ -1044,7 +1041,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
       // Update match details (published status, coach, and staff) in a single API call
       try {
-        await axios.patch(`${BASE_URL}/matches/${match._id}`, {
+        await apiClient.patch(`/matches/${match._id}`, {
           [teamFlag]: {
             rosterPublished: rosterData.published,
             coach: rosterData.coach,
@@ -1056,9 +1053,9 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           }
         });
         console.log('Match details updated successfully (published status, coach, and staff)');
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status !== 304) {
-          console.error('Error updating match details:', error);
+      } catch (error: any) {
+        if (error.response?.status !== 304) {
+          console.error('Error updating match details:', getErrorMessage(error));
         } else {
           console.log('Match details not changed (304)');
         }
@@ -1072,8 +1069,8 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
           const matchTeamFlag: 'home' | 'away' = m.home.teamId === matchTeam.teamId ? 'home' : 'away';
 
           // Save roster for this match
-          const rosterResponse = await axios.put(
-            `${BASE_URL}/matches/${m._id}/${matchTeamFlag}/roster/`,
+          const rosterResponse = await apiClient.put(
+            `/matches/${m._id}/${matchTeamFlag}/roster/`,
             rosterData.roster,
             {
               headers: {
@@ -1087,7 +1084,7 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
           // Update match details (published status, coach, and staff) in a single API call
           try {
-            await axios.patch(`${BASE_URL}/matches/${m._id}`, {
+            await apiClient.patch(`/matches/${m._id}`, {
               [matchTeamFlag]: {
                 rosterPublished: rosterData.published,
                 coach: rosterData.coach,
@@ -1099,16 +1096,16 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
               }
             });
             console.log(`Match details updated for match ${m._id} as ${matchTeamFlag} team (published status, coach, and staff)`);
-          } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status !== 304) {
-              console.error(`Error updating match details for match ${m._id}:`, error);
+          } catch (error: any) {
+            if (error.response?.status !== 304) {
+              console.error(`Error updating match details for match ${m._id}:`, getErrorMessage(error));
             } else {
               console.log(`Match details not changed (304) for match ${m._id}`);
             }
           }
 
         } catch (error) {
-          console.error('Error saving roster for additional match:', error);
+          console.error('Error saving roster for additional match:', getErrorMessage(error));
           setError(`Fehler beim Speichern der Aufstellung für ${m.home.shortName} vs ${m.away.shortName}`);
         }
       }
@@ -1116,12 +1113,12 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
       // Show success message or redirect
       setError(null);
       // You could add a success message here if needed
-    } catch (error) {
+    } catch (error: any) {
       // Ignore 304 Not Modified errors as they're not actual errors
-      if (axios.isAxiosError(error) && error.response?.status === 304) {
+      if (error.response?.status === 304) {
         console.log('Match not changed (304 Not Modified), continuing normally');
       } else {
-        console.error('Error saving roster/match:', error);
+        console.error('Error saving roster/match:', getErrorMessage(error));
         setError('Aufstellung konnte nicht gespeichert werden.');
       }
     } finally {
@@ -1149,13 +1146,11 @@ const RosterPage = ({ jwt, match, matchTeam, club, team, roster, rosterPublished
 
   return (
     <Layout>
-      <Link href={backLink}>
-        <a className="flex items-center" aria-label="Back">
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            {backLink.includes('/matchcenter') ? 'Match Center' : backLink.includes('/calendar') ? 'Kalender' : tournamentConfigs[match.tournament.alias]?.name}
-          </span>
-        </a>
+      <Link href={backLink} className="flex items-center" aria-label="Back">
+        <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+        <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+          {backLink.includes('/matchcenter') ? 'Match Center' : backLink.includes('/calendar') ? 'Kalender' : tournamentConfigs[match.tournament.alias]?.name}
+        </span>
       </Link>
 
       <MatchHeader

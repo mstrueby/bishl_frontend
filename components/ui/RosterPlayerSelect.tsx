@@ -1,9 +1,9 @@
 import React, { Fragment, useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { Combobox, Transition } from '@headlessui/react';
-import { RosterPlayer, EventPlayer } from '../../types/MatchValues';
-import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
-import { MinusCircleIcon} from '@heroicons/react/24/outline'
+import { RosterPlayer } from '../../types/MatchValues';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+import { MinusCircleIcon } from '@heroicons/react/24/outline';
 import { classNames } from '../../tools/utils';
 
 interface RosterPlayerSelectProps {
