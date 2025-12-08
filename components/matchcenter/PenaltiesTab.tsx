@@ -5,7 +5,6 @@ import PenaltyList from '../ui/PenaltyList';
 
 interface PenaltiesTabProps {
   match: Match;
-  jwt: string;
   permissions: {
     showButtonPenaltiesHome: boolean;
     showButtonPenaltiesAway: boolean;
@@ -20,7 +19,6 @@ interface PenaltiesTabProps {
 
 const PenaltiesTab: React.FC<PenaltiesTabProps> = ({
   match,
-  jwt,
   permissions,
   refreshMatchData,
   setIsHomePenaltyDialogOpen,
@@ -32,7 +30,6 @@ const PenaltiesTab: React.FC<PenaltiesTabProps> = ({
     <div className="flex flex-col md:flex-row md:space-x-8">
       <div className="w-full md:w-1/2 mb-6 md:mb-0">
         <PenaltyList
-          jwt={jwt}
           teamName={match.home.fullName}
           matchId={match._id}
           teamFlag="home"
@@ -47,7 +44,6 @@ const PenaltiesTab: React.FC<PenaltiesTabProps> = ({
       </div>
       <div className="w-full md:w-1/2">
         <PenaltyList
-          jwt={jwt}
           teamName={match.away.fullName}
           matchId={match._id}
           teamFlag="away"
