@@ -1,10 +1,9 @@
+
 import React, { Fragment, useState, useEffect, useRef } from 'react';
 import useAuth from '../../../../../hooks/useAuth';
 import { useRouter } from 'next/router';
-import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import Layout from '../../../../../components/Layout';
-import { getCookie } from 'cookies-next';
 import { MatchValues, RosterPlayer, Team } from '../../../../../types/MatchValues';
 import apiClient from '../../../../../lib/apiClient';
 import { getErrorMessage } from '../../../../../lib/errorHandler';
@@ -18,6 +17,7 @@ import RosterPlayerSelect from '../../../../../components/ui/RosterPlayerSelect'
 import RosterList from '../../../../../components/ui/RosterList';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
+import LoadingState from '../../../../../components/ui/LoadingState';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import RosterPDF from '../../../../../components/pdf/RosterPDF';
 import { CldImage } from 'next-cloudinary';
@@ -45,280 +45,6 @@ interface AvailablePlayer {
   active?: boolean;
 }
 
-interface RosterPageProps {
-  match: MatchValues;
-  matchTeam: Team;
-  club: ClubValues;
-  team: TeamValues;
-  roster: RosterPlayer[];
-  rosterPublished: boolean;
-  coach: {
-    firstName: string;
-    lastName: string;
-    licence: string
-  };
-  staff: {
-    firstName: string;
-    lastName: string;
-    role: string;
-  }[];
-  teamFlag: string;
-  availablePlayers: AvailablePlayer[];
-  allAvailablePlayers: AvailablePlayer[];
-  matches: MatchValues[];
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id, teamFlag } = context.params as { id: string; teamFlag: string };
-  if (!id || !teamFlag)
-    return { notFound: true };
-
-  try {
-    // Fetch match data
-    const matchResponse = await apiClient.get(`/matches/${id}`);
-    const match: MatchValues = matchResponse.data;
-
-    // Determine which team's roster to fetch
-    const matchTeam: Team = teamFlag === 'home' ? match.home : match.away;
-
-    // get club object
-    const clubResponse = await apiClient.get(`/clubs/${matchTeam.clubAlias}`);
-    const club: ClubValues = clubResponse.data;
-
-    // get team object
-    const teamResponse = await apiClient.get(`/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`);
-    const team: TeamValues = teamResponse.data;
-    //console.log(team)
-    const teamAgeGroup = team.ageGroup;
-
-    // Fetch available players from the current team
-    const teamPlayerResponse = await apiClient.get(
-      `/players/clubs/${matchTeam.clubAlias}/teams/${matchTeam.teamAlias}`, {
-      params: {
-        sortby: 'lastName',
-        // No active param - we'll fetch all players and filter on the client
-        all: true
-      }
-    }
-    );
-    const teamPlayers: PlayerValues[] = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
-    let allTeamsPlayers: PlayerValues[] = [];
-    let additionalPlayers: PlayerValues[] = [];
-    let additionalTeamsIds: string[] = [];
-
-    // Handle team partnerships if they exist
-    if (team.teamPartnership && Array.isArray(team.teamPartnership) && team.teamPartnership.length > 0) {
-      console.log(`Found ${team.teamPartnership.length} team partnerships`);
-
-      // Fetch players from each partnership team
-      for (const partnership of team.teamPartnership) {
-        if (partnership.clubAlias && partnership.teamAlias) {
-          console.log(`Getting players from partnership: ${partnership.clubAlias}/${partnership.teamAlias}`);
-
-          try {
-            // Get the team details first to add to additionalTeamsIds
-            const partnerTeamResponse = await apiClient.get(
-              `/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`
-            );
-            const partnerTeam = partnerTeamResponse.data;
-            if (partnerTeam && partnerTeam._id) {
-              additionalTeamsIds.push(partnerTeam._id);
-            }
-
-            // Get the players from the partnership team
-            const playersResponse = await apiClient.get(
-              `/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`, {
-              params: {
-                sortby: 'lastName',
-                // No active param - we'll fetch all players and filter on the client
-                all: true
-              }
-            });
-
-            const partnershipPlayers = Array.isArray(playersResponse.data.results)
-              ? playersResponse.data.results
-              : [];
-
-            additionalPlayers = [...additionalPlayers, ...partnershipPlayers];
-          } catch (error) {
-            console.error(`Error fetching players from partnership ${partnership.clubAlias}/${partnership.teamAlias}:`, getErrorMessage(error));
-          }
-        }
-      }
-    }
-
-    {/**
-    // Define age group progression map
-    const ageGroupMergeMap: { [key: string]: string } = {
-      'Junioren': 'Jugend',
-      'Jugend': 'Schüler',
-      'Schüler': 'Bambini',
-      'Bambini': 'Mini'
-    };
-
-    // Check if the current team's age group has younger teams to merge from
-    const youngerAgeGroup = ageGroupMergeMap[teamAgeGroup];
-
-    if (youngerAgeGroup) {
-      // Find teams from the younger age group
-      const youngerTeams: TeamValues[] = club.teams.filter((team: TeamValues) =>
-        team.ageGroup === youngerAgeGroup && team.active
-      );
-
-      if (youngerTeams.length > 0) {
-        console.log(`Found ${youngerTeams.length} ${youngerAgeGroup} teams to merge with ${teamAgeGroup}`);
-        const youngerTeamIds = youngerTeams.map((team: TeamValues) => team._id);
-        additionalTeamsIds = [...additionalTeamsIds, ...youngerTeamIds];
-
-        // Fetch players from each younger team
-        for (const youngerTeam of youngerTeams) {
-          console.log(`Getting players from ${youngerAgeGroup} team: ${youngerTeam.name}`);
-
-          try {
-            const playersResponse = await axios.get(
-              `${BASE_URL}/players/clubs/${matchTeam.clubAlias}/teams/${youngerTeam.alias}`, {
-              headers: {
-                Authorization: `Bearer ${jwt}`,
-              },
-              params: {
-                sortby: 'lastName',
-                active: 'true'
-              }
-            }
-            );
-
-            const youngerTeamPlayers = Array.isArray(playersResponse.data.results)
-              ? playersResponse.data.results
-              : [];
-
-            additionalPlayers = [...additionalPlayers, ...youngerTeamPlayers];
-          } catch (error) {
-            console.error(`Error fetching players from ${youngerTeam.name}:`, error);
-          }
-        }
-      }
-    }
-    */}
-
-
-    // Combine the players from the current team and all additional players
-    allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
-    console.log(`Total players after merging: ${allTeamsPlayers.length}`);
-
-    // Debug log to check what's coming back
-    console.log("Additional team IDs:", additionalTeamsIds);
-    console.log("Team players count:", allTeamsPlayers.length);
-    //console.log("All teams players:", allTeamsPlayers);
-    // loop through assignedTeams.clubs[].teams in availablePlayers to find team with teamId=matchTeam.teamId. get passNo and jerseyNo
-    const availablePlayers = allTeamsPlayers.map((teamPlayer: PlayerValues) => {
-      // Check if assignedTeams exists and is an array
-      if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
-        console.log("Player missing assignedTeams:", teamPlayer._id);
-        return null;
-      }
-
-      // Find the team assignment that matches the target team ID or matches the Bambini team alias
-      //console.log("teamPlayer name:", teamPlayer.firstName, teamPlayer.lastName)
-      //console.log("teamPlayer.assignedTeams:", JSON.stringify(teamPlayer.assignedTeams, null, 2));
-      const assignedTeam = teamPlayer.assignedTeams
-        .flatMap((assignment: Assignment) => assignment.teams || [])
-        .find((team: AssignmentTeam) => {
-          if (!team) return false;
-          if (team.teamId === matchTeam.teamId) return true;
-          return additionalTeamsIds.some(id => id === team.teamId);
-        });
-      // Determine if this is a player from a merged team
-      const isFromYoungerTeam = additionalTeamsIds.some(id => assignedTeam && assignedTeam.teamId === id);
-
-      // Find original team name if the player is from another team
-      let originalTeamName = null;
-      if (isFromYoungerTeam && assignedTeam) {
-        // Find the team from club.teams that matches the assignedTeam.teamId
-        const originalTeam = club.teams.find(t => t._id === assignedTeam.teamId);
-        if (originalTeam) {
-          originalTeamName = originalTeam.name;
-        }
-      }
-
-      return assignedTeam ? {
-        _id: teamPlayer._id,
-        firstName: teamPlayer.firstName,
-        lastName: teamPlayer.lastName,
-        displayFirstName: teamPlayer.displayFirstName,
-        displayLastName: teamPlayer.displayLastName,
-        position: teamPlayer.position || 'Skater',
-        fullFaceReq: teamPlayer.fullFaceReq,
-        source: teamPlayer.source,
-        imageUrl: teamPlayer.imageUrl,
-        imageVisible: teamPlayer.imageVisible,
-        passNo: assignedTeam.passNo,
-        jerseyNo: assignedTeam.jerseyNo,
-        called: false,
-        originalTeam: originalTeamName, // Add the original team name if available
-        active: assignedTeam.active // Include active status from team assignment
-      } : null;
-    }).filter((player: AvailablePlayer | null) => player !== null);
-
-    // Sort available players by lastName, then by firstName
-    const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
-      // First sort by lastName
-      const lastNameComparison = ((a?.lastName ?? "") as string).localeCompare((b?.lastName ?? "") as string);
-      // If lastName is the same, sort by firstName
-      return lastNameComparison !== 0 ? lastNameComparison :
-        ((a?.firstName ?? "") as string).localeCompare((b?.firstName ?? "") as string);
-    });
-
-    // Keep both the full list and a filtered list of available players
-    const rosterPlayerIds = (matchTeam.roster || []).map(rp => rp.player.playerId);
-    const filteredAvailablePlayers = sortedAvailablePlayers.filter(player =>
-      !rosterPlayerIds.includes(player?._id ?? '')
-    );
-
-    console.log("All available players:", availablePlayers.length);
-    console.log("Filtered available players for roster:", filteredAvailablePlayers.length);
-
-    // Fetch other matches of the same matchday
-    const matchesResponse = await apiClient.get(`/matches`, {
-      params: {
-        matchday: match.matchday.alias,
-        round: match.round.alias,
-        season: match.season.alias,
-        tournament: match.tournament.alias,
-        club: matchTeam.clubAlias,
-        team: matchTeam.teamAlias
-      },
-    });
-    const matches: MatchValues[] = matchesResponse.data;
-
-
-
-    return {
-      props: {
-        match,
-        matchTeam,
-        club,
-        team,
-        roster: matchTeam.roster || [],
-        rosterPublished: matchTeam.rosterPublished || false,
-        coach: matchTeam.coach || {},
-        staff: matchTeam.staff || [],
-        teamFlag,
-        availablePlayers: filteredAvailablePlayers || [],
-        allAvailablePlayers: availablePlayers || [],
-        matches: matches || [],
-      }
-    };
-
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    return {
-      notFound: true
-    };
-  }
-};
-
-
-
 // Player position options
 const playerPositions = [
   { key: 'F', value: 'Feldspieler' },
@@ -327,35 +53,47 @@ const playerPositions = [
   { key: 'G', value: 'Goalie' },
 ];
 
-const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: initialRosterPublished, coach, staff, teamFlag, availablePlayers = [], allAvailablePlayers = [], matches }: RosterPageProps) => {
+const RosterPage = () => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { id, teamFlag } = router.query as { id: string; teamFlag: string };
+  const { user, loading: authLoading } = useAuth();
 
   // ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL LOGIC
+  const [pageLoading, setPageLoading] = useState(true);
+  const [match, setMatch] = useState<MatchValues | null>(null);
+  const [matchTeam, setMatchTeam] = useState<Team | null>(null);
+  const [club, setClub] = useState<ClubValues | null>(null);
+  const [team, setTeam] = useState<TeamValues | null>(null);
+  const [matches, setMatches] = useState<MatchValues[]>([]);
+  const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>([]);
+  const [matchdayOwner, setMatchdayOwner] = useState<{
+    clubId: string;
+    clubName: string;
+    clubAlias: string;
+  } | null>(null);
+
   // Calculate back link once during initialization
   const getBackLink = () => {
     const referrer = typeof window !== 'undefined' ? document.referrer : '';
-    // Check referrer if it exists
-    if (referrer && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
+    if (referrer && match && referrer.includes(`/tournaments/${match.tournament.alias}`)) {
       return `/tournaments/${match.tournament.alias}`;
     }
-    // Check if there's a query parameter indicating source
-    else if (router.query.from === 'tournament') {
+    else if (router.query.from === 'tournament' && match) {
       return `/tournaments/${match.tournament.alias}`;
     }
     else if (router.query.from === 'calendar') {
       return `/calendar`;
     }
-    else if (router.query.from === 'matchcenter') {
+    else if (router.query.from === 'matchcenter' && match) {
       return `/matches/${match._id}/matchcenter`;
     }
-    // Default to match sheet
-    else {
+    else if (match) {
       return `/matches/${match._id}`;
     }
+    return '/';
   };
 
-  const [backLink] = useState(() => getBackLink());
+  const [backLink, setBackLink] = useState('/');
   const playerSelectRef = useRef<any>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const jerseyNumberRef = useRef<HTMLInputElement>(null);
@@ -364,10 +102,9 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
   const [savingRoster, setSavingRoster] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
   const [playerNumber, setPlayerNumber] = useState<number>(0);
-  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]); // Default to 'F' (Feldspieler)
-  const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>(availablePlayers || []);
-  const [allAvailablePlayersList, setAllAvailablePlayersList] = useState<AvailablePlayer[]>(allAvailablePlayers || []);
-  const [rosterPublished, setRosterPublished] = useState<boolean>(initialRosterPublished);
+  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
+  const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>([]);
+  const [rosterPublished, setRosterPublished] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
   const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
@@ -384,108 +121,229 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
   const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{ [playerId: string]: number }>({});
-  const [matchdayOwner, setMatchdayOwner] = useState<{
-    clubId: string;
-    clubName: string;
-    clubAlias: string;
-  } | null>(null);
   const [coachData, setCoachData] = useState({
-    firstName: coach?.firstName || '',
-    lastName: coach?.lastName || '',
-    licence: coach?.licence || ''
+    firstName: '',
+    lastName: '',
+    licence: ''
   });
-  const [staffData, setStaffData] = useState(() => {
-    const initialStaff = staff || [];
-    // Start with existing staff or at least one empty slot
-    const staffArray = [...initialStaff];
-    if (staffArray.length === 0) {
-      staffArray.push({ firstName: '', lastName: '', role: '' });
-    }
-    // Limit to 4 staff members maximum
-    return staffArray.slice(0, 4);
-  });
-
-  // Calculate permissions for this user and match
-  const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner || undefined, backLink.includes('matchcenter'));
-  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
-
-  // Fetch matchday owner
-  useEffect(() => {
-    const fetchMatchdayOwner = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
-        );
-        if (response.ok) {
-          const matchdayData = await response.json();
-          setMatchdayOwner(matchdayData.owner || null);
-        }
-      } catch (error) {
-        console.error('Error fetching matchday owner:', error);
-      }
-    };
-
-    fetchMatchdayOwner();
-  }, [match.tournament.alias, match.season.alias, match.round.alias, match.matchday.alias]);
-
-  // Handler to close the success message
-  const handleCloseSuccessMessage = () => {
-    setSuccessMessage(null);
-  };
-  const handleCloseErrorMesssage = () => {
-    setError(null);
-  }
-
-  const handleCloseModalError = () => {
-    setModalError(null);
-  };
-
-  // Fetch teams from the same club with the same age group
-  useEffect(() => {
-    if (isCallUpModalOpen && club && team) {
-      // Filter teams from the same club with the same age group and a lower team number, but not the current team
-      const fetchTeams = async () => {
-        try {
-          const teamsResponse = await apiClient.get(`/clubs/${club.alias}/teams`);
-          const filteredTeams = teamsResponse.data.filter((t: TeamValues) =>
-            t.ageGroup === team.ageGroup && t._id !== team._id && t.active && t.teamNumber > team.teamNumber
-          );
-          setCallUpTeams(filteredTeams);
-        } catch (error) {
-          console.error('Error fetching teams:', getErrorMessage(error));
-          setCallUpModalError('Fehler beim Laden der Teams');
-        }
-      };
-
-      fetchTeams();
-    }
-  }, [isCallUpModalOpen, club, team]);
+  const [staffData, setStaffData] = useState<{ firstName: string; lastName: string; role: string; }[]>([
+    { firstName: '', lastName: '', role: '' }
+  ]);
+  const [rosterList, setRosterList] = useState<RosterPlayer[]>([]);
 
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = React.useCallback((rosterToSort: RosterPlayer[]): RosterPlayer[] => {
     if (!rosterToSort || rosterToSort.length === 0) return [];
 
     return [...rosterToSort].sort((a, b) => {
-      // Define position priorities (C = 1, A = 2, G = 3, F = 4)
       const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
-
-      // Get priorities
       const posA = positionPriority[a.playerPosition.key] || 99;
       const posB = positionPriority[b.playerPosition.key] || 99;
 
-      // First sort by position priority
       if (posA !== posB) {
         return posA - posB;
       }
 
-      // If positions are the same, sort by jersey number
       const jerseyA = a.player.jerseyNumber || 999;
       const jerseyB = b.player.jerseyNumber || 999;
       return jerseyA - jerseyB;
     });
   }, []);
 
-  const minSkaterCount = team.ageGroup === 'HERREN' || team.ageGroup === 'DAMEN' ? 4 : 8;
+  // Fetch all data on mount
+  useEffect(() => {
+    if (authLoading || !user || !id || !teamFlag) return;
+
+    const fetchData = async () => {
+      try {
+        setPageLoading(true);
+
+        // Fetch match data
+        const matchResponse = await apiClient.get(`/matches/${id}`);
+        const matchData: MatchValues = matchResponse.data;
+        setMatch(matchData);
+
+        const matchTeamData: Team = teamFlag === 'home' ? matchData.home : matchData.away;
+        setMatchTeam(matchTeamData);
+        setRosterList(sortRoster(matchTeamData.roster || []));
+        setRosterPublished(matchTeamData.rosterPublished || false);
+        setCoachData({
+          firstName: matchTeamData.coach?.firstName || '',
+          lastName: matchTeamData.coach?.lastName || '',
+          licence: matchTeamData.coach?.licence || ''
+        });
+        const initialStaff = matchTeamData.staff || [];
+        const staffArray = [...initialStaff];
+        if (staffArray.length === 0) {
+          staffArray.push({ firstName: '', lastName: '', role: '' });
+        }
+        setStaffData(staffArray.slice(0, 4));
+
+        // Get club object
+        const clubResponse = await apiClient.get(`/clubs/${matchTeamData.clubAlias}`);
+        const clubData: ClubValues = clubResponse.data;
+        setClub(clubData);
+
+        // Get team object
+        const teamResponse = await apiClient.get(`/clubs/${matchTeamData.clubAlias}/teams/${matchTeamData.teamAlias}`);
+        const teamData: TeamValues = teamResponse.data;
+        setTeam(teamData);
+
+        // Fetch available players from the current team
+        const teamPlayerResponse = await apiClient.get(
+          `/players/clubs/${matchTeamData.clubAlias}/teams/${matchTeamData.teamAlias}`, {
+          params: {
+            sortby: 'lastName',
+            all: true
+          }
+        });
+        const teamPlayers: PlayerValues[] = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
+        let allTeamsPlayers: PlayerValues[] = [];
+        let additionalPlayers: PlayerValues[] = [];
+        let additionalTeamsIds: string[] = [];
+
+        // Handle team partnerships if they exist
+        if (teamData.teamPartnership && Array.isArray(teamData.teamPartnership) && teamData.teamPartnership.length > 0) {
+          for (const partnership of teamData.teamPartnership) {
+            if (partnership.clubAlias && partnership.teamAlias) {
+              try {
+                const partnerTeamResponse = await apiClient.get(
+                  `/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`
+                );
+                const partnerTeam = partnerTeamResponse.data;
+                if (partnerTeam && partnerTeam._id) {
+                  additionalTeamsIds.push(partnerTeam._id);
+                }
+
+                const playersResponse = await apiClient.get(
+                  `/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`, {
+                  params: {
+                    sortby: 'lastName',
+                    all: true
+                  }
+                });
+
+                const partnershipPlayers = Array.isArray(playersResponse.data.results)
+                  ? playersResponse.data.results
+                  : [];
+
+                additionalPlayers = [...additionalPlayers, ...partnershipPlayers];
+              } catch (error) {
+                console.error(`Error fetching players from partnership:`, getErrorMessage(error));
+              }
+            }
+          }
+        }
+
+        // Combine the players from the current team and all additional players
+        allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
+
+        const availablePlayers = allTeamsPlayers.map((teamPlayer: PlayerValues) => {
+          if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
+            return null;
+          }
+
+          const assignedTeam = teamPlayer.assignedTeams
+            .flatMap((assignment: Assignment) => assignment.teams || [])
+            .find((team: AssignmentTeam) => {
+              if (!team) return false;
+              if (team.teamId === matchTeamData.teamId) return true;
+              return additionalTeamsIds.some(id => id === team.teamId);
+            });
+
+          const isFromYoungerTeam = additionalTeamsIds.some(id => assignedTeam && assignedTeam.teamId === id);
+
+          let originalTeamName = null;
+          if (isFromYoungerTeam && assignedTeam) {
+            const originalTeam = clubData.teams.find(t => t._id === assignedTeam.teamId);
+            if (originalTeam) {
+              originalTeamName = originalTeam.name;
+            }
+          }
+
+          return assignedTeam ? {
+            _id: teamPlayer._id,
+            firstName: teamPlayer.firstName,
+            lastName: teamPlayer.lastName,
+            displayFirstName: teamPlayer.displayFirstName,
+            displayLastName: teamPlayer.displayLastName,
+            position: teamPlayer.position || 'Skater',
+            fullFaceReq: teamPlayer.fullFaceReq,
+            source: teamPlayer.source,
+            imageUrl: teamPlayer.imageUrl,
+            imageVisible: teamPlayer.imageVisible,
+            passNo: assignedTeam.passNo,
+            jerseyNo: assignedTeam.jerseyNo,
+            called: false,
+            originalTeam: originalTeamName,
+            active: assignedTeam.active
+          } : null;
+        }).filter((player: AvailablePlayer | null) => player !== null);
+
+        const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
+          const lastNameComparison = ((a?.lastName ?? "") as string).localeCompare((b?.lastName ?? "") as string);
+          return lastNameComparison !== 0 ? lastNameComparison :
+            ((a?.firstName ?? "") as string).localeCompare((b?.firstName ?? "") as string);
+        });
+
+        setAllAvailablePlayersList(sortedAvailablePlayers);
+
+        const rosterPlayerIds = (matchTeamData.roster || []).map(rp => rp.player.playerId);
+        const filteredAvailablePlayers = sortedAvailablePlayers.filter(player =>
+          !rosterPlayerIds.includes(player?._id ?? '')
+        );
+        setAvailablePlayersList(filteredAvailablePlayers);
+
+        // Fetch other matches of the same matchday
+        const matchesResponse = await apiClient.get(`/matches`, {
+          params: {
+            matchday: matchData.matchday.alias,
+            round: matchData.round.alias,
+            season: matchData.season.alias,
+            tournament: matchData.tournament.alias,
+            club: matchTeamData.clubAlias,
+            team: matchTeamData.teamAlias
+          },
+        });
+        setMatches(matchesResponse.data || []);
+
+        // Fetch matchday owner
+        try {
+          const matchdayResponse = await apiClient.get(
+            `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`
+          );
+          setMatchdayOwner(matchdayResponse.data?.owner || null);
+        } catch (error) {
+          console.error('Error fetching matchday owner:', error);
+        }
+
+      } catch (error) {
+        console.error('Error fetching data:', getErrorMessage(error));
+        setError('Fehler beim Laden der Daten');
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [authLoading, user, id, teamFlag, sortRoster]);
+
+  // Update back link when match is loaded
+  useEffect(() => {
+    if (match) {
+      setBackLink(getBackLink());
+    }
+  }, [match, router.query.from]);
+
+  const minSkaterCount = team?.ageGroup === 'HERREN' || team?.ageGroup === 'DAMEN' ? 4 : 8;
+
+  // Calculate permissions for this user and match
+  const permissions = match && user ? calculateMatchButtonPermissions(user, match, matchdayOwner || undefined, backLink.includes('matchcenter')) : {
+    showButtonRosterHome: false,
+    showButtonRosterAway: false,
+    showButtonSupplementary: false
+  };
+  const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
 
   // Check if all requirements are met for publishing the roster
   const isRosterValid = () => {
@@ -504,85 +362,72 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
     return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinSkater && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
   };
 
-  // Fetch players when a team is selected
-  const [rosterList, setRosterList] = useState<RosterPlayer[]>(sortRoster(roster || []));
+  // Memoized PDF download link
+  const pdfDownloadLink = React.useMemo(() => {
+    if (!match || !team || !matchTeam) return null;
 
-  // Memoized PDF download link to avoid recreating on every render
-  const pdfDownloadLink = React.useMemo(() => (
-    <PDFDownloadLink
-      document={
-        <RosterPDF
-          teamFlag={teamFlag}
-          matchDate={match.startDate}
-          venue={match.venue.name}
-          roster={sortRoster(rosterList)}
-          teamLogo={team.logoUrl}
-          tournament={match.tournament.name}
-          round={match.round.name}
-          homeTeam={match.home}
-          awayTeam={match.away}
-          coach={coachData}
-          staff={staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim())}
-          userEmail={user?.email || ''} // Pass user email here
-        />
-      }
-      fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
-      className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-    >
-      {({ loading }) => (
-        <>
-          <span className="block sm:hidden">PDF</span>
-          <span className="hidden sm:block">{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
-        </>
-      )}
-    </PDFDownloadLink>
-  ), [teamFlag, match.startDate, match.venue.name, match.tournament.name, match.round.name, match.home, match.away, team.alias, team.logoUrl, rosterList, coachData, staffData, user?.email, sortRoster]);
-
-  {/** Debugging focus events
-  useEffect(() => {
-    const logFocus = (e: FocusEvent) => {
-      console.log('Focused:', document.activeElement);
-    };
-    window.addEventListener('focusin', logFocus);
-    return () => {
-      window.removeEventListener('focusin', logFocus);
-    };
-  }, []);
-  */}
+    return (
+      <PDFDownloadLink
+        document={
+          <RosterPDF
+            teamFlag={teamFlag}
+            matchDate={match.startDate}
+            venue={match.venue.name}
+            roster={sortRoster(rosterList)}
+            teamLogo={team.logoUrl}
+            tournament={match.tournament.name}
+            round={match.round.name}
+            homeTeam={match.home}
+            awayTeam={match.away}
+            coach={coachData}
+            staff={staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim())}
+            userEmail={user?.email || ''}
+          />
+        }
+        fileName={`roster-${team.alias}-${new Date().toISOString().split('T')[0]}.pdf`}
+        className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+      >
+        {({ loading }) => (
+          <>
+            <span className="block sm:hidden">PDF</span>
+            <span className="hidden sm:block">{loading ? 'Generiere PDF...' : 'PDF herunterladen'}</span>
+          </>
+        )}
+      </PDFDownloadLink>
+    );
+  }, [teamFlag, match, team, matchTeam, rosterList, coachData, staffData, user?.email, sortRoster]);
 
   // Update available players list when the toggle changes
   useEffect(() => {
     if (includeInactivePlayers) {
-      // Use all players when including inactive
       const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
       const filteredPlayers = allAvailablePlayersList.filter(player =>
         !rosterPlayerIds.includes(player._id)
       );
       setAvailablePlayersList(filteredPlayers);
     } else {
-      // Only show active players (filter out inactive from allAvailablePlayersList)
       const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
       const filteredPlayers = allAvailablePlayersList.filter(player =>
         !rosterPlayerIds.includes(player._id) &&
-        (player.active !== false) // Only include players where active is not false
+        (player.active !== false)
       );
       setAvailablePlayersList(filteredPlayers);
     }
-  }, [includeInactivePlayers, rosterList, allAvailablePlayersList, sortRoster]);
+  }, [includeInactivePlayers, rosterList, allAvailablePlayersList]);
 
   // Auto-set published to true if match is finished
-  const isMatchFinished = match.matchStatus.key === 'FINISHED';
+  const isMatchFinished = match?.matchStatus.key === 'FINISHED';
   useEffect(() => {
     if (isMatchFinished) {
       setRosterPublished(true);
     }
   }, [isMatchFinished]);
 
-  // Handle focus after call-up modal closes - removed automatic focus
-
   // Fetch player stats for called players
   useEffect(() => {
     const fetchPlayerStats = async () => {
+      if (!match || !matchTeam) return;
+
       const calledPlayers = rosterList.filter(player => player.called);
       const statsPromises = calledPlayers.map(async (player) => {
         try {
@@ -590,7 +435,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
 
           const playerData = response.data;
           if (playerData.stats && Array.isArray(playerData.stats)) {
-            // Find stats that match the current match context
             const matchingStats = playerData.stats.find((stat: any) =>
               stat.season?.alias === match.season.alias &&
               stat.tournament?.alias === match.tournament.alias &&
@@ -628,28 +472,44 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
     if (rosterList.some(player => player.called)) {
       fetchPlayerStats();
     }
-  }, [rosterList, match.season.alias, match.tournament.alias, matchTeam.name]);
+  }, [rosterList, match, matchTeam]);
+
+  // Fetch teams from the same club with the same age group
+  useEffect(() => {
+    if (isCallUpModalOpen && club && team) {
+      const fetchTeams = async () => {
+        try {
+          const teamsResponse = await apiClient.get(`/clubs/${club.alias}/teams`);
+          const filteredTeams = teamsResponse.data.filter((t: TeamValues) =>
+            t.ageGroup === team.ageGroup && t._id !== team._id && t.active && t.teamNumber > team.teamNumber
+          );
+          setCallUpTeams(filteredTeams);
+        } catch (error) {
+          console.error('Error fetching teams:', getErrorMessage(error));
+          setCallUpModalError('Fehler beim Laden der Teams');
+        }
+      };
+
+      fetchTeams();
+    }
+  }, [isCallUpModalOpen, club, team]);
 
   // Fetch players when a team is selected
   useEffect(() => {
-    if (selectedCallUpTeam) {
+    if (selectedCallUpTeam && club) {
       const fetchPlayers = async () => {
         try {
           const playersResponse = await apiClient.get(
             `/players/clubs/${club.alias}/teams/${selectedCallUpTeam.alias}`, {
             params: {
               sortby: 'lastName',
-              // If includeInactivePlayers is true, don't specify active param to get all players
-              // Otherwise, only get active players
               ...(includeInactivePlayers ? { all: true } : { active: 'true' })
             }
           });
 
           const players = playersResponse.data.results || [];
 
-          // Format the players to match the AvailablePlayer interface
           const formattedPlayers = players.map((player: PlayerValues) => {
-            // Find the team assignment for the selected team
             const assignedTeam = player.assignedTeams
               ?.flatMap((assignment: Assignment) => assignment.teams || [])
               .find((team: AssignmentTeam) => team && team.teamId === selectedCallUpTeam._id);
@@ -668,11 +528,10 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
               passNo: assignedTeam?.passNo || '',
               jerseyNo: assignedTeam?.jerseyNo,
               called: true,
-              active: assignedTeam?.active // Track active status
+              active: assignedTeam?.active
             };
           }).filter((player: AvailablePlayer | null) => player !== null);
 
-          // Filter out players that are already in the roster
           const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
           const filteredPlayers = formattedPlayers.filter((player: AvailablePlayer) =>
             !rosterPlayerIds.includes(player._id)
@@ -693,81 +552,63 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
     }
   }, [selectedCallUpTeam, club, rosterList, includeInactivePlayers]);
 
-  // Check if user has permission to access roster - after all hooks
-  if (!hasRosterPermission) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
-            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Aufstellung für diese Mannschaft zu bearbeiten.</p>
-            <Link href={`/matches/${match._id}`} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Zurück zum Spiel
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
+  // Handler to close the success message
+  const handleCloseSuccessMessage = () => {
+    setSuccessMessage(null);
+  };
+  const handleCloseErrorMesssage = () => {
+    setError(null);
   }
 
-  // Handle adding the selected call-up player to the available players list
+  const handleCloseModalError = () => {
+    setModalError(null);
+  };
+
   const handleConfirmCallUp = () => {
     if (!selectedCallUpPlayer) {
       setCallUpModalError('Bitte wähle einen Spieler aus');
       return;
     }
 
-    // Check if the player is already in the available players list
     if (availablePlayersList.some(p => p._id === selectedCallUpPlayer._id)) {
       setCallUpModalError('Dieser Spieler ist bereits in der Liste verfügbar');
       return;
     }
 
-    // Make sure the called attribute is set to true
     const playerWithCalled = {
       ...selectedCallUpPlayer,
       called: true
     };
 
-    // Add the player to the available players list and sort alphabetically
     setAvailablePlayersList(prev => {
       const newList = [...prev, playerWithCalled];
       return newList.sort((a, b) => {
-        // First sort by lastName
         const lastNameComparison = a.lastName.localeCompare(b.lastName);
-        // If lastName is the same, sort by firstName
         return lastNameComparison !== 0 ? lastNameComparison :
           a.firstName.localeCompare(b.firstName);
       });
     });
 
-    // Auto-select the newly called up player
     setSelectedPlayer(playerWithCalled);
 
-    // Set the jersey number if the called up player has one
     if (selectedCallUpPlayer.jerseyNo) {
       setPlayerNumber(selectedCallUpPlayer.jerseyNo);
     }
 
-    // Close the modal and reset selections
     setIsCallUpModalOpen(false);
     setSelectedCallUpTeam(null);
     setSelectedCallUpPlayer(null);
     setCallUpModalError(null);
 
-    // Modal closed successfully
-
-    // Optional: Show a success message
     setSuccessMessage(`Spieler ${selectedCallUpPlayer.firstName} ${selectedCallUpPlayer.lastName} wurde hochgemeldet und steht zur Verfügung.`);
   };
 
   const handleEditPlayer = (player: RosterPlayer) => {
     setEditingPlayer(player);
     setEditPlayerNumber(player.player.jerseyNumber);
-    // Find the position in playerPositions that matches the player's position
     const position = playerPositions.find(pos => pos.key === player.playerPosition.key);
-    setEditPlayerPosition(position || playerPositions[0]); // Default to 'F' if not found
-    setModalError(null); // Clear any modal errors when opening the dialog
+    setEditPlayerPosition(position || playerPositions[0]);
+    setModalError(null);
     setError(null)
     setIsEditModalOpen(true);
   };
@@ -775,7 +616,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
   const handleSaveEdit = () => {
     if (!editingPlayer) return;
 
-    // Check if trying to change to Captain when another player is already Captain
     if (editPlayerPosition.key === 'C' &&
       rosterList.some(player =>
         player.playerPosition.key === 'C' &&
@@ -785,7 +625,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
       return;
     }
 
-    // Check if trying to change to Assistant when another player is already Assistant
     if (editPlayerPosition.key === 'A' &&
       rosterList.some(player =>
         player.playerPosition.key === 'A' &&
@@ -795,7 +634,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
       return;
     }
 
-    // Check if trying to add more than 2 Goalies
     if (editPlayerPosition.key === 'G' && editingPlayer.playerPosition.key !== 'G') {
       const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
       if (goalieCount >= 2) {
@@ -804,7 +642,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
       }
     }
 
-    // Check if trying to add more than 14 Feldspieler
     if (editPlayerPosition.key === 'F' && editingPlayer.playerPosition.key !== 'F') {
       const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
       if (feldspielerCount >= 14) {
@@ -839,38 +676,22 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
     setModalError(null);
   };
 
-  if (loading) {
-    return <Layout><div>Loading...</div></Layout>;
-  }
-
-  if (!match) {
-    return <Layout><div>Match not found</div></Layout>;
-  }
-
-  // Filter out players that are already in the roster
-  //const availablePlayers = allPlayers.filter(player =>
-  //    !rosterList.some(rp => rp.id === player._id)
-  //);
-
   const handleAddPlayer = async () => {
     if (!selectedPlayer) {
       setError('Wähle einen Spieler aus');
       return;
     }
 
-    // Check if trying to add a Captain when one already exists
     if (playerPosition.key === 'C' && rosterList.some(player => player.playerPosition.key === 'C')) {
       setError('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
       return;
     }
 
-    // Check if trying to add an Assistant when one already exists
     if (playerPosition.key === 'A' && rosterList.some(player => player.playerPosition.key === 'A')) {
       setError('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
       return;
     }
 
-    // Check if trying to add more than 2 Goalies
     if (playerPosition.key === 'G') {
       const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
       if (goalieCount >= 2) {
@@ -879,7 +700,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
       }
     }
 
-    // Check if trying to add more than 14 Feldspieler
     if (playerPosition.key === 'F') {
       const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
       if (feldspielerCount >= 14) {
@@ -888,10 +708,8 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
       }
     }
 
-    // Set playerNumber to the jerseyNo from playerDetails if it exists and playerNumber is not set
     if (!playerNumber) {
-      // Find the player in playerDetails
-      const playerDetail = availablePlayers.find(player => player._id === selectedPlayer._id);
+      const playerDetail = availablePlayersList.find(player => player._id === selectedPlayer._id);
       if (playerDetail && playerDetail.jerseyNo) {
         setPlayerNumber(playerDetail.jerseyNo);
       }
@@ -900,8 +718,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
     setLoading(true);
 
     try {
-      // Here you would normally make an API call to save the player to the roster
-      // For now, we'll just update the local state
       const newPlayer: RosterPlayer = {
         player: {
           playerId: selectedPlayer._id,
@@ -921,46 +737,24 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
         penaltyMinutes: 0
       };
 
-      // Add player to roster
       const updatedRoster = [...rosterList, newPlayer];
-
-      // Sort roster using the sortRoster function
       const sortedRoster = sortRoster(updatedRoster);
-      console.log("updatedRoster", updatedRoster);
-      console.log("sortedRoster", sortedRoster);
       setRosterList(sortedRoster);
 
-      // Remove the selected player from the available players list
       if (selectedPlayer) {
         setAvailablePlayersList(prevList =>
           prevList.filter(player => player._id !== selectedPlayer._id)
         );
       }
 
-      // Reset form
       setSelectedPlayer(null);
       setPlayerNumber(0);
-      setPlayerPosition(playerPositions[0]); // Reset to 'F' (Feldspieler)
+      setPlayerPosition(playerPositions[0]);
       setError('');
 
-      // Player added successfully
-
-      // Focus the player select for next player addition
       if (playerSelectRef.current) {
         playerSelectRef.current.focus();
       }
-
-      // Here you would make the actual API call to update the roster
-      /*
-      await axios.post(`${BASE_URL}/matches/${match._id}/roster/${teamFlag}`, {
-        playerId: selectedPlayer._id,
-        playerNumber: playerNumber
-      }, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        }
-      });
-      */
 
     } catch (error) {
       console.error('Error adding player to roster:', error);
@@ -971,8 +765,7 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
   };
 
   const handleSaveRoster = async () => {
-    // For finished matches, automatically set roster to published
-    if (match.matchStatus.key === 'FINISHED') {
+    if (match?.matchStatus.key === 'FINISHED') {
       setRosterPublished(true);
     }
 
@@ -980,55 +773,43 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
     setError('');
     let cntAdditionalMatches = 0;
 
-    // Prepare the data to be sent
     const rosterData = {
       roster: rosterList,
-      published: rosterPublished || match.matchStatus.key === 'FINISHED', // Always publish if match is finished
+      published: rosterPublished || match?.matchStatus.key === 'FINISHED',
       coach: coachData,
-      staff: staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()) // Only include non-empty staff
+      staff: staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim())
     };
 
-    console.log('Roster data to be saved:', rosterData)
-
     try {
-      // Make the API call to save the roster for the main match
-      const rosterResponse = await apiClient.put(`/matches/${match._id}/${teamFlag}/roster`, rosterData.roster);
+      const rosterResponse = await apiClient.put(`/matches/${id}/${teamFlag}/roster`, rosterData.roster);
       console.log('Roster successfully saved:', rosterResponse.data);
 
-      // Update match details (published status, coach, and staff) in a single API call
       try {
-        await apiClient.patch(`/matches/${match._id}`, {
+        await apiClient.patch(`/matches/${id}`, {
           [teamFlag]: {
             rosterPublished: rosterData.published,
             coach: rosterData.coach,
             staff: rosterData.staff
           }
         });
-        console.log('Match details updated successfully (published status, coach, and staff)');
+        console.log('Match details updated successfully');
       } catch (error: any) {
         if (error.response?.status !== 304) {
           console.error('Error updating match details:', getErrorMessage(error));
-        } else {
-          console.log('Match details not changed (304)');
         }
       }
 
-      // Save roster for selected additional matches
-      console.log('Selected matches:', selectedMatches);
       for (const m of matches.filter(m => selectedMatches.includes(m._id))) {
         try {
-          // Determine if the team is home or away in this match
-          const matchTeamFlag: 'home' | 'away' = m.home.teamId === matchTeam.teamId ? 'home' : 'away';
+          const matchTeamFlag: 'home' | 'away' = m.home.teamId === matchTeam?.teamId ? 'home' : 'away';
 
-          // Save roster for this match
           const rosterResponse = await apiClient.put(
             `/matches/${m._id}/${matchTeamFlag}/roster`,
             rosterData.roster
           );
-          console.log(`Roster successfully saved for match ${m._id} as ${matchTeamFlag} team:`, rosterResponse.data);
+          console.log(`Roster successfully saved for match ${m._id}`);
           cntAdditionalMatches += 1;
 
-          // Update match details (published status, coach, and staff) in a single API call
           try {
             await apiClient.patch(`/matches/${m._id}`, {
               [matchTeamFlag]: {
@@ -1037,12 +818,9 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                 staff: rosterData.staff
               }
             });
-            console.log(`Match details updated for match ${m._id} as ${matchTeamFlag} team (published status, coach, and staff)`);
           } catch (error: any) {
             if (error.response?.status !== 304) {
               console.error(`Error updating match details for match ${m._id}:`, getErrorMessage(error));
-            } else {
-              console.log(`Match details not changed (304) for match ${m._id}`);
             }
           }
 
@@ -1052,20 +830,16 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
         }
       }
 
-      // Show success message or redirect
       setError(null);
-      // You could add a success message here if needed
     } catch (error: any) {
-      // Ignore 304 Not Modified errors as they're not actual errors
       if (error.response?.status === 304) {
-        console.log('Match not changed (304 Not Modified), continuing normally');
+        console.log('Match not changed (304 Not Modified)');
       } else {
         console.error('Error saving roster/match:', getErrorMessage(error));
         setError('Aufstellung konnte nicht gespeichert werden.');
       }
     } finally {
       setSavingRoster(false);
-      // Set success message if no error occurred
       if (!error) {
         let successMsg = '';
         if (cntAdditionalMatches === 0) {
@@ -1081,10 +855,51 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
         }
         setSuccessMessage(successMsg);
       }
-      // Scroll to the top of the page
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  // Show loading state
+  if (authLoading || pageLoading) {
+    return (
+      <Layout>
+        <LoadingState message="Lade Aufstellung..." />
+      </Layout>
+    );
+  }
+
+  // Check auth after loading
+  if (!user) {
+    router.push('/login');
+    return null;
+  }
+
+  // Check permissions after loading
+  if (!hasRosterPermission) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
+            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Aufstellung für diese Mannschaft zu bearbeiten.</p>
+            <Link href={match ? `/matches/${match._id}` : '/'} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Zurück zum Spiel
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!match || !team || !matchTeam) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <p>Match not found</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -1212,7 +1027,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === 'Tab') {
                       e.preventDefault();
-                      // Focus the position select dropdown when Enter or Tab is pressed
                       if (positionSelectRef.current) {
                         positionSelectRef.current.focus();
                       }
@@ -1235,7 +1049,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                             if (e.key === 'Enter' && !open) {
                               e.preventDefault();
                             }
-                            // Handle letter key presses for position selection
                             const key = e.key.toUpperCase();
                             if (['C', 'A', 'G', 'F'].includes(key)) {
                               e.preventDefault();
@@ -1316,7 +1129,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault();
-                  // Focus the player select for next player addition
                   if (playerSelectRef.current) {
                     playerSelectRef.current.focus();
                   }
@@ -1361,19 +1173,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                               : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
                           <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
                           <span className="hidden sm:block">Hochgemeldet</span>
-                          {/** Feasture -Switch */}
-                          {/**
-                          {playerStats[player.player.playerId] !== undefined && (
-                            <span className="ml-1 sm:ml-2 inline-flex items-center gap-x-2 mr-1">
-                              <svg viewBox="0 0 2 2" className="hidden sm:block h-0.5 w-0.5 fill-current">
-                                <circle r={1} cx={1} cy={1} />
-                              </svg>
-                              <span className="text-xs font-medium">
-                                {playerStats[player.player.playerId]}
-                              </span>
-                            </span>
-                          )}
-                          */}
                         </span>
                       ) : null}
                     </div>
@@ -1386,7 +1185,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                         <PencilIcon className="h-5 w-5" aria-hidden="true" />
                       </button>
                       {(() => {
-                        // Check if player has any events (goals or penalties)
                         const hasScored = match[teamFlag as 'home' | 'away'].scores?.some(score =>
                           score.goalPlayer.playerId === player.player.playerId ||
                           (score.assistPlayer && score.assistPlayer.playerId === player.player.playerId)
@@ -1397,7 +1195,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                         const hasEvents = hasScored || hasPenalty;
 
                         if (hasEvents) {
-                          // Show disabled button with tooltip
                           return (
                             <button
                               type="button"
@@ -1409,27 +1206,20 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                             </button>
                           );
                         } else {
-                          // Show active delete button
                           return (
                             <button
                               type="button"
                               onClick={() => {
-                                // Find the player in the complete list of all players
-                                const playerToAddBack = allAvailablePlayers.find(p => p._id === player.player.playerId);
+                                const playerToAddBack = allAvailablePlayersList.find(p => p._id === player.player.playerId);
 
-                                // Remove from roster
                                 const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
                                 setRosterList(updatedRoster);
 
-                                // Add back to available players list if found and not already there
                                 if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
                                   setAvailablePlayersList(prevList => {
-                                    // Add the player back and sort the list by lastName, then firstName
                                     const newList = [...prevList, playerToAddBack];
                                     return newList.sort((a, b) => {
-                                      // First sort by lastName
                                       const lastNameComparison = a.lastName.localeCompare(b.lastName);
-                                      // If lastName is the same, sort by firstName
                                       return lastNameComparison !== 0 ? lastNameComparison :
                                         a.firstName.localeCompare(b.firstName);
                                     });
@@ -1695,7 +1485,7 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
               </div>
             ))}
 
-            {/* Add Staff Button - only show if less than 4 staff rows are displayed */}
+            {/* Add Staff Button */}
             {staffData.slice(0, Math.max(1, staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length + 1)).length < 4 && (
               <div className="flex justify-center py-4">
                 <button
@@ -1703,7 +1493,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                   onClick={() => {
                     const filledStaffCount = staffData.filter(s => s.firstName.trim() || s.lastName.trim() || s.role.trim()).length;
                     if (filledStaffCount < 4) {
-                      // Find the next empty slot or add a new one
                       const newStaffData = [...staffData];
                       const nextEmptyIndex = newStaffData.findIndex(s => !s.firstName.trim() && !s.lastName.trim() && !s.role.trim());
                       if (nextEmptyIndex === -1 && newStaffData.length < 4) {
@@ -1737,10 +1526,7 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                 <ul className="divide-y divide-gray-200">
                   {matches
                     .filter(m => {
-                      // Exclude current match
                       if (m._id === match._id) return false;
-
-                      // Only show matches on the same date
                       const matchDate = new Date(match.startDate);
                       const otherMatchDate = new Date(m.startDate);
                       return matchDate.toDateString() === otherMatchDate.toDateString();
@@ -1768,7 +1554,7 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                             />
                             <div className="flex-shrink-0 h-8 w-8">
                               <CldImage
-                                src={m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
+                                src={m[m.home.teamId === matchTeam?.teamId ? 'away' : 'home'].logo || 'https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png'}
                                 alt="Team logo"
                                 width={32}
                                 height={32}
@@ -1778,7 +1564,7 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                               />
                             </div>
                             <div className="text-sm text-gray-900">
-                              {m[m.home.teamId === matchTeam.teamId ? 'away' : 'home'].shortName}
+                              {m[m.home.teamId === matchTeam?.teamId ? 'away' : 'home'].shortName}
                             </div>
                           </div>
                           <div className="text-xs text-gray-500">
@@ -1936,7 +1722,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                     <div className="relative">
                       <Listbox.Button
                         onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                          // Handle letter key presses for position selection
                           const key = e.key.toUpperCase();
                           if (['C', 'A', 'G', 'F'].includes(key)) {
                             e.preventDefault();
@@ -2218,7 +2003,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                       onKeyDown={(e) => {
                         if (e.key === 'Tab' && !e.shiftKey) {
                           e.preventDefault();
-                          // Focus back to team select to complete the circle
                           const teamSelect = document.querySelector('[tabindex="1"]') as HTMLButtonElement;
                           if (teamSelect) {
                             teamSelect.focus();
@@ -2237,7 +2021,6 @@ const RosterPage = ({ match, matchTeam, club, team, roster, rosterPublished: ini
                       onKeyDown={(e) => {
                         if (e.key === 'Tab' && !e.shiftKey) {
                           e.preventDefault();
-                          // Focus the cancel button next
                           const cancelButton = e.currentTarget.parentElement?.querySelector('button:last-child') as HTMLButtonElement;
                           if (cancelButton) {
                             cancelButton.focus();
