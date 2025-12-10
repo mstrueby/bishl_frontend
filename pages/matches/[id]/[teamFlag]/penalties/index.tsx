@@ -1,21 +1,20 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import useAuth from '../../../../../hooks/useAuth';
+import usePermissions from '../../../../../hooks/usePermissions';
 import { useRouter } from 'next/router';
-import { GetServerSideProps } from 'next';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
 import Link from 'next/link';
 import { Match, RosterPlayer, EventPlayer, Team, PenaltiesBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
+import LoadingState from '../../../../../components/ui/LoadingState';
 import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
 import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
-import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import EventPlayerSelect from '../../../../../components/ui/EventPlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 import PenaltyCodeSelect from '../../../../../components/ui/PenaltyCodeSelect';
@@ -23,159 +22,121 @@ import Listbox from '../../../../../components/ui/form/Listbox';
 import Toggle from '../../../../../components/ui/form/Toggle';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { calculateMatchButtonPermissions } from '../../../../../tools/utils';
+import apiClient from '../../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../../lib/errorHandler';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface PenaltyRegisterFormProps {
-  jwt: string;
-  match: Match;
-  teamFlag: string;
-  team: Team;
-  initialRoster: RosterPlayer[];
-  initialPenalties: PenaltiesBase[];
-}
 
 type PenaltyCode = {
   key: string;
   value: string;
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id, teamFlag } = context.params as { id: string; teamFlag: string };
-  const jwt = getCookie('jwt', context);
-  if (!jwt || !id || !teamFlag) {
-    return { notFound: true };
-  }
+const penaltyMinuteOptions = [
+  { key: '2', value: '2' },
+  { key: '5', value: '5' },
+  { key: '10', value: '10' },
+  { key: '20', value: '20' }
+];
 
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-    const user = userResponse.data;
+const PenaltyRegisterForm = () => {
+  const router = useRouter();
+  const { id, teamFlag } = router.query as { id: string; teamFlag: string };
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
 
-    // Fetch match data
-    const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      }
-    });
-    const match: Match = matchResponse.data;
-    const matchTeam: Team = teamFlag === 'home' ? match.home : match.away;
-
-    // Roster is obtained directly from the match data
-    const roster = matchTeam.roster;
-    const penalties = matchTeam.penalties;
-
-    
-
-    return {
-      props: {
-        jwt,
-        match,
-        teamFlag,
-        team: matchTeam,
-        initialRoster: roster || [],
-        initialPenalties: penalties || []
-      }
-    };
-  } catch (error) {
-    console.error('Error fetching roster data:', error);
-    return {
-      props: {
-        jwt,
-        match: null,
-        teamFlag,
-        team: null,
-        initialRoster: [],
-        initialPenalties: []
-      }
-    };
-  }
-};
-
-const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster, initialPenalties }) => {
-  const [roster, setRoster] = useState<RosterPlayer[]>(initialRoster);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [match, setMatch] = useState<Match | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
+  const [roster, setRoster] = useState<RosterPlayer[]>([]);
+  const [initialPenalties, setInitialPenalties] = useState<PenaltiesBase[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [match, setMatch] = useState<Match>(initialMatch);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
 
-  const router = useRouter();
-  const { user } = useAuth();
-  const { id } = router.query;
+  // Auth check - redirect to login if not authenticated
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
 
-  // Function declarations
+  // Fetch penalty codes on component mount
+  useEffect(() => {
+    const fetchPenaltyCodes = async () => {
+      try {
+        const response = await apiClient.get('/configs/penaltycode');
+        const data = response.data.value;
+        if (Array.isArray(data) && data.length > 0) {
+          const filteredData = data.map(({ key, value }) => ({ key, value }));
+          setPenaltyCodes(filteredData);
+        } else {
+          console.error('Invalid penalty codes data format:', data);
+          setPenaltyCodes([]);
+        }
+      } catch (error) {
+        console.error('Error fetching penalty codes:', getErrorMessage(error));
+        setPenaltyCodes([]);
+      }
+    };
+
+    fetchPenaltyCodes();
+  }, []);
+
+  // Fetch all data on mount
+  useEffect(() => {
+    if (authLoading || !user || !id || !teamFlag) return;
+
+    const fetchData = async () => {
+      try {
+        setPageLoading(true);
+
+        // Fetch match data
+        const matchResponse = await apiClient.get(`/matches/${id}`);
+        const matchData: Match = matchResponse.data;
+        setMatch(matchData);
+
+        const matchTeam: Team = teamFlag === 'home' ? matchData.home : matchData.away;
+        setTeam(matchTeam);
+        setRoster(matchTeam.roster || []);
+        setInitialPenalties(matchTeam.penalties || []);
+
+      } catch (error) {
+        console.error('Error fetching data:', getErrorMessage(error));
+        setError('Fehler beim Laden der Daten');
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [authLoading, user, id, teamFlag]);
+
+  // Calculate permissions
+  const permissions = match && user ? calculateMatchButtonPermissions(user, match, undefined, true) : {
+    showButtonPenaltiesHome: false,
+    showButtonPenaltiesAway: false
+  };
+  const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
+
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
   const handleCloseErrorMessage = () => {
     setError(null);
   };
-  const fetchPenaltyCodes = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/configs/penaltycode`);
-      const data = response.data.value;
-      if (Array.isArray(data) && data.length > 0) {
-        // Ensure each item has key and value properties and remove sortOrder attribute
-        const filteredData = data.map(({ key, value }) => ({ key, value }));
-        setPenaltyCodes(filteredData);
-      } else {
-        console.error('Invalid penalty codes data format:', data);
-        setPenaltyCodes([]);
-      }
-    } catch (error) {
-      console.error('Error fetching penalty codes:', error);
-      setPenaltyCodes([]);
-    }
-  };
-
-  const penaltyMinuteOptions = [
-    { key: '2', value: '2' },
-    { key: '5', value: '5' },
-    { key: '10', value: '10' },
-    { key: '20', value: '20' }
-  ];
-
-  // Fetch penalty codes on component mount
-  useEffect(() => {
-    fetchPenaltyCodes();
-  }, []);
 
   // Sort roster by jersey number
   const sortedRoster = [...roster].sort((a, b) => {
-    // Ensure jersey numbers are treated as numbers for sorting
     const jerseyA = a.player.jerseyNumber || 999;
     const jerseyB = b.player.jerseyNumber || 999;
     return jerseyA - jerseyB;
   });
-
-  // Calculate permissions
-  const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
-  const hasPenaltiesPermission = teamFlag === 'home' ? permissions.showButtonPenaltiesHome : permissions.showButtonPenaltiesAway;
-
-  // Check if user has permission to access penalties
-  if (!hasPenaltiesPermission) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
-            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Strafen für diese Mannschaft zu bearbeiten.</p>
-            <Link href={`/matches/${match._id}`}>
-              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Zurück zum Spiel
-              </a>
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   // Validation schema
   const validationSchema = Yup.object({
@@ -193,7 +154,7 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
         matchTimeEnd: Yup.string()
           .matches(/^(\d{1,3}:\d{2})?$/, 'Zeit muss im Format MM:SS sein oder leer bleiben')
           .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function(value) {
-            if (!value || value === '' || !value.includes(':')) return true; // Allow empty for optional field
+            if (!value || value === '' || !value.includes(':')) return true;
             const [minutes, seconds] = value.split(':');
             const secondsNum = parseInt(seconds, 10);
             return secondsNum >= 0 && secondsNum <= 59;
@@ -220,19 +181,17 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
 
   // Form submission
   const onSubmit = async (penalties: any[]) => {
-    if (!match._id) return;
+    if (!match?._id) return;
 
     setLoading(true);
     setError(null);
 
-    // Convert penaltyMinutes to number and sort penalties by matchTimeStart before submitting
     const processedPenalties: PenaltiesBase[] = penalties.map(penalty => ({
       ...penalty,
       penaltyMinutes: Number(penalty.penaltyMinutes)
     }));
 
     const sortedPenalties = [...processedPenalties].sort((a, b) => {
-      // Convert time strings to comparable format (mm:ss -> minutes * 60 + seconds)
       const timeToSeconds = (timeStr: string) => {
         if (!timeStr) return 0;
         const [minutes, seconds] = timeStr.split(':').map(Number);
@@ -241,59 +200,79 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
       return timeToSeconds(a.matchTimeStart) - timeToSeconds(b.matchTimeStart);
     });
 
-    // Structure the payload with teamFlag
     const payload = {
       [teamFlag]: {
         penalties: sortedPenalties
       }
     };
 
-    console.log("submitted payload", payload)
-
     try {
-      const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await apiClient.patch(`/matches/${match._id}`, payload);
 
-      // Ignore 304 Not Modified status - no changes needed
       if (response.status === 304) {
         setSuccessMessage('Keine Änderungen erforderlich');
-        console.log('No changes needed (304)');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
-      if (!response.ok) {
-        throw new Error('Failed to save the penalty sheet');
-      }
-
       setSuccessMessage('Strafen wurden erfolgreich gespeichert');
-      console.log('Penalty sheet saved successfully');
-
-      // Scroll to top of page
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error('An error occurred:', getErrorMessage(error));
       setError('Fehler beim Speichern der Strafen');
     } finally {
       setLoading(false);
     }
   };
 
+  // Show loading state
+  if (authLoading || pageLoading) {
+    return (
+      <Layout>
+        <LoadingState message="Lade Strafen..." />
+      </Layout>
+    );
+  }
+
+  // Return null while redirecting
+  if (!user) {
+    return null;
+  }
+
+  // Check permissions after loading
+  if (!hasPenaltiesPermission) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
+            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Strafen für diese Mannschaft zu bearbeiten.</p>
+            <Link href={match ? `/matches/${match._id}` : '/'} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Zurück zum Spiel
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!match || !team) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <p>Match not found</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <Link href={`/matches/${match._id}/matchcenter?tab=penalties`}>
-        <a className="flex items-center" aria-label="Back to Match Center">
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Match Center
-          </span>
-        </a>
+      <Link href={`/matches/${match._id}/matchcenter?tab=penalties`} className="flex items-center" aria-label="Back to Match Center">
+        <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+        <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+          Match Center
+        </span>
       </Link>
 
       <MatchHeader
@@ -336,7 +315,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                         values.penalties.map((penalty, index) => (
                           <div key={index} className="px-3 py-6 md:py-6">
                             <div className="flex flex-col md:flex-row gap-4 md:items-center">
-                              {/** mobile header with index and remove button */}
                               <div className="flex items-center justify-between md:hidden">
                                 <span className="font-medium text-gray-700">Strafe #{index + 1}</span>
                                 <button
@@ -349,15 +327,11 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                 </button>
                               </div>
 
-                              {/** desktop index (hidden on mobile) */}
                               <div className="hidden md:block w-8 text-center">
                                 <span className="text-gray-500">{index + 1}</span>
                               </div>
 
-                              {/** form fields container */}
-                              {/** Start End Time */}
                               <div className="flex flex-initial flex-row md:flex-col md:w-28 gap-4">
-                                {/** Time Input - Start */}
                                 <div className="justify-center md:justify-start w-full">
                                   <InputMatchTime
                                     name={`penalties.${index}.matchTimeStart`}
@@ -367,7 +341,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     }}
                                   />
                                 </div>
-                                {/** Time Input - End (Optional) */}
                                 <div className="justify-center md:justify-start w-full">
                                   <InputMatchTime
                                     name={`penalties.${index}.matchTimeEnd`}
@@ -375,9 +348,8 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   />
                                 </div>
                               </div>
-                              {/** Player, Code */}
+
                               <div className="flex flex-auto flex-col gap-4">
-                                {/** Player Selection */}
                                 <EventPlayerSelect
                                   name={`penalties.${index}.penaltyPlayer`}
                                   selectedPlayer={penalty.penaltyPlayer || null}
@@ -390,7 +362,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                   showErrorText={false}
                                   tabIndex={index * 6 + 3}
                                 />
-                                {/** Penalty Code Selection */}
                                 <PenaltyCodeSelect
                                   name={`penalties.${index}.penaltyCode`}
                                   selectedPenaltyCode={
@@ -403,27 +374,23 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                     setError('');
                                   }}
                                   penaltyCodes={penaltyCodes}
-                                  //label="Strafe"
                                   required={true}
                                   placeholder="Strafe auswählen"
                                   showErrorText={false}
                                   tabIndex={index * 6 + 4}
                                 />
                               </div>
-                              {/** Minutes, GM, MP */}
+
                               <div className=" flex flex-col w-full md:w-48 gap-4">
-                                {/** Penalty Minutes */}
                                 <div className="w-full md:flex-auto">
                                   <Listbox
                                     name={`penalties.${index}.penaltyMinutes`}
-                                    // label="Strafminuten"
                                     options={penaltyMinuteOptions}
                                     placeholder="Strafminuten"
                                     showErrorText={false}
                                     tabIndex={index * 6 + 5}
                                   />
                                 </div>
-                                {/** Penalty Type Toggles */}
                                 <div className="flex flex-row items-center justify-end md:justify-between p-2 gap-6 -mt-6 -mb-2">
                                   <Toggle
                                     name={`penalties.${index}.isGM`}
@@ -438,7 +405,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                                 </div>
                               </div>
 
-                              {/** Desktop remove button (hidden on mobile) */}
                               <div className="hidden md:flex flex-none">
                                 <button
                                   type="button"
@@ -455,7 +421,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                       )}
                     </div>
 
-                    {/** add penalty */}
                     <div className="flex justify-center">
                       <button
                         type="button"
@@ -471,7 +436,6 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                             isGM: false,
                             isMP: false
                           });
-                          // Focus on the new input after a short delay to ensure it's rendered
                           setTimeout(() => {
                             const newInput = inputRefs.current[newIndex];
                             if (newInput) {
@@ -486,12 +450,9 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
                       </button>
                     </div>
 
-                    {/** buttons */}
                     <div className="flex justify-end space-x-3 pt-8">
-                      <Link href={`/matches/${match._id}/matchcenter?tab=penalties`}>
-                        <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabIndex={values.penalties.length * 6 + 10}>
-                          Schließen
-                        </a>
+                      <Link href={`/matches/${match._id}/matchcenter?tab=penalties`} className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabIndex={values.penalties.length * 6 + 10}>
+                        Schließen
                       </Link>
                       <ButtonPrimary
                         name="btnSubmit"
@@ -512,4 +473,4 @@ const PenaltyRegisterForm: React.FC<PenaltyRegisterFormProps> = ({ jwt, match: i
   );
 };
 
-export default PenaltyRegisterForm
+export default PenaltyRegisterForm;
