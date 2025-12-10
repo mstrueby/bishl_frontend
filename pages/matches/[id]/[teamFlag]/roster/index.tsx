@@ -238,59 +238,60 @@ const RosterPage = () => {
         // Combine the players from the current team and all additional players
         allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
 
-        const availablePlayers = allTeamsPlayers.map((teamPlayer: PlayerValues) => {
-          if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
-            return null;
-          }
-
-          const assignedTeam = teamPlayer.assignedTeams
-            .flatMap((assignment: Assignment) => assignment.teams || [])
-            .find((team: AssignmentTeam) => {
-              if (!team) return false;
-              if (team.teamId === matchTeamData.teamId) return true;
-              return additionalTeamsIds.some(id => id === team.teamId);
-            });
-
-          const isFromYoungerTeam = additionalTeamsIds.some(id => assignedTeam && assignedTeam.teamId === id);
-
-          let originalTeamName = null;
-          if (isFromYoungerTeam && assignedTeam) {
-            const originalTeam = clubData.teams.find(t => t._id === assignedTeam.teamId);
-            if (originalTeam) {
-              originalTeamName = originalTeam.name;
+        const availablePlayers: AvailablePlayer[] = allTeamsPlayers
+          .map((teamPlayer: PlayerValues): AvailablePlayer | null => {
+            if (!teamPlayer.assignedTeams || !Array.isArray(teamPlayer.assignedTeams)) {
+              return null;
             }
-          }
 
-          return assignedTeam ? {
-            _id: teamPlayer._id,
-            firstName: teamPlayer.firstName,
-            lastName: teamPlayer.lastName,
-            displayFirstName: teamPlayer.displayFirstName,
-            displayLastName: teamPlayer.displayLastName,
-            position: teamPlayer.position || 'Skater',
-            fullFaceReq: teamPlayer.fullFaceReq,
-            source: teamPlayer.source,
-            imageUrl: teamPlayer.imageUrl,
-            imageVisible: teamPlayer.imageVisible,
-            passNo: assignedTeam.passNo,
-            jerseyNo: assignedTeam.jerseyNo,
-            called: false,
-            originalTeam: originalTeamName,
-            active: assignedTeam.active
-          } : null;
-        }).filter((player: AvailablePlayer | null): player is AvailablePlayer => player !== null);
+            const assignedTeam = teamPlayer.assignedTeams
+              .flatMap((assignment: Assignment) => assignment.teams || [])
+              .find((team: AssignmentTeam) => {
+                if (!team) return false;
+                if (team.teamId === matchTeamData.teamId) return true;
+                return additionalTeamsIds.some(id => id === team.teamId);
+              });
+
+            const isFromYoungerTeam = additionalTeamsIds.some(id => assignedTeam && assignedTeam.teamId === id);
+
+            let originalTeamName = null;
+            if (isFromYoungerTeam && assignedTeam) {
+              const originalTeam = clubData.teams.find(t => t._id === assignedTeam.teamId);
+              if (originalTeam) {
+                originalTeamName = originalTeam.name;
+              }
+            }
+
+            return assignedTeam ? {
+              _id: teamPlayer._id,
+              firstName: teamPlayer.firstName,
+              lastName: teamPlayer.lastName,
+              displayFirstName: teamPlayer.displayFirstName,
+              displayLastName: teamPlayer.displayLastName,
+              position: teamPlayer.position || 'Skater',
+              fullFaceReq: teamPlayer.fullFaceReq,
+              source: teamPlayer.source,
+              imageUrl: teamPlayer.imageUrl,
+              imageVisible: teamPlayer.imageVisible,
+              passNo: assignedTeam.passNo,
+              jerseyNo: assignedTeam.jerseyNo,
+              called: false,
+              originalTeam: originalTeamName,
+              active: assignedTeam.active
+            } : null;
+          })
+          .filter((player): player is AvailablePlayer => player !== null);
 
         const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
-          const lastNameComparison = ((a?.lastName ?? "") as string).localeCompare((b?.lastName ?? "") as string);
-          return lastNameComparison !== 0 ? lastNameComparison :
-            ((a?.firstName ?? "") as string).localeCompare((b?.firstName ?? "") as string);
+          const lastNameComparison = a.lastName.localeCompare(b.lastName);
+          return lastNameComparison !== 0 ? lastNameComparison : a.firstName.localeCompare(b.firstName);
         });
 
         setAllAvailablePlayersList(sortedAvailablePlayers);
 
         const rosterPlayerIds = (matchTeamData.roster || []).map(rp => rp.player.playerId);
         const filteredAvailablePlayers = sortedAvailablePlayers.filter(player =>
-          !rosterPlayerIds.includes(player?._id ?? '')
+          !rosterPlayerIds.includes(player._id)
         );
         setAvailablePlayersList(filteredAvailablePlayers);
 
