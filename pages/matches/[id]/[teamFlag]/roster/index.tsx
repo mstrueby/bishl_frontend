@@ -860,6 +860,16 @@ const RosterPage = () => {
     }
   };
 
+  // Auth check - redirect to login if not authenticated
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
+
   // Show loading state
   if (authLoading || pageLoading) {
     return (
@@ -869,9 +879,8 @@ const RosterPage = () => {
     );
   }
 
-  // Check auth after loading
+  // Return null while redirecting (should not be reached due to useEffect)
   if (!user) {
-    router.push('/login');
     return null;
   }
 
