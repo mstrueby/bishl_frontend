@@ -1,6 +1,7 @@
 
 import React, { Fragment, useState, useEffect, useRef } from 'react';
 import useAuth from '../../../../../hooks/useAuth';
+import usePermissions from '../../../../../hooks/usePermissions';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../../../../components/Layout';
@@ -25,7 +26,7 @@ import MatchStatusBadge from '../../../../../components/ui/MatchStatusBadge';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { tournamentConfigs } from '../../../../../tools/consts';
-
+import { UserRole } from '../../../../../lib/auth';
 
 interface AvailablePlayer {
   _id: string,
@@ -57,6 +58,7 @@ const RosterPage = () => {
   const router = useRouter();
   const { id, teamFlag } = router.query as { id: string; teamFlag: string };
   const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
 
   // ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL LOGIC
   const [pageLoading, setPageLoading] = useState(true);
@@ -149,6 +151,16 @@ const RosterPage = () => {
       return jerseyA - jerseyB;
     });
   }, []);
+
+  // Auth check - redirect to login if not authenticated
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
 
   // Fetch all data on mount
   useEffect(() => {
@@ -859,16 +871,6 @@ const RosterPage = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-
-  // Auth check - redirect to login if not authenticated
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-  }, [authLoading, user, router]);
 
   // Show loading state
   if (authLoading || pageLoading) {
