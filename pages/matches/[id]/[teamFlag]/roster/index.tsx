@@ -1172,7 +1172,9 @@ const RosterPage = () => {
                               ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
                               : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
                           <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
-                          <span className="hidden sm:block">Hochgemeldet</span>
+                          <span className="hidden sm:block">
+                            Hochgemeldet {playerStats[player.player.playerId] !== undefined ? `(${playerStats[player.player.playerId]})` : ''}
+                          </span>
                         </span>
                       ) : null}
                     </div>
