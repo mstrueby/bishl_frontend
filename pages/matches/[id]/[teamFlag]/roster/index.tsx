@@ -507,7 +507,7 @@ const RosterPage = () => {
             }
           });
 
-          const players = playersResponse.data.results || [];
+          const players = playersResponse.data || [];
 
           const formattedPlayers = players.map((player: PlayerValues) => {
             const assignedTeam = player.assignedTeams
