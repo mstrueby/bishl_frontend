@@ -1166,14 +1166,15 @@ const RosterPage = () => {
                     <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
                       {player.called ? (
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
-                         ${playerStats[player.player.playerId] >= 0 && playerStats[player.player.playerId] <= 3
+                         ${playerStats[player.player.playerId] >= 0 && playerStats[player.player.playerId] + 1 <= 4
                             ? 'bg-green-50 text-green-800 ring-green-600/20'
-                            : playerStats[player.player.playerId] === 4
+                            : playerStats[player.player.playerId] + 1 === 5
                               ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
                               : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
                           <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
                           <span className="hidden sm:block">
-                            Hochgemeldet {playerStats[player.player.playerId] !== undefined ? `(${playerStats[player.player.playerId]})` : ''}
+                            Hochgemeldet
+                            {playerStats[player.player.playerId] !== undefined ? ` (${playerStats[player.player.playerId] + 1})` : ''}
                           </span>
                         </span>
                       ) : null}
