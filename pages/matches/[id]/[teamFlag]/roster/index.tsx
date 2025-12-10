@@ -278,7 +278,7 @@ const RosterPage = () => {
             originalTeam: originalTeamName,
             active: assignedTeam.active
           } : null;
-        }).filter((player: AvailablePlayer | null) => player !== null);
+        }).filter((player: AvailablePlayer | null): player is AvailablePlayer => player !== null);
 
         const sortedAvailablePlayers = availablePlayers.sort((a, b) => {
           const lastNameComparison = ((a?.lastName ?? "") as string).localeCompare((b?.lastName ?? "") as string);

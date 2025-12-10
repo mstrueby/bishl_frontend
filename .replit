@@ -95,6 +95,10 @@ externalPort = 3003
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 38799
+externalPort = 3000
+
 [deployment]
 deploymentTarget = "cloudrun"
 build = ["sh", "-c", "NODE_ENV=production npm run build"]
