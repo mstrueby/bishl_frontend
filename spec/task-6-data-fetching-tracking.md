@@ -137,20 +137,26 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ---
 
-#### 6. `pages/matches/[id]/supplementary/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Current:** Uses `getServerSideProps` with JWT  
+#### 6. `pages/matches/[id]/supplementary/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
 **Issues:**
-- ❌ Uses direct `fetch()` (not `apiClient`)
-- ❌ Uses `getCookie('jwt', context)`
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
 
-**Required Actions:**
-- [ ] Remove `getServerSideProps` or remove auth from it
-- [ ] Replace `fetch()` with `apiClient`
-- [ ] Implement client-side auth if admin-only
-- [ ] Add loading/error states
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
 
-**Recommendation:** Determine if public or admin-only, then migrate accordingly
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
