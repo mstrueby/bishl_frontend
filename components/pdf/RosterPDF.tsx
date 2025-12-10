@@ -272,7 +272,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
             rows.push(
               <View key={`row-goalie-${i}`} style={styles.tableRow}>
                 <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '') : ''}</Text>
-                <Text style={styles.positionCell}>{goalie ? 'G' : 'G'}</Text>
+                <Text style={styles.positionCell}>G</Text>
                 <Text style={styles.nameCell}>
                   {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
                 </Text>
@@ -288,7 +288,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
             rows.push(
               <View key={`row-forward-${i}`} style={styles.tableRow}>
                 <Text style={styles.numberCell}>{forward ? (forward.player.jerseyNumber || '') : ''}</Text>
-                <Text style={styles.positionCell}>{forward ? forward.playerPosition.key : ''}</Text>
+                <Text style={styles.positionCell}>F</Text>
                 <Text style={styles.nameCell}>
                   {forward ? `${forward.player.lastName}, ${forward.player.firstName}${forward.called ? ' (H)' : ''}` : ''}
                 </Text>
