@@ -530,7 +530,7 @@ const RosterPage = () => {
               called: true,
               active: assignedTeam?.active
             };
-          }).filter((player: AvailablePlayer | null) => player !== null);
+          }).filter((player: AvailablePlayer | null): player is AvailablePlayer => player !== null);
 
           const rosterPlayerIds = rosterList.map(rp => rp.player.playerId);
           const filteredPlayers = formattedPlayers.filter((player: AvailablePlayer) =>
