@@ -197,7 +197,7 @@ const RosterPage = () => {
             all: true
           }
         });
-        const teamPlayers: PlayerValues[] = Array.isArray(teamPlayerResponse.data.results) ? teamPlayerResponse.data.results : [];
+        const teamPlayers: PlayerValues[] = Array.isArray(teamPlayerResponse.data) ? teamPlayerResponse.data : [];
         let allTeamsPlayers: PlayerValues[] = [];
         let additionalPlayers: PlayerValues[] = [];
         let additionalTeamsIds: string[] = [];
@@ -223,8 +223,8 @@ const RosterPage = () => {
                   }
                 });
 
-                const partnershipPlayers = Array.isArray(playersResponse.data.results)
-                  ? playersResponse.data.results
+                const partnershipPlayers = Array.isArray(playersResponse.data)
+                  ? playersResponse.data
                   : [];
 
                 additionalPlayers = [...additionalPlayers, ...partnershipPlayers];
