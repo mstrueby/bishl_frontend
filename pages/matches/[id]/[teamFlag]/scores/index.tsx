@@ -1,142 +1,92 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import useAuth from '../../../../../hooks/useAuth';
+import usePermissions from '../../../../../hooks/usePermissions';
 import { useRouter } from 'next/router';
-import { GetServerSideProps } from 'next';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
 import Link from 'next/link';
 import { Match, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
+import LoadingState from '../../../../../components/ui/LoadingState';
 import { ChevronLeftIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import MatchHeader from '../../../../../components/ui/MatchHeader';
 import { Formik, Form, FieldArray, FieldArrayRenderProps } from 'formik';
 import * as Yup from 'yup';
 import ButtonPrimary from '../../../../../components/ui/form/ButtonPrimary';
-import ButtonLight from '../../../../../components/ui/form/ButtonLight';
 import EventPlayerSelect from '../../../../../components/ui/EventPlayerSelect';
 import InputMatchTime from '../../../../../components/ui/form/InputMatchTime';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { calculateMatchButtonPermissions } from '../../../../../tools/utils';
+import apiClient from '../../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../../lib/errorHandler';
 
 let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-/*
-interface Goal {
-  player: string;
-  assist: string;
-  time: string;
-}
+const GoalRegisterForm = () => {
+  const router = useRouter();
+  const { id, teamFlag } = router.query as { id: string; teamFlag: string };
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
 
-interface GoalFormValues {
-  goals: Goal[];
-}
-*/
-interface GoalRegisterFormProps {
-  jwt: string;
-  match: Match;
-  teamFlag: string;
-  team: Team;
-  initialRoster: RosterPlayer[];
-  initialScores: ScoresBase[];
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id, teamFlag } = context.params as { id: string; teamFlag: string };
-  const jwt = getCookie('jwt', context);
-  if (!jwt || !id || !teamFlag) {
-    return { notFound: true };
-  }
-
-  try {
-    // First check if user has required role
-    const userResponse = await axios.get(`${BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${jwt}`
-      }
-    });
-
-    const user = userResponse.data;
-
-    // Fetch match data
-    const matchResponse = await axios.get(`${BASE_URL}/matches/${id}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      }
-    });
-    const match: Match = matchResponse.data;
-    const matchTeam: Team = teamFlag === 'home' ? match.home : match.away;
-
-    // Roster is obtained directly from the match data
-    const roster = matchTeam.roster;
-    const scores = matchTeam.scores;
-
-
-
-    return {
-      props: {
-        jwt,
-        match,
-        teamFlag,
-        team: matchTeam,
-        initialRoster: roster || [],
-        initialScores: scores || []
-      }
-    };
-  } catch (error) {
-    console.error('Error fetching roster data:', error);
-    return {
-      props: {
-        jwt,
-        match: null,
-        teamFlag,
-        team: null,
-        initialRoster: [],
-        initialScores: []
-      }
-    };
-  }
-};
-
-const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initialMatch, teamFlag, team, initialRoster, initialScores }) => {
-  const [roster, setRoster] = useState<RosterPlayer[]>(initialRoster);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [match, setMatch] = useState<Match | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
+  const [roster, setRoster] = useState<RosterPlayer[]>([]);
+  const [initialScores, setInitialScores] = useState<ScoresBase[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [match, setMatch] = useState<Match>(initialMatch);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
   const goalPlayerRefs = useRef<{ [key: number]: any }>({});
   const assistPlayerRefs = useRef<{ [key: number]: any }>({});
   const addGoalButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const router = useRouter();
-  const { user } = useAuth();
-  const { id } = router.query;
+  // Auth check - redirect to login if not authenticated
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
+
+  // Fetch all data on mount
+  useEffect(() => {
+    if (authLoading || !user || !id || !teamFlag) return;
+
+    const fetchData = async () => {
+      try {
+        setPageLoading(true);
+
+        // Fetch match data
+        const matchResponse = await apiClient.get(`/matches/${id}`);
+        const matchData: Match = matchResponse.data;
+        setMatch(matchData);
+
+        const matchTeam: Team = teamFlag === 'home' ? matchData.home : matchData.away;
+        setTeam(matchTeam);
+        setRoster(matchTeam.roster || []);
+        setInitialScores(matchTeam.scores || []);
+
+      } catch (error) {
+        console.error('Error fetching data:', getErrorMessage(error));
+        setError('Fehler beim Laden der Daten');
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [authLoading, user, id, teamFlag]);
 
   // Calculate permissions
-  const permissions = calculateMatchButtonPermissions(user, match, undefined, true);
+  const permissions = match && user ? calculateMatchButtonPermissions(user, match, undefined, true) : {
+    showButtonScoresHome: false,
+    showButtonScoresAway: false
+  };
   const hasScoresPermission = teamFlag === 'home' ? permissions.showButtonScoresHome : permissions.showButtonScoresAway;
-
-  // Check if user has permission to access scores
-  if (!hasScoresPermission) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
-            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Tore für diese Mannschaft zu bearbeiten.</p>
-            <Link href={`/matches/${match._id}`}>
-              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Zurück zum Spiel
-              </a>
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
@@ -147,16 +97,10 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
   // Sort roster by jersey number
   const sortedRoster = [...roster].sort((a, b) => {
-    // Ensure jersey numbers are treated as numbers for sorting
     const jerseyA = a.player.jerseyNumber || 999;
     const jerseyB = b.player.jerseyNumber || 999;
     return jerseyA - jerseyB;
   });
-
-  // Initial form values
-  ///const initialValues: ScoresBase[] = {
-  //  goals: [{ player: '', assist: '', time: '' }]
-  //};
 
   // Validation schema
   const validationSchema = Yup.object({
@@ -179,7 +123,7 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
             jerseyNumber: Yup.number().required()
           })
           .required('Torschütze ist erforderlich'),
-        assistPlayer: Yup.object().nullable(), // Optional
+        assistPlayer: Yup.object().nullable(),
         isPPG: Yup.boolean(),
         isSHG: Yup.boolean(),
         isGWG: Yup.boolean()
@@ -189,14 +133,12 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
 
   // Form submission
   const onSubmit = async (values: ScoresBase[]) => {
-    if (!match._id) return;
+    if (!match?._id) return;
 
     setLoading(true);
     setError(null);
 
-    // Sort scores by matchTime before submitting
     const sortedScores = [...values].sort((a, b) => {
-      // Convert time strings to comparable format (mm:ss -> minutes * 60 + seconds)
       const timeToSeconds = (timeStr: string) => {
         if (!timeStr) return 0;
         const [minutes, seconds] = timeStr.split(':').map(Number);
@@ -205,59 +147,81 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
       return timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime);
     });
 
-    // Structure the payload with teamFlag
     const payload = {
       [teamFlag]: {
         scores: sortedScores
       }
     };
 
-    console.log("submitted payload", payload);
-
     try {
-      const response = await fetch(`${BASE_URL}/matches/${match._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await apiClient.patch(`/matches/${match._id}`, payload);
 
-      // Ignore 304 Not Modified status - no changes needed
       if (response.status === 304) {
         setSuccessMessage('Keine Änderungen erforderlich');
-        console.log('No changes needed (304)');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
-      if (!response.ok) {
-        throw new Error('Failed to save the goal sheet');
-      }
-
       setSuccessMessage('Tore wurden erfolgreich gespeichert');
-      console.log('Goal sheet saved successfully');
-
-      // Scroll to top of page
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error('An error occurred:', getErrorMessage(error));
       setError('Fehler beim Speichern der Tore');
     } finally {
       setLoading(false);
     }
   };
 
+  // Show loading state
+  if (authLoading || pageLoading) {
+    return (
+      <Layout>
+        <LoadingState message="Lade Tore..." />
+      </Layout>
+    );
+  }
+
+  // Return null while redirecting
+  if (!user) {
+    return null;
+  }
+
+  // Check permissions after loading
+  if (!hasScoresPermission) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Nicht berechtigt</h2>
+            <p className="text-gray-500 mb-4">Sie haben keine Berechtigung, die Tore für diese Mannschaft zu bearbeiten.</p>
+            <Link href={match ? `/matches/${match._id}` : '/'} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Zurück zum Spiel
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!match || !team) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <p>Match not found</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  const expectedGoals = teamFlag === 'home' ? match?.home?.stats?.goalsFor || 0 : match?.away?.stats?.goalsFor || 0;
+
   return (
     <Layout>
-      <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
-        <a className="flex items-center" aria-label="Back to Match Center">
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-          <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-            Match Center
-          </span>
-        </a>
+      <Link href={`/matches/${match._id}/matchcenter?tab=goals`} className="flex items-center" aria-label="Back to Match Center">
+        <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+        <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
+          Match Center
+        </span>
       </Link>
 
       <MatchHeader
@@ -280,7 +244,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
         onSubmit={(values) => onSubmit(values.scores)}
       >
         {({ values, errors, touched, setFieldValue }) => {
-          const expectedGoals = teamFlag === 'home' ? match?.home?.stats?.goalsFor || 0 : match?.away?.stats?.goalsFor || 0;
           const currentGoalsCount = values.scores.length;
           const scoresMismatch = currentGoalsCount !== expectedGoals;
 
@@ -299,7 +262,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                         values.scores.map((score, index) => (
                           <div key={index} className="p-3">
                             <div className="flex flex-col md:flex-row gap-4 md:items-center">
-                              {/* Mobile header with index and remove button */}
                               <div className="flex items-center justify-between md:hidden">
                                 <span className="font-medium text-gray-700">Tor #{index + 1}</span>
                                 <button
@@ -312,14 +274,11 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 </button>
                               </div>
 
-                              {/* Desktop index (hidden on mobile) */}
                               <div className="hidden md:block w-8 text-center">
                                 <span className="text-gray-500">{index + 1}</span>
                               </div>
 
-                              {/* Form fields container */}
                               <div className="flex flex-col md:flex-row gap-4 flex-1">
-                                {/* Time Input */}
                                 <div className="justify-center md:justify-start">
                                   <InputMatchTime
                                     name={`scores.${index}.matchTime`}
@@ -330,7 +289,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                     onKeyDown={(e: React.KeyboardEvent) => {
                                       if (e.key === 'Enter') {
                                         e.preventDefault();
-                                        // Move focus to goal player select
                                         if (goalPlayerRefs.current[index]) {
                                           goalPlayerRefs.current[index].focus();
                                         }
@@ -339,7 +297,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                   />
                                 </div>
 
-                                {/* Scores Selection */}
                                 <div className="w-full md:flex-auto">
                                   <EventPlayerSelect
                                     ref={(el: any) => {
@@ -358,7 +315,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                   />
                                 </div>
 
-                                {/* Assist Selection */}
                                 <div className="w-full md:flex-auto">
                                   <EventPlayerSelect
                                     ref={(el: any) => {
@@ -378,7 +334,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                                 </div>
                               </div>
 
-                              {/* Desktop remove button (hidden on mobile) */}
                               <div className="hidden md:flex flex-none">
                                 <button
                                   type="button"
@@ -395,7 +350,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                       )}
                     </div>
 
-                    {/* Score mismatch indicator */}
                     {scoresMismatch && (
                       <div className="flex items-center p-4 mb-6 text-amber-800 rounded-lg bg-amber-50 border border-amber-200">
                         <ExclamationTriangleIcon className="flex-shrink-0 w-5 h-5" aria-hidden="true" />
@@ -406,7 +360,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                       </div>
                     )}
 
-                    {/* add score */}
                     <div className="flex justify-center">
                       <button
                         type="button"
@@ -422,7 +375,6 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                             isSHG: false,
                             isGWG: false
                           });
-                          // Focus on the new input after a short delay to ensure it's rendered
                           setTimeout(() => {
                             const newInput = inputRefs.current[newIndex];
                             if (newInput) {
@@ -437,12 +389,9 @@ const GoalRegisterForm: React.FC<GoalRegisterFormProps> = ({ jwt, match: initial
                       </button>
                     </div>
 
-                    {/* buttons */}
                     <div className="flex justify-end space-x-3 pt-8">
-                      <Link href={`/matches/${match._id}/matchcenter?tab=goals`}>
-                        <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                          Schließen
-                        </a>
+                      <Link href={`/matches/${match._id}/matchcenter?tab=goals`} className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Schließen
                       </Link>
                       <ButtonPrimary
                         name="btnSubmit"

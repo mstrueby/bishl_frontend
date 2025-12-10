@@ -23,103 +23,115 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ### 🔴 High Priority - Breaking Issues
 
-#### 1. `pages/matches/[id]/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
+#### 1. `pages/matches/[id]/index.tsx` ✅
+**Status:** COMPLETED  
 **Current:** Uses `getServerSideProps` with JWT from cookies  
 **Issues:**
 - ✅ Uses `apiClient` for match data
-- ❌ Fetches `/users/me` in SSR
-- ❌ Uses `getCookie('jwt', context)`
-- ❌ Passes `jwt`, `userRoles`, `userClubId` as props
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `jwt`, `userRoles`, `userClubId` props
 
-**Required Actions:**
-- [ ] Remove JWT cookie reading from `getServerSideProps`
-- [ ] Remove `/users/me` fetch from SSR
-- [ ] Only fetch match data in SSR (public data)
-- [ ] Move auth-dependent features to client-side (`useAuth()`, `usePermissions()`)
-- [ ] Verify context menu permissions are client-side only
-- [ ] Ensure proper error handling
-- [ ] Add loading states with `LoadingState` component
+**Completed Actions:**
+- ✅ Removed JWT cookie reading from `getServerSideProps`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ Only fetches match data in SSR (public data)
+- ✅ Auth-dependent features use client-side (`useAuth()`, `usePermissions()`)
+- ✅ Context menu permissions are client-side only
+- ✅ Has proper error handling
+- ✅ Uses `LoadingState` component
 
 **Recommendation:** Keep SSR for SEO, client-side auth only
 
 ---
 
-#### 2. `pages/matches/[id]/matchcenter/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Current:** Uses `getServerSideProps` with JWT  
+#### 2. `pages/matches/[id]/matchcenter/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses `getServerSideProps` without JWT  
 **Issues:**
 - ✅ Uses `apiClient` for match data
-- ❌ Fetches `/users/me` in SSR
-- ❌ Uses `getCookie('jwt', context)`
-- ❌ Passes `jwt`, `userRoles`, `userClubId` as props
-- ❌ Multiple data fetches in SSR (roster, scores, penalties)
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `jwt`, `userRoles`, `userClubId` props
+- ✅ Removed roster/scores/penalties fetching from SSR
 
-**Required Actions:**
-- [ ] Remove JWT/auth from `getServerSideProps`
-- [ ] Remove `/users/me` fetch
-- [ ] Only fetch match data in SSR
-- [ ] Move auth checks to client-side (`useAuth`, `usePermissions`)
-- [ ] Move roster/scores/penalties fetching to client-side
-- [ ] Add loading states for client-side data
-- [ ] Ensure proper error handling
+**Completed Actions:**
+- ✅ Removed JWT/auth from `getServerSideProps`
+- ✅ Removed `/users/me` fetch
+- ✅ Only fetches match data in SSR
+- ✅ Auth checks use client-side (`useAuth`, `usePermissions`)
+- ✅ Roster/scores/penalties data available from match object
+- ✅ Has loading states for client-side operations
+- ✅ Has proper error handling
 
 **Recommendation:** Keep SSR for match data, client-side for everything else
 
 ---
 
-#### 3. `pages/matches/[id]/[teamFlag]/roster/index.tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Uses `getServerSideProps` with JWT  
+#### 3. `pages/matches/[id]/[teamFlag]/roster/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
 **Issues:**
-- ❌ Uses direct `axios` (not `apiClient`)
-- ❌ Uses `getCookie('jwt', context)`
-- ❌ Fetches `/users/me` in SSR
-- ❌ All data fetching in SSR
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
 
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Replace all `axios` with `apiClient`
-- [ ] Implement client-side auth with `useAuth()` and `usePermissions()`
-- [ ] Add auth redirect `useEffect` (redirect to login if not authenticated)
-- [ ] Client-side data fetching with `useEffect` or `useApiRequest`
-- [ ] Add loading states with `LoadingState` component
-- [ ] Check role requirements (likely needs team manager/admin)
-- [ ] Ensure proper error handling
-
-**Recommendation:** Full client-side migration (admin page)
-
----
-
-#### 4. `pages/matches/[id]/[teamFlag]/scores/index.tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Uses `getServerSideProps` with JWT  
-**Issues:** Same as roster page
-
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Replace all `axios` with `apiClient`
-- [ ] Implement client-side auth pattern
-- [ ] Client-side data fetching
-- [ ] Add loading/error states
-- [ ] Check role requirements
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
 
 **Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 5. `pages/matches/[id]/[teamFlag]/penalties/index.tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Uses `getServerSideProps` with JWT  
-**Issues:** Same as roster page
+#### 4. `pages/matches/[id]/[teamFlag]/scores/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
 
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Replace all `axios` with `apiClient`
-- [ ] Implement client-side auth pattern
-- [ ] Client-side data fetching
-- [ ] Add loading/error states
-- [ ] Check role requirements
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
+
+**Recommendation:** Full client-side migration (admin page)
+
+---
+
+#### 5. `pages/matches/[id]/[teamFlag]/penalties/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
 
 **Recommendation:** Full client-side migration (admin page)
 
@@ -490,8 +502,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 0  
+**Completed:** 5 (files 1-5)  
 **In Progress:** 0  
-**Pending:** 56  
+**Pending:** 51  
 
-**Last Updated:** 2025-02-02
+**Last Updated:** 2025-02-03
