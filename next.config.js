@@ -66,7 +66,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' " + process.env.NEXT_PUBLIC_API_URL + (process.env.NODE_ENV === 'development' ? " webpack://* ws://* wss://*" : ""),
+              "connect-src 'self' data: blob: " + process.env.NEXT_PUBLIC_API_URL + (process.env.NODE_ENV === 'development' ? " webpack://* ws://* wss://*" : ""),
               process.env.NODE_ENV === 'development' ? "frame-ancestors *" : "frame-ancestors 'self'",
             ].join('; ')
           }
