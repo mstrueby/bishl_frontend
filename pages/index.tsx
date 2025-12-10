@@ -581,7 +581,7 @@ const Home: NextPage<PostsProps> = ({
     .slice()
     .sort(
       (a, b) =>
-        new Date(b.createDate).getTime() - new Date(a.createDate).getTime(),
+        new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime(),
     )
     .map((post: PostValues) => ({
       _id: post._id,
@@ -1090,10 +1090,10 @@ const Home: NextPage<PostsProps> = ({
                   <div className="flex max-w-xl grow flex-col justify-between">
                     <div className="mt-8 flex items-center gap-x-4 text-xs">
                       <time
-                        dateTime={post.createDate}
+                        dateTime={post.updateDate}
                         className="text-gray-500"
                       >
-                        {getFuzzyDate(post.createDate)}
+                        {getFuzzyDate(post.updateDate)}
                       </time>
                       {/*<a
                         href={post.category.href}
