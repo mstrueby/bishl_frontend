@@ -1,0 +1,246 @@
+⚠️ NEEDS REVIEW - SSR with Auth Issues
+These pages use getServerSideProps but have authentication problems:
+
+pages/matches/[id]/index.tsx ⚠️
+
+Current: Uses getServerSideProps with JWT from cookies
+Issues:
+Fetches /users/me in SSR ❌
+Uses getCookie('jwt', context) (old auth) ❌
+Passes jwt, userRoles, userClubId as props ❌
+Recommendation: Keep SSR for SEO, but remove auth from SSR
+Actions:
+Remove JWT cookie reading from getServerSideProps
+Remove /users/me fetch from SSR
+Only fetch match data in SSR (public data)
+Move auth-dependent features (edit buttons, context menus) to client-side with useAuth() and usePermissions()
+Verify apiClient usage (no axios)
+Check error handling
+pages/matches/[id]/matchcenter/index.tsx ⚠️
+
+Current: Uses getServerSideProps with JWT
+Issues:
+Fetches /users/me in SSR ❌
+Uses getCookie('jwt', context) ❌
+Passes jwt, userRoles, userClubId as props ❌
+Recommendation: Keep SSR for match data, client-side for auth
+Actions:
+Remove JWT/auth from getServerSideProps
+Remove /users/me fetch
+Only fetch match data in SSR
+Move auth checks to client-side (useAuth, usePermissions)
+Verify apiClient usage
+Check error handling
+pages/posts/[alias].tsx ⚠️
+
+Current: Unknown (need to check if exists and how it fetches)
+Recommendation: Should use SSG with ISR for individual posts
+Actions:
+Check current implementation
+Migrate to getStaticProps with getStaticPaths
+Use ISR (revalidate: 300)
+Remove any auth from SSR
+Verify apiClient usage
+⚠️ NEEDS MIGRATION - Client-Side Auth Required
+These admin pages should use client-side authentication only:
+
+pages/admin/profile/index.tsx ⚠️
+
+Current: getServerSideProps returns empty props
+Issues: Still has SSR wrapper but does nothing
+Actions:
+Remove getServerSideProps entirely
+Add client-side auth with useAuth() and usePermissions()
+Add auth redirect useEffect
+Check role requirements (UserRole.USER minimum)
+Add loading states
+Verify apiClient usage (no axios, no /users/me)
+pages/admin/clubs/index.tsx ⚠️
+
+Status: Per roadmap, marked as ✅ COMPLETE
+Actions:
+Verify client-side auth implementation
+Confirm no SSR auth checks
+Verify apiClient usage
+Check error handling
+pages/admin/clubs/add.tsx ⚠️
+
+Actions:
+Check for getServerSideProps - should be removed
+Verify client-side auth (useAuth, usePermissions)
+Check role requirements (UserRole.ADMIN)
+Verify apiClient for POST requests
+Check error handling
+pages/admin/clubs/[cAlias]/edit.tsx ⚠️
+
+Actions:
+Remove getServerSideProps if present
+Client-side auth with proper roles
+Client-side data fetching with useApiRequest or useEffect
+Verify apiClient for GET/PATCH
+Check error handling
+pages/admin/clubs/[cAlias]/teams/index.tsx ⚠️
+
+Actions: Same as above
+pages/admin/clubs/[cAlias]/teams/add.tsx ⚠️
+
+Actions: Same as add pattern
+pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx ⚠️
+
+Actions: Same as edit pattern
+pages/admin/clubs/[cAlias]/teams/[tAlias]/players/index.tsx ⚠️
+
+Actions: Same as index pattern
+pages/admin/players/index.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE in roadmap
+Actions: Verify implementation
+pages/admin/players/add.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/players/[playerId]/edit.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/posts/index.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/admin/posts/add.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/admin/posts/[alias]/edit.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/admin/myclub/index.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/admin/myclub/[teamAlias]/index.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/myclub/[teamAlias]/[playerId]/index.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/myref/index.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/admin/documents/index.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/admin/documents/add.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/documents/[alias]/edit.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/venues/index.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/admin/venues/add.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/venues/[alias]/edit.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/refadmin/index.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/refadmin/referees/index.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/admin/refadmin/referees/[userId]/edit.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+🔧 LEAGUE MANAGER PAGES (Need Client-Side Auth)
+pages/leaguemanager/index.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/leaguemanager/tournaments/index.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+pages/leaguemanager/tournaments/add.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+All nested league manager tournament pages ⚠️
+
+Actions: Verify client-side auth pattern for each
+🎯 ROSTER/SCORES/PENALTIES PAGES (Special Case)
+pages/matches/[id]/[teamFlag]/roster/index.tsx ⚠️
+
+Current: Uses getServerSideProps with JWT
+Issues:
+Uses getCookie('jwt', context) ❌
+Uses direct axios (not apiClient) ❌
+Fetches /users/me ❌
+Actions:
+Remove getServerSideProps entirely
+Migrate to client-side auth with useAuth() and usePermissions()
+Replace axios with apiClient
+Remove /users/me fetch
+Client-side data fetching
+Add loading states
+Check role requirements
+pages/matches/[id]/[teamFlag]/scores/index.tsx ⚠️
+
+Actions: Same as roster page
+pages/matches/[id]/[teamFlag]/penalties/index.tsx ⚠️
+
+Current: Uses getServerSideProps with JWT
+Issues: Same as roster page
+Actions: Same as roster page
+pages/matches/[id]/supplementary/index.tsx ⚠️
+
+Actions: Verify client-side auth pattern
+📄 PUBLIC PAGES (Should use SSG/ISR)
+pages/documents/index.tsx ⚠️
+
+Recommendation: Should use SSG or client-side fetch (no auth needed for public docs)
+Actions:
+Check current implementation
+Consider migrating to getStaticProps with ISR
+Or use client-side fetch with apiClient
+pages/documents/[category].tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/venues/index.tsx ⚠️
+
+Status: Marked as ✅ COMPLETE
+Actions: Verify implementation
+pages/datenschutz.tsx ✅
+
+Status: Static page, no data fetching needed
+pages/impressum.tsx ✅
+
+Status: Static page, no data fetching needed
+📋 Summary of Actions Needed
+High Priority (Breaking Issues)
+pages/matches/[id]/index.tsx - Remove SSR auth, keep SSR for match data
+pages/matches/[id]/matchcenter/index.tsx - Remove SSR auth
+pages/matches/[id]/[teamFlag]/roster/index.tsx - Full client-side migration + replace axios
+pages/matches/[id]/[teamFlag]/scores/index.tsx - Full client-side migration + replace axios
+pages/matches/[id]/[teamFlag]/penalties/index.tsx - Full client-side migration + replace axios
+Medium Priority (Verification Needed)
+All admin pages marked as "✅ COMPLETE" - verify they follow client-side auth pattern
+All league manager pages - verify client-side auth
+pages/posts/[alias].tsx - migrate to SSG with ISR
+Low Priority (Optional Optimization)
+pages/documents/index.tsx - consider SSG with ISR
+Tournament pages already using SSG ✅
+🔍 Common Issues to Check For
+For each page, verify:
+
+❌ No getCookie('jwt', context) usage
+❌ No /users/me fetches in SSR
+❌ No direct axios usage (use apiClient)
+❌ No jwt props passed from server to client
+✅ Client-side auth uses useAuth() and usePermissions()
+✅ Proper auth redirect pattern with useEffect
+✅ Loading states with LoadingState component
+✅ Error handling with try/catch and ErrorState
+✅ Link components without deprecated <a> tag
