@@ -239,12 +239,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           // Create 18 rows total with specific positioning
           const rows = [];
 
-          // Row 1: Captain (C) - always first
+          // Row 1: Captain (C) - always first, always show "C"
           const captain = captains[0];
           rows.push(
             <View key="row-1" style={styles.tableRow}>
               <Text style={styles.numberCell}>{captain ? (captain.player.jerseyNumber || '') : ''}</Text>
-              <Text style={styles.positionCell}>{captain ? 'C' : ''}</Text>
+              <Text style={styles.positionCell}>C</Text>
               <Text style={styles.nameCell}>
                 {captain ? `${captain.player.lastName}, ${captain.player.firstName}${captain.called ? ' (H)' : ''}` : ''}
               </Text>
@@ -252,12 +252,12 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
             </View>
           );
 
-          // Row 2: Assistant (A) - always second
+          // Row 2: Assistant (A) - always second, always show "A"
           const assistant = assistants[0];
           rows.push(
             <View key="row-2" style={styles.tableRow}>
               <Text style={styles.numberCell}>{assistant ? (assistant.player.jerseyNumber || '') : ''}</Text>
-              <Text style={styles.positionCell}>{assistant ? 'A' : ''}</Text>
+              <Text style={styles.positionCell}>A</Text>
               <Text style={styles.nameCell}>
                 {assistant ? `${assistant.player.lastName}, ${assistant.player.firstName}${assistant.called ? ' (H)' : ''}` : ''}
               </Text>
