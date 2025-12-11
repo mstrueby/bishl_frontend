@@ -8,12 +8,34 @@ import usePermissions from '../../../hooks/usePermissions';
 import LoadingState from '../../../components/ui/LoadingState';
 import ErrorState from '../../../components/ui/ErrorState';
 import { UserRole } from '../../../lib/auth';
+import { ClubValues } from '../../../types/ClubValues';
+import apiClient from '../../../lib/apiClient';
+
+const initialClubValues: ClubValues = {
+  _id: '',
+  name: '',
+  alias: '',
+  fullName: '',
+  addressName: '',
+  street: '',
+  zipCode: '',
+  city: '',
+  country: 'DE',
+  email: '',
+  yearOfFoundation: '',
+  description: '',
+  website: '',
+  ishdId: '',
+  active: true,
+  legacyId: 0,
+};
 
 export default function AddClubPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
   // Auth redirect
   useEffect(() => {
@@ -32,11 +54,28 @@ export default function AddClubPage() {
     setIsAuthorized(true);
   }, [authLoading, user, hasAnyRole, router]);
 
+  const handleSubmit = async (values: ClubValues) => {
+    setFormLoading(true);
+    try {
+      await apiClient.post('/clubs', values);
+      router.push('/admin/clubs');
+    } catch (error) {
+      console.error('Error creating club:', error);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    router.push('/admin/clubs');
+  };
+
   // Show loading state while checking auth
   if (authLoading || !isAuthorized) {
     return (
       <LayoutAdm
-        mainNavData={[]}
+        navData={[]}
+        sectionTitle="Verein hinzufügen"
         breadcrumbs={[
           { order: 1, name: 'Vereine', url: '/admin/clubs' },
           { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
@@ -50,7 +89,8 @@ export default function AddClubPage() {
   if (!user) {
     return (
       <LayoutAdm
-        mainNavData={[]}
+        navData={[]}
+        sectionTitle="Verein hinzufügen"
         breadcrumbs={[
           { order: 1, name: 'Vereine', url: '/admin/clubs' },
           { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
@@ -63,7 +103,8 @@ export default function AddClubPage() {
 
   return (
     <LayoutAdm
-      mainNavData={[]}
+      navData={[]}
+      sectionTitle="Verein hinzufügen"
       breadcrumbs={[
         { order: 1, name: 'Vereine', url: '/admin/clubs' },
         { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
@@ -74,7 +115,13 @@ export default function AddClubPage() {
       </Head>
 
       <div className="space-y-10 divide-y divide-gray-900/10">
-        <ClubForm />
+        <ClubForm
+          initialValues={initialClubValues}
+          onSubmit={handleSubmit}
+          enableReinitialize={false}
+          handleCancel={handleCancel}
+          loading={formLoading}
+        />
       </div>
     </LayoutAdm>
   );
