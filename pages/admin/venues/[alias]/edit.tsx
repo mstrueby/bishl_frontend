@@ -11,6 +11,7 @@ import usePermissions from '../../../../hooks/usePermissions';
 import { UserRole } from '../../../../lib/auth';
 import LoadingState from '../../../../components/ui/LoadingState';
 import apiClient from '../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../lib/errorHandler';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -45,10 +46,8 @@ const Edit: NextPage = () => {
         const response = await apiClient.get(`/venues/${alias}`);
         setVenue(response.data);
       } catch (error) {
-        if (error) {
-          console.error('Error fetching venue:', error.message);
-          setError('Fehler beim Laden der Spielstätte');
-        }
+        console.error('Error fetching venue:', getErrorMessage(error));
+        setError(getErrorMessage(error));
       } finally {
         setDataLoading(false);
       }
@@ -108,16 +107,14 @@ const Edit: NextPage = () => {
           pathname: `/admin/venues`,
           query: { message: `Die Spielstätte <strong>${values.name}</strong> wurde erfolgreich aktualisiert.` }
         }, `/admin/venues`);
-      }
-    } catch (error: any) {
-      if (error.response?.status === 304) {
+      } else if (response.status === 304) {
         router.push({
           pathname: `/admin/venues`,
           query: { message: `Keine Änderungen für Spielstätte <strong>${values.name}</strong> vorgenommen.` }
         }, `/admin/venues`);
-      } else {
-        setError('Ein Fehler ist aufgetreten.');
       }
+    } catch (error) {
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }

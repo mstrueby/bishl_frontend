@@ -12,6 +12,7 @@ import useAuth from '../../../hooks/useAuth';
 import usePermissions from '../../../hooks/usePermissions';
 import { UserRole } from '../../../lib/auth';
 import apiClient from '../../../lib/apiClient';
+import { getErrorMessage } from '../../../lib/errorHandler';
 
 const Add: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -90,13 +91,9 @@ const Add: NextPage = () => {
           pathname: '/admin/venues',
           query: { message: `Die neue Spielfläche <strong>${values.name}</strong> wurde erfolgreich angelegt.` }
         }, '/admin/venues');
-      } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (error) {
-        setError(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
-      }
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
