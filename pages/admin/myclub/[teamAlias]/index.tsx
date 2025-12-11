@@ -7,6 +7,7 @@ import { PlayerValues } from '../../../../types/PlayerValues';
 import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
+import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import DataList from '../../../../components/admin/ui/DataList';
 import { getDataListItems } from '../../../../tools/playerItems';
 import LoadingState from '../../../../components/ui/LoadingState';
@@ -14,6 +15,7 @@ import useAuth from '../../../../hooks/useAuth';
 import usePermissions from '../../../../hooks/usePermissions';
 import { UserRole } from '../../../../lib/auth';
 import apiClient from '../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../lib/errorHandler';
 
 const transformedUrl = (id: string) => buildUrl(id, {
   cloud: {
@@ -33,6 +35,7 @@ const TeamPage: NextPage = () => {
   const [players, setPlayers] = useState<PlayerValues[]>([]);
   const [totalPlayers, setTotalPlayers] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const currentPage = parseInt(router.query.page as string) || 1;
@@ -79,9 +82,8 @@ const TeamPage: NextPage = () => {
       setTotalPlayers(playersResponse.data?.total || 0);
 
     } catch (error) {
-      if (error) {
-        console.error('Error fetching data:', error);
-      }
+      console.error('Error fetching data:', getErrorMessage(error));
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -100,9 +102,8 @@ const TeamPage: NextPage = () => {
       });
       setPlayers(playersResponse.data?.results || playersResponse.data || []);
     } catch (error) {
-      if (error) {
-        console.error('Error fetching players:', error);
-      }
+      console.error('Error fetching players:', getErrorMessage(error));
+      setError(getErrorMessage(error));
     }
   }, [club, team]);
 
@@ -157,11 +158,10 @@ const TeamPage: NextPage = () => {
         await fetchPlayers(currentPage);
       } else if (response.status === 304) {
         console.log('No changes were made to the player status.');
-      } else {
-        console.error('Failed to update player status.');
       }
     } catch (error) {
-      console.error('Error updating player status:', error);
+      console.error('Error updating player status:', getErrorMessage(error));
+      setError(getErrorMessage(error));
     }
   }
 
@@ -186,6 +186,10 @@ const TeamPage: NextPage = () => {
 
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
+  };
+
+  const handleCloseError = () => {
+    setError(null);
   };
 
   // Show loading state while checking auth or fetching data
@@ -222,6 +226,7 @@ const TeamPage: NextPage = () => {
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+      {error && <ErrorMessage error={error} onClose={handleCloseError} />}
 
       <DataList
         items={dataListItems}
