@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withAuth } from '../../lib/serverAuth';
+import axios from 'axios';
 
 const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'GET') {
@@ -14,26 +15,25 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       const accessToken = authHeader.substring(7); // Remove 'Bearer ' prefix
 
       // Fetch user info from backend using access token
-      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-        method: 'GET',
+      const result = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
       });
 
-      if (result.ok) {
-        const response = await result.json();
-        // Backend returns { success, data: UserValues, message }
-        // Extract the actual user data
-        const userData = response.data || response;
-        res.status(200).json(userData);
-      } else {
-        const errorData = await result.json();
-        res.status(result.status).json({ error: errorData.detail || 'Failed to fetch user' });
-      }
+      // Backend returns { success, data: UserValues, message }
+      // Extract the actual user data
+      const userData = result.data?.data || result.data;
+      res.status(200).json(userData);
     } catch (error) {
       console.error('User fetch error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      if (axios.isAxiosError(error) && error.response) {
+        res.status(error.response.status).json({ 
+          error: error.response.data?.detail || 'Failed to fetch user' 
+        });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
   } else {
     res.setHeader('Allow', ['GET']);
