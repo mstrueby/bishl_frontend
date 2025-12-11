@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Match, SupplementarySheet } from "../../types/MatchValues";
+import { MatchValues, SupplementarySheet } from "../../types/MatchValues";
 import Badge from "../ui/Badge";
 
 interface Assignment {
@@ -20,7 +20,7 @@ interface Assignment {
 }
 
 interface SupplementaryTabProps {
-  match: Match;
+  match: MatchValues;
   jwt?: string;
   permissions: {
     showButtonSupplementary: boolean;
