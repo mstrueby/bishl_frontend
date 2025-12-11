@@ -12,8 +12,8 @@ import { UserValues } from '../types/UserValues';
 export enum UserRole {
   ADMIN = 'ADMIN',
   LEAGUE_MANAGER = 'LEAGUE_MANAGER',
+  REF_ADMINN = 'REF_ADMINN',
   REFEREE = 'REFEREE',
-  CLUB_MANAGER = 'CLUB_MANAGER',
   CLUB_ADMIN = 'CLUB_ADMIN', // Backend uses CLUB_ADMIN
   DOC_ADMIN = 'DOC_ADMIN',
   AUTHOR = 'AUTHOR',
@@ -89,7 +89,6 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     Permission.VIEW_MATCHES,
     Permission.VIEW_CLUBS,
     Permission.VIEW_PLAYERS,
-    Permission.MANAGE_REFEREES,
     Permission.VIEW_REFEREE_ASSIGNMENTS,
     Permission.MANAGE_POSTS,
     Permission.PUBLISH_POSTS,
@@ -97,21 +96,21 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     Permission.VIEW_DOCUMENTS,
     Permission.VIEW_VENUES
   ],
+  [UserRole.REF_ADMINN]: [
+    Permission.VIEW_TOURNAMENTS,
+    Permission.VIEW_MATCHES,
+    Permission.VIEW_CLUBS,
+    Permission.VIEW_PLAYERS,
+    Permission.VIEW_POSTS,
+    Permission.VIEW_DOCUMENTS,
+    Permission.MANAGE_REFEREES,
+    Permission.VIEW_REFEREE_ASSIGNMENTS
+  ],
   [UserRole.REFEREE]: [
     Permission.VIEW_TOURNAMENTS,
     Permission.VIEW_MATCHES,
     Permission.VIEW_REFEREE_ASSIGNMENTS,
     Permission.VIEW_CLUBS,
-    Permission.VIEW_PLAYERS,
-    Permission.VIEW_POSTS,
-    Permission.VIEW_DOCUMENTS
-  ],
-  [UserRole.CLUB_MANAGER]: [
-    Permission.VIEW_TOURNAMENTS,
-    Permission.VIEW_MATCHES,
-    Permission.MANAGE_OWN_CLUB,
-    Permission.VIEW_CLUBS,
-    Permission.MANAGE_OWN_TEAM_PLAYERS,
     Permission.VIEW_PLAYERS,
     Permission.VIEW_POSTS,
     Permission.VIEW_DOCUMENTS
@@ -124,6 +123,15 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     Permission.MANAGE_OWN_TEAM_PLAYERS,
     Permission.VIEW_PLAYERS,
     Permission.VIEW_POSTS,
+    Permission.VIEW_DOCUMENTS
+  ],
+  [UserRole.DOC_ADMIN]: [
+    Permission.VIEW_TOURNAMENTS,
+    Permission.VIEW_MATCHES,
+    Permission.VIEW_CLUBS,
+    Permission.VIEW_PLAYERS,
+    Permission.VIEW_POSTS,
+    Permission.MANAGE_DOCUMENTS,
     Permission.VIEW_DOCUMENTS
   ],
   [UserRole.AUTHOR]: [
@@ -206,7 +214,7 @@ export function canManageClub(user: UserValues | null, clubId: number): boolean 
   }
   
   // Club managers can only manage their own club
-  if (hasRole(user, UserRole.CLUB_MANAGER) && user.club) {
+  if (hasRole(user, UserRole.CLUB_ADMIN) && user.club) {
     return user.club.clubId === clubId.toString();
   }
   
@@ -227,7 +235,7 @@ export function canManageTeamPlayers(user: UserValues | null, teamId: number): b
   }
   
   // Club managers can manage their club's teams (note: need to add team associations to UserValues)
-  if (hasRole(user, UserRole.CLUB_MANAGER)) {
+  if (hasRole(user, UserRole.CLUB_ADMIN)) {
     // TODO: Add team associations to UserValues type
     return false;
   }
