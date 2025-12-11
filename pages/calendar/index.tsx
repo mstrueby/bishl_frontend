@@ -1,39 +1,31 @@
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
-import Standings from '../../components/ui/Standings';
-import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid'
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, FunnelIcon as FunnelIconSolid } from '@heroicons/react/24/solid'
 import { FunnelIcon as FunnelIconOutline } from '@heroicons/react/24/outline'
 import { Fragment, useEffect, useState, useRef, useCallback } from 'react'
-import { Listbox, Transition, Dialog } from '@headlessui/react'
+import { Transition, Dialog } from '@headlessui/react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, getDay } from 'date-fns';
 import { de } from 'date-fns/locale'; // Import German locale
-import ClipLoader from 'react-spinners/ClipLoader';
-import { Match } from '../../types/MatchValues';
+import { MatchValues } from '../../types/MatchValues';
 import MatchCard from '../../components/ui/MatchCard';
-import Matchday from '../leaguemanager/tournaments/[tAlias]/[sAlias]/[rAlias]/[mdAlias]';
-import { MatchdayValues } from '../../types/TournamentValues';
 import ClubSelect from '../../components/ui/ClubSelect';
 import TeamSelect from '../../components/ui/TeamSelect';
 import VenueSelect from '../../components/ui/VenueSelect';
 import TournamentSelect from '../../components/ui/TournamentSelect';
-import { Team } from '../../types/MatchValues';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { classNames } from '../../tools/utils';
 import { tournamentConfigs } from '../../tools/consts';
 import type { VenueValues } from '../../types/VenueValues';
 import type { ClubValues, TeamValues } from '../../types/ClubValues';
 import type { TournamentValues } from '../../types/TournamentValues';
-import axios from 'axios';
 import apiClient from '../../lib/apiClient';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
 
 interface CalendarProps {
-  matches: Match[];
+  matches: MatchValues[];
   venues: VenueValues[];
   clubs: ClubValues[];
   tournaments: TournamentValues[];
@@ -48,7 +40,7 @@ export const getStaticProps: GetStaticProps = async () => {
     });
     console.log('Number of Matches:', matchesRes.data.length);
     // Handle paginated response - data is wrapped in a 'data' attribute
-    const matchesData: Match[] = Array.isArray(matchesRes.data) 
+    const matchesData: MatchValues[] = Array.isArray(matchesRes.data) 
       ? matchesRes.data 
       : (matchesRes.data?.data || []);
 
@@ -249,7 +241,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
     //setIsFilterOpen(false);
   };
 
-  const handleMatchUpdate = async (updatedMatch: Partial<Match>) => {
+  const handleMatchUpdate = async (updatedMatch: Partial<MatchValues>) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${updatedMatch._id}`);
       const fullUpdatedMatch = await response.json();
