@@ -11,8 +11,9 @@ import { UserValues } from '../types/UserValues';
 // Define all possible roles in the system
 export enum UserRole {
   ADMIN = 'ADMIN',
-  LEAGUE_MANAGER = 'LEAGUE_MANAGER',
-  REF_ADMIN = 'REF_ADMINN',
+  LEAGUE_ADMIN = 'LEAGUE_ADMIN',
+  PLAYER_ADMIN = 'PLAYER_ADMIN',
+  REF_ADMIN = 'REF_ADMIN',
   REFEREE = 'REFEREE',
   CLUB_ADMIN = 'CLUB_ADMIN', // Backend uses CLUB_ADMIN
   DOC_ADMIN = 'DOC_ADMIN',
@@ -81,7 +82,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     Permission.MANAGE_VENUES,
     Permission.VIEW_VENUES
   ],
-  [UserRole.LEAGUE_MANAGER]: [
+  [UserRole.LEAGUE_ADMIN]: [
     Permission.MANAGE_TOURNAMENTS,
     Permission.VIEW_TOURNAMENTS,
     Permission.MANAGE_MATCHES,
@@ -105,6 +106,15 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     Permission.VIEW_DOCUMENTS,
     Permission.MANAGE_REFEREES,
     Permission.VIEW_REFEREE_ASSIGNMENTS
+  ],
+  [UserRole.PLAYER_ADMIN]: [
+    Permission.VIEW_TOURNAMENTS,
+    Permission.VIEW_MATCHES,
+    Permission.VIEW_CLUBS,
+    Permission.VIEW_PLAYERS,
+    Permission.VIEW_POSTS,
+    Permission.VIEW_DOCUMENTS,
+    Permission.MANAGE_PLAYERS
   ],
   [UserRole.REFEREE]: [
     Permission.VIEW_TOURNAMENTS,
