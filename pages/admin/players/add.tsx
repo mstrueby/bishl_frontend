@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { PlayerValues } from '../../../types/PlayerValues';
 import { ClubValues } from '../../../types/ClubValues';
 import PlayerAdminForm from '../../../components/admin/PlayerAdminForm';
@@ -125,10 +124,9 @@ const Add: NextPage = () => {
       } else {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
-      }
+    } catch (error: any) {
+      console.error('Error adding player:', error);
+      setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
     } finally {
       setLoading(false);
     }
