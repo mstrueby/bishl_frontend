@@ -12,7 +12,7 @@ import { UserValues } from '../types/UserValues';
 export enum UserRole {
   ADMIN = 'ADMIN',
   LEAGUE_MANAGER = 'LEAGUE_MANAGER',
-  REF_ADMINN = 'REF_ADMINN',
+  REF_ADMIN = 'REF_ADMINN',
   REFEREE = 'REFEREE',
   CLUB_ADMIN = 'CLUB_ADMIN', // Backend uses CLUB_ADMIN
   DOC_ADMIN = 'DOC_ADMIN',
@@ -96,7 +96,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     Permission.VIEW_DOCUMENTS,
     Permission.VIEW_VENUES
   ],
-  [UserRole.REF_ADMINN]: [
+  [UserRole.REF_ADMIN]: [
     Permission.VIEW_TOURNAMENTS,
     Permission.VIEW_MATCHES,
     Permission.VIEW_CLUBS,
