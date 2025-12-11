@@ -13,6 +13,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../../lib/errorHandler';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -55,10 +56,8 @@ const Edit: NextPage = () => {
         });
         setClubs(clubsResponse.data);
       } catch (error) {
-        if (error) {
-          console.error('Error fetching data:', error.message);
-          router.push('/admin/refadmin/referees');
-        }
+        console.error('Error fetching data:', getErrorMessage(error));
+        setError(getErrorMessage(error));
       } finally {
         setDataLoading(false);
       }
@@ -106,22 +105,14 @@ const Edit: NextPage = () => {
           pathname: '/admin/refadmin/referees',
           query: { message: `Schiedsrichter <strong>${values.firstName} ${values.lastName}</strong> wurde erfolgreich aktualisiert.` }
         }, `/admin/refadmin/referees`);
-      } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+      } else if (response.status === 304) {
+        router.push({
+          pathname: '/admin/refadmin/referees',
+          query: { message: `Keine Änderungen für <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
+        }, `/admin/refadmin/referees`);
       }
     } catch (error) {
-      if (error) {
-        if (error.response?.status === 304) {
-          router.push({
-            pathname: '/admin/refadmin/referees',
-            query: { message: `Keine Änderungen für <strong>${values.firstName} ${values.lastName}</strong> vorgenommen.` }
-          }, `/admin/refadmin/referees`);
-        } else {
-          setError('Ein Fehler ist aufgetreten.');
-        }
-      } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
-      }
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
