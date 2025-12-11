@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { MatchValues } from '../../../types/MatchValues';
-import axios from 'axios';
 import MatchStatusSelect from './MatchStatusSelect';
 import FinishTypeSelect from './FinishTypeSelect';
 import { allMatchStatuses, allFinishTypes } from '../../../tools/consts';
 import { CldImage } from 'next-cloudinary';
+import apiClient from '../../../lib/apiClient';
 
 interface EditData {
   matchStatus: { key: string; value: string };
@@ -29,12 +30,11 @@ interface MatchEditProps {
   isOpen: boolean;
   onClose: () => void;
   match: MatchValues;
-  jwt: string;
   onSuccess: (updatedMatch: Partial<MatchValues>) => void;
   onMatchUpdate?: (updatedMatch: Partial<MatchValues>) => Promise<void>;
 }
 
-const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: MatchEditProps) => {
+const MatchStatus = ({ isOpen, onClose, match, onSuccess, onMatchUpdate }: MatchEditProps) => {
   const initialEditData = {
     matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
     finishType: { key: match.finishType.key, value: match.finishType.value },
@@ -76,17 +76,13 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
     });
 
     try {
-      const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+      const response = await apiClient.patch(`/matches/${match._id}`, {
         matchStatus,
         finishType,
         home: editData.home,
         away: editData.away
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`
-        }
       });
+      
       if (response.status === 200) {
         const updatedMatch = response.data;
         onSuccess(updatedMatch);
@@ -96,17 +92,13 @@ const MatchStatus = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: 
           onMatchUpdate(updatedMatch);
         }
         return updatedMatch;
+      } else if (response.status === 304) {
+        onClose();
       } else {
         console.error('Error updating match:', response.data);
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 304) {
-          onClose();
-        } else {
-          console.error('Error updating match:', error);
-        }
-      }
+      console.error('Error updating match:', error);
     } finally {
       setLoading(false);
     }
