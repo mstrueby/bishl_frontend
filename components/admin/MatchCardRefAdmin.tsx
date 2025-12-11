@@ -7,7 +7,6 @@ import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevels } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
-import axios from 'axios';
 import apiClient from '../../lib/apiClient'; // Assuming apiClient is configured for token management
 import { CldImage } from 'next-cloudinary';
 

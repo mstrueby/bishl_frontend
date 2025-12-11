@@ -10,7 +10,6 @@ import InputText from '../components/ui/form/InputText';
 import ButtonPrimary from '../components/ui/form/ButtonPrimary';
 import { XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import apiClient from '../lib/apiClient';
-import axios from 'axios';
 
 // Assign the arrow function to a variable
 const LoginPage = () => {
@@ -85,10 +84,7 @@ const LoginPage = () => {
       router.push('/');
     } catch (error) {
       console.error('Login error:', error);
-      if (axios.isAxiosError(error)) {
-        const errMsg = error.response?.data?.error || error.response?.data?.detail || 'Login failed';
-        setError(errMsg);
-      } else {
+      if (error) {
         setError('Login failed. Please try again.');
       }
     } finally {

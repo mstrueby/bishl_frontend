@@ -3,7 +3,6 @@ import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import axios from "axios";
 import { getCookie } from "cookies-next";
 import { PostValues } from "../types/PostValues";
 import { MatchValues } from "../types/MatchValues";
@@ -34,7 +33,11 @@ interface PostsProps {
   jwt: string | null;
   posts: PostValues[];
   todaysMatches: MatchValues[];
-  restOfWeekMatches: { date: string; dayName: string; matches: MatchValues[] }[];
+  restOfWeekMatches: {
+    date: string;
+    dayName: string;
+    matches: MatchValues[];
+  }[];
   tournaments: TournamentValues[];
 }
 
@@ -57,9 +60,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Response is already unwrapped by interceptor
     posts = res.data || [];
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error("Error fetching posts:", error);
-    }
+    console.error("Error fetching posts:", error);
   }
 
   // Fetch today's matches
@@ -203,7 +204,11 @@ const Home: NextPage<PostsProps> = ({
   // Group matches by time slots
   const groupMatchesByTimeSlot = (matches: MatchValues[]) => {
     const groups: {
-      [key: string]: { label: string; description: string; matches: MatchValues[] };
+      [key: string]: {
+        label: string;
+        description: string;
+        matches: MatchValues[];
+      };
     } = {};
 
     matches.forEach((match) => {
