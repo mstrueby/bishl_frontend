@@ -11,7 +11,7 @@ import useAuth from '../../../../../../hooks/useAuth';
 import usePermissions from '../../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../../lib/auth';
 import apiClient from '../../../../../../lib/apiClient';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
