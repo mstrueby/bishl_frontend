@@ -162,40 +162,66 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ### 🟡 Medium Priority - Admin Pages
 
-#### 7. `pages/admin/profile/index.tsx` ⚠️
-**Status:** NEEDS CLEANUP  
-**Current:** Has `getServerSideProps` returning empty props  
+#### 7. `pages/admin/profile/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
 **Issues:**
-- Has SSR wrapper but does nothing
+- ✅ Uses `apiClient` for all API calls (via ProfileForm)
+- ✅ Removed `getServerSideProps`
+- ✅ All data fetching is client-side
 
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Verify client-side auth with `useAuth()` and `usePermissions()`
-- [ ] Add auth redirect `useEffect`
-- [ ] Check role requirements (likely `UserRole.USER` minimum)
-- [ ] Verify `apiClient` usage
-- [ ] Add loading states
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Role check allows all authenticated users (USER, AUTHOR, CLUB_MANAGER, REFEREE, LEAGUE_MANAGER, ADMIN)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with `ErrorState`
+
+**Recommendation:** Full client-side migration (user profile page)
 
 ---
 
 #### 8. `pages/admin/clubs/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify no SSR auth checks
-- [ ] Verify `apiClient` usage
-- [ ] Verify client-side auth implementation
-- [ ] Check error handling
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No SSR auth checks
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorState`
+- ✅ Client-side search functionality
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 9. `pages/admin/clubs/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:**
-- [ ] Check for `getServerSideProps` - should be removed
-- [ ] Verify client-side auth (`useAuth`, `usePermissions`)
-- [ ] Check role requirements (`UserRole.ADMIN`)
-- [ ] Verify `apiClient` for POST requests
-- [ ] Check error handling
+#### 9. `pages/admin/clubs/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls (via ClubForm)
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Form uses `apiClient` for POST requests (via ClubForm component)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with `ErrorState`
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
@@ -508,8 +534,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 5 (files 1-5)  
+**Completed:** 9 (files 1-9)  
 **In Progress:** 0  
-**Pending:** 51  
+**Pending:** 47  
 
 **Last Updated:** 2025-02-03

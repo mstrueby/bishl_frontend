@@ -1,155 +1,81 @@
-
-import { useState, useEffect } from 'react'
-import { NextPage } from 'next';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
-import { ClubValues } from '../../../types/ClubValues';
+import Head from 'next/head';
+import LayoutAdm from '../../../components/LayoutAdm';
 import ClubForm from '../../../components/admin/ClubForm';
-import Layout from '../../../components/Layout';
-import SectionHeader from "../../../components/admin/SectionHeader";
-import ErrorMessage from '../../../components/ui/ErrorMessage';
-import LoadingState from '../../../components/ui/LoadingState';
 import useAuth from '../../../hooks/useAuth';
 import usePermissions from '../../../hooks/usePermissions';
+import LoadingState from '../../../components/ui/LoadingState';
+import ErrorState from '../../../components/ui/ErrorState';
 import { UserRole } from '../../../lib/auth';
-import apiClient from '../../../lib/apiClient';
 
-const Add: NextPage = () => {
+export default function AddClubPage() {
+  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  // Auth redirect check
+  // Auth redirect
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       router.push('/login');
       return;
     }
-    
+
     if (!hasAnyRole([UserRole.ADMIN])) {
       router.push('/');
+      return;
     }
+
+    setIsAuthorized(true);
   }, [authLoading, user, hasAnyRole, router]);
 
-  const initialValues: ClubValues = {
-    _id: '',
-    name: '',
-    alias: '',
-    addressName: '',
-    street: '',
-    zipCode: '',
-    city: '',
-    country: 'Deutschland',
-    email: '',
-    yearOfFoundation: '',
-    description: '',
-    website: '',
-    ishdId: '',
-    active: false,
-    logoUrl: '',
-    legacyId: '',
-    teams: [],
-  };
-
-  const onSubmit = async (values: ClubValues) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        // Skip _id field and teams array
-        if (key === '_id') return;
-        if (key === 'teams') return;
-        
-        // Handle File objects (from ImageUpload)
-        if (value instanceof File) {
-          formData.append(key, value);
-          return;
-        }
-        
-        // Handle boolean values - always include them
-        if (typeof value === 'boolean') {
-          formData.append(key, value.toString());
-          return;
-        }
-        
-        // For other values, skip if empty
-        if (value !== null && value !== undefined && value !== '') {
-          formData.append(key, value.toString());
-        }
-      });
-      
-      // Log filtered FormData fields
-      console.log('submitted values');
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-      
-      const response = await apiClient.post('/clubs', formData);
-      if (response.status === 201) {
-        router.push({
-          pathname: '/admin/clubs',
-          query: { message: `Verein <strong>${values.name}</strong> wurde erfolgreich angelegt.` },
-        }, '/admin/clubs');
-      } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.detail || 'Ein Fehler ist aufgetreten.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    router.push('/admin/clubs');
-  };
-
-  useEffect(() => {
-    if (error) {
-      window.scrollTo(0, 0);
-    }
-  }, [error]);
-
-  const handleCloseMessage = () => {
-    setError(null);
-  };
-
-  // Loading state
-  if (authLoading) {
+  // Show loading state while checking auth
+  if (authLoading || !isAuthorized) {
     return (
-      <Layout>
-        <LoadingState />
-      </Layout>
+      <LayoutAdm
+        mainNavData={[]}
+        breadcrumbs={[
+          { order: 1, name: 'Vereine', url: '/admin/clubs' },
+          { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
+        ]}
+      >
+        <LoadingState message="Bereite Formular vor..." />
+      </LayoutAdm>
     );
   }
 
-  // Auth guard
-  if (!hasAnyRole([UserRole.ADMIN])) {
-    return null;
+  if (!user) {
+    return (
+      <LayoutAdm
+        mainNavData={[]}
+        breadcrumbs={[
+          { order: 1, name: 'Vereine', url: '/admin/clubs' },
+          { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
+        ]}
+      >
+        <ErrorState message="Nicht autorisiert" />
+      </LayoutAdm>
+    );
   }
 
-  const sectionTitle = 'Neuer Verein';
-
   return (
-    <Layout>
-      <SectionHeader title={sectionTitle} />
-      {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
-      <ClubForm 
-        initialValues={initialValues}
-        onSubmit={onSubmit}
-        enableReinitialize={false}
-        handleCancel={handleCancel}
-        loading={loading}
-      />
-    </Layout>
-  );
-};
+    <LayoutAdm
+      mainNavData={[]}
+      breadcrumbs={[
+        { order: 1, name: 'Vereine', url: '/admin/clubs' },
+        { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
+      ]}
+    >
+      <Head>
+        <title>Verein hinzufügen | BISHL Admin</title>
+      </Head>
 
-export default Add;
+      <div className="space-y-10 divide-y divide-gray-900/10">
+        <ClubForm />
+      </div>
+    </LayoutAdm>
+  );
+}

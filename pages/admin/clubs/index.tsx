@@ -1,196 +1,141 @@
-import { useState, useEffect } from "react";
-import { NextPage } from "next";
-import { useRouter } from "next/router";
-import axios from "axios";
-import { ClubValues } from "../../../types/ClubValues";
-import Layout from "../../../components/Layout";
-import SectionHeader from "../../../components/admin/SectionHeader";
-import SuccessMessage from "../../../components/ui/SuccessMessage";
-import DataList from "../../../components/admin/ui/DataList";
-import apiClient from "../../../lib/apiClient";
-import useAuth from "../../../hooks/useAuth";
-import { UserRole } from "../../../lib/auth";
-import usePermissions from "../../../hooks/usePermissions";
-import LoadingState from "../../../components/ui/LoadingState";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+import Link from 'next/link';
+import { PlusIcon } from '@heroicons/react/20/solid';
+import LayoutAdm from '../../../components/LayoutAdm';
+import SearchBox from '../../../components/ui/SearchBox';
+import DataList from '../../../components/admin/ui/DataList';
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import apiClient from '../../../lib/apiClient';
+import LoadingState from '../../../components/ui/LoadingState';
+import ErrorState from '../../../components/ui/ErrorState';
+import { UserRole } from '../../../lib/auth';
+import { ClubValues } from '../../../types/ClubValues';
 
-const Clubs: NextPage = () => {
+export default function ClubsPage() {
+  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [clubs, setClubs] = useState<ClubValues[]>([]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [dataLoading, setDataLoading] = useState(true);
-  const router = useRouter();
+  const [filteredClubs, setFilteredClubs] = useState<ClubValues[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Auth redirect check
+  // Auth redirect
   useEffect(() => {
     if (authLoading) return;
 
     if (!user) {
-      router.push("/login");
+      router.push('/login');
       return;
     }
 
     if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) {
-      router.push("/");
+      router.push('/');
+      return;
     }
+
+    setIsAuthorized(true);
   }, [authLoading, user, hasAnyRole, router]);
 
-  // Fetch clubs function for reuse
-  const fetchClubs = async () => {
-    try {
-      const res = await apiClient.get("/clubs");
-      setClubs(res.data || []);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error fetching clubs:", error);
-      }
-    }
-  };
-
-  // Data fetching on mount
+  // Fetch clubs data
   useEffect(() => {
-    if (authLoading || !user) return;
+    if (!isAuthorized) return;
 
-    const loadClubs = async () => {
-      await fetchClubs();
-      setDataLoading(false);
+    const fetchClubs = async () => {
+      try {
+        setLoading(true);
+        const response = await apiClient.get('/clubs');
+        setClubs(response.data || []);
+        setFilteredClubs(response.data || []);
+        setError(null);
+      } catch (err: any) {
+        console.error('Error fetching clubs:', err);
+        setError(err.response?.data?.message || 'Fehler beim Laden der Vereine');
+      } finally {
+        setLoading(false);
+      }
     };
-    loadClubs();
-  }, [authLoading, user]);
 
-  const toggleActive = async (clubId: string, currentStatus: boolean, logoUrl: string | null) => {
-    try {
-      const formData = new FormData();
-      formData.append('active', (!currentStatus).toString()); // Toggle the status
-      if (logoUrl) {
-        formData.append('logoUrl', logoUrl);
-      }
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
+    fetchClubs();
+  }, [isAuthorized]);
 
-      const response = await apiClient.patch(`/clubs/${clubId}`, formData);
-      if (response.status === 200) {
-        // Handle successful response
-        console.log(`Club ${clubId} successfully activated`);
-        await fetchClubs();
-      } else if (response.status === 304) {
-        // Handle not modified response
-        console.log('No changes were made to the club.');
-      } else {
-        // Handle error response
-        console.error('Failed to activate club.');
-      }
-    } catch (error) {
-      console.error('Error activating club:', error);
+  const handleSearch = (searchTerm: string) => {
+    if (!searchTerm.trim()) {
+      setFilteredClubs(clubs);
+      return;
     }
+
+    const filtered = clubs.filter((club) =>
+      club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      club.alias.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredClubs(filtered);
   };
 
-  useEffect(() => {
-    if (router.query.message) {
-      setSuccessMessage(router.query.message as string);
-      const currentPath = router.pathname;
-      const currentQuery = { ...router.query };
-      delete currentQuery.message;
-      router.replace(
-        {
-          pathname: currentPath,
-          query: currentQuery,
-        },
-        undefined,
-        { shallow: true },
-      );
-    }
-  }, [router]);
-
-  const handleCloseSuccessMessage = () => {
-    setSuccessMessage(null);
-  };
-
-  // Loading state
-  if (authLoading || dataLoading) {
+  // Show loading state while checking auth
+  if (authLoading || !isAuthorized) {
     return (
-      <Layout>
-        <SectionHeader title="Vereine" />
-        <LoadingState />
-      </Layout>
+      <LayoutAdm
+        mainNavData={[]}
+        breadcrumbs={[{ order: 1, name: 'Vereine', url: '/admin/clubs' }]}
+      >
+        <LoadingState message="Lade Vereine..." />
+      </LayoutAdm>
     );
   }
 
-  // Auth guard
-  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) return null;
-
-  const clubValues = clubs
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.alias))
-    .map((club: ClubValues) => ({
-      ...club,
-    }));
-
-  const sectionTitle = "Vereine";
-  const newLink = "/admin/clubs/add";
-  const statuses = {
-    Published: "text-green-500 bg-green-500/20",
-    Unpublished: "text-gray-500 bg-gray-800/10",
-    Archived: "text-yellow-800 bg-yellow-50 ring-yellow-600/20",
-  };
-
-  const dataListItems = clubValues.map((club) => {
-    return {
-      _id: club._id,
-      title: club.name,
-      alias: club.alias,
-      image: {
-        src: club.logoUrl
-          ? club.logoUrl
-          : "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.svg",
-        width: 48,
-        height: 48,
-        gravity: "center",
-        className: "object-contain",
-        radius: 0,
-      },
-      published: club.active,
-      menu: [
-        {
-          edit: {
-            onClick: () => router.push(`/admin/clubs/${club.alias}/edit`),
-          },
-        },
-        {
-          teams: {
-            onClick: () => router.push(`/admin/clubs/${club.alias}/teams`),
-          },
-        },
-        {
-          active: {
-            onClick: () =>
-              toggleActive(club._id, club.active, club.logoUrl || null),
-          },
-        },
-      ],
-    };
-  });
-
   return (
-    <Layout>
-      <SectionHeader title={sectionTitle} newLink={newLink} />
+    <LayoutAdm
+      mainNavData={[]}
+      breadcrumbs={[{ order: 1, name: 'Vereine', url: '/admin/clubs' }]}
+    >
+      <Head>
+        <title>Vereine | BISHL Admin</title>
+      </Head>
 
-      {successMessage && (
-        <SuccessMessage
-          message={successMessage}
-          onClose={handleCloseSuccessMessage}
-        />
+      <div className="sm:flex sm:items-center">
+        <div className="sm:flex-auto">
+          <h1 className="text-3xl font-semibold leading-6 text-gray-900">
+            Vereine
+          </h1>
+        </div>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <Link
+            href="/admin/clubs/add"
+            className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            <PlusIcon className="h-5 w-5 inline mr-1" aria-hidden="true" />
+            Verein hinzufügen
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <SearchBox onSearch={handleSearch} placeholder="Vereine durchsuchen..." />
+      </div>
+
+      {loading ? (
+        <LoadingState message="Lade Vereine..." />
+      ) : error ? (
+        <ErrorState message={error} />
+      ) : (
+        <div className="mt-8">
+          <DataList
+            items={filteredClubs.map((club) => ({
+              id: club._id,
+              name: club.name,
+              alias: club.alias,
+              editUrl: `/admin/clubs/${club.alias}/edit`,
+              detailUrl: `/admin/clubs/${club.alias}/teams`,
+            }))}
+            emptyMessage="Keine Vereine gefunden"
+          />
+        </div>
       )}
-
-      <DataList
-        items={dataListItems}
-        statuses={statuses}
-        showThumbnails
-        showStatusIndicator
-      />
-    </Layout>
+    </LayoutAdm>
   );
-};
-
-export default Clubs;
+}

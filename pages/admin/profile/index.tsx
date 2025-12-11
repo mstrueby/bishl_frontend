@@ -1,165 +1,73 @@
-import { useState, useEffect } from "react";
-import { GetServerSideProps, NextPage } from "next";
-import { useRouter } from "next/router";
-import axios from "axios";
-import apiClient from "../../../lib/apiClient";
-import ProfileForm from "../../../components/admin/ProfileForm";
-import Layout from "../../../components/Layout";
-import SectionHeader from "../../../components/admin/SectionHeader";
-import { UserValues } from "../../../types/UserValues";
-import ErrorMessage from "../../../components/ui/ErrorMessage";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+import LayoutAdm from '../../../components/LayoutAdm';
+import ProfileForm from '../../../components/admin/ProfileForm';
+import useAuth from '../../../hooks/useAuth';
+import usePermissions from '../../../hooks/usePermissions';
+import LoadingState from '../../../components/ui/LoadingState';
+import ErrorState from '../../../components/ui/ErrorState';
+import { UserRole } from '../../../lib/auth';
 
-interface EditProps {
-  profile: UserValues;
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  // Profile page relies on client-side authentication via apiClient
-  // We can't check auth server-side since tokens are in localStorage
-  // The page will handle auth checks client-side via AuthContext
-  return { props: {} };
-};
-
-const Profile: NextPage<EditProps> = () => {
-  const [profile, setProfile] = useState<UserValues | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [initialLoading, setInitialLoading] = useState<boolean>(true);
+export default function ProfilePage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const { hasAnyRole } = usePermissions();
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  // Fetch profile on component mount
+  // Auth redirect
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await apiClient.get("/users/me");
-        setProfile(response.data);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          setError("Fehler beim Laden des Profils.");
-          console.error("Error fetching profile:", error);
-        }
-      } finally {
-        setInitialLoading(false);
-      }
-    };
+    if (authLoading) return;
 
-    fetchProfile();
-  }, []);
-
-  // Handler for form submission
-  const onSubmit = async (values: UserValues) => {
-    setError(null);
-    setLoading(true);
-
-    // Remove 'roles' from the values object
-    console.log("submitted values", values);
-    const { roles, _id, club, ...filteredValues } = values;
-
-    console.log("filtered values", filteredValues);
-    try {
-      const formData = new FormData();
-      Object.entries(filteredValues).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
-
-      // Debug FormData by logging key-value pairs to the console
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ": " + pair[1]);
-      }
-
-      const response = await apiClient.patch(
-        `/users/${profile!._id}`,
-        formData,
-      );
-      console.log("response", response.data);
-      if (response.status === 200) {
-        router.push(
-          {
-            pathname: "/",
-            query: {
-              message:"Dein Profil wurde erfolgreich aktualisiert."
-            },
-          },
-          `/`,
-        );
-      } else {
-        setError("Ein unerwarteter Fehler ist aufgetreten.");
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError("Ein Fehler ist aufgetreten.");
-      } else {
-        setError("Ein unerwarteter Fehler ist aufgetreten.");
-      }
-    } finally {
-      setLoading(false);
+    if (!user) {
+      router.push('/login');
+      return;
     }
-  };
 
-  const handleCancel = () => {
-    router.push("/");
-  };
-
-  useEffect(() => {
-    if (error) {
-      window.scrollTo(0, 0);
+    // Profile page is accessible to all authenticated users
+    if (!hasAnyRole([UserRole.USER, UserRole.AUTHOR, UserRole.CLUB_MANAGER, UserRole.REFEREE, UserRole.LEAGUE_MANAGER, UserRole.ADMIN])) {
+      router.push('/');
+      return;
     }
-  }, [error]);
 
-  const handleCloseMessage = () => {
-    setError(null);
-  };
+    setIsAuthorized(true);
+  }, [authLoading, user, hasAnyRole, router]);
 
-  const sectionTitle = "Mein Profil";
-
-  if (initialLoading) {
+  // Show loading state while checking auth
+  if (authLoading || !isAuthorized) {
     return (
-      <Layout>
-        <SectionHeader title={sectionTitle} />
-        <div className="flex justify-center items-center min-h-screen">
-          <div>Laden...</div>
-        </div>
-      </Layout>
+      <LayoutAdm
+        mainNavData={[]}
+        breadcrumbs={[{ order: 1, name: 'Profil', url: '/admin/profile' }]}
+      >
+        <LoadingState message="Lade Profil..." />
+      </LayoutAdm>
     );
   }
 
-  if (!profile) {
+  if (!user) {
     return (
-      <Layout>
-        <SectionHeader title={sectionTitle} />
-        {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
-      </Layout>
+      <LayoutAdm
+        mainNavData={[]}
+        breadcrumbs={[{ order: 1, name: 'Profil', url: '/admin/profile' }]}
+      >
+        <ErrorState message="Nicht angemeldet" />
+      </LayoutAdm>
     );
   }
-
-  const intialValues: UserValues = {
-    _id: profile._id,
-    email: profile.email,
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    club: {
-      clubId: profile.club ? profile.club.clubId : "",
-      clubName: profile.club ? profile.club.clubName : "",
-      logoUrl: profile.club ? profile.club.logoUrl : "",
-    },
-    roles: profile.roles,
-  };
 
   return (
-    <Layout>
-      <SectionHeader title={sectionTitle} />
+    <LayoutAdm
+      mainNavData={[]}
+      breadcrumbs={[{ order: 1, name: 'Profil', url: '/admin/profile' }]}
+    >
+      <Head>
+        <title>Profil | BISHL</title>
+      </Head>
 
-      {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
-
-      <ProfileForm
-        initialValues={intialValues}
-        onSubmit={onSubmit}
-        enableReinitialize={true}
-        handleCancel={handleCancel}
-        loading={loading}
-      />
-    </Layout>
+      <div className="space-y-10 divide-y divide-gray-900/10">
+        <ProfileForm user={user} />
+      </div>
+    </LayoutAdm>
   );
-};
-
-export default Profile;
+}
