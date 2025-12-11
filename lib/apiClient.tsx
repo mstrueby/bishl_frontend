@@ -2,6 +2,24 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
 import { redirectToLogin } from './authRedirect';
 
+// Extend AxiosResponse to include our custom properties added by interceptors
+export interface ExtendedAxiosResponse<T = any> extends AxiosResponse<T> {
+  pagination?: {
+    page: number;
+    page_size: number;
+    total_items: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+  message?: string;
+  success?: boolean;
+}
+
+
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
+import { redirectToLogin } from './authRedirect';
+
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -97,7 +115,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 // Response interceptor - unwrap standardized responses and handle token refresh
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
+  (response: AxiosResponse): ExtendedAxiosResponse => {
     // Unwrap standardized response format
     // Backend returns: { success: true, data: {...}, message: "..." }
     // We want to return just the data for easier consumption
@@ -109,11 +127,11 @@ apiClient.interceptors.response.use(
         pagination: response.data.pagination,
         message: response.data.message,
         success: response.data.success,
-      };
+      } as ExtendedAxiosResponse;
     }
     
     // Return response as-is if not standardized format
-    return response;
+    return response as ExtendedAxiosResponse;
   },
   async (error) => {
     const originalRequest = error.config;

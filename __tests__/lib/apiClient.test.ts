@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import apiClient, { CancelToken, isCancel } from '@/lib/apiClient';
+import apiClient, { CancelToken, isCancel, ExtendedAxiosResponse } from '@/lib/apiClient';
 import { redirectToLogin } from '@/lib/authRedirect';
 
 // Mock the redirect helper
@@ -128,7 +128,7 @@ describe('lib/apiClient.tsx - API Client', () => {
         message: 'Success',
       });
 
-      const response = await apiClient.get('/test');
+      const response: ExtendedAxiosResponse = await apiClient.get('/test');
       expect(response.data).toEqual({ id: 1, name: 'Test' });
       expect(response.success).toBe(true);
       expect(response.message).toBe('Success');
@@ -149,10 +149,10 @@ describe('lib/apiClient.tsx - API Client', () => {
         message: 'Success',
       });
 
-      const response = await apiClient.get('/test');
+      const response: ExtendedAxiosResponse = await apiClient.get('/test');
       expect(response.data).toEqual([{ id: 1 }, { id: 2 }]);
       expect(response.pagination).toBeDefined();
-      expect(response.pagination.total_items).toBe(20);
+      expect(response.pagination!.total_items).toBe(20);
     });
 
     it('should return response as-is if not standardized format', async () => {
