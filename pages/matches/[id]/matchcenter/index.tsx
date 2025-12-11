@@ -253,7 +253,7 @@ export default function MatchDetails({
       // Fetch home team stats
       if (
         match.home.roster &&
-        match.home.roster.some((player) => player.called)
+        match.home.roster.some((player: RosterPlayer) => player.called)
       ) {
         const homeStats = await fetchPlayerStats(match.home.roster, {
           name: match.home.name,
@@ -264,7 +264,7 @@ export default function MatchDetails({
       // Fetch away team stats
       if (
         match.away.roster &&
-        match.away.roster.some((player) => player.called)
+        match.away.roster.some((player: RosterPlayer) => player.called)
       ) {
         const awayStats = await fetchPlayerStats(match.away.roster, {
           name: match.away.name,

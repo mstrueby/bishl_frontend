@@ -4,7 +4,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Match, RosterPlayer, EventPlayer, Team, PenaltiesBase } from '../../../../../types/MatchValues';
+import { MatchValues, RosterPlayer, EventPlayer, Team, PenaltiesBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -46,7 +46,7 @@ const PenaltyRegisterForm = () => {
   const { hasAnyRole } = usePermissions();
 
   const [pageLoading, setPageLoading] = useState(true);
-  const [match, setMatch] = useState<Match | null>(null);
+  const [match, setMatch] = useState<MatchValues | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
   const [roster, setRoster] = useState<RosterPlayer[]>([]);
   const [initialPenalties, setInitialPenalties] = useState<PenaltiesBase[]>([]);
@@ -98,7 +98,7 @@ const PenaltyRegisterForm = () => {
 
         // Fetch match data
         const matchResponse = await apiClient.get(`/matches/${id}`);
-        const matchData: Match = matchResponse.data;
+        const matchData: MatchValues = matchResponse.data;
         setMatch(matchData);
 
         const matchTeam: Team = teamFlag === 'home' ? matchData.home : matchData.away;

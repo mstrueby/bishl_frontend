@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import { PostValues } from "../types/PostValues";
-import { Match } from "../types/MatchValues";
+import { MatchValues } from "../types/MatchValues";
 import { TournamentValues } from "../types/TournamentValues";
 import Layout from "../components/Layout";
 import { getFuzzyDate } from "../tools/dateUtils";
@@ -33,8 +33,8 @@ import apiClient from "../lib/apiClient";
 interface PostsProps {
   jwt: string | null;
   posts: PostValues[];
-  todaysMatches: Match[];
-  restOfWeekMatches: { date: string; dayName: string; matches: Match[] }[];
+  todaysMatches: MatchValues[];
+  restOfWeekMatches: { date: string; dayName: string; matches: MatchValues[] }[];
   tournaments: TournamentValues[];
 }
 
@@ -113,7 +113,7 @@ const Home: NextPage<PostsProps> = ({
   const [selectedTournament, setSelectedTournament] =
     useState<TournamentValues | null>(null);
   const [filteredMatches, setFilteredMatches] =
-    useState<Match[]>(todaysMatches);
+    useState<MatchValues[]>(todaysMatches);
   const router = useRouter();
 
   // Use upcoming matches if no today's matches - memoize to prevent re-renders
@@ -201,9 +201,9 @@ const Home: NextPage<PostsProps> = ({
   };
 
   // Group matches by time slots
-  const groupMatchesByTimeSlot = (matches: Match[]) => {
+  const groupMatchesByTimeSlot = (matches: MatchValues[]) => {
     const groups: {
-      [key: string]: { label: string; description: string; matches: Match[] };
+      [key: string]: { label: string; description: string; matches: MatchValues[] };
     } = {};
 
     matches.forEach((match) => {
@@ -236,7 +236,7 @@ const Home: NextPage<PostsProps> = ({
   };
 
   // Categorize matches
-  const categorizeMatches = (matches: Match[]) => {
+  const categorizeMatches = (matches: MatchValues[]) => {
     const now = new Date();
 
     const live = matches.filter((match) => {
@@ -329,7 +329,7 @@ const Home: NextPage<PostsProps> = ({
     matches,
   }: {
     tournament: TournamentValues;
-    matches: Match[];
+    matches: MatchValues[];
   }) => {
     const tournamentConfig = tournamentConfigs[tournament.alias];
     const isExpanded = expandedTournaments.has(tournament.alias);
@@ -421,7 +421,7 @@ const Home: NextPage<PostsProps> = ({
   };
 
   // MatchCard component for today's games
-  const MatchCard = ({ match }: { match: Match }) => {
+  const MatchCard = ({ match }: { match: MatchValues }) => {
     // Determine border color based on match status and date
     const getBorderColor = () => {
       // Check if match is today
@@ -925,7 +925,6 @@ const Home: NextPage<PostsProps> = ({
                               published: true,
                               active: true,
                               external: false,
-                              seasons: [],
                             },
                             matches: [],
                           };
@@ -935,7 +934,7 @@ const Home: NextPage<PostsProps> = ({
                       },
                       {} as Record<
                         string,
-                        { tournament: TournamentValues; matches: Match[] }
+                        { tournament: TournamentValues; matches: MatchValues[] }
                       >,
                     );
 
