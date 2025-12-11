@@ -290,9 +290,26 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ---
 
-#### 13. `pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 13. `pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET/PATCH)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Client-side data fetching with `useEffect` for club and team data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses TeamForm component for form handling
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
@@ -576,8 +593,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 12 (files 1-12)  
+**Completed:** 13 (files 1-13)  
 **In Progress:** 0  
-**Pending:** 44  
+**Pending:** 43  
 
 **Last Updated:** 2025-02-03
