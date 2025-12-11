@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { ScoresBase } from '../../types/MatchValues';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import apiClient from '../../lib/apiClient';
 
 interface ScoresListProps {
-  jwt: string;
   teamName: string;
   matchId: string;
   teamFlag: string;
@@ -20,7 +19,6 @@ interface ScoresListProps {
 }
 
 const ScoresList: React.FC<ScoresListProps> = ({
-  jwt,
   teamName,
   matchId,
   teamFlag,
@@ -34,7 +32,7 @@ const ScoresList: React.FC<ScoresListProps> = ({
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<ScoresBase | undefined>(undefined);
-  const [isDeleting, setIsDeleting] = useState(false); // State for deletion loading
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteClick = (goal: ScoresBase) => {
     setGoalToDelete(goal);
@@ -44,28 +42,16 @@ const ScoresList: React.FC<ScoresListProps> = ({
   const handleDeleteConfirm = async () => {
     if (!goalToDelete) return;
     try {
-      setIsDeleting(true); // Set loading state
-      const response = await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/${goalToDelete._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      if (response.status === 200 || response.status === 204) {
-        if (refreshMatchData) {
-          refreshMatchData();
-        }
-      }
+      setIsDeleting(true);
+      await apiClient.delete(`/matches/${matchId}/${teamFlag}/scores/${goalToDelete._id}`);
+      
       if (refreshMatchData) {
         refreshMatchData();
       }
     } catch (error) {
       console.error('Error deleting goal:', error);
     } finally {
-      setIsDeleting(false); // Reset loading state
+      setIsDeleting(false);
       setIsDeleteModalOpen(false);
       setGoalToDelete(undefined);
     }
