@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Match } from '../../types/MatchValues';
+import { MatchValues } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { Referee } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, XCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
@@ -14,7 +14,7 @@ import { CldImage } from 'next-cloudinary';
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type MatchCardRefAdminProps = {
-  match: Match;
+  match: MatchValues;
   assignments: AssignmentValues[];
 };
 
