@@ -19,7 +19,7 @@ interface ListboxProps extends ComponentPropsWithoutRef<'input'> {
 
 const MyListbox = ({ label, name, placeholder, showErrorText = true, options, tabIndex, ...props }: ListboxProps) => {
   const [field, meta, helpers] = useField(name);
-  const [selected, setSelected] = useState<ListboxOption | null>(null);
+  const [selected, setSelected] = useState<ListboxOption | undefined>(undefined);
 
   const handleChange = (event: ListboxOption) => {
     const index = options.findIndex(option => option.key === event.key)
@@ -34,12 +34,10 @@ const MyListbox = ({ label, name, placeholder, showErrorText = true, options, ta
       if (index > -1) {
         setSelected(options[index]);
       } else {
-        // If field has a value but no matching option, keep selected as null
-        setSelected(null);
+        setSelected(undefined);
       }
     } else {
-      // Always set to null, never undefined
-      setSelected(null);
+      setSelected(undefined);
     }
   }, [field.value, options]);
 
