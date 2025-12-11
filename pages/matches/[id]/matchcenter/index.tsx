@@ -8,7 +8,7 @@ import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { Dialog, Transition } from "@headlessui/react";
 import {
-  Match,
+  MatchValues,
   RosterPlayer,
   PenaltiesBase,
   ScoresBase,
@@ -45,7 +45,7 @@ import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
 import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
 
 interface MatchDetailsProps {
-  match: Match;
+  match: MatchValues;
   matchdayOwner: MatchdayOwner;
   jwt?: string;
   userRoles?: string[];
@@ -102,7 +102,7 @@ export default function MatchDetails({
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
-  const [match, setMatch] = useState<Match>(initialMatch);
+  const [match, setMatch] = useState<MatchValues>(initialMatch);
 
   const getBackLink = () => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
