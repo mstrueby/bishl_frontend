@@ -12,6 +12,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../../lib/errorHandler';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -52,10 +53,8 @@ const Edit: NextPage = () => {
           const response = await apiClient.get(`/players/${playerId}`);
           setPlayer(response.data);
         } catch (error) {
-          if (error) {
-            console.error('Error fetching player:', error.message);
-            setError('Fehler beim Laden des Spielers.');
-          }
+          console.error('Error fetching player:', getErrorMessage(error));
+          setError(getErrorMessage(error));
         } finally {
           setDataLoading(false);
         }
@@ -151,14 +150,8 @@ const Edit: NextPage = () => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (error) {
-        router.push({
-          pathname: `/admin/myclub/${teamAlias}`,
-          query: { message: `Keine Änderungen für <strong>${values.displayFirstName} ${values.displayLastName}</strong> vorgenommen.` }
-        }, `/admin/myclub/${teamAlias}`);
-      } else {
-        setError('Ein Fehler ist aufgetreten.');
-      }
+      console.error('Error updating player:', getErrorMessage(error));
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
