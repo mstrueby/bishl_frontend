@@ -1,15 +1,13 @@
-
 import React from 'react';
-import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 import { CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { Match } from '../../types/MatchValues';
+import { MatchValues } from '../../types/MatchValues';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchStatusBadge from './MatchStatusBadge';
 
 interface MatchHeaderProps {
-  match: Match;
+  match: MatchValues;
   isRefreshing: boolean;
   onRefresh: () => void;
 }

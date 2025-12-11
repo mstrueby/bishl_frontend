@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Match, PenaltiesBase } from '../../types/MatchValues';
+import { MatchValues, PenaltiesBase } from '../../types/MatchValues';
 import PenaltyList from '../ui/PenaltyList';
 
 interface PenaltiesTabProps {
-  match: Match;
+  match: MatchValues;
   permissions: {
     showButtonPenaltiesHome: boolean;
     showButtonPenaltiesAway: boolean;

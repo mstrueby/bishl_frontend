@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Match } from '../../types/MatchValues';
+import { MatchValues } from '../../types/MatchValues';
 import RosterList from '../ui/RosterList';
 
 interface RosterTabProps {
-  match: Match;
+  match: MatchValues;
   permissions: {
     showButtonRosterHome: boolean;
     showButtonRosterAway: boolean;
