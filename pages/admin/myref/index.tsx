@@ -44,8 +44,8 @@ const MyRef: NextPage = () => {
         
         // Filter matches assigned to current referee
         const myMatches = matchesData.filter((match: MatchValues) => 
-          match.referee1?._id === user._id || 
-          match.referee2?._id === user._id
+          match.referee1?.userId === user._id || 
+          match.referee2?.userId === user._id
         );
         
         setMatches(myMatches);
