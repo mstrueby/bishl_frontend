@@ -22,7 +22,7 @@ export default function handler(
     sameSite: 'strict',
     maxAge: 60 * 60 * 24, // 24 hours
     path: '/',
-  });
+  } as any);
 
   // Return token for client to include in request headers
   res.status(200).json({ csrfToken });
