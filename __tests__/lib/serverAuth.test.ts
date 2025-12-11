@@ -86,7 +86,8 @@ describe('lib/serverAuth', () => {
     const mockUser: UserValues = {
       _id: 'user-123',
       email: 'test@example.com',
-      name: 'Test User',
+      firstName: 'Test',
+      lastName: 'User',
       roles: ['user']
     };
 
@@ -145,7 +146,8 @@ describe('lib/serverAuth', () => {
     const mockUser: UserValues = {
       _id: 'user-123',
       email: 'test@example.com',
-      name: 'Test User',
+      firstName: 'Test',
+      lastName: 'User',
       roles: ['user']
     };
 
@@ -219,14 +221,16 @@ describe('lib/serverAuth', () => {
     const mockUserWithPermission: UserValues = {
       _id: 'admin-123',
       email: 'admin@example.com',
-      name: 'Admin User',
+      firstName: 'Admin',
+      lastName: 'User',
       roles: ['admin']
     };
 
     const mockUserWithoutPermission: UserValues = {
       _id: 'user-123',
       email: 'user@example.com',
-      name: 'Regular User',
+      firstName: 'Regular',
+      lastName: 'User',
       roles: ['user']
     };
 
@@ -288,14 +292,16 @@ describe('lib/serverAuth', () => {
     const mockAdmin: UserValues = {
       _id: 'admin-123',
       email: 'admin@example.com',
-      name: 'Admin User',
+      firstName: 'Admin',
+      lastName: 'User',
       roles: ['admin']
     };
 
     const mockUser: UserValues = {
       _id: 'user-123',
       email: 'user@example.com',
-      name: 'Regular User',
+      firstName: 'Regular',
+      lastName: 'User',
       roles: ['user']
     };
 
@@ -353,14 +359,16 @@ describe('lib/serverAuth', () => {
     const mockLeagueManager: UserValues = {
       _id: 'lm-123',
       email: 'lm@example.com',
-      name: 'League Manager',
+      firstName: 'League',
+      lastName: 'Manager',
       roles: ['LEAGUE_ADMIN']
     };
 
     const mockUser: UserValues = {
       _id: 'user-123',
       email: 'user@example.com',
-      name: 'Regular User',
+      firstName: 'Regular',
+      lastName: 'User',
       roles: ['user']
     };
 
