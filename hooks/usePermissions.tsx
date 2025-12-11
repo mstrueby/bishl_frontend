@@ -48,7 +48,7 @@ export function usePermissions() {
     isAdmin: hasRole(user, UserRole.ADMIN),
     isLeagueManager: hasRole(user, UserRole.LEAGUE_ADMIN),
     isReferee: hasRole(user, UserRole.REFEREE),
-    isClubManager: hasRole(user, UserRole.CLUB_MANAGER),
+    isClubManager: hasRole(user, UserRole.CLUB_ADMIN),
     
     // User data
     user
