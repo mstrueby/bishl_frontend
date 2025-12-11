@@ -146,23 +146,29 @@ export default function SeasonHub({
   };
 
   // Helper function to format date range
-  const formatDate = (startDate?: string, endDate?: string) => {
+  const formatDate = (startDate?: string | Date | null, endDate?: string | Date | null) => {
     if (!startDate && !endDate) return "";
 
     if (startDate && endDate) {
-      const dateFrom = new Date(startDate);
-      const dateTo = new Date(endDate);
+      const dateFrom = typeof startDate === 'string' ? new Date(startDate) : startDate;
+      const dateTo = typeof endDate === 'string' ? new Date(endDate) : endDate;
       return (
         `${format(dateFrom, "d. LLL", { locale: de })}` +
         `${dateTo.getDate() !== dateFrom.getDate() ? " - " + format(dateTo, "d. LLL", { locale: de }) : ""}`
       );
     }
 
-    return startDate
-      ? format(new Date(startDate), "d. LLL", { locale: de })
-      : endDate
-        ? format(new Date(endDate), "d. LLL", { locale: de })
-        : "";
+    if (startDate) {
+      const dateFrom = typeof startDate === 'string' ? new Date(startDate) : startDate;
+      return format(dateFrom, "d. LLL", { locale: de });
+    }
+    
+    if (endDate) {
+      const dateTo = typeof endDate === 'string' ? new Date(endDate) : endDate;
+      return format(dateTo, "d. LLL", { locale: de });
+    }
+    
+    return "";
   };
 
   // Build page title
