@@ -5,47 +5,47 @@ import type { UserValues } from '@/types/UserValues';
 describe('lib/auth.ts - Authentication Utilities', () => {
   // Mock user data for testing
   const mockAdminUser: UserValues = {
-    id: 1,
+    _id: '1',
     username: 'admin_user',
     email: 'admin@bishl.de',
     firstName: 'Admin',
     lastName: 'User',
-    roles: ['admin', 'referee'],
-    isStaff: true,
-    isSuperuser: false,
+    roles: ['ADMIN', 'REFEREE'],
+    club: null,
+    referee: null,
   };
 
   const mockRefereeUser: UserValues = {
-    id: 2,
+    _id: '2',
     username: 'referee_user',
     email: 'referee@bishl.de',
     firstName: 'Referee',
     lastName: 'User',
-    roles: ['referee'],
-    isStaff: false,
-    isSuperuser: false,
+    roles: ['REFEREE'],
+    club: null,
+    referee: null,
   };
 
   const mockClubManagerUser: UserValues = {
-    id: 3,
+    _id: '3',
     username: 'club_manager',
     email: 'clubmanager@bishl.de',
     firstName: 'Club',
     lastName: 'Manager',
-    roles: ['club_manager'],
-    isStaff: false,
-    isSuperuser: false,
+    roles: ['CLUB_MANAGER'],
+    club: null,
+    referee: null,
   };
 
   const mockUserWithoutRoles: UserValues = {
-    id: 4,
+    _id: '4',
     username: 'regular_user',
     email: 'user@bishl.de',
     firstName: 'Regular',
     lastName: 'User',
     roles: [],
-    isStaff: false,
-    isSuperuser: false,
+    club: null,
+    referee: null,
   };
 
   describe('hasRole()', () => {
@@ -163,7 +163,7 @@ describe('lib/auth.ts - Authentication Utilities', () => {
 
     it('should be case-sensitive for role names', () => {
       // TypeScript enums are already case-sensitive
-      const userWithWrongCase = { ...mockAdminUser, roles: ['Admin', 'ADMIN'] };
+      const userWithWrongCase = { ...mockAdminUser, roles: ['Admin', 'admin'] };
       expect(hasRole(userWithWrongCase, UserRole.ADMIN)).toBe(false);
     });
   });

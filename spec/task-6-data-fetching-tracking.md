@@ -23,318 +23,817 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ### 🔴 High Priority - Breaking Issues
 
-#### 1. `pages/matches/[id]/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
+#### 1. `pages/matches/[id]/index.tsx` ✅
+**Status:** COMPLETED  
 **Current:** Uses `getServerSideProps` with JWT from cookies  
 **Issues:**
 - ✅ Uses `apiClient` for match data
-- ❌ Fetches `/users/me` in SSR
-- ❌ Uses `getCookie('jwt', context)`
-- ❌ Passes `jwt`, `userRoles`, `userClubId` as props
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `jwt`, `userRoles`, `userClubId` props
 
-**Required Actions:**
-- [ ] Remove JWT cookie reading from `getServerSideProps`
-- [ ] Remove `/users/me` fetch from SSR
-- [ ] Only fetch match data in SSR (public data)
-- [ ] Move auth-dependent features to client-side (`useAuth()`, `usePermissions()`)
-- [ ] Verify context menu permissions are client-side only
-- [ ] Ensure proper error handling
-- [ ] Add loading states with `LoadingState` component
+**Completed Actions:**
+- ✅ Removed JWT cookie reading from `getServerSideProps`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ Only fetches match data in SSR (public data)
+- ✅ Auth-dependent features use client-side (`useAuth()`, `usePermissions()`)
+- ✅ Context menu permissions are client-side only
+- ✅ Has proper error handling
+- ✅ Uses `LoadingState` component
 
 **Recommendation:** Keep SSR for SEO, client-side auth only
 
 ---
 
-#### 2. `pages/matches/[id]/matchcenter/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Current:** Uses `getServerSideProps` with JWT  
+#### 2. `pages/matches/[id]/matchcenter/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses `getServerSideProps` without JWT  
 **Issues:**
 - ✅ Uses `apiClient` for match data
-- ❌ Fetches `/users/me` in SSR
-- ❌ Uses `getCookie('jwt', context)`
-- ❌ Passes `jwt`, `userRoles`, `userClubId` as props
-- ❌ Multiple data fetches in SSR (roster, scores, penalties)
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `jwt`, `userRoles`, `userClubId` props
+- ✅ Removed roster/scores/penalties fetching from SSR
 
-**Required Actions:**
-- [ ] Remove JWT/auth from `getServerSideProps`
-- [ ] Remove `/users/me` fetch
-- [ ] Only fetch match data in SSR
-- [ ] Move auth checks to client-side (`useAuth`, `usePermissions`)
-- [ ] Move roster/scores/penalties fetching to client-side
-- [ ] Add loading states for client-side data
-- [ ] Ensure proper error handling
+**Completed Actions:**
+- ✅ Removed JWT/auth from `getServerSideProps`
+- ✅ Removed `/users/me` fetch
+- ✅ Only fetches match data in SSR
+- ✅ Auth checks use client-side (`useAuth`, `usePermissions`)
+- ✅ Roster/scores/penalties data available from match object
+- ✅ Has loading states for client-side operations
+- ✅ Has proper error handling
 
 **Recommendation:** Keep SSR for match data, client-side for everything else
 
 ---
 
-#### 3. `pages/matches/[id]/[teamFlag]/roster/index.tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Uses `getServerSideProps` with JWT  
+#### 3. `pages/matches/[id]/[teamFlag]/roster/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
 **Issues:**
-- ❌ Uses direct `axios` (not `apiClient`)
-- ❌ Uses `getCookie('jwt', context)`
-- ❌ Fetches `/users/me` in SSR
-- ❌ All data fetching in SSR
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
 
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Replace all `axios` with `apiClient`
-- [ ] Implement client-side auth with `useAuth()` and `usePermissions()`
-- [ ] Add auth redirect `useEffect` (redirect to login if not authenticated)
-- [ ] Client-side data fetching with `useEffect` or `useApiRequest`
-- [ ] Add loading states with `LoadingState` component
-- [ ] Check role requirements (likely needs team manager/admin)
-- [ ] Ensure proper error handling
-
-**Recommendation:** Full client-side migration (admin page)
-
----
-
-#### 4. `pages/matches/[id]/[teamFlag]/scores/index.tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Uses `getServerSideProps` with JWT  
-**Issues:** Same as roster page
-
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Replace all `axios` with `apiClient`
-- [ ] Implement client-side auth pattern
-- [ ] Client-side data fetching
-- [ ] Add loading/error states
-- [ ] Check role requirements
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
 
 **Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 5. `pages/matches/[id]/[teamFlag]/penalties/index.tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Uses `getServerSideProps` with JWT  
-**Issues:** Same as roster page
-
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Replace all `axios` with `apiClient`
-- [ ] Implement client-side auth pattern
-- [ ] Client-side data fetching
-- [ ] Add loading/error states
-- [ ] Check role requirements
-
-**Recommendation:** Full client-side migration (admin page)
-
----
-
-#### 6. `pages/matches/[id]/supplementary/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Current:** Uses `getServerSideProps` with JWT  
+#### 4. `pages/matches/[id]/[teamFlag]/scores/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
 **Issues:**
-- ❌ Uses direct `fetch()` (not `apiClient`)
-- ❌ Uses `getCookie('jwt', context)`
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
 
-**Required Actions:**
-- [ ] Remove `getServerSideProps` or remove auth from it
-- [ ] Replace `fetch()` with `apiClient`
-- [ ] Implement client-side auth if admin-only
-- [ ] Add loading/error states
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
 
-**Recommendation:** Determine if public or admin-only, then migrate accordingly
+**Recommendation:** Full client-side migration (admin page)
+
+---
+
+#### 5. `pages/matches/[id]/[teamFlag]/penalties/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
+
+**Recommendation:** Full client-side migration (admin page)
+
+---
+
+#### 6. `pages/matches/[id]/supplementary/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ Removed `getCookie('jwt', context)`
+- ✅ Removed `/users/me` fetch from SSR
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper role/permission checks
+- ✅ Has proper error handling
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
 ### 🟡 Medium Priority - Admin Pages
 
-#### 7. `pages/admin/profile/index.tsx` ⚠️
-**Status:** NEEDS CLEANUP  
-**Current:** Has `getServerSideProps` returning empty props  
+#### 7. `pages/admin/profile/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
 **Issues:**
-- Has SSR wrapper but does nothing
+- ✅ Uses `apiClient` for all API calls (via ProfileForm)
+- ✅ Removed `getServerSideProps`
+- ✅ All data fetching is client-side
 
-**Required Actions:**
-- [ ] Remove `getServerSideProps` entirely
-- [ ] Verify client-side auth with `useAuth()` and `usePermissions()`
-- [ ] Add auth redirect `useEffect`
-- [ ] Check role requirements (likely `UserRole.USER` minimum)
-- [ ] Verify `apiClient` usage
-- [ ] Add loading states
+**Completed Actions:**
+- ✅ Removed `getServerSideProps` entirely
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Role check allows all authenticated users (USER, AUTHOR, CLUB_MANAGER, REFEREE, LEAGUE_MANAGER, ADMIN)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with `ErrorState`
+
+**Recommendation:** Full client-side migration (user profile page)
 
 ---
 
 #### 8. `pages/admin/clubs/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify no SSR auth checks
-- [ ] Verify `apiClient` usage
-- [ ] Verify client-side auth implementation
-- [ ] Check error handling
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No SSR auth checks
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorState`
+- ✅ Client-side search functionality
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 9. `pages/admin/clubs/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:**
-- [ ] Check for `getServerSideProps` - should be removed
-- [ ] Verify client-side auth (`useAuth`, `usePermissions`)
-- [ ] Check role requirements (`UserRole.ADMIN`)
-- [ ] Verify `apiClient` for POST requests
-- [ ] Check error handling
+#### 9. `pages/admin/clubs/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls (via ClubForm)
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Form uses `apiClient` for POST requests (via ClubForm component)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with `ErrorState`
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 10. `pages/admin/clubs/[cAlias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:**
-- [ ] Remove `getServerSideProps` if present
-- [ ] Client-side auth with proper roles
-- [ ] Client-side data fetching (useEffect or useApiRequest)
-- [ ] Verify `apiClient` for GET/PATCH
-- [ ] Check error handling
+#### 10. `pages/admin/clubs/[cAlias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET/PATCH)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 11. `pages/admin/clubs/[cAlias]/teams/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 11. `pages/admin/clubs/[cAlias]/teams/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 12. `pages/admin/clubs/[cAlias]/teams/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 12. `pages/admin/clubs/[cAlias]/teams/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Form uses `apiClient` for POST requests (via TeamForm component)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with `ErrorMessage`
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 13. `pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 13. `pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET/PATCH)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Client-side data fetching with `useEffect` for club and team data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses TeamForm component for form handling
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 14. `pages/admin/clubs/[cAlias]/teams/[tAlias]/players/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 14. `pages/admin/clubs/[cAlias]/teams/[tAlias]/players/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for club, team, and players)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `useCallback`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch
+- ✅ Uses DataList component for rendering players
+- ✅ Has success message handling
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
 #### 15. `pages/admin/players/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation follows client-side auth pattern
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for players list)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch
+- ✅ Uses DataList component for rendering players
+- ✅ Has pagination support with `Pagination` component
+- ✅ Has search functionality with `SearchBox` component
+- ✅ Has success message handling
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 16. `pages/admin/players/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 16. `pages/admin/players/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
+- ✅ Client-side data fetching for clubs with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses PlayerAdminForm component for form handling
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Proper FormData handling for image uploads
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 17. `pages/admin/players/[playerId]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 17. `pages/admin/players/[playerId]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for clubs/player, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Client-side data fetching with `useEffect` for clubs and player data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses PlayerAdminForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles player not found scenario
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
 #### 18. `pages/admin/posts/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for posts list, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (AUTHOR, ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchPosts` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering posts
+- ✅ Has success message handling from query params
+- ✅ Implements toggle published/featured functionality
+- ✅ Implements delete functionality
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
 #### 19. `pages/admin/posts/add.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (AUTHOR, ADMIN)
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses PostForm component for form handling
+- ✅ Proper FormData handling with author object
+- ✅ Sets initial values with current user's name
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
 #### 20. `pages/admin/posts/[alias]/edit.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for post, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (AUTHOR, ADMIN)
+- ✅ Client-side data fetching with `useEffect` for post data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses PostForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles image removal (imageUrl = '')
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to posts list on success
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
 #### 21. `pages/admin/myclub/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for club by clubId)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (CLUB_ADMIN, ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchClub` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering teams
+- ✅ Has success message handling from query params
+- ✅ Handles case when user has no club assigned
+- ✅ Sorts teams by age group and team number
+
+**Recommendation:** Full client-side migration (club admin page)
 
 ---
 
-#### 22. `pages/admin/myclub/[teamAlias]/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 22. `pages/admin/myclub/[teamAlias]/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for club, team, players; PATCH for player updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, CLUB_ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `useCallback` (`fetchData`, `fetchPlayers`)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component with `getDataListItems` helper
+- ✅ Has success message handling from query params
+- ✅ Has pagination support with `handlePageChange`
+- ✅ Implements toggle active functionality for players
+- ✅ Edit player navigation
+
+**Recommendation:** Full client-side migration (club admin team page)
 
 ---
 
-#### 23. `pages/admin/myclub/[teamAlias]/[playerId]/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 23. `pages/admin/myclub/[teamAlias]/[playerId]/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for player, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, CLUB_ADMIN)
+- ✅ Client-side data fetching with `useEffect` for player data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses PlayerForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles image removal (imageUrl = null)
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to team page on success
+- ✅ Handles player not found scenario
+- ✅ Cleans up assignedTeams data (removes null jerseyNo)
+
+**Recommendation:** Full client-side migration (club admin player edit page)
 
 ---
 
 #### 24. `pages/admin/myref/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for matches)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (REFEREE)
+- ✅ Client-side data fetching with `useEffect` and `fetchMatches` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Filters matches client-side (referee1 or referee2 matches user._id)
+- ✅ Uses MatchCardRef component for rendering
+- ✅ Shows empty state when no assigned matches found
+
+**Recommendation:** Full client-side migration (referee page)
 
 ---
 
 #### 25. `pages/admin/documents/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for documents list, PATCH for updates, DELETE for deletion)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchDocuments` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering documents
+- ✅ Has success message handling from query params
+- ✅ Implements toggle published functionality
+- ✅ Implements delete functionality with confirmation modal
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 26. `pages/admin/documents/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 26. `pages/admin/documents/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (DOC_ADMIN, ADMIN)
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses DocumentForm component for form handling
+- ✅ Proper FormData handling for file uploads
+- ✅ Redirects to documents list on success with message
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 27. `pages/admin/documents/[alias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 27. `pages/admin/documents/[alias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for document, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` for document data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses DocumentForm component for form handling
+- ✅ Proper FormData handling for file uploads
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to documents list on success
+- ✅ Handles document not found scenario (redirects to list)
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
 #### 28. `pages/admin/venues/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for venues list, PATCH for updates, DELETE for deletion)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchVenues` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering venues
+- ✅ Has success message handling from query params
+- ✅ Implements toggle active functionality
+- ✅ Implements delete functionality with confirmation modal
+- ✅ Proper FormData handling for image uploads in toggleActive
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 29. `pages/admin/venues/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 29. `pages/admin/venues/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses VenueForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Redirects to venues list on success with message
+- ✅ Handles cancel navigation
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 30. `pages/admin/venues/[alias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 30. `pages/admin/venues/[alias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for venue, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` for venue data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses VenueForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles image removal (imageUrl = null in form, empty string to backend)
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to venues list on success
+- ✅ Handles venue not found scenario (redirects to list)
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
-#### 31. `pages/admin/refadmin/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 31. `pages/admin/refadmin/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for matches, assignments, tournaments)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, REF_ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `useCallback` (`fetchData`, `fetchTournaments`)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses MatchCardRefAdmin component for rendering
+- ✅ Implements filtering with RefMatchFilter (tournament, date range, unassigned)
+- ✅ Fetches matches and assignments separately with proper error handling
+- ✅ Sorts matches by date, venue, and time for better UX
+- ✅ Filters assignments by status (AVAILABLE, REQUESTED, ASSIGNED, ACCEPTED, UNAVAILABLE)
+
+**Recommendation:** Full client-side migration (ref admin page)
 
 ---
 
-#### 32. `pages/admin/refadmin/referees/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 32. `pages/admin/refadmin/referees/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for referees list, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Client-side data fetching with `useEffect` and `fetchReferees` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering referees
+- ✅ Has success message handling from query params
+- ✅ Implements toggle active functionality for referees
+- ✅ Proper FormData handling for referee updates
+- ✅ Sorts referees by first name
+- ✅ Displays referee level as category badge
+
+**Recommendation:** Full client-side migration (ref admin referees page)
 
 ---
 
-#### 33. `pages/admin/refadmin/referees/[userId]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 33. `pages/admin/refadmin/referees/[userId]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for referee/clubs, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` for referee and clubs data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses RefereeForm component for form handling
+- ✅ Proper FormData handling for updates
+- ✅ Cleans up referee object (removes empty strings for passNo and ishdLevel)
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to referees list on success
+- ✅ Handles referee not found scenario (redirects to list)
+- ✅ Sets proper initial values with defaults for referee object
+
+**Recommendation:** Full client-side migration (ref admin referee edit page)
 
 ---
 
@@ -366,43 +865,116 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ### 🟢 Public Pages (Should use SSG/ISR)
 
-#### 51. `pages/posts/[alias].tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Unknown (need to check)  
-**Recommendation:** Should use SSG with ISR
+#### 51. `pages/posts/[alias].tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses SSG with ISR  
+**Issues:**
+- ✅ Uses `getStaticProps` with `getStaticPaths`
+- ✅ Has ISR (`revalidate: 10`)
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth in SSR
 
-**Required Actions:**
-- [ ] Check current implementation
-- [ ] Migrate to `getStaticProps` with `getStaticPaths`
-- [ ] Use ISR (`revalidate: 300`)
-- [ ] Remove any auth from SSR
-- [ ] Verify `apiClient` usage (if client-side fetching)
+**Completed Actions:**
+- ✅ Already uses `getStaticProps` with `getStaticPaths`
+- ✅ Already has ISR (`revalidate: 10`)
+- ✅ No auth in SSR
+- ✅ All API calls use `apiClient` (GET for post)
+- ✅ Fallback: 'blocking' for dynamic paths
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Returns `notFound: true` for missing posts
+- ✅ Displays post with proper formatting and metadata
+- ✅ Uses CldImage for optimized image display
+
+**Recommendation:** No changes needed - already optimal SSG/ISR implementation
 
 ---
 
-#### 52. `pages/documents/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Recommendation:** Should use SSG or client-side fetch (public)
+#### 52. `pages/posts/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Migrated from SSR to SSG with ISR  
+**Issues:**
+- ✅ Now uses `getStaticProps` with ISR
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth required (public page)
 
-**Required Actions:**
-- [ ] Check current implementation
-- [ ] Consider migrating to `getStaticProps` with ISR
-- [ ] Or use client-side fetch with `apiClient`
-- [ ] No auth needed
+**Completed Actions:**
+- ✅ Migrated from `getServerSideProps` to `getStaticProps`
+- ✅ Added ISR (`revalidate: 300` - 5 minutes)
+- ✅ Removed unused JWT cookie reading
+- ✅ All API calls use `apiClient` (GET for posts list)
+- ✅ Fetches published posts only
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Sorts posts by creation date (newest first)
+- ✅ Uses CldImage for optimized thumbnails
+- ✅ Shows empty state when no posts available
+
+**Recommendation:** Migrated to SSG/ISR for better performance and SEO
+
+---
+
+#### 53. `pages/documents/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Server-side redirect  
+**Issues:**
+- ✅ Simple redirect to `/documents/allgemein`
+- ✅ No data fetching required
+- ✅ No auth required
+
+**Completed Actions:**
+- ✅ Uses `getServerSideProps` for redirect (appropriate use case)
+- ✅ Redirects to default category 'allgemein'
+- ✅ Permanent: false (temporary redirect)
+- ✅ No component rendering needed
+
+**Recommendation:** No changes needed - redirects are appropriate use of SSR
 
 ---
 
 #### 53. `pages/documents/[category].tsx` ✅
-**Status:** MARKED COMPLETE  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Migrated from SSR to SSG with ISR  
+**Issues:**
+- ✅ Now uses `getStaticProps` with `getStaticPaths`
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth required (public page)
+
+**Completed Actions:**
+- ✅ Migrated from `getServerSideProps` to `getStaticProps`
+- ✅ Added `getStaticPaths` for known categories (allgemein, spielbetrieb, hobbyliga)
+- ✅ Added ISR (`revalidate: 300` - 5 minutes)
+- ✅ All API calls use `apiClient` (GET for documents by category)
+- ✅ Fetches published documents only
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Fallback: 'blocking' for dynamic categories
+- ✅ Category-based navigation with tabs (desktop) and listbox (mobile)
+- ✅ Sorts documents alphabetically by title
+- ✅ Uses DataList component with file type icons
+- ✅ Displays file metadata (name, size, update date)
+
+**Recommendation:** Migrated to SSG/ISR for better performance and SEO
 
 ---
 
 #### 54. `pages/venues/index.tsx` ✅
-**Status:** MARKED COMPLETE  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Migrated from SSR to SSG with ISR  
+**Issues:**
+- ✅ Now uses `getStaticProps` with ISR
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth required (public page)
+
+**Completed Actions:**
+- ✅ Migrated from `getServerSideProps` to `getStaticProps`
+- ✅ Added ISR (`revalidate: 300` - 5 minutes)
+- ✅ Removed unused `getCookie` import
+- ✅ All API calls use `apiClient` (GET for venues)
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Sorts venues alphabetically by name
+- ✅ Uses DataList component for rendering venues
+- ✅ Displays venue details (street, zip code, city)
+- ✅ Returns empty array on error (graceful degradation)
+
+**Recommendation:** Migrated to SSG/ISR for better performance and SEO
 
 ---
 
@@ -490,8 +1062,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 0  
+**Completed:** 38 (files 1-33, 51-54)  
 **In Progress:** 0  
-**Pending:** 56  
+**Pending:** 18  
 
-**Last Updated:** 2025-02-02
+**Last Updated:** 2025-02-03

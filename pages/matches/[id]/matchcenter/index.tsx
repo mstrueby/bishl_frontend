@@ -8,7 +8,7 @@ import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { Dialog, Transition } from "@headlessui/react";
 import {
-  Match,
+  MatchValues,
   RosterPlayer,
   PenaltiesBase,
   ScoresBase,
@@ -45,7 +45,7 @@ import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
 import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
 
 interface MatchDetailsProps {
-  match: Match;
+  match: MatchValues;
   matchdayOwner: MatchdayOwner;
   jwt?: string;
   userRoles?: string[];
@@ -102,7 +102,7 @@ export default function MatchDetails({
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
-  const [match, setMatch] = useState<Match>(initialMatch);
+  const [match, setMatch] = useState<MatchValues>(initialMatch);
 
   const getBackLink = () => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
@@ -1064,94 +1064,11 @@ export default function MatchDetails({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
-  const jwt = (getCookie("jwt", context) || "") as string;
 
   try {
-    let match: Match;
-    let homeRoster: RosterPlayer[] = [];
-    let awayRoster: RosterPlayer[] = [];
-    let homeScores: ScoresBase[] = [];
-    let awayScores: ScoresBase[] = [];
-    let homePenalties: PenaltiesBase[] = [];
-    let awayPenalties: PenaltiesBase[] = [];
-
-    // Fetch match details
-    try {
-      const response = await apiClient.get(`/matches/${id}`);
-      match = response.data;
-    } catch (error) {
-      console.error('Error fetching match:', error);
-      // If match fetching fails, return notFound
-      return { notFound: true };
-    }
-
-    // Fetch home roster
-    try {
-      const response = await apiClient.get(`/matches/${id}/home/roster`);
-      homeRoster = response.data || [];
-    } catch (error) {
-      console.error('Error fetching home roster:', error);
-    }
-
-    // Fetch away roster
-    try {
-      const response = await apiClient.get(`/matches/${id}/away/roster`);
-      awayRoster = response.data || [];
-    } catch (error) {
-      console.error('Error fetching away roster:', error);
-    }
-
-    // Fetch home scores
-    try {
-      const response = await apiClient.get(`/matches/${id}/home/scores`);
-      homeScores = response.data || [];
-    } catch (error) {
-      console.error('Error fetching home scores:', error);
-    }
-
-    // Fetch away scores
-    try {
-      const response = await apiClient.get(`/matches/${id}/away/scores`);
-      awayScores = response.data || [];
-    } catch (error) {
-      console.error('Error fetching away scores:', error);
-    }
-
-    // Fetch home penalties
-    try {
-      const response = await apiClient.get(`/matches/${id}/home/penalties`);
-      homePenalties = response.data || [];
-    } catch (error) {
-      console.error('Error fetching home penalties:', error);
-    }
-
-    // Fetch away penalties
-    try {
-      const response = await apiClient.get(`/matches/${id}/away/penalties`);
-      awayPenalties = response.data || [];
-    } catch (error) {
-      console.error('Error fetching away penalties:', error);
-    }
-
-
-    let userRoles: string[] = [];
-    let userClubId: string | null = null;
-
-    if (jwt) {
-      const userResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-        {
-          headers: { Authorization: `Bearer ${jwt}` },
-        },
-      );
-      const userData = await userResponse.json();
-      userRoles = userData.roles || [];
-
-      // Get user's club ID if available
-      if (userData.club && userData.club.clubId) {
-        userClubId = userData.club.clubId;
-      }
-    }
+    // Only fetch match data (public data)
+    const matchResponse = await apiClient.get(`/matches/${id}`);
+    const match = matchResponse.data;
 
     // Fetch matchday owner data
     let matchdayOwner: MatchdayOwner | null = null;
@@ -1164,31 +1081,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error('Error fetching matchday owner:', error);
     }
 
-    // Ensure that match details are correctly assigned if they were fetched successfully
-    const finalMatch = {
-      ...match,
-      home: {
-        ...match.home,
-        roster: homeRoster,
-        scores: homeScores,
-        penalties: homePenalties,
-      },
-      away: {
-        ...match.away,
-        roster: awayRoster,
-        scores: awayScores,
-        penalties: awayPenalties,
-      },
-    };
-
-
     return {
       props: {
-        match: finalMatch,
+        match,
         matchdayOwner,
-        jwt,
-        userRoles,
-        userClubId: userClubId || null,
       },
     };
   } catch (error) {

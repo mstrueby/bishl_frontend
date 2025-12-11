@@ -1,14 +1,12 @@
+
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
-import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import { Match, SupplementarySheet, Referee } from "../../../../types/MatchValues";
+import { MatchValues, SupplementarySheet, Referee } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
-import { getCookie } from "cookies-next";
-import axios from "axios";
 import useAuth from "../../../../hooks/useAuth";
 import { ChevronLeftIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import {
@@ -19,12 +17,14 @@ import MatchHeader from "../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
+import LoadingState from '../../../../components/ui/LoadingState';
 import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { Fragment } from 'react';
 import { AssignmentValues } from '../../../../types/AssignmentValues';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { UserValues } from '../../../../types/UserValues';
-
+import apiClient from '../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../lib/errorHandler';
 
 interface SectionHeaderSimpleProps {
   title: string;
@@ -151,10 +151,10 @@ interface RefereeChangeDialogProps {
   isOpen: boolean;
   onClose: () => void;
   refereeNumber: 1 | 2;
-  assignments: AssignmentValues[];
-  jwt: string;
-  onConfirm: (assignment: AssignmentValues, position: number) => Promise<void>;
-  onAssignmentComplete: (referee: Referee) => void;
+  allReferees: UserValues[];
+  selectedReferee: UserValues | null;
+  setSelectedReferee: (referee: UserValues | null) => void;
+  onConfirm: () => void;
 }
 
 function RefereeChangeDialog({
@@ -165,15 +165,7 @@ function RefereeChangeDialog({
   selectedReferee,
   setSelectedReferee,
   onConfirm,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  refereeNumber: 1 | 2;
-  allReferees: UserValues[];
-  selectedReferee: UserValues | null;
-  setSelectedReferee: (referee: UserValues | null) => void;
-  onConfirm: () => void;
-}) {
+}: RefereeChangeDialogProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -251,18 +243,15 @@ function RefereeChangeDialog({
                               {({ selected, active }) => (
                                 <div className="flex items-center gap-x-3">
                                   <div className="flex items-center gap-x-3 flex-1 truncate">
-                                    {/* Profile Avatar */}
                                     <div className={`size-5 rounded-full flex items-center justify-center text-xs ${
                                       active ? 'bg-indigo-500' : 'bg-gray-100'
                                     }`}>
                                       {referee.firstName.charAt(0)}{referee.lastName.charAt(0)}
                                     </div>
-                                    {/* Name */}
                                     <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
                                       {referee.firstName} {referee.lastName}
                                     </span>
                                   </div>
-                                  {/* Club Logo */}
                                   {referee.referee?.club?.logoUrl && (
                                     <Image
                                       src={referee.referee.club.logoUrl}
@@ -319,7 +308,7 @@ function RefereeAttendanceCard({
   refereeNumber: 1 | 2;
   formData: SupplementarySheet;
   updateField: (field: string, value: any) => void;
-  match: Match;
+  match: MatchValues;
   assignments: Assignment[];
   onOpenRefereeDialog: () => void;
 }) {
@@ -369,7 +358,6 @@ function RefereeAttendanceCard({
       </div>
       <div className="bg-white px-4 py-5 sm:p-6">
         <div className="text-sm text-gray-700 space-y-4">
-          {/** Referee present */}
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-900">Anwesend</span>
             <button
@@ -403,7 +391,6 @@ function RefereeAttendanceCard({
               />
             </button>
           </div>
-          {/** Referee pass available */}
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-900">
               Pass liegt vor
@@ -439,7 +426,6 @@ function RefereeAttendanceCard({
               />
             </button>
           </div>
-          {/** Referee pass number */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <label
               htmlFor={`referee${refereeNumber}Pass`}
@@ -467,7 +453,6 @@ function RefereeAttendanceCard({
               </div>
             </div>
           </div>
-          {/** Referee delay */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <label
               htmlFor={`referee${refereeNumber}Delay`}
@@ -532,7 +517,7 @@ interface RefereePaymentCardProps {
     field: string,
     value: number,
   ) => void;
-  match: Match;
+  match: MatchValues;
 }
 
 function RefereePaymentCard({
@@ -807,12 +792,6 @@ function TeamEquipmentCard({
   );
 }
 
-interface SupplementaryFormProps {
-  match: Match;
-  matchdayOwner: MatchdayOwner;
-  jwt?: string;
-}
-
 interface Assignment {
   _id: string;
   matchId: string;
@@ -830,19 +809,18 @@ interface Assignment {
   position: number;
 }
 
-export default function SupplementaryForm({
-  match: initialMatch,
-  matchdayOwner,
-  jwt,
-}: SupplementaryFormProps) {
+export default function SupplementaryForm() {
   const router = useRouter();
-  const { user } = useAuth();
-  const [match, setMatch] = useState<Match>(initialMatch);
+  const { id } = router.query;
+  const { user, loading: authLoading } = useAuth();
+
+  const [pageLoading, setPageLoading] = useState(true);
+  const [match, setMatch] = useState<MatchValues | null>(null);
+  const [matchdayOwner, setMatchdayOwner] = useState<MatchdayOwner | null>(null);
   const [formData, setFormData] = useState<SupplementarySheet>({
-    ...match.supplementarySheet,
-    timekeeper1: match.supplementarySheet?.timekeeper1 || {},
-    timekeeper2: match.supplementarySheet?.timekeeper2 || {},
-    technicalDirector: match.supplementarySheet?.technicalDirector || {},
+    timekeeper1: {},
+    timekeeper2: {},
+    technicalDirector: {},
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -853,61 +831,79 @@ export default function SupplementaryForm({
   const [allReferees, setAllReferees] = useState<UserValues[]>([]);
   const [selectedReferee, setSelectedReferee] = useState<UserValues | null>(null);
 
-  const permissions = calculateMatchButtonPermissions(
-    user,
-    match,
-    matchdayOwner,
-  );
-
-  const fetchAssignments = useCallback(async () => {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
-      
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${jwt}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setAssignments(data);
-      }
-    } catch (error) {
-      console.error('Error fetching assignments:', error);
-    }
-  }, [match._id, jwt]);
-
+  // Auth check - redirect to login if not authenticated
   useEffect(() => {
-    if (jwt) {
-      fetchAssignments();
-    }
-  }, [jwt, fetchAssignments]);
+    if (authLoading) return;
 
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
+
+  // Fetch all data on mount
   useEffect(() => {
-    const fetchReferees = async () => {
+    if (authLoading || !user || !id) return;
+
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/referees`, {
-          headers: {
-            'Authorization': `Bearer ${jwt}`,
-            'Content-Type': 'application/json',
-          },
+        setPageLoading(true);
+
+        // Fetch match data
+        const matchResponse = await apiClient.get(`/matches/${id}`);
+        const matchData: MatchValues = matchResponse.data;
+        setMatch(matchData);
+
+        setFormData({
+          ...matchData.supplementarySheet,
+          timekeeper1: matchData.supplementarySheet?.timekeeper1 || {},
+          timekeeper2: matchData.supplementarySheet?.timekeeper2 || {},
+          technicalDirector: matchData.supplementarySheet?.technicalDirector || {},
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setAllReferees(data);
+
+        // Fetch matchday owner
+        try {
+          const matchdayResponse = await apiClient.get(
+            `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`
+          );
+          setMatchdayOwner(matchdayResponse.data?.owner || null);
+        } catch (error) {
+          console.error('Error fetching matchday owner:', getErrorMessage(error));
         }
+
+        // Fetch assignments
+        try {
+          const assignmentsResponse = await apiClient.get(
+            `/assignments/matches/${id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`
+          );
+          setAssignments(assignmentsResponse.data || []);
+        } catch (error) {
+          console.error('Error fetching assignments:', getErrorMessage(error));
+        }
+
+        // Fetch all referees
+        try {
+          const refereesResponse = await apiClient.get('/users/referees');
+          setAllReferees(refereesResponse.data || []);
+        } catch (error) {
+          console.error('Error fetching referees:', getErrorMessage(error));
+        }
+
       } catch (error) {
-        console.error('Error fetching referees:', error);
+        console.error('Error fetching data:', getErrorMessage(error));
+        setError('Fehler beim Laden der Daten');
+      } finally {
+        setPageLoading(false);
       }
     };
 
-    if (jwt) {
-      fetchReferees();
-    }
-  }, [jwt]);
+    fetchData();
+  }, [authLoading, user, id]);
+
+  // Calculate permissions
+  const permissions = match && user ? calculateMatchButtonPermissions(user, match, matchdayOwner || undefined) : {
+    showButtonSupplementary: false
+  };
 
   const handleOpenRefereeDialog = (position: 1 | 2) => {
     setSelectedRefereePosition(position);
@@ -915,11 +911,8 @@ export default function SupplementaryForm({
   };
 
   const handleRefereeChange = async () => {
-    if (!selectedReferee) return;
+    if (!selectedReferee || !match) return;
 
-    console.log('Selected referee:', selectedReferee);
-
-    // Construct the referee object in the expected format
     const refereeData = {
       userId: selectedReferee._id,
       firstName: selectedReferee.firstName,
@@ -931,39 +924,16 @@ export default function SupplementaryForm({
       level: selectedReferee.referee?.level || 'n/a'
     };
 
-    console.log('Referee data to send:', refereeData);
-
     const requestBody = {
       [`referee${selectedRefereePosition}`]: refereeData
     };
 
-    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
-
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`,
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const response = await apiClient.patch(`/matches/${match._id}`, requestBody);
 
-      console.log('Response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        throw new Error(`Failed to update referee: ${JSON.stringify(errorData)}`);
-      }
-
-      const updatedMatch = await response.json();
-      console.log('Updated match:', updatedMatch);
+      const updatedMatch = response.data;
       setMatch(updatedMatch);
-      
+
       // Reset form values for the changed referee
       const resetFields = {
         [`referee${selectedRefereePosition}Present`]: false,
@@ -971,84 +941,61 @@ export default function SupplementaryForm({
         [`referee${selectedRefereePosition}PassNo`]: '',
         [`referee${selectedRefereePosition}DelayMin`]: 0,
       };
-      
+
       setFormData({ ...formData, ...resetFields });
-      
+
       setSuccessMessage(`Schiedsrichter ${selectedRefereePosition} wurde erfolgreich geändert`);
       setRefereeDialogOpen(false);
       setSelectedReferee(null);
-      fetchAssignments();
+
+      // Refetch assignments
+      try {
+        const assignmentsResponse = await apiClient.get(
+          `/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`
+        );
+        setAssignments(assignmentsResponse.data || []);
+      } catch (error) {
+        console.error('Error fetching assignments:', getErrorMessage(error));
+      }
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      console.error('Error updating referee:', error);
-      setError(`Fehler beim Aktualisieren des Schiedsrichters: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error updating referee:', getErrorMessage(error));
+      setError(`Fehler beim Aktualisieren des Schiedsrichters: ${getErrorMessage(error)}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  
-
-  // Check permissions
-  if (!permissions.showButtonSupplementary) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Nicht berechtigt
-            </h2>
-            <p className="text-gray-500 mb-4">
-              Sie haben keine Berechtigung, das Zusatzblatt zu bearbeiten.
-            </p>
-            <Link href={`/matches/${match._id}`}>
-              <a className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                Zurück zum Spiel
-              </a>
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
+
   const handleCloseErrorMessage = () => {
     setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!match) return;
+
     setLoading(true);
     setError(null);
     setSuccessMessage(null);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+      const response = await apiClient.patch(
+        `/matches/${match._id}`,
         {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`,
-          },
-          body: JSON.stringify({
-            supplementarySheet: { ...formData, isSaved: true },
-          }),
+          supplementarySheet: { ...formData, isSaved: true },
         }
       );
 
-      // Ignore 304 Not Modified status - no changes needed
+      // Ignore 304 Not Modified status
       if (response.status === 304) {
         setSuccessMessage('Keine Änderungen erforderlich');
         console.log('No changes needed (304)');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to save supplementary sheet');
       }
 
       if (response.status === 200) {
@@ -1059,7 +1006,7 @@ export default function SupplementaryForm({
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
-      console.error("Error saving supplementary sheet:", error);
+      console.error("Error saving supplementary sheet:", getErrorMessage(error));
       setError("Fehler beim Speichern des Zusatzblatts");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
@@ -1104,6 +1051,51 @@ export default function SupplementaryForm({
     });
   };
 
+  // Show loading state
+  if (authLoading || pageLoading) {
+    return (
+      <Layout>
+        <LoadingState message="Lade Zusatzblatt..." />
+      </Layout>
+    );
+  }
+
+  // Return null while redirecting
+  if (!user) {
+    return null;
+  }
+
+  // Check permissions after loading
+  if (!permissions.showButtonSupplementary) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Nicht berechtigt
+            </h2>
+            <p className="text-gray-500 mb-4">
+              Sie haben keine Berechtigung, das Zusatzblatt zu bearbeiten.
+            </p>
+            <Link href={match ? `/matches/${match._id}` : '/'} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+              Zurück zum Spiel
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!match) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <p>Match not found</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -1112,14 +1104,12 @@ export default function SupplementaryForm({
         </title>
       </Head>
       <Layout>
-        <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`}>
-          <a className="flex items-center text-gray-500 hover:text-gray-700 text-sm font-base">
-            <ChevronLeftIcon
-              aria-hidden="true"
-              className="h-3 w-3 text-gray-400"
-            />
-            <span className="ml-2">Match Center</span>
-          </a>
+        <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`} className="flex items-center text-gray-500 hover:text-gray-700 text-sm font-base">
+          <ChevronLeftIcon
+            aria-hidden="true"
+            className="h-3 w-3 text-gray-400"
+          />
+          <span className="ml-2">Match Center</span>
         </Link>
 
         <MatchHeader match={match} isRefreshing={false} onRefresh={() => {}} />
@@ -1451,10 +1441,9 @@ export default function SupplementaryForm({
             <div className="flex justify-end space-x-3 pt-8">
               <Link
                 href={`/matches/${match._id}/matchcenter?tab=supplementary`}
+                className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                <a className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                  Abbrechen
-                </a>
+                Abbrechen
               </Link>
               <button
                 type="submit"
@@ -1506,30 +1495,3 @@ export default function SupplementaryForm({
     </>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params as { id: string };
-  const jwt = (getCookie("jwt", context) || "") as string;
-
-  try {
-    const match: Match = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/matches/${id}`,
-    ).then((res) => res.json());
-
-    const matchday = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}/`,
-    ).then((res) => res.json());
-
-    return {
-      props: {
-        match,
-        matchdayOwner: matchday.owner,
-        jwt,
-      },
-    };
-  } catch (error) {
-    return {
-      notFound: true,
-    };
-  }
-};
