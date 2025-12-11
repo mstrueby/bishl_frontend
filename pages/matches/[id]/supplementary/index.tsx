@@ -4,7 +4,7 @@ import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { Match, SupplementarySheet, Referee } from "../../../../types/MatchValues";
+import { MatchValues, SupplementarySheet, Referee } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
 import useAuth from "../../../../hooks/useAuth";
@@ -308,7 +308,7 @@ function RefereeAttendanceCard({
   refereeNumber: 1 | 2;
   formData: SupplementarySheet;
   updateField: (field: string, value: any) => void;
-  match: Match;
+  match: MatchValues;
   assignments: Assignment[];
   onOpenRefereeDialog: () => void;
 }) {
@@ -517,7 +517,7 @@ interface RefereePaymentCardProps {
     field: string,
     value: number,
   ) => void;
-  match: Match;
+  match: MatchValues;
 }
 
 function RefereePaymentCard({
@@ -815,7 +815,7 @@ export default function SupplementaryForm() {
   const { user, loading: authLoading } = useAuth();
 
   const [pageLoading, setPageLoading] = useState(true);
-  const [match, setMatch] = useState<Match | null>(null);
+  const [match, setMatch] = useState<MatchValues | null>(null);
   const [matchdayOwner, setMatchdayOwner] = useState<MatchdayOwner | null>(null);
   const [formData, setFormData] = useState<SupplementarySheet>({
     timekeeper1: {},
@@ -851,7 +851,7 @@ export default function SupplementaryForm() {
 
         // Fetch match data
         const matchResponse = await apiClient.get(`/matches/${id}`);
-        const matchData: Match = matchResponse.data;
+        const matchData: MatchValues = matchResponse.data;
         setMatch(matchData);
 
         setFormData({
