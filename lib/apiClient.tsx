@@ -16,10 +16,6 @@ export interface ExtendedAxiosResponse<T = any> extends AxiosResponse<T> {
   success?: boolean;
 }
 
-
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
-import { redirectToLogin } from './authRedirect';
-
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
