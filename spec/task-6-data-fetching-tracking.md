@@ -931,16 +931,50 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 ---
 
 #### 53. `pages/documents/[category].tsx` ✅
-**Status:** MARKED COMPLETE  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Migrated from SSR to SSG with ISR  
+**Issues:**
+- ✅ Now uses `getStaticProps` with `getStaticPaths`
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth required (public page)
+
+**Completed Actions:**
+- ✅ Migrated from `getServerSideProps` to `getStaticProps`
+- ✅ Added `getStaticPaths` for known categories (allgemein, spielbetrieb, hobbyliga)
+- ✅ Added ISR (`revalidate: 300` - 5 minutes)
+- ✅ All API calls use `apiClient` (GET for documents by category)
+- ✅ Fetches published documents only
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Fallback: 'blocking' for dynamic categories
+- ✅ Category-based navigation with tabs (desktop) and listbox (mobile)
+- ✅ Sorts documents alphabetically by title
+- ✅ Uses DataList component with file type icons
+- ✅ Displays file metadata (name, size, update date)
+
+**Recommendation:** Migrated to SSG/ISR for better performance and SEO
 
 ---
 
 #### 54. `pages/venues/index.tsx` ✅
-**Status:** MARKED COMPLETE  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Migrated from SSR to SSG with ISR  
+**Issues:**
+- ✅ Now uses `getStaticProps` with ISR
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth required (public page)
+
+**Completed Actions:**
+- ✅ Migrated from `getServerSideProps` to `getStaticProps`
+- ✅ Added ISR (`revalidate: 300` - 5 minutes)
+- ✅ Removed unused `getCookie` import
+- ✅ All API calls use `apiClient` (GET for venues)
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Sorts venues alphabetically by name
+- ✅ Uses DataList component for rendering venues
+- ✅ Displays venue details (street, zip code, city)
+- ✅ Returns empty array on error (graceful degradation)
+
+**Recommendation:** Migrated to SSG/ISR for better performance and SEO
 
 ---
 
@@ -1028,8 +1062,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 36 (files 1-33, 51-53)  
+**Completed:** 38 (files 1-33, 51-54)  
 **In Progress:** 0  
-**Pending:** 20  
+**Pending:** 18  
 
 **Last Updated:** 2025-02-03
