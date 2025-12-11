@@ -1,6 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
 import { RosterPlayer } from '../../types/MatchValues';
-import { Match, Team } from '../../types/MatchValues';
+import { Team } from '../../types/MatchValues';
 
 const styles = StyleSheet.create({
   page: {

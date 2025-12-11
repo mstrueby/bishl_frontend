@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Match, ScoresBase } from '../../types/MatchValues';
+import { MatchValues, ScoresBase } from '../../types/MatchValues';
 import ScoreList from '../ui/ScoreList';
 
 interface GoalsTabProps {
-  match: Match;
+  match: MatchValues;
+  jwt: string;
   permissions: {
     showButtonScoresHome: boolean;
     showButtonScoresAway: boolean;
@@ -19,6 +20,7 @@ interface GoalsTabProps {
 
 const GoalsTab: React.FC<GoalsTabProps> = ({
   match,
+  jwt,
   permissions,
   refreshMatchData,
   setIsHomeGoalDialogOpen,
@@ -30,6 +32,7 @@ const GoalsTab: React.FC<GoalsTabProps> = ({
     <div className="flex flex-col md:flex-row md:space-x-8">
       <div className="w-full md:w-1/2 mb-6 md:mb-0">
         <ScoreList
+          jwt={jwt}
           teamName={match.home.fullName}
           matchId={match._id}
           teamFlag="home"
@@ -44,6 +47,7 @@ const GoalsTab: React.FC<GoalsTabProps> = ({
       </div>
       <div className="w-full md:w-1/2">
         <ScoreList
+          jwt={jwt}
           teamName={match.away.fullName}
           matchId={match._id}
           teamFlag="away"
