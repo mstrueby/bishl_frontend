@@ -10,6 +10,7 @@ import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import LoadingState from '../../../../../components/ui/LoadingState';
 import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
+import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
 import axios from 'axios';
 
@@ -28,12 +29,17 @@ const Edit: NextPage = () => {
 
   // Redirect if not authenticated or authorized
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/');
-    } else if (!authLoading && isAuthenticated && !hasAnyRole(['ADMIN', 'CLUB_ADMIN'])) {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN])) {
       router.push('/');
     }
-  }, [authLoading, isAuthenticated, hasAnyRole, router]);
+  }, [authLoading, user, hasAnyRole, router]);
 
   // Fetch player data
   useEffect(() => {
@@ -183,7 +189,7 @@ const Edit: NextPage = () => {
   }
 
   // Auth guard (shouldn't reach here due to redirect, but just in case)
-  if (!isAuthenticated || !hasAnyRole(['ADMIN', 'CLUB_ADMIN']) || !player) {
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN]) || !player) {
     return null;
   }
 
