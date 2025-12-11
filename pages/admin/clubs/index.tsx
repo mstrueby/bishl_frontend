@@ -117,7 +117,12 @@ export default function ClubsPage() {
       </div>
 
       <div className="mt-8">
-        <SearchBox onSearch={handleSearch} placeholder="Vereine durchsuchen..." />
+        <SearchBox 
+          onSearch={handleSearch} 
+          placeholder="Vereine durchsuchen..." 
+          options={[]}
+          onSelect={() => {}}
+        />
       </div>
 
       {loading ? (
@@ -128,13 +133,15 @@ export default function ClubsPage() {
         <div className="mt-8">
           <DataList
             items={filteredClubs.map((club) => ({
-              id: club._id,
-              name: club.name,
+              _id: club._id,
+              title: club.name,
               alias: club.alias,
-              editUrl: `/admin/clubs/${club.alias}/edit`,
-              detailUrl: `/admin/clubs/${club.alias}/teams`,
+              menu: [
+                { edit: { onClick: () => router.push(`/admin/clubs/${club.alias}/edit`) } },
+                { teams: { onClick: () => router.push(`/admin/clubs/${club.alias}/teams`) } },
+              ],
             }))}
-            emptyMessage="Keine Vereine gefunden"
+            statuses={{}}
           />
         </div>
       )}
