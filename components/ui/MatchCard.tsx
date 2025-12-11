@@ -155,7 +155,6 @@ const StatusMenu = ({
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
         match={match}
-        jwt={user?.jwt || ""}
         onSuccess={async (updatedMatch) => {
           setMatch({ ...match, ...updatedMatch });
           if (onMatchUpdate) {
@@ -169,7 +168,6 @@ const StatusMenu = ({
         isOpen={isStatusOpen}
         onClose={() => setIsStatusOpen(false)}
         match={match}
-        jwt={user?.jwt || ""}
         onSuccess={async (updatedMatch) => {
           setMatch({ ...match, ...updatedMatch });
           if (onMatchUpdate) {
