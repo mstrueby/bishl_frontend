@@ -8,10 +8,9 @@ import { CalendarIcon, MapPinIcon, ChevronDownIcon } from '@heroicons/react/24/o
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import useAuth from '../../hooks/useAuth';
+import apiClient from '../../lib/apiClient';
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt: string }> = ({ match, assignment, jwt }) => {
+const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues }> = ({ match, assignment }) => {
   const { home, away, startDate, venue } = match;
   const [matchdayMatches, setMatchdayMatches] = useState<Match[]>([]);
   const [roundData, setRoundData] = useState<any>(null);
@@ -35,13 +34,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   useEffect(() => {
     const fetchRoundData = async () => {
       try {
-        const response = await fetch(
-          `${BASE_URL}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}`
+        const response = await apiClient.get(
+          `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}`
         );
-        if (response.ok) {
-          const round = await response.json();
-          setRoundData(round);
-        }
+        setRoundData(response.data);
       } catch (error) {
         console.error('Error fetching round data:', error);
       }
@@ -59,13 +55,10 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       }
 
       try {
-        const response = await fetch(
-          `${BASE_URL}/matches/?tournament=${match.tournament.alias}&season=${match.season.alias}&round=${match.round.alias}&matchday=${match.matchday.alias}`
+        const response = await apiClient.get(
+          `/matches/?tournament=${match.tournament.alias}&season=${match.season.alias}&round=${match.round.alias}&matchday=${match.matchday.alias}`
         );
-        if (response.ok) {
-          const matches = await response.json();
-          setMatchdayMatches(matches);
-        }
+        setMatchdayMatches(response.data);
       } catch (error) {
         console.error('Error fetching matchday matches:', error);
       }
@@ -79,11 +72,7 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
   const updateAssignmentStatus = async (newStatus: typeof selected) => {
     try {
       const isNewAssignment = !localAssignment || selected.key === 'AVAILABLE';
-      const method = isNewAssignment ? 'POST' : 'PATCH';
-      const endpoint = isNewAssignment ?
-        `${BASE_URL}/assignments/` :
-        `${BASE_URL}/assignments/${localAssignment?._id}`;
-
+      
       const body = isNewAssignment ?
         { matchId: match._id, status: newStatus.key } :
         { status: newStatus.key };
@@ -92,28 +81,21 @@ const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues, jwt:
       console.log('Selected status:', selected.key);
       console.log('Request body:', body);
 
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update assignment status');
+      let response;
+      if (isNewAssignment) {
+        response = await apiClient.post('/assignments/', body);
+      } else {
+        response = await apiClient.patch(`/assignments/${localAssignment?._id}`, body);
       }
 
       // For new assignments, save the created assignment data so we can use it
       if (isNewAssignment) {
-        const createdAssignment = await response.json();
-        console.log('Created new assignment:', createdAssignment);
+        console.log('Created new assignment:', response.data);
 
         // Update local assignment state with the newly created assignment
         // This allows further updates without refresh
-        if (createdAssignment) {
-          setLocalAssignment(createdAssignment);
+        if (response.data) {
+          setLocalAssignment(response.data);
         }
       }
     } catch (error) {
