@@ -597,21 +597,79 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 ---
 
 #### 25. `pages/admin/documents/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for documents list, PATCH for updates, DELETE for deletion)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchDocuments` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering documents
+- ✅ Has success message handling from query params
+- ✅ Implements toggle published functionality
+- ✅ Implements delete functionality with confirmation modal
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 26. `pages/admin/documents/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 26. `pages/admin/documents/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (DOC_ADMIN, ADMIN)
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses DocumentForm component for form handling
+- ✅ Proper FormData handling for file uploads
+- ✅ Redirects to documents list on success with message
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 27. `pages/admin/documents/[alias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 27. `pages/admin/documents/[alias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for document, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` for document data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses DocumentForm component for form handling
+- ✅ Proper FormData handling for file uploads
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to documents list on success
+- ✅ Handles document not found scenario (redirects to list)
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
@@ -804,8 +862,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 24 (files 1-24)  
+**Completed:** 27 (files 1-27)  
 **In Progress:** 0  
-**Pending:** 32  
+**Pending:** 29  
 
 **Last Updated:** 2025-02-03
