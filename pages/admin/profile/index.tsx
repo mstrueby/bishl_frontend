@@ -37,7 +37,8 @@ export default function ProfilePage() {
   if (authLoading || !isAuthorized) {
     return (
       <LayoutAdm
-        mainNavData={[]}
+        navData={[]}
+        sectionTitle="Profil"
         breadcrumbs={[{ order: 1, name: 'Profil', url: '/admin/profile' }]}
       >
         <LoadingState message="Lade Profil..." />
@@ -48,7 +49,8 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <LayoutAdm
-        mainNavData={[]}
+        navData={[]}
+        sectionTitle="Profil"
         breadcrumbs={[{ order: 1, name: 'Profil', url: '/admin/profile' }]}
       >
         <ErrorState message="Nicht angemeldet" />
@@ -58,7 +60,8 @@ export default function ProfilePage() {
 
   return (
     <LayoutAdm
-      mainNavData={[]}
+      navData={[]}
+      sectionTitle="Profil"
       breadcrumbs={[{ order: 1, name: 'Profil', url: '/admin/profile' }]}
     >
       <Head>
