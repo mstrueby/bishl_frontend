@@ -4,6 +4,9 @@ import Layout from "../../components/Layout";
 import { PostValues } from "../../types/PostValues";
 import { getFuzzyDate } from "../../tools/dateUtils";
 import apiClient from "../../lib/apiClient";
+import { getErrorMessage } from "../../lib/errorHandler";
+import LoadingState from "../../components/ui/LoadingState";
+import ErrorState from "../../components/ui/ErrorState";
 
 import { CldImage } from "next-cloudinary";
 
@@ -15,7 +18,7 @@ export default function Post({ post }: { post?: PostValues }) {
   if (!post) {
     return (
       <Layout>
-        <div>Loading...</div>
+        <LoadingState message="Loading post..." />
       </Layout>
     );
   }
@@ -109,7 +112,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     }));
     return { paths, fallback: "blocking" };
   } catch (error) {
-    console.error("Error fetching posts for paths:", error);
+    console.error("Error fetching posts for paths:", getErrorMessage(error));
     return { paths: [], fallback: "blocking" };
   }
 };
@@ -133,12 +136,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       props: {
         post: postData,
       },
-      revalidate: 10,
+      revalidate: 300, // Revalidate every 5 minutes
     };
   } catch (error) {
-    if (error) {
-      console.error("Error fetching post:", error.message);
-    }
+    console.error("Error fetching post:", getErrorMessage(error));
     return { notFound: true };
   }
 };
