@@ -865,29 +865,68 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ### 🟢 Public Pages (Should use SSG/ISR)
 
-#### 51. `pages/posts/[alias].tsx` ⚠️
-**Status:** NEEDS MIGRATION  
-**Current:** Unknown (need to check)  
-**Recommendation:** Should use SSG with ISR
+#### 51. `pages/posts/[alias].tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses SSG with ISR  
+**Issues:**
+- ✅ Uses `getStaticProps` with `getStaticPaths`
+- ✅ Has ISR (`revalidate: 10`)
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth in SSR
 
-**Required Actions:**
-- [ ] Check current implementation
-- [ ] Migrate to `getStaticProps` with `getStaticPaths`
-- [ ] Use ISR (`revalidate: 300`)
-- [ ] Remove any auth from SSR
-- [ ] Verify `apiClient` usage (if client-side fetching)
+**Completed Actions:**
+- ✅ Already uses `getStaticProps` with `getStaticPaths`
+- ✅ Already has ISR (`revalidate: 10`)
+- ✅ No auth in SSR
+- ✅ All API calls use `apiClient` (GET for post)
+- ✅ Fallback: 'blocking' for dynamic paths
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Returns `notFound: true` for missing posts
+- ✅ Displays post with proper formatting and metadata
+- ✅ Uses CldImage for optimized image display
+
+**Recommendation:** No changes needed - already optimal SSG/ISR implementation
 
 ---
 
-#### 52. `pages/documents/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Recommendation:** Should use SSG or client-side fetch (public)
+#### 52. `pages/posts/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Migrated from SSR to SSG with ISR  
+**Issues:**
+- ✅ Now uses `getStaticProps` with ISR
+- ✅ Uses `apiClient` for all API calls
+- ✅ No auth required (public page)
 
-**Required Actions:**
-- [ ] Check current implementation
-- [ ] Consider migrating to `getStaticProps` with ISR
-- [ ] Or use client-side fetch with `apiClient`
-- [ ] No auth needed
+**Completed Actions:**
+- ✅ Migrated from `getServerSideProps` to `getStaticProps`
+- ✅ Added ISR (`revalidate: 300` - 5 minutes)
+- ✅ Removed unused JWT cookie reading
+- ✅ All API calls use `apiClient` (GET for posts list)
+- ✅ Fetches published posts only
+- ✅ Proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Sorts posts by creation date (newest first)
+- ✅ Uses CldImage for optimized thumbnails
+- ✅ Shows empty state when no posts available
+
+**Recommendation:** Migrated to SSG/ISR for better performance and SEO
+
+---
+
+#### 53. `pages/documents/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Server-side redirect  
+**Issues:**
+- ✅ Simple redirect to `/documents/allgemein`
+- ✅ No data fetching required
+- ✅ No auth required
+
+**Completed Actions:**
+- ✅ Uses `getServerSideProps` for redirect (appropriate use case)
+- ✅ Redirects to default category 'allgemein'
+- ✅ Permanent: false (temporary redirect)
+- ✅ No component rendering needed
+
+**Recommendation:** No changes needed - redirects are appropriate use of SSR
 
 ---
 
@@ -989,8 +1028,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 33 (files 1-33)  
+**Completed:** 36 (files 1-33, 51-53)  
 **In Progress:** 0  
-**Pending:** 23  
+**Pending:** 20  
 
 **Last Updated:** 2025-02-03
