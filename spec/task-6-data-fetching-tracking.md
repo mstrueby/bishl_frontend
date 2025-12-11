@@ -753,21 +753,87 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ---
 
-#### 31. `pages/admin/refadmin/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 31. `pages/admin/refadmin/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for matches, assignments, tournaments)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, REF_ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `useCallback` (`fetchData`, `fetchTournaments`)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses MatchCardRefAdmin component for rendering
+- ✅ Implements filtering with RefMatchFilter (tournament, date range, unassigned)
+- ✅ Fetches matches and assignments separately with proper error handling
+- ✅ Sorts matches by date, venue, and time for better UX
+- ✅ Filters assignments by status (AVAILABLE, REQUESTED, ASSIGNED, ACCEPTED, UNAVAILABLE)
+
+**Recommendation:** Full client-side migration (ref admin page)
 
 ---
 
-#### 32. `pages/admin/refadmin/referees/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 32. `pages/admin/refadmin/referees/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for referees list, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Client-side data fetching with `useEffect` and `fetchReferees` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering referees
+- ✅ Has success message handling from query params
+- ✅ Implements toggle active functionality for referees
+- ✅ Proper FormData handling for referee updates
+- ✅ Sorts referees by first name
+- ✅ Displays referee level as category badge
+
+**Recommendation:** Full client-side migration (ref admin referees page)
 
 ---
 
-#### 33. `pages/admin/refadmin/referees/[userId]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 33. `pages/admin/refadmin/referees/[userId]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for referee/clubs, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` for referee and clubs data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses RefereeForm component for form handling
+- ✅ Proper FormData handling for updates
+- ✅ Cleans up referee object (removes empty strings for passNo and ishdLevel)
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to referees list on success
+- ✅ Handles referee not found scenario (redirects to list)
+- ✅ Sets proper initial values with defaults for referee object
+
+**Recommendation:** Full client-side migration (ref admin referee edit page)
 
 ---
 
@@ -923,8 +989,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 30 (files 1-30)  
+**Completed:** 33 (files 1-33)  
 **In Progress:** 0  
-**Pending:** 26  
+**Pending:** 23  
 
 **Last Updated:** 2025-02-03
