@@ -11,6 +11,7 @@ import usePermissions from '../../../../hooks/usePermissions';
 import { UserRole } from '../../../../lib/auth';
 import LoadingState from '../../../../components/ui/LoadingState';
 import apiClient from '../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../lib/errorHandler';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -45,10 +46,8 @@ const Edit: NextPage = () => {
         const response = await apiClient.get(`/clubs/${cAlias}`);
         setClub(response.data);
       } catch (error) {
-        if (error) {
-          console.error('Error fetching club:', error.message);
-          setError('Fehler beim Laden des Vereins');
-        }
+        console.error('Error fetching club:', getErrorMessage(error));
+        setError(getErrorMessage(error));
       } finally {
         setDataLoading(false);
       }
@@ -112,14 +111,8 @@ const Edit: NextPage = () => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (error) {
-        router.push({
-          pathname: `/admin/clubs`,
-          query: { message: `Keine Änderungen für Verein <strong>${values.name}</strong> vorgenommen.` }
-        }, `/admin/clubs`);
-      } else {
-        setError('Ein Fehler ist aufgetreten.');
-      }
+      console.error('Error updating club:', getErrorMessage(error));
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
