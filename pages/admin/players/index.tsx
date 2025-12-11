@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { PlayerValues } from "../../../types/PlayerValues";
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
