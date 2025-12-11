@@ -1,9 +1,8 @@
-import { GetServerSideProps, NextPage } from 'next';
+import { GetStaticProps, NextPage } from 'next';
 import Layout from '../../components/Layout';
 import Head from 'next/head';
 import { VenueValues } from '../../types/VenueValues';
 import axios from 'axios';
-import { getCookie } from 'cookies-next';
 import DataList from '../../components/ui/DataList';
 import apiClient from '../../lib/apiClient';
 
@@ -11,7 +10,7 @@ interface VenuePageProps {
   venues: VenueValues[];
 }
 
-export const getServerSideProps: GetServerSideProps<VenuePageProps> = async (context) => {
+export const getStaticProps: GetStaticProps<VenuePageProps> = async () => {
   let venues: VenueValues[] = [];
 
   try {
@@ -23,7 +22,12 @@ export const getServerSideProps: GetServerSideProps<VenuePageProps> = async (con
     }
   }
 
-  return { props: { venues: venues } };
+  return {
+    props: {
+      venues: venues
+    },
+    revalidate: 300 // Revalidate every 5 minutes
+  };
 };
 
 const Venues: NextPage<VenuePageProps> = ({ venues }) => {

@@ -1,6 +1,6 @@
 // File: pages/documents/[category].tsx
 
-import { GetServerSideProps, NextPage } from 'next';
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -194,21 +194,54 @@ const DocumentPage: NextPage<DocumentPageProps> = ({ category, docs }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const category = context.params ? context.params.category : undefined;
-  const res = await apiClient.get(`/documents/categories/${category}`, {
-    params: { 
-      published: true,
-      page: 1
-    },
-  });
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Define the known document categories
+  const categories = ['allgemein', 'spielbetrieb', 'hobbyliga'];
+  
+  const paths = categories.map((category) => ({
+    params: { category },
+  }));
 
   return {
-    props: {
-      category,
-      docs: res.data || [],
-    },
+    paths,
+    fallback: 'blocking', // Allow dynamic categories not in the list
   };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const category = context.params?.category;
+
+  if (!category || typeof category !== 'string') {
+    return { notFound: true };
+  }
+
+  try {
+    const res = await apiClient.get(`/documents/categories/${category}`, {
+      params: { 
+        published: true,
+        page: 1
+      },
+    });
+
+    return {
+      props: {
+        category,
+        docs: res.data || [],
+      },
+      revalidate: 300, // Revalidate every 5 minutes
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching documents:', error);
+    }
+    return {
+      props: {
+        category,
+        docs: [],
+      },
+      revalidate: 300,
+    };
+  }
 };
 
 export default DocumentPage;
