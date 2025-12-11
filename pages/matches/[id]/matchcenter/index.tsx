@@ -984,7 +984,6 @@ export default function MatchDetails({
           roster={[...(match.home.roster || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
-          jwt={jwt || ""}
           onSuccess={refreshMatchData}
           editGoal={editingHomeGoal}
         />
@@ -1001,7 +1000,6 @@ export default function MatchDetails({
           roster={[...(match.away.roster || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
-          jwt={jwt || ""}
           onSuccess={refreshMatchData}
           editGoal={editingAwayGoal}
         />
@@ -1018,7 +1016,6 @@ export default function MatchDetails({
           roster={[...(match.home.roster || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
-          jwt={jwt || ""}
           onSuccess={refreshMatchData}
           editPenalty={editingHomePenalty}
         />
@@ -1035,7 +1032,6 @@ export default function MatchDetails({
           roster={[...(match.away.roster || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
-          jwt={jwt || ""}
           onSuccess={refreshMatchData}
           editPenalty={editingAwayPenalty}
         />
