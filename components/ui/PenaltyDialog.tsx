@@ -1,6 +1,5 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import axios from 'axios';
 import EventPlayerSelect from './EventPlayerSelect';
 import PenaltyCodeSelect from './PenaltyCodeSelect';
 import InputMatchTime from './form/InputMatchTime';
@@ -9,6 +8,7 @@ import Toggle from './form/Toggle';
 import { RosterPlayer, PenaltiesBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import apiClient from '../../lib/apiClient';
 
 interface PenaltyCode {
   key: string;
@@ -28,7 +28,6 @@ interface PenaltyDialogProps {
   matchId: string;
   teamFlag: 'home' | 'away';
   roster: RosterPlayer[];
-  jwt: string;
   onSuccess: () => void;
   editPenalty: PenaltiesBase | undefined;
 }
@@ -67,7 +66,7 @@ const validationSchema = Yup.object().shape({
   isMP: Yup.boolean(),
 });
 
-const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editPenalty }: PenaltyDialogProps) => {
+const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, editPenalty }: PenaltyDialogProps) => {
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -84,7 +83,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
   // Fetch penalty codes from API
   const fetchPenaltyCodes = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/configs/penaltycode`);
+      const response = await apiClient.get('/configs/penaltycode');
       const data = response.data.value;
       if (Array.isArray(data) && data.length > 0) {
         setPenaltyCodes(data);
@@ -136,29 +135,17 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       };
 
       if (editPenalty && editPenalty._id) {
-        const response = await axios.patch(
-          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
-          penaltyData,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${jwt}`
-            }
-          }
+        const response = await apiClient.patch(
+          `/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
+          penaltyData
         );
         if (response.status === 200 || response.status === 304) {
           console.log('Edit successful, closing dialog and refreshing data');
         }
       } else {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/penalties/`,
-          penaltyData,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${jwt}`
-            }
-          }
+        const response = await apiClient.post(
+          `/matches/${matchId}/${teamFlag}/penalties/`,
+          penaltyData
         );
         if (response.status === 201) {
           console.log('Create penalty successful, closing dialog and refreshing data');
@@ -168,9 +155,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSucc
       onClose();
     } catch (error) {
       console.error('Error saving penalty:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('API error details:', error.response?.data);
-      }
     } finally {
       setIsSubmitting(false);
     }
