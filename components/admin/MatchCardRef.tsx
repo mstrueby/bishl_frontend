@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { Match } from '../../types/MatchValues';
+import { MatchValues } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { allRefereeAssignmentStatuses, getValidTransitions } from '../../tools/consts';
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
@@ -10,9 +10,9 @@ import { classNames } from '../../tools/utils';
 import useAuth from '../../hooks/useAuth';
 import apiClient from '../../lib/apiClient';
 
-const MatchCardRef: React.FC<{ match: Match, assignment?: AssignmentValues }> = ({ match, assignment }) => {
+const MatchCardRef: React.FC<{ match: MatchValues, assignment?: AssignmentValues }> = ({ match, assignment }) => {
   const { home, away, startDate, venue } = match;
-  const [matchdayMatches, setMatchdayMatches] = useState<Match[]>([]);
+  const [matchdayMatches, setMatchdayMatches] = useState<MatchValues[]>([]);
   const [roundData, setRoundData] = useState<any>(null);
 
 
