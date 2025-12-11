@@ -34,7 +34,7 @@ const Edit: NextPage = () => {
       return;
     }
 
-    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) {
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
       router.push("/");
     }
   }, [authLoading, user, hasAnyRole, router]);
@@ -186,7 +186,7 @@ const Edit: NextPage = () => {
   }
 
   // 4. Auth guard
-  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) return null;
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) return null;
 
   if (!player) {
     return (
