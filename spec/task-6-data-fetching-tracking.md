@@ -674,21 +674,82 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 ---
 
 #### 28. `pages/admin/venues/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for venues list, PATCH for updates, DELETE for deletion)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchVenues` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering venues
+- ✅ Has success message handling from query params
+- ✅ Implements toggle active functionality
+- ✅ Implements delete functionality with confirmation modal
+- ✅ Proper FormData handling for image uploads in toggleActive
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 29. `pages/admin/venues/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 29. `pages/admin/venues/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses VenueForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Redirects to venues list on success with message
+- ✅ Handles cancel navigation
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 30. `pages/admin/venues/[alias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 30. `pages/admin/venues/[alias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for venue, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN)
+- ✅ Client-side data fetching with `useEffect` for venue data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses VenueForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles image removal (imageUrl = null in form, empty string to backend)
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to venues list on success
+- ✅ Handles venue not found scenario (redirects to list)
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
@@ -862,8 +923,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 27 (files 1-27)  
+**Completed:** 30 (files 1-30)  
 **In Progress:** 0  
-**Pending:** 29  
+**Pending:** 26  
 
 **Last Updated:** 2025-02-03
