@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { MatchValues } from '../../../types/MatchValues';
-import axios from 'axios';
 import VenueSelect from '../../ui/VenueSelect';
 import { VenueValues } from '../../../types/VenueValues';
+import apiClient from '../../../lib/apiClient';
 
 interface EditMatchData {
   venue: { venueId: string; name: string; alias: string };
@@ -15,7 +15,6 @@ interface MatchEditProps {
   isOpen: boolean;
   onClose: () => void;
   match: MatchValues;
-  jwt: string;
   onSuccess: (updatedMatch: Partial<MatchValues>) => void;
   onMatchUpdate?: (updatedMatch: Partial<MatchValues>) => Promise<void>;
 }
@@ -31,7 +30,7 @@ const formatDate = (date: Date | string) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: MatchEditProps) => {
+const MatchEdit = ({ isOpen, onClose, match, onSuccess, onMatchUpdate }: MatchEditProps) => {
   const [venues, setVenues] = useState<VenueValues[]>([]);
   const initialEditData = {
     venue: { venueId: match.venue.venueId, name: match.venue.name, alias: match.venue.alias },
@@ -43,9 +42,8 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venues/?active=true`);
-        const data = await response.json();
-        setVenues(data);
+        const response = await apiClient.get('/venues/?active=true');
+        setVenues(response.data);
       } catch (error) {
         console.error('Error fetching venues:', error);
       }
@@ -71,15 +69,11 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
     console.log('Submitted values:', { venue, startDate });
 
     try {
-      const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`, {
+      const response = await apiClient.patch(`/matches/${match._id}`, {
         startDate: formatDate(startDate),
         venue
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`
-        }
       });
+      
       if (response.status === 200) {
         const updatedMatch = response.data;
         onSuccess(updatedMatch);
@@ -92,11 +86,7 @@ const MatchEdit = ({ isOpen, onClose, match, jwt, onSuccess, onMatchUpdate }: Ma
         console.error('Error updating match:', response.data);
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        onClose();
-      } else {
-        console.error('Error updating match:', error);
-      }
+      console.error('Error updating match:', error);
     } finally {
       setLoading(false);
     }
