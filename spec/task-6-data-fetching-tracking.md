@@ -413,23 +413,79 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 ---
 
 #### 18. `pages/admin/posts/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for posts list, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (AUTHOR, ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchPosts` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering posts
+- ✅ Has success message handling from query params
+- ✅ Implements toggle published/featured functionality
+- ✅ Implements delete functionality
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
 #### 19. `pages/admin/posts/add.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (AUTHOR, ADMIN)
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses PostForm component for form handling
+- ✅ Proper FormData handling with author object
+- ✅ Sets initial values with current user's name
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
 #### 20. `pages/admin/posts/[alias]/edit.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for post, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (AUTHOR, ADMIN)
+- ✅ Client-side data fetching with `useEffect` for post data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses PostForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles image removal (imageUrl = '')
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to posts list on success
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
@@ -667,8 +723,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 17 (files 1-17)  
+**Completed:** 20 (files 1-20)  
 **In Progress:** 0  
-**Pending:** 39  
+**Pending:** 36  
 
 **Last Updated:** 2025-02-03
