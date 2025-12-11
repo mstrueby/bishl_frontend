@@ -1045,7 +1045,6 @@ export default function MatchDetails({
           isOpen={isStatusDialogOpen}
           onClose={() => setIsStatusDialogOpen(false)}
           match={match}
-          jwt={jwt || ""}
           onSuccess={(updatedMatch) => {
             if (updatedMatch && updatedMatch._id) {
               setMatch({ ...match, ...updatedMatch });
