@@ -11,7 +11,6 @@ import useAuth from '../../../../../../hooks/useAuth';
 import usePermissions from '../../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../../lib/auth';
 import apiClient from '../../../../../../lib/apiClient';
-import axios, { AxiosError } from 'axios';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -52,7 +51,7 @@ const Edit: NextPage = () => {
         const teamResponse = await apiClient.get(`/clubs/${cAlias}/teams/${tAlias}`);
         setTeam(teamResponse.data);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (error) {
           console.error('Error fetching data:', error.message);
           router.push(`/admin/clubs/${cAlias}/teams/`);
         }
@@ -99,7 +98,7 @@ const Edit: NextPage = () => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         router.push({
           pathname: `/admin/clubs/${club.alias}/teams/`,
           query: { message: `Keine Änderungen für Mannschaft <strong>${values.name}</strong> vorgenommen.` }

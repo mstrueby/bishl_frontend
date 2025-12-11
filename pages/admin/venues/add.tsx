@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import Layout from '../../../components/Layout';
 import SectionHeader from "../../../components/admin/SectionHeader";
 import VenueForm from '../../../components/admin/VenueForm'
@@ -95,7 +94,7 @@ const Add: NextPage = () => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         setError(error?.response?.data.detail || 'Ein Fehler ist aufgetreten.');
       }
     } finally {

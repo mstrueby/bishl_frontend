@@ -43,7 +43,7 @@ const Documents: NextPage = () => {
       const res = await apiClient.get("/documents");
       setDocuments(res.data || []);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error("Error fetching documents:", error);
       }
     }
