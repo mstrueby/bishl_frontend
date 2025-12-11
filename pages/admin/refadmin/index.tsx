@@ -2,14 +2,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { MatchValues } from '../../../types/MatchValues';
 import { AssignmentValues } from '../../../types/AssignmentValues';
 import { TournamentValues } from '../../../types/TournamentValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import MatchCardRefAdmin from "../../../components/admin/MatchCardRefAdmin";
-import RefMatchFilter from "../../../components/admin/RefMatchFilter";
 import apiClient from '../../../lib/apiClient';
 import useAuth from '../../../hooks/useAuth';
 import { UserRole } from '../../../lib/auth';
