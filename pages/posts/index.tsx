@@ -1,10 +1,10 @@
+
 import Head from "next/head";
-import { GetServerSideProps, NextPage } from 'next';
+import { GetStaticProps, NextPage } from 'next';
 import axios from 'axios';
 import Link from 'next/link';
-import { getCookie } from 'cookies-next';
 import { PostValues } from '../../types/PostValues';
-import Layout from "../..//components/Layout";
+import Layout from "../../components/Layout";
 import { getFuzzyDate } from '../../tools/dateUtils';
 import { CldImage } from 'next-cloudinary';
 import apiClient from '../../lib/apiClient';
@@ -14,12 +14,10 @@ function classNames(...classes: string[]) {
 }
 
 interface PostsProps {
-  jwt: string | null,
   posts: PostValues[]
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = (getCookie('jwt', context) as string) || null;
+export const getStaticProps: GetStaticProps = async () => {
   let posts = null;
   try {
     const res = await apiClient.get('/posts/', {
@@ -35,10 +33,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.error('Error fetching posts:', error);
     }
   }
-  return posts ? { props: { jwt, posts } } : { props: { jwt, posts: [] } };
+  return {
+    props: {
+      posts: posts || []
+    },
+    revalidate: 300 // Revalidate every 5 minutes
+  };
 };
 
-const Posts: NextPage<PostsProps> = ({ jwt, posts }) => {
+const Posts: NextPage<PostsProps> = ({ posts }) => {
 
   const postItems = posts
     .slice()
