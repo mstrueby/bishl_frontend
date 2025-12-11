@@ -13,7 +13,6 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
-import axios from 'axios';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -56,7 +55,7 @@ const Edit: NextPage = () => {
         });
         setClubs(clubsResponse.data);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (error) {
           console.error('Error fetching data:', error.message);
           router.push('/admin/refadmin/referees');
         }
@@ -111,7 +110,7 @@ const Edit: NextPage = () => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         if (error.response?.status === 304) {
           router.push({
             pathname: '/admin/refadmin/referees',

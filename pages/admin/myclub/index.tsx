@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { buildUrl } from 'cloudinary-build-url';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
@@ -64,7 +63,7 @@ const MyClub: NextPage = () => {
         const res = await apiClient.get(`/clubs/id/${user.club.clubId}`);
         setClub(res.data || null);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (error) {
           console.error('Error fetching club:', error);
         }
       } finally {

@@ -15,7 +15,6 @@ import useAuth from '../../../../../../../hooks/useAuth';
 import usePermissions from '../../../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../../../lib/auth';
 import apiClient from '../../../../../../../lib/apiClient';
-import axios, { AxiosError } from 'axios';
 
 interface PlayersProps {}
 
@@ -79,7 +78,7 @@ const Players: NextPage<PlayersProps> = () => {
       setTotalPlayers(playersResponse.data?.total || 0);
 
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error('Error fetching data:', error.message);
       }
     } finally {

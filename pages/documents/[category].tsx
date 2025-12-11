@@ -5,7 +5,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Fragment } from 'react';
-import axios from 'axios';
 import Layout from '../../components/Layout';
 import apiClient from '../../lib/apiClient';
 import { Listbox, Transition } from '@headlessui/react';
@@ -231,7 +230,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       revalidate: 300, // Revalidate every 5 minutes
     };
   } catch (error) {
-    if (axios.isAxiosError(error)) {
+    if (error) {
       console.error('Error fetching documents:', error);
     }
     return {

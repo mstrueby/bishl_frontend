@@ -1,7 +1,6 @@
 
 import Head from "next/head";
 import { GetStaticProps, NextPage } from 'next';
-import axios from 'axios';
 import Link from 'next/link';
 import { PostValues } from '../../types/PostValues';
 import Layout from "../../components/Layout";
@@ -29,7 +28,7 @@ export const getStaticProps: GetStaticProps = async () => {
     });
     posts = res.data || [];
   } catch (error) {
-    if (axios.isAxiosError(error)) {
+    if (error) {
       console.error('Error fetching posts:', error);
     }
   }

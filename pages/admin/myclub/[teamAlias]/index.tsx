@@ -14,7 +14,6 @@ import useAuth from '../../../../hooks/useAuth';
 import usePermissions from '../../../../hooks/usePermissions';
 import { UserRole } from '../../../../lib/auth';
 import apiClient from '../../../../lib/apiClient';
-import axios from 'axios';
 
 const transformedUrl = (id: string) => buildUrl(id, {
   cloud: {
@@ -80,7 +79,7 @@ const TeamPage: NextPage = () => {
       setTotalPlayers(playersResponse.data?.total || 0);
 
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error('Error fetching data:', error);
       }
     } finally {
@@ -101,7 +100,7 @@ const TeamPage: NextPage = () => {
       });
       setPlayers(playersResponse.data?.results || playersResponse.data || []);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error('Error fetching players:', error);
       }
     }

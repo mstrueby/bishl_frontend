@@ -13,7 +13,6 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
-import axios from 'axios';
 
 interface TeamsProps {}
 
@@ -72,7 +71,7 @@ const Teams: NextPage<TeamsProps> = () => {
         const teamsResponse = await apiClient.get(`/clubs/${cAlias}/teams`);
         setTeams(teamsResponse.data || []);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (error) {
           console.error('Error fetching data:', error.message);
         }
       } finally {
@@ -90,7 +89,7 @@ const Teams: NextPage<TeamsProps> = () => {
       const response = await apiClient.get(`/clubs/${club.alias}/teams`);
       setTeams(response.data || []);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error('TEAMS: Error fetching teams:', error);
       }
     }

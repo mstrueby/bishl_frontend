@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import VenueForm from '../../../../components/admin/VenueForm';
 import Layout from '../../../../components/Layout';
 import SectionHeader from '../../../../components/admin/SectionHeader';
@@ -46,7 +45,7 @@ const Edit: NextPage = () => {
         const response = await apiClient.get(`/venues/${alias}`);
         setVenue(response.data);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (error) {
           console.error('Error fetching venue:', error.message);
           setError('Fehler beim Laden der Spielstätte');
         }

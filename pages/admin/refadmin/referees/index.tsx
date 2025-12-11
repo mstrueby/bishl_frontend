@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import React from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { UserValues, RefereeValues } from '../../../../types/UserValues';
 import Layout from "../../../../components/Layout";
 import SectionHeader from "../../../../components/admin/SectionHeader";
@@ -44,7 +43,7 @@ const Referees: NextPage = () => {
       const res = await apiClient.get("/users/referees");
       setReferees(res.data || []);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error('Error fetching referees:', error);
       }
     }
