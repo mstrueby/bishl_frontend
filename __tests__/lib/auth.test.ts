@@ -29,7 +29,7 @@ describe('lib/auth.ts - Authentication Utilities', () => {
     email: 'clubmanager@bishl.de',
     firstName: 'Club',
     lastName: 'Manager',
-    roles: ['CLUB_MANAGER'],
+    roles: ['CLUB_ADMIN'],
     club: null,
     referee: null,
   };
