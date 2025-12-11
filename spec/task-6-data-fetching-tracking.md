@@ -225,26 +225,68 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ---
 
-#### 10. `pages/admin/clubs/[cAlias]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:**
-- [ ] Remove `getServerSideProps` if present
-- [ ] Client-side auth with proper roles
-- [ ] Client-side data fetching (useEffect or useApiRequest)
-- [ ] Verify `apiClient` for GET/PATCH
-- [ ] Check error handling
+#### 10. `pages/admin/clubs/[cAlias]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET/PATCH)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 11. `pages/admin/clubs/[cAlias]/teams/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 11. `pages/admin/clubs/[cAlias]/teams/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient`
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
+- ✅ Client-side data fetching with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch
+
+**Recommendation:** Full client-side migration (admin page)
 
 ---
 
-#### 12. `pages/admin/clubs/[cAlias]/teams/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 12. `pages/admin/clubs/[cAlias]/teams/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role check (ADMIN only)
+- ✅ Form uses `apiClient` for POST requests (via TeamForm component)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with `ErrorMessage`
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
@@ -534,8 +576,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 9 (files 1-9)  
+**Completed:** 12 (files 1-12)  
 **In Progress:** 0  
-**Pending:** 47  
+**Pending:** 44  
 
 **Last Updated:** 2025-02-03
