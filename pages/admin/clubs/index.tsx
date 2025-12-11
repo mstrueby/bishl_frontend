@@ -80,7 +80,8 @@ export default function ClubsPage() {
   if (authLoading || !isAuthorized) {
     return (
       <LayoutAdm
-        mainNavData={[]}
+        navData={[]}
+        sectionTitle="Vereine"
         breadcrumbs={[{ order: 1, name: 'Vereine', url: '/admin/clubs' }]}
       >
         <LoadingState message="Lade Vereine..." />
@@ -90,7 +91,8 @@ export default function ClubsPage() {
 
   return (
     <LayoutAdm
-      mainNavData={[]}
+      navData={[]}
+      sectionTitle="Vereine"
       breadcrumbs={[{ order: 1, name: 'Vereine', url: '/admin/clubs' }]}
     >
       <Head>
