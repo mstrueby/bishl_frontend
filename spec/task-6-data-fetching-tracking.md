@@ -490,21 +490,84 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 ---
 
 #### 21. `pages/admin/myclub/index.tsx` ✅
-**Status:** MARKED COMPLETE (needs verification)  
-**Actions:**
-- [ ] Verify implementation
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for club by clubId)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (CLUB_ADMIN, ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `fetchClub` function
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component for rendering teams
+- ✅ Has success message handling from query params
+- ✅ Handles case when user has no club assigned
+- ✅ Sorts teams by age group and team number
+
+**Recommendation:** Full client-side migration (club admin page)
 
 ---
 
-#### 22. `pages/admin/myclub/[teamAlias]/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 22. `pages/admin/myclub/[teamAlias]/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for club, team, players; PATCH for player updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, CLUB_ADMIN)
+- ✅ Client-side data fetching with `useEffect` and `useCallback` (`fetchData`, `fetchPlayers`)
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `axios.isAxiosError()`
+- ✅ Uses DataList component with `getDataListItems` helper
+- ✅ Has success message handling from query params
+- ✅ Has pagination support with `handlePageChange`
+- ✅ Implements toggle active functionality for players
+- ✅ Edit player navigation
+
+**Recommendation:** Full client-side migration (club admin team page)
 
 ---
 
-#### 23. `pages/admin/myclub/[teamAlias]/[playerId]/index.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 23. `pages/admin/myclub/[teamAlias]/[playerId]/index.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for player, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, CLUB_ADMIN)
+- ✅ Client-side data fetching with `useEffect` for player data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch, `axios.isAxiosError()`, and `ErrorMessage`
+- ✅ Uses PlayerForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles image removal (imageUrl = null)
+- ✅ Handles 304 (no changes) response with success message
+- ✅ Redirects to team page on success
+- ✅ Handles player not found scenario
+- ✅ Cleans up assignedTeams data (removes null jerseyNo)
+
+**Recommendation:** Full client-side migration (club admin player edit page)
 
 ---
 
@@ -723,8 +786,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 20 (files 1-20)  
+**Completed:** 23 (files 1-23)  
 **In Progress:** 0  
-**Pending:** 36  
+**Pending:** 33  
 
 **Last Updated:** 2025-02-03
