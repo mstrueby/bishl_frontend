@@ -223,7 +223,7 @@ describe('lib/serverAuth', () => {
       email: 'admin@example.com',
       firstName: 'Admin',
       lastName: 'User',
-      roles: ['admin']
+      roles: ['ADMIN']
     };
 
     const mockUserWithoutPermission: UserValues = {
@@ -294,7 +294,7 @@ describe('lib/serverAuth', () => {
       email: 'admin@example.com',
       firstName: 'Admin',
       lastName: 'User',
-      roles: ['admin']
+      roles: ['ADMIN']
     };
 
     const mockUser: UserValues = {
@@ -302,7 +302,7 @@ describe('lib/serverAuth', () => {
       email: 'user@example.com',
       firstName: 'Regular',
       lastName: 'User',
-      roles: ['user']
+      roles: ['USER']
     };
 
     it('should call handler if user has required role', async () => {
@@ -349,7 +349,7 @@ describe('lib/serverAuth', () => {
       expect(statusMock).toHaveBeenCalledWith(403);
       expect(jsonMock).toHaveBeenCalledWith({
         error: 'Forbidden',
-        message: 'Role required: admin'
+        message: 'Role required: ADMIN'
       });
       expect(handler).not.toHaveBeenCalled();
     });
@@ -416,7 +416,7 @@ describe('lib/serverAuth', () => {
       expect(statusMock).toHaveBeenCalledWith(403);
       expect(jsonMock).toHaveBeenCalledWith({
         error: 'Forbidden',
-        message: 'One of these roles required: admin, LEAGUE_ADMIN'
+        message: 'One of these roles required: ADMIN, LEAGUE_ADMIN'
       });
       expect(handler).not.toHaveBeenCalled();
     });
