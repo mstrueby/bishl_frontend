@@ -11,8 +11,8 @@ import { CldImage } from 'next-cloudinary';
 import Badge from '../ui/Badge';
 import Toggle from '../ui/form/Toggle';
 import AssignmentModal from '../ui/AssignmentModal';
-import axios from 'axios';
 import { canAlsoPlayInAgeGroup } from '../../tools/consts';
+import apiClient from '../../lib/apiClient';
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -37,10 +37,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   useEffect(() => {
     const fetchClub = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/clubs/id/${clubId}`);
-        if (response.status === 200) {
-          setClub(response.data);
-        }
+        const response = await apiClient.get(`/clubs/id/${clubId}`);
+        setClub(response.data);
       } catch (error) {
         console.error('Error fetching club:', error);
       }
