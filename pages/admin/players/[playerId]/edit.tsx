@@ -12,6 +12,7 @@ import usePermissions from "../../../../hooks/usePermissions";
 import { UserRole } from "../../../../lib/auth";
 import LoadingState from "../../../../components/ui/LoadingState";
 import apiClient from "../../../../lib/apiClient";
+import { getErrorMessage } from "../../../../lib/errorHandler";
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -54,10 +55,8 @@ const Edit: NextPage = () => {
         const playerResponse = await apiClient.get(`/players/${playerId}`);
         setPlayer(playerResponse.data);
       } catch (error) {
-        if (error) {
-          console.error("Error fetching data:", error.message);
-          setError("Fehler beim Laden der Daten");
-        }
+        console.error("Error fetching data:", getErrorMessage(error));
+        setError(getErrorMessage(error));
       } finally {
         setDataLoading(false);
       }
@@ -149,13 +148,9 @@ const Edit: NextPage = () => {
           },
           `/admin/players`,
         );
-      } else {
-        setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } catch (error) {
-      if (error) {
-        setError("Ein Fehler ist aufgetreten.");
-      }
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
