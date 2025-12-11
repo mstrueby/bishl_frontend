@@ -13,6 +13,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../../lib/errorHandler';
 
 interface TeamsProps {}
 
@@ -71,9 +72,7 @@ const Teams: NextPage<TeamsProps> = () => {
         const teamsResponse = await apiClient.get(`/clubs/${cAlias}/teams`);
         setTeams(teamsResponse.data || []);
       } catch (error) {
-        if (error) {
-          console.error('Error fetching data:', error.message);
-        }
+        console.error('Error fetching data:', getErrorMessage(error));
       } finally {
         setDataLoading(false);
       }
@@ -89,9 +88,7 @@ const Teams: NextPage<TeamsProps> = () => {
       const response = await apiClient.get(`/clubs/${club.alias}/teams`);
       setTeams(response.data || []);
     } catch (error) {
-      if (error) {
-        console.error('TEAMS: Error fetching teams:', error);
-      }
+      console.error('Error fetching teams:', getErrorMessage(error));
     }
   };
 
@@ -113,7 +110,7 @@ const Teams: NextPage<TeamsProps> = () => {
         console.error('Failed to activate team.');
       }
     } catch (error) {
-      console.error('Error activating team:', error);
+      console.error('Error activating team:', getErrorMessage(error));
     }
   };
 

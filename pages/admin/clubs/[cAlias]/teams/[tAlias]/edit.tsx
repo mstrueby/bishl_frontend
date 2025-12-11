@@ -11,6 +11,7 @@ import useAuth from '../../../../../../hooks/useAuth';
 import usePermissions from '../../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../../lib/auth';
 import apiClient from '../../../../../../lib/apiClient';
+import { getErrorMessage } from '../../../../../../lib/errorHandler';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -51,10 +52,8 @@ const Edit: NextPage = () => {
         const teamResponse = await apiClient.get(`/clubs/${cAlias}/teams/${tAlias}`);
         setTeam(teamResponse.data);
       } catch (error) {
-        if (error) {
-          console.error('Error fetching data:', error.message);
-          router.push(`/admin/clubs/${cAlias}/teams/`);
-        }
+        console.error('Error fetching data:', getErrorMessage(error));
+        setError(getErrorMessage(error));
       } finally {
         setDataLoading(false);
       }
@@ -98,14 +97,8 @@ const Edit: NextPage = () => {
         setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
-      if (error) {
-        router.push({
-          pathname: `/admin/clubs/${club.alias}/teams/`,
-          query: { message: `Keine Änderungen für Mannschaft <strong>${values.name}</strong> vorgenommen.` }
-        }, `/admin/clubs/${club.alias}/teams/`);
-      } else {
-        setError('Ein Fehler ist aufgetreten.');
-      }
+      console.error('Error updating team:', getErrorMessage(error));
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
