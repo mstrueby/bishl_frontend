@@ -354,7 +354,7 @@ describe('lib/serverAuth', () => {
       _id: 'lm-123',
       email: 'lm@example.com',
       name: 'League Manager',
-      roles: ['league_manager']
+      roles: ['LEAGUE_ADMIN']
     };
 
     const mockUser: UserValues = {
@@ -379,7 +379,7 @@ describe('lib/serverAuth', () => {
       await withAnyRole(
         mockReq as NextApiRequest,
         mockRes as NextApiResponse,
-        [UserRole.ADMIN, UserRole.LEAGUE_MANAGER],
+        [UserRole.ADMIN, UserRole.LEAGUE_ADMIN],
         handler
       );
 
@@ -401,14 +401,14 @@ describe('lib/serverAuth', () => {
       await withAnyRole(
         mockReq as NextApiRequest,
         mockRes as NextApiResponse,
-        [UserRole.ADMIN, UserRole.LEAGUE_MANAGER],
+        [UserRole.ADMIN, UserRole.LEAGUE_ADMIN],
         handler
       );
 
       expect(statusMock).toHaveBeenCalledWith(403);
       expect(jsonMock).toHaveBeenCalledWith({
         error: 'Forbidden',
-        message: 'One of these roles required: admin, league_manager'
+        message: 'One of these roles required: admin, LEAGUE_ADMIN'
       });
       expect(handler).not.toHaveBeenCalled();
     });

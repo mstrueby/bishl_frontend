@@ -174,7 +174,7 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 - ✅ Removed `getServerSideProps` entirely
 - ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
 - ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
-- ✅ Role check allows all authenticated users (USER, AUTHOR, CLUB_MANAGER, REFEREE, LEAGUE_MANAGER, ADMIN)
+- ✅ Role check allows all authenticated users (USER, AUTHOR, CLUB_MANAGER, REFEREE, LEAGUE_ADMIN, ADMIN)
 - ✅ Has loading states with `LoadingState` component
 - ✅ Has proper error handling with `ErrorState`
 
@@ -195,7 +195,7 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 - ✅ All API calls use `apiClient`
 - ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
 - ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
-- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
 - ✅ Has loading states with `LoadingState` component
 - ✅ Has proper error handling with try/catch and `ErrorState`
 - ✅ Client-side search functionality
@@ -350,7 +350,7 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 - ✅ All API calls use `apiClient` (GET for players list)
 - ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
 - ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
-- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
 - ✅ Client-side data fetching with `useEffect`
 - ✅ Has loading states with `LoadingState` component
 - ✅ Has proper error handling with try/catch
@@ -400,7 +400,7 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 - ✅ All API calls use `apiClient` (GET for clubs/player, PATCH for updates)
 - ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
 - ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
-- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
 - ✅ Client-side data fetching with `useEffect` for clubs and player data
 - ✅ Has loading states with `LoadingState` component
 - ✅ Has proper error handling with try/catch and `ErrorMessage`
@@ -793,7 +793,7 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 - ✅ All API calls use `apiClient` (GET for referees list, PATCH for updates)
 - ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
 - ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
-- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
 - ✅ Client-side data fetching with `useEffect` and `fetchReferees` function
 - ✅ Has loading states with `LoadingState` component
 - ✅ Has proper error handling with try/catch and `axios.isAxiosError()`

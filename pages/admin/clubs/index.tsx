@@ -33,7 +33,7 @@ export default function ClubsPage() {
       return;
     }
 
-    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) {
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
       router.push('/');
       return;
     }

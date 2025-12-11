@@ -259,8 +259,8 @@ const EditPage = () => {
 ### ✅ Completed (24)
 - [x] `pages/admin/posts/index.tsx` - AUTHOR/ADMIN
 - [x] `pages/admin/documents/index.tsx` - ADMIN
-- [x] `pages/admin/clubs/index.tsx` - ADMIN/LEAGUE_MANAGER
-- [x] `pages/admin/players/index.tsx` - ADMIN/LEAGUE_MANAGER
+- [x] `pages/admin/clubs/index.tsx` - ADMIN/LEAGUE_ADMIN
+- [x] `pages/admin/players/index.tsx` - ADMIN/LEAGUE_ADMIN
 - [x] `pages/admin/venues/index.tsx` - ADMIN
 - [x] `pages/admin/refadmin/index.tsx` - ADMIN
 - [x] `pages/admin/myref/index.tsx` - REFEREE
@@ -268,7 +268,7 @@ const EditPage = () => {
 - [x] `pages/admin/documents/[alias]/edit.tsx` - ADMIN
 - [x] `pages/admin/posts/[alias]/edit.tsx` - AUTHOR/ADMIN
 - [x] `pages/admin/posts/add.tsx` - AUTHOR/ADMIN
-- [x] `pages/admin/players/[playerId]/edit.tsx` - ADMIN/LEAGUE_MANAGER
+- [x] `pages/admin/players/[playerId]/edit.tsx` - ADMIN/LEAGUE_ADMIN
 - [x] `pages/admin/venues/[alias]/edit.tsx` - ADMIN
 - [x] `pages/admin/clubs/[cAlias]/edit.tsx` - ADMIN
 - [x] `pages/admin/clubs/[cAlias]/teams/[tAlias]/edit.tsx` - ADMIN
@@ -276,7 +276,7 @@ const EditPage = () => {
 - [x] `pages/admin/documents/add.tsx` - DOC_ADMIN/ADMIN
 - [x] `pages/admin/clubs/add.tsx` - ADMIN
 - [x] `pages/admin/clubs/[cAlias]/teams/add.tsx` - ADMIN
-- [x] `pages/admin/players/add.tsx` - ADMIN/LEAGUE_MANAGER
+- [x] `pages/admin/players/add.tsx` - ADMIN/LEAGUE_ADMIN
 - [x] `pages/admin/venues/add.tsx` - ADMIN
 
 ### 🔄 In Progress (0)
