@@ -6,7 +6,6 @@ describe('lib/auth.ts - Authentication Utilities', () => {
   // Mock user data for testing
   const mockAdminUser: UserValues = {
     _id: '1',
-    username: 'admin_user',
     email: 'admin@bishl.de',
     firstName: 'Admin',
     lastName: 'User',
@@ -17,7 +16,6 @@ describe('lib/auth.ts - Authentication Utilities', () => {
 
   const mockRefereeUser: UserValues = {
     _id: '2',
-    username: 'referee_user',
     email: 'referee@bishl.de',
     firstName: 'Referee',
     lastName: 'User',
@@ -28,7 +26,6 @@ describe('lib/auth.ts - Authentication Utilities', () => {
 
   const mockClubManagerUser: UserValues = {
     _id: '3',
-    username: 'club_manager',
     email: 'clubmanager@bishl.de',
     firstName: 'Club',
     lastName: 'Manager',
@@ -39,7 +36,6 @@ describe('lib/auth.ts - Authentication Utilities', () => {
 
   const mockUserWithoutRoles: UserValues = {
     _id: '4',
-    username: 'regular_user',
     email: 'user@bishl.de',
     firstName: 'Regular',
     lastName: 'User',
@@ -52,7 +48,7 @@ describe('lib/auth.ts - Authentication Utilities', () => {
     it('should return true when user has the specified role', () => {
       expect(hasRole(mockAdminUser, UserRole.ADMIN)).toBe(true);
       expect(hasRole(mockRefereeUser, UserRole.REFEREE)).toBe(true);
-      expect(hasRole(mockClubManagerUser, UserRole.CLUB_MANAGER)).toBe(true);
+      expect(hasRole(mockClubManagerUser, UserRole.CLUB_ADMIN)).toBe(true);
     });
 
     it('should return false when user does not have the role', () => {
@@ -78,13 +74,13 @@ describe('lib/auth.ts - Authentication Utilities', () => {
 
   describe('hasAnyRole()', () => {
     it('should return true when user has at least one of the specified roles', () => {
-      expect(hasAnyRole(mockAdminUser, [UserRole.ADMIN, UserRole.CLUB_MANAGER])).toBe(true);
+      expect(hasAnyRole(mockAdminUser, [UserRole.ADMIN, UserRole.CLUB_ADMIN])).toBe(true);
       expect(hasAnyRole(mockAdminUser, [UserRole.REFEREE, UserRole.LEAGUE_ADMIN])).toBe(true);
       expect(hasAnyRole(mockRefereeUser, [UserRole.REFEREE, UserRole.ADMIN])).toBe(true);
     });
 
     it('should return false when user has none of the specified roles', () => {
-      expect(hasAnyRole(mockRefereeUser, [UserRole.ADMIN, UserRole.CLUB_MANAGER])).toBe(false);
+      expect(hasAnyRole(mockRefereeUser, [UserRole.ADMIN, UserRole.CLUB_ADMIN])).toBe(false);
       expect(hasAnyRole(mockClubManagerUser, [UserRole.ADMIN, UserRole.REFEREE])).toBe(false);
     });
 
