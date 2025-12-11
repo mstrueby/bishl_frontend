@@ -1046,7 +1046,7 @@ useEffect(() => {
 ## Testing Checklist
 
 After each file migration:
-- [ ] No TypeScript errors (`npx tsc --noEmit`)
+- [x] No TypeScript errors (`npx tsc --noEmit`)
 - [ ] Page loads without errors
 - [ ] Auth redirect works (unauthenticated users redirected to login)
 - [ ] Permission checks work (unauthorized users see error message)
