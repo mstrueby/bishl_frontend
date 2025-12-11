@@ -363,15 +363,52 @@ This document tracks all files requiring updates for Task 6: Data Fetching Strat
 
 ---
 
-#### 16. `pages/admin/players/add.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #9
+#### 16. `pages/admin/players/add.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data operations are client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_ADMIN)
+- ✅ Client-side data fetching for clubs with `useEffect`
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses PlayerAdminForm component for form handling
+- ✅ Form uses `apiClient` for POST requests
+- ✅ Proper FormData handling for image uploads
+
+**Recommendation:** Full client-side migration (admin add page)
 
 ---
 
-#### 17. `pages/admin/players/[playerId]/edit.tsx` ⚠️
-**Status:** NEEDS REVIEW  
-**Actions:** Same as #10
+#### 17. `pages/admin/players/[playerId]/edit.tsx` ✅
+**Status:** COMPLETED  
+**Current:** Uses client-side auth and data fetching  
+**Issues:**
+- ✅ Uses `apiClient` for all API calls
+- ✅ No `getServerSideProps` present
+- ✅ All data fetching is client-side
+
+**Completed Actions:**
+- ✅ No `getServerSideProps` present
+- ✅ All API calls use `apiClient` (GET for clubs/player, PATCH for updates)
+- ✅ Implements client-side auth with `useAuth()` and `usePermissions()`
+- ✅ Has auth redirect `useEffect` (redirects to login if not authenticated)
+- ✅ Has proper role checks (ADMIN, LEAGUE_MANAGER)
+- ✅ Client-side data fetching with `useEffect` for clubs and player data
+- ✅ Has loading states with `LoadingState` component
+- ✅ Has proper error handling with try/catch and `ErrorMessage`
+- ✅ Uses PlayerAdminForm component for form handling
+- ✅ Proper FormData handling for image uploads
+- ✅ Handles player not found scenario
+
+**Recommendation:** Full client-side migration (admin edit page)
 
 ---
 
@@ -630,8 +667,8 @@ After each file migration:
 ## Progress Tracker
 
 **Total Files:** 56  
-**Completed:** 15 (files 1-15)  
+**Completed:** 17 (files 1-17)  
 **In Progress:** 0  
-**Pending:** 41  
+**Pending:** 39  
 
 **Last Updated:** 2025-02-03
