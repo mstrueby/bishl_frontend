@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { VenueValues } from '../../../types/VenueValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
@@ -46,7 +45,7 @@ const Venues: NextPage = () => {
         const res = await apiClient.get('/venues');
         setVenues(res.data || []);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (error) {
           console.error('Error fetching venues:', error);
         }
       } finally {
@@ -61,7 +60,7 @@ const Venues: NextPage = () => {
       const res = await apiClient.get('/venues');
       setVenues(res.data || []);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error('Error fetching venues:', error);
       }
     }

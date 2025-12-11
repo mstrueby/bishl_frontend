@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import React from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { PostValues } from '../../../types/PostValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
@@ -47,7 +46,7 @@ const Posts: NextPage = () => {
       });
       setPosts(res.data || []);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error('Error fetching posts:', error);
       }
     }

@@ -1,25 +1,29 @@
-import Head from 'next/head';
-import { GetStaticPaths, GetStaticProps } from 'next';
-import Layout from '../../components/Layout';
-import { PostValues } from '../../types/PostValues';
-import { getFuzzyDate } from '../../tools/dateUtils';
+import Head from "next/head";
+import { GetStaticPaths, GetStaticProps } from "next";
+import Layout from "../../components/Layout";
+import { PostValues } from "../../types/PostValues";
+import { getFuzzyDate } from "../../tools/dateUtils";
+import apiClient from "../../lib/apiClient";
 
-import { CldImage } from 'next-cloudinary';
+import { CldImage } from "next-cloudinary";
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
-export default function Post({
-  post
-}: {
-  post?: PostValues
-}) {
+export default function Post({ post }: { post?: PostValues }) {
   if (!post) {
-    return <Layout><div>Loading...</div></Layout>;
+    return (
+      <Layout>
+        <div>Loading...</div>
+      </Layout>
+    );
   }
 
-  const createDate = new Date(new Date(post.createDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString();
+  const createDate = new Date(
+    new Date(post.createDate).getTime() -
+      new Date().getTimezoneOffset() * 60000,
+  ).toISOString();
 
   return (
     <Layout>
@@ -36,7 +40,10 @@ export default function Post({
               {getFuzzyDate(createDate)}
             </time>
             <div className="-ml-4 flex items-center gap-x-4">
-              <svg viewBox="0 0 2 2" className="-ml-0.5 h-0.5 w-0.5 flex-none fill-black/50">
+              <svg
+                viewBox="0 0 2 2"
+                className="-ml-0.5 h-0.5 w-0.5 flex-none fill-black/50"
+              >
                 <circle r={1} cx={1} cy={1} />
               </svg>
               <div className="flex items-center gap-x-2.5">
@@ -45,9 +52,7 @@ export default function Post({
                 </div>
                 <div className="text-sm/6">
                   <p className="font-extralight text-gray-900">
-                    <a href="#">
-                      {post.author.firstName}
-                    </a>
+                    <a href="#">{post.author.firstName}</a>
                   </p>
                   {/*<p className="text-gray-600">{post.author.role}</p>*/}
                 </div>
@@ -64,7 +69,12 @@ export default function Post({
           </div>
 
           {post.imageUrl && (
-            <CldImage src={post.imageUrl} alt="post image" width={768} height={432} aspectRatio="16:9"
+            <CldImage
+              src={post.imageUrl}
+              alt="post image"
+              width={768}
+              height={432}
+              aspectRatio="16:9"
               crop="fill"
               gravity="auto"
               className="aspect-[16/9] w-full rounded-xl object-cover sm:aspect-[2/1] lg:aspect-[3/2] border border-gray-200 shadow-md"
@@ -73,35 +83,34 @@ export default function Post({
 
           {post.content && (
             <div className="mt-10 max-w-2xl">
-              <div className="post" dangerouslySetInnerHTML= {{ __html: post.content }} ></div>
+              <div
+                className="post"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              ></div>
             </div>
           )}
-
         </div>
       </div>
     </Layout>
-  )
+  );
 }
-
-import apiClient from '../../lib/apiClient';
-import axios from 'axios';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const res = await apiClient.get('/posts/', {
+    const res = await apiClient.get("/posts/", {
       params: {
         published: true,
-        page: 1
-      }
+        page: 1,
+      },
     });
     const allPostsData = res.data || [];
     const paths = allPostsData.map((post: PostValues) => ({
       params: { alias: post.alias },
     }));
-    return { paths, fallback: 'blocking' };
+    return { paths, fallback: "blocking" };
   } catch (error) {
-    console.error('Error fetching posts for paths:', error);
-    return { paths: [], fallback: 'blocking' };
+    console.error("Error fetching posts for paths:", error);
+    return { paths: [], fallback: "blocking" };
   }
 };
 
@@ -122,13 +131,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     return {
       props: {
-        post: postData
+        post: postData,
       },
-      revalidate: 10
+      revalidate: 10,
     };
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching post:', error.message);
+    if (error) {
+      console.error("Error fetching post:", error.message);
     }
     return { notFound: true };
   }

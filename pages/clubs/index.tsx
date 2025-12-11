@@ -2,7 +2,6 @@ import { GetServerSideProps, NextPage } from 'next';
 import Layout from '../../components/Layout';
 import Head from 'next/head';
 import { ClubValues } from '../../types/ClubValues';
-import axios from 'axios';
 import DataList from '../../components/ui/DataList';
 import apiClient from '../../lib/apiClient';
 
@@ -24,7 +23,7 @@ export const getServerSideProps: GetServerSideProps<ClubPageProps> = async (cont
     });
     clubs = response.data || [];
   } catch (error) {
-    if (axios.isAxiosError(error)) {
+    if (error) {
       console.error('Error fetching clubs:', error);
     }
   }

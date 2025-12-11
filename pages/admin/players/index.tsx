@@ -43,7 +43,7 @@ const Players: NextPage = () => {
       setPlayers(res.data?.data || res.data || []);
       setTotalPlayers(res.data?.pagination?.total_items || 0);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         console.error("Error fetching players:", error);
       }
     } finally {

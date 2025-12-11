@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import axios from "axios";
 import PlayerAdminForm from "../../../../components/admin/PlayerAdminForm";
 import Layout from "../../../../components/Layout";
 import SectionHeader from "../../../../components/admin/SectionHeader";
@@ -55,7 +54,7 @@ const Edit: NextPage = () => {
         const playerResponse = await apiClient.get(`/players/${playerId}`);
         setPlayer(playerResponse.data);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (error) {
           console.error("Error fetching data:", error.message);
           setError("Fehler beim Laden der Daten");
         }
@@ -154,7 +153,7 @@ const Edit: NextPage = () => {
         setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (error) {
         setError("Ein Fehler ist aufgetreten.");
       }
     } finally {
