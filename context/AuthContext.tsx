@@ -4,7 +4,7 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }: {children: ReactNode}) => {
   const [user, setUser] = useState(null);
-  const [authError, setAuthError] = useState(null);
+  const [authError, setAuthError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
       } catch (error) {
         console.error('Auth check failed:', error);
         setUser(null);
-        setAuthError(error);
+        setAuthError(error instanceof Error ? error : new Error(String(error)));
       } finally {
         setLoading(false);
       }

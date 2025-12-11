@@ -15,7 +15,6 @@ const initialClubValues: ClubValues = {
   _id: '',
   name: '',
   alias: '',
-  fullName: '',
   addressName: '',
   street: '',
   zipCode: '',
@@ -27,7 +26,9 @@ const initialClubValues: ClubValues = {
   website: '',
   ishdId: '',
   active: true,
-  legacyId: 0,
+  logoUrl: '',
+  legacyId: '',
+  teams: []
 };
 
 export default function AddClubPage() {
