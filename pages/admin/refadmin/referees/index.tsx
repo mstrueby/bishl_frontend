@@ -147,7 +147,7 @@ const Referees: NextPage = () => {
       featured: false,
       menu: [
         { edit: { onClick: () => editReferee(referee._id) } },
-        { active: { onClick: () => { toggleActive(referee._id, referee.referee) } } },
+        { active: { onClick: () => { toggleActive(referee._id, referee.referee ?? undefined) } } },
       ],
     };
   });
