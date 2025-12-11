@@ -1,12 +1,12 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import axios from 'axios';
 import EventPlayerSelect from './EventPlayerSelect';
 import InputMatchTime from './form/InputMatchTime';
 import { RosterPlayer, EventPlayer, ScoresBase } from '../../types/MatchValues';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import apiClient from '../../lib/apiClient';
 
 interface GoalDialogProps {
   isOpen: boolean;
@@ -14,7 +14,6 @@ interface GoalDialogProps {
   matchId: string;
   teamFlag: 'home' | 'away';
   roster: RosterPlayer[];
-  jwt: string;
   onSuccess: () => void;
   editGoal?: ScoresBase;
 }
@@ -41,7 +40,7 @@ const validationSchema = Yup.object().shape({
   isGWG: Yup.boolean()
 });
 
-const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess, editGoal }: GoalDialogProps) => {
+const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, editGoal }: GoalDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -68,30 +67,18 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
 
       if (editGoal && editGoal._id) {
         // Update existing goal
-        const response = await axios.patch(
-          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/${editGoal._id}`,
-          goalData,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${jwt}`
-            }
-          }
+        const response = await apiClient.patch(
+          `/matches/${matchId}/${teamFlag}/scores/${editGoal._id}`,
+          goalData
         );
         if (response.status === 200 || response.status === 304) {
           console.log('Edit successful, closing dialog and refreshing data');
         }
       } else {
         // Create new goal
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/${teamFlag}/scores/`,
-          goalData,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${jwt}`
-            }
-          }
+        const response = await apiClient.post(
+          `/matches/${matchId}/${teamFlag}/scores/`,
+          goalData
         );
         if (response.status === 201) {
           console.log('Create goal successful, closing dialog and refreshing data');
@@ -102,10 +89,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, jwt, onSuccess
       onClose();
     } catch (error) {
       console.error('Error saving goal:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('API error details:', error.response?.data);
-        setError('Fehler beim Speichern des Tors');
-      }
+      setError('Fehler beim Speichern des Tors');
     } finally {
       setIsSubmitting(false);
     }
