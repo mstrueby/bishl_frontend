@@ -30,7 +30,7 @@ export default function ProfilePage() {
     }
 
     // Profile page is accessible to all authenticated users
-    if (!hasAnyRole([UserRole.USER, UserRole.AUTHOR, UserRole.CLUB_ADMIN, UserRole.REFEREE, UserRole.LEAGUE_MANAGER, UserRole.ADMIN])) {
+    if (!hasAnyRole([UserRole.USER, UserRole.AUTHOR, UserRole.CLUB_ADMIN, UserRole.REFEREE, UserRole.LEAGUE_ADMIN, UserRole.ADMIN])) {
       router.push('/');
       return;
     }

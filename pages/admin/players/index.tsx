@@ -111,7 +111,7 @@ const Players: NextPage = () => {
       return;
     }
 
-    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) {
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
       router.push("/");
     }
   }, [authLoading, user, hasAnyRole, router]);
@@ -159,7 +159,7 @@ const Players: NextPage = () => {
   }
 
   // Auth guard
-  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_MANAGER])) return null;
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) return null;
 
   const playerValues = players
     .slice()

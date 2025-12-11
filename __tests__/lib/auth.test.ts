@@ -79,7 +79,7 @@ describe('lib/auth.ts - Authentication Utilities', () => {
   describe('hasAnyRole()', () => {
     it('should return true when user has at least one of the specified roles', () => {
       expect(hasAnyRole(mockAdminUser, [UserRole.ADMIN, UserRole.CLUB_MANAGER])).toBe(true);
-      expect(hasAnyRole(mockAdminUser, [UserRole.REFEREE, UserRole.LEAGUE_MANAGER])).toBe(true);
+      expect(hasAnyRole(mockAdminUser, [UserRole.REFEREE, UserRole.LEAGUE_ADMIN])).toBe(true);
       expect(hasAnyRole(mockRefereeUser, [UserRole.REFEREE, UserRole.ADMIN])).toBe(true);
     });
 
