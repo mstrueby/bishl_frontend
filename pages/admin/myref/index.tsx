@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { MatchValues } from '../../../types/MatchValues';
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
@@ -50,10 +49,8 @@ const MyRef: NextPage = () => {
         );
         
         setMatches(myMatches);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error('Error fetching matches:', error);
-        }
+      } catch (error: any) {
+        console.error('Error fetching matches:', error);
       } finally {
         setDataLoading(false);
       }
