@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Match } from '../../../types/MatchValues';
+import { MatchValues } from '../../../types/MatchValues';
 import axios from 'axios';
 import VenueSelect from '../../ui/VenueSelect';
 import { VenueValues } from '../../../types/VenueValues';
@@ -14,10 +14,10 @@ interface EditMatchData {
 interface MatchEditProps {
   isOpen: boolean;
   onClose: () => void;
-  match: Match;
+  match: MatchValues;
   jwt: string;
-  onSuccess: (updatedMatch: Partial<Match>) => void;
-  onMatchUpdate?: (updatedMatch: Partial<Match>) => Promise<void>;
+  onSuccess: (updatedMatch: Partial<MatchValues>) => void;
+  onMatchUpdate?: (updatedMatch: Partial<MatchValues>) => Promise<void>;
 }
 
 const formatDate = (date: Date | string) => {
