@@ -178,6 +178,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({
               );
 
               // Debug logging
+      {/**
               console.log(`=== Referee ${refNumber} Debug ===`);
               console.log("Referee object:", referee);
               console.log("Assignment object:", assignment);
@@ -192,6 +193,7 @@ const SupplementaryTab: React.FC<SupplementaryTabProps> = ({
                   referee &&
                   assignment.referee.userId !== referee.userId,
               );
+      */}
 
               const isDifferentReferee =
                 assignment &&
