@@ -1054,8 +1054,8 @@ After each file migration:
 - [ ] Loading states display properly
 - [ ] Error states display on failures
 - [ ] No console errors or warnings
-- [ ] No `/users/me` calls in SSR
-- [ ] All API calls use `apiClient`
+- [x] No `/users/me` calls in SSR
+- [x] All API calls use `apiClient`
 
 ---
 

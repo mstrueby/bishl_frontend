@@ -153,6 +153,8 @@ const GoalRegisterForm = () => {
       }
     };
 
+    console.log('Submitting payload:', payload);
+
     try {
       const response = await apiClient.patch(`/matches/${match._id}`, payload);
 
