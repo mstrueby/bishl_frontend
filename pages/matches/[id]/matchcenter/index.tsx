@@ -400,23 +400,22 @@ export default function MatchDetails({
           {/* Home Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              {permissions.showButtonEvents &&
-                match.matchStatus.key === "INPROGRESS" && (
-                  <>
-                    <button
-                      onClick={() => setIsHomeGoalDialogOpen(true)}
-                      className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Tor
-                    </button>
-                    <button
-                      onClick={() => setIsHomePenaltyDialogOpen(true)}
-                      className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Strafe
-                    </button>
-                  </>
-                )}
+              {permissions.showButtonEvents && (
+                <>
+                  <button
+                    onClick={() => setIsHomeGoalDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Tor
+                  </button>
+                  <button
+                    onClick={() => setIsHomePenaltyDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Strafe
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -532,23 +531,22 @@ export default function MatchDetails({
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              {permissions.showButtonEvents &&
-                match.matchStatus.key === "INPROGRESS" && (
-                  <>
-                    <button
-                      onClick={() => setIsAwayGoalDialogOpen(true)}
-                      className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Tor
-                    </button>
-                    <button
-                      onClick={() => setIsAwayPenaltyDialogOpen(true)}
-                      className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Strafe
-                    </button>
-                  </>
-                )}
+              {permissions.showButtonEvents && (
+                <>
+                  <button
+                    onClick={() => setIsAwayGoalDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Tor
+                  </button>
+                  <button
+                    onClick={() => setIsAwayPenaltyDialogOpen(true)}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Strafe
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
