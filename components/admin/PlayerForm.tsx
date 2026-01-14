@@ -33,13 +33,16 @@ interface PlayerFormProps {
 }
 
 const invalidReasonCodeMap: Record<string, string> = {
-  MULTIPLE_PRIMARY: 'Mehrere Erstpässe gefunden',
-  AGE_MISMATCH: 'Altersklasse stimmt nicht überein',
-  INVALID_TEAM: 'Ungültige Mannschaft',
-  DUPLICATE_LICENCE: 'Doppelter Spielerpass',
-  MISSING_PASS_NO: 'Pass-Nummer fehlt',
-  EXPIRED: 'Abgelaufen',
-  NOT_ACTIVE: 'Nicht aktiv',
+  MULTIPLE_PRIMARY: 'Mehrere Erstpässe',
+  TOO_MANY_LOAN: 'Zu viele Gastspielrechte',
+  LOAN_CLUB_CONFLICT: 'Vereinskonflikt (Gastspiel)',
+  AGE_GROUP_VIOLATION: 'Falsche Altersklasse',
+  OVERAGE_NOT_ALLOWED: 'OA nicht zulässig',
+  EXCEEDS_WKO_LIMIT: 'WKO-Limit überschritten',
+  CONFLICTING_CLUB: 'Widersprüchlicher Verein',
+  IMPORT_CONFLICT: 'Import-Konflikt',
+  UNKNOWN_LICENCE_TYPE: 'Unbekannter Passtyp',
+  HOBBY_PLAYER_CONFLICT: 'Hobbyspieler-Konflikt',
 };
 
 const licenceTypeBadgeColors: Record<string, string> = {
@@ -102,7 +105,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setLicenceLoading(true);
     setErrorMessage(null);
     try {
-      const response = await apiClient.post(`/players/${initialValues._id}/auto-optimize`, {
+      const response = await apiClient.post(`/players/${initialValues._id}/auto_optimize`, {
         assignedTeams: values.assignedTeams,
         keep_invalid: true,
       });
@@ -564,7 +567,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 <Fragment key={teamIndex}>
                                   <tr>
                                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
-                                      {team.teamAlias || team.teamName}
+                                      {team.teamName}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-4 text-sm">
                                       <span className={classNames(
@@ -580,7 +583,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                           'h-2 w-2 rounded-full',
                                           isValid ? 'bg-green-500' : 'bg-red-500'
                                         )} />
-                                        <span className="text-gray-500">{isValid ? 'valid' : 'invalid'}</span>
+                                        <span className="text-gray-700">{isValid ? 'Gültig' : 'Ungültig'}</span>
                                       </div>
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-4 text-sm">
@@ -602,7 +605,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                           'h-2 w-2 rounded-full',
                                           team.active ? 'bg-green-500' : 'bg-gray-300'
                                         )} />
-                                        <span className="text-gray-500">{team.active ? 'Active' : 'Inactive'}</span>
+                                        <span className="text-gray-500">{team.active ? 'Aktiv' : 'Inaktiv'}</span>
                                       </div>
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
