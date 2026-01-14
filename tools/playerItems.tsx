@@ -81,6 +81,9 @@ export const getDataListItems = (
       published: player.assignedTeams
         .flatMap(item => item.teams)
         .find(teamInner => teamInner.teamId === team._id)?.active || false,
+      category: player.assignedTeams
+        .flatMap(item => item.teams)
+        .find(teamInner => teamInner.teamId === team._id)?.licenseType || 'N/A',
       menu: menuItems,
     };
   });
