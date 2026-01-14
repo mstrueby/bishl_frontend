@@ -207,7 +207,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                       <div className={`size-1.5 rounded-full ${color === 'green' ? 'bg-emerald-500' : color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'}`} />
                                     </div>
                                     <p className="text-sm/6 font-semibold text-gray-900 truncate">
-                                      {team.teamName}
+                                      {team.teamName} - {team.licenseType}
                                     </p>
                                   </div>
                                   <div className="mt-1 flex items-center gap-x-2 text-xs text-gray-500 space-x-2">

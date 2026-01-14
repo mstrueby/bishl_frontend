@@ -86,6 +86,9 @@ export function calculateMatchButtonPermissions(
   const isMatchInPast = matchDate < today;
   const isMatchDay = matchDate === today;
   const isAdminOrLeagueAdmin = user.roles.includes("ADMIN") || user.roles.includes("LEAGUE_ADMIN");
+  const isMatchInProgress = match.matchStatus.key === "INPROGRESS";
+  const isMatchScheduled = match.matchStatus.key === "SCHEDULED";
+  const isMatchFinished = !isMatchInProgress && !isMatchScheduled;
   
   // For non-admins, deny all access to past matches (before today)
   if (isMatchInPast && !isAdminOrLeagueAdmin) {
@@ -101,7 +104,8 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
 
-    if (isMatchCenter) {
+    // Events button only shown in match center when match is in progress
+    if (isMatchCenter && isMatchInProgress) {
       permissions.showButtonEvents = true;
     }
 
@@ -132,7 +136,8 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonMatchCenter = true;
       permissions.showButtonSupplementary = true;
 
-      if (isMatchCenter) {
+      // Events button only shown in match center when match is in progress
+      if (isMatchCenter && isMatchInProgress) {
         permissions.showButtonEvents = true;
       }
     }
@@ -149,14 +154,9 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonRosterAway = true;
     }
 
-    // Can edit away roster if match starts soon
-    if (matchStartTime < thirtyMinutesFromNow) {
+    // Can edit away roster if match starts soon but not in progress
+    if (matchStartTime < thirtyMinutesFromNow && !isMatchInProgress) {
       permissions.showButtonRosterAway = true;
-    }
-
-    // Cannot edit roster when match is in progress
-    if (match.matchStatus.key === "INPROGRESS") {
-      permissions.showButtonRosterAway = false;
     }
   }
 
@@ -175,7 +175,8 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonMatchCenter = true;
     permissions.showButtonSupplementary = true;
 
-    if (isMatchCenter) {
+    // Events button only shown in match center when match is in progress
+    if (isMatchCenter && isMatchInProgress) {
       permissions.showButtonEvents = true;
     }
   }
