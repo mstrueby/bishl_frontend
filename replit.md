@@ -8,6 +8,22 @@ BISHL App is a Next.js-based web application for managing ice hockey leagues in 
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (January 2026)
+
+### PlayerForm Refactoring
+- **Section 1 (Non-editable master data)**: Read-only display of ISHD-managed data (name, birthdate, sex, age group, full face requirement). Removed `managedByISHD` from this section as it's now editable.
+- **Section 2 (Editable master data)**: View/Edit mode pattern with Edit/Cancel/Save buttons. Fields include image upload, image visibility, display names, and `managedByISHD` toggle (ISHD/BISHL dropdown in edit mode, colored badge in view mode).
+- **Section 3 (Licence table)**: Full licence management with Auto-Optimize (Fix), Revalidate (Check), and Add (Neu) buttons. Context menu per row with Edit and Remove actions. Invalid reason codes displayed with human-readable descriptions.
+
+### New Components
+- **TeamAssignmentSelect** (`components/ui/TeamAssignmentSelect.tsx`): Dropdown for selecting teams from `/players/:id/possible-teams` API, with time-window restriction from `PLAYERASSIGNMENTWINDOW` config.
+- **AssignmentModal** (refactored): HeadlessUI dialog with TeamAssignmentSelect, jerseyNo input, and active toggle. Supports both add and edit modes.
+
+### API Integration
+- All API calls use `lib/apiClient.tsx` (no direct axios usage)
+- Licence operations: Auto-optimize (POST `/players/:id/auto-optimize`), Revalidate (POST `/players/:id/revalidate`), PATCH `/players/:id` for assignments
+- Master data saved via PATCH `/players/:id` with FormData (only section 2 fields)
+
 ## System Architecture
 
 ### Frontend Architecture

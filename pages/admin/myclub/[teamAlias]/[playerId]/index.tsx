@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -27,7 +26,6 @@ const Edit: NextPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [dataLoading, setDataLoading] = useState<boolean>(true);
 
-  // Redirect if not authenticated or authorized
   useEffect(() => {
     if (authLoading) return;
     
@@ -41,7 +39,6 @@ const Edit: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole, router]);
 
-  // Fetch player data
   useEffect(() => {
     if (!authLoading && isAuthenticated && user && playerId && typeof playerId === 'string') {
       const fetchPlayer = async () => {
@@ -64,7 +61,6 @@ const Edit: NextPage = () => {
     }
   }, [authLoading, isAuthenticated, user, playerId]);
 
-  // Handler for form submission
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
@@ -84,30 +80,23 @@ const Edit: NextPage = () => {
           'ageGroup',
           'overAge',
           'nationality',
-          'managedByISHD',
           'sex'
         ];
         if (excludedFields.includes(key)) return;
 
-        // Handle image/imageUrl specially
         if (key === 'image' || key === 'imageUrl') {
           if (value instanceof File) {
-            // New file upload
             formData.append('image', value);
           } else if (value === null) {
-            // Image was removed - signal backend to delete
             formData.append('imageUrl', '');
           }
-          // If value is a string (existing URL), don't append anything - backend keeps existing
           return;
         }
 
-        // Handle File objects (from ImageUpload)
         if (value instanceof File) {
           formData.append(key, value);
           return;
         }
-        // Handle FileList (legacy support)
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
           return;
@@ -137,9 +126,6 @@ const Edit: NextPage = () => {
         }
       });
 
-      // Log formData fields
-      console.log('FormData entries:', Array.from(formData.entries()));
-
       const response = await apiClient.patch(`/players/${player?._id}`, formData);
       if (response.status === 200) {
         router.push({
@@ -157,6 +143,10 @@ const Edit: NextPage = () => {
     }
   };
 
+  const handlePlayerUpdate = (updatedPlayer: PlayerValues) => {
+    setPlayer(updatedPlayer);
+  };
+
   const handleCancel = () => {
     router.push(`/admin/myclub/${teamAlias}`);
   };
@@ -171,7 +161,6 @@ const Edit: NextPage = () => {
     setError(null);
   };
 
-  // Show loading state while checking auth or fetching data
   if (authLoading || dataLoading) {
     return (
       <Layout>
@@ -180,12 +169,10 @@ const Edit: NextPage = () => {
     );
   }
 
-  // Auth guard (shouldn't reach here due to redirect, but just in case)
   if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN]) || !player) {
     return null;
   }
 
-  // Form initial values with existing player data
   const initialValues: PlayerValues = {
     _id: player._id || '',
     firstName: player.firstName || '',
@@ -221,10 +208,12 @@ const Edit: NextPage = () => {
       <PlayerForm
         initialValues={initialValues}
         onSubmit={onSubmit}
+        onPlayerUpdate={handlePlayerUpdate}
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
         clubId={clubId}
+        clubName={clubName}
       />
     </Layout>
   );
