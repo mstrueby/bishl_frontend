@@ -640,284 +640,294 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               />
 
               {values.assignedTeams && values.assignedTeams.length > 0 ? (
-                <div className="mt-4">
-                  {values.assignedTeams.map((assignment, assignmentIndex) => {
-                    const isOwnClub = assignment.clubId === clubId;
-                    const showClubHeader =
-                      values.assignedTeams.length > 1 || !isOwnClub;
-
-                    return (
-                      <div key={assignmentIndex} className="mb-6">
-                        {showClubHeader && (
-                          <div className="flex items-center gap-x-2 py-2 px-4 bg-gray-50 rounded-t-md">
-                            <span className="text-sm font-semibold text-gray-900">
-                              {assignment.clubName}
-                            </span>
-                            {assignment.clubType && (
-                              <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                {assignment.clubType}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <table className="relative min-w-full">
-                          <thead className="bg-white">
-                            <tr>
-                              <th
-                                scope="col"
-                                className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3"
-                              >
-                                Team
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                              >
-                                Typ
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                              >
-                                Status
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                              >
-                                Quelle
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                              >
-                                Pass
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                              >
-                                Aktiv
-                              </th>
-                              <th
-                                scope="col"
-                                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                              >
-                                Nr.
-                              </th>
-                              {isOwnClub && (
-                                <th
-                                  scope="col"
-                                  className="py-3.5 pl-3 pr-4 sm:pr-3"
-                                >
-                                  <span className="sr-only">Aktionen</span>
-                                </th>
-                              )}
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white">
-                            {assignment.teams.map((team, teamIndex) => {
-                              const isValid =
-                                team.status === "VALID" ||
-                                team.status === "valid";
-                              const canRemove = !(
-                                team.source === "ISHD" &&
-                                initialValues.managedByISHD
-                              );
+                <div className="mt-8">
+                  <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                      <table className="relative min-w-full border-b border-gray-200 mb-20">
+                        <thead className="bg-white uppercase text-sm font-medium text-gray-500">
+                          <tr>
+                            <th
+                              scope="col"
+                              className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-3"
+                            >
+                              Team
+                            </th>
+                            <th scope="col" className="px-3 py-3.5 text-left">
+                              Typ
+                            </th>
+                            <th scope="col" className="px-3 py-3.5 text-left">
+                              Status
+                            </th>
+                            <th scope="col" className="px-3 py-3.5 text-center">
+                              Quelle
+                            </th>
+                            <th scope="col" className="px-3 py-3.5 text-center">
+                              Pass
+                            </th>
+                            <th scope="col" className="px-3 py-3.5 text-left">
+                              Aktiv
+                            </th>
+                            <th scope="col" className="px-3 py-3.5 text-left">
+                              Nr.
+                            </th>
+                            <th
+                              scope="col"
+                              className="py-3.5 pl-3 pr-4 sm:pr-3"
+                            >
+                              <span className="sr-only">Aktionen</span>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                          {values.assignedTeams.map(
+                            (assignment, assignmentIndex) => {
+                              const isOwnClub = assignment.clubId === clubId;
+                              const showClubHeader =
+                                values.assignedTeams.length > 1 || !isOwnClub;
 
                               return (
-                                <Fragment key={teamIndex}>
-                                  <tr>
-                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
-                                      {team.teamName}
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
-                                      <span
+                                <Fragment key={assignment.clubId}>
+                                  {showClubHeader && (
+                                    <tr
+                                      key={assignmentIndex}
+                                      className="border-t border-gray-200"
+                                    >
+                                      <th
+                                        scope="colgroup"
+                                        colSpan={8}
+                                        className="bg-gray-50 py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3 space-x-3"
+                                      >
+                                        <span>{assignment.clubName}</span>
+                                        {assignment.clubType && (
+                                          <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                            {assignment.clubType}
+                                          </span>
+                                        )}
+                                      </th>
+                                    </tr>
+                                  )}
+                                  {assignment.teams.map((team, teamIndex) => {
+                                    const isValid =
+                                      team.status === "VALID" ||
+                                      team.status === "valid";
+                                    const canRemove = !(
+                                      team.source === "ISHD" &&
+                                      initialValues.managedByISHD
+                                    );
+
+                                    return (
+                                      <tr
+                                        key={team.teamId}
                                         className={classNames(
-                                          "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                                          licenceTypeBadgeColors[
-                                            team.licenseType
-                                          ] ||
-                                            "bg-gray-50 text-gray-700 ring-gray-600/20",
+                                          teamIndex === 0 && !showClubHeader
+                                            ? "border-gray-300"
+                                            : "border-gray-200",
+                                          "border-t",
                                         )}
                                       >
-                                        {team.licenseType}
-                                      </span>
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
-                                      <div className="flex items-center gap-x-2">
-                                        <div
-                                          className={classNames(
-                                            "flex-none rounded-full p-1",
-                                            isValid
-                                              ? "text-green-500 bg-green-500/20"
-                                              : "text-red-500 bg-red-500/20",
-                                          )}
-                                        >
-                                          <div className="h-2 w-2 rounded-full bg-current" />
-                                        </div>
-                                        <span className="text-gray-700">
-                                          {isValid ? "Gültig" : "Ungültig"}
-                                        </span>
-                                      </div>
-                                      {!isValid &&
-                                        team.invalidReasonCodes &&
-                                        team.invalidReasonCodes.length > 0 && (
-                                          <div className="mt-1 text-xs text-red-700">
-                                            {team.invalidReasonCodes.map(
-                                              (code, idx) => (
-                                                <div key={idx}>
-                                                  {invalidReasonCodeMap[code] ||
-                                                    code}
-                                                  {idx <
-                                                    team.invalidReasonCodes
-                                                      .length -
-                                                      1}
-                                                </div>
-                                              ),
+                                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
+                                          {team.teamName}
+                                        </td>
+                                        <td className="whitespace-nowrap px-3 py-4">
+                                          <span
+                                            className={classNames(
+                                              "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                                              licenceTypeBadgeColors[
+                                                team.licenseType
+                                              ] ||
+                                                "bg-gray-50 text-gray-700 ring-gray-600/20",
                                             )}
-                                          </div>
-                                        )}
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
-                                      <span
-                                        className={classNames(
-                                          "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                                          team.source === "ISHD"
-                                            ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-                                            : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
-                                        )}
-                                      >
-                                        {team.source}
-                                      </span>
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                      {team.passNo || "-"}
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
-                                      <div className="flex items-center gap-x-2">
-                                        <div
-                                          className={classNames(
-                                            "flex-none rounded-full p-1",
-                                            team.active
-                                              ? "text-green-500 bg-green-500/20"
-                                              : "text-gray-500 bg-gray-800/10",
-                                          )}
-                                        >
-                                          <div className="h-2 w-2 rounded-full bg-current" />
-                                        </div>
-                                        <span className="text-gray-500">
-                                          {team.active ? "Aktiv" : "Inaktiv"}
-                                        </span>
-                                      </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                      {team.jerseyNo || "-"}
-                                    </td>
-                                    {isOwnClub && (
-                                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                        <Menu
-                                          as="div"
-                                          className="relative inline-block text-left"
-                                        >
-                                          <Menu.Button className="flex items-center rounded-full bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                            <span className="sr-only">
-                                              Optionen öffnen
-                                            </span>
-                                            <EllipsisVerticalIcon
-                                              className="h-5 w-5"
-                                              aria-hidden="true"
-                                            />
-                                          </Menu.Button>
-                                          <Transition
-                                            as={Fragment}
-                                            enter="transition ease-out duration-100"
-                                            enterFrom="transform opacity-0 scale-95"
-                                            enterTo="transform opacity-100 scale-100"
-                                            leave="transition ease-in duration-75"
-                                            leaveFrom="transform opacity-100 scale-100"
-                                            leaveTo="transform opacity-0 scale-95"
                                           >
-                                            <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                              <div className="py-1">
-                                                <Menu.Item>
-                                                  {({ active }) => (
-                                                    <button
-                                                      type="button"
-                                                      onClick={() => {
-                                                        setEditingTeam(team);
-                                                        setEditingClubId(
-                                                          assignment.clubId,
-                                                        );
-                                                        setIsModalOpen(true);
-                                                      }}
-                                                      className={classNames(
-                                                        active
-                                                          ? "bg-gray-100 text-gray-900"
-                                                          : "text-gray-700",
-                                                        "flex w-full items-center px-4 py-2 text-sm",
-                                                      )}
-                                                    >
-                                                      <PencilIcon
-                                                        className="mr-3 h-5 w-5 text-gray-400"
-                                                        aria-hidden="true"
-                                                      />
-                                                      Bearbeiten
-                                                    </button>
-                                                  )}
-                                                </Menu.Item>
-                                                <Menu.Item
-                                                  disabled={!canRemove}
-                                                >
-                                                  {({ active, disabled }) => (
-                                                    <button
-                                                      type="button"
-                                                      onClick={() =>
-                                                        handleRemoveLicence(
-                                                          assignment,
-                                                          team,
-                                                          values,
-                                                          setFieldValue,
-                                                        )
-                                                      }
-                                                      disabled={disabled}
-                                                      className={classNames(
-                                                        disabled
-                                                          ? "text-gray-300 cursor-not-allowed"
-                                                          : active
-                                                            ? "bg-gray-100 text-gray-900"
-                                                            : "text-gray-700",
-                                                        "flex w-full items-center px-4 py-2 text-sm",
-                                                      )}
-                                                    >
-                                                      <TrashIcon
-                                                        className={classNames(
-                                                          "mr-3 h-5 w-5",
-                                                          disabled
-                                                            ? "text-gray-300"
-                                                            : "text-gray-400",
-                                                        )}
-                                                        aria-hidden="true"
-                                                      />
-                                                      Entfernen
-                                                    </button>
-                                                  )}
-                                                </Menu.Item>
+                                            {team.licenseType}
+                                          </span>
+                                        </td>
+                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                                          <div className="flex items-center gap-x-2">
+                                            <div
+                                              className={classNames(
+                                                "flex-none rounded-full p-1",
+                                                isValid
+                                                  ? "text-green-500 bg-green-500/20"
+                                                  : "text-red-500 bg-red-500/20",
+                                              )}
+                                            >
+                                              <div className="h-2 w-2 rounded-full bg-current" />
+                                            </div>
+                                            <span className="text-gray-700">
+                                              {isValid ? "Gültig" : "Ungültig"}
+                                            </span>
+                                          </div>
+                                          {!isValid &&
+                                            team.invalidReasonCodes &&
+                                            team.invalidReasonCodes.length >
+                                              0 && (
+                                              <div className="mt-1 text-xs font-normal text-red-800 space-y-0.5 ml-6">
+                                                {team.invalidReasonCodes.map(
+                                                  (code, idx) => (
+                                                    <div key={idx}>
+                                                      {invalidReasonCodeMap[
+                                                        code
+                                                      ] || code}
+                                                      {idx <
+                                                        team.invalidReasonCodes
+                                                          .length -
+                                                          1}
+                                                    </div>
+                                                  ),
+                                                )}
                                               </div>
-                                            </Menu.Items>
-                                          </Transition>
-                                        </Menu>
-                                      </td>
-                                    )}
-                                  </tr>
+                                            )}
+                                        </td>
+                                        <td className="whitespace-nowrap px-3 py-4 text-center">
+                                          <span
+                                            className={classNames(
+                                              "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                                              team.source === "ISHD"
+                                                ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+                                                : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+                                            )}
+                                          >
+                                            {team.source}
+                                          </span>
+                                        </td>
+                                        <td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-500">
+                                          {team.passNo || "-"}
+                                        </td>
+                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500">
+                                          <div className="flex items-center gap-x-2">
+                                            <div
+                                              className={classNames(
+                                                "flex-none rounded-full p-1",
+                                                team.active
+                                                  ? "text-green-500 bg-green-500/20"
+                                                  : "text-gray-500 bg-gray-800/10",
+                                              )}
+                                            >
+                                              <div className="h-2 w-2 rounded-full bg-current" />
+                                            </div>
+                                            <span className="text-gray-500">
+                                              {team.active
+                                                ? "Aktiv"
+                                                : "Inaktiv"}
+                                            </span>
+                                          </div>
+                                        </td>
+                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500">
+                                          {team.jerseyNo || "-"}
+                                        </td>
+                                        {isOwnClub && (
+                                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
+                                            <Menu
+                                              as="div"
+                                              className="relative inline-block text-left"
+                                            >
+                                              <Menu.Button className="flex items-center rounded-full bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                <span className="sr-only">
+                                                  Optionen öffnen
+                                                </span>
+                                                <EllipsisVerticalIcon
+                                                  className="h-5 w-5"
+                                                  aria-hidden="true"
+                                                />
+                                              </Menu.Button>
+                                              <Transition
+                                                as={Fragment}
+                                                enter="transition ease-out duration-100"
+                                                enterFrom="transform opacity-0 scale-95"
+                                                enterTo="transform opacity-100 scale-100"
+                                                leave="transition ease-in duration-75"
+                                                leaveFrom="transform opacity-100 scale-100"
+                                                leaveTo="transform opacity-0 scale-95"
+                                              >
+                                                <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                                  <div className="py-1">
+                                                    <Menu.Item>
+                                                      {({ active }) => (
+                                                        <button
+                                                          type="button"
+                                                          onClick={() => {
+                                                            setEditingTeam(
+                                                              team,
+                                                            );
+                                                            setEditingClubId(
+                                                              assignment.clubId,
+                                                            );
+                                                            setIsModalOpen(
+                                                              true,
+                                                            );
+                                                          }}
+                                                          className={classNames(
+                                                            active
+                                                              ? "bg-gray-100 text-gray-900"
+                                                              : "text-gray-700",
+                                                            "flex w-full items-center px-4 py-2 text-sm",
+                                                          )}
+                                                        >
+                                                          <PencilIcon
+                                                            className="mr-3 h-5 w-5 text-gray-400"
+                                                            aria-hidden="true"
+                                                          />
+                                                          Bearbeiten
+                                                        </button>
+                                                      )}
+                                                    </Menu.Item>
+                                                    <Menu.Item
+                                                      disabled={!canRemove}
+                                                    >
+                                                      {({
+                                                        active,
+                                                        disabled,
+                                                      }) => (
+                                                        <button
+                                                          type="button"
+                                                          onClick={() =>
+                                                            handleRemoveLicence(
+                                                              assignment,
+                                                              team,
+                                                              values,
+                                                              setFieldValue,
+                                                            )
+                                                          }
+                                                          disabled={disabled}
+                                                          className={classNames(
+                                                            disabled
+                                                              ? "text-gray-300 cursor-not-allowed"
+                                                              : active
+                                                                ? "bg-gray-100 text-gray-900"
+                                                                : "text-gray-700",
+                                                            "flex w-full items-center px-4 py-2 text-sm",
+                                                          )}
+                                                        >
+                                                          <TrashIcon
+                                                            className={classNames(
+                                                              "mr-3 h-5 w-5",
+                                                              disabled
+                                                                ? "text-gray-300"
+                                                                : "text-gray-400",
+                                                            )}
+                                                            aria-hidden="true"
+                                                          />
+                                                          Entfernen
+                                                        </button>
+                                                      )}
+                                                    </Menu.Item>
+                                                  </div>
+                                                </Menu.Items>
+                                              </Transition>
+                                            </Menu>
+                                          </td>
+                                        )}
+                                      </tr>
+                                    );
+                                  })}
                                 </Fragment>
                               );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    );
-                  })}
+                            },
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-4 text-center py-8 text-gray-500">
