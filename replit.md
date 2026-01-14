@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
 
 ### API Integration
 - All API calls use `lib/apiClient.tsx` (no direct axios usage)
-- Licence operations: Auto-optimize (POST `/players/:id/auto-optimize`), Revalidate (POST `/players/:id/revalidate`), PATCH `/players/:id` for assignments
+- Licence operations: Auto-optimize (POST `/players/:id/auto_optimize`), Revalidate (POST `/players/:id/revalidate`), PATCH `/players/:id` for assignments
 - Master data saved via PATCH `/players/:id` with FormData (only section 2 fields)
 
 ## System Architecture
