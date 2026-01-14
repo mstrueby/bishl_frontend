@@ -10,7 +10,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import ImageUpload from '../ui/form/ImageUpload';
 import { CldImage } from 'next-cloudinary';
 import Toggle from '../ui/form/Toggle';
-import AssignmentModal from '../ui/AssignmentModal';
+// import AssignmentModal from '../ui/AssignmentModal';
 import { ClubValues } from '../../types/ClubValues';
 import { canAlsoPlayInAgeGroup, getAgeGroupRules } from '../../tools/consts';
 
@@ -171,6 +171,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
               Zuordnungen von der ISHD können hier <em>nicht</em> entfernt werden.
             </p>
 
+            {/**
             <AssignmentModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
@@ -196,6 +197,7 @@ const PlayerAdminForm: React.FC<PlayerAdminFormProps> = ({
                 setIsModalOpen(false);
               }}
             />
+*/}
 
             {values.assignedTeams && values.assignedTeams.length > 0 &&
               values.assignedTeams.map((assignment, index) => {

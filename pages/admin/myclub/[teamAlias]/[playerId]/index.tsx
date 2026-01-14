@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import PlayerForm from '../../../../../components/admin/PlayerFrom';
+import PlayerForm from '../../../../../components/admin/PlayerForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
 import { PlayerValues } from '../../../../../types/PlayerValues';
@@ -206,7 +206,8 @@ const Edit: NextPage = () => {
     ageGroup: player.ageGroup || '',
     overAge: player.overAge || false,
     managedByISHD: player.managedByISHD || false,
-    sex: player.sex || ''
+    sex: player.sex || '',
+    playUpTrackings: player.playUpTrackings || [],
   };
 
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;

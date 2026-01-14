@@ -1,0 +1,305 @@
+# Guidelines
+
+- use client side authentication, see @specs/client-side-auth-migration.md:
+```
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN])) {
+      router.push('/');
+    }
+  }, [authLoading, user, hasAnyRole, router]);
+```
+- For all admin pages using PlayerForm:
+-- Only UserRole.ADMIN and UserRole.CLUBADMIN may access the page and edit data.
+-- Use apiClient from lib/apiClient.tsx for all HTTP requests.
+-- Do not use axios directly.
+-- Do not fetch users/me.
+-- Use next/link’s Link component without deprecated <a> props.
+
+- Keep the licence table and master data in sync with the backend:
+-- The licence table must always reflect the current database state after any save, auto-optimize, revalidate or modal save.
+-- “Master data” sections must also reflect the latest values after saving.
+-- Every save operation must be clearly visible for the user with a success or error message.
+
+# Context
+
+- The @components/admin/PlayerForm.tsx is used on admin page @pages/admin/myclub/[teamAlias]/[playerId]/index.tsx
+- the goal is 
+-- Keep player master data consistent with ISHD data where required.
+-- Allow CLUB_ADMINs to manage BISHL-specific data and licences in a controlled time window.
+-- Make assignments and licence changes transparent and clearly separated from immutable ISHD data.
+- Permissions:
+-- ADMIN can manage all players and clubs.
+-- CLUB_ADMIN can:
+--- Adjust licences of players in the own club (within a defined time window).
+--- Modify jerseyNo and active/inactive for teams of the own club.
+--- Trigger licence revalidation and auto-optimization for players of the own club.
+
+
+- use PlayForm in @pages/admin/myclub/[teamAlias]/[playerId]/index.tsx, refactor page as needed
+- refactor @components/ui/AssignmentModal.tsx
+- create new component TeamAssignmentSelect.tsx to be used in AssignmentModal (style similar to existing TeamSelect component)
+
+# Goal
+
+The overall goal of the revised PlayerForm is:
+- Clear separation between:
+-- Non-editable master data (synced / constrained by ISHD).
+-- Editable master data (BISHL UI fields).
+-- Licence / assignment management (per club and per team).
+- No confusion about what is saved where:
+-- Section 2 “editable master data” is saved via PATCH /players/:id using only its own fields.
+-- Section 3 “licence table” is managed via:
+--- Auto-Optimize (POST /players/:id/auto-optimize)
+--- Revalidate (POST /players/:id/revalidate)
+--- Add/Edit licence modal (PATCH /players/:id with updated assignedTeams).
+
+- keep licenceTable up to data all the time and always reflect database data
+- masterdata reflect current data as well
+- no confusion, every save is clear
+- CLUB_ADMIN can:
+-- adjust licenses in defined time window
+-- modify player (jerseyNo and active/inactive switch) of teams of own club
+-- revalidate and optimize licences
+
+# Detailed Requirements
+
+## PlayerForm:
+
+### first section: non-editable master data, keep fields as they are.
+- This section must be fully read-only, no form fields here.
+- Use initialValues from the PlayerForm props as the source of truth for this section.
+- No submit logic must depend on this section; it is for display only.
+a) display:
+- firstName, lastName (combined)
+- birthdate (formatted via toLocaleDateString("de-DE", ...))
+- sex
+- ageGroup
+- fullFaceReq
+- Note: REMOVE managedByISHD, because it will now be editable
+
+### second section: editable master data, keep input fields as they are.
+- This section is for BISHL-editable master data and must support an Edit / Cancel / Save interaction pattern.
+a) fields:
+- upload Image / remove Image
+- imageVisible
+- displayFirstName
+- displayLastName
+- manageByISHD: 
+-- if form: DropDown with values ISHD (if true) / BISHL (if false)
+-- if data display: colored Badge: "ISHD" (yellow), "BISHL" (indigo)
+b) details:
+1. default view mode: 
+- show values as data descriptions using <dt>, <dd>, similar to section 1.
+- At the top-right of the section:
+-- Show a primary Edit button:
+-- Label: Bearbeiten
+-- Icon: Pencil icon on the left (Heroicons).
+- The form fields must not be visible in this mode.
+
+2. Buttons
+a) **Edit** (view mode only):
+- onClick:
+-- Hide all dt / dd displayed fields of this section.
+-- Show all form fields for this section (e.g. displayFirstName, displayLastName, image, imageVisible, etc.).
+-- Hide the Edit button; instead show Cancel and Save.
+
+b) **Cancel** (edit mode only):
+- Caption: Abbrechen
+- Style: secondary.
+- On click:
+-- Discard all unsaved changes of this section:
+--- Reset fields of this section to the latest saved values (from Formik initial values or last successful save).
+-- hide form fields
+-- Show dt / dd view with unchanged data.
+- show Edit button again
+
+e) **Save** button onClick:
+- Caption: Speichern
+- Style: primary.
+- On click:
+-- Submit only the fields belonging to this section via the existing onSubmit handler.
+-- Construct FormData as already implemented, but explicitly:
+--- Only include section-2 fields when saving from this block.
+--- **Do not send assignedTeams when saving from section 2.**
+-- After a successful response:
+--- Close edit mode (back to view mode).
+--- Update the view with the saved values.
+--- Show a success message using existing UI components.
+- On error:
+-- Stay in edit mode.
+-- Show an error message using existing error components.
+
+3. Image handling
+- Keep the current logic:
+-- If imageUrl is present, show a preview (CldImage).
+-- Provide a “Bild entfernen” button that sets imageUrl to null and ensures the backend deletes the image.
+-- Use ImageUpload for new images.
+- Ensure that:
+-- The backend receives either image (File) or imageUrl deletion flags as today.
+-- Existing image remains unchanged if neither a new image nor deletion is submitted.
+
+### third section: licence table
+The third section manages licences and team assignments. It must work for the own club and show other-club assignments read-only.
+
+1) section header and action buttons:
+a) Header
+- title on the left "Spielerpässe"
+- action buttons at the right, order from left to right:
+
+b) Auto-Optimize
+- style: secondary
+- caption "Fix"
+- icon to the left: SparklesIcon from heroicons
+- on click:
+-- call /players/{_id}/auto-optimize
+-- Params: keep_invalid=true
+-- payload: current assignedTeams from the form state (use the same structure as used by the PATCH /players/:id endpoint).
+-- response: 
+--- Returns full PlayerDB object.
+--- Replace the local assignedTeams in Formik with response.data.assignedTeams.
+--- Refresh the licence table to reflect changes.
+-- show success/error message with data ???
+
+c) Revalidate: 
+- style: secondary
+- caption "Check"
+- icon to the left: CheckIcon
+- on click:
+-- call API /players/{_id}/revalidate
+-- Params: resetClassification=true and resetValidation=true
+-- payload: current assignedTeams from form state.
+-- response:
+--- returns full PlayerDB object
+--- Replace local assignedTeams with response.data.assignedTeams.
+--- Refresh licence table to reflect changes.
+-- show success/error message with data ???
+
+d) Add
+- style: primary style (indogo, filled)
+- caption "Neu"
+- icon: PlusCircleIcon on the left
+- on click:
+-- open component *AssignmentModal*
+
+2) **assigned teams table**
+
+a) club header row
+- Only show a grouped header per club if there is more than one club in assignedTeams.
+- For the own club (assignment.clubId === clubId from props):
+- Show a header row with clubName and clubType (as Badge).
+
+b) columns for each team row:
+- Team: teamAlias
+- Type: licenceType - show colored Badge:
+-- PRIMARY: green
+-- SECONDARY: yellow
+-- OVERAGE: pink
+-- LOAN: blue
+-- DEVELOPMENT: purple
+-- SPECIAL: red
+- Status: status
+-- show a colored dot with description "valid"/"invalid")
+- Source: 
+-- show a colored Badge:
+--- "ISHD" (yellow)
+--- "BISHL" (indigo)
+- Pass: PassNo
+- Active: (colored dot indicator + description "Active" / "Inactive")
+- No: jerseyNo
+- invalidReasonCodes:
+-- For invalid licences, show a separate row spanning all columns.
+-- Use a slightly highlighted style for error descriptions (e.g. subtle background).
+-- Introduce an internal map from invalidReasonCodes to human-readable descriptions; use this map for display only.
+
+c) *context menu action each row:*
+- Each row (own club) gets a context menu with EllipsisVerticalIcon from heroicons
+a) Actions:
+- edit (always enabled): 
+-- icon: PencilIcon
+-- caption "Bearbeiten"
+-- opens *AssignmentModal* prefilled with data of this licence.
+- remove:
+-- icon: TrashIcon 
+-- caption "Entfernen"
+-- Removes the licence (from the assignedTeams structure) and triggers a PATCH /players/:id with the updated assignedTeams.
+-- Disabled if source === "ISHD" and managedByISHD === true.
+b) After edit or remove:
+- Replace assignedTeams in form state with the updated data from the API.
+- Refresh the table and show success/error messages.
+
+## Create a new component TeamAssignmentSelect.tsx
+
+- Data source:
+-- Call GET /players/:id/possible-teams.
+-- Use the data attribute of the returned document.
+- Filtering:
+-- Filter teams by clubId of the current user’s club (obtain from token payload).
+-- Only show active teams of the own club.
+- UI:
+-- Dropdown listing available teams with:
+--- Colored dot indicating status (valid/invalid)
+--- Colored Badge indicating recommendedType
+--- Example entry: "(colored dot) 1. Herren [SECONDARY]"
+- Time-frame restriction:
+-- Call GET /configs/PLAYERASSIGNMENTWINDOW.
+-- Expected format in returned object:
+--- Within the PLAYERASSIGNMENTWINDOW config:
+---- key ENABLED, value true/false, sortOrder: 1
+---- key STARTMONTH, value number (1–12), sortOrder: 2
+---- key STARTDAY, value number (1–31), sortOrder: 3
+---- key ENDMONTH, value number (1–12), sortOrder: 4
+---- key ENDDAY, value number (1–31), sortOrder: 5
+-- Logic:
+--- If ENABLED is true and the current date is within the given window (inclusive) from STARTDAY.STARTMONTH to ENDDAY.ENDMONTH, then:
+---- Enable the TeamAssignmentSelect dropdown.
+---- Otherwise:
+----- Disable the dropdown and visually indicate that the assignment window is closed (e.g. greyed out, tooltip).
+
+## AssignmentModal
+- HeadlessUI dialog, refactor existing @components/ui/AssignmentModal.tsx
+
+a) Modal Fields:
+- TeamAssignmentSelect (as above)
+- jerseyNo: text field for numeric input (1-99)
+- active: toggle switch for active / inactive
+
+b) Buttons:
+- Cancel:
+-- caption "Abbrechen"
+-- style: secondary
+-- reset form fields, close the dialog
+- Save: 
+-- caption "Speichern"
+-- style: primary
+-- Behavior:
+--- Validate form fields.
+--- Apply changes to the assignedTeams object:
+---- For a new licence: add a new entry for the selected team under the own-club assignment.
+---- For edit: update the matching team entry.
+--- Call PATCH /players/:id with the complete updated assignedTeams object as formData.
+--- On success:
+---- Close the dialog.
+---- Refresh assignedTeams in the parent PlayerForm from API response.
+---- Show success message.
+--- On error:
+---- Keep modal open and show error message.
+
+# API and error handling
+- Use lib/apiClient.tsx for all API calls in PlayerForm, myclub_team_player and the new modal components.
+- Ensure spec/api-fetch-update-plan.md is followed:
+-- Proper HTTP methods.
+-- Proper Error handling.
+- After every API call affecting assignedTeams or editable master data:
+-- Replace local form state (Formik values) with the updated data from the response.
+-- Do not rely on optimistic updates without syncing with backend.
+- Ensure that all pages:
+-- Do not use axios directly.
+-- Do not use deprecated <a> tags for internal navigation.
+-- Do not fetch users/me.
