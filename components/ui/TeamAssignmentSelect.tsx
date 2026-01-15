@@ -184,15 +184,6 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                     <span className="block truncate">
                       {selectedTeam.teamName}
                     </span>
-                    <span
-                      className={classNames(
-                        "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-                        licenceTypeBadgeColors[selectedTeam.recommendedType] ||
-                          "bg-gray-50 text-gray-700 ring-gray-600/20",
-                      )}
-                    >
-                      {selectedTeam.recommendedType}
-                    </span>
                   </span>
                 ) : (
                   <span className="block truncate text-gray-400">
@@ -249,19 +240,6 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                                 )}
                               >
                                 {team.teamName}
-                              </span>
-                              <span
-                                className={classNames(
-                                  "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-                                  active
-                                    ? "bg-indigo-500 text-white ring-indigo-400"
-                                    : licenceTypeBadgeColors[
-                                        team.recommendedType
-                                      ] ||
-                                        "bg-gray-50 text-gray-700 ring-gray-600/20",
-                                )}
-                              >
-                                {team.recommendedType}
                               </span>
                             </div>
                             {selected && (
