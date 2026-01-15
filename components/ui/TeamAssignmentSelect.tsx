@@ -1,8 +1,8 @@
-import { Fragment, useState, useEffect } from 'react';
-import { Listbox, Transition } from '@headlessui/react';
-import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
-import { classNames } from '../../tools/utils';
-import apiClient from '../../lib/apiClient';
+import { Fragment, useState, useEffect } from "react";
+import { Listbox, Transition } from "@headlessui/react";
+import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
+import { classNames } from "../../tools/utils";
+import apiClient from "../../lib/apiClient";
 
 interface PossibleTeam {
   teamId: string;
@@ -25,12 +25,12 @@ interface TeamAssignmentSelectProps {
 }
 
 const licenceTypeBadgeColors: Record<string, string> = {
-  PRIMARY: 'bg-green-50 text-green-700 ring-green-600/20',
-  SECONDARY: 'bg-yellow-50 text-yellow-700 ring-yellow-600/20',
-  OVERAGE: 'bg-pink-50 text-pink-700 ring-pink-600/20',
-  LOAN: 'bg-blue-50 text-blue-700 ring-blue-600/20',
-  DEVELOPMENT: 'bg-purple-50 text-purple-700 ring-purple-600/20',
-  SPECIAL: 'bg-red-50 text-red-700 ring-red-600/20',
+  PRIMARY: "bg-green-50 text-green-700 ring-green-600/20",
+  SECONDARY: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
+  OVERAGE: "bg-pink-50 text-pink-700 ring-pink-600/20",
+  LOAN: "bg-blue-50 text-blue-700 ring-blue-600/20",
+  DEVELOPMENT: "bg-purple-50 text-purple-700 ring-purple-600/20",
+  SPECIAL: "bg-red-50 text-red-700 ring-red-600/20",
 };
 
 const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
@@ -38,7 +38,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   clubId,
   selectedTeamId,
   onTeamChange,
-  label = 'Mannschaft',
+  label = "Mannschaft",
   disabled = false,
 }) => {
   const [teams, setTeams] = useState<PossibleTeam[]>([]);
@@ -52,7 +52,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
         setLoading(true);
         const [teamsResponse, configResponse] = await Promise.all([
           apiClient.get(`/players/${playerId}/possible-teams`),
-          apiClient.get('/configs/player_assignment_window'),
+          apiClient.get("/configs/player_assignment_window"),
         ]);
 
         const allTeams: PossibleTeam[] = teamsResponse.data || [];
@@ -60,37 +60,54 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
         setTeams(filteredTeams);
 
         const configItems = configResponse.data?.items || [];
-        const enabledItem = configItems.find((item: any) => item.key === 'ENABLED');
-        const startMonthItem = configItems.find((item: any) => item.key === 'STARTMONTH');
-        const startDayItem = configItems.find((item: any) => item.key === 'STARTDAY');
-        const endMonthItem = configItems.find((item: any) => item.key === 'ENDMONTH');
-        const endDayItem = configItems.find((item: any) => item.key === 'ENDDAY');
+        const enabledItem = configItems.find(
+          (item: any) => item.key === "ENABLED",
+        );
+        const startMonthItem = configItems.find(
+          (item: any) => item.key === "STARTMONTH",
+        );
+        const startDayItem = configItems.find(
+          (item: any) => item.key === "STARTDAY",
+        );
+        const endMonthItem = configItems.find(
+          (item: any) => item.key === "ENDMONTH",
+        );
+        const endDayItem = configItems.find(
+          (item: any) => item.key === "ENDDAY",
+        );
 
-        const isEnabled = enabledItem?.value === 'true' || enabledItem?.value === true;
-        const startMonth = parseInt(startMonthItem?.value || '1', 10);
-        const startDay = parseInt(startDayItem?.value || '1', 10);
-        const endMonth = parseInt(endMonthItem?.value || '12', 10);
-        const endDay = parseInt(endDayItem?.value || '31', 10);
+        const isEnabled =
+          enabledItem?.value === "true" || enabledItem?.value === true;
+        const startMonth = parseInt(startMonthItem?.value || "1", 10);
+        const startDay = parseInt(startDayItem?.value || "1", 10);
+        const endMonth = parseInt(endMonthItem?.value || "12", 10);
+        const endDay = parseInt(endDayItem?.value || "31", 10);
 
         if (isEnabled) {
           const now = new Date();
           const currentMonth = now.getMonth() + 1;
           const currentDay = now.getDate();
 
-          const isAfterStart = currentMonth > startMonth || (currentMonth === startMonth && currentDay >= startDay);
-          const isBeforeEnd = currentMonth < endMonth || (currentMonth === endMonth && currentDay <= endDay);
+          const isAfterStart =
+            currentMonth > startMonth ||
+            (currentMonth === startMonth && currentDay >= startDay);
+          const isBeforeEnd =
+            currentMonth < endMonth ||
+            (currentMonth === endMonth && currentDay <= endDay);
 
           const isInWindow = isAfterStart && isBeforeEnd;
           setWindowEnabled(isInWindow);
 
           if (!isInWindow) {
-            setWindowMessage(`Passwechsel nur vom ${startDay}.${startMonth}. bis ${endDay}.${endMonth}. möglich`);
+            setWindowMessage(
+              `Passwechsel nur vom ${startDay}.${startMonth}. bis ${endDay}.${endMonth}. möglich`,
+            );
           }
         } else {
           setWindowEnabled(true);
         }
       } catch (error) {
-        console.error('Error fetching possible teams:', error);
+        console.error("Error fetching possible teams:", error);
         setTeams([]);
       } finally {
         setLoading(false);
@@ -104,16 +121,17 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
 
   const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
   const isDisabled = disabled || !windowEnabled || loading;
-  console.log('disabled', disabled, 'windowEnabled', windowEnabled, 'loading', loading, 'isDisabled', isDisabled)
 
   const getStatusColor = (status: string) => {
-    return status === 'valid' || status === 'VALID' ? 'bg-green-500' : 'bg-red-500';
+    return status === "valid" || status === "VALID"
+      ? "bg-green-500"
+      : "bg-red-500";
   };
 
   return (
     <div className="mb-4">
       <Listbox
-        value={selectedTeamId || ''}
+        value={selectedTeamId || ""}
         onChange={(teamId) => {
           const team = teams.find((t) => t.teamId === teamId) || null;
           onTeamChange(team);
@@ -130,30 +148,45 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
             <div className="relative mt-2">
               <Listbox.Button
                 className={classNames(
-                  'relative w-full cursor-default rounded-md py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset sm:text-sm sm:leading-6',
+                  "relative w-full cursor-default rounded-md py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset sm:text-sm sm:leading-6",
                   isDisabled
-                    ? 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
-                    : 'bg-white text-gray-900 ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                    ? "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed"
+                    : "bg-white text-gray-900 ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500",
                 )}
               >
                 {loading ? (
                   <span className="block truncate text-gray-400">Laden...</span>
                 ) : selectedTeam ? (
                   <span className="flex items-center gap-x-3">
-                    <span className={classNames('h-2 w-2 rounded-full flex-shrink-0', getStatusColor(selectedTeam.status))} />
-                    <span className="block truncate">{selectedTeam.teamName}</span>
-                    <span className={classNames(
-                      'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                      licenceTypeBadgeColors[selectedTeam.recommendedType] || 'bg-gray-50 text-gray-700 ring-gray-600/20'
-                    )}>
+                    <span
+                      className={classNames(
+                        "h-2 w-2 rounded-full flex-shrink-0",
+                        getStatusColor(selectedTeam.status),
+                      )}
+                    />
+                    <span className="block truncate">
+                      {selectedTeam.teamName}
+                    </span>
+                    <span
+                      className={classNames(
+                        "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                        licenceTypeBadgeColors[selectedTeam.recommendedType] ||
+                          "bg-gray-50 text-gray-700 ring-gray-600/20",
+                      )}
+                    >
                       {selectedTeam.recommendedType}
                     </span>
                   </span>
                 ) : (
-                  <span className="block truncate text-gray-400">(auswählen)</span>
+                  <span className="block truncate text-gray-400">
+                    (auswählen)
+                  </span>
                 )}
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <ChevronUpDownIcon
+                    className="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
                 </span>
               </Listbox.Button>
 
@@ -175,8 +208,10 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                         key={team.teamId}
                         className={({ active }) =>
                           classNames(
-                            active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                            'relative cursor-default select-none py-2 pl-3 pr-9'
+                            active
+                              ? "bg-indigo-600 text-white"
+                              : "text-gray-900",
+                            "relative cursor-default select-none py-2 pl-3 pr-9",
                           )
                         }
                         value={team.teamId}
@@ -184,25 +219,45 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                         {({ selected, active }) => (
                           <>
                             <div className="flex items-center gap-x-3">
-                              <span className={classNames('h-2 w-2 rounded-full flex-shrink-0', getStatusColor(team.status))} />
-                              <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                              <span
+                                className={classNames(
+                                  "h-2 w-2 rounded-full flex-shrink-0",
+                                  getStatusColor(team.status),
+                                )}
+                              />
+                              <span
+                                className={classNames(
+                                  selected ? "font-semibold" : "font-normal",
+                                  "block truncate",
+                                )}
+                              >
                                 {team.teamName}
                               </span>
-                              <span className={classNames(
-                                'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                                active ? 'bg-indigo-500 text-white ring-indigo-400' : licenceTypeBadgeColors[team.recommendedType] || 'bg-gray-50 text-gray-700 ring-gray-600/20'
-                              )}>
+                              <span
+                                className={classNames(
+                                  "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                                  active
+                                    ? "bg-indigo-500 text-white ring-indigo-400"
+                                    : licenceTypeBadgeColors[
+                                        team.recommendedType
+                                      ] ||
+                                        "bg-gray-50 text-gray-700 ring-gray-600/20",
+                                )}
+                              >
                                 {team.recommendedType}
                               </span>
                             </div>
                             {selected && (
                               <span
                                 className={classNames(
-                                  active ? 'text-white' : 'text-indigo-600',
-                                  'absolute inset-y-0 right-0 flex items-center pr-4'
+                                  active ? "text-white" : "text-indigo-600",
+                                  "absolute inset-y-0 right-0 flex items-center pr-4",
                                 )}
                               >
-                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                <CheckIcon
+                                  className="h-5 w-5"
+                                  aria-hidden="true"
+                                />
                               </span>
                             )}
                           </>
