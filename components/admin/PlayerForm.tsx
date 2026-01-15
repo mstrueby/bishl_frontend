@@ -113,7 +113,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setErrorMessage(null);
     try {
       const response = await apiClient.post(
-        `/players/${initialValues._id}/auto_optimize`,
+        `/players/${initialValues._id}/auto-optimize`,
         {
           assignedTeams: values.assignedTeams,
           keep_invalid: false,
@@ -589,8 +589,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       className="-ml-0.5 h-5 w-5 text-gray-400"
                       aria-hidden="true"
                     />
-                    Fix
+                    Auto-Fix
                   </button>
+                  {/** 
                   <button
                     type="button"
                     onClick={() => handleRevalidate(values, setFieldValue)}
@@ -603,6 +604,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     />
                     Check
                   </button>
+                  */}
                   <button
                     type="button"
                     onClick={() => {
@@ -640,290 +642,132 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               />
 
               {values.assignedTeams && values.assignedTeams.length > 0 ? (
-                <div className="mt-8">
+                <div className="mt-4 flow-root">
                   <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                      <table className="relative min-w-full border-b border-gray-200 mb-20">
-                        <thead className="bg-white uppercase text-sm font-medium text-gray-500">
+                      <table className="min-w-full divide-y divide-gray-300">
+                        <thead className="bg-white">
                           <tr>
-                            <th
-                              scope="col"
-                              className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-3"
-                            >
-                              Team
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-left">
-                              Typ
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-left">
-                              Status
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-center">
-                              Quelle
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-center">
-                              Pass
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-left">
-                              Aktiv
-                            </th>
-                            <th scope="col" className="px-3 py-3.5 text-left">
-                              Nr.
-                            </th>
-                            <th
-                              scope="col"
-                              className="py-3.5 pl-3 pr-4 sm:pr-3"
-                            >
+                            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">Mannschaft</th>
+                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Passtyp</th>
+                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">#</th>
+                            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+                            <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-0">
                               <span className="sr-only">Aktionen</span>
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white">
-                          {values.assignedTeams.map(
-                            (assignment, assignmentIndex) => {
-                              const isOwnClub = assignment.clubId === clubId;
-                              const showClubHeader =
-                                values.assignedTeams.length > 1 || !isOwnClub;
-
-                              return (
-                                <Fragment key={assignment.clubId}>
-                                  {showClubHeader && (
-                                    <tr
-                                      key={assignmentIndex}
-                                      className="border-t border-gray-200"
-                                    >
-                                      <th
-                                        scope="colgroup"
-                                        colSpan={8}
-                                        className="bg-gray-50 py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3 space-x-3"
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                          {values.assignedTeams.map((assignment, assignmentIndex) => (
+                            <Fragment key={assignmentIndex}>
+                              <tr className="bg-gray-50">
+                                <td colSpan={5} className="py-2 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0">
+                                  <div className="flex items-center gap-x-2">
+                                    <span>{assignment.clubName}</span>
+                                    {assignment.clubType && (
+                                      <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                        {assignment.clubType}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                              {assignment.teams.map((team, teamIndex) => (
+                                <tr key={`${assignmentIndex}-${teamIndex}`}>
+                                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                    {team.teamName}
+                                  </td>
+                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    <span className={classNames(
+                                      "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                                      licenceTypeBadgeColors[team.licenseType] || "bg-gray-50 text-gray-700 ring-gray-600/20"
+                                    )}>
+                                      {team.licenseType}
+                                    </span>
+                                  </td>
+                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    {team.jerseyNo || "-"}
+                                  </td>
+                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    <div className="flex flex-col gap-1">
+                                      <div className="flex items-center gap-1.5">
+                                        <div className={classNames(
+                                          "h-1.5 w-1.5 rounded-full",
+                                          (team.status === "VALID" || team.status === "valid") ? "bg-green-500" : "bg-red-500"
+                                        )} />
+                                        <span className={(team.status === "VALID" || team.status === "valid") ? "text-green-700" : "text-red-700"}>
+                                          {(team.status === "VALID" || team.status === "valid") ? "Valid" : "Invalid"}
+                                        </span>
+                                      </div>
+                                      {(team.status !== "VALID" && team.status !== "valid") && team.invalidReasonCodes && team.invalidReasonCodes.length > 0 && (
+                                        <div className="text-[10px] text-red-500 leading-tight flex flex-col">
+                                          {team.invalidReasonCodes.map((code, idx) => (
+                                            <span key={idx}>{invalidReasonCodeMap[code] || code}</span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                                    <Menu as="div" className="relative inline-block text-left">
+                                      <Menu.Button className="flex items-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
+                                        <span className="sr-only">Menü öffnen</span>
+                                        <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+                                      </Menu.Button>
+                                      <Transition
+                                        as={Fragment}
+                                        enter="transition ease-out duration-100"
+                                        enterFrom="transform opacity-0 scale-95"
+                                        enterTo="transform opacity-100 scale-100"
+                                        leave="transition ease-in duration-75"
+                                        leaveFrom="transform opacity-100 scale-100"
+                                        leaveTo="transform opacity-0 scale-95"
                                       >
-                                        <span>{assignment.clubName}</span>
-                                        {assignment.clubType && (
-                                          <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                            {assignment.clubType}
-                                          </span>
-                                        )}
-                                      </th>
-                                    </tr>
-                                  )}
-                                  {assignment.teams.map((team, teamIndex) => {
-                                    const isValid =
-                                      team.status === "VALID" ||
-                                      team.status === "valid";
-                                    const canRemove = !(
-                                      team.source === "ISHD" &&
-                                      initialValues.managedByISHD
-                                    );
-
-                                    return (
-                                      <tr
-                                        key={team.teamId}
-                                        className={classNames(
-                                          teamIndex === 0 && !showClubHeader
-                                            ? "border-gray-300"
-                                            : "border-gray-200",
-                                          "border-t",
-                                        )}
-                                      >
-                                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
-                                          {team.teamName}
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4">
-                                          <span
-                                            className={classNames(
-                                              "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                                              licenceTypeBadgeColors[
-                                                team.licenseType
-                                              ] ||
-                                                "bg-gray-50 text-gray-700 ring-gray-600/20",
-                                            )}
-                                          >
-                                            {team.licenseType}
-                                          </span>
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                                          <div className="flex items-center gap-x-2">
-                                            <div
-                                              className={classNames(
-                                                "flex-none rounded-full p-1",
-                                                isValid
-                                                  ? "text-green-500 bg-green-500/20"
-                                                  : "text-red-500 bg-red-500/20",
+                                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                          <div className="py-1">
+                                            <Menu.Item>
+                                              {({ active }) => (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    setEditingTeam(team);
+                                                    setEditingClubId(assignment.clubId);
+                                                    setIsModalOpen(true);
+                                                  }}
+                                                  className={classNames(
+                                                    active ? "bg-gray-100 text-gray-900" : "text-gray-700",
+                                                    "flex w-full items-center px-4 py-2 text-sm"
+                                                  )}
+                                                >
+                                                  <PencilIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                  Bearbeiten
+                                                </button>
                                               )}
-                                            >
-                                              <div className="h-2 w-2 rounded-full bg-current" />
-                                            </div>
-                                            <span className="text-gray-700">
-                                              {isValid ? "Gültig" : "Ungültig"}
-                                            </span>
-                                          </div>
-                                          {!isValid &&
-                                            team.invalidReasonCodes &&
-                                            team.invalidReasonCodes.length >
-                                              0 && (
-                                              <div className="mt-1 text-xs font-normal text-red-800 space-y-0.5 ml-6">
-                                                {team.invalidReasonCodes.map(
-                                                  (code, idx) => (
-                                                    <div key={idx}>
-                                                      {invalidReasonCodeMap[
-                                                        code
-                                                      ] || code}
-                                                      {idx <
-                                                        team.invalidReasonCodes
-                                                          .length -
-                                                          1}
-                                                    </div>
-                                                  ),
-                                                )}
-                                              </div>
-                                            )}
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-center">
-                                          <span
-                                            className={classNames(
-                                              "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                                              team.source === "ISHD"
-                                                ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-                                                : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
-                                            )}
-                                          >
-                                            {team.source}
-                                          </span>
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-500">
-                                          {team.passNo || "-"}
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500">
-                                          <div className="flex items-center gap-x-2">
-                                            <div
-                                              className={classNames(
-                                                "flex-none rounded-full p-1",
-                                                team.active
-                                                  ? "text-green-500 bg-green-500/20"
-                                                  : "text-gray-500 bg-gray-800/10",
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                              {({ active }) => (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleRemoveLicence(assignment, team, values, setFieldValue)}
+                                                  className={classNames(
+                                                    active ? "bg-red-50 text-red-900" : "text-red-700",
+                                                    "flex w-full items-center px-4 py-2 text-sm"
+                                                  )}
+                                                >
+                                                  <TrashIcon className="mr-3 h-5 w-5 text-red-400" aria-hidden="true" />
+                                                  Löschen
+                                                </button>
                                               )}
-                                            >
-                                              <div className="h-2 w-2 rounded-full bg-current" />
-                                            </div>
-                                            <span className="text-gray-500">
-                                              {team.active
-                                                ? "Aktiv"
-                                                : "Inaktiv"}
-                                            </span>
+                                            </Menu.Item>
                                           </div>
-                                        </td>
-                                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500">
-                                          {team.jerseyNo || "-"}
-                                        </td>
-                                        {isOwnClub && (
-                                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                            <Menu
-                                              as="div"
-                                              className="relative inline-block text-left"
-                                            >
-                                              <Menu.Button className="flex items-center rounded-full bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                <span className="sr-only">
-                                                  Optionen öffnen
-                                                </span>
-                                                <EllipsisVerticalIcon
-                                                  className="h-5 w-5"
-                                                  aria-hidden="true"
-                                                />
-                                              </Menu.Button>
-                                              <Transition
-                                                as={Fragment}
-                                                enter="transition ease-out duration-100"
-                                                enterFrom="transform opacity-0 scale-95"
-                                                enterTo="transform opacity-100 scale-100"
-                                                leave="transition ease-in duration-75"
-                                                leaveFrom="transform opacity-100 scale-100"
-                                                leaveTo="transform opacity-0 scale-95"
-                                              >
-                                                <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                                  <div className="py-1">
-                                                    <Menu.Item>
-                                                      {({ active }) => (
-                                                        <button
-                                                          type="button"
-                                                          onClick={() => {
-                                                            setEditingTeam(
-                                                              team,
-                                                            );
-                                                            setEditingClubId(
-                                                              assignment.clubId,
-                                                            );
-                                                            setIsModalOpen(
-                                                              true,
-                                                            );
-                                                          }}
-                                                          className={classNames(
-                                                            active
-                                                              ? "bg-gray-100 text-gray-900"
-                                                              : "text-gray-700",
-                                                            "flex w-full items-center px-4 py-2 text-sm",
-                                                          )}
-                                                        >
-                                                          <PencilIcon
-                                                            className="mr-3 h-5 w-5 text-gray-400"
-                                                            aria-hidden="true"
-                                                          />
-                                                          Bearbeiten
-                                                        </button>
-                                                      )}
-                                                    </Menu.Item>
-                                                    <Menu.Item
-                                                      disabled={!canRemove}
-                                                    >
-                                                      {({
-                                                        active,
-                                                        disabled,
-                                                      }) => (
-                                                        <button
-                                                          type="button"
-                                                          onClick={() =>
-                                                            handleRemoveLicence(
-                                                              assignment,
-                                                              team,
-                                                              values,
-                                                              setFieldValue,
-                                                            )
-                                                          }
-                                                          disabled={disabled}
-                                                          className={classNames(
-                                                            disabled
-                                                              ? "text-gray-300 cursor-not-allowed"
-                                                              : active
-                                                                ? "bg-gray-100 text-gray-900"
-                                                                : "text-gray-700",
-                                                            "flex w-full items-center px-4 py-2 text-sm",
-                                                          )}
-                                                        >
-                                                          <TrashIcon
-                                                            className={classNames(
-                                                              "mr-3 h-5 w-5",
-                                                              disabled
-                                                                ? "text-gray-300"
-                                                                : "text-gray-400",
-                                                            )}
-                                                            aria-hidden="true"
-                                                          />
-                                                          Entfernen
-                                                        </button>
-                                                      )}
-                                                    </Menu.Item>
-                                                  </div>
-                                                </Menu.Items>
-                                              </Transition>
-                                            </Menu>
-                                          </td>
-                                        )}
-                                      </tr>
-                                    );
-                                  })}
-                                </Fragment>
-                              );
-                            },
-                          )}
+                                        </Menu.Items>
+                                      </Transition>
+                                    </Menu>
+                                  </td>
+                                </tr>
+                              ))}
+                            </Fragment>
+                          ))}
                         </tbody>
                       </table>
                     </div>
