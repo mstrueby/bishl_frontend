@@ -3,6 +3,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import { classNames } from "../../tools/utils";
 import apiClient from "../../lib/apiClient";
+import { ageGroupConfig } from "../../tools/consts";
 
 interface PossibleTeam {
   teamId: string;
@@ -56,7 +57,18 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
         ]);
 
         const allTeams: PossibleTeam[] = teamsResponse.data || [];
-        const filteredTeams = allTeams.filter((team) => team.clubId === clubId);
+        const sortedAllTeams = [...allTeams].sort((a, b) => {
+          const orderA = ageGroupConfig.find(g => g.key === a.teamAgeGroup)?.sortOrder || 999;
+          const orderB = ageGroupConfig.find(g => g.key === b.teamAgeGroup)?.sortOrder || 999;
+          
+          if (orderA !== orderB) {
+            return orderA - orderB;
+          }
+          
+          return (a.teamAlias || "").localeCompare(b.teamAlias || "");
+        });
+
+        const filteredTeams = sortedAllTeams.filter((team) => team.clubId === clubId);
         setTeams(filteredTeams);
 
         const configItems = configResponse.data?.items || [];
