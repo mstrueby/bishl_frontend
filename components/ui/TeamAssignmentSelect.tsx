@@ -51,7 +51,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
       try {
         setLoading(true);
         const [teamsResponse, configResponse] = await Promise.all([
-          apiClient.get(`/players/${playerId}/possible_teams`),
+          apiClient.get(`/players/${playerId}/possible-teams`),
           apiClient.get('/configs/player_assignment_window'),
         ]);
 
