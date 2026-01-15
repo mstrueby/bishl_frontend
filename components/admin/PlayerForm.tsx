@@ -584,7 +584,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 const sortedTeams = [...assignment.teams].sort((teamA, teamB) => {
                   const orderA = ageGroupConfig.find(g => g.key === teamA.teamAgeGroup)?.sortOrder || 999;
                   const orderB = ageGroupConfig.find(g => g.key === teamB.teamAgeGroup)?.sortOrder || 999;
-                  return orderA - orderB;
+                  
+                  if (orderA !== orderB) {
+                    return orderA - orderB;
+                  }
+                  
+                  return (teamA.teamAlias || "").localeCompare(teamB.teamAlias || "");
                 });
                 return { ...assignment, teams: sortedTeams };
               });
