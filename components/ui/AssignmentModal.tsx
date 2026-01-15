@@ -96,12 +96,26 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
       let updatedAssignments = [...currentAssignments];
 
       if (isEditMode && editingTeam) {
+        const teamChanged = selectedTeam && selectedTeam.teamId !== editingTeam.teamId;
         updatedAssignments = updatedAssignments.map((assignment) => {
           if (assignment.clubId === (editingClubId || clubId)) {
             return {
               ...assignment,
               teams: assignment.teams.map((team) => {
                 if (team.teamId === editingTeam.teamId) {
+                  if (teamChanged && selectedTeam) {
+                    return {
+                      ...team,
+                      teamId: selectedTeam.teamId,
+                      teamName: selectedTeam.teamName,
+                      teamAlias: selectedTeam.teamAlias,
+                      teamAgeGroup: selectedTeam.teamAgeGroup,
+                      licenseType: selectedTeam.recommendedType,
+                      jerseyNo: jerseyNumber,
+                      active: active,
+                      modifyDate: new Date().toISOString(),
+                    };
+                  }
                   return {
                     ...team,
                     jerseyNo: jerseyNumber,
@@ -197,26 +211,13 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 )}
 
                 <div className="mt-4 space-y-4">
-                  {!isEditMode && (
-                    <TeamAssignmentSelect
-                      playerId={playerId}
-                      clubId={clubId}
-                      selectedTeamId={selectedTeam?.teamId || null}
-                      onTeamChange={setSelectedTeam}
-                      label="Mannschaft"
-                    />
-                  )}
-
-                  {isEditMode && editingTeam && (
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium leading-6 text-gray-900">
-                        Mannschaft
-                      </label>
-                      <div className="mt-2 py-2 px-3 rounded-md bg-gray-100 text-gray-700 text-sm">
-                        {editingTeam.teamName}
-                      </div>
-                    </div>
-                  )}
+                  <TeamAssignmentSelect
+                    playerId={playerId}
+                    clubId={clubId}
+                    selectedTeamId={selectedTeam?.teamId || null}
+                    onTeamChange={setSelectedTeam}
+                    label="Mannschaft"
+                  />
 
                   <div>
                     <label htmlFor="jerseyNo" className="block text-sm font-medium leading-6 text-gray-900">
