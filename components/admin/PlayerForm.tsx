@@ -647,6 +647,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     currentAssignments={values.assignedTeams || []}
                     editingTeam={editingTeam}
                     editingClubId={editingClubId}
+                    managedByISHD={values.managedByISHD}
                   />
 
                   {sortedAssignedTeams.length > 0 ? (

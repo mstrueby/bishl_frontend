@@ -24,6 +24,7 @@ interface AssignmentModalProps {
   currentAssignments: Assignment[];
   editingTeam?: AssignmentTeam | null;
   editingClubId?: string | null;
+  managedByISHD?: boolean;
 }
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -36,6 +37,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   currentAssignments = [],
   editingTeam = null,
   editingClubId = null,
+  managedByISHD = false,
 }) => {
   const [selectedTeam, setSelectedTeam] = useState<PossibleTeam | null>(null);
   const [jerseyNo, setJerseyNo] = useState<string>('');
@@ -217,6 +219,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     selectedTeamId={selectedTeam?.teamId || null}
                     onTeamChange={setSelectedTeam}
                     label="Mannschaft"
+                    managedByISHD={managedByISHD}
+                    licenceSource={editingTeam?.source}
                   />
 
                   <div>

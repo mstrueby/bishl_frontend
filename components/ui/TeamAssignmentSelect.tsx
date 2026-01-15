@@ -23,6 +23,8 @@ interface TeamAssignmentSelectProps {
   onTeamChange: (team: PossibleTeam | null) => void;
   label?: string;
   disabled?: boolean;
+  managedByISHD?: boolean;
+  licenceSource?: string;
 }
 
 const licenceTypeBadgeColors: Record<string, string> = {
@@ -41,6 +43,8 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   onTeamChange,
   label = "Mannschaft",
   disabled = false,
+  managedByISHD = false,
+  licenceSource = "",
 }) => {
   const [teams, setTeams] = useState<PossibleTeam[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,7 +136,8 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   }, [playerId, clubId]);
 
   const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
-  const isDisabled = disabled || !windowEnabled || loading;
+  const isISHDManaged = managedByISHD && licenceSource === "ISHD";
+  const isDisabled = disabled || !windowEnabled || loading || isISHDManaged;
 
   const getStatusColor = (status: string) => {
     return status === "valid" || status === "VALID"
