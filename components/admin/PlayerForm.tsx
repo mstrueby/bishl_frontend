@@ -874,7 +874,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                                       )}
                                                     </Menu.Item>
                                                     <Menu.Item
-                                                      disabled={!canRemove}
+                                                      disabled={assignment.clubId === clubId && assignment.teams.length === 1}
                                                     >
                                                       {({
                                                         active,
