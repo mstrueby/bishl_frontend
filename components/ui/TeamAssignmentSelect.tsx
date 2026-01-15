@@ -104,6 +104,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
 
   const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
   const isDisabled = disabled || !windowEnabled || loading;
+  console.log('disabled', disabled, 'windowEnabled', windowEnabled, 'loading', loading, 'isDisabled', isDisabled)
 
   const getStatusColor = (status: string) => {
     return status === 'valid' || status === 'VALID' ? 'bg-green-500' : 'bg-red-500';
