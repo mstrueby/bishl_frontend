@@ -712,9 +712,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                     const isValid =
                                       team.status === "VALID" ||
                                       team.status === "valid";
+                                    const isLastLicenceInOwnClub = isOwnClub && assignment.teams.length === 1;
                                     const canRemove = !(
-                                      team.source === "ISHD" &&
-                                      initialValues.managedByISHD
+                                      (team.source === "ISHD" && initialValues.managedByISHD) ||
+                                      isLastLicenceInOwnClub
                                     );
 
                                     return (
