@@ -25,6 +25,7 @@ interface TeamAssignmentSelectProps {
   disabled?: boolean;
   managedByISHD?: boolean;
   licenceType?: string;
+  licenceSource?: string;
 }
 
 const licenceTypeBadgeColors: Record<string, string> = {
@@ -45,6 +46,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   disabled = false,
   managedByISHD = false,
   licenceType = "",
+  licenceSource = "",
 }) => {
   const [teams, setTeams] = useState<PossibleTeam[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,7 +138,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   }, [playerId, clubId]);
 
   const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
-  const isISHDManaged = managedByISHD && (selectedTeam?.status === "VALID" || selectedTeam?.status === "valid"); // In Section 3, ISHD teams are usually already valid
+  const isISHDManaged = managedByISHD && licenceSource === "ISHD";
   const isLoan = licenceType === "LOAN";
   const isDisabled = disabled || !windowEnabled || loading || isISHDManaged || isLoan;
 

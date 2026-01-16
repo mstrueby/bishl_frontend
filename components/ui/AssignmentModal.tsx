@@ -221,6 +221,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     label="Mannschaft"
                     managedByISHD={managedByISHD}
                     licenceType={editingTeam?.licenseType}
+                    licenceSource={editingTeam?.source}
                   />
 
                   <div>
