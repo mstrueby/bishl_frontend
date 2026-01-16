@@ -47,6 +47,7 @@ const invalidReasonCodeMap: Record<string, string> = {
   IMPORT_CONFLICT: "Import-Konflikt",
   UNKNOWN_LICENCE_TYPE: "Unbekannter Passtyp",
   HOBBY_PLAYER_CONFLICT: "Hobbyspieler-Konflikt",
+  LOAN_AGE_GROUP_CONFLICT: "Leihpass-Altersklassenkonflikt"
 };
 
 const licenceTypeBadgeColors: Record<string, string> = {
