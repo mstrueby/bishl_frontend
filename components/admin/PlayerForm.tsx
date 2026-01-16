@@ -575,6 +575,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
             {/* Section 3: Licence table */}
             {(() => {
+              const ownClubAssignment = values.assignedTeams?.find(a => a.clubId === clubId);
+              const isLoanClub = ownClubAssignment?.teams.some(t => t.licenseType === "LOAN");
+              const hasLoanLicence = isLoanClub;
+
               const sortedAssignedTeams = [...(values.assignedTeams || [])].sort((a, b) => {
                 const aIsOwn = a.clubId === clubId;
                 const bIsOwn = b.clubId === clubId;
@@ -605,11 +609,16 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       <button
                         type="button"
                         onClick={() => handleAutoOptimize(values, setFieldValue)}
-                        disabled={licenceLoading}
-                        className="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                        disabled={licenceLoading || hasLoanLicence}
+                        className={classNames(
+                          "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                          hasLoanLicence 
+                            ? "bg-gray-50 text-gray-400 ring-gray-200 cursor-not-allowed" 
+                            : "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50"
+                        )}
                       >
                         <SparklesIcon
-                          className="-ml-0.5 h-5 w-5 text-gray-400"
+                          className={classNames("-ml-0.5 h-5 w-5", hasLoanLicence ? "text-gray-300" : "text-gray-400")}
                           aria-hidden="true"
                         />
                         Auto-Fix
@@ -621,7 +630,13 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           setEditingClubId(null);
                           setIsModalOpen(true);
                         }}
-                        className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        disabled={hasLoanLicence}
+                        className={classNames(
+                          "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                          hasLoanLicence
+                            ? "bg-indigo-300 text-white cursor-not-allowed"
+                            : "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600"
+                        )}
                       >
                         <PlusCircleIcon
                           className="-ml-0.5 h-5 w-5"
