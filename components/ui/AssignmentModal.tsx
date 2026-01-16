@@ -220,7 +220,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     onTeamChange={setSelectedTeam}
                     label="Mannschaft"
                     managedByISHD={managedByISHD}
-                    licenceSource={editingTeam?.source}
+                    licenceType={editingTeam?.licenseType}
                   />
 
                   <div>
