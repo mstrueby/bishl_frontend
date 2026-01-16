@@ -137,7 +137,8 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
 
   const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
   const isISHDManaged = managedByISHD && licenceSource === "ISHD";
-  const isDisabled = disabled || !windowEnabled || loading || isISHDManaged;
+  const isLoan = licenceSource === "LOAN";
+  const isDisabled = disabled || !windowEnabled || loading || isISHDManaged || isLoan;
 
   const getStatusColor = (status: string) => {
     return status === "valid" || status === "VALID"
