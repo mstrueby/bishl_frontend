@@ -44,7 +44,7 @@ const Edit: NextPage = () => {
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && user && playerId && typeof playerId === 'string') {
-      const fetchPlayer = async () => {
+      const fetchData = async () => {
         try {
           setDataLoading(true);
           setClubId(user.club.clubId);
@@ -54,20 +54,27 @@ const Edit: NextPage = () => {
             apiClient.get(`/players/${playerId}`),
             apiClient.get('/players/wko-rules')
           ]);
+          
           setPlayer(playerResponse.data);
-          if (wkoResponse.data?.success) {
-            setWkoRules(wkoResponse.data.data.wko_rules || []);
-            setDynamicRules(wkoResponse.data.data.dynamic_rules || null);
+          
+          // The API returns { success: true, data: { wko_rules: [...] } } based on attached file
+          const responseData = wkoResponse.data;
+          if (responseData?.data?.wko_rules) {
+            setWkoRules(responseData.data.wko_rules);
+            setDynamicRules(responseData.data.dynamic_rules || null);
+          } else if (responseData?.wko_rules) {
+            setWkoRules(responseData.wko_rules);
+            setDynamicRules(responseData.dynamic_rules || null);
           }
         } catch (error) {
-          console.error('Error fetching player:', getErrorMessage(error));
+          console.error('Error fetching data:', getErrorMessage(error));
           setError(getErrorMessage(error));
         } finally {
           setDataLoading(false);
         }
       };
 
-      fetchPlayer();
+      fetchData();
     }
   }, [authLoading, isAuthenticated, user, playerId]);
 
@@ -78,19 +85,8 @@ const Edit: NextPage = () => {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         const excludedFields = [
-          '_id',
-          'stats',
-          'firstName',
-          'lastName',
-          'birthdate',
-          'fullFaceReq',
-          'source',
-          'legacyId',
-          'createDate',
-          'ageGroup',
-          'overAge',
-          'nationality',
-          'sex'
+          '_id', 'stats', 'firstName', 'lastName', 'birthdate', 'fullFaceReq',
+          'source', 'legacyId', 'createDate', 'ageGroup', 'overAge', 'nationality', 'sex'
         ];
         if (excludedFields.includes(key)) return;
 
@@ -114,9 +110,7 @@ const Edit: NextPage = () => {
         if (typeof value === 'object') {
           if (key === 'assignedTeams') {
             const cleanedTeams = value.map(
-              (club: {
-                teams: { jerseyNo: number | null; [key: string]: any }[];
-              }) => ({
+              (club: { teams: { jerseyNo: number | null; [key: string]: any }[] }) => ({
                 ...club,
                 teams: club.teams.map((team) => {
                   if (team.jerseyNo === null) {
