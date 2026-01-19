@@ -49,6 +49,7 @@ interface DataListProps {
     };
     published?: boolean;
     featured?: boolean;
+    valid?: boolean;
     menu: Array<{
       edit?: { onClick: () => void };
       feature?: { onClick: () => void };
@@ -206,6 +207,21 @@ const DataList: React.FC<DataListProps> = ({
               >
                 {item.count}
               </span>
+            </div>
+          )}
+
+          {/* Validity Badge */}
+          {item.valid !== undefined && (
+            <div className="flex-none mr-4">
+              {item.valid ? (
+                <span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-700">
+                  Gültig
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700">
+                  Ungültig
+                </span>
+              )}
             </div>
           )}
 
