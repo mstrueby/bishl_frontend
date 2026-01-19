@@ -243,7 +243,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                               active
                                 ? "bg-indigo-600 text-white"
                                 : optionDisabled
-                                ? "text-gray-300 bg-gray-50"
+                                ? "text-gray-500 bg-gray-50"
                                 : "text-gray-900",
                               "relative cursor-default select-none py-2 pl-3 pr-9",
                               optionDisabled ? "cursor-not-allowed" : ""
