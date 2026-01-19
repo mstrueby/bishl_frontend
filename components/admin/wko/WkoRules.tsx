@@ -125,7 +125,13 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
           {dynamicRules?.fullFaceReq && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
               <h4 className="text-sm font-semibold text-gray-900">Vollvisier-Pflicht</h4>
-              <p className="mt-2 text-xs text-gray-600">{dynamicRules.fullFaceReq.rule}</p>
+              <p className="mt-2 text-xs text-gray-600">Alle Spieler*innen, die am oder nach dem {(() => {
+                try {
+                  return format(parseISO(dynamicRules.fullFaceReq.threshold_date), 'dd.MM.yyyy', { locale: de });
+                } catch (e) {
+                  return dynamicRules.fullFaceReq.threshold_date;
+                }
+              })()} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</p>
             </div>
           )}
           {dynamicRules?.ageGroups && (
