@@ -31,9 +31,10 @@ interface WkoAgeGroupRule {
 interface WkoRulesProps {
   rules: WkoAgeGroupRule[];
   dynamicRules: any;
+  assignmentWindow?: any;
 }
 
-const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
+const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWindow }) => {
   // Ensure we are working with an array
   const rulesList = Array.isArray(rules) ? rules : [];
   
@@ -121,7 +122,39 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
         </div>
 
         {/* Dynamic Rules Info */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {assignmentWindow && (
+            <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900">Zuweisungsfenster</h4>
+              <div className="mt-2 text-xs text-gray-600">
+                {(() => {
+                  const enabled = assignmentWindow.value?.find((v: any) => v.key === 'ENABLED')?.value;
+                  if (!enabled) {
+                    return <p>Kein Zuweisungsfenster definiert. Spieler können nicht durch Club-Admins zugewiesen werden.</p>;
+                  }
+                  
+                  const startMonth = assignmentWindow.value?.find((v: any) => v.key === 'START_MONTH')?.value;
+                  const startDay = assignmentWindow.value?.find((v: any) => v.key === 'START_DAY')?.value;
+                  const endMonth = assignmentWindow.value?.find((v: any) => v.key === 'END_MONTH')?.value;
+                  const endDay = assignmentWindow.value?.find((v: any) => v.key === 'END_DAY')?.value;
+
+                  if (startMonth && startDay && endMonth && endDay) {
+                    // Create dates for current year to format
+                    const currentYear = new Date().getFullYear();
+                    const startDate = new Date(currentYear, startMonth - 1, startDay);
+                    const endDate = new Date(currentYear, endMonth - 1, endDay);
+                    
+                    return (
+                      <p>
+                        Zuweisungen möglich vom <span className="font-semibold">{format(startDate, 'dd. MMMM', { locale: de })}</span> bis <span className="font-semibold">{format(endDate, 'dd. MMMM', { locale: de })}</span>.
+                      </p>
+                    );
+                  }
+                  return <p>Ungültige Fenster-Konfiguration.</p>;
+                })()}
+              </div>
+            </div>
+          )}
           {dynamicRules?.fullFaceReq && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
               <h4 className="text-sm font-semibold text-gray-900">Vollvisier-Pflicht</h4>
