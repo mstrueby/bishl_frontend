@@ -42,8 +42,8 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
   }
   
   return (
-    <div className="mt-16 border-t border-gray-200 pt-10 pb-20">
-      <div className="mb-8">
+    <div className="mt-16 pt-10 pb-20">
+      <div className="mb-8 pb-4 border-b border-gray-200">
         <h3 className="text-base font-semibold leading-7 text-gray-900 uppercase">WKO-Regelwerk</h3>
         <p className="mt-1 text-sm leading-6 text-gray-500">
           Übersicht der Spielberechtigungen und Altersklassen-Regelungen gemäß WKO.
@@ -66,8 +66,8 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
             <tbody className="divide-y divide-gray-200 bg-white">
               {[...rulesList].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((rule) => (
                 <tr key={rule.ageGroup}>
-                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                    {rule.label} <span className="text-xs text-gray-400 font-normal">({rule.altKey})</span>
+                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 uppercase">
+                    {rule.label} <span className="text-xs text-gray-400 font-normal normal-case">({rule.altKey})</span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                     <div className="flex gap-1">
@@ -125,13 +125,7 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
           {dynamicRules?.fullFaceReq && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
               <h4 className="text-sm font-semibold text-gray-900">Vollvisier-Pflicht</h4>
-              <p className="mt-2 text-xs text-gray-600">Alle Spieler*innen, die am oder nach dem {(() => {
-                try {
-                  return format(parseISO(dynamicRules.fullFaceReq.threshold_date), 'dd.MM.yyyy', { locale: de });
-                } catch (e) {
-                  return dynamicRules.fullFaceReq.threshold_date;
-                }
-              })()} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</p>
+              <p className="mt-2 text-xs text-gray-600">Alle Spieler*innen, die am oder nach dem {dynamicRules.fullFaceReq.threshold_date} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</p>
             </div>
           )}
           {dynamicRules?.ageGroups && (
