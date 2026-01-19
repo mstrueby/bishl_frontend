@@ -43,7 +43,7 @@ export const getDataListItems = (
     return {
       _id: player._id,
       title: `${number ? number + ' - ' : ''}${name}`,
-      category: licenseType,
+      category: licenseType.toUpperCase(),
       alias: player._id,
       description: [
         player.ageGroup + (player.overAge && player.ageGroup !== team.ageGroup ? ' (OA)' : ''),
