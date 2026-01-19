@@ -316,10 +316,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       {/* Section 1: Non-editable master data */}
       <div className="mt-8">
         <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
-          Stammdaten (nicht änderbar)
+          Stammdaten
         </h3>
         <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-          Diese Daten werden durch den ISHD verwaltet und können nicht geändert
+          Diese Daten werden durch die Passstelle verwaltet und können nicht geändert
           werden.
         </p>
       </div>
@@ -403,7 +403,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     Änderbare Daten
                   </h3>
                   <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-                    Diese Daten können für die BISHL-Anzeige angepasst werden.
+                    Diese Daten können für die Anzeige angepasst werden.
                   </p>
                 </div>
                 {!editMode && (

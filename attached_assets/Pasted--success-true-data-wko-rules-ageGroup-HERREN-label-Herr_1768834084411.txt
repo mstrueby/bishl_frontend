@@ -1,0 +1,313 @@
+{
+	"success": true,
+	"data": {
+		"wko_rules": [
+			{
+				"ageGroup": "HERREN",
+				"label": "Herren",
+				"sortOrder": 1,
+				"altKey": "Herren",
+				"sex": [
+					"männlich",
+					"weiblich"
+				],
+				"secondaryRules": [],
+				"overAgeRules": [],
+				"maxTotalAgeClasses": {
+					"männlich": 2,
+					"weiblich": 2
+				}
+			},
+			{
+				"ageGroup": "DAMEN",
+				"label": "Damen",
+				"sortOrder": 2,
+				"altKey": "Damen",
+				"sex": [
+					"weiblich"
+				],
+				"secondaryRules": [
+					{
+						"targetAgeGroup": "HERREN",
+						"sex": [
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": false
+					}
+				],
+				"overAgeRules": [
+					{
+						"targetAgeGroup": "U19",
+						"sex": [
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"maxOverAgePlayersPerTeam": 3
+					}
+				],
+				"maxTotalAgeClasses": {
+					"männlich": 2,
+					"weiblich": 2
+				}
+			},
+			{
+				"ageGroup": "U19",
+				"label": "U19",
+				"sortOrder": 3,
+				"altKey": "Junioren",
+				"sex": [
+					"männlich",
+					"weiblich"
+				],
+				"secondaryRules": [
+					{
+						"targetAgeGroup": "HERREN",
+						"sex": [
+							"männlich"
+						],
+						"maxLicenses": 99,
+						"requiresAdmin": false
+					},
+					{
+						"targetAgeGroup": "DAMEN",
+						"sex": [
+							"weiblich"
+						],
+						"maxLicenses": 99,
+						"requiresAdmin": false
+					}
+				],
+				"overAgeRules": [
+					{
+						"targetAgeGroup": "U16",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"maxOverAgePlayersPerTeam": 3
+					}
+				],
+				"maxTotalAgeClasses": {
+					"männlich": 2,
+					"weiblich": 3
+				}
+			},
+			{
+				"ageGroup": "U16",
+				"label": "U16",
+				"sortOrder": 4,
+				"altKey": "Jugend",
+				"sex": [
+					"männlich",
+					"weiblich"
+				],
+				"secondaryRules": [
+					{
+						"targetAgeGroup": "U19",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": false
+					},
+					{
+						"targetAgeGroup": "HERREN",
+						"sex": [
+							"männlich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": false
+					},
+					{
+						"targetAgeGroup": "DAMEN",
+						"sex": [
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": true
+					}
+				],
+				"overAgeRules": [
+					{
+						"targetAgeGroup": "U13",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"maxOverAgePlayersPerTeam": 3
+					}
+				],
+				"maxTotalAgeClasses": {
+					"männlich": 2,
+					"weiblich": 3
+				}
+			},
+			{
+				"ageGroup": "U13",
+				"label": "U13",
+				"sortOrder": 5,
+				"altKey": "Schüler",
+				"sex": [
+					"männlich",
+					"weiblich"
+				],
+				"secondaryRules": [
+					{
+						"targetAgeGroup": "U16",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": false
+					},
+					{
+						"targetAgeGroup": "DAMEN",
+						"sex": [
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": true
+					}
+				],
+				"overAgeRules": [
+					{
+						"targetAgeGroup": "U10",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"maxOverAgePlayersPerTeam": 3
+					}
+				],
+				"maxTotalAgeClasses": {
+					"männlich": 2,
+					"weiblich": 3
+				}
+			},
+			{
+				"ageGroup": "U10",
+				"label": "U10",
+				"sortOrder": 6,
+				"altKey": "Bambini",
+				"sex": [
+					"männlich",
+					"weiblich"
+				],
+				"secondaryRules": [
+					{
+						"targetAgeGroup": "U13",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": false
+					},
+					{
+						"targetAgeGroup": "DAMEN",
+						"sex": [
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": true
+					}
+				],
+				"overAgeRules": [
+					{
+						"targetAgeGroup": "U8",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"maxOverAgePlayersPerTeam": 2
+					}
+				],
+				"maxTotalAgeClasses": {
+					"männlich": 2,
+					"weiblich": 3
+				}
+			},
+			{
+				"ageGroup": "U8",
+				"label": "U8",
+				"sortOrder": 7,
+				"altKey": "Mini",
+				"sex": [
+					"männlich",
+					"weiblich"
+				],
+				"secondaryRules": [
+					{
+						"targetAgeGroup": "U10",
+						"sex": [
+							"männlich",
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": false
+					},
+					{
+						"targetAgeGroup": "DAMEN",
+						"sex": [
+							"weiblich"
+						],
+						"maxLicenses": 1,
+						"requiresAdmin": true
+					}
+				],
+				"overAgeRules": [],
+				"maxTotalAgeClasses": {
+					"männlich": 2,
+					"weiblich": 3
+				}
+			}
+		],
+		"dynamic_rules": {
+			"fullFaceReq": {
+				"description": "Full face protection requirement",
+				"rule": "Required for all players born on or after 1993-01-01",
+				"threshold_date": "1993-01-01"
+			},
+			"ageGroups": {
+				"description": "Age group calculation based on birth year relative to current year",
+				"logic": [
+					{
+						"max_age_diff": 7,
+						"group": "U8"
+					},
+					{
+						"max_age_diff": 9,
+						"group": "U10"
+					},
+					{
+						"max_age_diff": 12,
+						"group": "U13"
+					},
+					{
+						"max_age_diff": 15,
+						"group": "U16"
+					},
+					{
+						"max_age_diff": 18,
+						"group": "U19"
+					},
+					{
+						"default": "HERREN (Male) / DAMEN (Female)"
+					}
+				]
+			},
+			"overAgeRules": {
+				"description": "Special over-age eligibility rules (e.g. Bambini rule)",
+				"details": "Specific rules apply for U13, U16, U19 and DAMEN based on sex and birth month."
+			}
+		}
+	},
+	"message": "WKO Rules retrieved successfully"
+}
