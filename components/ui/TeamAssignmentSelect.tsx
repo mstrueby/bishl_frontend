@@ -142,10 +142,18 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   const isLoan = licenceType === "LOAN";
   const isDisabled = disabled || !windowEnabled || loading || isISHDManaged || isLoan;
 
-  const getStatusColor = (status: string) => {
-    return status === "valid" || status === "VALID"
-      ? "bg-green-500"
-      : "bg-red-500";
+  const getStatusIndicator = (status: string) => {
+    const isValid = status === "valid" || status === "VALID";
+    return (
+      <div
+        className={classNames(
+          "flex-none rounded-full p-1",
+          isValid ? "text-green-500 bg-green-500/20" : "text-red-500 bg-red-500/10",
+        )}
+      >
+        <div className="h-2 w-2 rounded-full bg-current" />
+      </div>
+    );
   };
 
   return (
@@ -179,12 +187,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                 ) : selectedTeam ? (
                   <span className="flex items-center justify-between w-full pr-6">
                     <span className="flex items-center gap-x-3 truncate">
-                      <span
-                        className={classNames(
-                          "h-2 w-2 rounded-full flex-shrink-0",
-                          getStatusColor(selectedTeam.status),
-                        )}
-                      />
+                      {getStatusIndicator(selectedTeam.status)}
                       <span className="block truncate">
                         {selectedTeam.teamName}
                       </span>
@@ -244,12 +247,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                           <>
                             <div className="flex items-center justify-between w-full">
                               <div className="flex items-center gap-x-3">
-                                <span
-                                  className={classNames(
-                                    "h-2 w-2 rounded-full flex-shrink-0",
-                                    getStatusColor(team.status),
-                                  )}
-                                />
+                                {getStatusIndicator(team.status)}
                                 <span
                                   className={classNames(
                                     selected ? "font-semibold" : "font-normal",
