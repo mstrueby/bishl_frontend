@@ -36,6 +36,10 @@ export const getDataListItems = (
       .flatMap(item => item.teams)
       .find(teamInner => teamInner.teamId === team._id)?.licenseType || 'N/A';
 
+    const teamAssignment = player.assignedTeams
+      .flatMap((item) => item.teams)
+      .find((teamInner) => teamInner.teamId === team._id);
+
     return {
       _id: player._id,
       title: `${number ? number + ' - ' : ''}${name}`,
@@ -46,15 +50,7 @@ export const getDataListItems = (
       alias: player._id,
       description: [
         player.ageGroup + (player.overAge && player.ageGroup !== team.ageGroup ? ' (OA)' : ''),
-        `${player.assignedTeams
-          .map((item) => {
-            const filteredTeams = item.teams.filter((teamInner) => teamInner.teamId === team._id);
-            const passNos = filteredTeams.map((teamInner) => teamInner.passNo);
-            return passNos.length > 0 ? passNos.join(', ') : '';
-          })
-          .filter(Boolean)
-          .join(', ')
-        }`,
+        teamAssignment?.passNo || "-",
         `geb. ${new Date(player.birthdate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`,
         `${player.sex === 'männlich' ? '♂' : '♀'}`
       ],
