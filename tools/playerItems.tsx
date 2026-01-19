@@ -44,8 +44,8 @@ export const getDataListItems = (
         className: 'object-contain rounded-full',
         radius: 0,
       },
+      valid: teamAssignment?.status === 'VALID',
       published: teamAssignment?.active ? teamAssignment.active : false,
-      valid: teamAssignment?.status === 'valid',
       menu: menuItems,
     };
   });
