@@ -177,16 +177,29 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                 {loading ? (
                   <span className="block truncate text-gray-400">Laden...</span>
                 ) : selectedTeam ? (
-                  <span className="flex items-center gap-x-3">
-                    <span
-                      className={classNames(
-                        "h-2 w-2 rounded-full flex-shrink-0",
-                        getStatusColor(selectedTeam.status),
-                      )}
-                    />
-                    <span className="block truncate">
-                      {selectedTeam.teamName}
+                  <span className="flex items-center justify-between w-full pr-6">
+                    <span className="flex items-center gap-x-3 truncate">
+                      <span
+                        className={classNames(
+                          "h-2 w-2 rounded-full flex-shrink-0",
+                          getStatusColor(selectedTeam.status),
+                        )}
+                      />
+                      <span className="block truncate">
+                        {selectedTeam.teamName}
+                      </span>
                     </span>
+                    {selectedTeam.recommendedType && (
+                      <span
+                        className={classNames(
+                          "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ml-2",
+                          licenceTypeBadgeColors[selectedTeam.recommendedType] ||
+                            "bg-gray-50 text-gray-600 ring-gray-500/10",
+                        )}
+                      >
+                        {selectedTeam.recommendedType}
+                      </span>
+                    )}
                   </span>
                 ) : (
                   <span className="block truncate text-gray-400">
@@ -262,7 +275,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                               <span
                                 className={classNames(
                                   active ? "text-white" : "text-indigo-600",
-                                  "absolute inset-y-0 right-0 flex items-center pr-4",
+                                  "absolute inset-y-0 right-0 flex items-center pr-2",
                                 )}
                               >
                                 <CheckIcon
