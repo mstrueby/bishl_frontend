@@ -73,8 +73,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [editingTeam, setEditingTeam] = useState<AssignmentTeam | null>(null);
   const [editingClubId, setEditingClubId] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [masterSuccessMessage, setMasterSuccessMessage] = useState<string | null>(null);
+  const [masterErrorMessage, setMasterErrorMessage] = useState<string | null>(null);
+  const [licenceSuccessMessage, setLicenceSuccessMessage] = useState<string | null>(null);
+  const [licenceErrorMessage, setLicenceErrorMessage] = useState<string | null>(null);
   const [masterDataLoading, setMasterDataLoading] = useState(false);
   const [licenceLoading, setLicenceLoading] = useState(false);
   const [savedMasterData, setSavedMasterData] = useState({
@@ -95,15 +97,26 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     });
   }, [initialValues]);
 
-  const showSuccess = (message: string) => {
-    setSuccessMessage(message);
-    setErrorMessage(null);
-    setTimeout(() => setSuccessMessage(null), 5000);
+  const showMasterSuccess = (message: string) => {
+    setMasterSuccessMessage(message);
+    setMasterErrorMessage(null);
+    setTimeout(() => setMasterSuccessMessage(null), 5000);
   };
 
-  const showError = (message: string) => {
-    setErrorMessage(message);
-    setSuccessMessage(null);
+  const showMasterError = (message: string) => {
+    setMasterErrorMessage(message);
+    setMasterSuccessMessage(null);
+  };
+
+  const showLicenceSuccess = (message: string) => {
+    setLicenceSuccessMessage(message);
+    setLicenceErrorMessage(null);
+    setTimeout(() => setLicenceSuccessMessage(null), 5000);
+  };
+
+  const showLicenceError = (message: string) => {
+    setLicenceErrorMessage(message);
+    setLicenceSuccessMessage(null);
   };
 
   const handleAutoOptimize = async (
@@ -111,7 +124,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setFieldValue: any,
   ) => {
     setLicenceLoading(true);
-    setErrorMessage(null);
+    setLicenceErrorMessage(null);
     try {
       const response = await apiClient.post(
         `/players/${initialValues._id}/auto-optimize`,
@@ -122,10 +135,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       );
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
-      showSuccess("Pässe erfolgreich optimiert.");
+      showLicenceSuccess("Pässe erfolgreich optimiert.");
     } catch (error) {
       console.error("Error auto-optimizing:", error);
-      showError("Fehler bei der Optimierung.");
+      showLicenceError("Fehler bei der Optimierung.");
     } finally {
       setLicenceLoading(false);
     }
@@ -133,7 +146,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
   const handleRevalidate = async (values: PlayerValues, setFieldValue: any) => {
     setLicenceLoading(true);
-    setErrorMessage(null);
+    setLicenceErrorMessage(null);
     try {
       const response = await apiClient.post(
         `/players/${initialValues._id}/revalidate`,
@@ -145,10 +158,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       );
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
-      showSuccess("Pässe erfolgreich validiert.");
+      showLicenceSuccess("Pässe erfolgreich validiert.");
     } catch (error) {
       console.error("Error revalidating:", error);
-      showError("Fehler bei der Validierung.");
+      showLicenceError("Fehler bei der Validierung.");
     } finally {
       setLicenceLoading(false);
     }
@@ -161,12 +174,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setFieldValue: any,
   ) => {
     if (team.source === "ISHD" && initialValues.managedByISHD) {
-      showError("ISHD-Pässe können nicht entfernt werden.");
+      showLicenceError("ISHD-Pässe können nicht entfernt werden.");
       return;
     }
 
     setLicenceLoading(true);
-    setErrorMessage(null);
+    setLicenceErrorMessage(null);
     try {
       const updatedAssignments = values.assignedTeams
         .map((a) => {
@@ -189,10 +202,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       );
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
-      showSuccess("Pass erfolgreich entfernt.");
+      showLicenceSuccess("Pass erfolgreich entfernt.");
     } catch (error) {
       console.error("Error removing licence:", error);
-      showError("Fehler beim Entfernen des Passes.");
+      showLicenceError("Fehler beim Entfernen des Passes.");
     } finally {
       setLicenceLoading(false);
     }
@@ -203,7 +216,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setFieldValue: any,
   ) => {
     setLicenceLoading(true);
-    setErrorMessage(null);
+    setLicenceErrorMessage(null);
     try {
       const formData = new FormData();
       formData.append("assignedTeams", JSON.stringify(updatedAssignedTeams));
@@ -214,7 +227,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       );
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
-      showSuccess(
+      showLicenceSuccess(
         editingTeam
           ? "Pass erfolgreich aktualisiert."
           : "Neuer Pass erfolgreich hinzugefügt.",
@@ -233,7 +246,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     resetForm: any,
   ) => {
     setMasterDataLoading(true);
-    setErrorMessage(null);
+    setMasterErrorMessage(null);
     try {
       const formData = new FormData();
 
@@ -272,10 +285,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
       onPlayerUpdate(response.data);
       setEditMode(false);
-      showSuccess("Daten erfolgreich gespeichert.");
+      showMasterSuccess("Daten erfolgreich gespeichert.");
     } catch (error) {
       console.error("Error saving master data:", error);
-      showError("Fehler beim Speichern der Daten.");
+      showMasterError("Fehler beim Speichern der Daten.");
     } finally {
       setMasterDataLoading(false);
     }
@@ -293,17 +306,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
   return (
     <>
-      {successMessage && (
-        <div className="mb-4 p-4 rounded-md bg-green-50 border-l-4 border-green-400">
-          <p className="text-sm text-green-700">{successMessage}</p>
-        </div>
-      )}
-      {errorMessage && (
-        <div className="mb-4 p-4 rounded-md bg-red-50 border-l-4 border-red-400">
-          <p className="text-sm text-red-700">{errorMessage}</p>
-        </div>
-      )}
-
       {/* Section 1: Non-editable master data */}
       <div className="mt-8">
         <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
@@ -411,6 +413,17 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                   </button>
                 )}
               </div>
+
+              {masterSuccessMessage && (
+                <div className="mt-4 p-4 rounded-md bg-green-50 border-l-4 border-green-400">
+                  <p className="text-sm text-green-700">{masterSuccessMessage}</p>
+                </div>
+              )}
+              {masterErrorMessage && (
+                <div className="mt-4 p-4 rounded-md bg-red-50 border-l-4 border-red-400">
+                  <p className="text-sm text-red-700">{masterErrorMessage}</p>
+                </div>
+              )}
 
               {!editMode ? (
                 <div className="mt-6 border-t border-b border-gray-100">
@@ -646,6 +659,17 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       </button>
                     </div>
                   </div>
+
+                  {licenceSuccessMessage && (
+                    <div className="mt-4 p-4 rounded-md bg-green-50 border-l-4 border-green-400">
+                      <p className="text-sm text-green-700">{licenceSuccessMessage}</p>
+                    </div>
+                  )}
+                  {licenceErrorMessage && (
+                    <div className="mt-4 p-4 rounded-md bg-red-50 border-l-4 border-red-400">
+                      <p className="text-sm text-red-700">{licenceErrorMessage}</p>
+                    </div>
+                  )}
 
                   <AssignmentModal
                     isOpen={isModalOpen}
