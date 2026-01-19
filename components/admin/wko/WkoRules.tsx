@@ -1,5 +1,4 @@
 import React from 'react';
-import { classNames } from '../../../tools/utils';
 
 interface SecondaryRule {
   targetAgeGroup: string;
@@ -32,6 +31,13 @@ interface WkoRulesProps {
 }
 
 const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
+  // Ensure we are working with an array
+  const rulesList = Array.isArray(rules) ? rules : [];
+  
+  if (rulesList.length === 0) {
+    return null;
+  }
+  
   return (
     <div className="mt-16 border-t border-gray-200 pt-10 pb-20">
       <div className="mb-8">
@@ -55,7 +61,7 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {rules.sort((a, b) => a.sortOrder - b.sortOrder).map((rule) => (
+              {[...rulesList].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((rule) => (
                 <tr key={rule.ageGroup}>
                   <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                     {rule.label} <span className="text-xs text-gray-400 font-normal">({rule.altKey})</span>
@@ -70,7 +76,7 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
                     </div>
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
-                    {rule.secondaryRules.length > 0 ? (
+                    {rule.secondaryRules && rule.secondaryRules.length > 0 ? (
                       <div className="space-y-1">
                         {rule.secondaryRules.map((sr, idx) => (
                           <div key={idx} className="flex items-center gap-1">
@@ -85,7 +91,7 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
                     )}
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
-                    {rule.overAgeRules.length > 0 ? (
+                    {rule.overAgeRules && rule.overAgeRules.length > 0 ? (
                       <div className="space-y-1">
                         {rule.overAgeRules.map((or, idx) => (
                           <div key={idx} className="flex items-center gap-1">
@@ -100,9 +106,9 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
                     <div className="flex justify-center gap-2">
-                       <span title="Männlich">M: {rule.maxTotalAgeClasses.männlich}</span>
+                       <span title="Männlich">M: {rule.maxTotalAgeClasses?.männlich || 0}</span>
                        <span className="text-gray-300">|</span>
-                       <span title="Weiblich">W: {rule.maxTotalAgeClasses.weiblich}</span>
+                       <span title="Weiblich">W: {rule.maxTotalAgeClasses?.weiblich || 0}</span>
                     </div>
                   </td>
                 </tr>
