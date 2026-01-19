@@ -140,7 +140,31 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
           {dynamicRules?.overAgeRules && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
               <h4 className="text-sm font-semibold text-gray-900">Over-Age (OA) Sonderregeln</h4>
-              <p className="mt-2 text-xs text-gray-600">{dynamicRules.overAgeRules.details}</p>
+              <div className="mt-2 space-y-3">
+                {dynamicRules.overAgeRules.logic?.map((l: any, idx: number) => (
+                  <div key={idx} className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                    <span className="font-bold block mb-1 text-gray-900">{l.target_group}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between">
+                        <span>Weiblich:</span>
+                        <span className="font-medium">
+                          {typeof l.female === 'object' && l.female?.year_of_birth 
+                            ? `Geburtsjahr ${l.female.year_of_birth}` 
+                            : l.female}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Männlich:</span>
+                        <span className="font-medium text-right">
+                          {typeof l.male === 'object' 
+                            ? `${l.male.start_date} bis ${l.male.end_date}` 
+                            : l.male}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
