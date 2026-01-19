@@ -316,10 +316,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       {/* Section 1: Non-editable master data */}
       <div className="mt-8">
         <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
-          Stammdaten (nicht änderbar)
+          Stammdaten
         </h3>
         <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-          Diese Daten werden durch den ISHD verwaltet und können nicht geändert
+          Diese Daten werden durch die Passstelle verwaltet und können nicht geändert
           werden.
         </p>
       </div>
@@ -403,7 +403,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     Änderbare Daten
                   </h3>
                   <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-                    Diese Daten können für die BISHL-Anzeige angepasst werden.
+                    Diese Daten können für die Anzeige angepasst werden.
                   </p>
                 </div>
                 {!editMode && (
@@ -689,29 +689,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       />
                     </div>
                   )}
-
-                  {(() => {
-                    const hasPrimary = values.assignedTeams?.some(a => 
-                      a.teams.some(t => t.licenseType === "PRIMARY")
-                    );
-                    if (!hasPrimary) {
-                      return (
-                        <div className="mt-4 border-l-4 border-yellow-400 rounded-md bg-yellow-50 p-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <SparklesIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm font-medium text-yellow-800">
-                                Es sollte mindestens eine PRIMARY Lizenz existieren. Bitte ordne das entsprechende Team zu.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
 
                   <AssignmentModal
                     isOpen={isModalOpen}

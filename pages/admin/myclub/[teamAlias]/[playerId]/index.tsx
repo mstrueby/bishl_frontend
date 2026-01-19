@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import PlayerForm from '../../../../../components/admin/PlayerForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
+import WkoRules from '../../../../../components/admin/wko/WkoRules';
 import { PlayerValues } from '../../../../../types/PlayerValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import LoadingState from '../../../../../components/ui/LoadingState';
@@ -25,6 +26,8 @@ const Edit: NextPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const [wkoRules, setWkoRules] = useState<any[]>([]);
+  const [dynamicRules, setDynamicRules] = useState<any>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -47,8 +50,15 @@ const Edit: NextPage = () => {
           setClubId(user.club.clubId);
           setClubName(user.club.clubName);
 
-          const response = await apiClient.get(`/players/${playerId}`);
-          setPlayer(response.data);
+          const [playerResponse, wkoResponse] = await Promise.all([
+            apiClient.get(`/players/${playerId}`),
+            apiClient.get('/players/wko-rules')
+          ]);
+          setPlayer(playerResponse.data);
+          if (wkoResponse.data?.success) {
+            setWkoRules(wkoResponse.data.data.wko_rules || []);
+            setDynamicRules(wkoResponse.data.data.dynamic_rules || null);
+          }
         } catch (error) {
           console.error('Error fetching player:', getErrorMessage(error));
           setError(getErrorMessage(error));
@@ -215,6 +225,8 @@ const Edit: NextPage = () => {
         clubId={clubId}
         clubName={clubName}
       />
+
+      <WkoRules rules={wkoRules} dynamicRules={dynamicRules} />
     </Layout>
   );
 };
