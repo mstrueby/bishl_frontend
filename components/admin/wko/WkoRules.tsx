@@ -131,7 +131,7 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
               <ul className="mt-2 space-y-1 text-xs text-gray-600">
                 {dynamicRules.ageGroups.logic?.map((l: any, idx: number) => (
                   <li key={idx}>
-                    {l.max_age_diff ? `Max. Differenz ${l.max_age_diff} Jahre → ${l.group}` : l.default}
+                    {l.year_range ? `${l.year_range} → ${l.group}` : l.default}
                   </li>
                 ))}
               </ul>
