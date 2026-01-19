@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useRef } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import InputText from "../ui/form/InputText";
@@ -81,6 +81,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const [licenceErrorMessage, setLicenceErrorMessage] = useState<string | null>(null);
   const [masterDataLoading, setMasterDataLoading] = useState(false);
   const [licenceLoading, setLicenceLoading] = useState(false);
+  const masterSectionRef = useRef<HTMLDivElement>(null);
+  const licenceSectionRef = useRef<HTMLDivElement>(null);
   const [savedMasterData, setSavedMasterData] = useState({
     displayFirstName: initialValues.displayFirstName,
     displayLastName: initialValues.displayLastName,
@@ -102,7 +104,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const showMasterSuccess = (message: string) => {
     setMasterSuccessMessage(message);
     setMasterErrorMessage(null);
-    setTimeout(() => setMasterSuccessMessage(null), 5000);
   };
 
   const showMasterError = (message: string) => {
@@ -113,7 +114,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const showLicenceSuccess = (message: string) => {
     setLicenceSuccessMessage(message);
     setLicenceErrorMessage(null);
-    setTimeout(() => setLicenceSuccessMessage(null), 5000);
   };
 
   const showLicenceError = (message: string) => {
@@ -138,6 +138,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pässe erfolgreich optimiert.");
+      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       console.error("Error auto-optimizing:", error);
       showLicenceError("Fehler bei der Optimierung.");
@@ -161,6 +162,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pässe erfolgreich validiert.");
+      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       console.error("Error revalidating:", error);
       showLicenceError("Fehler bei der Validierung.");
@@ -205,6 +207,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pass erfolgreich entfernt.");
+      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       console.error("Error removing licence:", error);
       showLicenceError("Fehler beim Entfernen des Passes.");
@@ -234,6 +237,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           ? "Pass erfolgreich aktualisiert."
           : "Neuer Pass erfolgreich hinzugefügt.",
       );
+      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       console.error("Error saving assignment:", error);
       throw error;
@@ -288,6 +292,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       onPlayerUpdate(response.data);
       setEditMode(false);
       showMasterSuccess("Daten erfolgreich gespeichert.");
+      masterSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       console.error("Error saving master data:", error);
       showMasterError("Fehler beim Speichern der Daten.");
@@ -391,7 +396,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
         {({ values, handleChange, setFieldValue, resetForm }) => (
           <Form>
             {/* Section 2: Editable master data */}
-            <div className="mt-12">
+            <div className="mt-12" ref={masterSectionRef}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
@@ -621,7 +626,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               });
 
               return (
-                <div className="mt-12">
+                <div className="mt-12" ref={licenceSectionRef}>
                   <div className="flex items-center justify-between border-b border-gray-200 pb-4">
                     <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
                       Spielerpässe
