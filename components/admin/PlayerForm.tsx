@@ -12,6 +12,8 @@ import ImageUpload from "../ui/form/ImageUpload";
 import { CldImage } from "next-cloudinary";
 import Badge from "../ui/Badge";
 import Toggle from "../ui/form/Toggle";
+import SuccessMessage from "../ui/SuccessMessage";
+import ErrorMessage from "../ui/ErrorMessage";
 import AssignmentModal from "../ui/AssignmentModal";
 import { canAlsoPlayInAgeGroup, ageGroupConfig } from "../../tools/consts";
 import apiClient from "../../lib/apiClient";
@@ -415,13 +417,19 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               </div>
 
               {masterSuccessMessage && (
-                <div className="mt-4 p-4 rounded-md bg-green-50 border-l-4 border-green-400">
-                  <p className="text-sm text-green-700">{masterSuccessMessage}</p>
+                <div className="mt-4">
+                  <SuccessMessage 
+                    message={masterSuccessMessage} 
+                    onClose={() => setMasterSuccessMessage(null)} 
+                  />
                 </div>
               )}
               {masterErrorMessage && (
-                <div className="mt-4 p-4 rounded-md bg-red-50 border-l-4 border-red-400">
-                  <p className="text-sm text-red-700">{masterErrorMessage}</p>
+                <div className="mt-4">
+                  <ErrorMessage 
+                    error={masterErrorMessage} 
+                    onClose={() => setMasterErrorMessage(null)} 
+                  />
                 </div>
               )}
 
@@ -661,13 +669,19 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                   </div>
 
                   {licenceSuccessMessage && (
-                    <div className="mt-4 p-4 rounded-md bg-green-50 border-l-4 border-green-400">
-                      <p className="text-sm text-green-700">{licenceSuccessMessage}</p>
+                    <div className="mt-4">
+                      <SuccessMessage 
+                        message={licenceSuccessMessage} 
+                        onClose={() => setLicenceSuccessMessage(null)} 
+                      />
                     </div>
                   )}
                   {licenceErrorMessage && (
-                    <div className="mt-4 p-4 rounded-md bg-red-50 border-l-4 border-red-400">
-                      <p className="text-sm text-red-700">{licenceErrorMessage}</p>
+                    <div className="mt-4">
+                      <ErrorMessage 
+                        error={licenceErrorMessage} 
+                        onClose={() => setLicenceErrorMessage(null)} 
+                      />
                     </div>
                   )}
 
