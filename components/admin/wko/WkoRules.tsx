@@ -133,22 +133,23 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWind
                     return <p>Kein Zuweisungsfenster definiert. Spieler können nicht durch Club-Admins zugewiesen werden.</p>;
                   }
                   
-                  const startMonth = assignmentWindow.value?.find((v: any) => v.key === 'START_MONTH')?.value;
-                  const startDay = assignmentWindow.value?.find((v: any) => v.key === 'START_DAY')?.value;
-                  const endMonth = assignmentWindow.value?.find((v: any) => v.key === 'END_MONTH')?.value;
-                  const endDay = assignmentWindow.value?.find((v: any) => v.key === 'END_DAY')?.value;
+                  const startMonth = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'START_MONTH')?.value);
+                  const startDay = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'START_DAY')?.value);
+                  const endMonth = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'END_MONTH')?.value);
+                  const endDay = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'END_DAY')?.value);
 
-                  if (startMonth && startDay && endMonth && endDay) {
-                    // Create dates for current year to format
+                  if (!isNaN(startMonth) && !isNaN(startDay) && !isNaN(endMonth) && !isNaN(endDay)) {
                     const currentYear = new Date().getFullYear();
                     const startDate = new Date(currentYear, startMonth - 1, startDay);
                     const endDate = new Date(currentYear, endMonth - 1, endDay);
                     
-                    return (
-                      <p>
-                        Zuweisungen möglich vom <span className="font-semibold">{format(startDate, 'dd. MMMM', { locale: de })}</span> bis <span className="font-semibold">{format(endDate, 'dd. MMMM', { locale: de })}</span>.
-                      </p>
-                    );
+                    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                      return (
+                        <p>
+                          Zuweisungen möglich vom <span className="font-semibold">{format(startDate, 'd. MMMM', { locale: de })}</span> bis <span className="font-semibold">{format(endDate, 'd. MMMM', { locale: de })}</span>.
+                        </p>
+                      );
+                    }
                   }
                   return <p>Ungültige Fenster-Konfiguration.</p>;
                 })()}
@@ -158,7 +159,17 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWind
           {dynamicRules?.fullFaceReq && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
               <h4 className="text-sm font-semibold text-gray-900">Vollvisier-Pflicht</h4>
-              <p className="mt-2 text-xs text-gray-600">Alle Spieler*innen, die am oder nach dem {dynamicRules.fullFaceReq.threshold_date} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</p>
+              <p className="mt-2 text-xs text-gray-600">
+                {(() => {
+                  try {
+                    const thresholdDate = parseISO(dynamicRules.fullFaceReq.threshold_date);
+                    if (isNaN(thresholdDate.getTime())) throw new Error();
+                    return <>Alle Spieler*innen, die am oder nach dem {format(thresholdDate, 'd.MM.yyyy', { locale: de })} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</>;
+                  } catch (e) {
+                    return <>Alle Spieler*innen, die am oder nach dem {dynamicRules.fullFaceReq.threshold_date} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</>;
+                  }
+                })()}
+              </p>
             </div>
           )}
           {dynamicRules?.ageGroups && (
