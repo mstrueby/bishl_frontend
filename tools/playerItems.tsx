@@ -43,10 +43,7 @@ export const getDataListItems = (
     return {
       _id: player._id,
       title: `${number ? number + ' - ' : ''}${name}`,
-      badge: {
-        value: licenseType,
-        className: licenceTypeBadgeColors[licenseType] || 'bg-gray-50 text-gray-700 ring-gray-600/20'
-      },
+      category: licenseType,
       alias: player._id,
       description: [
         player.ageGroup + (player.overAge && player.ageGroup !== team.ageGroup ? ' (OA)' : ''),
@@ -54,6 +51,7 @@ export const getDataListItems = (
         `geb. ${new Date(player.birthdate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`,
         `${player.sex === 'männlich' ? '♂' : '♀'}`
       ],
+      categories: licenceTypeBadgeColors,
       image: {
         src: player.imageUrl || 'https://res.cloudinary.com/dajtykxvp/image/upload/w_36,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1737579941/players/player.png',
         width: 46,
