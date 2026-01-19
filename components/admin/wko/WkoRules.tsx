@@ -128,13 +128,18 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
           {dynamicRules?.ageGroups && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
               <h4 className="text-sm font-semibold text-gray-900">Altersklassen-Logik</h4>
-              <ul className="mt-2 space-y-1 text-xs text-gray-600">
+              <div className="mt-2 space-y-3">
                 {dynamicRules.ageGroups.logic?.map((l: any, idx: number) => (
-                  <li key={idx}>
-                    {l.year_range ? `${l.year_range} → ${l.group}` : l.default}
-                  </li>
+                  <div key={idx} className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-gray-900">{l.group || (l.default ? "Andere" : "")}</span>
+                      <span className="font-normal">
+                        {l.year_range || l.default}
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
           {dynamicRules?.overAgeRules && (
@@ -159,7 +164,7 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
                           {typeof l.male === 'object' 
                             ? `${l.male.start_date} bis ${l.male.end_date}` 
                             : l.male}
-                        </span>
+                        </span>a
                       </div>
                     </div>
                   </div>
