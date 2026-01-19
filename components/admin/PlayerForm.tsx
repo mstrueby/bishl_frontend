@@ -315,11 +315,11 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     <>
       {/* Section 1: Non-editable master data */}
       <div className="mt-8">
-        <h3 className="text-base/7 font-semibold text-gray-900">
-          Stammdaten
+        <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
+          Stammdaten (nicht änderbar)
         </h3>
         <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-          Diese Daten werden durch die Passstelle verwaltet und können nicht geändert
+          Diese Daten werden durch den ISHD verwaltet und können nicht geändert
           werden.
         </p>
       </div>
@@ -399,11 +399,11 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             <div className="mt-12" ref={masterSectionRef}>
               <div className="flex items-center justify-between border-b border-gray-200 pb-4">
                 <div>
-                  <h3 className="text-base/7 font-semibold text-gray-900">
+                  <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
                     Änderbare Daten
                   </h3>
                   <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-                    Diese Daten können für die Anzeige angepasst werden.
+                    Diese Daten können für die BISHL-Anzeige angepasst werden.
                   </p>
                 </div>
                 {!editMode && (
@@ -493,21 +493,16 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         Verwaltung
                       </dt>
                       <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                        <div className="flex items-center gap-x-3">
-                          <span
-                            className={classNames(
-                              "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                              savedMasterData.managedByISHD
-                                ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-                                : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
-                            )}
-                          >
-                            {savedMasterData.managedByISHD ? "ISHD" : "BISHL"}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-xs text-gray-500">
-                          Über <strong>Verwaltung</strong> kann gesteuert werden, ob die Mannschaftszuordnungen durch die Passstelle oder durch den Verein verwaltet werden.
-                        </p>
+                        <span
+                          className={classNames(
+                            "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                            savedMasterData.managedByISHD
+                              ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+                              : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+                          )}
+                        >
+                          {savedMasterData.managedByISHD ? "ISHD" : "BISHL"}
+                        </span>
                       </dd>
                     </div>
                   </dl>
@@ -566,9 +561,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     <label className="block text-sm font-medium leading-6 text-gray-900">
                       Verwaltung
                     </label>
-                    <p className="mt-1 text-xs text-gray-500">
-                      Über <strong>Verwaltung</strong> kann gesteuert werden, ob die Mannschaftszuordnungen durch die Passstelle oder durch den Verein verwaltet werden.
-                    </p>
                     <select
                       value={values.managedByISHD ? "ISHD" : "BISHL"}
                       onChange={(e) =>
@@ -697,6 +689,29 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       />
                     </div>
                   )}
+
+                  {(() => {
+                    const hasPrimary = values.assignedTeams?.some(a => 
+                      a.teams.some(t => t.licenseType === "PRIMARY")
+                    );
+                    if (!hasPrimary) {
+                      return (
+                        <div className="mt-4 border-l-4 border-yellow-400 rounded-md bg-yellow-50 p-4">
+                          <div className="flex">
+                            <div className="flex-shrink-0">
+                              <SparklesIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                            </div>
+                            <div className="ml-3">
+                              <p className="text-sm font-medium text-yellow-800">
+                                Es sollte mindestens eine PRIMARY Lizenz existieren. Bitte ordne das entsprechende Team zu.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
 
                   <AssignmentModal
                     isOpen={isModalOpen}
