@@ -679,7 +679,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 <th scope="col" className="px-3 py-3.5 text-center">Quelle</th>
                                 <th scope="col" className="px-3 py-3.5 text-center">Pass</th>
                                 <th scope="col" className="px-3 py-3.5 text-left">Aktiv</th>
-                                <th scope="col" className="px-3 py-3.5 text-left">Nr.</th>
+                                <th scope="col" className="px-3 py-3.5 text-center">Nr.</th>
                                 <th scope="col" className="py-3.5 pl-3 pr-4 sm:pr-3">
                                   <span className="sr-only">Aktionen</span>
                                 </th>
@@ -746,7 +746,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                               <span className="text-gray-500">{team.active ? "Aktiv" : "Inaktiv"}</span>
                                             </div>
                                           </td>
-                                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500">{team.jerseyNo || "-"}</td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500 text-center">{team.jerseyNo || "-"}</td>
                                           {isOwnClub && (
                                             <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
                                               <Menu as="div" className="relative inline-block text-left">
