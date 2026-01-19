@@ -229,21 +229,34 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                       >
                         {({ selected, active }) => (
                           <>
-                            <div className="flex items-center gap-x-3">
-                              <span
-                                className={classNames(
-                                  "h-2 w-2 rounded-full flex-shrink-0",
-                                  getStatusColor(team.status),
-                                )}
-                              />
-                              <span
-                                className={classNames(
-                                  selected ? "font-semibold" : "font-normal",
-                                  "block truncate",
-                                )}
-                              >
-                                {team.teamName}
-                              </span>
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-x-3">
+                                <span
+                                  className={classNames(
+                                    "h-2 w-2 rounded-full flex-shrink-0",
+                                    getStatusColor(team.status),
+                                  )}
+                                />
+                                <span
+                                  className={classNames(
+                                    selected ? "font-semibold" : "font-normal",
+                                    "block truncate",
+                                  )}
+                                >
+                                  {team.teamName}
+                                </span>
+                              </div>
+                              {team.recommendedType && (
+                                <span
+                                  className={classNames(
+                                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ml-2",
+                                    licenceTypeBadgeColors[team.recommendedType] ||
+                                      "bg-gray-50 text-gray-600 ring-gray-500/10",
+                                  )}
+                                >
+                                  {team.recommendedType}
+                                </span>
+                              )}
                             </div>
                             {selected && (
                               <span
