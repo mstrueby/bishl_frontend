@@ -397,7 +397,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           <Form>
             {/* Section 2: Editable master data */}
             <div className="mt-12" ref={masterSectionRef}>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-4">
                 <div>
                   <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
                     Änderbare Daten
@@ -439,7 +439,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               )}
 
               {!editMode ? (
-                <div className="mt-6 border-t border-b border-gray-100">
+                <div className="mt-6 border-b border-gray-100">
                   <dl className="divide-y divide-gray-100">
                     <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                       <dt className="text-sm/6 font-medium text-gray-900">
@@ -508,7 +508,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                   </dl>
                 </div>
               ) : (
-                <div className="mt-6 border-t border-gray-100 pt-6">
+                <div className="mt-6 pt-6">
                   {values.imageUrl ? (
                     <div className="mb-6">
                       <span className="block text-sm font-medium mb-2 leading-6 text-gray-900">
