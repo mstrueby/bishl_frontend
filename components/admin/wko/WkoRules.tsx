@@ -1,5 +1,7 @@
 import React from 'react';
 import { ageGroupConfig } from '../../../tools/consts';
+import { format, parseISO } from 'date-fns';
+import { de } from 'date-fns/locale';
 
 interface SecondaryRule {
   targetAgeGroup: string;
@@ -159,29 +161,50 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules }) => {
                     const orderB = ageGroupConfig.find(g => g.key === b.target_group)?.sortOrder || 999;
                     return orderA - orderB;
                   })
-                  .map((l: any, idx: number) => (
-                    <div key={idx} className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                      <span className="font-bold block mb-1 text-gray-900">{l.target_group}</span>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex justify-between">
-                          <span>Weiblich:</span>
-                          <span className="font-medium">
-                            {typeof l.female === 'object' && l.female?.year_of_birth 
-                              ? `Geburtsjahr ${l.female.year_of_birth}` 
-                              : l.female}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Männlich:</span>
-                          <span className="font-medium text-right">
-                            {typeof l.male === 'object' 
-                              ? `${l.male.start_date} bis ${l.male.end_date}` 
-                              : l.male}
-                          </span>
+                  .map((l: any, idx: number) => {
+                    const isFemaleHidden = typeof l.female === 'string' && ['not applicable', 'not eligible'].includes(l.female.toLowerCase());
+                    const isMaleHidden = typeof l.male === 'string' && ['not applicable', 'not eligible'].includes(l.male.toLowerCase());
+                    
+                    if (isFemaleHidden && isMaleHidden) return null;
+
+                    const formatDateRange = (male: any) => {
+                      try {
+                        const start = format(parseISO(male.start_date), 'dd.MM.yyyy', { locale: de });
+                        const end = format(parseISO(male.end_date), 'dd.MM.yyyy', { locale: de });
+                        return `${start} bis ${end}`;
+                      } catch (e) {
+                        return `${male.start_date} bis ${male.end_date}`;
+                      }
+                    };
+
+                    return (
+                      <div key={idx} className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                        <span className="font-bold block mb-1 text-gray-900">{l.target_group}</span>
+                        <div className="flex flex-col gap-1">
+                          {!isFemaleHidden && (
+                            <div className="flex justify-between">
+                              <span>Weiblich:</span>
+                              <span className="font-medium">
+                                {typeof l.female === 'object' && l.female?.year_of_birth 
+                                  ? `Geburtsjahr ${l.female.year_of_birth}` 
+                                  : l.female}
+                              </span>
+                            </div>
+                          )}
+                          {!isMaleHidden && (
+                            <div className="flex justify-between">
+                              <span>Männlich:</span>
+                              <span className="font-medium text-right">
+                                {typeof l.male === 'object' 
+                                  ? formatDateRange(l.male)
+                                  : l.male}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </div>
           )}
