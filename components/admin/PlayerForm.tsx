@@ -690,6 +690,29 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     </div>
                   )}
 
+                  {(() => {
+                    const hasPrimary = values.assignedTeams?.some(a => 
+                      a.teams.some(t => t.licenseType === "PRIMARY")
+                    );
+                    if (!hasPrimary) {
+                      return (
+                        <div className="mt-4 border-l-4 border-yellow-400 rounded-md bg-yellow-50 p-4">
+                          <div className="flex">
+                            <div className="flex-shrink-0">
+                              <SparklesIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                            </div>
+                            <div className="ml-3">
+                              <p className="text-sm font-medium text-yellow-800">
+                                Es sollte mindestens eine PRIMARY Lizenz existieren. Bitte ordne das entsprechende Team zu.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+
                   <AssignmentModal
                     isOpen={isModalOpen}
                     onClose={() => {
