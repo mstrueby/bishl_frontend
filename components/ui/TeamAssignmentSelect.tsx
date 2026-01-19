@@ -26,6 +26,7 @@ interface TeamAssignmentSelectProps {
   managedByISHD?: boolean;
   licenceType?: string;
   licenceSource?: string;
+  assignedTeamIds?: string[];
 }
 
 const licenceTypeBadgeColors: Record<string, string> = {
@@ -47,6 +48,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   managedByISHD = false,
   licenceType = "",
   licenceSource = "",
+  assignedTeamIds = [],
 }) => {
   const [teams, setTeams] = useState<PossibleTeam[]>([]);
   const [loading, setLoading] = useState(true);
@@ -230,62 +232,72 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
                       Keine Mannschaften verfügbar
                     </div>
                   ) : (
-                    teams.map((team) => (
-                      <Listbox.Option
-                        key={team.teamId}
-                        className={({ active }) =>
-                          classNames(
-                            active
-                              ? "bg-indigo-600 text-white"
-                              : "text-gray-900",
-                            "relative cursor-default select-none py-2 pl-3 pr-9",
-                          )
-                        }
-                        value={team.teamId}
-                      >
-                        {({ selected, active }) => (
-                          <>
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex items-center gap-x-3">
-                                {getStatusIndicator(team.status)}
-                                <span
-                                  className={classNames(
-                                    selected ? "font-semibold" : "font-normal",
-                                    "block truncate",
-                                  )}
-                                >
-                                  {team.teamName}
-                                </span>
+                    teams.map((team) => {
+                      const isAlreadyAssigned = assignedTeamIds.includes(team.teamId) && team.teamId !== selectedTeamId;
+                      return (
+                        <Listbox.Option
+                          key={team.teamId}
+                          disabled={isAlreadyAssigned}
+                          className={({ active, disabled: optionDisabled }) =>
+                            classNames(
+                              active
+                                ? "bg-indigo-600 text-white"
+                                : optionDisabled
+                                ? "text-gray-300 bg-gray-50"
+                                : "text-gray-900",
+                              "relative cursor-default select-none py-2 pl-3 pr-9",
+                              optionDisabled ? "cursor-not-allowed" : ""
+                            )
+                          }
+                          value={team.teamId}
+                        >
+                          {({ selected, active, disabled: optionDisabled }) => (
+                            <>
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-x-3">
+                                  {getStatusIndicator(team.status)}
+                                  <span
+                                    className={classNames(
+                                      selected ? "font-semibold" : "font-normal",
+                                      "block truncate",
+                                      optionDisabled ? "opacity-50" : ""
+                                    )}
+                                  >
+                                    {team.teamName}
+                                  </span>
+                                </div>
+                                {team.recommendedType && (
+                                  <span
+                                    className={classNames(
+                                      "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ml-2",
+                                      optionDisabled
+                                        ? "bg-gray-100 text-gray-400 ring-gray-300"
+                                        : licenceTypeBadgeColors[team.recommendedType] ||
+                                          "bg-gray-50 text-gray-600 ring-gray-500/10",
+                                    )}
+                                  >
+                                    {team.recommendedType}
+                                  </span>
+                                )}
                               </div>
-                              {team.recommendedType && (
+                              {selected && (
                                 <span
                                   className={classNames(
-                                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ml-2",
-                                    licenceTypeBadgeColors[team.recommendedType] ||
-                                      "bg-gray-50 text-gray-600 ring-gray-500/10",
+                                    active ? "text-white" : "text-indigo-600",
+                                    "absolute inset-y-0 right-0 flex items-center pr-2",
                                   )}
                                 >
-                                  {team.recommendedType}
+                                  <CheckIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
                                 </span>
                               )}
-                            </div>
-                            {selected && (
-                              <span
-                                className={classNames(
-                                  active ? "text-white" : "text-indigo-600",
-                                  "absolute inset-y-0 right-0 flex items-center pr-2",
-                                )}
-                              >
-                                <CheckIcon
-                                  className="h-5 w-5"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </Listbox.Option>
-                    ))
+                            </>
+                          )}
+                        </Listbox.Option>
+                      );
+                    })
                   )}
                 </Listbox.Options>
               </Transition>

@@ -222,6 +222,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     managedByISHD={managedByISHD}
                     licenceType={editingTeam?.licenseType}
                     licenceSource={editingTeam?.source}
+                    assignedTeamIds={currentAssignments.flatMap(a => a.teams.map(t => t.teamId))}
                   />
 
                   <div>
