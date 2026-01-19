@@ -28,6 +28,7 @@ const Edit: NextPage = () => {
   const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [wkoRules, setWkoRules] = useState<any[]>([]);
   const [dynamicRules, setDynamicRules] = useState<any>(null);
+  const [assignmentWindow, setAssignmentWindow] = useState<any>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -50,9 +51,10 @@ const Edit: NextPage = () => {
           setClubId(user.club.clubId);
           setClubName(user.club.clubName);
 
-          const [playerResponse, wkoResponse] = await Promise.all([
+          const [playerResponse, wkoResponse, assignmentWindowResponse] = await Promise.all([
             apiClient.get(`/players/${playerId}`),
-            apiClient.get('/players/wko-rules')
+            apiClient.get('/players/wko-rules'),
+            apiClient.get('/configs/player_assignment_window')
           ]);
           
           setPlayer(playerResponse.data);
@@ -66,6 +68,8 @@ const Edit: NextPage = () => {
             setWkoRules(responseData.wko_rules);
             setDynamicRules(responseData.dynamic_rules || null);
           }
+
+          setAssignmentWindow(assignmentWindowResponse.data);
         } catch (error) {
           console.error('Error fetching data:', getErrorMessage(error));
           setError(getErrorMessage(error));
@@ -220,7 +224,7 @@ const Edit: NextPage = () => {
         clubName={clubName}
       />
 
-      <WkoRules rules={wkoRules} dynamicRules={dynamicRules} />
+      <WkoRules rules={wkoRules} dynamicRules={dynamicRules} assignmentWindow={assignmentWindow} />
     </Layout>
   );
 };
