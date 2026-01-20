@@ -106,14 +106,26 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 
 // Use `getStaticPaths` to define which paths will be pre-rendered
 export async function getStaticPaths() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
-  const tournaments = await res.json();
-  // Generate paths with `tAlias` parameter
-  const paths = tournaments.map((tournament: TournamentValues) => ({
-    params: { tAlias: tournament.alias },
-  }));
+  let paths: { params: { tAlias: string } }[] = [];
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+    if (!res.ok) {
+      return { paths, fallback: 'blocking' };
+    }
+    const tournaments = await res.json();
+    if (!Array.isArray(tournaments)) {
+      return { paths, fallback: 'blocking' };
+    }
+    paths = tournaments.map((tournament: TournamentValues) => ({
+      params: { tAlias: tournament.alias },
+    }));
+  } catch {
+    return { paths, fallback: 'blocking' };
+  }
+
   return {
     paths,
-    fallback: 'blocking', // Can be 'blocking' or 'false' or 'true'
+    fallback: 'blocking',
   };
-};
+}
