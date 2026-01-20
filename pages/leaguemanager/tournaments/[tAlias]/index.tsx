@@ -48,15 +48,6 @@ export default function Tournament({
     { label: 'Extern', value: tournament.external ? 'Ja' : 'Nein' },
   ];
 
-  const dataListItems = tournament.seasons
-    .slice()
-    .sort((a, b) => b.alias.localeCompare(a.alias))
-    .map((season) => ({
-      name: season.name,
-      published: season.published,
-      href: `/leaguemanager/tournaments/${tAlias}/${season.alias}`,
-    }));
-
   return (
     <LayoutAdm
       navData={navData}
@@ -76,10 +67,6 @@ export default function Tournament({
       <SectionHeader
         title="Saisons"
         newLink= {`/leaguemanager/tournaments/${tAlias}/addSeason/`}
-      />
-      
-      <DataList
-        items={dataListItems}
       />
 
     </LayoutAdm>

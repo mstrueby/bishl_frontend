@@ -49,7 +49,7 @@ const Edit: NextPage<EditProps> = ({ jwt, tournament }) => {
     setError(null);
 
     // Ignore seasons and _id for update
-    const { seasons, _id, ...valuesToSend } = values;
+    const { _id, ...valuesToSend } = values;
 
     console.log(valuesToSend);
     try {
@@ -100,7 +100,6 @@ const Edit: NextPage<EditProps> = ({ jwt, tournament }) => {
     published: tournament?.published || false,
     active: tournament?.active || false,
     external: tournament?.external || false,
-    seasons: [],
     //website: tournament?.website || '',
   };
 

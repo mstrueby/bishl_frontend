@@ -44,7 +44,15 @@ export default function Add({ jwt }: AddProps) {
       key: '',
       value: ''
     },
-    matchdays: [],
+    matchSettings: {
+      numOfPeriods: 3,
+      periodLengthMin: 20,
+      overtime: false,
+      numOfPeriodsOvertime: 1,
+      periodLengthMinOvertime: 5,
+      shootout: false,
+      refereePoints: 0
+    }
   };
 
   const onSubmit = async (values: RoundValues) => {

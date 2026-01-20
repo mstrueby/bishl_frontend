@@ -35,7 +35,6 @@ export default function Add({ jwt }: AddProps) {
     name: '',
     alias: '',
     published: false,
-    rounds: [],
   };
 
   const onSubmit = async (values: SeasonValues) => {

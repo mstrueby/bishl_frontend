@@ -51,7 +51,7 @@ const Edit: NextPage<EditProps> = ({ jwt, round, tAlias, sAlias, rAlias }) => {
     setError(null);
     
     // Ignore Matchdays for update
-    const { matchdays, ...valuesToSend } = values;
+    const valuesToSend = values;
     console.log(valuesToSend);
 
     try {
@@ -101,7 +101,7 @@ const Edit: NextPage<EditProps> = ({ jwt, round, tAlias, sAlias, rAlias }) => {
     matchdaysType: round?.matchdaysType || '',
     matchdaysSortedBy: round?.matchdaysSortedBy || '',
     published: round?.published || false,
-    matchdays: round?.matchdays || [],
+    matchSettings: round?.matchSettings || []
   };
 
   const formProps = {

@@ -53,7 +53,7 @@ const Edit: NextPage<EditProps> = ({ jwt, season, tAlias, sAlias }) => {
     setError(null);
 
     // Ignore Rounds for update
-    const { rounds, ...valuesToSend } = values;
+    const valuesToSend = values;
     console.log(valuesToSend);
 
     try {
@@ -96,7 +96,6 @@ const Edit: NextPage<EditProps> = ({ jwt, season, tAlias, sAlias }) => {
     name: season?.name || '',
     alias: season?.alias || '',
     published: season?.published || false,
-    rounds: season?.rounds || [],
   };
 
   const formProps = {
