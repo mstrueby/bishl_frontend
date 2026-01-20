@@ -49,38 +49,6 @@ export default function Round({
     { label: 'Statistiken erstellen', value: round.createStats === true ? 'Ja' : 'Nein' },
     { label: 'Veröffentlicht', value: round.published === true ? 'Ja' : 'Nein' },
   ];
-
-  const dataListItems = round.matchdays
-    .slice()
-    .sort((a, b) => {
-      if (a.startDate === null) return 1;
-      if (b.startDate === null) return -1;
-      const dateComparison = new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-      if (dateComparison !== 0) return dateComparison;
-      return a.alias.localeCompare(b.alias);
-    }).map((matchday) => ({
-      name: matchday.name,
-      description: 
-        matchday.startDate === null || matchday.endDate === null 
-        ? '-' 
-        : matchday.endDate && new Date(matchday.endDate).getTime() > new Date(matchday.startDate).getTime()
-        ? `${new Date(matchday.startDate).toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          })} - ${new Date(matchday.endDate).toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          })}`
-        : new Date(matchday.startDate).toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
-      published: matchday.published,
-      href: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/${matchday.alias}`
-    }));
   
   return (
     <LayoutAdm
@@ -103,10 +71,6 @@ export default function Round({
       <SectionHeader
         title="Spieltage"
         newLink={`/leaguemanager/tournaments/${tAlias}/${sAlias}/${rAlias}/addMatchday/`}
-      />
-
-      <DataList
-        items={dataListItems}
       />
 
     </LayoutAdm>

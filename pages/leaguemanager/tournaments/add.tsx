@@ -38,7 +38,6 @@ export default function Add({ jwt }: AddProps) {
     published: false,
     active: false,
     external: false,
-    seasons: [],
   };
 
   const onSubmit = async (values: TournamentValues) => {
