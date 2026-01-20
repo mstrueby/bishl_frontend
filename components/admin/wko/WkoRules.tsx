@@ -1,7 +1,7 @@
-import React from 'react';
-import { ageGroupConfig } from '../../../tools/consts';
-import { format, parseISO } from 'date-fns';
-import { de } from 'date-fns/locale';
+import React from "react";
+import { ageGroupConfig } from "../../../tools/consts";
+import { format, parseISO } from "date-fns";
+import { de } from "date-fns/locale";
 
 interface SecondaryRule {
   targetAgeGroup: string;
@@ -34,20 +34,27 @@ interface WkoRulesProps {
   assignmentWindow?: any;
 }
 
-const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWindow }) => {
+const WkoRules: React.FC<WkoRulesProps> = ({
+  rules,
+  dynamicRules,
+  assignmentWindow,
+}) => {
   // Ensure we are working with an array
   const rulesList = Array.isArray(rules) ? rules : [];
-  
+
   if (rulesList.length === 0) {
     return null;
   }
-  
+
   return (
     <div className="mt-16 pt-10 pb-20">
       <div className="mb-8 pb-4 border-b border-gray-200">
-        <h3 className="text-base font-semibold leading-7 text-gray-900 uppercase">WKO-Regelwerk</h3>
+        <h3 className="text-base font-semibold leading-7 text-gray-900 uppercase">
+          WKO-Regelwerk
+        </h3>
         <p className="mt-1 text-sm leading-6 text-gray-500">
-          Übersicht der Spielberechtigungen und Altersklassen-Regelungen gemäß WKO.
+          Übersicht der Spielberechtigungen und Altersklassen-Regelungen gemäß
+          WKO.
         </p>
       </div>
 
@@ -57,135 +64,146 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWind
           <table className="min-w-full divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Altersklasse</th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Geschlecht</th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Zweitspielrecht (Max)</th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Over-Age (Ziel/Limit)</th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 text-center">Max. Altersklassen</th>
+                <th
+                  scope="col"
+                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                >
+                  Altersklasse
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  Geschlecht
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  Zweitspielrecht (Max)
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  Over-Age (Ziel/Limit)
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 text-center"
+                >
+                  Max. Altersklassen
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {[...rulesList].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((rule) => (
-                <tr key={rule.ageGroup}>
-                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 uppercase">
-                    {rule.label} <span className="text-xs text-gray-400 font-normal normal-case">({rule.altKey})</span>
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    <div className="flex gap-1">
-                      {rule.sex.map(s => (
-                        <span key={s} className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                          {s === 'männlich' ? 'M' : 'W'}
+              {[...rulesList]
+                .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+                .map((rule) => (
+                  <tr key={rule.ageGroup}>
+                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 uppercase">
+                      {rule.label}{" "}
+                      <span className="text-xs text-gray-400 font-normal normal-case">
+                        ({rule.altKey})
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <div className="flex gap-1">
+                        {rule.sex.map((s) => (
+                          <span
+                            key={s}
+                            className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+                          >
+                            {s === "männlich" ? "M" : "W"}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 text-sm text-gray-500">
+                      {rule.secondaryRules && rule.secondaryRules.length > 0 ? (
+                        <div className="space-y-1">
+                          {rule.secondaryRules.map((sr, idx) => (
+                            <div key={idx} className="flex items-center gap-1">
+                              <span className="font-medium">
+                                {sr.targetAgeGroup}
+                              </span>
+                              <span>
+                                ({sr.maxLicenses === 99 ? "∞" : sr.maxLicenses})
+                              </span>
+                              {sr.requiresAdmin && (
+                                <span className="text-[10px] bg-red-50 text-red-600 px-1 rounded border border-red-200">
+                                  Admin
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-4 text-sm text-gray-500">
+                      {rule.overAgeRules && rule.overAgeRules.length > 0 ? (
+                        <div className="space-y-1">
+                          {rule.overAgeRules.map((or, idx) => (
+                            <div key={idx} className="flex items-center gap-1">
+                              <span className="font-medium">
+                                → {or.targetAgeGroup}
+                              </span>
+                              <span>
+                                (max. {or.maxOverAgePlayersPerTeam}/Team)
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
+                      <div className="flex justify-center gap-2">
+                        <span title="Männlich">
+                          M: {rule.maxTotalAgeClasses?.männlich || 0}
                         </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 text-sm text-gray-500">
-                    {rule.secondaryRules && rule.secondaryRules.length > 0 ? (
-                      <div className="space-y-1">
-                        {rule.secondaryRules.map((sr, idx) => (
-                          <div key={idx} className="flex items-center gap-1">
-                            <span className="font-medium">{sr.targetAgeGroup}</span>
-                            <span>({sr.maxLicenses === 99 ? '∞' : sr.maxLicenses})</span>
-                            {sr.requiresAdmin && <span className="text-[10px] bg-red-50 text-red-600 px-1 rounded border border-red-200">Admin</span>}
-                          </div>
-                        ))}
+                        <span className="text-gray-300">|</span>
+                        <span title="Weiblich">
+                          W: {rule.maxTotalAgeClasses?.weiblich || 0}
+                        </span>
                       </div>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-4 text-sm text-gray-500">
-                    {rule.overAgeRules && rule.overAgeRules.length > 0 ? (
-                      <div className="space-y-1">
-                        {rule.overAgeRules.map((or, idx) => (
-                          <div key={idx} className="flex items-center gap-1">
-                            <span className="font-medium">→ {or.targetAgeGroup}</span>
-                            <span>(max. {or.maxOverAgePlayersPerTeam}/Team)</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
-                    <div className="flex justify-center gap-2">
-                       <span title="Männlich">M: {rule.maxTotalAgeClasses?.männlich || 0}</span>
-                       <span className="text-gray-300">|</span>
-                       <span title="Weiblich">W: {rule.maxTotalAgeClasses?.weiblich || 0}</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
 
         {/* Dynamic Rules Info */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {assignmentWindow && (
-            <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900">Zuweisungsfenster</h4>
-              <div className="mt-2 text-xs text-gray-600">
-                {(() => {
-                  const enabled = assignmentWindow.value?.find((v: any) => v.key === 'ENABLED')?.value;
-                  if (!enabled) {
-                    return <p>Kein Zuweisungsfenster definiert. Spieler können nicht durch Club-Admins zugewiesen werden.</p>;
-                  }
-                  
-                  const startMonth = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'START_MONTH')?.value);
-                  const startDay = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'START_DAY')?.value);
-                  const endMonth = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'END_MONTH')?.value);
-                  const endDay = parseInt(assignmentWindow.value?.find((v: any) => v.key === 'END_DAY')?.value);
-
-                  if (!isNaN(startMonth) && !isNaN(startDay) && !isNaN(endMonth) && !isNaN(endDay)) {
-                    const currentYear = new Date().getFullYear();
-                    const startDate = new Date(currentYear, startMonth - 1, startDay);
-                    const endDate = new Date(currentYear, endMonth - 1, endDay);
-                    
-                    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
-                      return (
-                        <p>
-                          Zuweisungen möglich vom <span className="font-semibold">{format(startDate, 'd. MMMM', { locale: de })}</span> bis <span className="font-semibold">{format(endDate, 'd. MMMM', { locale: de })}</span>.
-                        </p>
-                      );
-                    }
-                  }
-                  return <p>Ungültige Fenster-Konfiguration.</p>;
-                })()}
-              </div>
-            </div>
-          )}
-          {dynamicRules?.fullFaceReq && (
-            <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900">Vollvisier-Pflicht</h4>
-              <p className="mt-2 text-xs text-gray-600">
-                {(() => {
-                  try {
-                    const thresholdDate = parseISO(dynamicRules.fullFaceReq.threshold_date);
-                    if (isNaN(thresholdDate.getTime())) throw new Error();
-                    return <>Alle Spieler*innen, die am oder nach dem {format(thresholdDate, 'd.MM.yyyy', { locale: de })} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</>;
-                  } catch (e) {
-                    return <>Alle Spieler*innen, die am oder nach dem {dynamicRules.fullFaceReq.threshold_date} geboren wurden, <em>müssen</em> ein Vollvisier tragen.</>;
-                  }
-                })()}
-              </p>
-            </div>
-          )}
           {dynamicRules?.ageGroups && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900">Altersklassen-Logik</h4>
+              <h4 className="text-sm font-semibold text-gray-900">
+                Altersklassen-Logik
+              </h4>
               <div className="mt-2 space-y-3">
                 {[...(dynamicRules.ageGroups.logic || [])]
                   .sort((a, b) => {
-                    const orderA = ageGroupConfig.find(g => g.key === a.group)?.sortOrder || 999;
-                    const orderB = ageGroupConfig.find(g => g.key === b.group)?.sortOrder || 999;
+                    const orderA =
+                      ageGroupConfig.find((g) => g.key === a.group)
+                        ?.sortOrder || 999;
+                    const orderB =
+                      ageGroupConfig.find((g) => g.key === b.group)
+                        ?.sortOrder || 999;
                     return orderA - orderB;
                   })
                   .map((l: any, idx: number) => (
-                    <div key={idx} className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                    <div
+                      key={idx}
+                      className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0"
+                    >
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-gray-900">{l.group || (l.default ? "Andere" : "")}</span>
+                        <span className="font-bold text-gray-900">
+                          {l.group || (l.default ? "Andere" : "")}
+                        </span>
                         <span className="font-normal">
                           {l.year_range || l.default}
                         </span>
@@ -197,24 +215,46 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWind
           )}
           {dynamicRules?.overAgeRules && (
             <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900">Over-Age (OA) Sonderregeln</h4>
+              <h4 className="text-sm font-semibold text-gray-900">
+                Over-Age (OA) Sonderregeln
+              </h4>
               <div className="mt-2 space-y-3">
                 {[...(dynamicRules.overAgeRules.logic || [])]
                   .sort((a, b) => {
-                    const orderA = ageGroupConfig.find(g => g.key === a.target_group)?.sortOrder || 999;
-                    const orderB = ageGroupConfig.find(g => g.key === b.target_group)?.sortOrder || 999;
+                    const orderA =
+                      ageGroupConfig.find((g) => g.key === a.target_group)
+                        ?.sortOrder || 999;
+                    const orderB =
+                      ageGroupConfig.find((g) => g.key === b.target_group)
+                        ?.sortOrder || 999;
                     return orderA - orderB;
                   })
                   .map((l: any, idx: number) => {
-                    const isFemaleHidden = typeof l.female === 'string' && ['not applicable', 'not eligible'].includes(l.female.toLowerCase());
-                    const isMaleHidden = typeof l.male === 'string' && ['not applicable', 'not eligible'].includes(l.male.toLowerCase());
-                    
+                    const isFemaleHidden =
+                      typeof l.female === "string" &&
+                      ["not applicable", "not eligible"].includes(
+                        l.female.toLowerCase(),
+                      );
+                    const isMaleHidden =
+                      typeof l.male === "string" &&
+                      ["not applicable", "not eligible"].includes(
+                        l.male.toLowerCase(),
+                      );
+
                     if (isFemaleHidden && isMaleHidden) return null;
 
                     const formatDateRange = (male: any) => {
                       try {
-                        const start = format(parseISO(male.start_date), 'dd.MM.yyyy', { locale: de });
-                        const end = format(parseISO(male.end_date), 'dd.MM.yyyy', { locale: de });
+                        const start = format(
+                          parseISO(male.start_date),
+                          "d.M.yyyy",
+                          { locale: de },
+                        );
+                        const end = format(
+                          parseISO(male.end_date),
+                          "d.M.yyyy",
+                          { locale: de },
+                        );
                         return `${start} bis ${end}`;
                       } catch (e) {
                         return `${male.start_date} bis ${male.end_date}`;
@@ -222,15 +262,21 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWind
                     };
 
                     return (
-                      <div key={idx} className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                        <span className="font-bold block mb-1 text-gray-900">{l.target_group}</span>
+                      <div
+                        key={idx}
+                        className="text-xs text-gray-600 border-b border-gray-100 pb-2 last:border-0 last:pb-0"
+                      >
+                        <span className="font-bold block mb-1 text-gray-900">
+                          {l.target_group}
+                        </span>
                         <div className="flex flex-col gap-1">
                           {!isFemaleHidden && (
                             <div className="flex justify-between">
                               <span>Weiblich:</span>
                               <span className="font-medium">
-                                {typeof l.female === 'object' && l.female?.year_of_birth 
-                                  ? `Geburtsjahr ${l.female.year_of_birth}` 
+                                {typeof l.female === "object" &&
+                                l.female?.year_of_birth
+                                  ? `${l.female.year_of_birth}`
                                   : l.female}
                               </span>
                             </div>
@@ -239,7 +285,7 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWind
                             <div className="flex justify-between">
                               <span>Männlich:</span>
                               <span className="font-medium text-right">
-                                {typeof l.male === 'object' 
+                                {typeof l.male === "object"
                                   ? formatDateRange(l.male)
                                   : l.male}
                               </span>
@@ -249,6 +295,122 @@ const WkoRules: React.FC<WkoRulesProps> = ({ rules, dynamicRules, assignmentWind
                       </div>
                     );
                   })}
+              </div>
+            </div>
+          )}
+          {dynamicRules?.fullFaceReq && (
+            <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900">
+                Vollvisier-Pflicht
+              </h4>
+              <p className="mt-2 text-xs text-gray-600">
+                {(() => {
+                  try {
+                    const thresholdDate = parseISO(
+                      dynamicRules.fullFaceReq.threshold_date,
+                    );
+                    if (isNaN(thresholdDate.getTime())) throw new Error();
+                    return (
+                      <>
+                        Alle Spieler*innen, die am oder nach dem{" "}
+                        <strong>
+                          {format(thresholdDate, "d. MMMM yyyy", {
+                            locale: de,
+                          })}
+                        </strong>{" "}
+                        geboren wurden, <em>müssen</em> ein Vollvisier tragen.
+                      </>
+                    );
+                  } catch (e) {
+                    return (
+                      <>
+                        Alle Spieler*innen, die am oder nach dem{" "}
+                        <strong>
+                          {dynamicRules.fullFaceReq.threshold_date}
+                        </strong>{" "}
+                        geboren wurden, <em>müssen</em> ein Vollvisier tragen.
+                      </>
+                    );
+                  }
+                })()}
+              </p>
+            </div>
+          )}
+          {assignmentWindow && (
+            <div className="rounded-lg bg-gray-50 p-6 ring-1 ring-inset ring-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900">
+                Zuweisungsfenster
+              </h4>
+              <div className="mt-2 text-xs text-gray-600">
+                {(() => {
+                  const enabled = assignmentWindow.value?.find(
+                    (v: any) => v.key === "ENABLED",
+                  )?.value;
+                  if (!enabled) {
+                    return (
+                      <p>
+                        Kein Zuweisungsfenster definiert. Spieler können nicht
+                        durch die Vereine zugewiesen werden.
+                      </p>
+                    );
+                  }
+
+                  const startMonth = parseInt(
+                    assignmentWindow.value?.find(
+                      (v: any) => v.key === "START_MONTH",
+                    )?.value,
+                  );
+                  const startDay = parseInt(
+                    assignmentWindow.value?.find(
+                      (v: any) => v.key === "START_DAY",
+                    )?.value,
+                  );
+                  const endMonth = parseInt(
+                    assignmentWindow.value?.find(
+                      (v: any) => v.key === "END_MONTH",
+                    )?.value,
+                  );
+                  const endDay = parseInt(
+                    assignmentWindow.value?.find(
+                      (v: any) => v.key === "END_DAY",
+                    )?.value,
+                  );
+
+                  if (
+                    !isNaN(startMonth) &&
+                    !isNaN(startDay) &&
+                    !isNaN(endMonth) &&
+                    !isNaN(endDay)
+                  ) {
+                    const currentYear = new Date().getFullYear();
+                    const startDate = new Date(
+                      currentYear,
+                      startMonth - 1,
+                      startDay,
+                    );
+                    const endDate = new Date(currentYear, endMonth - 1, endDay);
+
+                    if (
+                      !isNaN(startDate.getTime()) &&
+                      !isNaN(endDate.getTime())
+                    ) {
+                      return (
+                        <p>
+                          Zuweisungen durch die Vereine sind vom{" "}
+                          <span className="font-semibold">
+                            {format(startDate, "d. MMMM", { locale: de })}
+                          </span>{" "}
+                          bis{" "}
+                          <span className="font-semibold">
+                            {format(endDate, "d. MMMM", { locale: de })}
+                          </span>{" "}
+                          möglich.
+                        </p>
+                      );
+                    }
+                  }
+                  return <p>Ungültige Fenster-Konfiguration.</p>;
+                })()}
               </div>
             </div>
           )}
