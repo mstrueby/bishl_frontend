@@ -176,43 +176,73 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 }
 
 export async function getStaticPaths() {
-  const tournamentsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/tournaments`,
-  );
-  const tournaments = await tournamentsRes.json();
   let paths: {
     params: { tAlias: string; sAlias: string; rAlias: string; mdAlias: string };
   }[] = [];
 
-  for (const tournament of tournaments) {
-    const seasonsRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`,
+  try {
+    const tournamentsRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/tournaments`,
     );
-    const seasons = await seasonsRes.json();
-    for (const season of seasons) {
-      const roundsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`,
-      );
-      const rounds = await roundsRes.json();
-      for (const round of rounds) {
-        const matchdaysRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${
-            tournament.alias
-          }/seasons/${season.alias}/rounds/${round.alias}/matchdays`,
+    if (!tournamentsRes.ok) {
+      return { paths, fallback: "blocking" };
+    }
+    const tournaments = await tournamentsRes.json();
+    if (!Array.isArray(tournaments)) {
+      return { paths, fallback: "blocking" };
+    }
+
+    for (const tournament of tournaments) {
+      try {
+        const seasonsRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`,
         );
-        const matchdays = await matchdaysRes.json();
-        for (const matchday of matchdays) {
-          paths.push({
-            params: {
-              tAlias: tournament.alias,
-              sAlias: season.alias,
-              rAlias: round.alias,
-              mdAlias: matchday.alias,
-            },
-          });
+        if (!seasonsRes.ok) continue;
+        const seasons = await seasonsRes.json();
+        if (!Array.isArray(seasons)) continue;
+
+        for (const season of seasons) {
+          try {
+            const roundsRes = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds`,
+            );
+            if (!roundsRes.ok) continue;
+            const rounds = await roundsRes.json();
+            if (!Array.isArray(rounds)) continue;
+
+            for (const round of rounds) {
+              try {
+                const matchdaysRes = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/${season.alias}/rounds/${round.alias}/matchdays`,
+                );
+                if (!matchdaysRes.ok) continue;
+                const matchdays = await matchdaysRes.json();
+                if (!Array.isArray(matchdays)) continue;
+
+                for (const matchday of matchdays) {
+                  paths.push({
+                    params: {
+                      tAlias: tournament.alias,
+                      sAlias: season.alias,
+                      rAlias: round.alias,
+                      mdAlias: matchday.alias,
+                    },
+                  });
+                }
+              } catch {
+                continue;
+              }
+            }
+          } catch {
+            continue;
+          }
         }
+      } catch {
+        continue;
       }
     }
+  } catch {
+    return { paths, fallback: "blocking" };
   }
 
   return {

@@ -110,17 +110,34 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 }
 
 export async function getStaticPaths() {
-  const tournamentsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`);
-  const tournaments = await tournamentsRes.json();
   let paths: { params: { tAlias: string; sAlias: string; } }[] = [];
 
-  for (const tournament of tournaments) {
-    const seasonsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons/`);
-    const seasons = await seasonsRes.json();
-    const tournamentPaths = seasons.map((season: SeasonValues) => ({
-      params: { tAlias: tournament.alias, sAlias: season.alias },
-    }));
-    paths = paths.concat(tournamentPaths);
+  try {
+    const tournamentsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`);
+    if (!tournamentsRes.ok) {
+      return { paths, fallback: 'blocking' };
+    }
+    const tournaments = await tournamentsRes.json();
+    if (!Array.isArray(tournaments)) {
+      return { paths, fallback: 'blocking' };
+    }
+
+    for (const tournament of tournaments) {
+      try {
+        const seasonsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/${tournament.alias}/seasons`);
+        if (!seasonsRes.ok) continue;
+        const seasons = await seasonsRes.json();
+        if (!Array.isArray(seasons)) continue;
+        const tournamentPaths = seasons.map((season: SeasonValues) => ({
+          params: { tAlias: tournament.alias, sAlias: season.alias },
+        }));
+        paths = paths.concat(tournamentPaths);
+      } catch {
+        continue;
+      }
+    }
+  } catch {
+    return { paths, fallback: 'blocking' };
   }
 
   return {
