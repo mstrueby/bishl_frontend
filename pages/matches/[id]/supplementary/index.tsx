@@ -864,13 +864,18 @@ export default function SupplementaryForm() {
         const matchResponse = await apiClient.get(`/matches/${id}`);
         const matchData: MatchValues = matchResponse.data;
         console.log('Supplementary page: Match data fetched', matchData._id);
+        
+        // Stabilize state updates
         setMatch(matchData);
-
-        setFormData({
-          ...matchData.supplementarySheet,
-          timekeeper1: matchData.supplementarySheet?.timekeeper1 || {},
-          timekeeper2: matchData.supplementarySheet?.timekeeper2 || {},
-          technicalDirector: matchData.supplementarySheet?.technicalDirector || {},
+        setFormData(prev => {
+          const nextData = {
+            ...matchData.supplementarySheet,
+            timekeeper1: matchData.supplementarySheet?.timekeeper1 || {},
+            timekeeper2: matchData.supplementarySheet?.timekeeper2 || {},
+            technicalDirector: matchData.supplementarySheet?.technicalDirector || {},
+          };
+          if (JSON.stringify(prev) === JSON.stringify(nextData)) return prev;
+          return nextData;
         });
 
         // Fetch matchday owner
@@ -879,7 +884,8 @@ export default function SupplementaryForm() {
             `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`
           );
           console.log('Supplementary page: Matchday owner fetched');
-          setMatchdayOwner(matchdayResponse.data?.owner || null);
+          const owner = matchdayResponse.data?.owner || null;
+          setMatchdayOwner(prev => prev === owner ? prev : owner);
         } catch (error) {
           console.error('Error fetching matchday owner:', getErrorMessage(error));
         }
@@ -890,7 +896,11 @@ export default function SupplementaryForm() {
             `/assignments/matches/${id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`
           );
           console.log('Supplementary page: Assignments fetched', assignmentsResponse.data?.length);
-          setAssignments(assignmentsResponse.data || []);
+          const nextAssignments = assignmentsResponse.data || [];
+          setAssignments(prev => {
+            if (JSON.stringify(prev) === JSON.stringify(nextAssignments)) return prev;
+            return nextAssignments;
+          });
         } catch (error) {
           console.error('Error fetching assignments:', getErrorMessage(error));
         }
@@ -899,7 +909,11 @@ export default function SupplementaryForm() {
         try {
           const refereesResponse = await apiClient.get('/users/referees');
           console.log('Supplementary page: Referees fetched', refereesResponse.data?.length);
-          setAllReferees(refereesResponse.data || []);
+          const nextReferees = refereesResponse.data || [];
+          setAllReferees(prev => {
+            if (JSON.stringify(prev) === JSON.stringify(nextReferees)) return prev;
+            return nextReferees;
+          });
         } catch (error) {
           console.error('Error fetching referees:', getErrorMessage(error));
         }

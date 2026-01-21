@@ -1,0 +1,113 @@
+Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: true}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: true}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: true, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: fetchData guard return {authLoading: true, user: true, id: '6937469b2fdc65d344112329'}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Match data fetched 6937469b2fdc65d344112329
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Match data fetched 6937469b2fdc65d344112329
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Matchday owner fetched
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Matchday owner fetched
+forward-logs-shared.ts:95 Supplementary page: Match data fetched 6937469b2fdc65d344112329
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Match data fetched 6937469b2fdc65d344112329
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Matchday owner fetched
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Assignments fetched 0
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Matchday owner fetched
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Assignments fetched 0
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Assignments fetched 0
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Assignments fetched 0
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Referees fetched 84
+forward-logs-shared.ts:95 Supplementary page: fetchData finished, setting loading to false
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: false, authLoading: true}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: false, authLoading: true}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: true, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: fetchData guard return {authLoading: true, user: true, id: '6937469b2fdc65d344112329'}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: true}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: true}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: true, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: fetchData guard return {authLoading: true, user: true, id: '6937469b2fdc65d344112329'}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Match data fetched 6937469b2fdc65d344112329
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Matchday owner fetched
+forward-logs-shared.ts:95 Supplementary page: Match data fetched 6937469b2fdc65d344112329
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Assignments fetched 0
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Matchday owner fetched
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Match data fetched 6937469b2fdc65d344112329
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Assignments fetched 0
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: Rendering LoadingState {pageLoading: true, authLoading: false}
+forward-logs-shared.ts:95 Supplementary page: fetchData effect triggered {authLoading: false, user: true, id: '6937469b2fdc65d344112329', routerReady: true}
+forward-logs-shared.ts:95 Supplementary page: Starting fetchData API calls
