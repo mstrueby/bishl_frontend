@@ -25,6 +25,7 @@ import {
   PlusCircleIcon,
   EllipsisVerticalIcon,
   TrashIcon,
+  ArrowUturnLeftIcon
 } from "@heroicons/react/24/outline";
 
 interface PlayerFormProps {
@@ -104,6 +105,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const showMasterSuccess = (message: string) => {
     setMasterSuccessMessage(message);
     setMasterErrorMessage(null);
+    setTimeout(() => {
+      setMasterSuccessMessage(null);
+    }, 3000);
   };
 
   const showMasterError = (message: string) => {
@@ -114,6 +118,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const showLicenceSuccess = (message: string) => {
     setLicenceSuccessMessage(message);
     setLicenceErrorMessage(null);
+    setTimeout(() => {
+      setLicenceSuccessMessage(null);
+    }, 3000)
   };
 
   const showLicenceError = (message: string) => {
@@ -359,7 +366,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               <Badge
                 info={
                   initialValues.ageGroup
-                    ? `${initialValues.ageGroup}${initialValues.overAge ? " (OA)" : ""}`
+                    ? `${initialValues.ageGroup}`
                     : "?"
                 }
               />
@@ -844,8 +851,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
+                <ArrowUturnLeftIcon className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
                 Zurück
               </button>
             </div>
