@@ -843,9 +843,15 @@ export default function SupplementaryForm() {
 
   // Fetch all data on mount
   useEffect(() => {
-    if (authLoading || !id) return;
-    
+    // Wait for auth to be determined and router query to be ready
+    if (authLoading || !router.isReady) return;
+
     if (!user) {
+      setPageLoading(false);
+      return;
+    }
+
+    if (!id) {
       setPageLoading(false);
       return;
     }
@@ -903,7 +909,7 @@ export default function SupplementaryForm() {
     };
 
     fetchData();
-  }, [authLoading, user, id]);
+  }, [authLoading, user, id, router.isReady]);
 
   // Calculate permissions
   const permissions = match && user ? calculateMatchButtonPermissions(user, match, matchdayOwner || undefined) : {
