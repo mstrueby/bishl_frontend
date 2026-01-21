@@ -843,15 +843,27 @@ export default function SupplementaryForm() {
 
   // Fetch all data on mount
   useEffect(() => {
-    if (authLoading || !user || !id) return;
+    console.log('Supplementary page: fetchData effect triggered', { 
+      authLoading, 
+      user: !!user, 
+      id,
+      routerReady: router.isReady 
+    });
+
+    if (authLoading || !user || !id) {
+      console.log('Supplementary page: fetchData guard return', { authLoading, user: !!user, id });
+      return;
+    }
 
     const fetchData = async () => {
       try {
+        console.log('Supplementary page: Starting fetchData API calls');
         setPageLoading(true);
 
         // Fetch match data
         const matchResponse = await apiClient.get(`/matches/${id}`);
         const matchData: MatchValues = matchResponse.data;
+        console.log('Supplementary page: Match data fetched', matchData._id);
         setMatch(matchData);
 
         setFormData({
@@ -866,6 +878,7 @@ export default function SupplementaryForm() {
           const matchdayResponse = await apiClient.get(
             `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`
           );
+          console.log('Supplementary page: Matchday owner fetched');
           setMatchdayOwner(matchdayResponse.data?.owner || null);
         } catch (error) {
           console.error('Error fetching matchday owner:', getErrorMessage(error));
@@ -876,6 +889,7 @@ export default function SupplementaryForm() {
           const assignmentsResponse = await apiClient.get(
             `/assignments/matches/${id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`
           );
+          console.log('Supplementary page: Assignments fetched', assignmentsResponse.data?.length);
           setAssignments(assignmentsResponse.data || []);
         } catch (error) {
           console.error('Error fetching assignments:', getErrorMessage(error));
@@ -884,15 +898,17 @@ export default function SupplementaryForm() {
         // Fetch all referees
         try {
           const refereesResponse = await apiClient.get('/users/referees');
+          console.log('Supplementary page: Referees fetched', refereesResponse.data?.length);
           setAllReferees(refereesResponse.data || []);
         } catch (error) {
           console.error('Error fetching referees:', getErrorMessage(error));
         }
 
       } catch (error) {
-        console.error('Error fetching data:', getErrorMessage(error));
+        console.error('Supplementary page: Error fetching data:', getErrorMessage(error));
         setError('Fehler beim Laden der Daten');
       } finally {
+        console.log('Supplementary page: fetchData finished, setting loading to false');
         setPageLoading(false);
       }
     };
@@ -1053,6 +1069,7 @@ export default function SupplementaryForm() {
 
   // Show loading state
   if (authLoading || pageLoading) {
+    console.log('Supplementary page: Rendering LoadingState', { pageLoading, authLoading });
     return (
       <Layout>
         <LoadingState message="Lade Zusatzblatt..." />
@@ -1062,6 +1079,7 @@ export default function SupplementaryForm() {
 
   // Return null while redirecting
   if (!user) {
+    console.log('Supplementary page: No user, returning null');
     return null;
   }
 
