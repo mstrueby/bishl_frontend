@@ -13,6 +13,7 @@ import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
 import { getErrorMessage } from '../../../../../lib/errorHandler';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -209,7 +210,11 @@ const Edit: NextPage = () => {
 
   return (
     <Layout>
-      <SectionHeader title={sectionTitle.toUpperCase()} description={clubName.toUpperCase()} />
+      <SectionHeader 
+        title={sectionTitle} 
+        description={clubName.toLocaleUpperCase()}
+        backLink={`/admin/myclub/${teamAlias}`}
+      />
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
@@ -225,6 +230,18 @@ const Edit: NextPage = () => {
       />
 
       <WkoRules rules={wkoRules} dynamicRules={dynamicRules} assignmentWindow={assignmentWindow} />
+
+      <div className="mt-8 flex justify-end py-4 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          <ArrowUturnLeftIcon className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+          Zurück
+        </button>
+      </div>
+      
     </Layout>
   );
 };
