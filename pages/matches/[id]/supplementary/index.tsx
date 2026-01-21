@@ -843,7 +843,12 @@ export default function SupplementaryForm() {
 
   // Fetch all data on mount
   useEffect(() => {
-    if (authLoading || !user || !id) return;
+    if (authLoading || !id) return;
+    
+    if (!user) {
+      setPageLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       try {
