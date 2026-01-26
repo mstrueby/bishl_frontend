@@ -1,0 +1,82 @@
+Refactor the React component in the attached file @pages/matches/[id]/[teamFlag]/roster/index.tsx (a Next.js page for managing match rosters in an inline hockey app using FastAPI backend, MongoDB, TypeScript, TailwindCSS). Preserve ALL existing functionality: creating/submitting team lineup, PDF export, all validation checks (e.g., unique C/A, max 2 G, min skaters, no duplicate jerseys, max 5 called players), Coach/Staff sections, "Hochmelden" modal logic, player stats fetching, matchday owner checks, permissions, sorting, and API integrations. Do not change data structures, types (e.g., AvailablePlayer, RosterPlayer, AssignmentTeam), API endpoints, or backend logic—merge roster data with assignedTeams as before.
+
+Core Change: Replace RosterPlayerSelect Dropdown + "Hinzufügen" Button + RosterList with a Single Interactive Table for Better UX (faster selection).
+
+Remove:
+
+RosterPlayerSelect dropdown
+
+Jersey/Position inputs + Add button
+
+Editable RosterList (ul/li with edit/delete)
+
+Replace with:
+
+3 Buttons above table (row, left-aligned, Tailwind-styled like existing):
+
+"Hochmelden" (ArrowUpIcon): Opens existing call-up modal (unchanged).
+
+"Inaktive Spieler" (EyeSlashIcon default): Toggle → EyeIcon + light indigo bg on active. When active (includeInactivePlayers=true), table includes inactive players (active=false from assignedTeams).
+
+"Aufstellung" (ClipboardIcon default): Toggle → "Spielerliste" label + ListBulletIcon. Filters table to only selected players, sorted by: 1. C, 2. A, 3. G+jerseyNo, 4. jerseyNo (use existing sortRoster logic).
+
+Search Input (below buttons, full-width, right-aligned MagnifyingGlass icon): Filters table rows by firstName or lastName (case-insensitive, live). Use state like searchTerm, filter current data list.
+
+Player Selection Table (responsive Tailwind table, full-width, sorted by firstName ascending):
+| Checkbox (selected) | JerseyNo Input (default: assignedTeams[team].jerseyNo, editable) | Position (C A G clickable badges, inline) | Image (CldImage from imageUrl) + firstName lastName | licenceType | source | PassNo | called (with count from playerStats) | status (from assignedTeams, yellow ! or shadow if roster.status != assignedTeams.status—always show assignedTeams value) |
+
+Table Data Source & Merging (preserve logic):
+
+Base: All players where assignedTeams[team].active === true (from teamPlayers + partnerships, as in fetchData).
+
+Merge with existing matchTeam.roster.players: Override "selected", "jerseyNo", "position" from roster if present.
+
+Each row: Extend AvailablePlayer with selected: boolean, jerseyNo: number, position: 'C'|'A'|'G'|null, statusDiff: boolean.
+
+Sort: firstName (stable).
+
+Interactions (local state only until Save; sync to rosterList on changes):
+
+Checkbox: Toggles selected. On change, update row state.
+
+JerseyNo Input: Editable number input (0+), validate no duplicates across selected.
+
+Position: Show "C A G" as clickable badges (inline flex, gray default). Click → colored round bg (e.g., indigo for active). Toggle off by re-click.
+
+C/A: Only one active (deactivate previous if new selected).
+
+G: Up to two active.
+
+Propagate to row position.
+
+Table drives rosterList: Selected rows → build RosterPlayer objects (with position, jerseyNo, etc.) for save/validation/export (use existing sortRoster, isRosterValid).
+
+Validation Integration: Update isRosterValid/checks to use table state (e.g., count selected C/A/G, jersey dups, etc.). Visual indicators (circles/badges) below table use table data.
+
+State Management (add/minimize):
+
+tablePlayers: AvailablePlayerWithRoster[] (merged/extended).
+
+selectedPositions: Record<'C'|'A'|'G', string|null> (for uniqueness).
+
+Preserve rosterList for backward compat (sync from table on changes/save).
+
+showInactive, showLineupOnly, searchTerm.
+
+Preserve/Integrate:
+
+Buttons trigger existing modals/exports (no changes).
+
+Save Roster: Build from table → existing API payload.
+
+PDF: Uses sortRoster(rosterList) → ensure table syncs it.
+
+All useEffects, fetches, permissions unchanged.
+
+Responsive: Mobile-friendly table (scroll/hide cols).
+
+Icons: Heroicons (match existing).
+
+UX: Faster—no modal/add steps; direct table select/edit.
+
+Explain changes in comments. Test validations/save/PDF work identically

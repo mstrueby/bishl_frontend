@@ -1,0 +1,81 @@
+Refactor the RosterPage component from the attached @pages/matches/[id]/[teamFlag]/roster/index.tsx file to improve UX by replacing the dropdown + "Hinzufügen" mechanism and RosterList with a selectable player table. Preserve all existing functionality: lineup creation and submission, PDF export, validation checks, and Coach/Staff sections. The code uses Next.js, React, Headless UI, Heroicons, Tailwind CSS, and custom hooks/types like useAuth, apiClient, AvailablePlayer, RosterPlayer, etc. Identify and maintain all data flows, API calls, states (e.g., rosterList, availablePlayersList, coachData), sorting (sortRoster), validations (isRosterValid), and permissions.
+
+Key Changes
+
+Remove: RosterPlayerSelect dropdown, jerseyNumber/position inputs, add/edit/delete buttons, RosterList component. No more manual add/edit/delete modals for players.
+
+Replace with: A new table above the existing Roster Completeness Check section, using current availablePlayersList (default: active players from assignedTeam where active=true, sorted by firstName).
+
+Preserve: All fetches (fetchData, player stats), states, handlers (handleSaveRoster, handleConfirmCallUp), coach/staff editing, PDF, publish toggle, modals (call-up, edit if needed), checks, sorting logic.
+
+New Table Structure and Features
+
+Build a responsive Tailwind table (<table className="min-w-full divide-y divide-gray-200">) with these columns (left to right):
+
+Checkbox: <input type="checkbox" /> to select/deselect player for lineup. Track selections in new state selectedPlayers: AvailablePlayer[] (init empty). Checkbox checked if in selectedPlayers.
+
+Jersey Number Input: <input type="number" value={player.jerseyNo || ''} onChange={update jersey for this player} />. Defaults from assignedTeams.(team).jerseyNo. Validate no zeros/duplicates in existing checks.
+
+Position Indicators: Display clickable buttons "C A G" side-by-side (<div className="flex space-x-1">). Each is a small rounded button (Tailwind: px-2 py-1 text-xs rounded font-medium).
+
+Default: plain gray text.
+
+Active: indigo background, white text (bg-indigo-100 text-indigo-800 → bg-indigo-500 text-white on click toggle).
+
+Logic: Track per-player positions in new state playerPositions: Record<string, string[]> (player.id → ['C'] or []).
+
+Rules: Only 1 C total (deactivate previous if new), 1 A total, max 2 G total. On click: toggle for that player, enforce globals (scan all, deactivate others). F not needed.
+
+Player Info: <CldImage src={player.imageUrl} width={32} height={32} className="rounded-full" alt="" /> + {player.firstName} {player.lastName} (sortable by firstName).
+
+Licence Type: {player.licenceType || '-'} (infer from types if missing).
+
+Source: {player.source}.
+
+PassNo: {player.passNo}.
+
+Called: {player.called ? Hochgemeldet (${playerStats[player.id]?.calledMatches || 0}) : 'Nein'} with green/yellow/red badges like existing.
+
+Status: {player.active ? 'Aktiv' : 'Inaktiv'}.
+
+Table Data:
+
+Source: availablePlayersList (filtered/sorted as now).
+
+Sort: Always by firstName ascending.
+
+Row key: player.id.
+
+On checkbox change: Add/remove from selectedPlayers. Auto-generate RosterPlayer entries: { player: { playerId, firstName, lastName, jerseyNumber, playerPosition: derive from playerPositions (priority C>A>G>F), passNumber }, called, goals:0, etc. }. Sync rosterList = sortRoster(selectedPlayers.map(toRosterPlayer)).
+
+Derive position for RosterPlayer: Scan playerPositions[player.id], prioritize C if present, else A, else G (first one), else F.
+
+Buttons Above Table (flex row, gap-2, left-aligned)
+
+"Hochmelden" (ArrowUpIcon right): button onClick={() => setIsCallUpModalOpen(true)} className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700". Opens existing call-up modal.
+
+"Inaktive Spieler" (EyeSlashIcon → EyeIcon on toggle): Track showInactive: boolean = false. On click: toggle state, indigo bg (bg-indigo-100) when active. If true, set includeInactivePlayers=true (existing toggle logic).
+
+"Aufstellung" (ClipboardIcon → ListBulletIcon, text → "Spielerliste"): Track viewMode: 'all' | 'lineup' = 'all'. On click toggle. If 'lineup': filter table to only selectedPlayers, sort by: 1. C, 2. A, 3. G+jerseyNo, 4. jerseyNo (use existing sortRoster priority).
+
+Search Field (below buttons, full-width)
+
+<div className="relative mt-4"> <input type="text" placeholder="Suche nach Namen..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 border rounded-md..." /> <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /> </div>
+
+Filter: Client-side on current table data (all/filtered by inactive/viewMode). Search firstName + ' ' + lastName contains searchTerm (case-insensitive).
+
+Integration and Behavior
+
+On Load: Table shows all active players (existing availablePlayersList). rosterList syncs from selections (load existing rosterList → pre-select checkboxes, set jersey/positions).
+
+Save: handleSaveRoster unchanged – uses rosterList.
+
+Validations: Existing isRosterValid works on rosterList (C=1, A=1, G<=2, min skaters, no zero/dup jerseys, <=5 called).
+
+UX Speed: Direct select + edit in-table. Remove modals/buttons except call-up.
+
+Responsive: Mobile: Stack columns or scroll-x. Use hidden sm:table-cell for less critical cols.
+
+Edge Cases: Empty table: "Keine Spieler verfügbar". Preserve all existing logic for partnerships, stats, permissions, etc.
+
+Output clean, refactored JSX/TSX code. Add new states/handlers minimally. Use existing utils (classNames, sortRoster). Ensure TypeScript compliance with AvailablePlayer, RosterPlayer.
