@@ -71,7 +71,7 @@ export interface AssignmentTeam {
   passNo: string;
   licenseType: LicenseTypeEnum;
   status: LicenseStatusEnum;
-  invalidReasonCodes: LicenseInvalidReasonCode;
+  invalidReasonCodes: LicenseInvalidReasonCode[];
   adminOverride: boolean;
   overrideReason: string;
   overrideDate: string;

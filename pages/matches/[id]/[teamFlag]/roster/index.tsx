@@ -177,14 +177,14 @@ const RosterPage = () => {
 
         const matchTeamData: Team = teamFlag === 'home' ? matchData.home : matchData.away;
         setMatchTeam(matchTeamData);
-        setRosterList(sortRoster(matchTeamData.roster || []));
-        setRosterPublished(matchTeamData.rosterPublished || false);
+        setRosterList(sortRoster(matchTeamData.roster?.players || []));
+        setRosterPublished(matchTeamData.roster?.published || false);
         setCoachData({
-          firstName: matchTeamData.coach?.firstName || '',
-          lastName: matchTeamData.coach?.lastName || '',
-          licence: matchTeamData.coach?.licence || ''
+          firstName: matchTeamData.roster?.coach?.firstName || '',
+          lastName: matchTeamData.roster?.coach?.lastName || '',
+          licence: matchTeamData.roster?.coach?.licence || ''
         });
-        const initialStaff = matchTeamData.staff || [];
+        const initialStaff = matchTeamData.roster?.staff || [];
         const staffArray = [...initialStaff];
         if (staffArray.length === 0) {
           staffArray.push({ firstName: '', lastName: '', role: '' });
@@ -301,7 +301,7 @@ const RosterPage = () => {
 
         setAllAvailablePlayersList(sortedAvailablePlayers);
 
-        const rosterPlayerIds = (matchTeamData.roster || []).map(rp => rp.player.playerId);
+        const rosterPlayerIds = (matchTeamData.roster?.players || []).map(rp => rp.player.playerId);
         const filteredAvailablePlayers = sortedAvailablePlayers.filter(player =>
           !rosterPlayerIds.includes(player._id)
         );
