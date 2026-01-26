@@ -4,7 +4,7 @@ import useAuth from '../../../hooks/useAuth';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { CldImage } from 'next-cloudinary';
-import { MatchValues, RosterPlayer, PenaltiesBase, ScoresBase } from '../../../types/MatchValues';
+import { MatchValues, Roster, RosterPlayer, PenaltiesBase, ScoresBase } from '../../../types/MatchValues';
 import { MatchdayOwner } from '../../../types/TournamentValues'
 import Layout from '../../../components/Layout';
 import { getCookie } from 'cookies-next';
@@ -249,8 +249,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
           <div className="w-full md:w-1/2 mb-6 md:mb-0">
             <RosterTable
               teamName={match.home.fullName}
-              roster={match.home.roster || []}
-              isPublished={match.home.rosterPublished || false}
+              roster={match.home.roster?.players || []}
+              isPublished={match.home.roster?.published || false}
             />
           </div>
 
@@ -258,8 +258,8 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
           <div className="w-full md:w-1/2 mt-4 md:mt-0">
             <RosterTable
               teamName={match.away.fullName}
-              roster={match.away.roster || []}
-              isPublished={match.away.rosterPublished || false}
+              roster={match.away.roster?.players || []}
+              isPublished={match.away.roster?.published || false}
             />
           </div>
         </div>

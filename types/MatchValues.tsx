@@ -24,6 +24,28 @@ export interface RosterPlayer {
   called: boolean;
 }
 
+interface Coach {
+  firstName: string;
+  lastName: string;
+  licence: string
+}
+
+interface Staff {
+  firstName: string;
+  lastName: string;
+  role: string;
+}
+
+export interface Roster {
+  players: RosterPlayer[];
+  status: string;
+  published: boolean;
+  eligibilityTimestamp?: Date;  
+  eligibilityValidator?: string;
+  coach?: Coach;
+  staff?: Staff[];  
+}
+
 export interface ScoresBase {
   _id?: string;
   matchTime: string;
@@ -62,18 +84,7 @@ export interface Team {
   tinyName: string;
   logo: string;
   stats: TeamStats;
-  roster?: RosterPlayer[];
-  rosterPublished?: boolean;
-  coach?: {
-    firstName?: string;
-    lastName?: string;
-    licence?: string;
-  }
-  staff?: {
-    firstName: string;
-    lastName: string;
-    role: string;
-  }[]
+  roster?: Roster;
   scores?: ScoresBase[];
   penalties?: PenaltiesBase[];
 }

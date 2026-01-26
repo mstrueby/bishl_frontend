@@ -36,8 +36,8 @@ const RosterTab: React.FC<RosterTabProps> = ({
     });
   };
 
-  const sortedHomeRoster = sortRoster(match.home.roster || []);
-  const sortedAwayRoster = sortRoster(match.away.roster || []);
+  const sortedHomeRoster = sortRoster(match.home.roster?.players || []);
+  const sortedAwayRoster = sortRoster(match.away.roster?.players || []);
 
   return (
     <div className="flex flex-col md:flex-row md:space-x-8">
@@ -45,7 +45,7 @@ const RosterTab: React.FC<RosterTabProps> = ({
         <RosterList
           teamName={match.home.fullName}
           roster={sortedHomeRoster}
-          isPublished={match.home.rosterPublished || false}
+          isPublished={match.home.roster?.published || false}
           showEditButton={permissions.showButtonRosterHome}
           editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
           sortRoster={sortRoster}
@@ -56,7 +56,7 @@ const RosterTab: React.FC<RosterTabProps> = ({
         <RosterList
           teamName={match.away.fullName}
           roster={sortedAwayRoster}
-          isPublished={match.away.rosterPublished || false}
+          isPublished={match.away.roster?.published || false}
           showEditButton={permissions.showButtonRosterAway}
           editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
           sortRoster={sortRoster}

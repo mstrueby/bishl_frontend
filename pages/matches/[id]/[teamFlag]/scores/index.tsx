@@ -3,7 +3,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { MatchValues, RosterPlayer, EventPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
+import { MatchValues, RosterPlayer, Roster, EventPlayer, Team, ScoresBase } from '../../../../../types/MatchValues';
 import Layout from '../../../../../components/Layout';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import SuccessMessage from '../../../../../components/ui/SuccessMessage';
@@ -67,7 +67,7 @@ const GoalRegisterForm = () => {
 
         const matchTeam: Team = teamFlag === 'home' ? matchData.home : matchData.away;
         setTeam(matchTeam);
-        setRoster(matchTeam.roster || []);
+        setRoster(matchTeam.roster?.players || []);
         setInitialScores(matchTeam.scores || []);
 
       } catch (error) {

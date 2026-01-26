@@ -1,9 +1,15 @@
+export enum ClubType {
+  MAIN = "MAIN",
+  LOAN = "LOAN",
+  DEVELOPMENT = "DEVELOPMENT"
+}
+
 export interface NewClubAssignment {
   clubId: string;
   clubName: string;
   clubAlias: string;
   clubIshdId?: number;
-  clubType: string;
+  clubType: ClubType;
   teams: {
     teamId: string;
     teamName: string;
@@ -42,7 +48,7 @@ export interface Assignment {
   clubName: string;
   clubAlias: string;
   clubIshdId?: string | '';
-  clubType: string; // e.g. "MAIN", "DEVELOPMENT"
+  clubType: ClubType; // e.g. "MAIN", "DEVELOPMENT"
   teams: AssignmentTeam[];
 };
 
@@ -62,6 +68,13 @@ export interface PlayUpTracking {
   occurrences: PlayUpOccurrence[];
 };
 
+export interface Suspension {
+  startDate: string;  // e.g. "2025-01-16T11:36:45.395Z"
+  endDate?: string;  // e.g. "2025-01-16T11:36:45.395Z"
+  reason: string;
+  teamIds?: string[];
+}
+
 export interface PlayerValues {
   _id: string;
   firstName: string;
@@ -76,6 +89,7 @@ export interface PlayerValues {
   sex: 'männlich' | 'weiblich';
   assignedTeams: Assignment[];
   playUpTrackings: PlayUpTracking[];
+  suspensions: Suspension[];
   stats?: {
     tournament: {
       name: string;
