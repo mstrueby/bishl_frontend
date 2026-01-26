@@ -1,3 +1,15 @@
+// ENUMs
+export enum ClubType {
+  MAIN = "MAIN",
+  LOAN = "LOAN",
+  DEVELOPMENT = "DEVELOPMENT",
+}
+
+export enum  TeamType {
+  COMPETITIVE = "COMPETITIVE",
+  HOBBY = "HOBBY"
+}
+
 export interface TeamPartnership {
   clubId: string;
   clubAlias: string
@@ -16,6 +28,7 @@ export interface TeamValues {
   fullName: string;
   shortName: string;
   tinyName: string;
+  teamType: TeamType;
   ageGroup: string;
   teamNumber: number;
   teamPartnership?: TeamPartnership[];  

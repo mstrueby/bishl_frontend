@@ -50,7 +50,8 @@ const invalidReasonCodeMap: Record<string, string> = {
   IMPORT_CONFLICT: "Import-Konflikt",
   UNKNOWN_LICENCE_TYPE: "Unbekannter Passtyp",
   HOBBY_PLAYER_CONFLICT: "Hobbyspieler-Konflikt",
-  LOAN_AGE_GROUP_CONFLICT: "Leihpass-Altersklassenkonflikt"
+  LOAN_AGE_GROUP_CONFLICT: "Leihpass-Altersklassenkonflikt",
+  SUSPENDED: "Gesperrt"
 };
 
 const licenceTypeBadgeColors: Record<string, string> = {
@@ -755,7 +756,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                       </tr>
                                     )}
                                     {assignment.teams.map((team, teamIndex) => {
-                                      const isValid = team.status === "VALID" || team.status === "valid";
+                                      const isValid = team.status === "VALID";
                                       const isLastLicenceInOwnClub = isOwnClub && assignment.teams.length === 1;
                                       const canRemove = !((team.source === "ISHD" && initialValues.managedByISHD) || isLastLicenceInOwnClub);
 
