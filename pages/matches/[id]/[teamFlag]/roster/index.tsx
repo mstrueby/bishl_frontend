@@ -445,10 +445,15 @@ const RosterPage = () => {
     }
   }, [includeInactivePlayers, rosterList, allAvailablePlayersList]);
 
+  // NEW: Track if initial table merge has been done
+  const initialTableMergeRef = useRef(false);
+
   // NEW: Merge allAvailablePlayersList with existing roster data into tablePlayers
   // This creates the combined data structure for the interactive table
+  // Only runs once when allAvailablePlayersList is first populated
   useEffect(() => {
     if (allAvailablePlayersList.length === 0) return;
+    if (initialTableMergeRef.current) return;
 
     const merged: AvailablePlayerWithRoster[] = allAvailablePlayersList.map(player => {
       const rosterPlayer = rosterList.find(rp => rp.player.playerId === player._id);
@@ -467,6 +472,7 @@ const RosterPage = () => {
     // Sort by firstName ascending as default
     merged.sort((a, b) => a.firstName.localeCompare(b.firstName));
     setTablePlayers(merged);
+    initialTableMergeRef.current = true;
   }, [allAvailablePlayersList, rosterList]);
 
   // NEW: Handler to toggle player selection in table
@@ -776,7 +782,7 @@ const RosterPage = () => {
       return;
     }
 
-    if (availablePlayersList.some(p => p._id === selectedCallUpPlayer._id)) {
+    if (tablePlayers.some(p => p._id === selectedCallUpPlayer._id)) {
       setCallUpModalError('Dieser Spieler ist bereits in der Liste verfügbar');
       return;
     }
@@ -786,6 +792,7 @@ const RosterPage = () => {
       called: true
     };
 
+    // Add to availablePlayersList for backward compatibility
     setAvailablePlayersList(prev => {
       const newList = [...prev, playerWithCalled];
       return newList.sort((a, b) => {
@@ -795,11 +802,19 @@ const RosterPage = () => {
       });
     });
 
-    setSelectedPlayer(playerWithCalled);
-
-    if (selectedCallUpPlayer.jerseyNo) {
-      setPlayerNumber(selectedCallUpPlayer.jerseyNo);
-    }
+    // NEW: Also add to tablePlayers for the new table UI
+    const tablePlayerToAdd: AvailablePlayerWithRoster = {
+      ...playerWithCalled,
+      selected: false,
+      rosterJerseyNo: playerWithCalled.jerseyNo || 0,
+      rosterPosition: null,
+      statusDiff: false,
+      assignedStatus: playerWithCalled.status,
+    };
+    setTablePlayers(prev => {
+      const newList = [...prev, tablePlayerToAdd];
+      return newList.sort((a, b) => a.firstName.localeCompare(b.firstName));
+    });
 
     setIsCallUpModalOpen(false);
     setSelectedCallUpTeam(null);
@@ -1132,343 +1147,269 @@ const RosterPage = () => {
       {/* Main Form */}
       <div className="bg-white shadow-md rounded-lg border">
 
-        {/* Add Player Form */}
+        {/* NEW: Action Buttons Row */}
         <div className="p-4 border-b bg-gray-50">
           <div className="flex flex-col gap-4">
-            {/* Player Selection */}
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setIsCallUpModalOpen(true)}
-                  className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
-                  Hochmelden
-                </button>
-              </div>
-              <div className="flex flex-row items-center justify-between sm:justify-end">
-                <span className="text-sm text-gray-700 sm:mr-4">Inaktive Spieler anzeigen</span>
-                <Switch
-                  checked={includeInactivePlayers}
-                  onChange={setIncludeInactivePlayers}
-                  className={`${includeInactivePlayers ? 'bg-indigo-600' : 'bg-gray-200'
-                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`${includeInactivePlayers ? 'translate-x-5' : 'translate-x-0'
-                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                  />
-                </Switch>
-              </div>
-              <RosterPlayerSelect
-                ref={playerSelectRef}
-                name="player-select"
-                tabIndex={1}
-                selectedPlayer={selectedPlayer ? {
-                  player: {
-                    playerId: selectedPlayer._id,
-                    firstName: selectedPlayer.firstName,
-                    lastName: selectedPlayer.lastName,
-                    jerseyNumber: selectedPlayer.jerseyNo || 0
-                  },
-                  playerPosition: { key: 'F', value: 'Feldspieler' },
-                  passNumber: selectedPlayer.passNo,
-                  called: selectedPlayer.called,
-                  goals: 0,
-                  assists: 0,
-                  points: 0,
-                  penaltyMinutes: 0
-                } : null}
-                onChange={(selectedRosterPlayer) => {
-                  if (selectedRosterPlayer) {
-                    const availablePlayer = availablePlayersList.find(p => p._id === selectedRosterPlayer.player.playerId);
-                    if (availablePlayer) {
-                      setSelectedPlayer(availablePlayer);
-                      if (availablePlayer.jerseyNo) {
-                        setPlayerNumber(availablePlayer.jerseyNo);
-                      }
-                    }
-                  } else {
-                    setSelectedPlayer(null);
-                  }
-                }}
-                roster={availablePlayersList.map(player => ({
-                  player: {
-                    playerId: player._id,
-                    firstName: player.firstName,
-                    lastName: player.lastName,
-                    jerseyNumber: player.jerseyNo || 0
-                  },
-                  playerPosition: { key: 'F', value: 'Feldspieler' },
-                  passNumber: player.passNo,
-                  called: player.called,
-                  goals: 0,
-                  assists: 0,
-                  points: 0,
-                  penaltyMinutes: 0
-                }))}
-                placeholder="Spieler auswählen"
+            {/* 3 Action Buttons Row */}
+            <div className="flex flex-wrap gap-2">
+              {/* Hochmelden Button - Opens existing call-up modal */}
+              <button
+                type="button"
+                onClick={() => setIsCallUpModalOpen(true)}
+                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                <ArrowUpIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                Hochmelden
+              </button>
+
+              {/* Inaktive Spieler Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIncludeInactivePlayers(!includeInactivePlayers)}
+                className={classNames(
+                  includeInactivePlayers ? 'bg-indigo-100 ring-indigo-300' : 'bg-white ring-gray-300',
+                  'inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset hover:bg-gray-50'
+                )}
+              >
+                {includeInactivePlayers ? (
+                  <EyeIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                ) : (
+                  <EyeSlashIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                )}
+                Inaktive Spieler
+              </button>
+
+              {/* Aufstellung/Spielerliste Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setShowLineupOnly(!showLineupOnly)}
+                className={classNames(
+                  showLineupOnly ? 'bg-indigo-100 ring-indigo-300' : 'bg-white ring-gray-300',
+                  'inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset hover:bg-gray-50'
+                )}
+              >
+                {showLineupOnly ? (
+                  <>
+                    <ListBulletIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                    Spielerliste
+                  </>
+                ) : (
+                  <>
+                    <ClipboardDocumentListIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                    Aufstellung
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Spieler suchen..."
+                className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              </div>
             </div>
-            {/* Jersey Number and Position */}
-            <div className="flex flex-row justify-between items-center mb-1">
-              <div>
-                <label htmlFor="player-number" className="block text-sm font-medium text-gray-700 mb-1">
+          </div>
+        </div>
+
+        {/* NEW: Interactive Player Selection Table */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="w-12 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <span className="sr-only">Auswahl</span>
+                </th>
+                <th scope="col" className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Nr.
-                </label>
-                <input
-                  ref={jerseyNumberRef}
-                  type="text"
-                  id="player-number"
-                  value={playerNumber}
-                  onChange={(e) => setPlayerNumber(parseInt(e.target.value) || 0)}
-                  className="block w-16 rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  placeholder="##"
-                  tabIndex={2}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === 'Tab') {
-                      e.preventDefault();
-                      if (positionSelectRef.current) {
-                        positionSelectRef.current.focus();
-                      }
-                    }
-                  }}
-                />
-              </div>
-              <div className="w-full ml-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                </th>
+                <th scope="col" className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Position
-                </label>
-                <Listbox value={playerPosition} onChange={setPlayerPosition}>
-                  {({ open }) => (
-                    <>
-                      <div className="relative">
-                        <Listbox.Button
-                          ref={positionSelectRef}
-                          tabIndex={3}
-                          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                            if (e.key === 'Enter' && !open) {
-                              e.preventDefault();
-                            }
-                            const key = e.key.toUpperCase();
-                            if (['C', 'A', 'G', 'F'].includes(key)) {
-                              e.preventDefault();
-                              const position = playerPositions.find(pos => pos.key === key);
-                              if (position) {
-                                setPlayerPosition(position);
-                              }
-                            }
-                          }}
-                          className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                          <span className="block truncate">
-                            {playerPosition.key} - {playerPosition.value}
-                          </span>
-                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                          </span>
-                        </Listbox.Button>
+                </th>
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Spieler
+                </th>
+                <th scope="col" className="hidden md:table-cell px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Quelle
+                </th>
+                <th scope="col" className="hidden sm:table-cell px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Pass Nr.
+                </th>
+                <th scope="col" className="hidden lg:table-cell px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {getFilteredTablePlayers().length > 0 ? (
+                getFilteredTablePlayers().map((player) => {
+                  const hasEvents = match[teamFlag as 'home' | 'away'].scores?.some(score =>
+                    score.goalPlayer.playerId === player._id ||
+                    (score.assistPlayer && score.assistPlayer.playerId === player._id)
+                  ) || match[teamFlag as 'home' | 'away'].penalties?.some(penalty =>
+                    penalty.penaltyPlayer.playerId === player._id
+                  );
+                  const isDuplicateJersey = player.selected && player.rosterJerseyNo > 0 &&
+                    tablePlayers.filter(p => p.selected && p.rosterJerseyNo === player.rosterJerseyNo).length > 1;
 
-                        <Transition
-                          show={open}
-                          as={Fragment}
-                          leave="transition ease-in duration-100"
-                          leaveFrom="opacity-100"
-                          leaveTo="opacity-0"
-                        >
-                          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                            {playerPositions.map((position) => (
-                              <Listbox.Option
-                                key={position.key}
-                                className={({ active }) =>
-                                  classNames(
-                                    active ? 'bg-indigo-600 text-white' : 'text-gray-900',
-                                    'relative cursor-default select-none py-2 pl-3 pr-9'
-                                  )
-                                }
-                                value={position}
-                              >
-                                {({ selected, active }) => (
-                                  <>
-                                    <span className={classNames(
-                                      selected ? 'font-semibold' : 'font-normal',
-                                      'block truncate'
-                                    )}>
-                                      {position.key} - {position.value}
-                                    </span>
+                  return (
+                    <tr
+                      key={player._id}
+                      className={classNames(
+                        player.selected ? 'bg-indigo-50' : '',
+                        player.active === false ? 'opacity-60' : '',
+                        isDuplicateJersey ? 'bg-yellow-50' : ''
+                      )}
+                    >
+                      {/* Checkbox */}
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={player.selected}
+                          onChange={() => handleTablePlayerToggle(player._id)}
+                          disabled={hasEvents && player.selected}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-600 border-gray-300 rounded disabled:opacity-50"
+                        />
+                      </td>
 
-                                    {selected ? (
-                                      <span
-                                        className={classNames(
-                                          active ? 'text-white' : 'text-indigo-600',
-                                          'absolute inset-y-0 right-0 flex items-center pr-4'
-                                        )}
-                                      >
-                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                      </span>
-                                    ) : null}
-                                  </>
-                                )}
-                              </Listbox.Option>
-                            ))}
-                          </Listbox.Options>
-                        </Transition>
-                      </div>
-                    </>
-                  )}
-                </Listbox>
-              </div>
-            </div>
-          </div>
-          {/** Button */}
-          <div className="mt-4 flex justify-end">
-            <button
-              ref={addButtonRef}
-              type="button"
-              onClick={handleAddPlayer}
-              disabled={loading}
-              tabIndex={4}
-              onKeyDown={(e) => {
-                if (e.key === 'Tab' && !e.shiftKey) {
-                  e.preventDefault();
-                  if (playerSelectRef.current) {
-                    playerSelectRef.current.focus();
-                  }
-                }
-              }}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-              Hinzufügen
-            </button>
-          </div>
-        </div>
+                      {/* Jersey Number Input */}
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <input
+                          type="number"
+                          min="0"
+                          value={player.rosterJerseyNo || ''}
+                          onChange={(e) => handleTableJerseyChange(player._id, parseInt(e.target.value) || 0)}
+                          className={classNames(
+                            'w-14 rounded-md border-0 py-1 px-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset focus:ring-indigo-600',
+                            isDuplicateJersey ? 'ring-red-500 bg-red-50' : 'ring-gray-300',
+                            player.rosterJerseyNo === 0 && player.selected ? 'ring-yellow-500 bg-yellow-50' : ''
+                          )}
+                        />
+                      </td>
 
-        {/* Roster List - Editable View */}
-        <div className="">
-          <ul className="divide-y divide-gray-200">
-            {rosterList.length > 0 ? (
-              rosterList.map((player) => (
-                <li key={player.player.playerId} className={`px-6 py-4 ${player.player.jerseyNumber === 0 ? 'bg-yellow-50' : ''}`}>
-                  <div className="flex items-center">
-                    <div className={`min-w-8 md:min-w-12 text-sm font-semibold ${player.player.jerseyNumber === 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                      {player.player.jerseyNumber}
-                    </div>
-                    <div className="min-w-8 md:min-w-12 text-sm font-medium text-gray-500">
-                      {player.playerPosition.key}
-                    </div>
-                    <div className="flex-1 text-sm text-gray-900">
-                      {player.player.lastName}, {player.player.firstName}
-                    </div>
-                    <div className="flex-1 hidden sm:block flex-1 text-xs">
-                      <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                        {player.passNumber}
-                      </span>
-                    </div>
-                    <div className="flex-1 text-sm text-gray-500 ml-6 md:ml-0">
-                      {player.called ? (
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
-                         ${playerStats[player.player.playerId] >= 0 && playerStats[player.player.playerId] + 1 <= 4
-                            ? 'bg-green-50 text-green-800 ring-green-600/20'
-                            : playerStats[player.player.playerId] + 1 === 5
-                              ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
-                              : 'bg-red-50 text-red-800 ring-red-600/20'}`}>
-                          <ArrowUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
-                          <span className="hidden sm:block">
-                            Hochgemeldet
-                            {playerStats[player.player.playerId] !== undefined ? ` (${playerStats[player.player.playerId] + 1})` : ''}
-                          </span>
+                      {/* Position Badges (C, A, G) */}
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <div className="flex gap-1">
+                          {(['C', 'A', 'G'] as const).map((pos) => (
+                            <button
+                              key={pos}
+                              type="button"
+                              onClick={() => handleTablePositionToggle(player._id, pos)}
+                              className={classNames(
+                                'w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition-colors',
+                                player.rosterPosition === pos
+                                  ? pos === 'C' ? 'bg-blue-600 text-white'
+                                    : pos === 'A' ? 'bg-green-600 text-white'
+                                      : 'bg-purple-600 text-white'
+                                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                              )}
+                            >
+                              {pos}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+
+                      {/* Player Image + Name */}
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {player.imageUrl && player.imageVisible ? (
+                            <CldImage
+                              src={player.imageUrl}
+                              alt={`${player.firstName} ${player.lastName}`}
+                              width={32}
+                              height={32}
+                              crop="thumb"
+                              gravity="face"
+                              className="h-8 w-8 rounded-full mr-2 object-cover"
+                            />
+                          ) : (
+                            <div className="h-8 w-8 rounded-full bg-gray-200 mr-2 flex items-center justify-center">
+                              <span className="text-xs text-gray-500">
+                                {player.firstName.charAt(0)}{player.lastName.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {player.firstName} {player.lastName}
+                            </div>
+                            {player.originalTeam && (
+                              <div className="text-xs text-gray-500">{player.originalTeam}</div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Source */}
+                      <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {player.source}
+                      </td>
+
+                      {/* Pass Number */}
+                      <td className="hidden sm:table-cell px-3 py-3 whitespace-nowrap">
+                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                          {player.passNo}
                         </span>
-                      ) : null}
-                    </div>
-                    <div className="flex space-x-2 sm:ml-4">
-                      <button
-                        type="button"
-                        onClick={() => handleEditPlayer(player)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        <PencilIcon className="h-5 w-5" aria-hidden="true" />
-                      </button>
-                      {(() => {
-                        const hasScored = match[teamFlag as 'home' | 'away'].scores?.some(score =>
-                          score.goalPlayer.playerId === player.player.playerId ||
-                          (score.assistPlayer && score.assistPlayer.playerId === player.player.playerId)
-                        );
-                        const hasPenalty = match[teamFlag as 'home' | 'away'].penalties?.some(penalty =>
-                          penalty.penaltyPlayer.playerId === player.player.playerId
-                        );
-                        const hasEvents = hasScored || hasPenalty;
+                      </td>
 
-                        if (hasEvents) {
-                          return (
-                            <button
-                              type="button"
-                              disabled
-                              title="Spieler kann nicht entfernt werden, da er bereits ein Tor erzielt, einen Assist gegeben oder eine Strafe erhalten hat."
-                              className="text-gray-400 cursor-not-allowed"
-                            >
-                              <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                            </button>
-                          );
-                        } else {
-                          return (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const playerToAddBack = allAvailablePlayersList.find(p => p._id === player.player.playerId);
-
-                                const updatedRoster = rosterList.filter(p => p.player.playerId !== player.player.playerId);
-                                setRosterList(updatedRoster);
-
-                                if (playerToAddBack && !availablePlayersList.some(p => p._id === playerToAddBack._id)) {
-                                  setAvailablePlayersList(prevList => {
-                                    const newList = [...prevList, playerToAddBack];
-                                    return newList.sort((a, b) => {
-                                      const lastNameComparison = a.lastName.localeCompare(b.lastName);
-                                      return lastNameComparison !== 0 ? lastNameComparison :
-                                        a.firstName.localeCompare(b.firstName);
-                                    });
-                                  });
-                                }
-                              }}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                            </button>
-                          );
-                        }
-                      })()}
-                    </div>
-                  </div>
-                </li>
-              ))
-            ) : (
-              <li className="px-6 py-4 text-center text-gray-500">
-                Keine Spieler in der Aufstellung
-              </li>
-            )}
-          </ul>
-
-          {/* Player Count Summary */}
-          {rosterList.length > 0 && (
-            <div className="border-t border-gray-200 bg-gray-50 px-6 py-3">
-              <div className="flex justify-between text-sm text-gray-900">
-                <span>
-                  Feldspieler: <span className="font-medium">{rosterList.filter(player => player.playerPosition.key !== 'G').length}</span>
-                </span>
-                <span>
-                  Goalies: <span className="font-medium">{rosterList.filter(player => player.playerPosition.key === 'G').length}</span>
-                </span>
-                <span>
-                  Gesamt: <span className="font-medium">{rosterList.length}</span>
-                </span>
-              </div>
-            </div>
-          )}
+                      {/* Status with Called indicator */}
+                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {player.called && (
+                            <span className={classNames(
+                              'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                              playerStats[player._id] !== undefined && playerStats[player._id] + 1 <= 4
+                                ? 'bg-green-50 text-green-800 ring-green-600/20'
+                                : playerStats[player._id] !== undefined && playerStats[player._id] + 1 === 5
+                                  ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
+                                  : 'bg-gray-50 text-gray-600 ring-gray-500/20'
+                            )}>
+                              <ArrowUpIcon className="h-3 w-3 mr-0.5" aria-hidden="true" />
+                              {playerStats[player._id] !== undefined ? playerStats[player._id] + 1 : ''}
+                            </span>
+                          )}
+                          {player.active === false && (
+                            <span className="text-xs text-yellow-600">Inaktiv</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    {searchTerm ? 'Keine Spieler gefunden' : 'Keine Spieler verfügbar'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
+
+        {/* Player Count Summary */}
+        {tablePlayers.filter(p => p.selected).length > 0 && (
+          <div className="border-t border-gray-200 bg-gray-50 px-6 py-3">
+            <div className="flex justify-between text-sm text-gray-900">
+              <span>
+                Feldspieler: <span className="font-medium">{tablePlayers.filter(p => p.selected && p.rosterPosition !== 'G').length}</span>
+              </span>
+              <span>
+                Goalies: <span className="font-medium">{tablePlayers.filter(p => p.selected && p.rosterPosition === 'G').length}</span>
+              </span>
+              <span>
+                Gesamt: <span className="font-medium">{tablePlayers.filter(p => p.selected).length}</span>
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Roster Completeness Check */}
         <div className="p-6 border-t bg-gray-50">
