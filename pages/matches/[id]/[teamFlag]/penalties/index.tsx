@@ -103,7 +103,7 @@ const PenaltyRegisterForm = () => {
 
         const matchTeam: Team = teamFlag === 'home' ? matchData.home : matchData.away;
         setTeam(matchTeam);
-        setRoster(matchTeam.roster || []);
+        setRoster(matchTeam.roster?.players || []);
         setInitialPenalties(matchTeam.penalties || []);
 
       } catch (error) {

@@ -253,9 +253,9 @@ export default function MatchDetails({
       // Fetch home team stats
       if (
         match.home.roster &&
-        match.home.roster.some((player: RosterPlayer) => player.called)
+        match.home.roster.players.some((player: RosterPlayer) => player.called)
       ) {
-        const homeStats = await fetchPlayerStats(match.home.roster, {
+        const homeStats = await fetchPlayerStats(match.home.roster.players, {
           name: match.home.name,
         });
         setHomePlayerStats(homeStats);
@@ -264,9 +264,9 @@ export default function MatchDetails({
       // Fetch away team stats
       if (
         match.away.roster &&
-        match.away.roster.some((player: RosterPlayer) => player.called)
+        match.away.roster.players.some((player: RosterPlayer) => player.called)
       ) {
-        const awayStats = await fetchPlayerStats(match.away.roster, {
+        const awayStats = await fetchPlayerStats(match.away.roster.players, {
           name: match.away.name,
         });
         setAwayPlayerStats(awayStats);
@@ -979,7 +979,7 @@ export default function MatchDetails({
           }}
           matchId={match._id}
           teamFlag="home"
-          roster={[...(match.home.roster || [])].sort(
+          roster={[...(match.home.roster?.players || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
           onSuccess={refreshMatchData}
@@ -995,7 +995,7 @@ export default function MatchDetails({
           }}
           matchId={match._id}
           teamFlag="away"
-          roster={[...(match.away.roster || [])].sort(
+          roster={[...(match.away.roster?.players || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
           onSuccess={refreshMatchData}
@@ -1011,7 +1011,7 @@ export default function MatchDetails({
           }}
           matchId={match._id}
           teamFlag="home"
-          roster={[...(match.home.roster || [])].sort(
+          roster={[...(match.home.roster?.players || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
           onSuccess={refreshMatchData}
@@ -1027,7 +1027,7 @@ export default function MatchDetails({
           }}
           matchId={match._id}
           teamFlag="away"
-          roster={[...(match.away.roster || [])].sort(
+          roster={[...(match.away.roster?.players || [])].sort(
             (a, b) => a.player.jerseyNumber - b.player.jerseyNumber,
           )}
           onSuccess={refreshMatchData}
