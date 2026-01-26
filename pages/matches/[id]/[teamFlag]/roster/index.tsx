@@ -109,14 +109,8 @@ const RosterPage = () => {
 
   const [backLink, setBackLink] = useState('/');
   const playerSelectRef = useRef<any>(null);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
-  const jerseyNumberRef = useRef<HTMLInputElement>(null);
-  const positionSelectRef = useRef<HTMLButtonElement>(null);
   const [loading, setLoading] = useState(false);
   const [savingRoster, setSavingRoster] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<AvailablePlayer | null>(null);
-  const [playerNumber, setPlayerNumber] = useState<number>(0);
-  const [playerPosition, setPlayerPosition] = useState(playerPositions[0]);
   const [availablePlayersList, setAvailablePlayersList] = useState<AvailablePlayer[]>([]);
   const [rosterPublished, setRosterPublished] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -143,9 +137,10 @@ const RosterPage = () => {
   const [staffData, setStaffData] = useState<{ firstName: string; lastName: string; role: string; }[]>([
     { firstName: '', lastName: '', role: '' }
   ]);
-  const [rosterList, setRosterList] = useState<RosterPlayer[]>([]);
+  // Initial roster data from server - only used for initial table population
+  const [initialRosterData, setInitialRosterData] = useState<RosterPlayer[]>([]);
 
-  // NEW STATE: Interactive table-based player selection
+  // NEW STATE: Interactive table-based player selection - SINGLE SOURCE OF TRUTH
   const [tablePlayers, setTablePlayers] = useState<AvailablePlayerWithRoster[]>([]);
   const [showLineupOnly, setShowLineupOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,6 +163,30 @@ const RosterPage = () => {
       return jerseyA - jerseyB;
     });
   }, []);
+
+  // DERIVED: rosterList is computed from tablePlayers - single source of truth
+  const rosterList = React.useMemo((): RosterPlayer[] => {
+    const selectedPlayers = tablePlayers.filter(p => p.selected);
+    const roster: RosterPlayer[] = selectedPlayers.map(player => ({
+      player: {
+        playerId: player._id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        jerseyNumber: player.rosterJerseyNo,
+      },
+      playerPosition: {
+        key: player.rosterPosition || 'F',
+        value: playerPositions.find(pos => pos.key === (player.rosterPosition || 'F'))?.value || 'Feldspieler',
+      },
+      passNumber: player.passNo,
+      called: player.called || false,
+      goals: 0,
+      assists: 0,
+      points: 0,
+      penaltyMinutes: 0,
+    }));
+    return sortRoster(roster);
+  }, [tablePlayers, sortRoster]);
 
   // Auth check - redirect to login if not authenticated
   useEffect(() => {
@@ -194,7 +213,7 @@ const RosterPage = () => {
 
         const matchTeamData: Team = teamFlag === 'home' ? matchData.home : matchData.away;
         setMatchTeam(matchTeamData);
-        setRosterList(sortRoster(matchTeamData.roster?.players || []));
+        setInitialRosterData(sortRoster(matchTeamData.roster?.players || []));
         setRosterPublished(matchTeamData.roster?.published || false);
         setCoachData({
           firstName: matchTeamData.roster?.coach?.firstName || '',
@@ -376,17 +395,21 @@ const RosterPage = () => {
   const hasRosterPermission = teamFlag === 'home' ? permissions.showButtonRosterHome : permissions.showButtonRosterAway;
 
   // Check if all requirements are met for publishing the roster
+  // Uses tablePlayers (selected rows) as the source of truth for validation
   const isRosterValid = () => {
-    const hasZeroJerseyNumber = rosterList.some(player => player.player.jerseyNumber === 0);
-    const hasCaptain = rosterList.some(player => player.playerPosition.key === 'C');
-    const hasAssistant = rosterList.some(player => player.playerPosition.key === 'A');
-    const hasGoalie = rosterList.some(player => player.playerPosition.key === 'G');
-    const skaterCount = rosterList.filter(player => player.playerPosition.key != 'G').length;
+    const selectedPlayers = tablePlayers.filter(p => p.selected);
+    
+    const hasZeroJerseyNumber = selectedPlayers.some(player => player.rosterJerseyNo === 0);
+    const hasCaptain = selectedPlayers.some(player => player.rosterPosition === 'C');
+    const hasAssistant = selectedPlayers.some(player => player.rosterPosition === 'A');
+    const hasGoalie = selectedPlayers.some(player => player.rosterPosition === 'G');
+    const skaterCount = selectedPlayers.filter(player => player.rosterPosition !== 'G').length;
     const hasMinSkater = skaterCount >= minSkaterCount;
-    const calledPlayersCount = rosterList.filter(player => player.called).length;
+    const calledPlayersCount = selectedPlayers.filter(player => player.called).length;
     const hasMaxCalledPlayers = calledPlayersCount <= 5;
-    const hasDoubleJerseyNumbers = rosterList.some((player, index) =>
-      rosterList.findIndex(p => p.player.jerseyNumber === player.player.jerseyNumber) !== index
+    const jerseyNumbers = selectedPlayers.map(p => p.rosterJerseyNo);
+    const hasDoubleJerseyNumbers = jerseyNumbers.some((num, index) =>
+      jerseyNumbers.indexOf(num) !== index
     );
 
     return !hasZeroJerseyNumber && hasCaptain && hasAssistant && hasGoalie && hasMinSkater && hasMaxCalledPlayers && !hasDoubleJerseyNumbers;
@@ -445,63 +468,83 @@ const RosterPage = () => {
     }
   }, [includeInactivePlayers, rosterList, allAvailablePlayersList]);
 
-  // NEW: Track if initial table merge has been done
-  const initialTableMergeRef = useRef(false);
+  // Track if initial table sync from initialRosterData has been done
+  const initialRosterSyncRef = useRef(false);
 
-  // NEW: Merge allAvailablePlayersList with existing roster data into tablePlayers
-  // This creates the combined data structure for the interactive table
-  // Only runs once when allAvailablePlayersList is first populated
+  // NEW: Merge allAvailablePlayersList with initial roster data into tablePlayers
+  // This runs on initial load and when allAvailablePlayersList/initialRosterData changes
+  // The ref prevents infinite loops by only doing the full merge once
   useEffect(() => {
     if (allAvailablePlayersList.length === 0) return;
-    if (initialTableMergeRef.current) return;
 
-    const merged: AvailablePlayerWithRoster[] = allAvailablePlayersList.map(player => {
-      const rosterPlayer = rosterList.find(rp => rp.player.playerId === player._id);
-      const isSelected = !!rosterPlayer;
+    setTablePlayers(prev => {
+      // Initial merge: tablePlayers is empty OR we haven't synced initial roster yet
+      if (prev.length === 0 || (!initialRosterSyncRef.current && initialRosterData.length > 0)) {
+        initialRosterSyncRef.current = true;
+        const merged: AvailablePlayerWithRoster[] = allAvailablePlayersList.map(player => {
+          const rosterPlayer = initialRosterData.find(rp => rp.player.playerId === player._id);
+          const isSelected = !!rosterPlayer;
+          
+          return {
+            ...player,
+            selected: isSelected,
+            rosterJerseyNo: rosterPlayer?.player.jerseyNumber ?? player.jerseyNo ?? 0,
+            rosterPosition: rosterPlayer?.playerPosition.key as 'C' | 'A' | 'G' | 'F' | null ?? null,
+            statusDiff: false,
+            assignedStatus: player.status,
+          };
+        });
+        merged.sort((a, b) => a.firstName.localeCompare(b.firstName));
+        return merged;
+      }
+
+      // After initial sync: only add new players from allAvailablePlayersList
+      // (e.g., players added via call-up that are now in allAvailablePlayersList)
+      const existingIds = new Set(prev.map(p => p._id));
+      const newPlayers = allAvailablePlayersList.filter(p => !existingIds.has(p._id));
       
-      return {
-        ...player,
-        selected: isSelected,
-        rosterJerseyNo: rosterPlayer?.player.jerseyNumber ?? player.jerseyNo ?? 0,
-        rosterPosition: rosterPlayer?.playerPosition.key as 'C' | 'A' | 'G' | 'F' | null ?? null,
-        statusDiff: false,
-        assignedStatus: player.status,
-      };
-    });
+      if (newPlayers.length === 0) {
+        return prev;
+      }
 
-    // Sort by firstName ascending as default
-    merged.sort((a, b) => a.firstName.localeCompare(b.firstName));
-    setTablePlayers(merged);
-    initialTableMergeRef.current = true;
-  }, [allAvailablePlayersList, rosterList]);
+      const newTablePlayers: AvailablePlayerWithRoster[] = newPlayers.map(player => {
+        const rosterPlayer = initialRosterData.find(rp => rp.player.playerId === player._id);
+        const isSelected = !!rosterPlayer;
+        
+        return {
+          ...player,
+          selected: isSelected,
+          rosterJerseyNo: rosterPlayer?.player.jerseyNumber ?? player.jerseyNo ?? 0,
+          rosterPosition: rosterPlayer?.playerPosition.key as 'C' | 'A' | 'G' | 'F' | null ?? null,
+          statusDiff: false,
+          assignedStatus: player.status,
+        };
+      });
+
+      const combined = [...prev, ...newTablePlayers];
+      combined.sort((a, b) => a.firstName.localeCompare(b.firstName));
+      return combined;
+    });
+  }, [allAvailablePlayersList, initialRosterData]);
 
   // NEW: Handler to toggle player selection in table
   const handleTablePlayerToggle = (playerId: string) => {
-    setTablePlayers(prev => {
-      const updated = prev.map(player => {
-        if (player._id === playerId) {
-          return { ...player, selected: !player.selected };
-        }
-        return player;
-      });
-      // Sync to rosterList for backward compatibility
-      syncTableToRosterList(updated);
-      return updated;
-    });
+    setTablePlayers(prev => prev.map(player => {
+      if (player._id === playerId) {
+        return { ...player, selected: !player.selected };
+      }
+      return player;
+    }));
   };
 
   // NEW: Handler to update jersey number in table
   const handleTableJerseyChange = (playerId: string, jerseyNo: number) => {
-    setTablePlayers(prev => {
-      const updated = prev.map(player => {
-        if (player._id === playerId) {
-          return { ...player, rosterJerseyNo: jerseyNo };
-        }
-        return player;
-      });
-      syncTableToRosterList(updated);
-      return updated;
-    });
+    setTablePlayers(prev => prev.map(player => {
+      if (player._id === playerId) {
+        return { ...player, rosterJerseyNo: jerseyNo };
+      }
+      return player;
+    }));
   };
 
   // NEW: Handler for position badge click (C, A, G)
@@ -512,19 +555,17 @@ const RosterPage = () => {
 
       // If clicking same position, toggle off to F (Feldspieler)
       if (player.rosterPosition === position) {
-        const updated = prev.map(p => {
+        return prev.map(p => {
           if (p._id === playerId) {
             return { ...p, rosterPosition: 'F' as const };
           }
           return p;
         });
-        syncTableToRosterList(updated);
-        return updated;
       }
 
       // C and A: only one active at a time - deactivate previous
       if (position === 'C' || position === 'A') {
-        const updated = prev.map(p => {
+        return prev.map(p => {
           if (p._id === playerId) {
             return { ...p, rosterPosition: position, selected: true };
           }
@@ -534,8 +575,6 @@ const RosterPage = () => {
           }
           return p;
         });
-        syncTableToRosterList(updated);
-        return updated;
       }
 
       // G: max 2 active
@@ -545,43 +584,20 @@ const RosterPage = () => {
           setError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
           return prev;
         }
-        const updated = prev.map(p => {
+        return prev.map(p => {
           if (p._id === playerId) {
             return { ...p, rosterPosition: position, selected: true };
           }
           return p;
         });
-        syncTableToRosterList(updated);
-        return updated;
       }
 
       return prev;
     });
   };
 
-  // NEW: Sync tablePlayers to rosterList for save/validation/PDF
-  const syncTableToRosterList = (players: AvailablePlayerWithRoster[]) => {
-    const selectedPlayers = players.filter(p => p.selected);
-    const newRosterList: RosterPlayer[] = selectedPlayers.map(player => ({
-      player: {
-        playerId: player._id,
-        firstName: player.firstName,
-        lastName: player.lastName,
-        jerseyNumber: player.rosterJerseyNo,
-      },
-      playerPosition: {
-        key: player.rosterPosition || 'F',
-        value: playerPositions.find(pos => pos.key === (player.rosterPosition || 'F'))?.value || 'Feldspieler',
-      },
-      passNumber: player.passNo,
-      called: player.called || false,
-      goals: 0,
-      assists: 0,
-      points: 0,
-      penaltyMinutes: 0,
-    }));
-    setRosterList(sortRoster(newRosterList));
-  };
+  // NOTE: rosterList is now derived via useMemo from tablePlayers (see line ~170)
+  // No sync useEffect needed - rosterList automatically updates when tablePlayers changes
 
   // NEW: Get filtered and sorted table data based on current view settings
   const getFilteredTablePlayers = React.useCallback(() => {
@@ -792,6 +808,16 @@ const RosterPage = () => {
       called: true
     };
 
+    // Add to allAvailablePlayersList (the master list) so filters/toggles don't drop call-ups
+    setAllAvailablePlayersList(prev => {
+      const newList = [...prev, playerWithCalled];
+      return newList.sort((a, b) => {
+        const lastNameComparison = a.lastName.localeCompare(b.lastName);
+        return lastNameComparison !== 0 ? lastNameComparison :
+          a.firstName.localeCompare(b.firstName);
+      });
+    });
+
     // Add to availablePlayersList for backward compatibility
     setAvailablePlayersList(prev => {
       const newList = [...prev, playerWithCalled];
@@ -837,55 +863,61 @@ const RosterPage = () => {
   const handleSaveEdit = () => {
     if (!editingPlayer) return;
 
+    // Use tablePlayers (selected rows) for validation - single source of truth
+    const selectedPlayers = tablePlayers.filter(p => p.selected);
+
     if (editPlayerPosition.key === 'C' &&
-      rosterList.some(player =>
-        player.playerPosition.key === 'C' &&
-        player.player.playerId !== editingPlayer.player.playerId
+      selectedPlayers.some(player =>
+        player.rosterPosition === 'C' &&
+        player._id !== editingPlayer.player.playerId
       )) {
       setModalError('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
       return;
     }
 
     if (editPlayerPosition.key === 'A' &&
-      rosterList.some(player =>
-        player.playerPosition.key === 'A' &&
-        player.player.playerId !== editingPlayer.player.playerId
+      selectedPlayers.some(player =>
+        player.rosterPosition === 'A' &&
+        player._id !== editingPlayer.player.playerId
       )) {
       setModalError('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
       return;
     }
 
-    if (editPlayerPosition.key === 'G' && editingPlayer.playerPosition.key !== 'G') {
-      const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
-      if (goalieCount >= 2) {
-        setModalError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
-        return;
+    if (editPlayerPosition.key === 'G') {
+      const currentPlayer = selectedPlayers.find(p => p._id === editingPlayer.player.playerId);
+      if (currentPlayer?.rosterPosition !== 'G') {
+        const goalieCount = selectedPlayers.filter(player => player.rosterPosition === 'G').length;
+        if (goalieCount >= 2) {
+          setModalError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
+          return;
+        }
       }
     }
 
-    if (editPlayerPosition.key === 'F' && editingPlayer.playerPosition.key !== 'F') {
-      const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
-      if (feldspielerCount >= 14) {
-        setModalError('Es können maximal 14 Feldspieler (F) eingetragen werden');
-        return;
+    if (editPlayerPosition.key === 'F') {
+      const currentPlayer = selectedPlayers.find(p => p._id === editingPlayer.player.playerId);
+      if (currentPlayer?.rosterPosition !== 'F') {
+        const feldspielerCount = selectedPlayers.filter(player => player.rosterPosition === 'F').length;
+        if (feldspielerCount >= 14) {
+          setModalError('Es können maximal 14 Feldspieler (F) eingetragen werden');
+          return;
+        }
       }
     }
 
-    const updatedRoster = rosterList.map(player => {
-      if (player.player.playerId === editingPlayer.player.playerId) {
+    // Only update tablePlayers - the useEffect will sync to rosterList
+    setTablePlayers(prev => prev.map(tp => {
+      if (tp._id === editingPlayer.player.playerId) {
         return {
-          ...player,
-          player: {
-            ...player.player,
-            jerseyNumber: editPlayerNumber
-          },
-          playerPosition: editPlayerPosition
+          ...tp,
+          rosterJerseyNo: editPlayerNumber,
+          rosterPosition: editPlayerPosition.key as 'C' | 'A' | 'G' | 'F' | null,
         };
       }
-      return player;
-    });
+      return tp;
+    }));
 
-    setRosterList(sortRoster(updatedRoster));
     setIsEditModalOpen(false);
     setEditingPlayer(null);
     setModalError(null);
@@ -895,94 +927,6 @@ const RosterPage = () => {
     setIsEditModalOpen(false);
     setEditingPlayer(null);
     setModalError(null);
-  };
-
-  const handleAddPlayer = async () => {
-    if (!selectedPlayer) {
-      setError('Wähle einen Spieler aus');
-      return;
-    }
-
-    if (playerPosition.key === 'C' && rosterList.some(player => player.playerPosition.key === 'C')) {
-      setError('Es kann nur ein Spieler als Captain (C) gekennzeichnet werden');
-      return;
-    }
-
-    if (playerPosition.key === 'A' && rosterList.some(player => player.playerPosition.key === 'A')) {
-      setError('Es kann nur ein Spieler als Assistant (A) gekennzeichnet werden');
-      return;
-    }
-
-    if (playerPosition.key === 'G') {
-      const goalieCount = rosterList.filter(player => player.playerPosition.key === 'G').length;
-      if (goalieCount >= 2) {
-        setError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
-        return;
-      }
-    }
-
-    if (playerPosition.key === 'F') {
-      const feldspielerCount = rosterList.filter(player => player.playerPosition.key === 'F').length;
-      if (feldspielerCount >= 14) {
-        setError('Es können maximal 14 Feldspieler (F) eingetragen werden');
-        return;
-      }
-    }
-
-    if (!playerNumber) {
-      const playerDetail = availablePlayersList.find(player => player._id === selectedPlayer._id);
-      if (playerDetail && playerDetail.jerseyNo) {
-        setPlayerNumber(playerDetail.jerseyNo);
-      }
-    }
-
-    setLoading(true);
-
-    try {
-      const newPlayer: RosterPlayer = {
-        player: {
-          playerId: selectedPlayer._id,
-          firstName: selectedPlayer.firstName,
-          lastName: selectedPlayer.lastName,
-          jerseyNumber: playerNumber,
-        },
-        playerPosition: {
-          key: playerPosition.key,
-          value: playerPosition.value,
-        },
-        passNumber: selectedPlayer.passNo,
-        called: selectedPlayer.called || false,
-        goals: 0,
-        assists: 0,
-        points: 0,
-        penaltyMinutes: 0
-      };
-
-      const updatedRoster = [...rosterList, newPlayer];
-      const sortedRoster = sortRoster(updatedRoster);
-      setRosterList(sortedRoster);
-
-      if (selectedPlayer) {
-        setAvailablePlayersList(prevList =>
-          prevList.filter(player => player._id !== selectedPlayer._id)
-        );
-      }
-
-      setSelectedPlayer(null);
-      setPlayerNumber(0);
-      setPlayerPosition(playerPositions[0]);
-      setError('');
-
-      if (playerSelectRef.current) {
-        playerSelectRef.current.focus();
-      }
-
-    } catch (error) {
-      console.error('Error adding player to roster:', error);
-      setError('Failed to add player to roster');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleSaveRoster = async () => {
