@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../../../../lib/errorHandler';
 import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
 import { PlayerValues, Assignment, AssignmentTeam } from '../../../../../types/PlayerValues';
 import { Listbox, Transition, Switch, Dialog } from '@headlessui/react';
-import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, CheckCircleIcon, ExclamationCircleIcon, ArrowUpIcon, MagnifyingGlassIcon, EyeIcon, EyeSlashIcon, ListBulletIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 import { ChevronUpDownIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { classNames, calculateMatchButtonPermissions } from '../../../../../tools/utils';
 import RosterPlayerSelect from '../../../../../components/ui/RosterPlayerSelect';
@@ -44,6 +44,18 @@ interface AvailablePlayer {
   called: boolean,
   originalTeam: string | null;
   active?: boolean;
+  licenceType?: string;
+  status?: string;
+}
+
+// Extended player type for the new interactive table
+// Merges AvailablePlayer with roster selection state
+interface AvailablePlayerWithRoster extends AvailablePlayer {
+  selected: boolean;
+  rosterJerseyNo: number;
+  rosterPosition: 'C' | 'A' | 'G' | 'F' | null;
+  statusDiff: boolean;
+  assignedStatus?: string;
 }
 
 // Player position options
@@ -132,6 +144,11 @@ const RosterPage = () => {
     { firstName: '', lastName: '', role: '' }
   ]);
   const [rosterList, setRosterList] = useState<RosterPlayer[]>([]);
+
+  // NEW STATE: Interactive table-based player selection
+  const [tablePlayers, setTablePlayers] = useState<AvailablePlayerWithRoster[]>([]);
+  const [showLineupOnly, setShowLineupOnly] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = React.useCallback((rosterToSort: RosterPlayer[]): RosterPlayer[] => {
@@ -427,6 +444,182 @@ const RosterPage = () => {
       setAvailablePlayersList(filteredPlayers);
     }
   }, [includeInactivePlayers, rosterList, allAvailablePlayersList]);
+
+  // NEW: Merge allAvailablePlayersList with existing roster data into tablePlayers
+  // This creates the combined data structure for the interactive table
+  useEffect(() => {
+    if (allAvailablePlayersList.length === 0) return;
+
+    const merged: AvailablePlayerWithRoster[] = allAvailablePlayersList.map(player => {
+      const rosterPlayer = rosterList.find(rp => rp.player.playerId === player._id);
+      const isSelected = !!rosterPlayer;
+      
+      return {
+        ...player,
+        selected: isSelected,
+        rosterJerseyNo: rosterPlayer?.player.jerseyNumber ?? player.jerseyNo ?? 0,
+        rosterPosition: rosterPlayer?.playerPosition.key as 'C' | 'A' | 'G' | 'F' | null ?? null,
+        statusDiff: false,
+        assignedStatus: player.status,
+      };
+    });
+
+    // Sort by firstName ascending as default
+    merged.sort((a, b) => a.firstName.localeCompare(b.firstName));
+    setTablePlayers(merged);
+  }, [allAvailablePlayersList, rosterList]);
+
+  // NEW: Handler to toggle player selection in table
+  const handleTablePlayerToggle = (playerId: string) => {
+    setTablePlayers(prev => {
+      const updated = prev.map(player => {
+        if (player._id === playerId) {
+          return { ...player, selected: !player.selected };
+        }
+        return player;
+      });
+      // Sync to rosterList for backward compatibility
+      syncTableToRosterList(updated);
+      return updated;
+    });
+  };
+
+  // NEW: Handler to update jersey number in table
+  const handleTableJerseyChange = (playerId: string, jerseyNo: number) => {
+    setTablePlayers(prev => {
+      const updated = prev.map(player => {
+        if (player._id === playerId) {
+          return { ...player, rosterJerseyNo: jerseyNo };
+        }
+        return player;
+      });
+      syncTableToRosterList(updated);
+      return updated;
+    });
+  };
+
+  // NEW: Handler for position badge click (C, A, G)
+  const handleTablePositionToggle = (playerId: string, position: 'C' | 'A' | 'G') => {
+    setTablePlayers(prev => {
+      const player = prev.find(p => p._id === playerId);
+      if (!player) return prev;
+
+      // If clicking same position, toggle off to F (Feldspieler)
+      if (player.rosterPosition === position) {
+        const updated = prev.map(p => {
+          if (p._id === playerId) {
+            return { ...p, rosterPosition: 'F' as const };
+          }
+          return p;
+        });
+        syncTableToRosterList(updated);
+        return updated;
+      }
+
+      // C and A: only one active at a time - deactivate previous
+      if (position === 'C' || position === 'A') {
+        const updated = prev.map(p => {
+          if (p._id === playerId) {
+            return { ...p, rosterPosition: position, selected: true };
+          }
+          // Deactivate any other player with this position
+          if (p.rosterPosition === position) {
+            return { ...p, rosterPosition: 'F' as const };
+          }
+          return p;
+        });
+        syncTableToRosterList(updated);
+        return updated;
+      }
+
+      // G: max 2 active
+      if (position === 'G') {
+        const currentGoalies = prev.filter(p => p.rosterPosition === 'G' && p._id !== playerId).length;
+        if (currentGoalies >= 2) {
+          setError('Es können maximal 2 Spieler als Goalie (G) gekennzeichnet werden');
+          return prev;
+        }
+        const updated = prev.map(p => {
+          if (p._id === playerId) {
+            return { ...p, rosterPosition: position, selected: true };
+          }
+          return p;
+        });
+        syncTableToRosterList(updated);
+        return updated;
+      }
+
+      return prev;
+    });
+  };
+
+  // NEW: Sync tablePlayers to rosterList for save/validation/PDF
+  const syncTableToRosterList = (players: AvailablePlayerWithRoster[]) => {
+    const selectedPlayers = players.filter(p => p.selected);
+    const newRosterList: RosterPlayer[] = selectedPlayers.map(player => ({
+      player: {
+        playerId: player._id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        jerseyNumber: player.rosterJerseyNo,
+      },
+      playerPosition: {
+        key: player.rosterPosition || 'F',
+        value: playerPositions.find(pos => pos.key === (player.rosterPosition || 'F'))?.value || 'Feldspieler',
+      },
+      passNumber: player.passNo,
+      called: player.called || false,
+      goals: 0,
+      assists: 0,
+      points: 0,
+      penaltyMinutes: 0,
+    }));
+    setRosterList(sortRoster(newRosterList));
+  };
+
+  // NEW: Get filtered and sorted table data based on current view settings
+  const getFilteredTablePlayers = React.useCallback(() => {
+    let filtered = [...tablePlayers];
+
+    // Filter by inactive toggle
+    if (!includeInactivePlayers) {
+      filtered = filtered.filter(p => p.active !== false);
+    }
+
+    // Filter by lineup only toggle
+    if (showLineupOnly) {
+      filtered = filtered.filter(p => p.selected);
+      // Sort by position for lineup view: C, A, G, then by jersey
+      filtered.sort((a, b) => {
+        const positionPriority: Record<string, number> = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+        const posA = positionPriority[a.rosterPosition || 'F'] || 99;
+        const posB = positionPriority[b.rosterPosition || 'F'] || 99;
+        if (posA !== posB) return posA - posB;
+        return (a.rosterJerseyNo || 999) - (b.rosterJerseyNo || 999);
+      });
+    } else {
+      // Default sort by firstName
+      filtered.sort((a, b) => a.firstName.localeCompare(b.firstName));
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.firstName.toLowerCase().includes(term) ||
+        p.lastName.toLowerCase().includes(term)
+      );
+    }
+
+    return filtered;
+  }, [tablePlayers, includeInactivePlayers, showLineupOnly, searchTerm]);
+
+  // NEW: Check for duplicate jersey numbers among selected players
+  const hasDuplicateJerseys = React.useMemo(() => {
+    const selectedPlayers = tablePlayers.filter(p => p.selected);
+    const jerseyNumbers = selectedPlayers.map(p => p.rosterJerseyNo).filter(n => n > 0);
+    return jerseyNumbers.length !== new Set(jerseyNumbers).size;
+  }, [tablePlayers]);
 
   // Auto-set published to true if match is finished
   const isMatchFinished = match?.matchStatus.key === 'FINISHED';
