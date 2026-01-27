@@ -1188,8 +1188,8 @@ const RosterPage = () => {
     setError("");
     let cntAdditionalMatches = 0;
 
-    const rosterData = {
-      roster: rosterList,
+    const rosterUpdate = {
+      players: rosterList,
       published: rosterPublished || match?.matchStatus.key === "FINISHED",
       coach: coachData,
       staff: staffData.filter(
@@ -1200,27 +1200,9 @@ const RosterPage = () => {
     try {
       const rosterResponse = await apiClient.put(
         `/matches/${id}/${teamFlag}/roster`,
-        rosterData.roster,
+        rosterUpdate,
       );
       console.log("Roster successfully saved:", rosterResponse.data);
-
-      try {
-        await apiClient.patch(`/matches/${id}`, {
-          [teamFlag]: {
-            rosterPublished: rosterData.published,
-            coach: rosterData.coach,
-            staff: rosterData.staff,
-          },
-        });
-        console.log("Match details updated successfully");
-      } catch (error: any) {
-        if (error.response?.status !== 304) {
-          console.error(
-            "Error updating match details:",
-            getErrorMessage(error),
-          );
-        }
-      }
 
       for (const m of matches.filter((m) => selectedMatches.includes(m._id))) {
         try {
@@ -1229,27 +1211,10 @@ const RosterPage = () => {
 
           const rosterResponse = await apiClient.put(
             `/matches/${m._id}/${matchTeamFlag}/roster`,
-            rosterData.roster,
+            rosterUpdate,
           );
           console.log(`Roster successfully saved for match ${m._id}`);
           cntAdditionalMatches += 1;
-
-          try {
-            await apiClient.patch(`/matches/${m._id}`, {
-              [matchTeamFlag]: {
-                rosterPublished: rosterData.published,
-                coach: rosterData.coach,
-                staff: rosterData.staff,
-              },
-            });
-          } catch (error: any) {
-            if (error.response?.status !== 304) {
-              console.error(
-                `Error updating match details for match ${m._id}:`,
-                getErrorMessage(error),
-              );
-            }
-          }
         } catch (error) {
           console.error(
             "Error saving roster for additional match:",
@@ -1548,8 +1513,8 @@ const RosterPage = () => {
                     <tr
                       key={player._id}
                       className={classNames(
-                        player.selected ? "bg-indigo-50" : "",
-                        player.active === false ? "opacity-60" : "",
+                        player.selected ? "bg-green-50 bg-opacity-30" : "",
+                        player.active === false ? "opacity-50" : "",
                         isDuplicateJersey ? "bg-yellow-50" : "",
                       )}
                     >
@@ -1590,7 +1555,7 @@ const RosterPage = () => {
 
                       {/* Position Badges (C, A, G) */}
                       <td className="px-3 py-3 whitespace-nowrap">
-                        <div className="flex gap-1">
+                        <div className="flex gap-2 items-center">
                           {(["C", "A", "G"] as const).map((pos) => (
                             <button
                               key={pos}
@@ -1599,7 +1564,7 @@ const RosterPage = () => {
                                 handleTablePositionToggle(player._id, pos)
                               }
                               className={classNames(
-                                "w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition-colors",
+                                "w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center transition-colors",
                                 player.rosterPosition === pos
                                   ? pos === "C"
                                     ? "bg-blue-600 text-white"
@@ -1650,22 +1615,22 @@ const RosterPage = () => {
                       </td>
 
                       {/* license type indicator */}
-                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500 text-center">
-                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset", (player.licenseType && (licenceTypeBadgeColors as any)[player.licenseType]) || "bg-gray-50 text-gray-700 ring-gray-600/20")}>
+                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
+                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset", (player.licenseType && (licenceTypeBadgeColors as any)[player.licenseType]) || "bg-gray-50 text-gray-700 ring-gray-600/20")}>
                           {player.licenseType}
                         </span>
                       </td>
 
                       {/* Source */}
-                      <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500 text-center">
-                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset", player.source === Source.ISHD ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20" : "bg-indigo-50 text-indigo-700 ring-indigo-600/20")}>
+                      <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
+                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset", player.source === Source.ISHD ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20" : "bg-indigo-50 text-indigo-700 ring-indigo-600/20")}>
                           {player.source}
                         </span>
                       </td>
 
                       {/* Pass Number */}
                       <td className="hidden sm:table-cell px-3 py-3 whitespace-nowrap text-center">
-                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-[10px] font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                           {player.passNo}
                         </span>
                       </td>
