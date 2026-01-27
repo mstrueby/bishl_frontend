@@ -1427,7 +1427,7 @@ const RosterPage = () => {
 
         {/* NEW: Interactive Player Selection Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
             <thead className="bg-gray-50">
               <tr>
                 <th
@@ -1525,7 +1525,7 @@ const RosterPage = () => {
                       )}
                     >
                       {/* Checkbox replaced by Toggle/Switch */}
-                      <td className="px-3 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap border-y border-transparent">
                         <Switch
                           checked={player.selected}
                           onChange={() => handleTablePlayerToggle(player._id)}
