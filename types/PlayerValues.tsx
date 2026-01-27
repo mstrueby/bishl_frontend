@@ -12,7 +12,7 @@ export enum ClubType {
   DEVELOPMENT = "DEVELOPMENT",
 }
 
-export enum LicenseTypeEnum {
+export enum LicenseType {
   UNKNOWN = "UNKNOWN",
   PRIMARY = "PRIMARY",
   SECONDARY = "SECONDARY",
@@ -22,7 +22,7 @@ export enum LicenseTypeEnum {
   SPECIAL = "SPECIAL",
 }
 
-export enum LicenseStatusEnum {
+export enum LicenseStatus {
   UNKNOWN = "UNKNOWN",
   VALID = "VALID",
   INVALID = "INVALID",
@@ -69,8 +69,8 @@ export interface AssignmentTeam {
   teamAgeGroup: string;
   teamIshdId?: string;
   passNo: string;
-  licenseType: LicenseTypeEnum;
-  status: LicenseStatusEnum;
+  licenseType: LicenseType;
+  status: LicenseStatus;
   invalidReasonCodes: LicenseInvalidReasonCode[];
   adminOverride: boolean;
   overrideReason: string;
