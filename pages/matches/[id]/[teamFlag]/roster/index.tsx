@@ -9,6 +9,7 @@ import {
   RosterPlayer,
   Team,
 } from "../../../../../types/MatchValues";
+import { Source, LicenseType, LicenseStatus } from "../../../../../types/PlayerValues";
 import apiClient from "../../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../../lib/errorHandler";
 import { ClubValues, TeamValues } from "../../../../../types/ClubValues";
@@ -69,6 +70,7 @@ interface AvailablePlayer {
   active?: boolean;
   licenceType?: string;
   status?: string;
+  licenseType?: string;
 }
 
 // Extended player type for the new interactive table
@@ -397,7 +399,7 @@ const RosterPage = () => {
                   displayLastName: teamPlayer.displayLastName,
                   position: teamPlayer.position || "Skater",
                   fullFaceReq: teamPlayer.fullFaceReq,
-                  source: teamPlayer.source,
+                  source: assignedTeam.source,
                   imageUrl: teamPlayer.imageUrl,
                   imageVisible: teamPlayer.imageVisible,
                   passNo: assignedTeam.passNo,
@@ -405,6 +407,8 @@ const RosterPage = () => {
                   called: false,
                   originalTeam: originalTeamName,
                   active: assignedTeam.active,
+                  status: assignedTeam.status,
+                  licenseType: assignedTeam.licenseType,
                 }
               : null;
           })
@@ -955,7 +959,7 @@ const RosterPage = () => {
                 jerseyNo: assignedTeam?.jerseyNo,
                 called: true,
                 active: assignedTeam?.active,
-                licenceType: assignedTeam?.licenseType
+                licenseType: assignedTeam?.licenseType,
               };
             })
             .filter(
@@ -1461,13 +1465,13 @@ const RosterPage = () => {
                 </th>
                 <th
                   scope="col"
-                  className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Nr.
                 </th>
                 <th
                   scope="col"
-                  className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="w-24 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Position
                 </th>
@@ -1479,25 +1483,31 @@ const RosterPage = () => {
                 </th>
                 <th
                   scope="col"
-                  className="hidden md:table-cell px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Type
+                </th>
+                <th
+                  scope="col"
+                  className="hidden md:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Quelle
                 </th>
                 <th
                   scope="col"
-                  className="hidden sm:table-cell px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden sm:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Pass Nr.
                 </th>
                 <th
                   scope="col"
-                  className="hidden lg:table-cell px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Hochgemeldet
                 </th>
                 <th
                   scope="col"
-                  className="hidden lg:table-cell px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Status
                 </th>
@@ -1631,20 +1641,25 @@ const RosterPage = () => {
                         </div>
                       </td>
 
+                      {/* license type indicator */}
+                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500 text-center">
+                        {player.licenseType}
+                      </td>
+
                       {/* Source */}
-                      <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                      <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500 text-center">
                         {player.source}
                       </td>
 
                       {/* Pass Number */}
-                      <td className="hidden sm:table-cell px-3 py-3 whitespace-nowrap">
+                      <td className="hidden sm:table-cell px-3 py-3 whitespace-nowrap text-center">
                         <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                           {player.passNo}
                         </span>
                       </td>
 
                       {/* Called indicator */}
-                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap">
+                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center gap-2">
                           {player.called && (
                             <span
@@ -1672,23 +1687,40 @@ const RosterPage = () => {
                       </td>
 
                       {/* licence status indicator */}
-                      <td className="px-3 py-3 whitespace-nowrap text-right text-sm font-medium">
-                        {player.licenceType && (
-                          <span
-                            className={classNames(
-                              "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-                              player.licenceType === "A"
-                                ? "bg-green-50 text-green-800 ring-green-600/20"
-                                : player.licenceType === "B"
-                                  ? "bg-blue-50 text-blue-800 ring-blue-600/20"
-                                  : player.licenceType === "L"
-                                    ? "bg-purple-50 text-purple-800 ring-purple-600/20"
-                                    : "bg-gray-50 text-gray-800 ring-gray-600/20",
-                            )}
-                          >
-                            {player.licenceType}
-                          </span>
-                        )}
+                      <td className="px-3 py-3 whitespace-nowrap text-center text-sm font-medium">
+                        <div className="flex flex-col items-center space-y-1">
+                          {/* License Type Badge */}
+                          {player.licenceType && (
+                            <span
+                              className={classNames(
+                                "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset",
+                                player.licenceType === "A"
+                                  ? "bg-green-50 text-green-800 ring-green-600/20"
+                                  : player.licenceType === "B"
+                                    ? "bg-blue-50 text-blue-800 ring-blue-600/20"
+                                    : player.licenceType === "L"
+                                      ? "bg-purple-50 text-purple-800 ring-purple-600/20"
+                                      : "bg-gray-50 text-gray-800 ring-gray-600/20",
+                              )}
+                            >
+                              {player.licenceType}
+                            </span>
+                          )}
+                          {/* License Status Badge */}
+                          {player.licenceStatus === "INVALID" ? (
+                            <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
+                              Ungültig
+                            </span>
+                          ) : player.licenceStatus === "VALID" ? (
+                            <span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+                              Gültig
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
+                              {player.licenceStatus || "UNKNOWN"}
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
