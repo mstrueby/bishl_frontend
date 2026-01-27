@@ -1427,7 +1427,7 @@ const RosterPage = () => {
 
         {/* NEW: Interactive Player Selection Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th
@@ -1515,17 +1515,17 @@ const RosterPage = () => {
                       className={classNames(
                         player.selected
                           ? player.status === LicenseStatus.VALID
-                            ? "bg-green-50 bg-opacity-40 border-l-4 border-green-500"
+                            ? "bg-green-50 border-l-4 border-green-500"
                             : player.status === LicenseStatus.INVALID
-                              ? "bg-red-50 bg-opacity-40 border-l-4 border-red-500"
-                              : "border-l-4 border-gray-400"
+                              ? "bg-red-50 border-l-4 border-red-500"
+                              : "bg-gray-50 border-l-4 border-gray-400"
                           : "border-l-4 border-transparent",
                         player.active === false ? "opacity-50" : "",
                         isDuplicateJersey ? "bg-yellow-50" : "",
                       )}
                     >
                       {/* Checkbox replaced by Toggle/Switch */}
-                      <td className="px-3 py-3 whitespace-nowrap border-y border-transparent">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <Switch
                           checked={player.selected}
                           onChange={() => handleTablePlayerToggle(player._id)}
