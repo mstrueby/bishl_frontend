@@ -112,6 +112,14 @@ const RosterPage = () => {
     clubName: string;
     clubAlias: string;
   } | null>(null);
+  const licenceTypeBadgeColors: Record<string, string> = {
+    PRIMARY: "bg-green-50 text-green-700 ring-green-600/20",
+    SECONDARY: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
+    OVERAGE: "bg-pink-50 text-pink-700 ring-pink-600/20",
+    LOAN: "bg-blue-50 text-blue-700 ring-blue-600/20",
+    DEVELOPMENT: "bg-purple-50 text-purple-700 ring-purple-600/20",
+    SPECIAL: "bg-red-50 text-red-700 ring-red-600/20",
+  };
 
   // Calculate back link once during initialization
   const getBackLink = () => {
@@ -1643,12 +1651,16 @@ const RosterPage = () => {
 
                       {/* license type indicator */}
                       <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {player.licenseType}
+                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset", (player.licenseType && (licenceTypeBadgeColors as any)[player.licenseType]) || "bg-gray-50 text-gray-700 ring-gray-600/20")}>
+                          {player.licenseType}
+                        </span>
                       </td>
 
                       {/* Source */}
                       <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {player.source}
+                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset", player.source === Source.ISHD ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20" : "bg-indigo-50 text-indigo-700 ring-indigo-600/20")}>
+                          {player.source}
+                        </span>
                       </td>
 
                       {/* Pass Number */}
