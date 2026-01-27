@@ -1515,11 +1515,11 @@ const RosterPage = () => {
                       className={classNames(
                         player.selected
                           ? player.status === LicenseStatus.VALID
-                            ? "bg-green-50 ring-2 ring-inset ring-green-500 border-l-4 border-green-500"
+                            ? "bg-opacity-25 bg-green-50"
                             : player.status === LicenseStatus.INVALID
-                              ? "bg-red-50 ring-2 ring-inset ring-red-500 border-l-4 border-red-500"
-                              : "border-l-4 border-transparent"
-                          : "border-l-4 border-transparent",
+                              ? "bg-opacity-25 bg-red-50 "
+                              : ""
+                          : "",
                         player.active === false ? "opacity-50" : "",
                         isDuplicateJersey ? "bg-yellow-50" : "",
                       )}
