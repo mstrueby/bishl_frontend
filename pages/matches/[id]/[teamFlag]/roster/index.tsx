@@ -939,8 +939,8 @@ const RosterPage = () => {
               params: {
                 sortby: "lastName",
                 ...(includeInactivePlayers
-                  ? { all: true }
-                  : { active: "true" }),
+                  ? { active: "true" } : {}),
+                all: true
               },
             },
           );
@@ -1369,12 +1369,8 @@ const RosterPage = () => {
               <button
                 type="button"
                 onClick={() => setShowLineupOnly(!showLineupOnly)}
-                className={classNames(
-                  showLineupOnly
-                    ? "bg-indigo-100 ring-indigo-300 hover:bg-indigo-200"
-                    : "bg-white ring-gray-300 hover:bg-gray-50",
-                  "flex-1 sm:flex-none inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset",
-                )}
+                className="w-32 bg-white ring-gray-300 hover:bg-gray-50
+                  flex-1 sm:flex-none inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset"
                 title={showLineupOnly ? "Spielerliste anzeigen" : "Aufstellung anzeigen"}
               >
                 {showLineupOnly ? (
