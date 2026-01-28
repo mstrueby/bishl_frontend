@@ -1,21 +1,20 @@
 export interface EventPlayer {
   playerId: string;
   firstName: string;
-  lastName: string
+  lastName: string;
   jerseyNumber: number;
   displayFirstName?: string;
-  displayLastName?: string
+  displayLastName?: string;
   imageUrl?: string;
   imageVisible?: boolean;
 }
 
-
 export interface RosterPlayer {
-  player: EventPlayer,
+  player: EventPlayer;
   playerPosition: {
     key: string;
     value: string;
-  },
+  };
   passNumber: string;
   goals: number;
   assists: number;
@@ -27,7 +26,7 @@ export interface RosterPlayer {
 interface Coach {
   firstName: string;
   lastName: string;
-  licence: string
+  licence: string;
 }
 
 interface Staff {
@@ -36,14 +35,21 @@ interface Staff {
   role: string;
 }
 
+enum RosterStatus {
+  DRAFT = "DRAFT",
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
+  INVALID = "INVALID",
+}
+
 export interface Roster {
   players: RosterPlayer[];
-  status: string;
+  status: RosterStatus;
   published: boolean;
-  eligibilityTimestamp?: Date;  
+  eligibilityTimestamp?: Date;
   eligibilityValidator?: string;
   coach?: Coach;
-  staff?: Staff[];  
+  staff?: Staff[];
 }
 
 export interface ScoresBase {
@@ -118,7 +124,7 @@ export interface Official {
 export interface SupplementarySheet {
   refereeAttendance?: string; // yes, only 1, no referee, substitute referee
   referee1Present?: boolean;
-  referee2Present?: boolean
+  referee2Present?: boolean;
   referee1PassAvailable?: boolean;
   referee2PassAvailable?: boolean;
   referee1PassNo?: string;
@@ -169,7 +175,7 @@ export interface MatchValues {
   matchday: {
     name: string;
     alias: string;
-  }
+  };
   home: Team;
   away: Team;
   matchStatus: { key: string; value: string };
