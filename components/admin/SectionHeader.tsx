@@ -6,6 +6,7 @@ import { ArrowPathIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import RefMatchFilter from './RefMatchFilter';
 import BulkStatusDialog from './BulkStatusDialog';
 import { TournamentValues } from '../../types/TournamentValues';
+import { classNames } from '../../tools/utils';
 
 interface FilterChangeParams {
   tournament: string;
@@ -14,7 +15,7 @@ interface FilterChangeParams {
   date_to?: string;
 }
 
-export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox, currentFilter, tournaments }: {
+export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox, currentFilter, tournaments, descriptionBadge }: {
   title: string,
   filter?: string,
   newLink?: string,
@@ -25,7 +26,11 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
   backLink?: string,
   searchBox?: React.ReactNode,
   currentFilter?: FilterChangeParams,
-  tournaments?: TournamentValues[]
+  tournaments?: TournamentValues[],
+  descriptionBadge?: {
+    text: string,
+    colorClass: string
+  }
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -50,6 +55,14 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
                 />
               )}
               <span>{description}</span>
+              {descriptionBadge && (
+                <span className={classNames(
+                  "ml-3 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                  descriptionBadge.colorClass
+                )}>
+                  {descriptionBadge.text}
+                </span>
+              )}
             </div>
           </div>
         )}

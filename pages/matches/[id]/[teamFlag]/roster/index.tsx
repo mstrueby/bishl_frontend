@@ -1330,6 +1330,10 @@ const RosterPage = () => {
           title="Mannschaftsaufstellung"
           description={`${team?.fullName} / ${team?.name}`}
           descriptionLogoUrl={team?.logoUrl}
+          descriptionBadge={{
+            text: rosterStatus === "SUBMITTED" ? "Abgegeben" : "Entwurf",
+            colorClass: rosterStatus === "SUBMITTED" ? "bg-green-50 text-green-700 ring-green-600/20" : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+          }}
         />
       </div>
 
