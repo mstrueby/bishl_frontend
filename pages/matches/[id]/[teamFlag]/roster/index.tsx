@@ -1201,11 +1201,8 @@ const RosterPage = () => {
       staff: staffData.filter(
         (s) => s.firstName.trim() || s.lastName.trim() || s.role.trim(),
       ),
+      status: localSubmitted ? "SUBMITTED" : "DRAFT"
     };
-
-    if (localSubmitted) {
-      rosterUpdate.status = "SUBMITTED";
-    }
 
     try {
       const rosterResponse = await apiClient.put(
@@ -1952,13 +1949,17 @@ const RosterPage = () => {
                 type="text"
                 id="coach-firstName"
                 value={coachData.firstName}
+                disabled={rosterStatus === "SUBMITTED"}
                 onChange={(e) =>
                   setCoachData((prev) => ({
                     ...prev,
                     firstName: e.target.value,
                   }))
                 }
-                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className={classNames(
+                  "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+                  rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                )}
               />
             </div>
             <div>
@@ -1972,13 +1973,17 @@ const RosterPage = () => {
                 type="text"
                 id="coach-lastName"
                 value={coachData.lastName}
+                disabled={rosterStatus === "SUBMITTED"}
                 onChange={(e) =>
                   setCoachData((prev) => ({
                     ...prev,
                     lastName: e.target.value,
                   }))
                 }
-                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className={classNames(
+                  "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+                  rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                )}
               />
             </div>
             <div>
@@ -1992,10 +1997,14 @@ const RosterPage = () => {
                 type="text"
                 id="coach-licence"
                 value={coachData.licence}
+                disabled={rosterStatus === "SUBMITTED"}
                 onChange={(e) =>
                   setCoachData((prev) => ({ ...prev, licence: e.target.value }))
                 }
-                className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className={classNames(
+                  "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+                  rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                )}
               />
             </div>
           </div>
@@ -2034,6 +2043,7 @@ const RosterPage = () => {
                       type="text"
                       id={`staff-${index}-firstName`}
                       value={staff.firstName}
+                      disabled={rosterStatus === "SUBMITTED"}
                       onChange={(e) => {
                         const newStaffData = [...staffData];
                         newStaffData[index] = {
@@ -2042,7 +2052,10 @@ const RosterPage = () => {
                         };
                         setStaffData(newStaffData);
                       }}
-                      className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className={classNames(
+                        "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+                        rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                      )}
                     />
                   </div>
                   <div>
@@ -2056,6 +2069,7 @@ const RosterPage = () => {
                       type="text"
                       id={`staff-${index}-lastName`}
                       value={staff.lastName}
+                      disabled={rosterStatus === "SUBMITTED"}
                       onChange={(e) => {
                         const newStaffData = [...staffData];
                         newStaffData[index] = {
@@ -2064,7 +2078,10 @@ const RosterPage = () => {
                         };
                         setStaffData(newStaffData);
                       }}
-                      className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className={classNames(
+                        "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+                        rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                      )}
                     />
                   </div>
                   <div>
@@ -2078,6 +2095,7 @@ const RosterPage = () => {
                       type="text"
                       id={`staff-${index}-role`}
                       value={staff.role}
+                      disabled={rosterStatus === "SUBMITTED"}
                       onChange={(e) => {
                         const newStaffData = [...staffData];
                         newStaffData[index] = {
@@ -2086,7 +2104,10 @@ const RosterPage = () => {
                         };
                         setStaffData(newStaffData);
                       }}
-                      className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className={classNames(
+                        "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+                        rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                      )}
                     />
                   </div>
                 </div>
