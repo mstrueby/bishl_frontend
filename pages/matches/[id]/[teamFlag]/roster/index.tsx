@@ -1195,14 +1195,17 @@ const RosterPage = () => {
     setError("");
     let cntAdditionalMatches = 0;
 
-    const rosterUpdate = {
+    const rosterUpdate: any = {
       players: rosterList,
-      status: localSubmitted ? "SUBMITTED" : "DRAFT",
       coach: coachData,
       staff: staffData.filter(
         (s) => s.firstName.trim() || s.lastName.trim() || s.role.trim(),
       ),
     };
+
+    if (localSubmitted) {
+      rosterUpdate.status = "SUBMITTED";
+    }
 
     try {
       const rosterResponse = await apiClient.put(
@@ -2265,7 +2268,7 @@ const RosterPage = () => {
                 if (isFinished) {
                   return "Aufstellung ist abgegeben (Spiel beendet)";
                 } else if (isSubmitted) {
-                  return "Aufstellung wurde abgegeben. Zum Bearbeiten Status wieder auf Entwurf setzen.";
+                  return "Aufstellung wurde abgegeben und kann nicht mehr bearbeitet werden.";
                 } else {
                   return "Aufstellung fertigstellen und abgeben";
                 }
