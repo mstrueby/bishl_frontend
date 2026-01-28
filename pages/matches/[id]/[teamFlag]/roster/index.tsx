@@ -154,6 +154,7 @@ const RosterPage = () => {
     AvailablePlayer[]
   >([]);
   const [rosterStatus, setRosterStatus] = useState<string>("DRAFT");
+  const [localSubmitted, setLocalSubmitted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
   const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
@@ -277,7 +278,9 @@ const RosterPage = () => {
           teamFlag === "home" ? matchData.home : matchData.away;
         setMatchTeam(matchTeamData);
         setInitialRosterData(sortRoster(matchTeamData.roster?.players || []));
-        setRosterStatus(matchTeamData.roster?.status || "DRAFT");
+        const initialStatus = matchTeamData.roster?.status || "DRAFT";
+        setRosterStatus(initialStatus);
+        setLocalSubmitted(initialStatus === "SUBMITTED");
         setCoachData({
           firstName: matchTeamData.roster?.coach?.firstName || "",
           lastName: matchTeamData.roster?.coach?.lastName || "",
@@ -1194,7 +1197,7 @@ const RosterPage = () => {
 
     const rosterUpdate = {
       players: rosterList,
-      status: rosterStatus === "SUBMITTED" ? "SUBMITTED" : "DRAFT",
+      status: localSubmitted ? "SUBMITTED" : "DRAFT",
       coach: coachData,
       staff: staffData.filter(
         (s) => s.firstName.trim() || s.lastName.trim() || s.role.trim(),
@@ -1207,6 +1210,7 @@ const RosterPage = () => {
         rosterUpdate,
       );
       console.log("Roster successfully saved:", rosterResponse.data);
+      setRosterStatus(localSubmitted ? "SUBMITTED" : "DRAFT");
 
       for (const m of matches.filter((m) => selectedMatches.includes(m._id))) {
         try {
@@ -2269,18 +2273,18 @@ const RosterPage = () => {
             </span>
           </div>
           <Switch
-            checked={rosterStatus === "SUBMITTED" || match.matchStatus.key === "FINISHED"}
+            checked={localSubmitted || match.matchStatus.key === "FINISHED"}
             onChange={(enabled) => {
-              if (match.matchStatus.key !== "FINISHED") {
-                setRosterStatus(enabled ? "SUBMITTED" : "DRAFT");
+              if (match.matchStatus.key !== "FINISHED" && rosterStatus !== "SUBMITTED") {
+                setLocalSubmitted(enabled);
               }
             }}
-            disabled={match.matchStatus.key === "FINISHED"}
+            disabled={match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED"}
             className={`${
-              rosterStatus === "SUBMITTED" || match.matchStatus.key === "FINISHED"
+              localSubmitted || match.matchStatus.key === "FINISHED"
                 ? "bg-indigo-600"
                 : "bg-gray-200"
-            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2 ${match.matchStatus.key === "FINISHED" ? "cursor-not-allowed opacity-50" : ""}`}
+            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2 ${match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <span className="sr-only">Abgeben</span>
             <span
