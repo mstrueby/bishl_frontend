@@ -1332,7 +1332,7 @@ const RosterPage = () => {
           descriptionLogoUrl={team?.logoUrl}
           descriptionBadge={{
             text: rosterStatus === "SUBMITTED" ? "Abgegeben" : "Entwurf",
-            colorClass: rosterStatus === "SUBMITTED" ? "bg-green-50 text-green-700 ring-green-600/20" : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+            colorClass: rosterStatus === "SUBMITTED" ? "bg-indigo-50 text-indigo-700 ring-indigo-700/10" : "bg-gray-50 text-gray-600 ring-gray-500/10"
           }}
         />
       </div>
