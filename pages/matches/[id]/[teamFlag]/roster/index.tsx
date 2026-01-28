@@ -2624,7 +2624,7 @@ const RosterPage = () => {
                                     ? selectedCallUpTeam.name
                                     : "Mannschaft auswählen"}
                                 </span>
-                                {selectedCallUpTeam && loadingPlayers && (
+                                {selectedCallUpTeam && loading && (
                                   <svg
                                     className="animate-spin h-4 w-4 text-indigo-600 mr-2"
                                     xmlns="http://www.w3.org/2000/svg"
