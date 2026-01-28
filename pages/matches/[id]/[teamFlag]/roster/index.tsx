@@ -1353,7 +1353,7 @@ const RosterPage = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Spieler suchen..."
-                className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-sm sm:leading-6"
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <MagnifyingGlassIcon
@@ -1383,7 +1383,7 @@ const RosterPage = () => {
                   <ClipboardDocumentListIcon className="h-4 w-4" aria-hidden="true" />
                 )}
                 <span className="hidden sm:block ml-1.5 whitespace-nowrap">
-                  {showLineupOnly ? "Liste" : "Aufstellung"}
+                  {showLineupOnly ? "Spielerliste" : "Aufstellung"}
                 </span>
               </button>
 
@@ -1414,7 +1414,7 @@ const RosterPage = () => {
                 className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:block ml-1.5 whitespace-nowrap">Call-Up</span>
+                <span className="hidden sm:block ml-1.5 whitespace-nowrap">Hochmelden</span>
               </button>
             </div>
           </div>
