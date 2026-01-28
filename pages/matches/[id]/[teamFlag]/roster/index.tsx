@@ -2290,7 +2290,7 @@ const RosterPage = () => {
             <span
               aria-hidden="true"
               className={`${
-                rosterStatus === "SUBMITTED" || match.matchStatus.key === "FINISHED"
+                localSubmitted || match.matchStatus.key === "FINISHED"
                   ? "translate-x-5"
                   : "translate-x-0"
               } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
