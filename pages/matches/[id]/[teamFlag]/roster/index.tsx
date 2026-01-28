@@ -9,7 +9,11 @@ import {
   RosterPlayer,
   Team,
 } from "../../../../../types/MatchValues";
-import { Source, LicenseType, LicenseStatus } from "../../../../../types/PlayerValues";
+import {
+  Source,
+  LicenseType,
+  LicenseStatus,
+} from "../../../../../types/PlayerValues";
 import apiClient from "../../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../../lib/errorHandler";
 import { ClubValues, TeamValues } from "../../../../../types/ClubValues";
@@ -1341,73 +1345,9 @@ const RosterPage = () => {
       <div className="bg-white shadow-md rounded-lg border">
         {/* NEW: Action Buttons Row */}
         <div className="p-4 border-b bg-gray-50">
-          <div className="flex flex-col gap-4">
-            {/* 3 Action Buttons Row */}
-            <div className="flex flex-wrap gap-2">
-              {/* Hochmelden Button - Opens existing call-up modal */}
-              <button
-                type="button"
-                onClick={() => setIsCallUpModalOpen(true)}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                <ArrowUpIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                Hochmelden
-              </button>
-
-              {/* Inaktive Spieler Toggle Button */}
-              <button
-                type="button"
-                onClick={() =>
-                  setIncludeInactivePlayers(!includeInactivePlayers)
-                }
-                className={classNames(
-                  includeInactivePlayers
-                    ? "bg-indigo-100 ring-indigo-300"
-                    : "bg-white ring-gray-300",
-                  "inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset hover:bg-gray-50",
-                )}
-              >
-                {includeInactivePlayers ? (
-                  <EyeIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                ) : (
-                  <EyeSlashIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                )}
-                Inaktive Spieler
-              </button>
-
-              {/* Aufstellung/Spielerliste Toggle Button */}
-              <button
-                type="button"
-                onClick={() => setShowLineupOnly(!showLineupOnly)}
-                className={classNames(
-                  showLineupOnly
-                    ? "bg-indigo-100 ring-indigo-300"
-                    : "bg-white ring-gray-300",
-                  "inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset hover:bg-gray-50",
-                )}
-              >
-                {showLineupOnly ? (
-                  <>
-                    <ListBulletIcon
-                      className="h-4 w-4 mr-1.5"
-                      aria-hidden="true"
-                    />
-                    Spielerliste
-                  </>
-                ) : (
-                  <>
-                    <ClipboardDocumentListIcon
-                      className="h-4 w-4 mr-1.5"
-                      aria-hidden="true"
-                    />
-                    Aufstellung
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Search Input */}
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            {/* Search Input - Expands to fill space */}
+            <div className="relative flex-grow w-full">
               <input
                 type="text"
                 value={searchTerm}
@@ -1421,6 +1361,61 @@ const RosterPage = () => {
                   aria-hidden="true"
                 />
               </div>
+            </div>
+
+            {/* Action Buttons - Fixed width on mobile, auto on desktop */}
+            <div className="flex w-full sm:w-auto gap-2">
+              {/* Aufstellung/Spielerliste Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setShowLineupOnly(!showLineupOnly)}
+                className={classNames(
+                  showLineupOnly
+                    ? "bg-indigo-100 ring-indigo-300 hover:bg-indigo-200"
+                    : "bg-white ring-gray-300 hover:bg-gray-50",
+                  "flex-1 sm:flex-none inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset",
+                )}
+                title={showLineupOnly ? "Spielerliste anzeigen" : "Aufstellung anzeigen"}
+              >
+                {showLineupOnly ? (
+                  <ListBulletIcon className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <ClipboardDocumentListIcon className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span className="hidden sm:block ml-1.5 whitespace-nowrap">
+                  {showLineupOnly ? "Liste" : "Aufstellung"}
+                </span>
+              </button>
+
+              {/* Inaktive Spieler Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIncludeInactivePlayers(!includeInactivePlayers)}
+                className={classNames(
+                  includeInactivePlayers
+                    ? "bg-indigo-100 ring-indigo-300 hover:bg-indigo-200"
+                    : "bg-white ring-gray-300 hover:bg-gray-50",
+                  "flex-1 sm:flex-none inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset",
+                )}
+                title={includeInactivePlayers ? "Nur aktive Spieler" : "Inaktive Spieler anzeigen"}
+              >
+                {includeInactivePlayers ? (
+                  <EyeIcon className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span className="hidden sm:block ml-1.5 whitespace-nowrap">Inaktiv</span>
+              </button>
+
+              {/* Hochmelden Button */}
+              <button
+                type="button"
+                onClick={() => setIsCallUpModalOpen(true)}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:block ml-1.5 whitespace-nowrap">Call-Up</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1456,13 +1451,13 @@ const RosterPage = () => {
                 </th>
                 <th
                   scope="col"
-                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden md:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Typ
                 </th>
                 <th
                   scope="col"
-                  className="hidden md:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Quelle
                 </th>
@@ -1480,7 +1475,7 @@ const RosterPage = () => {
                 </th>
                 <th
                   scope="col"
-                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Status
                 </th>
@@ -1515,9 +1510,9 @@ const RosterPage = () => {
                       className={classNames(
                         player.selected
                           ? player.status === LicenseStatus.VALID
-                            ? "bg-opacity-25 bg-green-50"
+                            ? "bg-opacity-40 bg-green-50"
                             : player.status === LicenseStatus.INVALID
-                              ? "bg-opacity-25 bg-red-50 "
+                              ? "bg-opacity-40 bg-red-100 "
                               : ""
                           : "",
                         player.active === false ? "opacity-50" : "",
@@ -1539,7 +1534,9 @@ const RosterPage = () => {
                           <span
                             aria-hidden="true"
                             className={classNames(
-                              player.selected ? "translate-x-3" : "translate-x-0",
+                              player.selected
+                                ? "translate-x-3"
+                                : "translate-x-0",
                               "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                             )}
                           />
@@ -1632,15 +1629,31 @@ const RosterPage = () => {
                       </td>
 
                       {/* license type indicator */}
-                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
-                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset", (player.licenseType && (licenceTypeBadgeColors as any)[player.licenseType]) || "bg-gray-50 text-gray-700 ring-gray-600/20")}>
+                      <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
+                        <span
+                          className={classNames(
+                            "inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset",
+                            (player.licenseType &&
+                              (licenceTypeBadgeColors as any)[
+                                player.licenseType
+                              ]) ||
+                              "bg-gray-50 text-gray-700 ring-gray-600/20",
+                          )}
+                        >
                           {player.licenseType}
                         </span>
                       </td>
 
                       {/* Source */}
-                      <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
-                        <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset", player.source === Source.ISHD ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20" : "bg-indigo-50 text-indigo-700 ring-indigo-600/20")}>
+                      <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
+                        <span
+                          className={classNames(
+                            "inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset",
+                            player.source === Source.ISHD
+                              ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+                              : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+                          )}
+                        >
                           {player.source}
                         </span>
                       </td>
@@ -1683,7 +1696,6 @@ const RosterPage = () => {
                       {/* licence status indicator */}
                       <td className="px-3 py-3 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex flex-col items-center space-y-1">
-
                           {/* License Status Badge */}
                           {player.status === LicenseStatus.INVALID ? (
                             <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
