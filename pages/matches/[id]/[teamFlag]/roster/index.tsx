@@ -153,7 +153,7 @@ const RosterPage = () => {
   const [availablePlayersList, setAvailablePlayersList] = useState<
     AvailablePlayer[]
   >([]);
-  const [rosterPublished, setRosterPublished] = useState<boolean>(false);
+  const [rosterStatus, setRosterStatus] = useState<string>("DRAFT");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<RosterPlayer | null>(null);
   const [editPlayerNumber, setEditPlayerNumber] = useState<number>(0);
@@ -277,7 +277,7 @@ const RosterPage = () => {
           teamFlag === "home" ? matchData.home : matchData.away;
         setMatchTeam(matchTeamData);
         setInitialRosterData(sortRoster(matchTeamData.roster?.players || []));
-        setRosterPublished(matchTeamData.roster?.published || false);
+        setRosterStatus(matchTeamData.roster?.status || "DRAFT");
         setCoachData({
           firstName: matchTeamData.roster?.coach?.firstName || "",
           lastName: matchTeamData.roster?.coach?.lastName || "",
@@ -1194,7 +1194,7 @@ const RosterPage = () => {
 
     const rosterUpdate = {
       players: rosterList,
-      published: rosterPublished || match?.matchStatus.key === "FINISHED",
+      status: rosterStatus === "SUBMITTED" ? "SUBMITTED" : "DRAFT",
       coach: coachData,
       staff: staffData.filter(
         (s) => s.firstName.trim() || s.lastName.trim() || s.role.trim(),
@@ -1407,7 +1407,8 @@ const RosterPage = () => {
               <button
                 type="button"
                 onClick={() => setIsCallUpModalOpen(true)}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                disabled={rosterStatus === "SUBMITTED"}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:block ml-1.5 whitespace-nowrap">Hochmelden</span>
@@ -1517,15 +1518,19 @@ const RosterPage = () => {
                     >
                       {/* Checkbox replaced by Toggle/Switch */}
                       <td className="px-3 py-3 whitespace-nowrap">
-                        <Switch
-                          checked={player.selected}
-                          onChange={() => handleTablePlayerToggle(player._id)}
-                          disabled={hasEvents && player.selected}
-                          className={classNames(
-                            player.selected ? "bg-indigo-600" : "bg-gray-200",
-                            "relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
-                          )}
-                        >
+                          <Switch
+                            checked={player.selected}
+                            onChange={() => {
+                              if (rosterStatus !== "SUBMITTED") {
+                                handleTablePlayerToggle(player._id);
+                              }
+                            }}
+                            disabled={(hasEvents && player.selected) || rosterStatus === "SUBMITTED"}
+                            className={classNames(
+                              player.selected ? "bg-indigo-600" : "bg-gray-200",
+                              "relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                            )}
+                          >
                           <span className="sr-only">Spieler auswählen</span>
                           <span
                             aria-hidden="true"
@@ -1545,6 +1550,7 @@ const RosterPage = () => {
                           type="number"
                           min="0"
                           value={player.rosterJerseyNo || ""}
+                          disabled={rosterStatus === "SUBMITTED"}
                           onChange={(e) =>
                             handleTableJerseyChange(
                               player._id,
@@ -1559,6 +1565,7 @@ const RosterPage = () => {
                             player.rosterJerseyNo === 0 && player.selected
                               ? "ring-yellow-500 bg-yellow-50"
                               : "",
+                            rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : "",
                           )}
                         />
                       </td>
@@ -1570,6 +1577,7 @@ const RosterPage = () => {
                             <button
                               key={pos}
                               type="button"
+                              disabled={rosterStatus === "SUBMITTED"}
                               onClick={() =>
                                 handleTablePositionToggle(player._id, pos)
                               }
@@ -1582,6 +1590,7 @@ const RosterPage = () => {
                                       ? "bg-green-600 text-white"
                                       : "bg-purple-600 text-white"
                                   : "bg-gray-200 text-gray-600 hover:bg-gray-300",
+                                rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : "",
                               )}
                             >
                               {pos}
@@ -2237,100 +2246,47 @@ const RosterPage = () => {
         </>
       )}
 
-      {/* Publish Roster Toggle */}
+      {/* Submit Roster Toggle */}
       <div className="flex items-center justify-between mt-12 p-6 border-t">
         <div className="flex items-center justify-between w-full">
           <div className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              Veröffentlichen
+              Abgeben
             </span>
             <span className="text-xs sm:text-sm text-gray-500">
               {(() => {
-                const allChecksPass = isRosterValid();
                 const isFinished = match.matchStatus.key === "FINISHED";
+                const isSubmitted = rosterStatus === "SUBMITTED";
 
                 if (isFinished) {
-                  return "Aufstellung ist veröffentlicht (Spiel beendet)";
-                } else if (!allChecksPass) {
-                  const errors = [];
-
-                  if (
-                    !rosterList.some(
-                      (player) => player.playerPosition.key === "C",
-                    )
-                  ) {
-                    errors.push("kein Captain");
-                  }
-                  if (
-                    !rosterList.some(
-                      (player) => player.playerPosition.key === "A",
-                    )
-                  ) {
-                    errors.push("kein Assistant");
-                  }
-                  if (
-                    !rosterList.some(
-                      (player) => player.playerPosition.key === "G",
-                    )
-                  ) {
-                    errors.push("kein Goalie");
-                  }
-                  if (
-                    rosterList.filter(
-                      (player) => player.playerPosition.key != "G",
-                    ).length < minSkaterCount
-                  ) {
-                    errors.push(`weniger als ${minSkaterCount} Feldspieler`);
-                  }
-                  if (
-                    rosterList.some(
-                      (player) => player.player.jerseyNumber === 0,
-                    )
-                  ) {
-                    errors.push("fehlende Rückennummern");
-                  }
-                  if (
-                    rosterList.some(
-                      (player, index) =>
-                        rosterList.findIndex(
-                          (p) =>
-                            p.player.jerseyNumber ===
-                            player.player.jerseyNumber,
-                        ) !== index,
-                    )
-                  ) {
-                    errors.push("doppelte Rückennummern");
-                  }
-                  if (rosterList.filter((player) => player.called).length > 5) {
-                    errors.push("zu viele hochgemeldete Spieler");
-                  }
-
-                  return `Speichern möglich auch mit Fehlern: ${errors.join(", ")}`;
+                  return "Aufstellung ist abgegeben (Spiel beendet)";
+                } else if (isSubmitted) {
+                  return "Aufstellung wurde abgegeben. Zum Bearbeiten Status wieder auf Entwurf setzen.";
                 } else {
-                  return "Aufstellung öffentlich sichtbar machen";
+                  return "Aufstellung fertigstellen und abgeben";
                 }
               })()}
             </span>
           </div>
           <Switch
-            checked={rosterPublished || match.matchStatus.key === "FINISHED"}
+            checked={rosterStatus === "SUBMITTED" || match.matchStatus.key === "FINISHED"}
             onChange={(enabled) => {
               if (match.matchStatus.key !== "FINISHED") {
-                setRosterPublished(enabled);
+                setRosterStatus(enabled ? "SUBMITTED" : "DRAFT");
               }
             }}
             disabled={match.matchStatus.key === "FINISHED"}
             className={`${
-              rosterPublished || match.matchStatus.key === "FINISHED"
+              rosterStatus === "SUBMITTED" || match.matchStatus.key === "FINISHED"
                 ? "bg-indigo-600"
                 : "bg-gray-200"
             } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2 ${match.matchStatus.key === "FINISHED" ? "cursor-not-allowed opacity-50" : ""}`}
           >
-            <span className="sr-only">Veröffentlichen</span>
+            <span className="sr-only">Abgeben</span>
             <span
               aria-hidden="true"
               className={`${
-                rosterPublished || match.matchStatus.key === "FINISHED"
+                rosterStatus === "SUBMITTED" || match.matchStatus.key === "FINISHED"
                   ? "translate-x-5"
                   : "translate-x-0"
               } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
@@ -2353,8 +2309,8 @@ const RosterPage = () => {
         <button
           type="button"
           onClick={handleSaveRoster}
-          disabled={loading || savingRoster}
-          className="w-24 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 hover:bg-indigo-500 py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          disabled={loading || savingRoster || (rosterStatus === "SUBMITTED" && match.matchStatus.key !== "FINISHED")}
+          className="w-24 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 hover:bg-indigo-500 py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {savingRoster ? (
             <svg
