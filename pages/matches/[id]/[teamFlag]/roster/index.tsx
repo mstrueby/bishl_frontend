@@ -939,8 +939,8 @@ const RosterPage = () => {
               params: {
                 sortby: "lastName",
                 ...(includeInactivePlayers
-                  ? { all: true }
-                  : { active: "true" }),
+                  ? { active: "true" } : {}),
+                all: true
               },
             },
           );
@@ -1353,7 +1353,7 @@ const RosterPage = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Spieler suchen..."
-                className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-sm sm:leading-6"
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <MagnifyingGlassIcon
@@ -1369,12 +1369,8 @@ const RosterPage = () => {
               <button
                 type="button"
                 onClick={() => setShowLineupOnly(!showLineupOnly)}
-                className={classNames(
-                  showLineupOnly
-                    ? "bg-indigo-100 ring-indigo-300 hover:bg-indigo-200"
-                    : "bg-white ring-gray-300 hover:bg-gray-50",
-                  "flex-1 sm:flex-none inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset",
-                )}
+                className="w-32 bg-white ring-gray-300 hover:bg-gray-50
+                  flex-1 sm:flex-none inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset"
                 title={showLineupOnly ? "Spielerliste anzeigen" : "Aufstellung anzeigen"}
               >
                 {showLineupOnly ? (
@@ -1383,7 +1379,7 @@ const RosterPage = () => {
                   <ClipboardDocumentListIcon className="h-4 w-4" aria-hidden="true" />
                 )}
                 <span className="hidden sm:block ml-1.5 whitespace-nowrap">
-                  {showLineupOnly ? "Liste" : "Aufstellung"}
+                  {showLineupOnly ? "Spielerliste" : "Aufstellung"}
                 </span>
               </button>
 
@@ -1414,7 +1410,7 @@ const RosterPage = () => {
                 className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:block ml-1.5 whitespace-nowrap">Call-Up</span>
+                <span className="hidden sm:block ml-1.5 whitespace-nowrap">Hochmelden</span>
               </button>
             </div>
           </div>
@@ -2585,25 +2581,23 @@ const RosterPage = () => {
 
                   {/* Include Inactive Players Toggle */}
                   <div className="flex flex-row items-center justify-between sm:justify-end mb-4">
-                    <span className="text-sm text-gray-700 sm:mr-4">
-                      Inaktive Spieler anzeigen
-                    </span>
-                    <Switch
-                      checked={includeInactivePlayers}
-                      onChange={setIncludeInactivePlayers}
-                      className={`${
-                        includeInactivePlayers ? "bg-indigo-600" : "bg-gray-200"
-                      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2`}
+                    <button
+                      type="button"
+                      onClick={() => setIncludeInactivePlayers(!includeInactivePlayers)}
+                      className={classNames(
+                        includeInactivePlayers
+                          ? "bg-indigo-100 ring-indigo-300 hover:bg-indigo-200"
+                          : "bg-white ring-gray-300 hover:bg-gray-50",
+                        "inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset",
+                      )}
                     >
-                      <span
-                        aria-hidden="true"
-                        className={`${
-                          includeInactivePlayers
-                            ? "translate-x-5"
-                            : "translate-x-0"
-                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                      />
-                    </Switch>
+                      {includeInactivePlayers ? (
+                        <EyeIcon className="h-4 w-4" aria-hidden="true" />
+                      ) : (
+                        <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
+                      )}
+                      <span className="ml-1.5">Inaktive Spieler</span>
+                    </button>
                   </div>
 
                   {/* Team Selection */}
@@ -2622,13 +2616,37 @@ const RosterPage = () => {
                               tabIndex={1}
                               className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             >
-                              <span
-                                className={`block truncate ${selectedCallUpTeam ? "" : "text-gray-400"}`}
-                              >
-                                {selectedCallUpTeam
-                                  ? selectedCallUpTeam.name
-                                  : "Mannschaft auswählen"}
-                              </span>
+                              <div className="flex items-center justify-between">
+                                <span
+                                  className={`block truncate ${selectedCallUpTeam ? "" : "text-gray-400"}`}
+                                >
+                                  {selectedCallUpTeam
+                                    ? selectedCallUpTeam.name
+                                    : "Mannschaft auswählen"}
+                                </span>
+                                {selectedCallUpTeam && loadingPlayers && (
+                                  <svg
+                                    className="animate-spin h-4 w-4 text-indigo-600 mr-2"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                                    ></path>
+                                  </svg>
+                                )}
+                              </div>
                               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                 <ChevronUpDownIcon
                                   className="h-5 w-5 text-gray-400"
