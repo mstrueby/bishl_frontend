@@ -1520,7 +1520,6 @@ const RosterPage = () => {
                               ? "bg-opacity-40 bg-red-100 "
                               : ""
                           : "",
-                        player.active === false ? "opacity-50" : "",
                         isDuplicateJersey ? "bg-yellow-50" : "",
                       )}
                     >
