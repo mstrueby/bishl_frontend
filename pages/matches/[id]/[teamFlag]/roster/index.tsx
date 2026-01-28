@@ -2123,7 +2123,7 @@ const RosterPage = () => {
                     s.firstName.trim() || s.lastName.trim() || s.role.trim(),
                 ).length + 1,
               ),
-            ).length < 4 && (
+            ).length < 4 && rosterStatus !== "SUBMITTED" && (
               <div className="flex justify-center py-4">
                 <button
                   type="button"
