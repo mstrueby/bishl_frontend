@@ -27,7 +27,7 @@ import {
   TrashIcon,
   ArrowUturnLeftIcon,
   FlagIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
 interface PlayerFormProps {
@@ -54,7 +54,7 @@ const invalidReasonCodeMap: Record<string, string> = {
   UNKNOWN_LICENCE_TYPE: "Unbekannter Passtyp",
   HOBBY_PLAYER_CONFLICT: "Hobbyspieler-Konflikt",
   LOAN_AGE_GROUP_CONFLICT: "Leihpass-Altersklassenkonflikt",
-  SUSPENDED: "Gesperrt"
+  SUSPENDED: "Gesperrt",
 };
 
 const licenceTypeBadgeColors: Record<string, string> = {
@@ -81,10 +81,18 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [editingTeam, setEditingTeam] = useState<AssignmentTeam | null>(null);
   const [editingClubId, setEditingClubId] = useState<string | null>(null);
-  const [masterSuccessMessage, setMasterSuccessMessage] = useState<string | null>(null);
-  const [masterErrorMessage, setMasterErrorMessage] = useState<string | null>(null);
-  const [licenceSuccessMessage, setLicenceSuccessMessage] = useState<string | null>(null);
-  const [licenceErrorMessage, setLicenceErrorMessage] = useState<string | null>(null);
+  const [masterSuccessMessage, setMasterSuccessMessage] = useState<
+    string | null
+  >(null);
+  const [masterErrorMessage, setMasterErrorMessage] = useState<string | null>(
+    null,
+  );
+  const [licenceSuccessMessage, setLicenceSuccessMessage] = useState<
+    string | null
+  >(null);
+  const [licenceErrorMessage, setLicenceErrorMessage] = useState<string | null>(
+    null,
+  );
   const [masterDataLoading, setMasterDataLoading] = useState(false);
   const [licenceLoading, setLicenceLoading] = useState(false);
   const masterSectionRef = useRef<HTMLDivElement>(null);
@@ -127,7 +135,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setLicenceErrorMessage(null);
     setTimeout(() => {
       setLicenceSuccessMessage(null);
-    }, 3000)
+    }, 3000);
   };
 
   const showLicenceError = (message: string) => {
@@ -152,7 +160,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pässe erfolgreich optimiert.");
-      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      licenceSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     } catch (error) {
       console.error("Error auto-optimizing:", error);
       showLicenceError("Fehler bei der Optimierung.");
@@ -176,7 +187,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pässe erfolgreich validiert.");
-      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      licenceSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     } catch (error) {
       console.error("Error revalidating:", error);
       showLicenceError("Fehler bei der Validierung.");
@@ -221,7 +235,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pass erfolgreich entfernt.");
-      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      licenceSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     } catch (error) {
       console.error("Error removing licence:", error);
       showLicenceError("Fehler beim Entfernen des Passes.");
@@ -251,7 +268,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           ? "Pass erfolgreich aktualisiert."
           : "Neuer Pass erfolgreich hinzugefügt.",
       );
-      licenceSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      licenceSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     } catch (error) {
       console.error("Error saving assignment:", error);
       throw error;
@@ -303,7 +323,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       onPlayerUpdate(response.data);
       setEditMode(false);
       showMasterSuccess("Daten erfolgreich gespeichert.");
-      masterSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      masterSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     } catch (error) {
       console.error("Error saving master data:", error);
       showMasterError("Fehler beim Speichern der Daten.");
@@ -330,7 +353,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("managedByISHD", response.data.managedByISHD);
       onPlayerUpdate(response.data);
       showLicenceSuccess(
-        `Verwaltung auf ${newValue ? "ISHD" : "BISHL"} geändert.`
+        `Verwaltung auf ${newValue ? "ISHD" : "BISHL"} geändert.`,
       );
     } catch (error) {
       console.error("Error updating managedByISHD:", error);
@@ -379,8 +402,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           Stammdaten
         </h3>
         <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-          Diese Daten werden durch die Passstelle verwaltet und können nicht geändert
-          werden.
+          Diese Daten werden durch die Passstelle verwaltet und können nicht
+          geändert werden.
         </p>
       </div>
       <div className="mt-6 border-t border-b border-gray-100">
@@ -418,9 +441,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
             <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
               <Badge
                 info={
-                  initialValues.ageGroup
-                    ? `${initialValues.ageGroup}`
-                    : "?"
+                  initialValues.ageGroup ? `${initialValues.ageGroup}` : "?"
                 }
               />
             </dd>
@@ -483,17 +504,17 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
               {masterSuccessMessage && (
                 <div className="mt-4">
-                  <SuccessMessage 
-                    message={masterSuccessMessage} 
-                    onClose={() => setMasterSuccessMessage(null)} 
+                  <SuccessMessage
+                    message={masterSuccessMessage}
+                    onClose={() => setMasterSuccessMessage(null)}
                   />
                 </div>
               )}
               {masterErrorMessage && (
                 <div className="mt-4">
-                  <ErrorMessage 
-                    error={masterErrorMessage} 
-                    onClose={() => setMasterErrorMessage(null)} 
+                  <ErrorMessage
+                    error={masterErrorMessage}
+                    onClose={() => setMasterErrorMessage(null)}
                   />
                 </div>
               )}
@@ -625,29 +646,43 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
             {/* Section 3: Licence table */}
             {(() => {
-              const ownClubAssignment = values.assignedTeams?.find(a => a.clubId === clubId);
-              const isLoanClub = ownClubAssignment?.teams.some(t => t.licenseType === "LOAN");
+              const ownClubAssignment = values.assignedTeams?.find(
+                (a) => a.clubId === clubId,
+              );
+              const isLoanClub = ownClubAssignment?.teams.some(
+                (t) => t.licenseType === "LOAN",
+              );
               const hasLoanLicence = isLoanClub;
 
-              const sortedAssignedTeams = [...(values.assignedTeams || [])].sort((a, b) => {
-                const aIsOwn = a.clubId === clubId;
-                const bIsOwn = b.clubId === clubId;
-                if (aIsOwn && !bIsOwn) return -1;
-                if (!aIsOwn && bIsOwn) return 1;
-                return a.clubName.localeCompare(b.clubName);
-              }).map(assignment => {
-                const sortedTeams = [...assignment.teams].sort((teamA, teamB) => {
-                  const orderA = ageGroupConfig.find(g => g.key === teamA.teamAgeGroup)?.sortOrder || 999;
-                  const orderB = ageGroupConfig.find(g => g.key === teamB.teamAgeGroup)?.sortOrder || 999;
-                  
-                  if (orderA !== orderB) {
-                    return orderA - orderB;
-                  }
-                  
-                  return (teamA.teamAlias || "").localeCompare(teamB.teamAlias || "");
+              const sortedAssignedTeams = [...(values.assignedTeams || [])]
+                .sort((a, b) => {
+                  const aIsOwn = a.clubId === clubId;
+                  const bIsOwn = b.clubId === clubId;
+                  if (aIsOwn && !bIsOwn) return -1;
+                  if (!aIsOwn && bIsOwn) return 1;
+                  return a.clubName.localeCompare(b.clubName);
+                })
+                .map((assignment) => {
+                  const sortedTeams = [...assignment.teams].sort(
+                    (teamA, teamB) => {
+                      const orderA =
+                        ageGroupConfig.find((g) => g.key === teamA.teamAgeGroup)
+                          ?.sortOrder || 999;
+                      const orderB =
+                        ageGroupConfig.find((g) => g.key === teamB.teamAgeGroup)
+                          ?.sortOrder || 999;
+
+                      if (orderA !== orderB) {
+                        return orderA - orderB;
+                      }
+
+                      return (teamA.teamAlias || "").localeCompare(
+                        teamB.teamAlias || "",
+                      );
+                    },
+                  );
+                  return { ...assignment, teams: sortedTeams };
                 });
-                return { ...assignment, teams: sortedTeams };
-              });
 
               return (
                 <div className="mt-12" ref={licenceSectionRef}>
@@ -665,47 +700,34 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           className="-ml-0.5 h-5 w-5 text-gray-400"
                           aria-hidden="true"
                         />
-                        Melden
+                        <span className="hidden sm:inline">Melden</span>
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleAutoOptimize(values, setFieldValue)}
+                        onClick={() =>
+                          handleAutoOptimize(values, setFieldValue)
+                        }
                         disabled={licenceLoading || hasLoanLicence}
                         className={classNames(
                           "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-                          hasLoanLicence 
-                            ? "bg-gray-50 text-gray-400 ring-gray-200 cursor-not-allowed" 
-                            : "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50"
+                          hasLoanLicence
+                            ? "bg-gray-50 text-gray-400 ring-gray-200 cursor-not-allowed"
+                            : "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50",
                         )}
                       >
                         <SparklesIcon
-                          className={classNames("-ml-0.5 h-5 w-5", hasLoanLicence ? "text-gray-300" : "text-gray-400")}
+                          className={classNames(
+                            "-ml-0.5 h-5 w-5",
+                            hasLoanLicence ? "text-gray-300" : "text-gray-400",
+                          )}
                           aria-hidden="true"
                         />
-                        Auto-Fix
+                        <span className="hidden sm:inline">Auto-Fix</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingTeam(null);
-                          setEditingClubId(null);
-                          setIsModalOpen(true);
-                        }}
-                        disabled={hasLoanLicence}
-                        className={classNames(
-                          "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-                          hasLoanLicence
-                            ? "bg-indigo-300 text-white cursor-not-allowed"
-                            : "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600"
-                        )}
+                      <Menu
+                        as="div"
+                        className="relative inline-block text-left"
                       >
-                        <PlusCircleIcon
-                          className="-ml-0.5 h-5 w-5"
-                          aria-hidden="true"
-                        />
-                        Neu
-                      </button>
-                      <Menu as="div" className="relative inline-block text-left">
                         <Menu.Button
                           disabled={managedByISHDLoading}
                           className={classNames(
@@ -714,11 +736,20 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                               ? "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed"
                               : values.managedByISHD
                                 ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20 hover:bg-yellow-100"
-                                : "bg-indigo-50 text-indigo-700 ring-indigo-600/20 hover:bg-indigo-100"
+                                : "bg-indigo-50 text-indigo-700 ring-indigo-600/20 hover:bg-indigo-100",
                           )}
                         >
-                          {managedByISHDLoading ? "..." : values.managedByISHD ? "ISHD" : "BISHL"}
-                          <ChevronDownIcon className="-mr-1 h-5 w-5" aria-hidden="true" />
+                          <span className="flex items-center">
+                            {managedByISHDLoading
+                              ? "..."
+                              : values.managedByISHD
+                                ? "ISHD"
+                                : "BISHL"}
+                            <ChevronDownIcon
+                              className="-mr-1 ml-1 h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </span>
                         </Menu.Button>
                         <Transition
                           as={Fragment}
@@ -735,7 +766,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 {({ active }) => (
                                   <button
                                     type="button"
-                                    onClick={() => handleManagedByISHDChange(true, setFieldValue)}
+                                    onClick={() =>
+                                      handleManagedByISHDChange(
+                                        true,
+                                        setFieldValue,
+                                      )
+                                    }
                                     disabled={values.managedByISHD}
                                     className={classNames(
                                       values.managedByISHD
@@ -743,13 +779,15 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                         : active
                                           ? "bg-gray-100 text-gray-900"
                                           : "text-gray-700",
-                                      "flex w-full items-center px-4 py-2 text-sm"
+                                      "flex w-full items-center px-4 py-2 text-sm",
                                     )}
                                   >
-                                    <span className={classNames(
-                                      "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-                                      "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-                                    )}>
+                                    <span
+                                      className={classNames(
+                                        "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                                        "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
+                                      )}
+                                    >
                                       ISHD
                                     </span>
                                   </button>
@@ -759,7 +797,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 {({ active }) => (
                                   <button
                                     type="button"
-                                    onClick={() => handleManagedByISHDChange(false, setFieldValue)}
+                                    onClick={() =>
+                                      handleManagedByISHDChange(
+                                        false,
+                                        setFieldValue,
+                                      )
+                                    }
                                     disabled={!values.managedByISHD}
                                     className={classNames(
                                       !values.managedByISHD
@@ -767,13 +810,15 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                         : active
                                           ? "bg-gray-100 text-gray-900"
                                           : "text-gray-700",
-                                      "flex w-full items-center px-4 py-2 text-sm"
+                                      "flex w-full items-center px-4 py-2 text-sm",
                                     )}
                                   >
-                                    <span className={classNames(
-                                      "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-                                      "bg-indigo-50 text-indigo-700 ring-indigo-600/20"
-                                    )}>
+                                    <span
+                                      className={classNames(
+                                        "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                                        "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+                                      )}
+                                    >
                                       BISHL
                                     </span>
                                   </button>
@@ -783,22 +828,43 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           </Menu.Items>
                         </Transition>
                       </Menu>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingTeam(null);
+                          setEditingClubId(null);
+                          setIsModalOpen(true);
+                        }}
+                        disabled={hasLoanLicence}
+                        className={classNames(
+                          "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                          hasLoanLicence
+                            ? "bg-indigo-300 text-white cursor-not-allowed"
+                            : "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600",
+                        )}
+                      >
+                        <PlusCircleIcon
+                          className="-ml-0.5 h-5 w-5"
+                          aria-hidden="true"
+                        />
+                        <span className="hidden sm:inline">Neu</span>
+                      </button>
                     </div>
                   </div>
 
                   {licenceSuccessMessage && (
                     <div className="mt-4">
-                      <SuccessMessage 
-                        message={licenceSuccessMessage} 
-                        onClose={() => setLicenceSuccessMessage(null)} 
+                      <SuccessMessage
+                        message={licenceSuccessMessage}
+                        onClose={() => setLicenceSuccessMessage(null)}
                       />
                     </div>
                   )}
                   {licenceErrorMessage && (
                     <div className="mt-4">
-                      <ErrorMessage 
-                        error={licenceErrorMessage} 
-                        onClose={() => setLicenceErrorMessage(null)} 
+                      <ErrorMessage
+                        error={licenceErrorMessage}
+                        onClose={() => setLicenceErrorMessage(null)}
                       />
                     </div>
                   )}
@@ -830,15 +896,22 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     }}
                     className="relative z-50"
                   >
-                    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                    <div
+                      className="fixed inset-0 bg-black/30"
+                      aria-hidden="true"
+                    />
                     <div className="fixed inset-0 flex items-center justify-center p-4">
                       <Dialog.Panel className="mx-auto max-w-md rounded-lg bg-white p-6 shadow-xl">
                         <Dialog.Title className="text-lg font-semibold text-gray-900">
                           Pass melden
                         </Dialog.Title>
                         <Dialog.Description className="mt-2 text-sm text-gray-600">
-                          Sende eine Anfrage an die Passstelle, damit sie den Pass/die Pässe von{" "}
-                          <strong>{initialValues.displayFirstName} {initialValues.displayLastName}</strong>{" "}
+                          Sende eine Anfrage an die Passstelle, damit sie den
+                          Pass/die Pässe von{" "}
+                          <strong>
+                            {initialValues.displayFirstName}{" "}
+                            {initialValues.displayLastName}
+                          </strong>{" "}
                           überprüfen können. Beschreibe kurz den Sachverhalt.
                         </Dialog.Description>
                         <textarea
@@ -862,7 +935,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           <button
                             type="button"
                             onClick={handlePassCheckRequest}
-                            disabled={passCheckLoading || !passCheckMessage.trim()}
+                            disabled={
+                              passCheckLoading || !passCheckMessage.trim()
+                            }
                             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {passCheckLoading ? "Wird gesendet..." : "Absenden"}
@@ -879,14 +954,52 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           <table className="relative min-w-full border-b border-gray-200 mb-20">
                             <thead className="bg-white uppercase text-sm font-medium text-gray-500">
                               <tr>
-                                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-3">Team</th>
-                                <th scope="col" className="px-3 py-3.5 text-left">Typ</th>
-                                <th scope="col" className="px-3 py-3.5 text-left">Status</th>
-                                <th scope="col" className="px-3 py-3.5 text-center">Quelle</th>
-                                <th scope="col" className="px-3 py-3.5 text-center">Pass</th>
-                                <th scope="col" className="px-3 py-3.5 text-left">Aktiv</th>
-                                <th scope="col" className="px-3 py-3.5 text-center">Nr.</th>
-                                <th scope="col" className="py-3.5 pl-3 pr-4 sm:pr-3">
+                                <th
+                                  scope="col"
+                                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-3"
+                                >
+                                  Team
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="px-3 py-3.5 text-left"
+                                >
+                                  Typ
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="px-3 py-3.5 text-left"
+                                >
+                                  Status
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="px-3 py-3.5 text-center"
+                                >
+                                  Quelle
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="px-3 py-3.5 text-center"
+                                >
+                                  Pass
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="px-3 py-3.5 text-left"
+                                >
+                                  Aktiv
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="px-3 py-3.5 text-center"
+                                >
+                                  Nr.
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="py-3.5 pl-3 pr-4 sm:pr-3"
+                                >
                                   <span className="sr-only">Aktionen</span>
                                 </th>
                               </tr>
@@ -894,13 +1007,18 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                             <tbody className="bg-white">
                               {sortedAssignedTeams.map((assignment) => {
                                 const isOwnClub = assignment.clubId === clubId;
-                                const showClubHeader = sortedAssignedTeams.length > 1 || !isOwnClub;
+                                const showClubHeader =
+                                  sortedAssignedTeams.length > 1 || !isOwnClub;
 
                                 return (
                                   <Fragment key={assignment.clubId}>
                                     {showClubHeader && (
                                       <tr className="border-t border-gray-200">
-                                        <th scope="colgroup" colSpan={8} className="bg-gray-50 py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3 space-x-3">
+                                        <th
+                                          scope="colgroup"
+                                          colSpan={8}
+                                          className="bg-gray-50 py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3 space-x-3"
+                                        >
                                           <span>{assignment.clubName}</span>
                                           {assignment.clubType && (
                                             <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
@@ -912,69 +1030,205 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                     )}
                                     {assignment.teams.map((team, teamIndex) => {
                                       const isValid = team.status === "VALID";
-                                      const isLastLicenceInOwnClub = isOwnClub && assignment.teams.length === 1;
-                                      const canRemove = !((team.source === "ISHD" && initialValues.managedByISHD) || isLastLicenceInOwnClub);
+                                      const isLastLicenceInOwnClub =
+                                        isOwnClub &&
+                                        assignment.teams.length === 1;
+                                      const canRemove = !(
+                                        (team.source === "ISHD" &&
+                                          initialValues.managedByISHD) ||
+                                        isLastLicenceInOwnClub
+                                      );
 
                                       return (
-                                        <tr key={team.teamId} className={classNames(teamIndex === 0 && !showClubHeader ? "border-gray-300" : "border-gray-200", "border-t")}>
-                                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{team.teamName}</td>
+                                        <tr
+                                          key={team.teamId}
+                                          className={classNames(
+                                            teamIndex === 0 && !showClubHeader
+                                              ? "border-gray-300"
+                                              : "border-gray-200",
+                                            "border-t",
+                                          )}
+                                        >
+                                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
+                                            {team.teamName}
+                                          </td>
                                           <td className="whitespace-nowrap px-3 py-4">
-                                            <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset", licenceTypeBadgeColors[team.licenseType] || "bg-gray-50 text-gray-700 ring-gray-600/20")}>
+                                            <span
+                                              className={classNames(
+                                                "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                                                licenceTypeBadgeColors[
+                                                  team.licenseType
+                                                ] ||
+                                                  "bg-gray-50 text-gray-700 ring-gray-600/20",
+                                              )}
+                                            >
                                               {team.licenseType}
                                             </span>
                                           </td>
                                           <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                                             <div className="flex items-center gap-x-2">
-                                              <div className={classNames("flex-none rounded-full p-1", isValid ? "text-green-500 bg-green-500/20" : "text-red-500 bg-red-500/20")}>
+                                              <div
+                                                className={classNames(
+                                                  "flex-none rounded-full p-1",
+                                                  isValid
+                                                    ? "text-green-500 bg-green-500/20"
+                                                    : "text-red-500 bg-red-500/20",
+                                                )}
+                                              >
                                                 <div className="h-2 w-2 rounded-full bg-current" />
                                               </div>
-                                              <span className="text-gray-700">{isValid ? "Gültig" : "Ungültig"}</span>
+                                              <span className="text-gray-700">
+                                                {isValid
+                                                  ? "Gültig"
+                                                  : "Ungültig"}
+                                              </span>
                                             </div>
-                                            {!isValid && team.invalidReasonCodes && team.invalidReasonCodes.length > 0 && (
-                                              <div className="mt-1 text-xs font-normal text-red-800 space-y-0.5 ml-6">
-                                                {team.invalidReasonCodes.map((code, idx) => (
-                                                  <div key={idx}>{invalidReasonCodeMap[code] || code}</div>
-                                                ))}
-                                              </div>
-                                            )}
+                                            {!isValid &&
+                                              team.invalidReasonCodes &&
+                                              team.invalidReasonCodes.length >
+                                                0 && (
+                                                <div className="mt-1 text-xs font-normal text-red-800 space-y-0.5 ml-6">
+                                                  {team.invalidReasonCodes.map(
+                                                    (code, idx) => (
+                                                      <div key={idx}>
+                                                        {invalidReasonCodeMap[
+                                                          code
+                                                        ] || code}
+                                                      </div>
+                                                    ),
+                                                  )}
+                                                </div>
+                                              )}
                                           </td>
                                           <td className="whitespace-nowrap px-3 py-4 text-center">
-                                            <span className={classNames("inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset", team.source === "ISHD" ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20" : "bg-indigo-50 text-indigo-700 ring-indigo-600/20")}>
+                                            <span
+                                              className={classNames(
+                                                "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                                                team.source === "ISHD"
+                                                  ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+                                                  : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+                                              )}
+                                            >
                                               {team.source}
                                             </span>
                                           </td>
-                                          <td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-500">{team.passNo || "-"}</td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-500">
+                                            {team.passNo || "-"}
+                                          </td>
                                           <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500">
                                             <div className="flex items-center gap-x-2">
-                                              <div className={classNames("flex-none rounded-full p-1", team.active ? "text-green-500 bg-green-500/20" : "text-gray-500 bg-gray-800/10")}>
+                                              <div
+                                                className={classNames(
+                                                  "flex-none rounded-full p-1",
+                                                  team.active
+                                                    ? "text-green-500 bg-green-500/20"
+                                                    : "text-gray-500 bg-gray-800/10",
+                                                )}
+                                              >
                                                 <div className="h-2 w-2 rounded-full bg-current" />
                                               </div>
-                                              <span className="text-gray-500">{team.active ? "Aktiv" : "Inaktiv"}</span>
+                                              <span className="text-gray-500">
+                                                {team.active
+                                                  ? "Aktiv"
+                                                  : "Inaktiv"}
+                                              </span>
                                             </div>
                                           </td>
-                                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500 text-center">{team.jerseyNo || "-"}</td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500 text-center">
+                                            {team.jerseyNo || "-"}
+                                          </td>
                                           {isOwnClub && (
                                             <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
-                                              <Menu as="div" className="relative inline-block text-left">
+                                              <Menu
+                                                as="div"
+                                                className="relative inline-block text-left"
+                                              >
                                                 <Menu.Button className="flex items-center text-gray-400 hover:text-gray-600">
-                                                  <span className="sr-only">Optionen öffnen</span>
-                                                  <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+                                                  <span className="sr-only">
+                                                    Optionen öffnen
+                                                  </span>
+                                                  <EllipsisVerticalIcon
+                                                    className="h-5 w-5"
+                                                    aria-hidden="true"
+                                                  />
                                                 </Menu.Button>
-                                                <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
+                                                <Transition
+                                                  as={Fragment}
+                                                  enter="transition ease-out duration-100"
+                                                  enterFrom="transform opacity-0 scale-95"
+                                                  enterTo="transform opacity-100 scale-100"
+                                                  leave="transition ease-in duration-75"
+                                                  leaveFrom="transform opacity-100 scale-100"
+                                                  leaveTo="transform opacity-0 scale-95"
+                                                >
                                                   <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                                     <div className="py-1">
                                                       <Menu.Item>
                                                         {({ active }) => (
-                                                          <button type="button" onClick={() => { setEditingTeam(team); setEditingClubId(assignment.clubId); setIsModalOpen(true); }} className={classNames(active ? "bg-gray-100 text-gray-900" : "text-gray-700", "flex w-full items-center px-4 py-2 text-sm")}>
-                                                            <PencilIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                          <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                              setEditingTeam(
+                                                                team,
+                                                              );
+                                                              setEditingClubId(
+                                                                assignment.clubId,
+                                                              );
+                                                              setIsModalOpen(
+                                                                true,
+                                                              );
+                                                            }}
+                                                            className={classNames(
+                                                              active
+                                                                ? "bg-gray-100 text-gray-900"
+                                                                : "text-gray-700",
+                                                              "flex w-full items-center px-4 py-2 text-sm",
+                                                            )}
+                                                          >
+                                                            <PencilIcon
+                                                              className="mr-3 h-5 w-5 text-gray-400"
+                                                              aria-hidden="true"
+                                                            />
                                                             Bearbeiten
                                                           </button>
                                                         )}
                                                       </Menu.Item>
-                                                      <Menu.Item disabled={!canRemove}>
-                                                        {({ active, disabled }) => (
-                                                          <button type="button" onClick={() => handleRemoveLicence(assignment, team, values, setFieldValue)} disabled={disabled} className={classNames(disabled ? "text-gray-300 cursor-not-allowed" : active ? "bg-gray-100 text-gray-900" : "text-gray-700", "flex w-full items-center px-4 py-2 text-sm")}>
-                                                            <TrashIcon className={classNames("mr-3 h-5 w-5", disabled ? "text-gray-300" : "text-gray-400")} aria-hidden="true" />
+                                                      <Menu.Item
+                                                        disabled={!canRemove}
+                                                      >
+                                                        {({
+                                                          active,
+                                                          disabled,
+                                                        }) => (
+                                                          <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                              handleRemoveLicence(
+                                                                assignment,
+                                                                team,
+                                                                values,
+                                                                setFieldValue,
+                                                              )
+                                                            }
+                                                            disabled={disabled}
+                                                            className={classNames(
+                                                              disabled
+                                                                ? "text-gray-300 cursor-not-allowed"
+                                                                : active
+                                                                  ? "bg-gray-100 text-gray-900"
+                                                                  : "text-gray-700",
+                                                              "flex w-full items-center px-4 py-2 text-sm",
+                                                            )}
+                                                          >
+                                                            <TrashIcon
+                                                              className={classNames(
+                                                                "mr-3 h-5 w-5",
+                                                                disabled
+                                                                  ? "text-gray-300"
+                                                                  : "text-gray-400",
+                                                              )}
+                                                              aria-hidden="true"
+                                                            />
                                                             Entfernen
                                                           </button>
                                                         )}
@@ -997,7 +1251,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-4 text-center py-8 text-gray-500">Keine Spielerpässe vorhanden.</div>
+                    <div className="mt-4 text-center py-8 text-gray-500">
+                      Keine Spielerpässe vorhanden.
+                    </div>
                   )}
                 </div>
               );
@@ -1009,7 +1265,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 onClick={handleCancel}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
-                <ArrowUturnLeftIcon className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" aria-hidden="true" />
+                <ArrowUturnLeftIcon
+                  className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400"
+                  aria-hidden="true"
+                />
                 Zurück
               </button>
             </div>
