@@ -74,7 +74,8 @@ const Add: NextPage = () => {
     sex: 'männlich',
     ageGroup: '',
     overAge: false,
-    playUpTrackings: []
+    playUpTrackings: [],
+    suspensions: []
   };
 
   const onSubmit = async (values: PlayerValues) => {

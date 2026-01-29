@@ -181,7 +181,8 @@ const Players: NextPage = () => {
       ageGroup: player.ageGroup,
       overAge: player.overAge,
       sex: player.sex,
-      playUpTrackings: player.playUpTrackings
+      playUpTrackings: player.playUpTrackings,
+      suspensions: player.suspensions
     }));
 
   const sectionTitle = "Spieler";
