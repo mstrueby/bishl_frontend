@@ -2,7 +2,7 @@ import React, { useState, useEffect, Fragment, useRef } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import InputText from "../ui/form/InputText";
-import { Switch, Menu, Transition } from "@headlessui/react";
+import { Switch, Menu, Transition, Dialog } from "@headlessui/react";
 import {
   PlayerValues,
   Assignment,
@@ -25,7 +25,8 @@ import {
   PlusCircleIcon,
   EllipsisVerticalIcon,
   TrashIcon,
-  ArrowUturnLeftIcon
+  ArrowUturnLeftIcon,
+  FlagIcon
 } from "@heroicons/react/24/outline";
 
 interface PlayerFormProps {
@@ -37,6 +38,7 @@ interface PlayerFormProps {
   loading: boolean;
   clubId: string;
   clubName: string;
+  clubEmail?: string;
 }
 
 const invalidReasonCodeMap: Record<string, string> = {
@@ -72,6 +74,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   loading,
   clubId,
   clubName,
+  clubEmail,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -92,6 +95,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     imageVisible: initialValues.imageVisible,
     managedByISHD: initialValues.managedByISHD,
   });
+  const [isPassCheckModalOpen, setIsPassCheckModalOpen] = useState(false);
+  const [passCheckMessage, setPassCheckMessage] = useState("");
+  const [passCheckLoading, setPassCheckLoading] = useState(false);
 
   useEffect(() => {
     setSavedMasterData({
@@ -317,6 +323,28 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setFieldValue("managedByISHD", savedMasterData.managedByISHD);
     setFieldValue("image", undefined);
     setEditMode(false);
+  };
+
+  const handlePassCheckRequest = async () => {
+    if (!passCheckMessage.trim()) {
+      return;
+    }
+    setPassCheckLoading(true);
+    try {
+      await apiClient.post("/players/pass-check-request", {
+        player_id: initialValues._id,
+        from_email: clubEmail || "",
+        message: passCheckMessage.trim(),
+      });
+      showLicenceSuccess("Anfrage erfolgreich gesendet.");
+      setIsPassCheckModalOpen(false);
+      setPassCheckMessage("");
+    } catch (error) {
+      console.error("Error sending pass check request:", error);
+      showLicenceError("Fehler beim Senden der Anfrage.");
+    } finally {
+      setPassCheckLoading(false);
+    }
   };
 
   return (
@@ -642,6 +670,17 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     <div className="flex items-center gap-x-2">
                       <button
                         type="button"
+                        onClick={() => setIsPassCheckModalOpen(true)}
+                        className="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      >
+                        <FlagIcon
+                          className="-ml-0.5 h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                        Melden
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleAutoOptimize(values, setFieldValue)}
                         disabled={licenceLoading || hasLoanLicence}
                         className={classNames(
@@ -716,6 +755,56 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     editingClubId={editingClubId}
                     managedByISHD={values.managedByISHD}
                   />
+
+                  <Dialog
+                    open={isPassCheckModalOpen}
+                    onClose={() => {
+                      setIsPassCheckModalOpen(false);
+                      setPassCheckMessage("");
+                    }}
+                    className="relative z-50"
+                  >
+                    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                    <div className="fixed inset-0 flex items-center justify-center p-4">
+                      <Dialog.Panel className="mx-auto max-w-md rounded-lg bg-white p-6 shadow-xl">
+                        <Dialog.Title className="text-lg font-semibold text-gray-900">
+                          Pass melden
+                        </Dialog.Title>
+                        <Dialog.Description className="mt-2 text-sm text-gray-600">
+                          Sende eine Anfrage an die Passstelle, damit sie den Pass/die Pässe von{" "}
+                          <strong>{initialValues.displayFirstName} {initialValues.displayLastName}</strong>{" "}
+                          überprüfen können. Beschreibe kurz den Sachverhalt.
+                        </Dialog.Description>
+                        <textarea
+                          value={passCheckMessage}
+                          onChange={(e) => setPassCheckMessage(e.target.value)}
+                          rows={4}
+                          className="mt-4 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          placeholder="Nachricht eingeben..."
+                        />
+                        <div className="mt-6 flex justify-end gap-x-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsPassCheckModalOpen(false);
+                              setPassCheckMessage("");
+                            }}
+                            className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                          >
+                            Abbrechen
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handlePassCheckRequest}
+                            disabled={passCheckLoading || !passCheckMessage.trim()}
+                            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {passCheckLoading ? "Wird gesendet..." : "Absenden"}
+                          </button>
+                        </div>
+                      </Dialog.Panel>
+                    </div>
+                  </Dialog>
 
                   {sortedAssignedTeams.length > 0 ? (
                     <div className="mt-8">
