@@ -145,7 +145,8 @@ const Edit: NextPage = () => {
     active: team.active,
     external: team.external,
     logoUrl: team.logoUrl,
-    ishdId: team.ishdId
+    ishdId: team.ishdId,
+    teamType: team.teamType
   };
 
   const sectionTitle = 'Mannschaft bearbeiten';

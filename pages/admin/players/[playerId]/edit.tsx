@@ -218,7 +218,8 @@ const Edit: NextPage = () => {
     overAge: player.overAge || false,
     managedByISHD: player.managedByISHD || false,
     sex: player.sex || "",
-    playUpTrackings: player.playUpTrackings || []
+    playUpTrackings: player.playUpTrackings || [],
+    suspensions: player.suspensions || []
   };
 
   const sectionTitle = "Spieler bearbeiten";

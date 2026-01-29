@@ -204,6 +204,7 @@ const Edit: NextPage = () => {
     managedByISHD: player.managedByISHD || false,
     sex: player.sex || '',
     playUpTrackings: player.playUpTrackings || [],
+    suspensions: player.suspensions || []
   };
 
   const sectionTitle = `${initialValues.displayFirstName} ${initialValues.displayLastName}`;
