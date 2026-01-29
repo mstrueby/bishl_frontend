@@ -690,11 +690,11 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
                       Spielerpässe
                     </h3>
-                    <div className="flex items-center gap-x-2">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-x-2">
                       <button
                         type="button"
                         onClick={() => setIsPassCheckModalOpen(true)}
-                        className="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                       >
                         <FlagIcon
                           className="-ml-0.5 h-5 w-5 text-gray-400"
@@ -709,7 +709,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         }
                         disabled={licenceLoading || hasLoanLicence}
                         className={classNames(
-                          "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                          "flex-1 sm:flex-none inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
                           hasLoanLicence
                             ? "bg-gray-50 text-gray-400 ring-gray-200 cursor-not-allowed"
                             : "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50",
@@ -726,12 +726,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       </button>
                       <Menu
                         as="div"
-                        className="relative inline-block text-left"
+                        className="relative inline-block text-left flex-auto sm:flex-none"
                       >
                         <Menu.Button
                           disabled={managedByISHDLoading}
                           className={classNames(
-                            "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset",
+                            "w-full sm:w-auto inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset",
                             managedByISHDLoading
                               ? "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed"
                               : values.managedByISHD
@@ -739,7 +739,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 : "bg-indigo-50 text-indigo-700 ring-indigo-600/20 hover:bg-indigo-100",
                           )}
                         >
-                          <span className="flex items-center">
+                          <span className="flex items-center justify-between w-full sm:w-auto">
                             {managedByISHDLoading
                               ? "..."
                               : values.managedByISHD
@@ -837,7 +837,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         }}
                         disabled={hasLoanLicence}
                         className={classNames(
-                          "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                          "flex-1 sm:flex-none inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
                           hasLoanLicence
                             ? "bg-indigo-300 text-white cursor-not-allowed"
                             : "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600",
