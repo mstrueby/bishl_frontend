@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { ClubValues, TeamValues } from '../../../../../types/ClubValues';
+import { ClubValues, TeamValues, TeamType } from '../../../../../types/ClubValues';
 import TeamForm from '../../../../../components/admin/TeamForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from "../../../../../components/admin/SectionHeader";
@@ -69,6 +69,7 @@ const Add: NextPage = () => {
     logoUrl: '',
     ishdId: '',
     legacyId: 0,
+    teamType: TeamType.COMPETITIVE
   };
 
   const onSubmit = async (values: TeamValues) => {
