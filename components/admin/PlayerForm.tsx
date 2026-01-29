@@ -26,7 +26,8 @@ import {
   EllipsisVerticalIcon,
   TrashIcon,
   ArrowUturnLeftIcon,
-  FlagIcon
+  FlagIcon,
+  ChevronDownIcon
 } from "@heroicons/react/24/outline";
 
 interface PlayerFormProps {
@@ -93,11 +94,11 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     displayLastName: initialValues.displayLastName,
     imageUrl: initialValues.imageUrl,
     imageVisible: initialValues.imageVisible,
-    managedByISHD: initialValues.managedByISHD,
   });
   const [isPassCheckModalOpen, setIsPassCheckModalOpen] = useState(false);
   const [passCheckMessage, setPassCheckMessage] = useState("");
   const [passCheckLoading, setPassCheckLoading] = useState(false);
+  const [managedByISHDLoading, setManagedByISHDLoading] = useState(false);
 
   useEffect(() => {
     setSavedMasterData({
@@ -105,7 +106,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       displayLastName: initialValues.displayLastName,
       imageUrl: initialValues.imageUrl,
       imageVisible: initialValues.imageVisible,
-      managedByISHD: initialValues.managedByISHD,
     });
   }, [initialValues]);
 
@@ -273,7 +273,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       formData.append("displayFirstName", values.displayFirstName);
       formData.append("displayLastName", values.displayLastName);
       formData.append("imageVisible", String(values.imageVisible));
-      formData.append("managedByISHD", String(values.managedByISHD));
 
       if (values.image instanceof File) {
         formData.append("image", values.image);
@@ -291,7 +290,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
         displayLastName: response.data.displayLastName,
         imageUrl: response.data.imageUrl,
         imageVisible: response.data.imageVisible,
-        managedByISHD: response.data.managedByISHD,
       };
 
       setSavedMasterData(newMasterData);
@@ -300,7 +298,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("displayLastName", newMasterData.displayLastName);
       setFieldValue("imageUrl", newMasterData.imageUrl);
       setFieldValue("imageVisible", newMasterData.imageVisible);
-      setFieldValue("managedByISHD", newMasterData.managedByISHD);
       setFieldValue("image", undefined);
 
       onPlayerUpdate(response.data);
@@ -315,12 +312,39 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     }
   };
 
+  const handleManagedByISHDChange = async (
+    newValue: boolean,
+    setFieldValue: any,
+  ) => {
+    setManagedByISHDLoading(true);
+    setLicenceErrorMessage(null);
+    try {
+      const formData = new FormData();
+      formData.append("managedByISHD", String(newValue));
+
+      const response = await apiClient.patch(
+        `/players/${initialValues._id}`,
+        formData,
+      );
+
+      setFieldValue("managedByISHD", response.data.managedByISHD);
+      onPlayerUpdate(response.data);
+      showLicenceSuccess(
+        `Verwaltung auf ${newValue ? "ISHD" : "BISHL"} geändert.`
+      );
+    } catch (error) {
+      console.error("Error updating managedByISHD:", error);
+      showLicenceError("Fehler beim Ändern der Verwaltung.");
+    } finally {
+      setManagedByISHDLoading(false);
+    }
+  };
+
   const handleEditCancel = (setFieldValue: any) => {
     setFieldValue("displayFirstName", savedMasterData.displayFirstName);
     setFieldValue("displayLastName", savedMasterData.displayLastName);
     setFieldValue("imageUrl", savedMasterData.imageUrl);
     setFieldValue("imageVisible", savedMasterData.imageVisible);
-    setFieldValue("managedByISHD", savedMasterData.managedByISHD);
     setFieldValue("image", undefined);
     setEditMode(false);
   };
@@ -524,23 +548,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         />
                       </dd>
                     </div>
-                    <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                      <dt className="text-sm/6 font-medium text-gray-900">
-                        Verwaltung
-                      </dt>
-                      <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                        <span
-                          className={classNames(
-                            "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                            savedMasterData.managedByISHD
-                              ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-                              : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
-                          )}
-                        >
-                          {savedMasterData.managedByISHD ? "ISHD" : "BISHL"}
-                        </span>
-                      </dd>
-                    </div>
                   </dl>
                 </div>
               ) : (
@@ -592,25 +599,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     type="text"
                     label="Angezeigter Nachname"
                   />
-
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium leading-6 text-gray-900">
-                      Verwaltung
-                    </label>
-                    <select
-                      value={values.managedByISHD ? "ISHD" : "BISHL"}
-                      onChange={(e) =>
-                        setFieldValue(
-                          "managedByISHD",
-                          e.target.value === "ISHD",
-                        )
-                      }
-                      className="mt-2 block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    >
-                      <option value="ISHD">ISHD</option>
-                      <option value="BISHL">BISHL</option>
-                    </select>
-                  </div>
 
                   <div className="mt-6 flex justify-end gap-x-3">
                     <button
@@ -717,6 +705,84 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         />
                         Neu
                       </button>
+                      <Menu as="div" className="relative inline-block text-left">
+                        <Menu.Button
+                          disabled={managedByISHDLoading}
+                          className={classNames(
+                            "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset",
+                            managedByISHDLoading
+                              ? "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed"
+                              : values.managedByISHD
+                                ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20 hover:bg-yellow-100"
+                                : "bg-indigo-50 text-indigo-700 ring-indigo-600/20 hover:bg-indigo-100"
+                          )}
+                        >
+                          {managedByISHDLoading ? "..." : values.managedByISHD ? "ISHD" : "BISHL"}
+                          <ChevronDownIcon className="-mr-1 h-5 w-5" aria-hidden="true" />
+                        </Menu.Button>
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                        >
+                          <Menu.Items className="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div className="py-1">
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleManagedByISHDChange(true, setFieldValue)}
+                                    disabled={values.managedByISHD}
+                                    className={classNames(
+                                      values.managedByISHD
+                                        ? "bg-yellow-50 text-yellow-700"
+                                        : active
+                                          ? "bg-gray-100 text-gray-900"
+                                          : "text-gray-700",
+                                      "flex w-full items-center px-4 py-2 text-sm"
+                                    )}
+                                  >
+                                    <span className={classNames(
+                                      "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                                      "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+                                    )}>
+                                      ISHD
+                                    </span>
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleManagedByISHDChange(false, setFieldValue)}
+                                    disabled={!values.managedByISHD}
+                                    className={classNames(
+                                      !values.managedByISHD
+                                        ? "bg-indigo-50 text-indigo-700"
+                                        : active
+                                          ? "bg-gray-100 text-gray-900"
+                                          : "text-gray-700",
+                                      "flex w-full items-center px-4 py-2 text-sm"
+                                    )}
+                                  >
+                                    <span className={classNames(
+                                      "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                                      "bg-indigo-50 text-indigo-700 ring-indigo-600/20"
+                                    )}>
+                                      BISHL
+                                    </span>
+                                  </button>
+                                )}
+                              </Menu.Item>
+                            </div>
+                          </Menu.Items>
+                        </Transition>
+                      </Menu>
                     </div>
                   </div>
 
