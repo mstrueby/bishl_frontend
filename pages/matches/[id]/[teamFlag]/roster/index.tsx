@@ -837,14 +837,6 @@ const RosterPage = () => {
     return jerseyNumbers.length !== new Set(jerseyNumbers).size;
   }, [tablePlayers]);
 
-  // Auto-set published to true if match is finished
-  const isMatchFinished = match?.matchStatus.key === "FINISHED";
-  useEffect(() => {
-    if (isMatchFinished) {
-      setRosterPublished(true);
-    }
-  }, [isMatchFinished]);
-
   // Fetch player stats for called players
   useEffect(() => {
     const fetchPlayerStats = async () => {
@@ -1187,14 +1179,6 @@ const RosterPage = () => {
   };
 
   const handleSaveRoster = async () => {
-    if (match?.matchStatus.key === "FINISHED") {
-      setRosterPublished(true);
-    }
-
-    setSavingRoster(true);
-    setError("");
-    let cntAdditionalMatches = 0;
-
     const rosterUpdate: any = {
       players: rosterList,
       coach: coachData,
