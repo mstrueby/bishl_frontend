@@ -902,7 +902,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     />
                     <div className="fixed inset-0 flex items-center justify-center p-4">
                       <Dialog.Panel className="mx-auto max-w-md rounded-lg bg-white p-6 shadow-xl">
-                        <Dialog.Title className="text-lg font-semibold text-gray-900">
+                        <Dialog.Title className="text-lg font-semibold text-gray-900 text-center pb-2">
                           Pass melden
                         </Dialog.Title>
                         <Dialog.Description className="mt-2 text-sm text-gray-600">
