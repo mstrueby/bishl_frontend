@@ -1179,6 +1179,10 @@ const RosterPage = () => {
   };
 
   const handleSaveRoster = async () => {
+    setSavingRoster(true);
+    setError("");
+    let cntAdditionalMatches = 0;
+
     const rosterUpdate: any = {
       players: rosterList,
       coach: coachData,
