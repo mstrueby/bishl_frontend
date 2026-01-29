@@ -24,6 +24,7 @@ const Edit: NextPage = () => {
   const [player, setPlayer] = useState<PlayerValues | null>(null);
   const [clubId, setClubId] = useState<string>('');
   const [clubName, setClubName] = useState<string>('');
+  const [clubEmail, setClubEmail] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [dataLoading, setDataLoading] = useState<boolean>(true);
@@ -51,6 +52,7 @@ const Edit: NextPage = () => {
           setDataLoading(true);
           setClubId(user.club.clubId);
           setClubName(user.club.clubName);
+          setClubEmail(user.club.email || user.email || '');
 
           const [playerResponse, wkoResponse, assignmentWindowResponse] = await Promise.all([
             apiClient.get(`/players/${playerId}`),
@@ -228,6 +230,7 @@ const Edit: NextPage = () => {
         loading={loading}
         clubId={clubId}
         clubName={clubName}
+        clubEmail={clubEmail}
       />
 
       <WkoRules rules={wkoRules} dynamicRules={dynamicRules} assignmentWindow={assignmentWindow} />
