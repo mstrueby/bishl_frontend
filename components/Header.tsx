@@ -171,44 +171,7 @@ MenuItemLink.displayName = 'MenuItemLink';
 
 const Header = () => {
   const router = useRouter();
-  const { user, setUser, authError, setAuthError, loading, setLoading } =
-    useAuth();
-  
-  useEffect(() => {
-    setLoading(true);
-    (async () => {
-      try {
-        const accessToken = localStorage.getItem('access_token');
-
-        if (!accessToken) {
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        const userData = await fetch("/api/user", {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-
-        if (userData.ok) {
-          const user = await userData.json();
-          setUser(user);
-        } else {
-          // Token might be expired, clear it
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          setUser(null);
-        }
-      } catch (error) {
-        setUser(null);
-        setAuthError(error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [setLoading, setUser, setAuthError]);
+  const { user, loading } = useAuth();
 
   return (
     <Disclosure as="nav" className="bg-gray-800 sticky top-0 z-50 shadow-md">
