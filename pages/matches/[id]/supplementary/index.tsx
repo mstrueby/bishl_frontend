@@ -1,10 +1,13 @@
-
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { MatchValues, SupplementarySheet, Referee } from "../../../../types/MatchValues";
+import {
+  MatchValues,
+  SupplementarySheet,
+  Referee,
+} from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
 import useAuth from "../../../../hooks/useAuth";
@@ -15,16 +18,16 @@ import {
 } from "../../../../tools/utils";
 import MatchHeader from "../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../components/admin/SectionHeader";
-import ErrorMessage from '../../../../components/ui/ErrorMessage';
-import SuccessMessage from '../../../../components/ui/SuccessMessage';
-import LoadingState from '../../../../components/ui/LoadingState';
-import { Dialog, Transition, Listbox } from '@headlessui/react';
-import { Fragment } from 'react';
-import { AssignmentValues } from '../../../../types/AssignmentValues';
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
-import { UserValues } from '../../../../types/UserValues';
-import apiClient from '../../../../lib/apiClient';
-import { getErrorMessage } from '../../../../lib/errorHandler';
+import ErrorMessage from "../../../../components/ui/ErrorMessage";
+import SuccessMessage from "../../../../components/ui/SuccessMessage";
+import LoadingState from "../../../../components/ui/LoadingState";
+import { Dialog, Transition, Listbox } from "@headlessui/react";
+import { Fragment } from "react";
+import { AssignmentValues } from "../../../../types/AssignmentValues";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { UserValues } from "../../../../types/UserValues";
+import apiClient from "../../../../lib/apiClient";
+import { getErrorMessage } from "../../../../lib/errorHandler";
 
 interface SectionHeaderSimpleProps {
   title: string;
@@ -51,11 +54,11 @@ function SectionHeaderSimple({ title, description }: SectionHeaderSimpleProps) {
 
 interface OfficialCardProps {
   title: string;
-  officialKey: 'timekeeper1' | 'timekeeper2' | 'technicalDirector';
+  officialKey: "timekeeper1" | "timekeeper2" | "technicalDirector";
   formData: SupplementarySheet;
   updateOfficialField: (
-    officialKey: 'timekeeper1' | 'timekeeper2' | 'technicalDirector',
-    field: 'firstName' | 'lastName' | 'licence',
+    officialKey: "timekeeper1" | "timekeeper2" | "technicalDirector",
+    field: "firstName" | "lastName" | "licence",
     value: string,
   ) => void;
 }
@@ -82,15 +85,19 @@ function OfficialCard({
             >
               Vorname
             </label>
-            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 lg:max-xl:w-1/2">
               <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                 <input
                   type="text"
                   id={`${officialKey}FirstName`}
                   placeholder=""
-                  value={official?.firstName || ''}
+                  value={official?.firstName || ""}
                   onChange={(e) =>
-                    updateOfficialField(officialKey, 'firstName', e.target.value)
+                    updateOfficialField(
+                      officialKey,
+                      "firstName",
+                      e.target.value,
+                    )
                   }
                   className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                 />
@@ -104,15 +111,15 @@ function OfficialCard({
             >
               Nachname
             </label>
-            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 lg:max-xl:w-1/2">
               <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                 <input
                   type="text"
                   id={`${officialKey}LastName`}
                   placeholder=""
-                  value={official?.lastName || ''}
+                  value={official?.lastName || ""}
                   onChange={(e) =>
-                    updateOfficialField(officialKey, 'lastName', e.target.value)
+                    updateOfficialField(officialKey, "lastName", e.target.value)
                   }
                   className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                 />
@@ -126,15 +133,15 @@ function OfficialCard({
             >
               Lizenz
             </label>
-            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 lg:max-xl:w-1/2">
               <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                 <input
                   type="text"
                   id={`${officialKey}Licence`}
                   placeholder=""
-                  value={official?.licence || ''}
+                  value={official?.licence || ""}
                   onChange={(e) =>
-                    updateOfficialField(officialKey, 'licence', e.target.value)
+                    updateOfficialField(officialKey, "licence", e.target.value)
                   }
                   className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                 />
@@ -201,26 +208,37 @@ function RefereeChangeDialog({
                 </Dialog.Title>
                 <div className="mt-2">
                   <p className="text-sm text-gray-500 mb-4">
-                    Wählen Sie einen neuen Schiedsrichter für Position {refereeNumber}
+                    Wählen Sie einen neuen Schiedsrichter für Position{" "}
+                    {refereeNumber}
                   </p>
-                  
-                  <Listbox value={selectedReferee} onChange={setSelectedReferee}>
+
+                  <Listbox
+                    value={selectedReferee}
+                    onChange={setSelectedReferee}
+                  >
                     <div className="relative mt-1 z-50">
                       <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
                         {selectedReferee ? (
                           <div className="flex items-center gap-x-3">
                             <div className="size-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                              {selectedReferee.firstName.charAt(0)}{selectedReferee.lastName.charAt(0)}
+                              {selectedReferee.firstName.charAt(0)}
+                              {selectedReferee.lastName.charAt(0)}
                             </div>
                             <span className="block truncate">
-                              {selectedReferee.firstName} {selectedReferee.lastName}
+                              {selectedReferee.firstName}{" "}
+                              {selectedReferee.lastName}
                             </span>
                           </div>
                         ) : (
-                          <span className="block truncate text-gray-400">(auswählen)</span>
+                          <span className="block truncate text-gray-400">
+                            (auswählen)
+                          </span>
                         )}
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          <ChevronUpDownIcon
+                            className="h-5 w-5 text-gray-400"
+                            aria-hidden="true"
+                          />
                         </span>
                       </Listbox.Button>
                       <Transition
@@ -230,41 +248,54 @@ function RefereeChangeDialog({
                         leaveTo="opacity-0"
                       >
                         <Listbox.Options className="absolute z-50 mt-1 max-h-[300px] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {[...allReferees].sort((a, b) => a.firstName.localeCompare(b.firstName)).map((referee) => (
-                            <Listbox.Option
-                              key={referee._id}
-                              className={({ active }) =>
-                                `relative cursor-default select-none py-2 px-3 ${
-                                  active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-                                }`
-                              }
-                              value={referee}
-                            >
-                              {({ selected, active }) => (
-                                <div className="flex items-center gap-x-3">
-                                  <div className="flex items-center gap-x-3 flex-1 truncate">
-                                    <div className={`size-5 rounded-full flex items-center justify-center text-xs ${
-                                      active ? 'bg-indigo-500' : 'bg-gray-100'
-                                    }`}>
-                                      {referee.firstName.charAt(0)}{referee.lastName.charAt(0)}
+                          {[...allReferees]
+                            .sort((a, b) =>
+                              a.firstName.localeCompare(b.firstName),
+                            )
+                            .map((referee) => (
+                              <Listbox.Option
+                                key={referee._id}
+                                className={({ active }) =>
+                                  `relative cursor-default select-none py-2 px-3 ${
+                                    active
+                                      ? "bg-indigo-600 text-white"
+                                      : "text-gray-900"
+                                  }`
+                                }
+                                value={referee}
+                              >
+                                {({ selected, active }) => (
+                                  <div className="flex items-center gap-x-3">
+                                    <div className="flex items-center gap-x-3 flex-1 truncate">
+                                      <div
+                                        className={`size-5 rounded-full flex items-center justify-center text-xs ${
+                                          active
+                                            ? "bg-indigo-500"
+                                            : "bg-gray-100"
+                                        }`}
+                                      >
+                                        {referee.firstName.charAt(0)}
+                                        {referee.lastName.charAt(0)}
+                                      </div>
+                                      <span
+                                        className={`block truncate ${selected ? "font-semibold" : "font-normal"}`}
+                                      >
+                                        {referee.firstName} {referee.lastName}
+                                      </span>
                                     </div>
-                                    <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
-                                      {referee.firstName} {referee.lastName}
-                                    </span>
+                                    {referee.referee?.club?.logoUrl && (
+                                      <Image
+                                        src={referee.referee.club.logoUrl}
+                                        alt={referee.referee.club.clubName}
+                                        width={24}
+                                        height={24}
+                                        className="object-contain"
+                                      />
+                                    )}
                                   </div>
-                                  {referee.referee?.club?.logoUrl && (
-                                    <Image
-                                      src={referee.referee.club.logoUrl}
-                                      alt={referee.referee.club.clubName}
-                                      width={24}
-                                      height={24}
-                                      className="object-contain"
-                                    />
-                                  )}
-                                </div>
-                              )}
-                            </Listbox.Option>
-                          ))}
+                                )}
+                              </Listbox.Option>
+                            ))}
                         </Listbox.Options>
                       </Transition>
                     </div>
@@ -313,8 +344,9 @@ function RefereeAttendanceCard({
   onOpenRefereeDialog: () => void;
 }) {
   const referee = refereeNumber === 1 ? match.referee1 : match.referee2;
-  const assignment = assignments.find(a => a.position === refereeNumber);
-  const isDifferentReferee = assignment && referee && assignment.referee.userId !== referee.userId;
+  const assignment = assignments.find((a) => a.position === refereeNumber);
+  const isDifferentReferee =
+    assignment && referee && assignment.referee.userId !== referee.userId;
 
   const refereeTitle = referee ? (
     <div>
@@ -335,17 +367,15 @@ function RefereeAttendanceCard({
       <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
         Schiedsrichter {refereeNumber}
       </div>
-      <div className="font-base text-gray-500">
-        nicht eingeteilt
-      </div>
-      <div className="text-xs font-normal text-gray-500">
-        &nbsp;
-      </div>
+      <div className="font-base text-gray-500">nicht eingeteilt</div>
+      <div className="text-xs font-normal text-gray-500">&nbsp;</div>
     </div>
   );
 
   return (
-    <div className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? 'border-red-600 border-2 shadow-red-500/50 shadow-lg' : ''}`}>
+    <div
+      className={`overflow-hidden bg-white rounded-md shadow-md border ${isDifferentReferee ? "border-red-600 border-2 shadow-red-500/50 shadow-lg" : ""}`}
+    >
       <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-900/5 flex items-center justify-between">
         <h4 className="text-sm">{refereeTitle}</h4>
         <button
@@ -496,11 +526,18 @@ function RefereeAttendanceCard({
         <div className=" pt-3 border-t border-gray-200 bg-gray-50 px-6 py-3">
           <div className="text-xs text-gray-600">
             <div className="font-medium text-gray-600 mb-2">
-              {assignment.status === 'ASSIGNED' ? 'Eingeteilt (nicht bestätigt)' : 'Eingeteilt (bestätigt)'}:
+              {assignment.status === "ASSIGNED"
+                ? "Eingeteilt (nicht bestätigt)"
+                : "Eingeteilt (bestätigt)"}
+              :
             </div>
-            <div className='text-sm text-gray-800'>{assignment.referee.firstName} {assignment.referee.lastName}</div>
+            <div className="text-sm text-gray-800">
+              {assignment.referee.firstName} {assignment.referee.lastName}
+            </div>
             {assignment.referee.clubName && (
-              <div className="text-gray-500 pb-1">{assignment.referee.clubName}</div>
+              <div className="text-gray-500 pb-1">
+                {assignment.referee.clubName}
+              </div>
             )}
           </div>
         </div>
@@ -555,12 +592,8 @@ function RefereePaymentCard({
       <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
         Schiedsrichter {refereeNumber}
       </div>
-      <div className="font-base text-gray-500">
-        nicht eingeteilt
-      </div>
-      <div className="text-xs font-normal text-gray-500">
-        &nbsp;
-      </div>
+      <div className="font-base text-gray-500">nicht eingeteilt</div>
+      <div className="text-xs font-normal text-gray-500">&nbsp;</div>
     </div>
   );
 
@@ -578,7 +611,7 @@ function RefereePaymentCard({
             >
               Fahrtkosten
             </label>
-            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 md:max-lg:w-28">
               <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                 <input
                   type="text"
@@ -611,7 +644,7 @@ function RefereePaymentCard({
             >
               Aufwandsentschädigung
             </label>
-            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 md:max-lg:w-28">
               <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                 <input
                   type="text"
@@ -644,7 +677,7 @@ function RefereePaymentCard({
             >
               Spielgebühren
             </label>
-            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48">
+            <div className="mt-2 sm:mt-0 sm:ml-4 w-full sm:w-48 md:max-lg:w-28">
               <div className="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                 <input
                   type="text"
@@ -816,7 +849,9 @@ export default function SupplementaryForm() {
 
   const [pageLoading, setPageLoading] = useState(true);
   const [match, setMatch] = useState<MatchValues | null>(null);
-  const [matchdayOwner, setMatchdayOwner] = useState<MatchdayOwner | null>(null);
+  const [matchdayOwner, setMatchdayOwner] = useState<MatchdayOwner | null>(
+    null,
+  );
   const [formData, setFormData] = useState<SupplementarySheet>({
     timekeeper1: {},
     timekeeper2: {},
@@ -827,52 +862,61 @@ export default function SupplementaryForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [refereeDialogOpen, setRefereeDialogOpen] = useState(false);
-  const [selectedRefereePosition, setSelectedRefereePosition] = useState<1 | 2>(1);
+  const [selectedRefereePosition, setSelectedRefereePosition] = useState<1 | 2>(
+    1,
+  );
   const [allReferees, setAllReferees] = useState<UserValues[]>([]);
-  const [selectedReferee, setSelectedReferee] = useState<UserValues | null>(null);
+  const [selectedReferee, setSelectedReferee] = useState<UserValues | null>(
+    null,
+  );
 
   // Auth check - redirect to login if not authenticated
   useEffect(() => {
     if (authLoading) return;
 
     if (!user) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
   }, [authLoading, user, router]);
 
   // Fetch all data on mount
   useEffect(() => {
-    console.log('Supplementary page: fetchData effect triggered', { 
-      authLoading, 
-      user: !!user, 
+    console.log("Supplementary page: fetchData effect triggered", {
+      authLoading,
+      user: !!user,
       id,
-      routerReady: router.isReady 
+      routerReady: router.isReady,
     });
 
     if (authLoading || !user || !id) {
-      console.log('Supplementary page: fetchData guard return', { authLoading, user: !!user, id });
+      console.log("Supplementary page: fetchData guard return", {
+        authLoading,
+        user: !!user,
+        id,
+      });
       return;
     }
 
     const fetchData = async () => {
       try {
-        console.log('Supplementary page: Starting fetchData API calls');
+        console.log("Supplementary page: Starting fetchData API calls");
         setPageLoading(true);
 
         // Fetch match data
         const matchResponse = await apiClient.get(`/matches/${id}`);
         const matchData: MatchValues = matchResponse.data;
-        console.log('Supplementary page: Match data fetched', matchData._id);
-        
+        console.log("Supplementary page: Match data fetched", matchData._id);
+
         // Stabilize state updates
         setMatch(matchData);
-        setFormData(prev => {
+        setFormData((prev) => {
           const nextData = {
             ...matchData.supplementarySheet,
             timekeeper1: matchData.supplementarySheet?.timekeeper1 || {},
             timekeeper2: matchData.supplementarySheet?.timekeeper2 || {},
-            technicalDirector: matchData.supplementarySheet?.technicalDirector || {},
+            technicalDirector:
+              matchData.supplementarySheet?.technicalDirector || {},
           };
           if (JSON.stringify(prev) === JSON.stringify(nextData)) return prev;
           return nextData;
@@ -881,48 +925,63 @@ export default function SupplementaryForm() {
         // Fetch matchday owner
         try {
           const matchdayResponse = await apiClient.get(
-            `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`
+            `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`,
           );
-          console.log('Supplementary page: Matchday owner fetched');
+          console.log("Supplementary page: Matchday owner fetched");
           const owner = matchdayResponse.data?.owner || null;
-          setMatchdayOwner(prev => prev === owner ? prev : owner);
+          setMatchdayOwner((prev) => (prev === owner ? prev : owner));
         } catch (error) {
-          console.error('Error fetching matchday owner:', getErrorMessage(error));
+          console.error(
+            "Error fetching matchday owner:",
+            getErrorMessage(error),
+          );
         }
 
         // Fetch assignments
         try {
           const assignmentsResponse = await apiClient.get(
-            `/assignments/matches/${id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`
+            `/assignments/matches/${id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`,
           );
-          console.log('Supplementary page: Assignments fetched', assignmentsResponse.data?.length);
+          console.log(
+            "Supplementary page: Assignments fetched",
+            assignmentsResponse.data?.length,
+          );
           const nextAssignments = assignmentsResponse.data || [];
-          setAssignments(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(nextAssignments)) return prev;
+          setAssignments((prev) => {
+            if (JSON.stringify(prev) === JSON.stringify(nextAssignments))
+              return prev;
             return nextAssignments;
           });
         } catch (error) {
-          console.error('Error fetching assignments:', getErrorMessage(error));
+          console.error("Error fetching assignments:", getErrorMessage(error));
         }
 
         // Fetch all referees
         try {
-          const refereesResponse = await apiClient.get('/users/referees');
-          console.log('Supplementary page: Referees fetched', refereesResponse.data?.length);
+          const refereesResponse = await apiClient.get("/users/referees");
+          console.log(
+            "Supplementary page: Referees fetched",
+            refereesResponse.data?.length,
+          );
           const nextReferees = refereesResponse.data || [];
-          setAllReferees(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(nextReferees)) return prev;
+          setAllReferees((prev) => {
+            if (JSON.stringify(prev) === JSON.stringify(nextReferees))
+              return prev;
             return nextReferees;
           });
         } catch (error) {
-          console.error('Error fetching referees:', getErrorMessage(error));
+          console.error("Error fetching referees:", getErrorMessage(error));
         }
-
       } catch (error) {
-        console.error('Supplementary page: Error fetching data:', getErrorMessage(error));
-        setError('Fehler beim Laden der Daten');
+        console.error(
+          "Supplementary page: Error fetching data:",
+          getErrorMessage(error),
+        );
+        setError("Fehler beim Laden der Daten");
       } finally {
-        console.log('Supplementary page: fetchData finished, setting loading to false');
+        console.log(
+          "Supplementary page: fetchData finished, setting loading to false",
+        );
         setPageLoading(false);
       }
     };
@@ -931,9 +990,12 @@ export default function SupplementaryForm() {
   }, [authLoading, user, id]);
 
   // Calculate permissions
-  const permissions = match && user ? calculateMatchButtonPermissions(user, match, matchdayOwner || undefined) : {
-    showButtonSupplementary: false
-  };
+  const permissions =
+    match && user
+      ? calculateMatchButtonPermissions(user, match, matchdayOwner || undefined)
+      : {
+          showButtonSupplementary: false,
+        };
 
   const handleOpenRefereeDialog = (position: 1 | 2) => {
     setSelectedRefereePosition(position);
@@ -947,19 +1009,22 @@ export default function SupplementaryForm() {
       userId: selectedReferee._id,
       firstName: selectedReferee.firstName,
       lastName: selectedReferee.lastName,
-      clubId: selectedReferee.referee?.club?.clubId || '',
-      clubName: selectedReferee.referee?.club?.clubName || '',
-      logoUrl: selectedReferee.referee?.club?.logoUrl || '',
+      clubId: selectedReferee.referee?.club?.clubId || "",
+      clubName: selectedReferee.referee?.club?.clubName || "",
+      logoUrl: selectedReferee.referee?.club?.logoUrl || "",
       points: selectedReferee.referee?.points || 0,
-      level: selectedReferee.referee?.level || 'n/a'
+      level: selectedReferee.referee?.level || "n/a",
     };
 
     const requestBody = {
-      [`referee${selectedRefereePosition}`]: refereeData
+      [`referee${selectedRefereePosition}`]: refereeData,
     };
 
     try {
-      const response = await apiClient.patch(`/matches/${match._id}`, requestBody);
+      const response = await apiClient.patch(
+        `/matches/${match._id}`,
+        requestBody,
+      );
 
       const updatedMatch = response.data;
       setMatch(updatedMatch);
@@ -968,31 +1033,35 @@ export default function SupplementaryForm() {
       const resetFields = {
         [`referee${selectedRefereePosition}Present`]: false,
         [`referee${selectedRefereePosition}PassAvailable`]: false,
-        [`referee${selectedRefereePosition}PassNo`]: '',
+        [`referee${selectedRefereePosition}PassNo`]: "",
         [`referee${selectedRefereePosition}DelayMin`]: 0,
       };
 
       setFormData({ ...formData, ...resetFields });
 
-      setSuccessMessage(`Schiedsrichter ${selectedRefereePosition} wurde erfolgreich geändert`);
+      setSuccessMessage(
+        `Schiedsrichter ${selectedRefereePosition} wurde erfolgreich geändert`,
+      );
       setRefereeDialogOpen(false);
       setSelectedReferee(null);
 
       // Refetch assignments
       try {
         const assignmentsResponse = await apiClient.get(
-          `/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`
+          `/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`,
         );
         setAssignments(assignmentsResponse.data || []);
       } catch (error) {
-        console.error('Error fetching assignments:', getErrorMessage(error));
+        console.error("Error fetching assignments:", getErrorMessage(error));
       }
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
-      console.error('Error updating referee:', getErrorMessage(error));
-      setError(`Fehler beim Aktualisieren des Schiedsrichters: ${getErrorMessage(error)}`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      console.error("Error updating referee:", getErrorMessage(error));
+      setError(
+        `Fehler beim Aktualisieren des Schiedsrichters: ${getErrorMessage(error)}`,
+      );
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -1013,18 +1082,15 @@ export default function SupplementaryForm() {
     setSuccessMessage(null);
 
     try {
-      const response = await apiClient.patch(
-        `/matches/${match._id}`,
-        {
-          supplementarySheet: { ...formData, isSaved: true },
-        }
-      );
+      const response = await apiClient.patch(`/matches/${match._id}`, {
+        supplementarySheet: { ...formData, isSaved: true },
+      });
 
       // Ignore 304 Not Modified status
       if (response.status === 304) {
-        setSuccessMessage('Keine Änderungen erforderlich');
-        console.log('No changes needed (304)');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setSuccessMessage("Keine Änderungen erforderlich");
+        console.log("No changes needed (304)");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
 
@@ -1036,7 +1102,10 @@ export default function SupplementaryForm() {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
-      console.error("Error saving supplementary sheet:", getErrorMessage(error));
+      console.error(
+        "Error saving supplementary sheet:",
+        getErrorMessage(error),
+      );
       setError("Fehler beim Speichern des Zusatzblatts");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
@@ -1068,8 +1137,8 @@ export default function SupplementaryForm() {
   };
 
   const updateOfficialField = (
-    officialKey: 'timekeeper1' | 'timekeeper2' | 'technicalDirector',
-    field: 'firstName' | 'lastName' | 'licence',
+    officialKey: "timekeeper1" | "timekeeper2" | "technicalDirector",
+    field: "firstName" | "lastName" | "licence",
     value: string,
   ) => {
     setFormData({
@@ -1083,7 +1152,10 @@ export default function SupplementaryForm() {
 
   // Show loading state
   if (authLoading || pageLoading) {
-    console.log('Supplementary page: Rendering LoadingState', { pageLoading, authLoading });
+    console.log("Supplementary page: Rendering LoadingState", {
+      pageLoading,
+      authLoading,
+    });
     return (
       <Layout>
         <LoadingState message="Lade Zusatzblatt..." />
@@ -1093,7 +1165,7 @@ export default function SupplementaryForm() {
 
   // Return null while redirecting
   if (!user) {
-    console.log('Supplementary page: No user, returning null');
+    console.log("Supplementary page: No user, returning null");
     return null;
   }
 
@@ -1109,7 +1181,10 @@ export default function SupplementaryForm() {
             <p className="text-gray-500 mb-4">
               Sie haben keine Berechtigung, das Zusatzblatt zu bearbeiten.
             </p>
-            <Link href={match ? `/matches/${match._id}` : '/'} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+            <Link
+              href={match ? `/matches/${match._id}` : "/"}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >
               Zurück zum Spiel
             </Link>
           </div>
@@ -1136,7 +1211,10 @@ export default function SupplementaryForm() {
         </title>
       </Head>
       <Layout>
-        <Link href={`/matches/${match._id}/matchcenter?tab=supplementary`} className="flex items-center text-gray-500 hover:text-gray-700 text-sm font-base">
+        <Link
+          href={`/matches/${match._id}/matchcenter?tab=supplementary`}
+          className="flex items-center text-gray-500 hover:text-gray-700 text-sm font-base"
+        >
           <ChevronLeftIcon
             aria-hidden="true"
             className="h-3 w-3 text-gray-400"
@@ -1177,7 +1255,9 @@ export default function SupplementaryForm() {
                     updateField={updateField}
                     match={match}
                     assignments={assignments}
-                    onOpenRefereeDialog={() => handleOpenRefereeDialog(refNumber as 1 | 2)}
+                    onOpenRefereeDialog={() =>
+                      handleOpenRefereeDialog(refNumber as 1 | 2)
+                    }
                   />
                 ))}
               </div>
@@ -1234,7 +1314,7 @@ export default function SupplementaryForm() {
                         min="0"
                         value={formData.crowd || 0}
                         onChange={(e) =>
-                          updateField('crowd', parseInt(e.target.value) || 0)
+                          updateField("crowd", parseInt(e.target.value) || 0)
                         }
                         className="block min-w-0 grow bg-white py-1.5 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
                       />
