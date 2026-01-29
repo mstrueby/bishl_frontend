@@ -686,11 +686,11 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
               return (
                 <div className="mt-12" ref={licenceSectionRef}>
-                  <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-4 gap-4 sm:gap-0">
                     <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
                       Spielerpässe
                     </h3>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-x-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setIsPassCheckModalOpen(true)}
