@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect, useMemo, ReactNode } from 'react';
 
 const AuthContext = createContext({});
 
@@ -74,12 +74,21 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
   }, [isClient]);
 
 
+  const contextValue = useMemo(() => ({
+    user,
+    setUser,
+    authError,
+    setAuthError,
+    loading,
+    setLoading
+  }), [user, authError, loading]);
+
   if (!isClient) {
     return null;
   }
 
   return (
-    <AuthContext.Provider value={{ user, setUser, authError, setAuthError, loading, setLoading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
