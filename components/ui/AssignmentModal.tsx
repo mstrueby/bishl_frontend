@@ -1,7 +1,8 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition, Switch } from '@headlessui/react';
 import TeamAssignmentSelect from './TeamAssignmentSelect';
-import { Assignment, AssignmentTeam } from '../../types/PlayerValues';
+import { Assignment, AssignmentTeam, LicenseType, LicenseStatus, Source, ClubType } from '../../types/PlayerValues';
+import { TeamType } from '../../types/ClubValues';
 
 interface PossibleTeam {
   teamId: string;
@@ -112,7 +113,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                       teamName: selectedTeam.teamName,
                       teamAlias: selectedTeam.teamAlias,
                       teamAgeGroup: selectedTeam.teamAgeGroup,
-                      licenseType: selectedTeam.recommendedType,
+                      licenseType: selectedTeam.recommendedType as LicenseType,
                       jerseyNo: jerseyNumber,
                       active: active,
                       modifyDate: new Date().toISOString(),
@@ -136,18 +137,18 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           teamId: selectedTeam.teamId,
           teamName: selectedTeam.teamName,
           teamAlias: selectedTeam.teamAlias,
-          teamType: '',
+          teamType: TeamType.COMPETITIVE,
           teamAgeGroup: selectedTeam.teamAgeGroup,
           passNo: '',
-          licenseType: selectedTeam.recommendedType,
-          status: 'PENDING',
+          licenseType: selectedTeam.recommendedType as LicenseType,
+          status: LicenseStatus.UNKNOWN,
           invalidReasonCodes: [],
           adminOverride: false,
           overrideReason: '',
           overrideDate: '',
           validFrom: new Date().toISOString(),
           validTo: '',
-          source: 'BISHL',
+          source: Source.BISHL,
           modifyDate: new Date().toISOString(),
           active: active,
           jerseyNo: jerseyNumber,
@@ -163,7 +164,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
             clubName: clubName,
             clubAlias: '',
             clubIshdId: '',
-            clubType: '',
+            clubType: ClubType.MAIN,
             teams: [newTeamAssignment],
           });
         } else {
