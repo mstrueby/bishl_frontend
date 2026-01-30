@@ -1,0 +1,422 @@
+## Goal
+
+Refactor the MatchCenter “Roster” view (@pages/matches/[id]/matchcenter/index.tsx) so that:
+
+- `RosterTab` is dissolved and its responsibilities are moved into `MatchCenter`.
+- `RosterList` becomes the rich, single‑team roster table used directly inside `MatchCenter`.
+- A new roster validation flow and a Player‑Card modal are added, optimized for identity checks via photo.
+
+Stack context: NextJS, Typescript, TailwindCSS, FastAPI backend, MongoDB.
+
+***
+
+## 1. RosterTab removal and integration into MatchCenter
+
+1. Identify current usages of `RosterTab` in `MatchCenter`, especially the `activeTab === "roster"` block.
+2. Remove `RosterTab` and inline its logic into `MatchCenter`:
+   - Keep the sorting behavior: positions ordered C, A, G, F, then by jersey number.
+   - Implement a shared `sortRoster` utility (e.g. `utils/matchRoster.tsx`) that takes `RosterPlayer[]` and returns the sorted list; use the same function for home and away rosters to avoid duplication.
+   - For the roster tab content, render two `RosterList` instances side by side (home/away) as currently done in `RosterTab`, but directly from `MatchCenter`.
+3. Ensure existing player stats logic (`homePlayerStats`, `awayPlayerStats` computed in a `useEffect`) is still passed into each `RosterList`.
+4. Verify that routing and permissions behavior remains unchanged:
+   - `permissions.showButtonRosterHome` and `permissions.showButtonRosterAway` still control whether the “Edit roster” action is available.
+   - Roster tab remains the default `activeTab === "roster"`.
+
+***
+
+## 2. RosterList: New API and UI spec
+
+### 2.1 Extended props
+
+Extend `RosterListProps` to support more data and behavior:
+
+- Existing:
+  - `teamName: string`
+  - `roster: RosterPlayer[]`
+  - `isPublished: boolean`
+  - `showEditButton?: boolean`
+  - `editUrl?: string`
+  - `sortRoster?: (roster: RosterPlayer[]) => RosterPlayer[]`
+  - `playerStats?: { [playerId: string]: number }` (currently used for calledMatches)
+- New:
+  - `teamLogoUrl?: string`
+  - `rosterStatus?: "VALID" | "INVALID" | "UNKNOWN" | string` (for header badge)
+  - `eligibilityTimestamp?: string | Date | null`
+  - `canValidateRoster?: boolean` (controls “Prüfen” button)
+  - `onValidateRoster?: () => Promise<void>` (callback for validation)
+  - `onOpenPlayerCard?: (ctx: { playerId: string; teamFlag: "home" | "away"; player: RosterPlayer }) => void`
+  - `teamFlag?: "home" | "away"` (needed for contextual callbacks)
+  - `isValidating?: boolean` (to show spinner in eligibility column during validation)
+
+### 2.2 Section header behavior
+
+Header layout (full width of the component):
+
+- Left side:
+  - Team logo (square/rounded image) from `teamLogoUrl`. Height aligned to header height, placed left of text block.
+  - Text block:
+    - Team name (e.g. “Berlin Buffalos 1. Herren”).
+    - Below it, a description line:
+      - If `eligibilityTimestamp` present: `Geprüft am: <localized datetime in German locale>`.
+      - If `eligibilityTimestamp` missing/null: `Noch nicht geprüft`.
+    - To format the timestamp, use JS `Intl.DateTimeFormat('de-DE', { ... })`.
+  - Next to team name, a colored status badge derived from `rosterStatus`:
+    - `INVALID` → red badge.
+    - `VALID` → green badge.
+    - any other/undefined → gray badge.
+- Right side:
+  - If `canValidateRoster` is true and `onValidateRoster` is provided:
+    - Show a button labeled “Prüfen” (text only, no icon).
+    - Clicking calls `onValidateRoster`.
+  - If `showEditButton && editUrl` are truthy:
+    - Show “Bearbeiten” button, as currently implemented.
+  - If the user is not allowed to edit (permissions false), hide the “Bearbeiten” button completely (no disabled state, no alternative indicator).
+
+### 2.3 Table structure and contents
+
+Add explicit table headers (thead) and restructure the tbody cells accordingly.
+
+Column order:
+
+1. Eligibility status icon (no header text or very short label like “ST”).
+2. NR. (jersey number).
+3. POS. (position).
+4. SPIELER (avatar + full name).
+5. TYP (licence type).
+6. QUELLE (source).
+7. PASS‑NR.
+8. HOCH (call‑ups).
+9. T (goals).
+10. V (assists).
+11. P (points).
+12. SM (penalty minutes).
+13. Actions (no header label).
+
+Details per column:
+
+1. **Eligibility status icon**
+   - Uses `player.eligibilityStatus` from the roster player object, based on what backend returns for each player.
+   - Mapping:
+     - `UNKNOWN` → gray QuestionMarkCircle icon.
+     - `VALID` → green CheckCircle icon.
+     - `INVALID` → red XCircle icon.
+   - Tooltip text:
+     - UNKNOWN → “Spielberechtigung unbekannt”.
+     - VALID → “Spielberechtigt”.
+     - INVALID → “Nicht spielberechtigt”.
+   - During roster validation (`isValidating === true` for this team):
+     - Option: display a small spinner in this cell instead of the icon, to indicate that eligibility statuses are being refreshed.
+
+2. **NR.**
+   - `player.player.jerseyNumber`.
+   - Always rendered; if undefined, decide on fallback (e.g. “–”) but keep the column value visible.
+
+3. **POS.**
+   - `player.playerPosition.key` with four valid codes:
+     - C (Captain).
+     - A (Assistant).
+     - G (Goalie).
+     - F (Feldspieler / field player).
+   - Visual:
+     - Render a circular label:
+       - For C/A/F: black filled circle with white letter.
+       - For G: visually distinct variant (e.g. black border, white fill, black letter) as requested.
+   - Tooltip on the position element:
+     - C → “Captain”.
+     - A → “Assistant”.
+     - G → “Goalie”.
+     - F → “Feldspieler”.
+
+4. **SPIELER**
+   - Show:
+     - Avatar (player image) on the left if available, otherwise a circle with initials (first letter of first name + first letter of last name).
+     - Full name as `firstName lastName` (not “Last, First”).
+   - The entire clickable area:
+     - Avatar.
+     - Name text.
+   - On click, if `onOpenPlayerCard` exists, call it with `{ playerId, teamFlag, player }`.
+
+5. **TYP**
+   - Licence type for this player, for the team this roster belongs to.
+   - Implementation detail: choose the correct `assignedTeam` entry corresponding to this `teamFlag` or team ID and derive `licenceType` from there.
+   - Display:
+     - Badge with text equal to the licence type (e.g. “Senior”, “U19”, etc.), using the same color coding as on the roster creation page (reuse existing badge styles).
+   - No tooltip necessary since the type is spelled out in the badge.
+
+6. **QUELLE**
+   - Source from `assignedTeam` of the relevant team:
+     - If source is `ISHD`, show yellow badge with text “ISHD”.
+     - If source is `BISHL`, show indigo badge with text “BISHL”.
+   - This is a simple colored badge with the source text.
+
+7. **PASS‑NR.**
+   - Show `player.passNumber` as already implemented:
+     - Small pill badge with gray background.
+
+8. **HOCH**
+   - Show data only if `player.called === true`.
+   - Representation:
+     - Badge with Up‑Arrow icon.
+     - No text label (“Hochgemeldet” removed).
+     - Next to/inside the badge, show numeric value of existing `calledMatches` for that player, for this season and tournament context.
+       - Use existing `playerStats[playerId]` mapping (currently derived from `/players/{id}`) as the count.
+     - 0 is a valid value and should still be displayed (e.g. arrow + “0”).
+   - If `player.called === false`, the cell can be rendered blank or a subtle “–” (decide and keep consistent).
+
+9–11. **T, V, P**
+   - Values representing per‑match stats (from roster/match context):
+     - T → goals.
+     - V → assists.
+     - P → points.
+   - Requirement: even if values are 0 or undefined, always render a number:
+     - If value missing, treat as 0.
+     - Do not hide the column for zeros.
+
+12. **SM**
+   - `penaltyMinutes` for this match.
+   - Same rule as above: always show a numeric value; if missing, show 0.
+
+13. **Actions**
+   - Only one action: Magnifying‑Glass icon (no secondary actions).
+   - This icon is another trigger for `onOpenPlayerCard`.
+   - Tooltip: “Spielerkarte anzeigen”.
+   - No header caption text; keep header cell empty.
+
+### 2.4 Roster footer (unchanged logic)
+
+Keep the current footer behavior:
+
+- Show counts derived from the roster (after sorting, but counts are independent of order):
+  - Field players (position ≠ G).
+  - Goalies (position = G).
+  - Total.
+- Ensure this still works with the extended table.
+
+***
+
+## 3. New roster validation feature
+
+### 3.1 Endpoint
+
+- For home:
+  - `POST` `/matches/{_id}/home/roster/validate`
+- For away:
+  - Presumably `/matches/{_id}/away/roster/validate` with the same contract (mirrored for away team).
+- Endpoint is authenticated with the current user (reuse existing `apiClient` configuration).
+
+### 3.2 Frontend flow (MatchCenter)
+
+- Add per‑team `isValidatingHomeRoster` and `isValidatingAwayRoster` booleans in `MatchCenter` state.
+- Pass these down to `RosterList` as `isValidating`.
+- Provide per‑team `onValidateRoster` callbacks to `RosterList`:
+  - Home:
+    - Set `isValidatingHomeRoster` to true.
+    - Call backend endpoint `/matches/{match._id}/home/roster/validate`.
+    - The response returns a `players` array with updated `eligibilityStatus` values.
+    - Merge updated roster data into `match.home.roster.players` and update `match` state via `setMatch`.
+    - Set `isValidatingHomeRoster` back to false.
+  - Away:
+    - Same pattern for `/away/roster/validate`.
+- While `isValidatingX` is true:
+  - Show spinner in the eligibility status column cells.
+  - Optionally disable the “Prüfen” button to avoid duplicate calls.
+
+### 3.3 Permissions
+
+- `canValidateRoster` in `RosterList` should be derived from `permissions` in `MatchCenter`. If user can edit roster he also can validate it.
+- If the user is not allowed to validate:
+  - Hide the “Prüfen” button entirely (no disabled state needed).
+
+***
+
+## 4. Player‑Card Modal: Data and triggers
+
+Primary purpose: identity verification via photo, plus quick view on licenses and season stats.
+
+### 4.1 Triggers
+
+From each roster table row, the modal opens when:
+
+- The Magnifying‑Glass icon is clicked.
+- The player name is clicked.
+- The player avatar is clicked.
+
+Implementation:
+
+- `RosterList` receives `onOpenPlayerCard`.
+- Inside `RosterList`, wrap avatar, name, and icon with onClick handlers that call `onOpenPlayerCard({ playerId, teamFlag, player })`.
+- In `MatchCenter`, maintain a `selectedPlayer` state and `isPlayerCardOpen` boolean.
+  - On `onOpenPlayerCard`, set `selectedPlayerContext` and open the modal.
+  - Use `Dialog` and `Transition` from `@headlessui/react` (already used in the file) to implement the modal.
+
+### 4.2 Data loading
+
+- Minimal data for the header (name, jersey number, position, team, basic eligibility status) can be passed directly from the roster row (no additional fetch required).
+- For extended data:
+  - Use existing `/players/{playerId}` endpoint already invoked in MatchCenter for `calledMatches`.
+  - Either reuse already fetched player data from `fetchPlayerStats` (if available) or fetch detailed player data on demand when opening the modal.
+- The modal component should accept:
+  - `playerContext` (includes roster row data, team name, team logo, team label like “1. Herren”).
+  - `playerDetails` (optional, asynchronous details from the player API).
+  - `onClose`.
+
+***
+
+## 5. Player‑Card Modal: Layout and contents
+
+### 5.1 Overall layout
+
+Structure the modal content into:
+
+1. Header section (identity focus).
+2. Block “Lizenzen”.
+3. Block “Statistiken”.
+4. Footer with close action.
+
+Use a centered dialog with a reasonable max width (e.g. `max-w-2xl`) and scrollable inside if necessary.
+
+### 5.2 Header: Identity focus
+
+Header should prominently show:
+
+- Large player photo:
+  - Circle image, significantly larger than avatar in table (e.g. 96–128px diameter).
+  - If no photo:
+    - Render a circle with background color and the player’s initials (first letter of first name + first letter of last name).
+- Player basic information, arranged in a clean grid:
+
+Recommended layout:
+
+- Left column:
+  - Large avatar at top.
+- Right column (stacked vertically):
+  - Player full name (`firstName lastName`) in bold.
+  - Line with jersey number and position:
+    - e.g. `#23 – C` with same position circle icon as table.
+  - Club & team:
+    - Club name with club logo (small inline image).
+    - Line with team name (e.g. `1. Herren`) – the specific team for which this roster exists (use the match’s home/away team’s label).
+  - Call‑up summary:
+    - “Hochgespielte Spiele: <number>` using the same `calledMatches` count used in the table’s HOCH column for this match’s season/tournament.
+  - Personal data:
+    - First name.
+    - Last name.
+    - Date of birth (formatted in German locale; fallback text if missing).
+  - Full face shield requirement:
+    - Badge indicating whether `fullFaceReq === true`.
+    - For example:
+      - If true: red or amber badge with text like “Vollvisier‑Pflicht”.
+      - If false: gray badge with text like “Keine Vollvisier‑Pflicht”.
+    - The exact badge coloring should be consistent with existing badge styling.
+
+### 5.3 Block “Lizenzen”
+
+Below the header, add the “Lizenzen” block.
+
+- Title: “Lizenzen”.
+- Content: compact table without header row, one row per license the player holds.
+- Each row includes:
+  1. Colored dot indicator for license validity/state.
+     - Example mapping:
+       - Valid license → green dot.
+       - Expired/invalid license → red dot.
+       - Unknown/other → gray dot.
+     - Derive validity from roster.status.
+  2. Mannschaft (team name / roster team name).
+  3. Lizenztyp (licenceType label).
+  4. Pass‑Nr. (pass number for that license).
+
+Implementation detail:
+
+- Underlying data comes from `player.assignedTeams` or a similar structure.
+- The dot indicator should be a small circle as already used in other context
+
+### 5.4 Block “Statistiken” (season totals)
+
+Below “Lizenzen”, add a block “Statistiken”.
+
+- Title: “Statistiken – Saison <currentSeasonName>”.
+- Show stats tiles for the current season (no competition split):
+
+Tiles:
+
+1. “Gespielte Spiele” – total games played.
+2. “Tore” – total goals.
+3. “Vorlagen” – total assists.
+4. “Punkte” – total points (goals + assists or direct from backend).
+
+Properties:
+
+- No penalty minutes tile (explicitly omitted).
+- The season context should be the current match’s season.
+- Values can be taken from aggregated `player.stats` for that season, combining across competitions if necessary.
+- Each tile can be a small card with:
+  - Label (e.g. “Gespielte Spiele”).
+  - Large numeric value.
+  - Optional subtle subtext if you want (“Saison <alias>”).
+
+If no statistics are available:
+
+- Show a clear message: “Keine Statistikdaten für diese Saison verfügbar.”
+
+### 5.5 Footer
+
+At the bottom of the modal:
+
+- Primary action: “Schließen” button that calls `onClose`.
+
+***
+
+## 6. Implementation guidance and sequencing
+
+Proposed implementation order for the coding‑assistant:
+
+1. **Refactor RosterTab into MatchCenter**
+   - Move `sortRoster` and dual `RosterList` rendering from `RosterTab` into `MatchCenter`.
+   - Remove `RosterTab` import/usage.
+   - Ensure roster tab view behaves as before using old `RosterList` API.
+
+2. **Extend RosterList API and UI**
+   - Add new props as described.
+   - Implement new header layout (logo, status badge, description text, “Prüfen” and “Bearbeiten” buttons).
+   - Add explicit table headers and new columns.
+   - Wire existing roster data into new columns.
+   - Make sure all zero values are rendered as `0`.
+
+3. **Add roster validation logic**
+   - In `MatchCenter`, implement `validateHomeRoster` and `validateAwayRoster` using `apiClient` hitting the required endpoints.
+   - Manage `isValidatingHomeRoster` / `isValidatingAwayRoster` state.
+   - Update match state with returned `players` containing updated `eligibilityStatus`.
+   - Pass `onValidateRoster`, `isValidating`, and `canValidateRoster` down to each `RosterList`.
+   - In `RosterList`, show spinner in eligibility cells when `isValidating` is true.
+
+4. **Add Player‑Card modal shell**
+   - Create a reusable `PlayerCardModal` component (e.g. in `components/ui/PlayerCardModal.tsx`) using `Dialog` and `Transition`.
+   - Manage `selectedPlayerContext` and `isPlayerCardOpen` in `MatchCenter`.
+   - Wire up `onOpenPlayerCard` from `MatchCenter` into each `RosterList` instance.
+   - Make avatar, player name, and magnifying glass call `onOpenPlayerCard`.
+
+5. **Implement Player‑Card contents**
+   - Build the header layout:
+     - Large avatar, name, jersey + position, club + team name, call‑up count, DOB, fullFaceReq badge.
+   - Implement “Lizenzen” block:
+     - Row per license with validity dot, team, licenceType, pass number.
+   - Implement “Statistiken” block:
+     - Tiles with games, goals, assists, points for the current season.
+   - Add `Schließen` button in footer.
+
+6. **Data wiring and loading**
+   - Decide if you reuse the existing `/players/{id}` calls used for `calledMatches` or fetch details on demand:
+     - Option A: extend existing effect to store the full player stats per player in a local map, pass to `PlayerCardModal`.
+     - Option B: when modal opens, fetch `/players/{id}` and show a loading state in the modal.
+   - Ensure that minimal data (name, jerseyNumber, position, callUp count) is always available from the roster row for immediate display, even before the async fetch.
+
+7. **UX polish and consistency**
+   - Ensure all tooltips and badges follow existing Tailwind and design conventions.
+   - Verify responsive behavior:
+     - On small screens, roster tables should horizontally scroll.
+     - Player‑Card modal should be scrollable with fixed header and footer if content exceeds viewport height.
+   - Test flows:
+     - Validate home/away rosters and confirm eligibility icons refresh.
+     - Open Player‑Card from each trigger type.
+     - Confirm all numeric cells show 0 instead of being empty.
