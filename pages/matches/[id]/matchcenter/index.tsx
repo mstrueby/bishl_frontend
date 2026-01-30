@@ -39,7 +39,10 @@ import FinishTypeSelect from "../../../../components/admin/ui/FinishTypeSelect";
 import MatchStatus from "../../../../components/admin/ui/MatchStatus";
 import GoalDialog from "../../../../components/ui/GoalDialog";
 import PenaltyDialog from "../../../../components/ui/PenaltyDialog";
-import RosterTab from "../../../../components/matchcenter/RosterTab";
+import RosterList from "../../../../components/ui/RosterList";
+import PlayerCardModal from "../../../../components/ui/PlayerCardModal";
+import { sortRoster } from "../../../../utils/matchRoster";
+import { PlayerDetails, PlayerStat } from "../../../../types/PlayerDetails";
 import GoalsTab from "../../../../components/matchcenter/GoalsTab";
 import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
 import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
@@ -162,6 +165,20 @@ export default function MatchDetails({
   const [savingSupplementaryField, setSavingSupplementaryField] = useState<
     string | null
   >(null);
+  const [isValidatingHomeRoster, setIsValidatingHomeRoster] = useState(false);
+  const [isValidatingAwayRoster, setIsValidatingAwayRoster] = useState(false);
+  const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
+  const [selectedPlayerContext, setSelectedPlayerContext] = useState<{
+    playerId: string;
+    teamFlag: "home" | "away";
+    player: RosterPlayer;
+    teamName?: string;
+    teamLogoUrl?: string;
+    clubName?: string;
+    clubLogoUrl?: string;
+  } | null>(null);
+  const [playerDetails, setPlayerDetails] = useState<PlayerDetails | null>(null);
+  const [isLoadingPlayerDetails, setIsLoadingPlayerDetails] = useState(false);
   {
     /**
   const [editData, setEditData] = useState<EditMatchData>({
@@ -207,11 +224,11 @@ export default function MatchDetails({
             `/players/${player.player.playerId}`
           );
 
-          const playerData = response.data;
+          const playerData = response.data as PlayerDetails;
           if (playerData.stats && Array.isArray(playerData.stats)) {
             // Find stats that match the current match context
             const matchingStats = playerData.stats.find(
-              (stat: any) =>
+              (stat: PlayerStat) =>
                 stat.season?.alias === match.season.alias &&
                 stat.tournament?.alias === match.tournament.alias &&
                 stat.team?.name === team.name,
@@ -290,6 +307,114 @@ export default function MatchDetails({
       setIsRefreshing(false);
     }
   }, [id, isRefreshing]);
+
+  // Roster validation callbacks
+  const validateHomeRoster = useCallback(async () => {
+    if (isValidatingHomeRoster) return;
+    
+    try {
+      setIsValidatingHomeRoster(true);
+      const response = await apiClient.post(
+        `/matches/${match._id}/home/roster/validate`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data) {
+        setMatch((prevMatch) => ({
+          ...prevMatch,
+          home: {
+            ...prevMatch.home,
+            roster: {
+              ...prevMatch.home.roster,
+              ...response.data,
+            },
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Error validating home roster:", error);
+    } finally {
+      setIsValidatingHomeRoster(false);
+    }
+  }, [match._id, jwt, isValidatingHomeRoster]);
+
+  const validateAwayRoster = useCallback(async () => {
+    if (isValidatingAwayRoster) return;
+    
+    try {
+      setIsValidatingAwayRoster(true);
+      const response = await apiClient.post(
+        `/matches/${match._id}/away/roster/validate`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data) {
+        setMatch((prevMatch) => ({
+          ...prevMatch,
+          away: {
+            ...prevMatch.away,
+            roster: {
+              ...prevMatch.away.roster,
+              ...response.data,
+            },
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Error validating away roster:", error);
+    } finally {
+      setIsValidatingAwayRoster(false);
+    }
+  }, [match._id, jwt, isValidatingAwayRoster]);
+
+  // Open player card modal
+  const handleOpenPlayerCard = useCallback(async (ctx: { 
+    playerId: string; 
+    teamFlag: "home" | "away"; 
+    player: RosterPlayer 
+  }) => {
+    const team = ctx.teamFlag === "home" ? match.home : match.away;
+    
+    setSelectedPlayerContext({
+      ...ctx,
+      teamName: team.name,
+      teamLogoUrl: team.logoUrl,
+      clubName: team.fullName,
+      clubLogoUrl: team.logoUrl,
+    });
+    setIsPlayerCardOpen(true);
+    setIsLoadingPlayerDetails(true);
+
+    try {
+      const response = await apiClient.get(`/players/${ctx.playerId}`, {
+        headers: jwt ? { Authorization: `Bearer ${jwt}` } : undefined,
+      });
+      setPlayerDetails(response.data);
+    } catch (error) {
+      console.error("Error fetching player details:", error);
+      setPlayerDetails(null);
+    } finally {
+      setIsLoadingPlayerDetails(false);
+    }
+  }, [match.home, match.away, jwt]);
+
+  const handleClosePlayerCard = useCallback(() => {
+    setIsPlayerCardOpen(false);
+    setSelectedPlayerContext(null);
+    setPlayerDetails(null);
+  }, []);
 
   // Function to handle supplementary sheet field updates
   const updateSupplementaryField = async (fieldName: string, value: any) => {
@@ -588,15 +713,46 @@ export default function MatchDetails({
         <div className="py-6">
           {activeTab === "roster" && (
             <div className="py-4">
-              <RosterTab
-                match={match}
-                permissions={{
-                  showButtonRosterHome: permissions.showButtonRosterHome ?? false,
-                  showButtonRosterAway: permissions.showButtonRosterAway ?? false,
-                }}
-                homePlayerStats={homePlayerStats}
-                awayPlayerStats={awayPlayerStats}
-              />
+              <div className="flex flex-col md:flex-row md:space-x-8">
+                <div className="w-full md:w-1/2 mb-6 md:mb-0">
+                  <RosterList
+                    teamName={match.home.fullName}
+                    roster={sortRoster(match.home.roster?.players || [])}
+                    isPublished={match.home.roster?.published || false}
+                    showEditButton={permissions.showButtonRosterHome ?? false}
+                    editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
+                    sortRoster={sortRoster}
+                    playerStats={homePlayerStats}
+                    teamLogoUrl={match.home.logoUrl}
+                    rosterStatus={match.home.roster?.status}
+                    eligibilityTimestamp={match.home.roster?.eligibilityCheckedAt}
+                    canValidateRoster={permissions.showButtonRosterHome ?? false}
+                    onValidateRoster={validateHomeRoster}
+                    teamFlag="home"
+                    isValidating={isValidatingHomeRoster}
+                    onOpenPlayerCard={handleOpenPlayerCard}
+                  />
+                </div>
+                <div className="w-full md:w-1/2">
+                  <RosterList
+                    teamName={match.away.fullName}
+                    roster={sortRoster(match.away.roster?.players || [])}
+                    isPublished={match.away.roster?.published || false}
+                    showEditButton={permissions.showButtonRosterAway ?? false}
+                    editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
+                    sortRoster={sortRoster}
+                    playerStats={awayPlayerStats}
+                    teamLogoUrl={match.away.logoUrl}
+                    rosterStatus={match.away.roster?.status}
+                    eligibilityTimestamp={match.away.roster?.eligibilityCheckedAt}
+                    canValidateRoster={permissions.showButtonRosterAway ?? false}
+                    onValidateRoster={validateAwayRoster}
+                    teamFlag="away"
+                    isValidating={isValidatingAwayRoster}
+                    onOpenPlayerCard={handleOpenPlayerCard}
+                  />
+                </div>
+              </div>
             </div>
           )}
 
@@ -1049,6 +1205,23 @@ export default function MatchDetails({
               setMatch({ ...match, ...updatedMatch });
             }
           }}
+        />
+
+        {/* Player Card Modal */}
+        <PlayerCardModal
+          isOpen={isPlayerCardOpen}
+          onClose={handleClosePlayerCard}
+          playerContext={selectedPlayerContext}
+          playerDetails={playerDetails}
+          calledMatchesCount={
+            selectedPlayerContext 
+              ? (selectedPlayerContext.teamFlag === "home" 
+                  ? homePlayerStats[selectedPlayerContext.playerId] 
+                  : awayPlayerStats[selectedPlayerContext.playerId]) ?? 0
+              : 0
+          }
+          currentSeasonName={match.season?.name || match.season?.alias}
+          isLoading={isLoadingPlayerDetails}
         />
       </Layout>
     </>
