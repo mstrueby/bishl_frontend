@@ -713,45 +713,41 @@ export default function MatchDetails({
         <div className="py-6">
           {activeTab === "roster" && (
             <div className="py-4">
-              <div className="flex flex-col md:flex-row md:space-x-8">
-                <div className="w-full md:w-1/2 mb-6 md:mb-0">
-                  <RosterList
-                    teamName={match.home.fullName}
-                    roster={sortRoster(match.home.roster?.players || [])}
-                    isPublished={match.home.roster?.published || false}
-                    showEditButton={permissions.showButtonRosterHome ?? false}
-                    editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
-                    sortRoster={sortRoster}
-                    playerStats={homePlayerStats}
-                    teamLogoUrl={match.home.logoUrl}
-                    rosterStatus={match.home.roster?.status}
-                    eligibilityTimestamp={match.home.roster?.eligibilityCheckedAt}
-                    canValidateRoster={permissions.showButtonRosterHome ?? false}
-                    onValidateRoster={validateHomeRoster}
-                    teamFlag="home"
-                    isValidating={isValidatingHomeRoster}
-                    onOpenPlayerCard={handleOpenPlayerCard}
-                  />
-                </div>
-                <div className="w-full md:w-1/2">
-                  <RosterList
-                    teamName={match.away.fullName}
-                    roster={sortRoster(match.away.roster?.players || [])}
-                    isPublished={match.away.roster?.published || false}
-                    showEditButton={permissions.showButtonRosterAway ?? false}
-                    editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
-                    sortRoster={sortRoster}
-                    playerStats={awayPlayerStats}
-                    teamLogoUrl={match.away.logoUrl}
-                    rosterStatus={match.away.roster?.status}
-                    eligibilityTimestamp={match.away.roster?.eligibilityCheckedAt}
-                    canValidateRoster={permissions.showButtonRosterAway ?? false}
-                    onValidateRoster={validateAwayRoster}
-                    teamFlag="away"
-                    isValidating={isValidatingAwayRoster}
-                    onOpenPlayerCard={handleOpenPlayerCard}
-                  />
-                </div>
+              <div className="flex flex-col space-y-8">
+                <RosterList
+                  teamName={match.home.fullName}
+                  roster={sortRoster(match.home.roster?.players || [])}
+                  isPublished={match.home.roster?.published || false}
+                  showEditButton={permissions.showButtonRosterHome ?? false}
+                  editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
+                  sortRoster={sortRoster}
+                  playerStats={homePlayerStats}
+                  teamLogoUrl={match.home.logoUrl}
+                  rosterStatus={match.home.roster?.status}
+                  eligibilityTimestamp={match.home.roster?.eligibilityCheckedAt}
+                  canValidateRoster={permissions.showButtonRosterHome ?? false}
+                  onValidateRoster={validateHomeRoster}
+                  teamFlag="home"
+                  isValidating={isValidatingHomeRoster}
+                  onOpenPlayerCard={handleOpenPlayerCard}
+                />
+                <RosterList
+                  teamName={match.away.fullName}
+                  roster={sortRoster(match.away.roster?.players || [])}
+                  isPublished={match.away.roster?.published || false}
+                  showEditButton={permissions.showButtonRosterAway ?? false}
+                  editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
+                  sortRoster={sortRoster}
+                  playerStats={awayPlayerStats}
+                  teamLogoUrl={match.away.logoUrl}
+                  rosterStatus={match.away.roster?.status}
+                  eligibilityTimestamp={match.away.roster?.eligibilityCheckedAt}
+                  canValidateRoster={permissions.showButtonRosterAway ?? false}
+                  onValidateRoster={validateAwayRoster}
+                  teamFlag="away"
+                  isValidating={isValidatingAwayRoster}
+                  onOpenPlayerCard={handleOpenPlayerCard}
+                />
               </div>
             </div>
           )}
