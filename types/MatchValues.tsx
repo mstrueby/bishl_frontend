@@ -9,6 +9,21 @@ export interface EventPlayer {
   imageVisible?: boolean;
 }
 
+export interface AssignedTeam {
+  team?: { name: string; fullName: string; teamId?: string };
+  licenceType?: string;
+  passNumber?: string;
+  source?: string;
+  status?: string;
+}
+
+export interface MatchStats {
+  goals?: number;
+  assists?: number;
+  points?: number;
+  penaltyMinutes?: number;
+}
+
 export interface RosterPlayer {
   player: EventPlayer;
   playerPosition: {
@@ -21,6 +36,9 @@ export interface RosterPlayer {
   points: number;
   penaltyMinutes: number;
   called: boolean;
+  eligibilityStatus?: "VALID" | "INVALID" | "UNKNOWN";
+  assignedTeam?: AssignedTeam;
+  matchStats?: MatchStats;
 }
 
 interface Coach {
@@ -44,9 +62,10 @@ enum RosterStatus {
 
 export interface Roster {
   players: RosterPlayer[];
-  status: RosterStatus;
+  status: RosterStatus | string;
   published: boolean;
   eligibilityTimestamp?: Date;
+  eligibilityCheckedAt?: Date | string;
   eligibilityValidator?: string;
   coach?: Coach;
   staff?: Staff[];
