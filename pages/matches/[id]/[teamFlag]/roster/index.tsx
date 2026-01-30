@@ -1319,8 +1319,8 @@ const RosterPage = () => {
           description={`${team?.fullName} / ${team?.name}`}
           descriptionLogoUrl={team?.logoUrl}
           descriptionBadge={{
-            text: rosterStatus === "SUBMITTED" ? "Abgegeben" : "Entwurf",
-            colorClass: rosterStatus === "SUBMITTED" ? "bg-indigo-50 text-indigo-700 ring-indigo-700/10" : "bg-gray-50 text-gray-600 ring-gray-500/10"
+            text: rosterStatus === "SUBMITTED" ? "Abgegeben" : rosterStatus === "INVALID" ? "Ungültig" : rosterStatus === "VALID" ? "Validiert" : "Entwurf",
+            colorClass: rosterStatus === "SUBMITTED" ? "bg-indigo-50 text-indigo-700 ring-indigo-700/10" : rosterStatus === "INVALID" ? "bg-red-50 text-red-700 ring-red-600/10" : rosterStatus === "VALID" ? "bg-green-50 text-green-700 ring-green-600/20" : "bg-gray-50 text-gray-600 ring-gray-500/10"
           }}
         />
       </div>
