@@ -19,10 +19,19 @@ Preferred communication style: Simple, everyday language.
 - **TeamAssignmentSelect** (`components/ui/TeamAssignmentSelect.tsx`): Dropdown for selecting teams from `/players/:id/possible-teams` API, with time-window restriction from `PLAYERASSIGNMENTWINDOW` config.
 - **AssignmentModal** (refactored): HeadlessUI dialog with TeamAssignmentSelect, jerseyNo input, and active toggle. Supports both add and edit modes.
 
+### MatchCenter Roster Refactoring
+- **Dissolved RosterTab**: Logic integrated directly into MatchCenter using shared `sortRoster` utility from `utils/matchRoster.tsx`
+- **Redesigned RosterList**: 13-column table with eligibility status icon, jersey number, position badge, player avatar/name, license type, source (ISHD/BISHL), pass number, call-ups, goals, assists, points, penalty minutes, and actions
+- **Roster Validation**: API endpoints at `/matches/{id}/home/roster/validate` and `/matches/{id}/away/roster/validate` with "Prüfen" button and loading states
+- **PlayerCardModal** (`components/ui/PlayerCardModal.tsx`): Identity verification modal with large avatar, personal data, assigned licenses table, and season statistics tiles
+- **Type Safety**: Created `types/PlayerDetails.tsx` with exported `PlayerDetails` and `PlayerStat` interfaces. All `any` type casts removed in favor of proper TypeScript types
+
 ### API Integration
 - All API calls use `lib/apiClient.tsx` (no direct axios usage)
 - Licence operations: Auto-optimize (POST `/players/:id/auto_optimize`), Revalidate (POST `/players/:id/revalidate`), PATCH `/players/:id` for assignments
 - Master data saved via PATCH `/players/:id` with FormData (only section 2 fields)
+- Roster validation: POST `/matches/{id}/home/roster/validate` and `/matches/{id}/away/roster/validate`
+- Player details: GET `/players/{id}` with JWT authorization headers
 
 ## System Architecture
 
