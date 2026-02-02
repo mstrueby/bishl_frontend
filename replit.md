@@ -8,7 +8,16 @@ BISHL App is a Next.js-based web application for managing ice hockey leagues in 
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (January 2026)
+## Recent Changes (February 2026)
+
+### CalledFromTeam Feature
+- **CalledFromTeam interface** (`types/MatchValues.tsx`): Structured object with `teamId`, `teamName`, `teamAlias` replacing string-based `originalTeam`
+- **Roster Display**: Called players show up arrow + team name (truncated) + colored pill badge with call-up match count
+- **Color coding**: Green (0-3 call-ups), Yellow (4 call-ups), Gray (fallback)
+- **Backward compatibility**: Legacy roster data without `calledFromTeam` still renders with arrow + pill, PDF shows "(H)" fallback
+- **Data flow**: `tablePlayers` initialization maps existing roster `calledFromTeam` to `originalTeam*` fields for persistence
+
+## Changes (January 2026)
 
 ### PlayerForm Refactoring
 - **Section 1 (Non-editable master data)**: Read-only display of ISHD-managed data (name, birthdate, sex, age group, full face requirement). Removed `managedByISHD` from this section as it's now editable.
