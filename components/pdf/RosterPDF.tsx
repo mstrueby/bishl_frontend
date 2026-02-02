@@ -239,6 +239,19 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
           // Create 18 rows total with specific positioning
           const rows = [];
 
+          // Helper to format player name with call-up team
+          const formatPlayerName = (player: RosterPlayer | undefined): string => {
+            if (!player) return '';
+            const baseName = `${player.player.lastName}, ${player.player.firstName}`;
+            if (player.called) {
+              if (player.calledFromTeam?.teamName) {
+                return `${baseName} (${player.calledFromTeam.teamName})`;
+              }
+              return `${baseName} (H)`;
+            }
+            return baseName;
+          };
+
           // Row 1: Captain (C) - always first, always show "C"
           const captain = captains[0];
           rows.push(
@@ -246,7 +259,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
               <Text style={styles.numberCell}>{captain ? (captain.player.jerseyNumber || '') : ''}</Text>
               <Text style={styles.positionCell}>C</Text>
               <Text style={styles.nameCell}>
-                {captain ? `${captain.player.lastName}, ${captain.player.firstName}${captain.called ? ' (H)' : ''}` : ''}
+                {formatPlayerName(captain)}
               </Text>
               <Text style={styles.passCell}>{captain ? (captain.passNumber || '') : ''}</Text>
             </View>
@@ -259,7 +272,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
               <Text style={styles.numberCell}>{assistant ? (assistant.player.jerseyNumber || '') : ''}</Text>
               <Text style={styles.positionCell}>A</Text>
               <Text style={styles.nameCell}>
-                {assistant ? `${assistant.player.lastName}, ${assistant.player.firstName}${assistant.called ? ' (H)' : ''}` : ''}
+                {formatPlayerName(assistant)}
               </Text>
               <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '') : ''}</Text>
             </View>
@@ -274,7 +287,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 <Text style={styles.numberCell}>{goalie ? (goalie.player.jerseyNumber || '') : ''}</Text>
                 <Text style={styles.positionCell}>G</Text>
                 <Text style={styles.nameCell}>
-                  {goalie ? `${goalie.player.lastName}, ${goalie.player.firstName}${goalie.called ? ' (H)' : ''}` : ''}
+                  {formatPlayerName(goalie)}
                 </Text>
                 <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '') : ''}</Text>
               </View>
@@ -290,7 +303,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 <Text style={styles.numberCell}>{forward ? (forward.player.jerseyNumber || '') : ''}</Text>
                 <Text style={styles.positionCell}>F</Text>
                 <Text style={styles.nameCell}>
-                  {forward ? `${forward.player.lastName}, ${forward.player.firstName}${forward.called ? ' (H)' : ''}` : ''}
+                  {formatPlayerName(forward)}
                 </Text>
                 <Text style={styles.passCell}>{forward ? (forward.passNumber || '') : ''}</Text>
               </View>

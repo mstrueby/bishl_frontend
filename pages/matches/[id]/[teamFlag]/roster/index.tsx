@@ -70,7 +70,9 @@ interface AvailablePlayer {
   passNo: string;
   jerseyNo: number | undefined;
   called: boolean;
-  originalTeam: string | null;
+  originalTeamId: string | null;
+  originalTeamName: string | null;
+  originalTeamAlias: string | null;
   active?: boolean;
   licenceType?: string;
   status?: string;
@@ -243,6 +245,11 @@ const RosterPage = () => {
       },
       passNumber: player.passNo,
       called: player.called || false,
+      calledFromTeam: player.called && player.originalTeamId ? {
+        teamId: player.originalTeamId,
+        teamName: player.originalTeamName || '',
+        teamAlias: player.originalTeamAlias || '',
+      } : undefined,
       goals: 0,
       assists: 0,
       points: 0,
@@ -395,13 +402,17 @@ const RosterPage = () => {
               (id) => assignedTeam && assignedTeam.teamId === id,
             );
 
-            let originalTeamName = null;
+            let originalTeamInfo: { id: string; name: string; alias: string } | null = null;
             if (isFromYoungerTeam && assignedTeam) {
               const originalTeam = clubData.teams.find(
                 (t) => t._id === assignedTeam.teamId,
               );
               if (originalTeam) {
-                originalTeamName = originalTeam.name;
+                originalTeamInfo = {
+                  id: originalTeam._id,
+                  name: originalTeam.name,
+                  alias: originalTeam.alias,
+                };
               }
             }
 
@@ -420,7 +431,9 @@ const RosterPage = () => {
                   passNo: assignedTeam.passNo,
                   jerseyNo: assignedTeam.jerseyNo,
                   called: false,
-                  originalTeam: originalTeamName,
+                  originalTeamId: originalTeamInfo?.id || null,
+                  originalTeamName: originalTeamInfo?.name || null,
+                  originalTeamAlias: originalTeamInfo?.alias || null,
                   active: assignedTeam.active,
                   status: assignedTeam.status,
                   licenseType: assignedTeam.licenseType,
@@ -692,6 +705,10 @@ const RosterPage = () => {
                 | null) ?? null,
             statusDiff: false,
             assignedStatus: player.status,
+            called: rosterPlayer?.called || player.called || false,
+            originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
+            originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
+            originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
           };
         },
       );
@@ -965,6 +982,9 @@ const RosterPage = () => {
                 passNo: assignedTeam?.passNo || "",
                 jerseyNo: assignedTeam?.jerseyNo,
                 called: true,
+                originalTeamId: selectedCallUpTeam._id,
+                originalTeamName: selectedCallUpTeam.name,
+                originalTeamAlias: selectedCallUpTeam.alias,
                 active: assignedTeam?.active,
                 licenseType: assignedTeam?.licenseType,
               };
@@ -1020,6 +1040,9 @@ const RosterPage = () => {
     const playerWithCalled = {
       ...selectedCallUpPlayer,
       called: true,
+      originalTeamId: selectedCallUpTeam?._id || null,
+      originalTeamName: selectedCallUpTeam?.name || null,
+      originalTeamAlias: selectedCallUpTeam?.alias || null,
     };
 
     // Add to allAvailablePlayersList (the master list) so filters/toggles don't drop call-ups
@@ -1619,9 +1642,9 @@ const RosterPage = () => {
                             <div className="text-sm font-medium text-gray-900">
                               {player.firstName} {player.lastName}
                             </div>
-                            {player.originalTeam && (
+                            {player.originalTeamName && (
                               <div className="text-xs text-gray-500">
-                                {player.originalTeam}
+                                {player.originalTeamName}
                               </div>
                             )}
                           </div>
@@ -1669,26 +1692,31 @@ const RosterPage = () => {
                       <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center gap-2">
                           {player.called && (
-                            <span
-                              className={classNames(
-                                "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-                                playerStats[player._id] !== undefined &&
-                                  playerStats[player._id] + 1 <= 4
-                                  ? "bg-green-50 text-green-800 ring-green-600/20"
-                                  : playerStats[player._id] !== undefined &&
-                                      playerStats[player._id] + 1 === 5
-                                    ? "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
-                                    : "bg-gray-50 text-gray-600 ring-gray-500/20",
-                              )}
-                            >
+                            <>
                               <ArrowUpIcon
-                                className="h-3 w-3 mr-0.5"
+                                className="h-3 w-3 text-gray-600 flex-shrink-0"
                                 aria-hidden="true"
                               />
-                              {playerStats[player._id] !== undefined
-                                ? playerStats[player._id] + 1
-                                : ""}
-                            </span>
+                              <span className="text-xs text-gray-700 truncate max-w-[80px]">
+                                {player.originalTeamName || ''}
+                              </span>
+                              <span
+                                className={classNames(
+                                  "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
+                                  playerStats[player._id] !== undefined &&
+                                    playerStats[player._id] + 1 <= 4
+                                    ? "bg-green-50 text-green-800 ring-green-600/20"
+                                    : playerStats[player._id] !== undefined &&
+                                        playerStats[player._id] + 1 === 5
+                                      ? "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
+                                      : "bg-gray-50 text-gray-600 ring-gray-500/20",
+                                )}
+                              >
+                                {playerStats[player._id] !== undefined
+                                  ? playerStats[player._id] + 1
+                                  : "–"}
+                              </span>
+                            </>
                           )}
                         </div>
                       </td>
