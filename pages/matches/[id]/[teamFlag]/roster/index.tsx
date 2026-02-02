@@ -706,6 +706,8 @@ const RosterPage = () => {
             statusDiff: false,
             assignedStatus: player.status,
             called: rosterPlayer?.called || player.called || false,
+            active: (rosterPlayer?.called || player.called) ? true : player.active,
+            status: (rosterPlayer?.called || player.called) ? player.status : player.status,
             originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
             originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
             originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
@@ -1070,9 +1072,10 @@ const RosterPage = () => {
     // NEW: Also add to tablePlayers for the new table UI
     const tablePlayerToAdd: AvailablePlayerWithRoster = {
       ...playerWithCalled,
-      selected: false,
+      selected: true,
+      active: true, // Automatically activate called-up players
       rosterJerseyNo: playerWithCalled.jerseyNo || 0,
-      rosterPosition: null,
+      rosterPosition: "F",
       statusDiff: false,
       assignedStatus: playerWithCalled.status,
     };
