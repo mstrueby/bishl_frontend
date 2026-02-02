@@ -24,6 +24,12 @@ export interface MatchStats {
   penaltyMinutes?: number;
 }
 
+export interface CalledFromTeam {
+  teamId: string;
+  teamName: string;
+  teamAlias: string;
+}
+
 export interface RosterPlayer {
   player: EventPlayer;
   playerPosition: {
@@ -36,6 +42,7 @@ export interface RosterPlayer {
   points: number;
   penaltyMinutes: number;
   called: boolean;
+  calledFromTeam?: CalledFromTeam;
   eligibilityStatus?: "VALID" | "INVALID" | "UNKNOWN";
   assignedTeam?: AssignedTeam;
   matchStats?: MatchStats;

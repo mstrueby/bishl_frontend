@@ -365,19 +365,26 @@ const RosterList: React.FC<RosterListProps> = ({
 
                     {/* Called/HOCH */}
                     <td className="px-2 py-2 whitespace-nowrap text-center">
-                      {player.called && playerStats !== undefined ? (
-                        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                          playerStats[player.player.playerId] >= 0 && playerStats[player.player.playerId] <= 3
-                            ? 'bg-green-50 text-green-800 ring-green-600/20'
-                            : playerStats[player.player.playerId] === 4
-                            ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
-                            : 'bg-red-50 text-red-800 ring-red-600/20'
-                        }`}>
-                          <ArrowUpIcon className="h-3 w-3" aria-hidden="true" />
-                          <span className="ml-0.5 text-xs font-medium">
-                            {playerStats[player.player.playerId] ?? 0}
+                      {player.called ? (
+                        <div className="flex items-center gap-1.5 justify-center">
+                          <ArrowUpIcon className="h-3 w-3 text-gray-600 flex-shrink-0" aria-hidden="true" />
+                          {player.calledFromTeam?.teamName && (
+                            <span className="text-xs text-gray-700 truncate max-w-[60px]">
+                              {player.calledFromTeam.teamName}
+                            </span>
+                          )}
+                          <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
+                            playerStats && playerStats[player.player.playerId] !== undefined && playerStats[player.player.playerId] <= 3
+                              ? 'bg-green-50 text-green-800 ring-green-600/20'
+                              : playerStats && playerStats[player.player.playerId] === 4
+                              ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
+                              : 'bg-gray-50 text-gray-600 ring-gray-500/20'
+                          }`}>
+                            {playerStats && playerStats[player.player.playerId] !== undefined
+                              ? playerStats[player.player.playerId]
+                              : '–'}
                           </span>
-                        </span>
+                        </div>
                       ) : (
                         <span className="text-gray-400">–</span>
                       )}
