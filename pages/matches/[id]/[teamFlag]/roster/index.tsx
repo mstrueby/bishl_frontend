@@ -666,11 +666,49 @@ const RosterPage = () => {
                   | null) ?? null,
               statusDiff: false,
               assignedStatus: player.status,
+              called: rosterPlayer?.called || player.called || false,
+              active: (rosterPlayer?.called || player.called) ? true : player.active,
+              originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
+              originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
+              originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
             };
           },
         );
-        merged.sort((a, b) => a.firstName.localeCompare(b.firstName));
-        return merged;
+        
+        // Add called-up players from roster that are NOT in allAvailablePlayersList
+        const availablePlayerIds = new Set(allAvailablePlayersList.map((p) => p._id));
+        const calledUpPlayersFromRoster = initialRosterData
+          .filter((rp) => !availablePlayerIds.has(rp.player.playerId))
+          .map((rp): AvailablePlayerWithRoster => ({
+            _id: rp.player.playerId,
+            firstName: rp.player.firstName,
+            lastName: rp.player.lastName,
+            displayFirstName: rp.player.firstName,
+            displayLastName: rp.player.lastName,
+            position: rp.playerPosition.key === 'G' ? 'Goalie' : 'Skater',
+            fullFaceReq: false,
+            source: 'BISHL',
+            imageUrl: '',
+            imageVisible: false,
+            passNo: rp.passNumber || '',
+            jerseyNo: rp.player.jerseyNumber,
+            called: rp.called || true,
+            originalTeamId: rp.calledFromTeam?.teamId || null,
+            originalTeamName: rp.calledFromTeam?.teamName || null,
+            originalTeamAlias: rp.calledFromTeam?.teamAlias || null,
+            active: true,
+            status: 'VALID',
+            licenseType: 'PRIMARY',
+            selected: true,
+            rosterJerseyNo: rp.player.jerseyNumber || 0,
+            rosterPosition: (rp.playerPosition.key as 'C' | 'A' | 'G' | 'F') || 'F',
+            statusDiff: false,
+            assignedStatus: 'VALID',
+          }));
+        
+        const allPlayers = [...merged, ...calledUpPlayersFromRoster];
+        allPlayers.sort((a, b) => a.firstName.localeCompare(b.firstName));
+        return allPlayers;
       }
 
       // After initial sync: only add new players from allAvailablePlayersList
