@@ -16,7 +16,6 @@ import {
 } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
-import { getCookie } from "cookies-next";
 import apiClient from '../../../../lib/apiClient';
 import { getErrorMessage } from '../../../../lib/errorHandler';
 
@@ -50,9 +49,6 @@ import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTa
 interface MatchDetailsProps {
   match: MatchValues;
   matchdayOwner: MatchdayOwner;
-  jwt?: string;
-  userRoles?: string[];
-  userClubId?: string | null;
 }
 
 interface EditMatchData {
@@ -98,9 +94,6 @@ const InfoCard: React.FC<InfoCardProps> = ({
 export default function MatchDetails({
   match: initialMatch,
   matchdayOwner,
-  jwt,
-  userRoles,
-  userClubId,
 }: MatchDetailsProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -213,7 +206,6 @@ export default function MatchDetails({
       roster: RosterPlayer[],
       team: { name: string },
     ) => {
-      if (!jwt) return {};
 
       const calledPlayers = roster.filter((player) => player.called);
       if (calledPlayers.length === 0) return {};
@@ -247,7 +239,7 @@ export default function MatchDetails({
         } catch (error) {
           console.error(
             `Error fetching stats for player ${player.player.playerId}:`,
-            error,
+            getErrorMessage(error),
           );
           return {
             playerId: player.player.playerId,
@@ -291,7 +283,7 @@ export default function MatchDetails({
     };
 
     fetchAllPlayerStats();
-  }, [match, jwt]);
+  }, [match]);
 
   // Refresh match data function
   const refreshMatchData = useCallback(async () => {
@@ -303,7 +295,7 @@ export default function MatchDetails({
       setMatch(response.data);
       setIsRefreshing(false);
     } catch (error) {
-      console.error("Error refreshing match data:", error);
+      console.error("Error refreshing match data:", getErrorMessage(error));
       setIsRefreshing(false);
     }
   }, [id, isRefreshing]);
@@ -316,13 +308,7 @@ export default function MatchDetails({
       setIsValidatingHomeRoster(true);
       const response = await apiClient.post(
         `/matches/${match._id}/home/roster/validate`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json",
-          },
-        }
+        {}
       );
 
       if (response.status === 200 && response.data) {
@@ -338,11 +324,11 @@ export default function MatchDetails({
         }));
       }
     } catch (error) {
-      console.error("Error validating home roster:", error);
+      console.error("Error validating home roster:", getErrorMessage(error));
     } finally {
       setIsValidatingHomeRoster(false);
     }
-  }, [match._id, jwt, isValidatingHomeRoster]);
+  }, [match._id, isValidatingHomeRoster]);
 
   const validateAwayRoster = useCallback(async () => {
     if (isValidatingAwayRoster) return;
@@ -351,13 +337,7 @@ export default function MatchDetails({
       setIsValidatingAwayRoster(true);
       const response = await apiClient.post(
         `/matches/${match._id}/away/roster/validate`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json",
-          },
-        }
+        {}
       );
 
       if (response.status === 200 && response.data) {
@@ -373,11 +353,11 @@ export default function MatchDetails({
         }));
       }
     } catch (error) {
-      console.error("Error validating away roster:", error);
+      console.error("Error validating away roster:", getErrorMessage(error));
     } finally {
       setIsValidatingAwayRoster(false);
     }
-  }, [match._id, jwt, isValidatingAwayRoster]);
+  }, [match._id, isValidatingAwayRoster]);
 
   // Open player card modal
   const handleOpenPlayerCard = useCallback(async (ctx: { 
@@ -398,17 +378,15 @@ export default function MatchDetails({
     setIsLoadingPlayerDetails(true);
 
     try {
-      const response = await apiClient.get(`/players/${ctx.playerId}`, {
-        headers: jwt ? { Authorization: `Bearer ${jwt}` } : undefined,
-      });
+      const response = await apiClient.get(`/players/${ctx.playerId}`);
       setPlayerDetails(response.data);
     } catch (error) {
-      console.error("Error fetching player details:", error);
+      console.error("Error fetching player details:", getErrorMessage(error));
       setPlayerDetails(null);
     } finally {
       setIsLoadingPlayerDetails(false);
     }
-  }, [match.home, match.away, jwt]);
+  }, [match.home, match.away]);
 
   const handleClosePlayerCard = useCallback(() => {
     setIsPlayerCardOpen(false);
@@ -427,13 +405,7 @@ export default function MatchDetails({
             ...match.supplementarySheet,
             [fieldName]: value,
           },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json",
-          },
-        },
+        }
       );
 
       if (response.status === 200) {
@@ -446,7 +418,7 @@ export default function MatchDetails({
         });
       }
     } catch (error) {
-      console.error(`Error updating supplementary field ${fieldName}:`, error);
+      console.error(`Error updating supplementary field ${fieldName}:`, getErrorMessage(error));
     } finally {
       setSavingSupplementaryField(null);
     }
@@ -560,13 +532,7 @@ export default function MatchDetails({
                               key: "INPROGRESS",
                               value: "Live",
                             },
-                          },
-                          {
-                            headers: {
-                              Authorization: `Bearer ${jwt}`,
-                              "Content-Type": "application/json",
-                            },
-                          },
+                          }
                         );
 
                         if (response.status === 200) {
@@ -575,7 +541,7 @@ export default function MatchDetails({
                           setMatch(updatedMatch);
                         }
                       } catch (error) {
-                        console.error("Error updating match status:", error);
+                        console.error("Error updating match status:", getErrorMessage(error));
                       } finally {
                         setIsRefreshing(false);
                       }
@@ -791,7 +757,6 @@ export default function MatchDetails({
           {activeTab === "supplementary" && (
             <SupplementaryTab
               match={match}
-              jwt={jwt}
               permissions={{
                 showButtonSupplementary: permissions.showButtonSupplementary ?? false,
               }}
@@ -911,13 +876,7 @@ export default function MatchDetails({
                     `/matches/${match._id}`,
                     {
                       matchSheetComplete: newCompleteStatus,
-                    },
-                    {
-                      headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        "Content-Type": "application/json",
-                      },
-                    },
+                    }
                   );
 
                   if (response.status === 200) {
@@ -929,7 +888,7 @@ export default function MatchDetails({
                 } catch (error) {
                   console.error(
                     "Error updating match sheet complete status:",
-                    error,
+                    getErrorMessage(error),
                   );
                 } finally {
                   setIsSavingMatchSheetComplete(false);
@@ -1061,20 +1020,14 @@ export default function MatchDetails({
                           try {
                             setIsRefreshing(true);
                             const response = await apiClient.patch(
-                              `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`,
+                              `/matches/${match._id}`,
                               {
                                 matchStatus: {
                                   key: "FINISHED",
                                   value: "Beendet",
                                 },
                                 finishType: selectedFinishType,
-                              },
-                              {
-                                headers: {
-                                  Authorization: `Bearer ${jwt}`,
-                                  "Content-Type": "application/json",
-                                },
-                              },
+                              }
                             );
 
                             if (response.status === 200) {
@@ -1084,7 +1037,7 @@ export default function MatchDetails({
                               setIsFinishDialogOpen(false);
                             }
                           } catch (error) {
-                            console.error("Error finishing match:", error);
+                            console.error("Error finishing match:", getErrorMessage(error));
                           } finally {
                             setIsRefreshing(false);
                           }
@@ -1226,19 +1179,28 @@ export default function MatchDetails({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   try {
-    // Only fetch match data (public data)
-    const matchResponse = await apiClient.get(`/matches/${id}`);
-    const match = matchResponse.data;
+    // Only fetch match data (public data) - use fetch directly for server-side
+    const matchResponse = await fetch(`${baseUrl}/matches/${id}`);
+    if (!matchResponse.ok) {
+      throw new Error(`Failed to fetch match: ${matchResponse.status}`);
+    }
+    const matchJson = await matchResponse.json();
+    const match = matchJson.data || matchJson;
 
     // Fetch matchday owner data
     let matchdayOwner: MatchdayOwner | null = null;
     try {
-      const matchdayResponse = await apiClient.get(
-        `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
+      const matchdayResponse = await fetch(
+        `${baseUrl}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
       );
-      matchdayOwner = matchdayResponse.data?.owner || null;
+      if (matchdayResponse.ok) {
+        const matchdayJson = await matchdayResponse.json();
+        const matchdayData = matchdayJson.data || matchdayJson;
+        matchdayOwner = matchdayData?.owner || null;
+      }
     } catch (error) {
       console.error('Error fetching matchday owner:', error);
     }

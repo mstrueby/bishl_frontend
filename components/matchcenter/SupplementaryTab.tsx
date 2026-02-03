@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { MatchValues, SupplementarySheet } from "../../types/MatchValues";
 import Badge from "../ui/Badge";
+import apiClient from "../../lib/apiClient";
+import { getErrorMessage } from "../../lib/errorHandler";
 
 interface Assignment {
   _id: string;
@@ -21,7 +23,6 @@ interface Assignment {
 
 interface SupplementaryTabProps {
   match: MatchValues;
-  jwt?: string;
   permissions: {
     showButtonSupplementary: boolean;
   };
@@ -59,44 +60,29 @@ const InfoCard: React.FC<InfoCardProps> = ({
 
 const SupplementaryTab: React.FC<SupplementaryTabProps> = ({
   match,
-  jwt,
   permissions,
 }) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
 
   useEffect(() => {
     const fetchAssignments = async () => {
-      if (!jwt) return;
-      
       try {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`;
-        console.log("Fetching assignments from URL:", url);
-
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json",
-          },
-        });
-        console.log("Response status:", response.status);
-        console.log("Response ok:", response.ok);
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Fetched assignments:", data);
-          console.log("Match referee1:", match.referee1);
-          console.log("Match referee2:", match.referee2);
-          setAssignments(data);
-        } else {
-          console.log("Response not ok, status:", response.status);
-        }
+        const response = await apiClient.get(
+          `/assignments/matches/${match._id}`,
+          {
+            params: {
+              assignmentStatus: ['ASSIGNED', 'ACCEPTED'],
+            },
+          }
+        );
+        setAssignments(response.data || []);
       } catch (error) {
-        console.error("Error fetching assignments:", error);
+        console.error("Error fetching assignments:", getErrorMessage(error));
       }
     };
 
     fetchAssignments();
-  }, [match._id, jwt]);
+  }, [match._id]);
 
   return (
     <div className="py-4">
