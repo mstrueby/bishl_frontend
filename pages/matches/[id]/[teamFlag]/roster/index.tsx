@@ -249,6 +249,10 @@ const RosterPage = () => {
           )?.value || "Feldspieler",
       },
       passNumber: player.passNo,
+      licenseType: player.licenseType || LicenseType.PRIMARY,
+      source: player.source,
+      eligibilityStatus: player.eligibilityStatus || player.status || LicenseStatus.UNKNOWN,
+      invalidReasonCodes: [],
       called: player.called || false,
       calledFromTeam: player.called && player.originalTeamId ? {
         teamId: player.originalTeamId,
