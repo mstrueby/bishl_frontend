@@ -370,9 +370,9 @@ export default function MatchDetails({
     setSelectedPlayerContext({
       ...ctx,
       teamName: team.name,
-      teamLogoUrl: team.logoUrl,
+      teamLogoUrl: team.logo,
       clubName: team.fullName,
-      clubLogoUrl: team.logoUrl,
+      clubLogoUrl: team.logo,
     });
     setIsPlayerCardOpen(true);
     setIsLoadingPlayerDetails(true);
@@ -688,7 +688,7 @@ export default function MatchDetails({
                   editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
                   sortRoster={sortRoster}
                   playerStats={homePlayerStats}
-                  teamLogoUrl={match.home.logoUrl}
+                  teamLogoUrl={match.home.logo}
                   rosterStatus={match.home.roster?.status}
                   eligibilityTimestamp={match.home.roster?.eligibilityCheckedAt}
                   canValidateRoster={permissions.showButtonRosterHome ?? false}
@@ -705,7 +705,7 @@ export default function MatchDetails({
                   editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
                   sortRoster={sortRoster}
                   playerStats={awayPlayerStats}
-                  teamLogoUrl={match.away.logoUrl}
+                  teamLogoUrl={match.away.logo}
                   rosterStatus={match.away.roster?.status}
                   eligibilityTimestamp={match.away.roster?.eligibilityCheckedAt}
                   canValidateRoster={permissions.showButtonRosterAway ?? false}
