@@ -87,6 +87,7 @@ interface AvailablePlayerWithRoster extends AvailablePlayer {
   rosterPosition: "C" | "A" | "G" | "F" | null;
   statusDiff: boolean;
   assignedStatus?: string;
+  eligibilityStatus?: string;
 }
 
 // Player position options
@@ -191,6 +192,8 @@ const RosterPage = () => {
   const [initialRosterData, setInitialRosterData] = useState<RosterPlayer[]>(
     [],
   );
+
+  const [playerDetailsMap, setPlayerDetailsMap] = useState<Record<string, PlayerValues>>({});
 
   // NEW STATE: Interactive table-based player selection - SINGLE SOURCE OF TRUTH
   const [tablePlayers, setTablePlayers] = useState<AvailablePlayerWithRoster[]>(
@@ -668,6 +671,7 @@ const RosterPage = () => {
               assignedStatus: player.status,
               called: rosterPlayer?.called || player.called || false,
               active: (rosterPlayer?.called || player.called) ? true : player.active,
+              eligibilityStatus: (rosterPlayer?.called || player.called) ? player.status : undefined,
               originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
               originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
               originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
@@ -704,6 +708,7 @@ const RosterPage = () => {
             rosterPosition: (rp.playerPosition.key as 'C' | 'A' | 'G' | 'F') || 'F',
             statusDiff: false,
             assignedStatus: rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID',
+            eligibilityStatus: rp.assignedTeam?.status || rp.eligibilityStatus || undefined,
           }));
         
         const allPlayers = [...merged, ...calledUpPlayersFromRoster];
@@ -751,23 +756,95 @@ const RosterPage = () => {
         },
       );
 
-      // DEBUG: Log merged table players that are called up
-      newTablePlayers.forEach(p => {
-        if (p.called) {
-          console.log(`[DEBUG] Roster Merge - Called Player: ${p.firstName} ${p.lastName} (${p._id})`, {
-            status: p.status,
-            passNo: p.passNo,
-            licenseType: p.licenseType,
-            originalTeam: p.originalTeamName
-          });
-        }
-      });
-
       const combined = [...prev, ...newTablePlayers];
       combined.sort((a, b) => a.firstName.localeCompare(b.firstName));
       return combined;
     });
   }, [allAvailablePlayersList, initialRosterData]);
+
+  const fetchingCalledPlayersRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const calledPlayersNeedingStatus = tablePlayers.filter(
+      (p) => p.called && p.originalTeamId && (!p.eligibilityStatus || p.eligibilityStatus === 'UNKNOWN')
+    );
+
+    if (calledPlayersNeedingStatus.length === 0) return;
+
+    const playersToFetch = calledPlayersNeedingStatus.filter(
+      (p) => !playerDetailsMap[p._id] && !fetchingCalledPlayersRef.current.has(p._id)
+    );
+
+    if (playersToFetch.length === 0) {
+      const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
+      calledPlayersNeedingStatus.forEach((p) => {
+        const cached = playerDetailsMap[p._id];
+        if (cached) {
+          const assignedTeam = cached.assignedTeams
+            ?.flatMap((a: Assignment) => a.teams || [])
+            .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
+          if (assignedTeam?.status) {
+            updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
+          }
+        }
+      });
+      if (Object.keys(updates).length > 0) {
+        setTablePlayers((prev) =>
+          prev.map((p) => updates[p._id] ? { ...p, ...updates[p._id] } : p)
+        );
+      }
+      return;
+    }
+
+    playersToFetch.forEach((p) => fetchingCalledPlayersRef.current.add(p._id));
+
+    const fetchDetails = async () => {
+      try {
+        const results = await Promise.all(
+          playersToFetch.map(async (p) => {
+            try {
+              const response = await apiClient.get(`/players/${p._id}`);
+              return { playerId: p._id, data: response.data as PlayerValues };
+            } catch (error) {
+              console.error(`Error fetching details for player ${p._id}:`, getErrorMessage(error));
+              return { playerId: p._id, data: null };
+            }
+          })
+        );
+
+        const newDetailsMap: Record<string, PlayerValues> = {};
+        results.forEach((r) => {
+          if (r.data) newDetailsMap[r.playerId] = r.data;
+        });
+
+        setPlayerDetailsMap((prev) => ({ ...prev, ...newDetailsMap }));
+
+        const allDetails = { ...playerDetailsMap, ...newDetailsMap };
+        const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
+        calledPlayersNeedingStatus.forEach((p) => {
+          const details = allDetails[p._id];
+          if (details) {
+            const assignedTeam = details.assignedTeams
+              ?.flatMap((a: Assignment) => a.teams || [])
+              .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
+            if (assignedTeam?.status) {
+              updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
+            }
+          }
+        });
+
+        if (Object.keys(updates).length > 0) {
+          setTablePlayers((prev) =>
+            prev.map((p) => updates[p._id] ? { ...p, ...updates[p._id] } : p)
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching called player details:", getErrorMessage(error));
+      }
+    };
+
+    fetchDetails();
+  }, [tablePlayers, playerDetailsMap]);
 
   // NEW: Handler to toggle player selection in table
   const handleTablePlayerToggle = (playerId: string) => {
@@ -1122,11 +1199,12 @@ const RosterPage = () => {
     const tablePlayerToAdd: AvailablePlayerWithRoster = {
       ...playerWithCalled,
       selected: true,
-      active: true, // Automatically activate called-up players
+      active: true,
       rosterJerseyNo: playerWithCalled.jerseyNo || 0,
       rosterPosition: "F",
       statusDiff: false,
       assignedStatus: playerWithCalled.status,
+      eligibilityStatus: playerWithCalled.status,
     };
     setTablePlayers((prev) => {
       const newList = [...prev, tablePlayerToAdd];
@@ -1577,9 +1655,9 @@ const RosterPage = () => {
                       key={player._id}
                       className={classNames(
                         player.selected
-                          ? player.status === LicenseStatus.VALID
+                          ? (player.eligibilityStatus || player.status) === LicenseStatus.VALID
                             ? "bg-opacity-40 bg-green-50"
-                            : player.status === LicenseStatus.INVALID
+                            : (player.eligibilityStatus || player.status) === LicenseStatus.INVALID
                               ? "bg-opacity-40 bg-red-100 "
                               : ""
                           : "",
@@ -1776,20 +1854,28 @@ const RosterPage = () => {
                       {/* licence status indicator */}
                       <td className="px-3 py-3 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex flex-col items-center space-y-1">
-                          {/* License Status Badge */}
-                          {player.status === LicenseStatus.INVALID ? (
-                            <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
-                              Ungültig
-                            </span>
-                          ) : player.status === LicenseStatus.VALID ? (
-                            <span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
-                              Gültig
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
-                              {player.status || "UNKNOWN"}
-                            </span>
-                          )}
+                          {(() => {
+                            const displayStatus = player.eligibilityStatus || player.status || 'UNKNOWN';
+                            if (displayStatus === LicenseStatus.INVALID) {
+                              return (
+                                <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
+                                  Ungültig
+                                </span>
+                              );
+                            } else if (displayStatus === LicenseStatus.VALID) {
+                              return (
+                                <span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+                                  Gültig
+                                </span>
+                              );
+                            } else {
+                              return (
+                                <span className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
+                                  {displayStatus}
+                                </span>
+                              );
+                            }
+                          })()}
                         </div>
                       </td>
                     </tr>
