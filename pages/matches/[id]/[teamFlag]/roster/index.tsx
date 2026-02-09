@@ -1031,6 +1031,7 @@ const RosterPage = () => {
                 imageVisible: player.imageVisible,
                 passNo: assignedTeam?.passNo || "",
                 jerseyNo: assignedTeam?.jerseyNo,
+                status: assignedTeam?.status,
                 called: true,
                 originalTeamId: selectedCallUpTeam._id,
                 originalTeamName: selectedCallUpTeam.name,
@@ -1755,16 +1756,16 @@ const RosterPage = () => {
                                 className={classNames(
                                   "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
                                   playerStats[player._id] !== undefined &&
-                                    playerStats[player._id] + 1 <= 4
+                                    playerStats[player._id] <= 4
                                     ? "bg-green-50 text-green-800 ring-green-600/20"
                                     : playerStats[player._id] !== undefined &&
-                                        playerStats[player._id] + 1 === 5
+                                        playerStats[player._id] === 5
                                       ? "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
-                                      : "bg-gray-50 text-gray-600 ring-gray-500/20",
+                                      : "bg-red-50 text-red-600 ring-red-500/20",
                                 )}
                               >
                                 {playerStats[player._id] !== undefined
-                                  ? playerStats[player._id] + 1
+                                  ? playerStats[player._id]
                                   : "–"}
                               </span>
                             </>
