@@ -697,13 +697,13 @@ const RosterPage = () => {
             originalTeamName: rp.calledFromTeam?.teamName || null,
             originalTeamAlias: rp.calledFromTeam?.teamAlias || null,
             active: true,
-            status: 'VALID',
-            licenseType: 'PRIMARY',
+            status: rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID',
+            licenseType: rp.assignedTeam?.licenceType || 'PRIMARY',
             selected: true,
             rosterJerseyNo: rp.player.jerseyNumber || 0,
             rosterPosition: (rp.playerPosition.key as 'C' | 'A' | 'G' | 'F') || 'F',
             statusDiff: false,
-            assignedStatus: 'VALID',
+            assignedStatus: rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID',
           }));
         
         const allPlayers = [...merged, ...calledUpPlayersFromRoster];
@@ -745,7 +745,7 @@ const RosterPage = () => {
             assignedStatus: player.status,
             called: rosterPlayer?.called || player.called || false,
             active: (rosterPlayer?.called || player.called) ? true : player.active,
-            status: (rosterPlayer?.called || player.called) ? player.status : player.status,
+            status: player.status,
             originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
             originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
             originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
@@ -1766,21 +1766,7 @@ const RosterPage = () => {
                       <td className="px-3 py-3 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex flex-col items-center space-y-1">
                           {/* License Status Badge */}
-                          {(player.called && player.assignedTeam?.status) ? (
-                            player.assignedTeam.status === "INVALID" ? (
-                              <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
-                                Ungültig
-                              </span>
-                            ) : player.assignedTeam.status === "VALID" ? (
-                              <span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
-                                Gültig
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
-                                {player.assignedTeam.status}
-                              </span>
-                            )
-                          ) : player.status === LicenseStatus.INVALID ? (
+                          {player.status === LicenseStatus.INVALID ? (
                             <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
                               Ungültig
                             </span>
