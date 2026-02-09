@@ -25,6 +25,20 @@ Preferred communication style: Simple, everyday language.
 - **Display**: Table uses `player.eligibilityStatus || player.status || 'UNKNOWN'` for badge rendering and row background colors
 - **Caching**: `playerDetailsMap` + `fetchingCalledPlayersRef` prevent duplicate API calls
 
+### 5-Match Call-Up Rule
+- Called-up players with 5+ `calledMatches` are forced to `INVALID` status regardless of their underlying license status
+- Applied in 4 locations: initial roster merge, useEffect status fetch (cached + API), and handleConfirmCallUp
+- Call-up dialog fetch now extracts `calledMatches` from player stats (season/tournament/team match) and adds to `playerStats` map on confirm
+- Red pill badge correctly shows count, INVALID status badge shown, red row background applied
+
+### RosterPlayer Field Integration (licenseType, source, invalidReasonCodes)
+- **RosterPlayer type** (`types/MatchValues.tsx`): Added `licenseType: string`, `source: string`, `invalidReasonCodes: string[]`
+- **Data flow**: Fields mapped from initial roster data → `tablePlayers` → `rosterList` memo → API submission
+- **Initial merge**: Regular players get `licenseType`/`source`/`invalidReasonCodes` from roster data with fallback to player assignment data
+- **Called-up players from roster**: Uses `rp.source` (not hardcoded), `rp.licenseType` with fallback, and `rp.invalidReasonCodes`
+- **RosterList display**: Eligibility icon tooltip shows `invalidReasonCodes` when status is INVALID
+- **Roster page table**: INVALID badge shows reason codes as tooltip on hover
+
 ## Changes (January 2026)
 
 ### PlayerForm Refactoring
