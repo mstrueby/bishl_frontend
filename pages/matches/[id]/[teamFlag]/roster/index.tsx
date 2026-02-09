@@ -78,6 +78,7 @@ interface AvailablePlayer {
   status?: string;
   licenseType?: string;
   calledMatches?: number;
+  invalidReasonCodes?: string[];
 }
 
 // Extended player type for the new interactive table
@@ -252,7 +253,7 @@ const RosterPage = () => {
       licenseType: player.licenseType || LicenseType.PRIMARY,
       source: player.source,
       eligibilityStatus: player.eligibilityStatus || player.status || LicenseStatus.UNKNOWN,
-      invalidReasonCodes: [],
+      invalidReasonCodes: player.invalidReasonCodes || [],
       called: player.called || false,
       calledFromTeam: player.called && player.originalTeamId ? {
         teamId: player.originalTeamId,
@@ -681,6 +682,9 @@ const RosterPage = () => {
               originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
               originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
               originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
+              licenseType: rosterPlayer?.licenseType || player.licenseType,
+              source: rosterPlayer?.source || player.source,
+              invalidReasonCodes: rosterPlayer?.invalidReasonCodes || player.invalidReasonCodes || [],
             };
           },
         );
@@ -697,7 +701,7 @@ const RosterPage = () => {
             displayLastName: rp.player.lastName,
             position: rp.playerPosition.key === 'G' ? 'Goalie' : 'Skater',
             fullFaceReq: false,
-            source: 'BISHL',
+            source: rp.source || 'BISHL',
             imageUrl: '',
             imageVisible: false,
             passNo: rp.passNumber || '',
@@ -708,7 +712,8 @@ const RosterPage = () => {
             originalTeamAlias: rp.calledFromTeam?.teamAlias || null,
             active: true,
             status: rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID',
-            licenseType: rp.assignedTeam?.licenceType || 'PRIMARY',
+            licenseType: rp.licenseType || rp.assignedTeam?.licenceType || 'PRIMARY',
+            invalidReasonCodes: rp.invalidReasonCodes || [],
             selected: true,
             rosterJerseyNo: rp.player.jerseyNumber || 0,
             rosterPosition: (rp.playerPosition.key as 'C' | 'A' | 'G' | 'F') || 'F',
@@ -1905,9 +1910,13 @@ const RosterPage = () => {
                         <div className="flex flex-col items-center space-y-1">
                           {(() => {
                             const displayStatus = player.eligibilityStatus || player.status || 'UNKNOWN';
+                            const reasonCodes = player.invalidReasonCodes || [];
                             if (displayStatus === LicenseStatus.INVALID) {
                               return (
-                                <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
+                                <span
+                                  className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700"
+                                  title={reasonCodes.length > 0 ? reasonCodes.join(', ') : undefined}
+                                >
                                   Ungültig
                                 </span>
                               );
