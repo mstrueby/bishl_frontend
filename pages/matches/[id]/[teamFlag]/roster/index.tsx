@@ -176,6 +176,7 @@ const RosterPage = () => {
   const [selectedCallUpPlayer, setSelectedCallUpPlayer] =
     useState<AvailablePlayer | null>(null);
   const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
+  const [loadingCallUpPlayers, setLoadingCallUpPlayers] = useState(false);
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [playerStats, setPlayerStats] = useState<{
     [playerId: string]: number;
@@ -1086,6 +1087,9 @@ const RosterPage = () => {
   // Fetch players when a team is selected
   useEffect(() => {
     if (selectedCallUpTeam && club) {
+      setLoadingCallUpPlayers(true);
+      setCallUpPlayers([]);
+      setSelectedCallUpPlayer(null);
       const fetchPlayers = async () => {
         try {
           const playersResponse = await apiClient.get(
@@ -1148,6 +1152,8 @@ const RosterPage = () => {
           console.error("Error fetching players:", getErrorMessage(error));
           setCallUpModalError("Fehler beim Laden der Spieler");
           setCallUpPlayers([]);
+        } finally {
+          setLoadingCallUpPlayers(false);
         }
       };
 
@@ -1155,6 +1161,7 @@ const RosterPage = () => {
     } else {
       setCallUpPlayers([]);
       setSelectedCallUpPlayer(null);
+      setLoadingCallUpPlayers(false);
     }
   }, [selectedCallUpTeam, club, rosterList, includeInactivePlayers]);
 
@@ -2946,6 +2953,8 @@ const RosterPage = () => {
                     }
                     required={false}
                     showErrorText={false}
+                    disabled={!selectedCallUpTeam}
+                    loading={loadingCallUpPlayers}
                   />
 
                   <div className="mt-6 flex justify-end space-x-3">
