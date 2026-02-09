@@ -1766,7 +1766,21 @@ const RosterPage = () => {
                       <td className="px-3 py-3 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex flex-col items-center space-y-1">
                           {/* License Status Badge */}
-                          {player.status === LicenseStatus.INVALID ? (
+                          {(player.called && player.assignedTeam?.status) ? (
+                            player.assignedTeam.status === "INVALID" ? (
+                              <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
+                                Ungültig
+                              </span>
+                            ) : player.assignedTeam.status === "VALID" ? (
+                              <span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+                                Gültig
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
+                                {player.assignedTeam.status}
+                              </span>
+                            )
+                          ) : player.status === LicenseStatus.INVALID ? (
                             <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
                               Ungültig
                             </span>
