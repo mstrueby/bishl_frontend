@@ -37,13 +37,16 @@ export interface RosterPlayer {
     value: string;
   };
   passNumber: string;
+  licenseType: string;
+  source: string;
+  eligibilityStatus?: "VALID" | "INVALID" | "UNKNOWN";
+  invalidReasonCodes: string[];
   goals: number;
   assists: number;
   points: number;
   penaltyMinutes: number;
   called: boolean;
   calledFromTeam?: CalledFromTeam;
-  eligibilityStatus?: "VALID" | "INVALID" | "UNKNOWN";
   assignedTeam?: AssignedTeam;
   matchStats?: MatchStats;
 }

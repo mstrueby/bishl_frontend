@@ -180,15 +180,15 @@ const RosterList: React.FC<RosterListProps> = ({
   };
 
   const getLicenceType = (player: RosterPlayer): string => {
-    if (player.assignedTeam?.licenceType) {
-      return player.assignedTeam.licenceType;
+    if (player.licenseType) {
+      return player.licenseType;
     }
     return '-';
   };
 
   const getLicenceSource = (player: RosterPlayer): string | null => {
-    if (player.assignedTeam?.source) {
-      return player.assignedTeam.source;
+    if (player.source) {
+      return player.source;
     }
     return null;
   };
@@ -378,7 +378,7 @@ const RosterList: React.FC<RosterListProps> = ({
                               ? 'bg-green-50 text-green-800 ring-green-600/20'
                               : playerStats && playerStats[player.player.playerId] === 4
                               ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
-                              : 'bg-gray-50 text-gray-600 ring-gray-500/20'
+                              : 'bg-red-50 text-red-600 ring-red-500/20'
                           }`}>
                             {playerStats && playerStats[player.player.playerId] !== undefined
                               ? playerStats[player.player.playerId]
