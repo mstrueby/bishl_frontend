@@ -17,6 +17,8 @@ interface RosterPlayerSelectProps {
   tabIndex?: number;
   removeButton?: boolean;
   showErrorText?: boolean;
+  disabled?: boolean;
+  loading?: boolean;
 }
 
 interface RosterPlayerSelectHandle {
@@ -34,7 +36,9 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
   placeholder = "Spieler auswählen",
   tabIndex,
   removeButton = false,
-  showErrorText = true,  
+  showErrorText = true,
+  disabled = false,
+  loading = false,
 }, ref) => {
   const [field, meta, helpers] = useField(name);
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
@@ -125,7 +129,7 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
 
   return (
     <div className="w-full">
-      <Combobox value={selectedPlayer} onChange={handlePlayerChange}>
+      <Combobox value={selectedPlayer} onChange={handlePlayerChange} disabled={disabled || loading}>
         {({ open }) => (
           <>
             {label && (
@@ -138,29 +142,45 @@ const FormikRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, RosterPlay
                 <Combobox.Input
                   ref={inputRef}
                   tabIndex={tabIndex}
-                  className={`relative w-full cursor-default rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${meta.touched && meta.error ? 'text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'}`}
+                  className={classNames(
+                    `relative w-full cursor-default rounded-md border py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm`,
+                    disabled || loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300' : meta.touched && meta.error ? 'bg-white text-red-900 border-red-300 focus:border-red-500 focus:ring-red-500 placeholder:text-red-300' : 'bg-white text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-600'
+                  )}
                   onChange={handleQueryChange}
                   value={selectedPlayer ? displayValue(selectedPlayer) : query}
-                  placeholder={placeholder}
+                  placeholder={loading ? "Lade Spieler..." : placeholder}
                   autoComplete="off"
+                  disabled={disabled || loading}
                   onFocus={() => {
-                    setShowAllOptions(true);
-                    setIsOpen(true);
+                    if (!disabled && !loading) {
+                      setShowAllOptions(true);
+                      setIsOpen(true);
+                    }
                   }}
                   onBlur={() => {
-                    // Delay closing to allow for option selection
                     setTimeout(() => setIsOpen(false), 200);
                   }}
                 />
+                {loading ? (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <svg className="animate-spin h-4 w-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                ) : (
                 <Combobox.Button
                   className="absolute inset-y-0 right-0 flex items-center pr-2"
                   onClick={() => {
-                    setShowAllOptions(true);
-                    setIsOpen(!isOpen);
+                    if (!disabled && !loading) {
+                      setShowAllOptions(true);
+                      setIsOpen(!isOpen);
+                    }
                   }}
                 >
                   <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </Combobox.Button>
+                )}
 
               <Transition
                   show={isOpen}
@@ -279,7 +299,9 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
   placeholder = "Spieler auswählen",
   tabIndex,
   removeButton = false,
-  showErrorText = true,  
+  showErrorText = true,
+  disabled = false,
+  loading = false,
 }, ref) => {
   const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(propSelectedPlayer);
   const [query, setQuery] = useState<string>('');
@@ -360,7 +382,7 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
 
   return (
     <div className="w-full">
-      <Combobox value={selectedPlayer} onChange={handlePlayerChange}>
+      <Combobox value={selectedPlayer} onChange={handlePlayerChange} disabled={disabled || loading}>
         {({ open }) => (
           <>
             {label && (
@@ -373,29 +395,45 @@ const StandaloneRosterPlayerSelect = forwardRef<RosterPlayerSelectHandle, Roster
                 <Combobox.Input
                   ref={inputRef}
                   tabIndex={tabIndex}
-                  className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 focus:border-indigo-500 focus:ring-indigo-600 text-gray-900 sm:text-sm"
+                  className={classNames(
+                    "relative w-full cursor-default rounded-md border border-gray-300 py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 focus:border-indigo-500 focus:ring-indigo-600 sm:text-sm",
+                    disabled || loading ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white text-gray-900"
+                  )}
                   onChange={handleQueryChange}
                   value={selectedPlayer ? displayValue(selectedPlayer) : query}
-                  placeholder={placeholder}
+                  placeholder={loading ? "Lade Spieler..." : placeholder}
                   autoComplete="off"
+                  disabled={disabled || loading}
                   onFocus={() => {
-                    setShowAllOptions(true);
-                    setIsOpen(true);
+                    if (!disabled && !loading) {
+                      setShowAllOptions(true);
+                      setIsOpen(true);
+                    }
                   }}
                   onBlur={() => {
-                    // Delay closing to allow for option selection
                     setTimeout(() => setIsOpen(false), 200);
                   }}
                 />
+                {loading ? (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <svg className="animate-spin h-4 w-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                ) : (
                 <Combobox.Button
                   className="absolute inset-y-0 right-0 flex items-center pr-2"
                   onClick={() => {
-                    setShowAllOptions(true);
-                    setIsOpen(!isOpen);
+                    if (!disabled && !loading) {
+                      setShowAllOptions(true);
+                      setIsOpen(!isOpen);
+                    }
                   }}
                 >
                   <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </Combobox.Button>
+                )}
 
               <Transition
                   show={isOpen}
