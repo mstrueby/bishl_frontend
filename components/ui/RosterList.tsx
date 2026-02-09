@@ -123,6 +123,10 @@ const RosterList: React.FC<RosterListProps> = ({
     }
 
     const status = player.eligibilityStatus || 'UNKNOWN';
+    const reasonCodes = player.invalidReasonCodes || [];
+    const invalidTitle = reasonCodes.length > 0
+      ? `${eligibilityTooltips['INVALID']}: ${reasonCodes.join(', ')}`
+      : eligibilityTooltips['INVALID'];
     
     switch (status) {
       case 'VALID':
@@ -136,7 +140,7 @@ const RosterList: React.FC<RosterListProps> = ({
         return (
           <XCircleIcon 
             className="h-5 w-5 text-red-500" 
-            title={eligibilityTooltips['INVALID']}
+            title={invalidTitle}
           />
         );
       default:
