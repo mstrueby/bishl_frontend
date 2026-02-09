@@ -747,11 +747,21 @@ const RosterPage = () => {
             active: (rosterPlayer?.called || player.called) ? true : player.active,
             status: player.status,
             originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
-            originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
-            originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
           };
         },
       );
+
+      // DEBUG: Log merged table players that are called up
+      newTablePlayers.forEach(p => {
+        if (p.called) {
+          console.log(`[DEBUG] Roster Merge - Called Player: ${p.firstName} ${p.lastName} (${p._id})`, {
+            status: p.status,
+            passNo: p.passNo,
+            licenseType: p.licenseType,
+            originalTeam: p.originalTeamName
+          });
+        }
+      });
 
       const combined = [...prev, ...newTablePlayers];
       combined.sort((a, b) => a.firstName.localeCompare(b.firstName));
