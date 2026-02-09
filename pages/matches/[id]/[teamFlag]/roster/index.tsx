@@ -709,7 +709,7 @@ const RosterPage = () => {
             rosterPosition: (rp.playerPosition.key as 'C' | 'A' | 'G' | 'F') || 'F',
             statusDiff: false,
             assignedStatus: rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID',
-            eligibilityStatus: (rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID') === 'VALID' && (playerStats[rp.player.playerId] || 0) >= 5 ? 'INVALID' : (rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID'),
+            eligibilityStatus: (playerStats[rp.player.playerId] || 0) >= 5 ? 'INVALID' : (rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID'),
           }));
         
         const allPlayers = [...merged, ...calledUpPlayersFromRoster];
@@ -795,7 +795,7 @@ const RosterPage = () => {
             if (updates[p._id]) {
               const newStatus = updates[p._id].eligibilityStatus;
               const callUps = playerStats[p._id] || 0;
-              const finalStatus = newStatus === 'VALID' && callUps >= 5 ? 'INVALID' : newStatus;
+              const finalStatus = callUps >= 5 ? 'INVALID' : newStatus;
               return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
             }
             return p;
@@ -848,7 +848,7 @@ const RosterPage = () => {
               if (updates[p._id]) {
                 const newStatus = updates[p._id].eligibilityStatus;
                 const callUps = playerStats[p._id] || 0;
-                const finalStatus = newStatus === 'VALID' && callUps >= 5 ? 'INVALID' : newStatus;
+                const finalStatus = callUps >= 5 ? 'INVALID' : newStatus;
                 return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
               }
               return p;
@@ -1220,7 +1220,7 @@ const RosterPage = () => {
 
     // NEW: Also add to tablePlayers for the new table UI
     const callUps = playerStats[selectedCallUpPlayer._id] || 0;
-    const eligibilityStatus = selectedCallUpPlayer.status === 'VALID' && callUps >= 5 ? 'INVALID' : selectedCallUpPlayer.status;
+    const eligibilityStatus = callUps >= 5 ? 'INVALID' : selectedCallUpPlayer.status;
 
     const newPlayer: AvailablePlayerWithRoster = {
       ...selectedCallUpPlayer,
