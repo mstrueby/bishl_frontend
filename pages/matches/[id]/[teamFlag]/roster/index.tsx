@@ -708,7 +708,7 @@ const RosterPage = () => {
             rosterPosition: (rp.playerPosition.key as 'C' | 'A' | 'G' | 'F') || 'F',
             statusDiff: false,
             assignedStatus: rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID',
-            eligibilityStatus: rp.assignedTeam?.status || rp.eligibilityStatus || undefined,
+            eligibilityStatus: (rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID') === 'VALID' && (playerStats[rp.player.playerId] || 0) >= 5 ? 'INVALID' : (rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID'),
           }));
         
         const allPlayers = [...merged, ...calledUpPlayersFromRoster];
@@ -790,7 +790,15 @@ const RosterPage = () => {
       });
       if (Object.keys(updates).length > 0) {
         setTablePlayers((prev) =>
-          prev.map((p) => updates[p._id] ? { ...p, ...updates[p._id] } : p)
+          prev.map((p) => {
+            if (updates[p._id]) {
+              const newStatus = updates[p._id].eligibilityStatus;
+              const callUps = playerStats[p._id] || 0;
+              const finalStatus = newStatus === 'VALID' && callUps >= 5 ? 'INVALID' : newStatus;
+              return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
+            }
+            return p;
+          })
         );
       }
       return;
@@ -835,7 +843,15 @@ const RosterPage = () => {
 
         if (Object.keys(updates).length > 0) {
           setTablePlayers((prev) =>
-            prev.map((p) => updates[p._id] ? { ...p, ...updates[p._id] } : p)
+            prev.map((p) => {
+              if (updates[p._id]) {
+                const newStatus = updates[p._id].eligibilityStatus;
+                const callUps = playerStats[p._id] || 0;
+                const finalStatus = newStatus === 'VALID' && callUps >= 5 ? 'INVALID' : newStatus;
+                return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
+              }
+              return p;
+            })
           );
         }
       } catch (error) {
@@ -1196,18 +1212,25 @@ const RosterPage = () => {
     });
 
     // NEW: Also add to tablePlayers for the new table UI
-    const tablePlayerToAdd: AvailablePlayerWithRoster = {
-      ...playerWithCalled,
+    const callUps = playerStats[selectedCallUpPlayer._id] || 0;
+    const eligibilityStatus = selectedCallUpPlayer.status === 'VALID' && callUps >= 5 ? 'INVALID' : selectedCallUpPlayer.status;
+
+    const newPlayer: AvailablePlayerWithRoster = {
+      ...selectedCallUpPlayer,
+      called: true,
+      originalTeamId: selectedCallUpTeam?._id || null,
+      originalTeamName: selectedCallUpTeam?.name || null,
+      originalTeamAlias: selectedCallUpTeam?.alias || null,
       selected: true,
       active: true,
-      rosterJerseyNo: playerWithCalled.jerseyNo || 0,
+      rosterJerseyNo: selectedCallUpPlayer.jerseyNo || 0,
       rosterPosition: "F",
       statusDiff: false,
-      assignedStatus: playerWithCalled.status,
-      eligibilityStatus: playerWithCalled.status,
+      assignedStatus: eligibilityStatus,
+      eligibilityStatus: eligibilityStatus,
     };
     setTablePlayers((prev) => {
-      const newList = [...prev, tablePlayerToAdd];
+      const newList = [...prev, newPlayer];
       return newList.sort((a, b) => a.firstName.localeCompare(b.firstName));
     });
 
@@ -1834,10 +1857,10 @@ const RosterPage = () => {
                                 className={classNames(
                                   "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
                                   playerStats[player._id] !== undefined &&
-                                    playerStats[player._id] <= 4
+                                    playerStats[player._id] <= 3
                                     ? "bg-green-50 text-green-800 ring-green-600/20"
                                     : playerStats[player._id] !== undefined &&
-                                        playerStats[player._id] === 5
+                                        playerStats[player._id] === 4
                                       ? "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
                                       : "bg-red-50 text-red-600 ring-red-500/20",
                                 )}
