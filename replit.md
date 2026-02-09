@@ -17,6 +17,14 @@ Preferred communication style: Simple, everyday language.
 - **Backward compatibility**: Legacy roster data without `calledFromTeam` still renders with arrow + pill, PDF shows "(H)" fallback
 - **Data flow**: `tablePlayers` initialization maps existing roster `calledFromTeam` to `originalTeam*` fields for persistence
 
+### Called Player Eligibility Status Fix
+- **Problem**: Called-up players showed "UNKNOWN" license status because roster data doesn't persist the origin team's license status
+- **Solution**: Added `eligibilityStatus` field to `AvailablePlayerWithRoster` interface and a `playerDetailsMap` cache state
+- **Data flow for new call-ups**: Call-up dialog already fetches `assignedTeam?.status` from the origin team; `handleConfirmCallUp` now passes it as `eligibilityStatus`
+- **Data flow for existing rosters**: A useEffect detects called players with missing `eligibilityStatus`, fetches full player details via `GET /players/{id}`, finds the `assignedTeam` matching `originalTeamId`, and extracts `status`
+- **Display**: Table uses `player.eligibilityStatus || player.status || 'UNKNOWN'` for badge rendering and row background colors
+- **Caching**: `playerDetailsMap` + `fetchingCalledPlayersRef` prevent duplicate API calls
+
 ## Changes (January 2026)
 
 ### PlayerForm Refactoring
