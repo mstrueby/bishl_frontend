@@ -77,6 +77,7 @@ interface AvailablePlayer {
   licenceType?: string;
   status?: string;
   licenseType?: string;
+  calledMatches?: number;
 }
 
 // Extended player type for the new interactive table
@@ -1115,6 +1116,14 @@ const RosterPage = () => {
                     team && team.teamId === selectedCallUpTeam._id,
                 );
 
+              const matchingStats = player.stats?.find(
+                (stat: any) =>
+                  stat.season?.alias === match?.season?.alias &&
+                  stat.tournament?.alias === match?.tournament?.alias &&
+                  stat.team?.name === matchTeam?.name,
+              );
+              const calledMatches = matchingStats?.calledMatches || 0;
+
               return {
                 _id: player._id,
                 firstName: player.firstName,
@@ -1135,6 +1144,7 @@ const RosterPage = () => {
                 originalTeamAlias: selectedCallUpTeam.alias,
                 active: assignedTeam?.active,
                 licenseType: assignedTeam?.licenseType,
+                calledMatches,
               };
             })
             .filter(
@@ -1219,8 +1229,13 @@ const RosterPage = () => {
     });
 
     // NEW: Also add to tablePlayers for the new table UI
-    const callUps = playerStats[selectedCallUpPlayer._id] || 0;
+    const callUps = selectedCallUpPlayer.calledMatches ?? playerStats[selectedCallUpPlayer._id] ?? 0;
     const eligibilityStatus = callUps >= 5 ? 'INVALID' : selectedCallUpPlayer.status;
+
+    setPlayerStats((prev) => ({
+      ...prev,
+      [selectedCallUpPlayer._id]: callUps,
+    }));
 
     const newPlayer: AvailablePlayerWithRoster = {
       ...selectedCallUpPlayer,
