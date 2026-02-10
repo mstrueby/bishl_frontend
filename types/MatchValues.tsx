@@ -7,6 +7,7 @@ export interface EventPlayer {
   displayLastName?: string;
   imageUrl?: string;
   imageVisible?: boolean;
+  birthDate?: string;
 }
 
 export interface AssignedTeam {

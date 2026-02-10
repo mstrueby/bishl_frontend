@@ -68,6 +68,7 @@ interface AvailablePlayer {
   source: string;
   imageUrl: string;
   imageVisible: boolean;
+  birthDate?: string;
   passNo: string;
   jerseyNo: number | undefined;
   called: boolean;
@@ -234,6 +235,7 @@ const RosterPage = () => {
         firstName: player.firstName,
         lastName: player.lastName,
         jerseyNumber: player.rosterJerseyNo,
+        birthDate: player.birthDate,
       },
       playerPosition: {
         key: player.rosterPosition || "F",
@@ -431,6 +433,7 @@ const RosterPage = () => {
                   source: assignedTeam.source,
                   imageUrl: teamPlayer.imageUrl,
                   imageVisible: teamPlayer.imageVisible,
+                  birthDate: teamPlayer.birthdate,
                   passNo: assignedTeam.passNo,
                   jerseyNo: assignedTeam.jerseyNo,
                   called: false,
@@ -695,8 +698,9 @@ const RosterPage = () => {
             position: rp.playerPosition.key === 'G' ? 'Goalie' : 'Skater',
             fullFaceReq: false,
             source: rp.source || 'BISHL',
-            imageUrl: rp.player.imageUrl,
-            imageVisible: rp.player.imageVisible,
+            imageUrl: rp.player.imageUrl || '',
+            imageVisible: rp.player.imageVisible || false,
+            birthDate: rp.player.birthDate,
             passNo: rp.passNumber || '',
             jerseyNo: rp.player.jerseyNumber,
             called: rp.called || true,
@@ -1137,6 +1141,7 @@ const RosterPage = () => {
                 source: player.source,
                 imageUrl: player.imageUrl,
                 imageVisible: player.imageVisible,
+                birthDate: player.birthDate,
                 passNo: assignedTeam?.passNo || "",
                 jerseyNo: assignedTeam?.jerseyNo,
                 status: assignedTeam?.status,
