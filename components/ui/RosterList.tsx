@@ -10,6 +10,7 @@ import {
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 import { ClipLoader } from 'react-spinners';
+import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass } from '../../lib/constants';
 
 interface RosterListProps {
   teamName: string;
@@ -43,14 +44,6 @@ const eligibilityTooltips: Record<string, string> = {
   'INVALID': 'Nicht spielberechtigt'
 };
 
-const licenceTypeBadgeColors: Record<string, string> = {
-  PRIMARY: "bg-green-50 text-green-700 ring-green-600/20",
-  SECONDARY: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-  OVERAGE: "bg-pink-50 text-pink-700 ring-pink-600/20",
-  LOAN: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  DEVELOPMENT: "bg-purple-50 text-purple-700 ring-purple-600/20",
-  SPECIAL: "bg-red-50 text-red-700 ring-red-600/20",
-};
 
 const RosterList: React.FC<RosterListProps> = ({
   teamName,
@@ -318,12 +311,11 @@ const RosterList: React.FC<RosterListProps> = ({
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">QUELLE</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">PASS-NR.</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">HOCH</th>
-                <th scope="col" className="w-px p-0 border-r border-gray-200"></th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">T</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">V</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">P</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">SM</th>
-                <th scope="col" className="px-2 py-2 w-8"></th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">T</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">V</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">P</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">SM</th>
+                <th scope="col" className="px-2 py-2 w-8 border-l border-gray-200"></th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200 text-gray-900 text-sm">
@@ -391,9 +383,7 @@ const RosterList: React.FC<RosterListProps> = ({
 
                     {/* Licence Type */}
                     <td className="px-2 py-2 whitespace-nowrap text-center">
-                      <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                        (player.licenseType && (licenceTypeBadgeColors as any)[player.licenseType]) || "bg-gray-50 text-gray-700 ring-gray-600/20"
-                      }`}>
+                      <span className={getLicenceTypeBadgeClass(player.licenseType)}>
                         {getLicenceType(player)}
                       </span>
                     </td>
@@ -401,19 +391,15 @@ const RosterList: React.FC<RosterListProps> = ({
                     {/* Source */}
                     <td className="px-2 py-2 whitespace-nowrap text-center">
                       {licenceSource && (
-                        <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                          licenceSource === 'ISHD' 
-                            ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20' 
-                            : 'bg-indigo-50 text-indigo-700 ring-indigo-700/10'
-                        }`}>
+                        <span className={getSourceBadgeClass(licenceSource)}>
                           {licenceSource}
                         </span>
                       )}
                     </td>
 
                     {/* Pass Number */}
-                    <td className="px-2 py-2 whitespace-nowrap text-center ">
-                      <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                    <td className="px-2 py-2 whitespace-nowrap text-center">
+                      <span className={passNoBadgeClass}>
                         {player.passNumber}
                       </span>
                     </td>
@@ -445,30 +431,28 @@ const RosterList: React.FC<RosterListProps> = ({
                       )}
                     </td>
 
-                    <td className="w-px p-0 border-r border-gray-200"></td>
-
                     {/* Goals */}
-                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700">
+                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700 border-l border-gray-200">
                       {stats.goals}
                     </td>
 
                     {/* Assists */}
-                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700">
+                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700 border-l border-gray-200">
                       {stats.assists}
                     </td>
 
                     {/* Points */}
-                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700">
+                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700 border-l border-gray-200">
                       {stats.points}
                     </td>
 
                     {/* Penalty Minutes */}
-                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700">
+                    <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700 border-l border-gray-200">
                       {stats.penaltyMinutes}
                     </td>
 
                     {/* Actions */}
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className="px-2 py-2 whitespace-nowrap border-l border-gray-200">
                       {onOpenPlayerCard && (
                         <button
                           type="button"
