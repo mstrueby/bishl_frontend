@@ -10,7 +10,7 @@ import {
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 import { ClipLoader } from 'react-spinners';
-import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass } from '../../lib/constants';
+import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass, invalidReasonCodeMap } from '../../lib/constants';
 
 interface RosterListProps {
   teamName: string;
@@ -374,7 +374,9 @@ const RosterList: React.FC<RosterListProps> = ({
                           </button>
                           {player.invalidReasonCodes && player.invalidReasonCodes.length > 0 && (
                             <div className="text-[10px] text-red-800 font-medium leading-tight truncate">
-                              {player.invalidReasonCodes.join(', ')}
+                              {player.invalidReasonCodes
+                                .map((code) => invalidReasonCodeMap[code] || code)
+                                .join(", ")}
                             </div>
                           )}
                         </div>
