@@ -4,6 +4,7 @@ import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import { classNames } from "../../tools/utils";
 import apiClient from "../../lib/apiClient";
 import { ageGroupConfig } from "../../tools/consts";
+import { licenceTypeBadgeColors } from "../../lib/constants";
 
 interface PossibleTeam {
   teamId: string;
@@ -29,14 +30,6 @@ interface TeamAssignmentSelectProps {
   assignedTeamIds?: string[];
 }
 
-const licenceTypeBadgeColors: Record<string, string> = {
-  PRIMARY: "bg-green-50 text-green-700 ring-green-600/20",
-  SECONDARY: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-  OVERAGE: "bg-pink-50 text-pink-700 ring-pink-600/20",
-  LOAN: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  DEVELOPMENT: "bg-purple-50 text-purple-700 ring-purple-600/20",
-  SPECIAL: "bg-red-50 text-red-700 ring-red-600/20",
-};
 
 const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   playerId,
