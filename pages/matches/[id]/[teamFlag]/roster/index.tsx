@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import useAuth from "../../../../../hooks/useAuth";
+import { useRouter } from "next/router";
 import usePermissions from "../../../../../hooks/usePermissions";
 import { CldImage } from "next-cloudinary";
 import Link from "next/link";
@@ -50,7 +51,6 @@ import ErrorMessage from "../../../../../components/ui/ErrorMessage";
 import LoadingState from "../../../../../components/ui/LoadingState";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import RosterPDF from "../../../../../components/pdf/RosterPDF";
-import { CldImage } from "next-cloudinary";
 import MatchStatusBadge from "../../../../../components/ui/MatchStatusBadge";
 import MatchHeader from "../../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../../components/admin/SectionHeader";
@@ -695,8 +695,8 @@ const RosterPage = () => {
             position: rp.playerPosition.key === 'G' ? 'Goalie' : 'Skater',
             fullFaceReq: false,
             source: rp.source || 'BISHL',
-            imageUrl: '',
-            imageVisible: false,
+            imageUrl: rp.player.imageUrl,
+            imageVisible: rp.player.imageVisible,
             passNo: rp.passNumber || '',
             jerseyNo: rp.player.jerseyNumber,
             called: rp.called || true,
@@ -1519,7 +1519,7 @@ const RosterPage = () => {
           description={`${team?.fullName} / ${team?.name}`}
           descriptionLogoUrl={team?.logoUrl}
           descriptionBadge={{
-            text: rosterStatus === "SUBMITTED" ? "Abgegeben" : rosterStatus === "INVALID" ? "Ungültig" : rosterStatus === "VALID" ? "Validiert" : "Entwurf",
+            text: rosterStatus === "SUBMITTED" ? "Eingereicht" : rosterStatus === "INVALID" ? "Ungültig" : rosterStatus === "VALID" ? "Validiert" : "Entwurf",
             colorClass: rosterStatus === "SUBMITTED" ? "bg-indigo-50 text-indigo-700 ring-indigo-700/10" : rosterStatus === "INVALID" ? "bg-red-50 text-red-700 ring-red-600/10" : rosterStatus === "VALID" ? "bg-green-50 text-green-700 ring-green-600/20" : "bg-gray-50 text-gray-600 ring-gray-500/10"
           }}
         />

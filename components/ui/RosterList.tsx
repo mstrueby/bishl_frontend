@@ -103,6 +103,10 @@ const RosterList: React.FC<RosterListProps> = ({
         return 'bg-green-50 text-green-700 ring-green-600/20';
       case 'INVALID':
         return 'bg-red-50 text-red-700 ring-red-600/10';
+      case 'DRAFT':
+        return 'bg-gray-50 text-gray-600 ring-gray-500/10';
+      case 'SUBMITTED':
+        return 'bg-indigo-50 text-indigo-700 ring-indigo-700/10';
       default:
         return 'bg-gray-50 text-gray-600 ring-gray-500/10';
     }
@@ -111,9 +115,13 @@ const RosterList: React.FC<RosterListProps> = ({
   const getStatusBadgeText = (status: string | undefined): string => {
     switch (status) {
       case 'VALID':
-        return 'Validiert';
+        return 'Gültig';
       case 'INVALID':
         return 'Ungültig';
+      case 'DRAFT':
+        return 'Entwurf';
+      case 'SUBMITTED':
+        return 'Eingereicht';
       default:
         return 'Unbekannt';
     }
@@ -260,8 +268,15 @@ const RosterList: React.FC<RosterListProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-0.5">
-                {formatEligibilityTimestamp(eligibilityTimestamp)}
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                {isValidating ? (
+                  <>
+                    <ClipLoader size={10} color="#6B7280" />
+                    <span>Prüfe...</span>
+                  </>
+                ) : (
+                  formatEligibilityTimestamp(eligibilityTimestamp)
+                )}
               </p>
             </div>
           </div>
@@ -303,7 +318,7 @@ const RosterList: React.FC<RosterListProps> = ({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
+                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10"></th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10">NR.</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-14">POS.</th>
                 <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[50x]">SPIELER</th>
@@ -326,7 +341,7 @@ const RosterList: React.FC<RosterListProps> = ({
                 return (
                   <tr key={player.player.playerId} className="h-11 hover:bg-gray-50">
                     {/* Eligibility Status */}
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className="px-2 py-2 whitespace-nowrap text-center">
                       {renderEligibilityIcon(player)}
                     </td>
 

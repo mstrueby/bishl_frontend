@@ -690,7 +690,7 @@ export default function MatchDetails({
                   playerStats={homePlayerStats}
                   teamLogoUrl={match.home.logo}
                   rosterStatus={match.home.roster?.status}
-                  eligibilityTimestamp={match.home.roster?.eligibilityCheckedAt}
+                  eligibilityTimestamp={match.home.roster?.eligibilityTimestamp}
                   canValidateRoster={permissions.showButtonRosterHome ?? false}
                   onValidateRoster={validateHomeRoster}
                   teamFlag="home"
@@ -707,7 +707,7 @@ export default function MatchDetails({
                   playerStats={awayPlayerStats}
                   teamLogoUrl={match.away.logo}
                   rosterStatus={match.away.roster?.status}
-                  eligibilityTimestamp={match.away.roster?.eligibilityCheckedAt}
+                  eligibilityTimestamp={match.away.roster?.eligibilityTimestamp}
                   canValidateRoster={permissions.showButtonRosterAway ?? false}
                   onValidateRoster={validateAwayRoster}
                   teamFlag="away"
