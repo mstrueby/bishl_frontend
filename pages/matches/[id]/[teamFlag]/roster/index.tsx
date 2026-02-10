@@ -1651,25 +1651,25 @@ const RosterPage = () => {
                 </th>
                 <th
                   scope="col"
-                  className="hidden md:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden md:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24"
                 >
                   Typ
                 </th>
                 <th
                   scope="col"
-                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24"
                 >
                   Quelle
                 </th>
                 <th
                   scope="col"
-                  className="hidden sm:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden sm:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24"
                 >
                   Pass-Nr.
                 </th>
                 <th
                   scope="col"
-                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24"
                 >
                   Hoch
                 </th>
@@ -1786,11 +1786,7 @@ const RosterPage = () => {
                               className={classNames(
                                 "w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center transition-colors",
                                 player.rosterPosition === pos
-                                  ? pos === "C"
-                                    ? "bg-blue-600 text-white"
-                                    : pos === "A"
-                                      ? "bg-green-600 text-white"
-                                      : "bg-purple-600 text-white"
+                                  ? "bg-gray-900 text-white"
                                   : "bg-gray-200 text-gray-600 hover:bg-gray-300",
                                 rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : "",
                               )}
@@ -1802,7 +1798,7 @@ const RosterPage = () => {
                       </td>
 
                       {/* Player Image + Name */}
-                      <td className="px-3 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap truncate">
                         <div className="flex items-center">
                           {player.imageUrl && player.imageVisible ? (
                             <CldImage
