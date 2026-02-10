@@ -11,6 +11,7 @@ export const invalidReasonCodeMap: Record<string, string> = {
   HOBBY_PLAYER_CONFLICT: "Hobbyspieler-Konflikt",
   LOAN_AGE_GROUP_CONFLICT: "Leihpass-Altersklassenkonflikt",
   SUSPENDED: "Gesperrt",
+  CALLED_LIMIT_EXCEEDED: "Maximales Hochspielen überschritten",
 };
 
 export const licenceTypeBadgeColors: Record<string, string> = {
@@ -27,7 +28,7 @@ export const sourceBadgeColors: Record<string, string> = {
   BISHL: "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
 };
 
-export const badgeBase = "inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset";
+export const badgeBase = "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset";
 
 export const passNoBadgeClass = `${badgeBase} bg-gray-50 text-gray-600 ring-gray-500/10`;
 

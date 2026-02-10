@@ -16,7 +16,7 @@ import {
 } from "../../../../../types/PlayerValues";
 import apiClient from "../../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../../lib/errorHandler";
-import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass } from "../../../../../lib/constants";
+import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass, invalidReasonCodeMap } from "../../../../../lib/constants";
 import { ClubValues, TeamValues } from "../../../../../types/ClubValues";
 import {
   PlayerValues,
@@ -1817,7 +1817,9 @@ const RosterPage = () => {
                             </div>
                             {player.invalidReasonCodes && player.invalidReasonCodes.length > 0 && (
                               <div className="text-[10px] text-red-800 font-medium leading-none mt-0.5">
-                                {player.invalidReasonCodes.join(', ')}
+                                {player.invalidReasonCodes
+                                  .map((code) => invalidReasonCodeMap[code] || code)
+                                  .join(", ")}
                               </div>
                             )}
                           </div>
