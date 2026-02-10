@@ -285,18 +285,19 @@ const RosterList: React.FC<RosterListProps> = ({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">ST</th>
+                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10">NR.</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10">POS.</th>
-                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">SPIELER</th>
-                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">TYP</th>
-                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">QUELLE</th>
-                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">PASS-NR.</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-14">HOCH</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-14">POS.</th>
+                <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[50x]">SPIELER</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">TYP</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">QUELLE</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">PASS-NR.</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">HOCH</th>
+                <th scope="col" className="w-px p-0 border-r border-gray-200"></th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">T</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">V</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">P</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10">SM</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">SM</th>
                 <th scope="col" className="px-2 py-2 w-8"></th>
               </tr>
             </thead>
@@ -343,14 +344,14 @@ const RosterList: React.FC<RosterListProps> = ({
                             {getPlayerInitials(player.player.firstName, player.player.lastName)}
                           </span>
                         )}
-                        <span className="truncate max-w-[120px]">
+                        <span className="">
                           {player.player.firstName} {player.player.lastName}
                         </span>
                       </button>
                     </td>
 
                     {/* Licence Type */}
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className="px-2 py-2 whitespace-nowrap text-center">
                       <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
                         (player.licenseType && (licenceTypeBadgeColors as any)[player.licenseType]) || "bg-gray-50 text-gray-700 ring-gray-600/20"
                       }`}>
@@ -359,7 +360,7 @@ const RosterList: React.FC<RosterListProps> = ({
                     </td>
 
                     {/* Source */}
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className="px-2 py-2 whitespace-nowrap text-center">
                       {licenceSource && (
                         <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
                           licenceSource === 'ISHD' 
@@ -372,7 +373,7 @@ const RosterList: React.FC<RosterListProps> = ({
                     </td>
 
                     {/* Pass Number */}
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className="px-2 py-2 whitespace-nowrap text-center ">
                       <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                         {player.passNumber}
                       </span>
@@ -404,6 +405,8 @@ const RosterList: React.FC<RosterListProps> = ({
                         <span className="text-gray-400">–</span>
                       )}
                     </td>
+
+                    <td className="w-px p-0 border-r border-gray-200"></td>
 
                     {/* Goals */}
                     <td className="px-2 py-2 whitespace-nowrap text-center text-gray-700">
@@ -445,7 +448,7 @@ const RosterList: React.FC<RosterListProps> = ({
             {/* Table Footer with Player Count Summary */}
             <tfoot className="bg-gray-50">
               <tr>
-                <td colSpan={13} className="px-3 py-3">
+                <td colSpan={14} className="px-3 py-3">
                   <div className="flex justify-between text-sm text-gray-900">
                     <span>
                       Feldspieler: <span className="font-medium">{sortedRoster.filter(player => player.playerPosition.key !== 'G').length}</span>
