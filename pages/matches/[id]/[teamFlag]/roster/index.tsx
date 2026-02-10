@@ -1826,9 +1826,9 @@ const RosterPage = () => {
                             <div className="text-sm font-medium text-gray-900">
                               {player.firstName} {player.lastName}
                             </div>
-                            {player.originalTeamName && (
-                              <div className="text-xs text-gray-500">
-                                {player.originalTeamName}
+                            {player.invalidReasonCodes && player.invalidReasonCodes.length > 0 && (
+                              <div className="text-[10px] text-red-800 font-medium leading-none mt-0.5">
+                                {player.invalidReasonCodes.join(', ')}
                               </div>
                             )}
                           </div>
