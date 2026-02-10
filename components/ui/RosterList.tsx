@@ -167,7 +167,7 @@ const RosterList: React.FC<RosterListProps> = ({
       case 'C':
         return (
           <span 
-            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-gray-900 text-white"
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-gray-600 text-white"
             title={positionTooltips[positionKey] || positionKey}
           >
             {positionKey}
@@ -176,7 +176,7 @@ const RosterList: React.FC<RosterListProps> = ({
       case 'A':
         return (
           <span 
-            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-gray-600 text-white"
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-gray-400 text-white"
             title={positionTooltips[positionKey] || positionKey}
           >
             {positionKey}
@@ -185,7 +185,7 @@ const RosterList: React.FC<RosterListProps> = ({
       case 'G':
         return (
           <span 
-            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-white text-gray-900 border-2 border-gray-900" 
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-white text-gray-900 border border-gray-900" 
             title={positionTooltips[positionKey] || positionKey}
           >
             {positionKey}
@@ -373,6 +373,11 @@ const RosterList: React.FC<RosterListProps> = ({
                           {player.player.firstName} {player.player.lastName}
                         </span>
                       </button>
+                      {player.invalidReasonCodes && player.invalidReasonCodes.length > 0 && (
+                        <div className="text-[10px] text-red-800 font-medium leading-none mt-0.5">
+                          {player.invalidReasonCodes.join(', ')}
+                        </div>
+                      )}
                     </td>
 
                     {/* Licence Type */}
