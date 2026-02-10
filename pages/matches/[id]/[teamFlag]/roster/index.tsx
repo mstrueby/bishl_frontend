@@ -1786,7 +1786,7 @@ const RosterPage = () => {
                               className={classNames(
                                 "w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center transition-colors",
                                 player.rosterPosition === pos
-                                  ? "bg-gray-900 text-white"
+                                  ? "bg-gray-600 text-white"
                                   : "bg-gray-200 text-gray-600 hover:bg-gray-300",
                                 rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : "",
                               )}
