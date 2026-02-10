@@ -1665,13 +1665,13 @@ const RosterPage = () => {
                   scope="col"
                   className="hidden sm:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Pass Nr.
+                  Pass-Nr.
                 </th>
                 <th
                   scope="col"
                   className="hidden lg:table-cell px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Hochgemeldet
+                  Hoch
                 </th>
                 <th
                   scope="col"
@@ -1874,7 +1874,7 @@ const RosterPage = () => {
 
                       {/* Called indicator */}
                       <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2 text-center">
                           {player.called && (
                             <>
                               <ArrowUpIcon
