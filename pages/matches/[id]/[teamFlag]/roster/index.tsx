@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import useAuth from "../../../../../hooks/useAuth";
 import usePermissions from "../../../../../hooks/usePermissions";
-import { useRouter } from "next/router";
+import { CldImage } from "next-cloudinary";
 import Link from "next/link";
 import Layout from "../../../../../components/Layout";
 import {
@@ -1793,7 +1793,7 @@ const RosterPage = () => {
                       {/* Player Image + Name */}
                       <td className="px-3 py-3 whitespace-nowrap truncate">
                         <div className="flex items-center">
-                          {player.imageUrl && player.imageVisible ? (
+                          {player.imageUrl ? (
                             <CldImage
                               src={player.imageUrl}
                               alt={`${player.firstName} ${player.lastName}`}
