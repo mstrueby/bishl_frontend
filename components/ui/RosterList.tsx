@@ -163,19 +163,44 @@ const RosterList: React.FC<RosterListProps> = ({
   };
 
   const renderPositionBadge = (positionKey: string) => {
-    const isGoalie = positionKey === 'G';
-    return (
-      <span 
-        className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${
-          isGoalie 
-            ? 'bg-white text-gray-900 border-2 border-gray-900' 
-            : 'bg-gray-900 text-white'
-        }`}
-        title={positionTooltips[positionKey] || positionKey}
-      >
-        {positionKey}
-      </span>
-    );
+    switch (positionKey) {
+      case 'C':
+        return (
+          <span 
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-gray-900 text-white"
+            title={positionTooltips[positionKey] || positionKey}
+          >
+            {positionKey}
+          </span>
+        );
+      case 'A':
+        return (
+          <span 
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-gray-600 text-white"
+            title={positionTooltips[positionKey] || positionKey}
+          >
+            {positionKey}
+          </span>
+        );
+      case 'G':
+        return (
+          <span 
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold bg-white text-gray-900 border-2 border-gray-900" 
+            title={positionTooltips[positionKey] || positionKey}
+          >
+            {positionKey}
+          </span>
+        );
+      default:
+        return (
+          <span 
+            className="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-gray-900"
+            title={positionTooltips[positionKey] || positionKey}
+          >
+            {positionKey}
+          </span>
+        );
+    }
   };
 
   const getPlayerInitials = (firstName: string, lastName: string): string => {
