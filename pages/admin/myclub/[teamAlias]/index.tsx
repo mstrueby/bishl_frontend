@@ -16,6 +16,7 @@ import usePermissions from '../../../../hooks/usePermissions';
 import { UserRole } from '../../../../lib/auth';
 import apiClient from '../../../../lib/apiClient';
 import { getErrorMessage } from '../../../../lib/errorHandler';
+import { licenceTypeBadgeColors } from '../../../../lib/constants';
 
 const transformedUrl = (id: string) => buildUrl(id, {
   cloud: {
@@ -206,14 +207,6 @@ const TeamPage: NextPage = () => {
     return null;
   }
 
-  const licenceTypeBadgeColors: Record<string, string> = {
-    PRIMARY: "bg-green-50 text-green-700 ring-green-600/20",
-    SECONDARY: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-    OVERAGE: "bg-pink-50 text-pink-700 ring-pink-600/20",
-    LOAN: "bg-blue-50 text-blue-700 ring-blue-600/20",
-    DEVELOPMENT: "bg-purple-50 text-purple-700 ring-purple-600/20",
-    SPECIAL: "bg-red-50 text-red-700 ring-red-600/20",
-  };
   
   const dataListItems = getDataListItems(players, team, editPlayer, toggleActive, true);
 

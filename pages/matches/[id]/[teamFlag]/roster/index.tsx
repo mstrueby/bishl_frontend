@@ -16,6 +16,7 @@ import {
 } from "../../../../../types/PlayerValues";
 import apiClient from "../../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../../lib/errorHandler";
+import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass } from "../../../../../lib/constants";
 import { ClubValues, TeamValues } from "../../../../../types/ClubValues";
 import {
   PlayerValues,
@@ -121,14 +122,6 @@ const RosterPage = () => {
     clubName: string;
     clubAlias: string;
   } | null>(null);
-  const licenceTypeBadgeColors: Record<string, string> = {
-    PRIMARY: "bg-green-50 text-green-700 ring-green-600/20",
-    SECONDARY: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-    OVERAGE: "bg-pink-50 text-pink-700 ring-pink-600/20",
-    LOAN: "bg-blue-50 text-blue-700 ring-blue-600/20",
-    DEVELOPMENT: "bg-purple-50 text-purple-700 ring-purple-600/20",
-    SPECIAL: "bg-red-50 text-red-700 ring-red-600/20",
-  };
 
   // Calculate back link once during initialization
   const getBackLink = () => {
@@ -1833,37 +1826,21 @@ const RosterPage = () => {
 
                       {/* license type indicator */}
                       <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
-                        <span
-                          className={classNames(
-                            "inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset",
-                            (player.licenseType &&
-                              (licenceTypeBadgeColors as any)[
-                                player.licenseType
-                              ]) ||
-                              "bg-gray-50 text-gray-700 ring-gray-600/20",
-                          )}
-                        >
+                        <span className={getLicenceTypeBadgeClass(player.licenseType)}>
                           {player.licenseType}
                         </span>
                       </td>
 
                       {/* Source */}
                       <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-gray-500 text-center">
-                        <span
-                          className={classNames(
-                            "inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium ring-1 ring-inset",
-                            player.source === Source.ISHD
-                              ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-                              : "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
-                          )}
-                        >
+                        <span className={getSourceBadgeClass(player.source)}>
                           {player.source}
                         </span>
                       </td>
 
                       {/* Pass Number */}
                       <td className="hidden sm:table-cell px-3 py-3 whitespace-nowrap text-center">
-                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-[10px] font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                        <span className={passNoBadgeClass}>
                           {player.passNo}
                         </span>
                       </td>

@@ -10,6 +10,7 @@ import {
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 import { ClipLoader } from 'react-spinners';
+import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass } from '../../lib/constants';
 
 interface RosterListProps {
   teamName: string;
@@ -43,14 +44,6 @@ const eligibilityTooltips: Record<string, string> = {
   'INVALID': 'Nicht spielberechtigt'
 };
 
-const licenceTypeBadgeColors: Record<string, string> = {
-  PRIMARY: "bg-green-50 text-green-700 ring-green-600/20",
-  SECONDARY: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-  OVERAGE: "bg-pink-50 text-pink-700 ring-pink-600/20",
-  LOAN: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  DEVELOPMENT: "bg-purple-50 text-purple-700 ring-purple-600/20",
-  SPECIAL: "bg-red-50 text-red-700 ring-red-600/20",
-};
 
 const RosterList: React.FC<RosterListProps> = ({
   teamName,
@@ -390,9 +383,7 @@ const RosterList: React.FC<RosterListProps> = ({
 
                     {/* Licence Type */}
                     <td className="px-2 py-2 whitespace-nowrap text-center">
-                      <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                        (player.licenseType && (licenceTypeBadgeColors as any)[player.licenseType]) || "bg-gray-50 text-gray-700 ring-gray-600/20"
-                      }`}>
+                      <span className={getLicenceTypeBadgeClass(player.licenseType)}>
                         {getLicenceType(player)}
                       </span>
                     </td>
@@ -400,19 +391,15 @@ const RosterList: React.FC<RosterListProps> = ({
                     {/* Source */}
                     <td className="px-2 py-2 whitespace-nowrap text-center">
                       {licenceSource && (
-                        <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                          licenceSource === 'ISHD' 
-                            ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20' 
-                            : 'bg-indigo-50 text-indigo-700 ring-indigo-700/10'
-                        }`}>
+                        <span className={getSourceBadgeClass(licenceSource)}>
                           {licenceSource}
                         </span>
                       )}
                     </td>
 
                     {/* Pass Number */}
-                    <td className="px-2 py-2 whitespace-nowrap text-center ">
-                      <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                    <td className="px-2 py-2 whitespace-nowrap text-center">
+                      <span className={passNoBadgeClass}>
                         {player.passNumber}
                       </span>
                     </td>
