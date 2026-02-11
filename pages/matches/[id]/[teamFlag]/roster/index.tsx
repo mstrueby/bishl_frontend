@@ -2469,53 +2469,55 @@ const RosterPage = () => {
       )}
 
       {/* Submit Roster Toggle */}
-      <div className="flex items-center justify-between mt-12 p-6 border-t">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900 mb-2">
-              Aufstellung einreichen
-            </span>
-            <span className="text-xs stext-gray-500">
-              {(() => {
-                const isFinished = match.matchStatus.key === "FINISHED";
-                const isSubmitted = rosterStatus === "SUBMITTED";
+      {rosterStatus !== "INVALID" && rosterStatus !== "APPROVED" && (
+        <div className="flex items-center justify-between mt-12 p-6 border-t">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-900 mb-2">
+                Aufstellung einreichen
+              </span>
+              <span className="text-xs stext-gray-500">
+                {(() => {
+                  const isFinished = match.matchStatus.key === "FINISHED";
+                  const isSubmitted = rosterStatus === "SUBMITTED";
 
-                if (isFinished) {
-                  return "Aufstellung ist abgegeben (Spiel beendet)";
-                } else if (isSubmitted) {
-                  return "Aufstellung wurde abgegeben und kann nicht mehr bearbeitet werden.";
-                } else {
-                  return "Aufstellung fertigstellen und einreichen. Es können danach keine Änderungen mehr vorgenommen werden.";
+                  if (isFinished) {
+                    return "Aufstellung ist abgegeben (Spiel beendet)";
+                  } else if (isSubmitted) {
+                    return "Aufstellung wurde abgegeben und kann nicht mehr bearbeitet werden.";
+                  } else {
+                    return "Aufstellung fertigstellen und einreichen. Es können danach keine Änderungen mehr vorgenommen werden.";
+                  }
+                })()}
+              </span>
+            </div>
+            <Switch
+              checked={localSubmitted || match.matchStatus.key === "FINISHED"}
+              onChange={(enabled) => {
+                if (match.matchStatus.key !== "FINISHED" && rosterStatus !== "SUBMITTED") {
+                  setLocalSubmitted(enabled);
                 }
-              })()}
-            </span>
-          </div>
-          <Switch
-            checked={localSubmitted || match.matchStatus.key === "FINISHED"}
-            onChange={(enabled) => {
-              if (match.matchStatus.key !== "FINISHED" && rosterStatus !== "SUBMITTED") {
-                setLocalSubmitted(enabled);
-              }
-            }}
-            disabled={match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED"}
-            className={`${
-              localSubmitted || match.matchStatus.key === "FINISHED"
-                ? "bg-indigo-600"
-                : "bg-gray-200"
-            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2 ${match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : ""}`}
-          >
-            <span className="sr-only">Abgeben</span>
-            <span
-              aria-hidden="true"
+              }}
+              disabled={match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED"}
               className={`${
                 localSubmitted || match.matchStatus.key === "FINISHED"
-                  ? "translate-x-5"
-                  : "translate-x-0"
-              } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-            />
-          </Switch>
+                  ? "bg-indigo-600"
+                  : "bg-gray-200"
+              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2 ${match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : ""}`}
+            >
+              <span className="sr-only">Abgeben</span>
+              <span
+                aria-hidden="true"
+                className={`${
+                  localSubmitted || match.matchStatus.key === "FINISHED"
+                    ? "translate-x-5"
+                    : "translate-x-0"
+                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+              />
+            </Switch>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Close, Save buttons */}
       <div className="flex space-x-3 mt-6 justify-end">
