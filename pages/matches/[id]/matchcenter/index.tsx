@@ -683,7 +683,6 @@ export default function MatchDetails({
                 <RosterList
                   teamName={match.home.fullName}
                   roster={sortRoster(match.home.roster?.players || [])}
-                  isPublished={match.home.roster?.published || false}
                   showEditButton={permissions.showButtonRosterHome ?? false}
                   editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
                   sortRoster={sortRoster}
@@ -700,7 +699,6 @@ export default function MatchDetails({
                 <RosterList
                   teamName={match.away.fullName}
                   roster={sortRoster(match.away.roster?.players || [])}
-                  isPublished={match.away.roster?.published || false}
                   showEditButton={permissions.showButtonRosterAway ?? false}
                   editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
                   sortRoster={sortRoster}

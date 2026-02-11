@@ -77,7 +77,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, edi
       } else {
         // Create new goal
         const response = await apiClient.post(
-          `/matches/${matchId}/${teamFlag}/scores/`,
+          `/matches/${matchId}/${teamFlag}/scores`,
           goalData
         );
         if (response.status === 201) {
