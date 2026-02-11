@@ -1403,6 +1403,9 @@ const RosterPage = () => {
       );
       console.log("Roster successfully saved:", rosterResponse.data);
       setRosterStatus(newStatus);
+      if (newStatus === "SUBMITTED") {
+        setLocalSubmitted(true);
+      }
 
       for (const m of matches.filter((m) => selectedMatches.includes(m._id))) {
         try {
