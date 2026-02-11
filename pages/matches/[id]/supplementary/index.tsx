@@ -1053,7 +1053,12 @@ export default function SupplementaryForm() {
       // Refetch assignments
       try {
         const assignmentsResponse = await apiClient.get(
-          `/assignments/matches/${match._id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`,
+          `/assignments/matches/${match._id}`,
+          {
+            params: {
+              assignmentStatus: ["ASSIGNED", "ACCEPTED"]
+            }
+          }
         );
         setAssignments(assignmentsResponse.data || []);
       } catch (error) {
@@ -1063,9 +1068,7 @@ export default function SupplementaryForm() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       console.error("Error updating referee:", getErrorMessage(error));
-      setError(
-        `Fehler beim Aktualisieren des Schiedsrichters: ${getErrorMessage(error)}`,
-      );
+      setError(getErrorMessage(error));
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -1111,7 +1114,7 @@ export default function SupplementaryForm() {
         "Error saving supplementary sheet:",
         getErrorMessage(error),
       );
-      setError("Fehler beim Speichern des Zusatzblatts");
+      setError(getErrorMessage(error));
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setLoading(false);
