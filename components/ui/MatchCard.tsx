@@ -194,7 +194,7 @@ const MatchCard: React.FC<{
   const { user } = useAuth();
 
   // Use SWR for real-time match data (deduplicates requests automatically)
-  const { data: liveMatch } = useSWR(
+  const { data: liveResponse } = useSWR(
     match?._id && match?.matchStatus?.key === "INPROGRESS"
       ? `${process.env.NEXT_PUBLIC_API_URL}/matches/${match._id}`
       : null,
@@ -207,6 +207,7 @@ const MatchCard: React.FC<{
   );
 
   // Update local state when live data arrives
+  const liveMatch = liveResponse?.data || liveResponse;
   const displayMatch = liveMatch || match;
 
   // Defensive checks for incomplete match data
