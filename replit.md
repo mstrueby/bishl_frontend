@@ -10,17 +10,6 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (February 2026)
 
-### Centralized Constants & Badge Styling
-- **`lib/constants.ts`**: Central definitions for `invalidReasonCodeMap`, `licenceTypeBadgeColors`, `sourceBadgeColors`, `passNoBadgeClass`, and helper functions (`getLicenceTypeBadgeClass`, `getSourceBadgeClass`)
-- All components import from `lib/constants.ts` instead of defining locally: PlayerForm, RosterList, TeamAssignmentSelect, roster page, myclub page
-- Badge styling for licenseType, source, and passNo is globally consistent using `badgeBase` class
-
-### EventPlayer birthDate
-- **`EventPlayer` interface** (`types/MatchValues.tsx`): Added optional `birthDate?: string` field
-- **Data flow**: `birthDate` mapped from `teamPlayer.birthdate` (PlayerValues) → `AvailablePlayer.birthDate` → `RosterPlayer.player.birthDate` → API submission
-- **PlayerCardModal**: Uses `playerDetails?.birthDate || player.player.birthDate` as fallback for old rosters without birthDate
-- **Backward compatibility**: Field is optional; old rosters without birthDate gracefully show "Nicht angegeben"
-
 ### CalledFromTeam Feature
 - **CalledFromTeam interface** (`types/MatchValues.tsx`): Structured object with `teamId`, `teamName`, `teamAlias` replacing string-based `originalTeam`
 - **Roster Display**: Called players show up arrow + team name (truncated) + colored pill badge with call-up match count

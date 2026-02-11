@@ -209,9 +209,17 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
 
                           {/* Personal Data */}
                           <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                            <div>
+                              <span className="text-gray-500">Vorname:</span>{' '}
+                              <span className="text-gray-900">{firstName}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Nachname:</span>{' '}
+                              <span className="text-gray-900">{lastName}</span>
+                            </div>
                             <div className="col-span-2">
                               <span className="text-gray-500">Geburtsdatum:</span>{' '}
-                              <span className="text-gray-900">{formatBirthDate(playerDetails?.birthDate || player.player.birthDate)}</span>
+                              <span className="text-gray-900">{formatBirthDate(playerDetails?.birthDate)}</span>
                             </div>
                           </div>
 
