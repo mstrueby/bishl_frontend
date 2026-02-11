@@ -144,7 +144,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, 
         }
       } else {
         const response = await apiClient.post(
-          `/matches/${matchId}/${teamFlag}/penalties/`,
+          `/matches/${matchId}/${teamFlag}/penalties`,
           penaltyData
         );
         if (response.status === 201) {
