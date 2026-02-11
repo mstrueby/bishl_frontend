@@ -15,13 +15,12 @@ import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass, invali
 interface RosterListProps {
   teamName: string;
   roster: RosterPlayer[];
-  isPublished: boolean;
+  rosterStatus?: "VALID" | "INVALID" | "UNKNOWN" | "DRAFT" | "SUBMITTED" | string;
   showEditButton?: boolean;
   editUrl?: string;
   sortRoster?: (roster: RosterPlayer[]) => RosterPlayer[];
   playerStats?: {[playerId: string]: number};
   teamLogoUrl?: string;
-  rosterStatus?: "VALID" | "INVALID" | "UNKNOWN" | string;
   eligibilityTimestamp?: string | Date | null;
   canValidateRoster?: boolean;
   onValidateRoster?: () => Promise<void>;
@@ -48,13 +47,12 @@ const eligibilityTooltips: Record<string, string> = {
 const RosterList: React.FC<RosterListProps> = ({
   teamName,
   roster,
-  isPublished,
+  rosterStatus,
   showEditButton = false,
   editUrl,
   sortRoster,
   playerStats,
   teamLogoUrl,
-  rosterStatus,
   eligibilityTimestamp,
   canValidateRoster = false,
   onValidateRoster,
@@ -314,7 +312,7 @@ const RosterList: React.FC<RosterListProps> = ({
 
       {/* Roster Table */}
       <div className="overflow-x-auto bg-white shadow-md rounded-md border">
-        {isPublished && sortedRoster && sortedRoster.length > 0 ? (
+        {rosterStatus !== 'DRAFT' && sortedRoster && sortedRoster.length > 0 ? (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -506,7 +504,7 @@ const RosterList: React.FC<RosterListProps> = ({
           </table>
         ) : (
           <div className="text-center py-5 text-sm text-gray-500">
-            {!isPublished ? 'Aufstellung nicht veröffentlicht' : 'Keine Spieler eingetragen'}
+            {rosterStatus === 'DRAFT' ? 'Aufstellung nicht veröffentlicht' : 'Keine Spieler eingetragen'}
           </div>
         )}
       </div>
