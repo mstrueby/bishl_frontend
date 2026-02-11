@@ -940,11 +940,16 @@ export default function SupplementaryForm() {
         // Fetch assignments
         try {
           const assignmentsResponse = await apiClient.get(
-            `/assignments/matches/${id}?assignmentStatus=ASSIGNED&assignmentStatus=ACCEPTED`,
+            `/assignments/matches/${id}`,
+            {
+              params: {
+                assignmentStatus: ["ASSIGNED", "ACCEPTED"]
+              }
+            }
           );
           console.log(
             "Supplementary page: Assignments fetched",
-            assignmentsResponse.data?.length,
+            assignmentsResponse.data?.length
           );
           const nextAssignments = assignmentsResponse.data || [];
           setAssignments((prev) => {
@@ -975,9 +980,9 @@ export default function SupplementaryForm() {
       } catch (error) {
         console.error(
           "Supplementary page: Error fetching data:",
-          getErrorMessage(error),
+          getErrorMessage(error)
         );
-        setError("Fehler beim Laden der Daten");
+        setError(getErrorMessage(error));
       } finally {
         console.log(
           "Supplementary page: fetchData finished, setting loading to false",
