@@ -1383,13 +1383,17 @@ const RosterPage = () => {
     setError("");
     let cntAdditionalMatches = 0;
 
+    const newStatus = (rosterStatus === "INVALID" || rosterStatus === "APPROVED") 
+      ? "SUBMITTED" 
+      : (localSubmitted ? "SUBMITTED" : "DRAFT");
+
     const rosterUpdate: any = {
       players: rosterList,
       coach: coachData,
       staff: staffData.filter(
         (s) => s.firstName.trim() || s.lastName.trim() || s.role.trim(),
       ),
-      status: localSubmitted ? "SUBMITTED" : "DRAFT"
+      status: newStatus
     };
 
     try {
@@ -1398,7 +1402,7 @@ const RosterPage = () => {
         rosterUpdate,
       );
       console.log("Roster successfully saved:", rosterResponse.data);
-      setRosterStatus(localSubmitted ? "SUBMITTED" : "DRAFT");
+      setRosterStatus(newStatus);
 
       for (const m of matches.filter((m) => selectedMatches.includes(m._id))) {
         try {
@@ -1519,8 +1523,8 @@ const RosterPage = () => {
           description={`${team?.fullName} / ${team?.name}`}
           descriptionLogoUrl={team?.logoUrl}
           descriptionBadge={{
-            text: rosterStatus === "SUBMITTED" ? "Eingereicht" : rosterStatus === "INVALID" ? "Ungültig" : rosterStatus === "VALID" ? "Validiert" : "Entwurf",
-            colorClass: rosterStatus === "SUBMITTED" ? "bg-indigo-50 text-indigo-700 ring-indigo-700/10" : rosterStatus === "INVALID" ? "bg-red-50 text-red-700 ring-red-600/10" : rosterStatus === "VALID" ? "bg-green-50 text-green-700 ring-green-600/20" : "bg-gray-50 text-gray-600 ring-gray-500/10"
+            text: rosterStatus === "SUBMITTED" ? "Eingereicht" : rosterStatus === "INVALID" ? "Ungültig" : rosterStatus === "APPROVED" ? "Gültig" : "Entwurf",
+            colorClass: rosterStatus === "SUBMITTED" ? "bg-indigo-50 text-indigo-700 ring-indigo-700/10" : rosterStatus === "INVALID" ? "bg-red-50 text-red-700 ring-red-600/10" : rosterStatus === "APPROVED" ? "bg-green-50 text-green-700 ring-green-600/20" : "bg-gray-50 text-gray-600 ring-gray-500/10"
           }}
         />
       </div>
@@ -2468,10 +2472,10 @@ const RosterPage = () => {
       <div className="flex items-center justify-between mt-12 p-6 border-t">
         <div className="flex items-center justify-between w-full">
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">
-              Abgeben
+            <span className="text-sm font-medium text-gray-900 mb-2">
+              Aufstellung einreichen
             </span>
-            <span className="text-xs sm:text-sm text-gray-500">
+            <span className="text-xs stext-gray-500">
               {(() => {
                 const isFinished = match.matchStatus.key === "FINISHED";
                 const isSubmitted = rosterStatus === "SUBMITTED";
@@ -2481,7 +2485,7 @@ const RosterPage = () => {
                 } else if (isSubmitted) {
                   return "Aufstellung wurde abgegeben und kann nicht mehr bearbeitet werden.";
                 } else {
-                  return "Aufstellung fertigstellen und abgeben";
+                  return "Aufstellung fertigstellen und einreichen. Es können danach keine Änderungen mehr vorgenommen werden.";
                 }
               })()}
             </span>

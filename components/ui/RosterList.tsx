@@ -97,7 +97,7 @@ const RosterList: React.FC<RosterListProps> = ({
 
   const getStatusBadgeStyles = (status: string | undefined): string => {
     switch (status) {
-      case 'VALID':
+      case 'APPROVED':
         return 'bg-green-50 text-green-700 ring-green-600/20';
       case 'INVALID':
         return 'bg-red-50 text-red-700 ring-red-600/10';
@@ -112,7 +112,7 @@ const RosterList: React.FC<RosterListProps> = ({
 
   const getStatusBadgeText = (status: string | undefined): string => {
     switch (status) {
-      case 'VALID':
+      case 'APPROVED':
         return 'Gültig';
       case 'INVALID':
         return 'Ungültig';
@@ -242,7 +242,7 @@ const RosterList: React.FC<RosterListProps> = ({
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="border-b mb-3 border-gray-200 pb-3 mt-3 sm:mt-0 sm:mx-3">
+      <div className="mb-1.5 pb-3 mt-3 sm:mt-0 sm:mx-3">
         <div className="flex items-start justify-between gap-4">
           {/* Left side: Logo + Team info */}
           <div className="flex items-center gap-3 min-w-0 flex-1">

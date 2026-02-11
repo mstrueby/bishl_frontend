@@ -679,16 +679,17 @@ export default function MatchDetails({
         <div className="py-6">
           {activeTab === "roster" && (
             <div className="py-4">
-              <div className="flex flex-col space-y-8">
+              <div className="flex flex-col space-y-16">
                 <RosterList
                   teamName={match.home.fullName}
                   roster={sortRoster(match.home.roster?.players || [])}
-                  rosterStatus={match.home.roster?.status}
+                  isPublished={match.home.roster?.published || false}
                   showEditButton={permissions.showButtonRosterHome ?? false}
                   editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
                   sortRoster={sortRoster}
                   playerStats={homePlayerStats}
                   teamLogoUrl={match.home.logo}
+                  rosterStatus={match.home.roster?.status}
                   eligibilityTimestamp={match.home.roster?.eligibilityTimestamp}
                   canValidateRoster={permissions.showButtonRosterHome ?? false}
                   onValidateRoster={validateHomeRoster}
@@ -699,12 +700,13 @@ export default function MatchDetails({
                 <RosterList
                   teamName={match.away.fullName}
                   roster={sortRoster(match.away.roster?.players || [])}
-                  rosterStatus={match.away.roster?.status}
+                  isPublished={match.away.roster?.published || false}
                   showEditButton={permissions.showButtonRosterAway ?? false}
                   editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
                   sortRoster={sortRoster}
                   playerStats={awayPlayerStats}
                   teamLogoUrl={match.away.logo}
+                  rosterStatus={match.away.roster?.status}
                   eligibilityTimestamp={match.away.roster?.eligibilityTimestamp}
                   canValidateRoster={permissions.showButtonRosterAway ?? false}
                   onValidateRoster={validateAwayRoster}
