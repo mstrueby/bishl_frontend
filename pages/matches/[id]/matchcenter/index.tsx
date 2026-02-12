@@ -61,7 +61,7 @@ interface EditMatchData {
 }
 
 const tabs = [
-  { id: "roster", name: "Aufstellung" },
+  { id: "roster", name: "Aufstellungen" },
   { id: "goals", name: "Tore" },
   { id: "penalties", name: "Strafen" },
   { id: "supplementary", name: "Zusatzblatt" },
