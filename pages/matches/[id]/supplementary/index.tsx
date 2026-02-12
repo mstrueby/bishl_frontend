@@ -1090,6 +1090,7 @@ export default function SupplementaryForm() {
     setSuccessMessage(null);
 
     try {
+      console.log("Saving supplementary sheet with data:", formData);
       const response = await apiClient.patch(`/matches/${match._id}`, {
         supplementarySheet: { ...formData, isSaved: true },
       });
