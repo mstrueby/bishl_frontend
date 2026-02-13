@@ -245,7 +245,7 @@ const RosterPage = () => {
       passNumber: player.passNo,
       licenseType: player.licenseType || LicenseType.PRIMARY,
       source: player.source,
-      eligibilityStatus: player.eligibilityStatus || player.status || LicenseStatus.UNKNOWN,
+      eligibilityStatus: (player.eligibilityStatus || player.status || LicenseStatus.UNKNOWN) as "VALID" | "INVALID" | "UNKNOWN",
       invalidReasonCodes: player.invalidReasonCodes || [],
       called: player.called || false,
       calledFromTeam: player.called && player.originalTeamId ? {
@@ -1828,7 +1828,7 @@ const RosterPage = () => {
                             </div>
                             {player.invalidReasonCodes && player.invalidReasonCodes.length > 0 && (
                               <div className="text-[10px] text-red-800 font-medium leading-none mt-0.5">
-                                XX {player.invalidReasonCodes
+                                {player.invalidReasonCodes
                                   .map((code) => invalidReasonCodeMap[code] || code)
                                   .join(", ")}
                               </div>
