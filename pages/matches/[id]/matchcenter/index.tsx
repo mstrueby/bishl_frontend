@@ -1075,7 +1075,7 @@ export default function MatchDetails({
 
         {/* Home Team Goal Dialog */}
         <GoalDialog
-          isOpen={isHomeGoalDialogOpen}R
+          isOpen={isHomeGoalDialogOpen}
           onClose={() => {
             setIsHomeGoalDialogOpen(false);
             setEditingHomeGoal(undefined);
