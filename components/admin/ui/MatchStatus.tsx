@@ -54,6 +54,25 @@ const MatchStatus = ({ isOpen, onClose, match, onSuccess, onMatchUpdate }: Match
   const [editData, setEditData] = useState<EditData>(initialEditData);
   const [loading, setLoading] = useState<boolean>(false);
 
+  useEffect(() => {
+    setEditData({
+      matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
+      finishType: { key: match.finishType.key, value: match.finishType.value },
+      home: {
+        stats: {
+          goalsFor: match.home.stats.goalsFor,
+          goalsAgainst: match.home.stats.goalsAgainst
+        }
+      },
+      away: {
+        stats: {
+          goalsFor: match.away.stats.goalsFor,
+          goalsAgainst: match.away.stats.goalsAgainst
+        }
+      }
+    });
+  }, [match.matchStatus.key, match.finishType.key, match.home.stats.goalsFor, match.home.stats.goalsAgainst, match.away.stats.goalsFor, match.away.stats.goalsAgainst]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
