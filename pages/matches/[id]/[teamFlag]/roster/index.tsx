@@ -2927,7 +2927,7 @@ const RosterPage = () => {
                             called: selectedCallUpPlayer.called,
                             licenseType: selectedCallUpPlayer.licenseType || LicenseType.PRIMARY,
                             source: selectedCallUpPlayer.source || Source.BISHL,
-                            invalidReasonCodes: selectedCallUpPlayer.invalidReasonCodes,
+                            invalidReasonCodes: selectedCallUpPlayer.invalidReasonCodes || [],
                             goals: 0,
                             assists: 0,
                             points: 0,
