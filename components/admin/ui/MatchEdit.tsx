@@ -42,7 +42,7 @@ const MatchEdit = ({ isOpen, onClose, match, onSuccess, onMatchUpdate }: MatchEd
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await apiClient.get('/venues/?active=true');
+        const response = await apiClient.get('/venues?active=true');
         setVenues(response.data);
       } catch (error) {
         console.error('Error fetching venues:', error);
