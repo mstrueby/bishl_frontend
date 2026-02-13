@@ -440,6 +440,7 @@ const RosterPage = () => {
                   active: assignedTeam.active,
                   status: assignedTeam.status,
                   licenseType: assignedTeam.licenseType,
+                  invalidReasonCodes: assignedTeam.invalidReasonCodes || [],
                 }
               : null;
           })
@@ -672,6 +673,7 @@ const RosterPage = () => {
               called: rosterPlayer?.called || player.called || false,
               active: (rosterPlayer?.called || player.called) ? true : player.active,
               eligibilityStatus: (rosterPlayer?.called || player.called) ? player.status : undefined,
+              invalidReasonCodes: rosterPlayer?.invalidReasonCodes || player.invalidReasonCodes || [],
               originalTeamId: rosterPlayer?.calledFromTeam?.teamId || player.originalTeamId || null,
               originalTeamName: rosterPlayer?.calledFromTeam?.teamName || player.originalTeamName || null,
               originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
@@ -1200,10 +1202,11 @@ const RosterPage = () => {
       return;
     }
 
-    const playerWithCalled = {
-      ...selectedCallUpPlayer,
-      called: true,
-      originalTeamId: selectedCallUpTeam?._id || null,
+      const playerWithCalled = {
+        ...selectedCallUpPlayer,
+        called: true,
+        invalidReasonCodes: selectedCallUpPlayer.invalidReasonCodes || [],
+        originalTeamId: selectedCallUpTeam?._id || null,
       originalTeamName: selectedCallUpTeam?.name || null,
       originalTeamAlias: selectedCallUpTeam?.alias || null,
     };
@@ -1250,6 +1253,7 @@ const RosterPage = () => {
       rosterJerseyNo: selectedCallUpPlayer.jerseyNo || 0,
       rosterPosition: "F",
       statusDiff: false,
+      invalidReasonCodes: selectedCallUpPlayer.invalidReasonCodes || [],
       assignedStatus: eligibilityStatus,
       eligibilityStatus: eligibilityStatus,
     };
@@ -1824,7 +1828,7 @@ const RosterPage = () => {
                             </div>
                             {player.invalidReasonCodes && player.invalidReasonCodes.length > 0 && (
                               <div className="text-[10px] text-red-800 font-medium leading-none mt-0.5">
-                                {player.invalidReasonCodes
+                                XX {player.invalidReasonCodes
                                   .map((code) => invalidReasonCodeMap[code] || code)
                                   .join(", ")}
                               </div>
