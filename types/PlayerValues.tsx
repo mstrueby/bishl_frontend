@@ -162,6 +162,7 @@ export interface PlayerValues {
     assists: number;
     points: number;
     penaltyMinutes: number;
+    calledMatches?: number;
   }[];
   imageUrl: string;
   imageVisible: boolean;
