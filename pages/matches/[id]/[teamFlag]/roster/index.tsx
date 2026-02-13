@@ -679,7 +679,6 @@ const RosterPage = () => {
               originalTeamAlias: rosterPlayer?.calledFromTeam?.teamAlias || player.originalTeamAlias || null,
               licenseType: rosterPlayer?.licenseType || player.licenseType,
               source: rosterPlayer?.source || player.source,
-              invalidReasonCodes: rosterPlayer?.invalidReasonCodes || player.invalidReasonCodes || [],
             };
           },
         );
@@ -697,8 +696,8 @@ const RosterPage = () => {
             position: rp.playerPosition.key === 'G' ? 'Goalie' : 'Skater',
             fullFaceReq: false,
             source: rp.source || 'BISHL',
-            imageUrl: rp.player.imageUrl,
-            imageVisible: rp.player.imageVisible,
+            imageUrl: rp.player.imageUrl || '',
+            imageVisible: rp.player.imageVisible ?? true,
             passNo: rp.passNumber || '',
             jerseyNo: rp.player.jerseyNumber,
             called: rp.called || true,
