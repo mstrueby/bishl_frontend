@@ -21,8 +21,7 @@ const nextConfig = {
     defaultLocale: "de-DE",
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'production'
-      ? 'https://api.bishl.de' : process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.bishl.de',
   },
   async headers() {
     return [
@@ -69,8 +68,20 @@ const nextConfig = {
               "connect-src 'self' data: blob: https://res.cloudinary.com " + process.env.NEXT_PUBLIC_API_URL + (process.env.NODE_ENV === 'development' ? " webpack://* ws://* wss://*" : ""),
               process.env.NODE_ENV === 'development' ? "frame-ancestors *" : "frame-ancestors 'self'",
             ].join('; ')
-          }
+          },
+          ...(process.env.NEXT_PUBLIC_IS_DEMO === 'true' ? [{
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow'
+          }] : [])
         ],
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/robots.txt',
+        destination: '/api/robots',
       },
     ];
   },
