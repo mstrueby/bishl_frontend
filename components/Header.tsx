@@ -169,6 +169,8 @@ const MenuItemLink = React.forwardRef<HTMLAnchorElement, MenuItemLinkProps>(
 
 MenuItemLink.displayName = 'MenuItemLink';
 
+const isDemo = process.env.NEXT_PUBLIC_IS_DEMO === 'true';
+
 const Header = () => {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -177,6 +179,11 @@ const Header = () => {
     <Disclosure as="nav" className="bg-gray-800 sticky top-0 z-50 shadow-md">
       {({ open }) => (
         <>
+          {isDemo && (
+            <div className="bg-red-600 text-white text-center text-xs font-bold py-1 tracking-wider uppercase">
+              DEMO
+            </div>
+          )}
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               {/* Navigation (tablet, desktop) */}
