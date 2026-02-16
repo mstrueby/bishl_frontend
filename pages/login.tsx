@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useAuth from '../hooks/useAuth';
 import Layout from '../components/Layout';
@@ -185,13 +186,11 @@ const LoginPage = () => {
               </Form>
             </Formik>
 
-            {/**
             <div className="mt-6 text-center text-sm text-gray-500">
-              <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+              <Link href="/forgot-password" className="font-semibold text-indigo-600 hover:text-indigo-500">
                 Passwort vergessen?
-              </a>
+              </Link>
             </div>
-            */}
           </div>
         </div>
       </Layout>
