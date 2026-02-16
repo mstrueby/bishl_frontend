@@ -59,7 +59,7 @@ export default function ProfilePage() {
   };
 
   const handleCancel = () => {
-    router.push('/admin');
+    router.back();
   };
 
   // Show loading state while checking auth
