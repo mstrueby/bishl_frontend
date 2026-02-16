@@ -19,6 +19,9 @@
 .DS_Store
 *.pem
 
+# Attached assets
+attached_assets/
+
 # images
 *.ico
 *.svg
