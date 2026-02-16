@@ -41,15 +41,14 @@ export default function ProfilePage() {
   const handleSubmit = async (values: any) => {
     setFormLoading(true);
     try {
-      const updateData: any = {
-        email: values.email,
-      };
+      const formData = new FormData();
+      formData.append('email', values.email);
       
       if (values.password) {
-        updateData.password = values.password;
+        formData.append('password', values.password);
       }
       
-      await apiClient.patch(`/users/${user?._id}`, updateData);
+      await apiClient.patch(`/users/${user?._id}`, formData);
       setSuccessMessage('Profil erfolgreich aktualisiert');
     } catch (error) {
       console.error('Error updating profile:', error);
