@@ -1,23 +1,27 @@
-import { useState } from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import Layout from '../components/Layout';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
-import InputText from '../components/ui/form/InputText';
-import ButtonPrimary from '../components/ui/form/ButtonPrimary';
-import { XCircleIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/20/solid';
-import apiClient from '../lib/apiClient';
+import { useState } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import Layout from "../components/Layout";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import InputText from "../components/ui/form/InputText";
+import ButtonPrimary from "../components/ui/form/ButtonPrimary";
+import {
+  XCircleIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/20/solid";
+import apiClient from "../lib/apiClient";
 
 const validationSchema = Yup.object({
   password: Yup.string()
-    .required('Bitte gib ein neues Passwort ein.')
-    .min(8, 'Das Passwort muss mindestens 8 Zeichen lang sein.'),
+    .required("Bitte gib ein neues Passwort ein.")
+    .min(8, "Das Passwort muss mindestens 8 Zeichen lang sein."),
   confirmPassword: Yup.string()
-    .required('Bitte bestätige dein Passwort.')
-    .oneOf([Yup.ref('password')], 'Die Passwörter stimmen nicht überein.'),
+    .required("Bitte bestätige dein Passwort.")
+    .oneOf([Yup.ref("password")], "Die Passwörter stimmen nicht überein."),
 });
 
 const ResetPasswordPage = () => {
@@ -27,28 +31,37 @@ const ResetPasswordPage = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (values: { password: string; confirmPassword: string }) => {
+  const handleSubmit = async (values: {
+    password: string;
+    confirmPassword: string;
+  }) => {
     if (!token) {
-      setError('Kein gültiger Token vorhanden. Bitte fordere einen neuen Link an.');
+      setError(
+        "Kein gültiger Token vorhanden. Bitte fordere einen neuen Link an.",
+      );
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      await apiClient.post('/users/reset-password', {
+      await apiClient.post("/users/reset-password", {
         token: token as string,
         password: values.password,
       });
       setSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.response?.data?.error || 'Ein Fehler ist aufgetreten. Der Link ist möglicherweise abgelaufen.');
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Ein Fehler ist aufgetreten. Der Link ist möglicherweise abgelaufen.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (!token && typeof window !== 'undefined' && router.isReady) {
+  if (!token && typeof window !== "undefined" && router.isReady) {
     return (
       <>
         <Head>
@@ -60,17 +73,24 @@ const ResetPasswordPage = () => {
               <div className="rounded-md bg-red-50 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                    <XCircleIcon
+                      className="h-5 w-5 text-red-400"
+                      aria-hidden="true"
+                    />
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-red-800">
-                      Ungültiger oder fehlender Token. Bitte fordere einen neuen Link an.
+                      Ungültiger oder fehlender Token. Bitte fordere einen neuen
+                      Link an.
                     </p>
                   </div>
                 </div>
               </div>
               <div className="mt-6 text-center">
-                <Link href="/forgot-password" className="font-semibold text-indigo-600 hover:text-indigo-500 text-sm">
+                <Link
+                  href="/forgot-password"
+                  className="font-semibold text-indigo-600 hover:text-indigo-500 text-sm"
+                >
                   Neuen Link anfordern
                 </Link>
               </div>
@@ -107,7 +127,10 @@ const ResetPasswordPage = () => {
             <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-sm rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                  <XCircleIcon
+                    className="h-5 w-5 text-red-400"
+                    aria-hidden="true"
+                  />
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-red-800">{error}</p>
@@ -126,27 +149,35 @@ const ResetPasswordPage = () => {
           )}
 
           {success ? (
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm rounded-md bg-green-50 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-green-800">
-                    Dein Passwort wurde erfolgreich zurückgesetzt.
-                  </p>
+            <>
+              <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm rounded-md bg-green-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <CheckCircleIcon
+                      className="h-5 w-5 text-green-400"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-green-800">
+                      Dein Passwort wurde erfolgreich zurückgesetzt.
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="mt-6 text-center">
-                <Link href="/login" className="font-semibold text-indigo-600 hover:text-indigo-500 text-sm">
+                <Link
+                  href="/login"
+                  className="font-semibold text-indigo-600 hover:text-indigo-500 text-sm"
+                >
                   Zur Anmeldung
                 </Link>
               </div>
-            </div>
+            </>
           ) : (
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
               <Formik
-                initialValues={{ password: '', confirmPassword: '' }}
+                initialValues={{ password: "", confirmPassword: "" }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
@@ -176,7 +207,10 @@ const ResetPasswordPage = () => {
               </Formik>
 
               <div className="mt-6 text-center text-sm text-gray-500">
-                <Link href="/login" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                <Link
+                  href="/login"
+                  className="font-semibold text-indigo-600 hover:text-indigo-500"
+                >
                   Zurück zur Anmeldung
                 </Link>
               </div>
