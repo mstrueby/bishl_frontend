@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (February 2026)
 
+### Shared Roster Validation
+- **Shared utility** (`utils/rosterValidation.tsx`): `validateRoster()` function returns array of `RosterCheckResult` objects for 7 checks: captain, assistant, goalie, min skaters, jersey numbers, duplicate jerseys, called players
+- **Reusable component** (`components/ui/RosterChecks.tsx`): Renders validation indicators with green/yellow icons and German messages
+- **Roster page refactored**: Replaced ~150 lines of inline validation UI with `<RosterChecks checks={rosterChecks} />` and `isRosterComplete()` for submit gating
+- **MatchCenter integration**: `RosterList.tsx` now accepts optional `minSkaterCount` prop and renders `RosterChecks` below the table footer
+- **Tournament-aware**: MatchCenter derives `minSkaterCount` from `match.tournament.alias` (youth tournaments = 8, adult = 4)
+
 ### CalledFromTeam Feature
 - **CalledFromTeam interface** (`types/MatchValues.tsx`): Structured object with `teamId`, `teamName`, `teamAlias` replacing string-based `originalTeam`
 - **Roster Display**: Called players show up arrow + team name (truncated) + colored pill badge with call-up match count
