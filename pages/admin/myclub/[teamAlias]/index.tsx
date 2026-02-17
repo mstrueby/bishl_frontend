@@ -155,10 +155,18 @@ const TeamPage: NextPage = () => {
       const response = await apiClient.patch(`/players/${playerId}`, formData);
 
       if (response.status === 200) {
-        console.log(`Player ${playerId} status successfully toggled for team ${teamId}`);
-        await fetchPlayers(currentPage);
-      } else if (response.status === 304) {
-        console.log('No changes were made to the player status.');
+        setPlayers(prev => prev.map(player => {
+          if (player._id !== playerId) return player;
+          return {
+            ...player,
+            assignedTeams: player.assignedTeams.map((item: any) => ({
+              ...item,
+              teams: item.teams.map((t: any) =>
+                t.teamId === teamId ? { ...t, active: !t.active } : t
+              ),
+            })),
+          };
+        }));
       }
     } catch (error) {
       console.error('Error updating player status:', getErrorMessage(error));
