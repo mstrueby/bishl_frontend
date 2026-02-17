@@ -100,6 +100,9 @@ export default function MatchDetails({
   const { id } = router.query;
   const [match, setMatch] = useState<MatchValues>(initialMatch);
 
+  const youthTournaments = ['juniorenliga', 'jugendliga', 'jugendliga-p', 'schuelerliga'];
+  const minSkaterCount = youthTournaments.includes(match.tournament.alias) ? 8 : 4;
+
   const getBackLink = () => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
     // Check referrer if it exists
@@ -695,6 +698,7 @@ export default function MatchDetails({
                   teamFlag="home"
                   isValidating={isValidatingHomeRoster}
                   onOpenPlayerCard={handleOpenPlayerCard}
+                  minSkaterCount={minSkaterCount}
                 />
                 <RosterList
                   teamName={match.away.fullName}
@@ -711,6 +715,7 @@ export default function MatchDetails({
                   teamFlag="away"
                   isValidating={isValidatingAwayRoster}
                   onOpenPlayerCard={handleOpenPlayerCard}
+                  minSkaterCount={minSkaterCount}
                 />
               </div>
             </div>

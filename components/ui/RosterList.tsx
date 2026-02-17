@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { RosterPlayer } from '../../types/MatchValues';
@@ -11,6 +11,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { ClipLoader } from 'react-spinners';
 import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass, invalidReasonCodeMap } from '../../lib/constants';
+import { validateRoster } from '../../utils/rosterValidation';
+import RosterChecks from './RosterChecks';
 
 interface RosterListProps {
   teamName: string;
@@ -28,6 +30,7 @@ interface RosterListProps {
   teamFlag?: "home" | "away";
   isValidating?: boolean;
   teamId?: string;
+  minSkaterCount?: number;
 }
 
 const positionTooltips: Record<string, string> = {
@@ -59,7 +62,8 @@ const RosterList: React.FC<RosterListProps> = ({
   onOpenPlayerCard,
   teamFlag = "home",
   isValidating = false,
-  teamId
+  teamId,
+  minSkaterCount = 4
 }) => {
   const defaultSortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
     if (!rosterToSort || rosterToSort.length === 0) return [];
@@ -80,6 +84,11 @@ const RosterList: React.FC<RosterListProps> = ({
   };
 
   const sortedRoster = sortRoster ? sortRoster(roster) : defaultSortRoster(roster);
+
+  const rosterChecks = useMemo(
+    () => validateRoster(sortedRoster, { minSkaterCount }),
+    [sortedRoster, minSkaterCount],
+  );
 
   const formatEligibilityTimestamp = (timestamp: string | Date | null | undefined): string => {
     if (!timestamp) return 'Noch nicht geprüft';
@@ -506,6 +515,10 @@ const RosterList: React.FC<RosterListProps> = ({
           <div className="text-center py-5 text-sm text-gray-500">
             {rosterStatus === 'DRAFT' ? 'Aufstellung nicht veröffentlicht' : 'Keine Spieler eingetragen'}
           </div>
+        )}
+
+        {sortedRoster.length > 0 && (
+          <RosterChecks checks={rosterChecks} />
         )}
       </div>
     </div>
