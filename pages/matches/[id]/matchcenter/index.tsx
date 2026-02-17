@@ -105,6 +105,7 @@ export default function MatchDetails({
 
   const getBackLink = () => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
+    console.log('Referrer:', referrer)
     // Check referrer if it exists
     if (
       referrer &&

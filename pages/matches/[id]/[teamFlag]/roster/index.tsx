@@ -2213,29 +2213,35 @@ const RosterPage = () => {
                       <li key={m._id} className="px-4 py-4">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center space-x-4">
-                            <input
-                              id={`match-${m._id}`}
-                              type="checkbox"
-                              value={m._id}
+                            <Switch
+                              checked={selectedMatches.includes(m._id)}
                               disabled={m.matchStatus.key !== "SCHEDULED"}
-                              className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-                                m.matchStatus.key === "SCHEDULED"
-                                  ? "text-blue-600 bg-gray-100"
-                                  : "text-gray-400 bg-gray-100 cursor-not-allowed"
-                              }`}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedMatches((prev) => [
-                                    ...prev,
-                                    m._id,
-                                  ]);
+                              onChange={(enabled) => {
+                                if (enabled) {
+                                  setSelectedMatches((prev) => [...prev, m._id]);
                                 } else {
                                   setSelectedMatches((prev) =>
                                     prev.filter((id) => id !== m._id),
                                   );
                                 }
                               }}
-                            />
+                              className={classNames(
+                                selectedMatches.includes(m._id)
+                                  ? "bg-blue-600"
+                                  : "bg-gray-200",
+                                "relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                              )}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className={classNames(
+                                  selectedMatches.includes(m._id)
+                                    ? "translate-x-4"
+                                    : "translate-x-0",
+                                  "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                )}
+                              />
+                            </Switch>
                             <div className="flex-shrink-0 h-8 w-8">
                               <CldImage
                                 src={
