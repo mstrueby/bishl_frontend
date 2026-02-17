@@ -750,7 +750,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                         setFieldValue,
                                       )
                                     }
-                                    disabled={values.managedByISHD}
+                                    disabled={values.managedByISHD || hasLoanLicence}
                                     className={classNames(
                                       values.managedByISHD
                                         ? "bg-yellow-50 text-yellow-700"
@@ -781,7 +781,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                         setFieldValue,
                                       )
                                     }
-                                    disabled={!values.managedByISHD}
+                                    disabled={!values.managedByISHD || hasLoanLicence}
                                     className={classNames(
                                       !values.managedByISHD
                                         ? "bg-indigo-50 text-indigo-700"
