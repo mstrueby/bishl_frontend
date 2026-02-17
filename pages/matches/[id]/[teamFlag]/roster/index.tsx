@@ -2215,7 +2215,7 @@ const RosterPage = () => {
                           <div className="flex items-center space-x-4">
                             <Switch
                               checked={selectedMatches.includes(m._id)}
-                              disabled={m.matchStatus.key !== "SCHEDULED"}
+                              disabled={m.matchStatus.key !== "SCHEDULED" || rosterStatus === "SUBMITTED"}
                               onChange={(enabled) => {
                                 if (enabled) {
                                   setSelectedMatches((prev) => [...prev, m._id]);
