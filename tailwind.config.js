@@ -32,7 +32,6 @@ module.exports = {
     'bg-purple-400/10',
     'bg-pink-50',
     'bg-pink-400/10',
-    'ring-pink-600/20'
     
     // Text colors
     'text-blue-700',
@@ -78,6 +77,7 @@ module.exports = {
     'ring-cyan-700/10',
     'ring-purple-700/10',
     'ring-pink-700/10',
+    'ring-pink-600/20',
     'ring-yellow-400/20',
     'ring-yellow-600/10',
 
