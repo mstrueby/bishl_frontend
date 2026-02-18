@@ -1106,7 +1106,7 @@ const RosterPage = () => {
             {
               params: {
                 sortby: "lastName",
-                ...(includeInactivePlayers
+                ...(!includeInactivePlayers
                   ? { active: "true" } : {}),
                 all: true
               },
