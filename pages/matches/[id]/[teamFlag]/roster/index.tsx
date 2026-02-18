@@ -525,6 +525,11 @@ const RosterPage = () => {
       ? permissions.showButtonRosterHome
       : permissions.showButtonRosterAway;
 
+  const isMatchCenterController = permissions.showButtonMatchCenter === true;
+  const isRosterEditable = isMatchCenterController
+    ? rosterStatus !== "SUBMITTED"
+    : rosterStatus === "DRAFT";
+
   // Check if all requirements are met for publishing the roster
   // Uses tablePlayers (selected rows) as the source of truth for validation
   const isRosterValid = () => {
@@ -1613,7 +1618,7 @@ const RosterPage = () => {
               <button
                 type="button"
                 onClick={() => setIsCallUpModalOpen(true)}
-                disabled={rosterStatus === "SUBMITTED"}
+                disabled={!isRosterEditable}
                 className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
@@ -1726,11 +1731,11 @@ const RosterPage = () => {
                           <Switch
                             checked={player.selected}
                             onChange={() => {
-                              if (rosterStatus !== "SUBMITTED") {
+                              if (isRosterEditable) {
                                 handleTablePlayerToggle(player._id);
                               }
                             }}
-                            disabled={(hasEvents && player.selected) || rosterStatus === "SUBMITTED"}
+                            disabled={(hasEvents && player.selected) || !isRosterEditable}
                             className={classNames(
                               player.selected ? "bg-indigo-600" : "bg-gray-200",
                               "relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
@@ -1755,7 +1760,7 @@ const RosterPage = () => {
                           type="number"
                           min="0"
                           value={player.rosterJerseyNo || ""}
-                          disabled={rosterStatus === "SUBMITTED"}
+                          disabled={!isRosterEditable}
                           onChange={(e) =>
                             handleTableJerseyChange(
                               player._id,
@@ -1770,7 +1775,7 @@ const RosterPage = () => {
                             player.rosterJerseyNo === 0 && player.selected
                               ? "ring-yellow-500 bg-yellow-50"
                               : "",
-                            rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : "",
+                            !isRosterEditable ? "bg-gray-50 text-gray-500 cursor-not-allowed" : "",
                           )}
                         />
                       </td>
@@ -1782,7 +1787,7 @@ const RosterPage = () => {
                             <button
                               key={pos}
                               type="button"
-                              disabled={rosterStatus === "SUBMITTED"}
+                              disabled={!isRosterEditable}
                               onClick={() =>
                                 handleTablePositionToggle(player._id, pos)
                               }
@@ -1791,7 +1796,7 @@ const RosterPage = () => {
                                 player.rosterPosition === pos
                                   ? "bg-gray-600 text-white"
                                   : "bg-gray-200 text-gray-600 hover:bg-gray-300",
-                                rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : "",
+                                !isRosterEditable ? "cursor-not-allowed opacity-50" : "",
                               )}
                             >
                               {pos}
@@ -2149,7 +2154,7 @@ const RosterPage = () => {
                 type="text"
                 id="coach-firstName"
                 value={coachData.firstName}
-                disabled={rosterStatus === "SUBMITTED"}
+                disabled={!isRosterEditable}
                 onChange={(e) =>
                   setCoachData((prev) => ({
                     ...prev,
@@ -2158,7 +2163,7 @@ const RosterPage = () => {
                 }
                 className={classNames(
                   "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
-                  rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                  !isRosterEditable ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
                 )}
               />
             </div>
@@ -2173,7 +2178,7 @@ const RosterPage = () => {
                 type="text"
                 id="coach-lastName"
                 value={coachData.lastName}
-                disabled={rosterStatus === "SUBMITTED"}
+                disabled={!isRosterEditable}
                 onChange={(e) =>
                   setCoachData((prev) => ({
                     ...prev,
@@ -2182,7 +2187,7 @@ const RosterPage = () => {
                 }
                 className={classNames(
                   "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
-                  rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                  !isRosterEditable ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
                 )}
               />
             </div>
@@ -2197,13 +2202,13 @@ const RosterPage = () => {
                 type="text"
                 id="coach-licence"
                 value={coachData.licence}
-                disabled={rosterStatus === "SUBMITTED"}
+                disabled={!isRosterEditable}
                 onChange={(e) =>
                   setCoachData((prev) => ({ ...prev, licence: e.target.value }))
                 }
                 className={classNames(
                   "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
-                  rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                  !isRosterEditable ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
                 )}
               />
             </div>
@@ -2243,7 +2248,7 @@ const RosterPage = () => {
                       type="text"
                       id={`staff-${index}-firstName`}
                       value={staff.firstName}
-                      disabled={rosterStatus === "SUBMITTED"}
+                      disabled={!isRosterEditable}
                       onChange={(e) => {
                         const newStaffData = [...staffData];
                         newStaffData[index] = {
@@ -2254,7 +2259,7 @@ const RosterPage = () => {
                       }}
                       className={classNames(
                         "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
-                        rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                        !isRosterEditable ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
                       )}
                     />
                   </div>
@@ -2269,7 +2274,7 @@ const RosterPage = () => {
                       type="text"
                       id={`staff-${index}-lastName`}
                       value={staff.lastName}
-                      disabled={rosterStatus === "SUBMITTED"}
+                      disabled={!isRosterEditable}
                       onChange={(e) => {
                         const newStaffData = [...staffData];
                         newStaffData[index] = {
@@ -2280,7 +2285,7 @@ const RosterPage = () => {
                       }}
                       className={classNames(
                         "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
-                        rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                        !isRosterEditable ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
                       )}
                     />
                   </div>
@@ -2295,7 +2300,7 @@ const RosterPage = () => {
                       type="text"
                       id={`staff-${index}-role`}
                       value={staff.role}
-                      disabled={rosterStatus === "SUBMITTED"}
+                      disabled={!isRosterEditable}
                       onChange={(e) => {
                         const newStaffData = [...staffData];
                         newStaffData[index] = {
@@ -2306,7 +2311,7 @@ const RosterPage = () => {
                       }}
                       className={classNames(
                         "block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
-                        rosterStatus === "SUBMITTED" ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
+                        !isRosterEditable ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""
                       )}
                     />
                   </div>
@@ -2323,7 +2328,7 @@ const RosterPage = () => {
                     s.firstName.trim() || s.lastName.trim() || s.role.trim(),
                 ).length + 1,
               ),
-            ).length < 4 && rosterStatus !== "SUBMITTED" && (
+            ).length < 4 && isRosterEditable && (
               <div className="flex justify-center py-4">
                 <button
                   type="button"
@@ -2397,29 +2402,35 @@ const RosterPage = () => {
                       <li key={m._id} className="px-4 py-4">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center space-x-4">
-                            <input
-                              id={`match-${m._id}`}
-                              type="checkbox"
-                              value={m._id}
-                              disabled={m.matchStatus.key !== "SCHEDULED"}
-                              className={`w-4 h-4 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-                                m.matchStatus.key === "SCHEDULED"
-                                  ? "text-blue-600 bg-gray-100"
-                                  : "text-gray-400 bg-gray-100 cursor-not-allowed"
-                              }`}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedMatches((prev) => [
-                                    ...prev,
-                                    m._id,
-                                  ]);
+                            <Switch
+                              checked={selectedMatches.includes(m._id)}
+                              disabled={m.matchStatus.key !== "SCHEDULED" || !isRosterEditable}
+                              onChange={(enabled) => {
+                                if (enabled) {
+                                  setSelectedMatches((prev) => [...prev, m._id]);
                                 } else {
                                   setSelectedMatches((prev) =>
                                     prev.filter((id) => id !== m._id),
                                   );
                                 }
                               }}
-                            />
+                              className={classNames(
+                                selectedMatches.includes(m._id)
+                                  ? "bg-indigo-600"
+                                  : "bg-gray-200",
+                                "relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                              )}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className={classNames(
+                                  selectedMatches.includes(m._id)
+                                    ? "translate-x-3"
+                                    : "translate-x-0",
+                                  "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                )}
+                              />
+                            </Switch>
                             <div className="flex-shrink-0 h-8 w-8">
                               <CldImage
                                 src={
@@ -2500,16 +2511,16 @@ const RosterPage = () => {
             <Switch
               checked={localSubmitted || match.matchStatus.key === "FINISHED"}
               onChange={(enabled) => {
-                if (match.matchStatus.key !== "FINISHED" && rosterStatus !== "SUBMITTED") {
+                if (match.matchStatus.key !== "FINISHED" && isRosterEditable) {
                   setLocalSubmitted(enabled);
                 }
               }}
-              disabled={match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED"}
+              disabled={match.matchStatus.key === "FINISHED" || !isRosterEditable}
               className={`${
                 localSubmitted || match.matchStatus.key === "FINISHED"
                   ? "bg-indigo-600"
                   : "bg-gray-200"
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2 ${match.matchStatus.key === "FINISHED" || rosterStatus === "SUBMITTED" ? "cursor-not-allowed opacity-50" : ""}`}
+              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ml-2 ${match.matchStatus.key === "FINISHED" || !isRosterEditable ? "cursor-not-allowed opacity-50" : ""}`}
             >
               <span className="sr-only">Abgeben</span>
               <span
@@ -2539,7 +2550,7 @@ const RosterPage = () => {
         <button
           type="button"
           onClick={handleSaveRoster}
-          disabled={loading || savingRoster || (rosterStatus === "SUBMITTED" && match.matchStatus.key !== "FINISHED")}
+          disabled={loading || savingRoster || (!isRosterEditable && match.matchStatus.key !== "FINISHED")}
           className="w-24 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 hover:bg-indigo-500 py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {savingRoster ? (
