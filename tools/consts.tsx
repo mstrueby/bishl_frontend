@@ -269,6 +269,12 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
   }
 };
 
+const adultTournaments = ['regionalliga-ost', 'landesliga', 'hobbyliga', 'tag-der-meister'];
+
+export const getMinSkaterCount = (tournamentAlias: string): number => {
+  return adultTournaments.includes(tournamentAlias) ? 4 : 8;
+};
+
 export const getValidTransitions = (currentStatus: string) => {
   switch (currentStatus) {
     case 'AVAILABLE':

@@ -54,8 +54,10 @@ import RosterPDF from "../../../../../components/pdf/RosterPDF";
 import MatchStatusBadge from "../../../../../components/ui/MatchStatusBadge";
 import MatchHeader from "../../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../../components/admin/SectionHeader";
-import { tournamentConfigs } from "../../../../../tools/consts";
+import { tournamentConfigs, getMinSkaterCount } from "../../../../../tools/consts";
 import { UserRole } from "../../../../../lib/auth";
+import { validateRoster, isRosterComplete } from "../../../../../utils/rosterValidation";
+import RosterChecks from "../../../../../components/ui/RosterChecks";
 
 interface AvailablePlayer {
   _id: string;
@@ -503,8 +505,7 @@ const RosterPage = () => {
     }
   }, [match, router.query.from]);
 
-  const minSkaterCount =
-    team?.ageGroup === "HERREN" || team?.ageGroup === "DAMEN" ? 4 : 8;
+  const minSkaterCount = match ? getMinSkaterCount(match.tournament.alias) : 4;
 
   // Calculate permissions for this user and match
   const permissions =
@@ -532,44 +533,12 @@ const RosterPage = () => {
 
   // Check if all requirements are met for publishing the roster
   // Uses tablePlayers (selected rows) as the source of truth for validation
-  const isRosterValid = () => {
-    const selectedPlayers = tablePlayers.filter((p) => p.selected);
+  const rosterChecks = React.useMemo(
+    () => validateRoster(rosterList, { minSkaterCount }),
+    [rosterList, minSkaterCount],
+  );
 
-    const hasZeroJerseyNumber = selectedPlayers.some(
-      (player) => player.rosterJerseyNo === 0,
-    );
-    const hasCaptain = selectedPlayers.some(
-      (player) => player.rosterPosition === "C",
-    );
-    const hasAssistant = selectedPlayers.some(
-      (player) => player.rosterPosition === "A",
-    );
-    const hasGoalie = selectedPlayers.some(
-      (player) => player.rosterPosition === "G",
-    );
-    const skaterCount = selectedPlayers.filter(
-      (player) => player.rosterPosition !== "G",
-    ).length;
-    const hasMinSkater = skaterCount >= minSkaterCount;
-    const calledPlayersCount = selectedPlayers.filter(
-      (player) => player.called,
-    ).length;
-    const hasMaxCalledPlayers = calledPlayersCount <= 5;
-    const jerseyNumbers = selectedPlayers.map((p) => p.rosterJerseyNo);
-    const hasDoubleJerseyNumbers = jerseyNumbers.some(
-      (num, index) => jerseyNumbers.indexOf(num) !== index,
-    );
-
-    return (
-      !hasZeroJerseyNumber &&
-      hasCaptain &&
-      hasAssistant &&
-      hasGoalie &&
-      hasMinSkater &&
-      hasMaxCalledPlayers &&
-      !hasDoubleJerseyNumbers
-    );
-  };
+  const isRosterValid = () => isRosterComplete(rosterChecks);
 
   // Memoized PDF download link
   const pdfDownloadLink = React.useMemo(() => {
@@ -1981,155 +1950,7 @@ const RosterPage = () => {
 
         {/* Roster Completeness Check */}
         <div className="p-6 border-t bg-gray-50">
-          <div className="space-y-3">
-            {/* Captain check indicator */}
-            <div className="flex items-center">
-              <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player) => player.playerPosition.key === "C") ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}
-              >
-                {rosterList.some(
-                  (player) => player.playerPosition.key === "C",
-                ) ? (
-                  <CheckCircleIcon className="h-6 w-6" />
-                ) : (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                )}
-              </div>
-              <span className="ml-2 text-sm">
-                {rosterList.some((player) => player.playerPosition.key === "C")
-                  ? "Captain (C) wurde festgelegt"
-                  : "Es wurde noch kein Captain (C) festgelegt"}
-              </span>
-            </div>
-
-            {/* Assistant check indicator */}
-            <div className="flex items-center">
-              <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player) => player.playerPosition.key === "A") ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}
-              >
-                {rosterList.some(
-                  (player) => player.playerPosition.key === "A",
-                ) ? (
-                  <CheckCircleIcon className="h-6 w-6" />
-                ) : (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                )}
-              </div>
-              <span className="ml-2 text-sm">
-                {rosterList.some((player) => player.playerPosition.key === "A")
-                  ? "Assistant (A) wurde festgelegt"
-                  : "Es wurde noch kein Assistant (A) festgelegt"}
-              </span>
-            </div>
-
-            {/* Goalie check indicator */}
-            <div className="flex items-center">
-              <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player) => player.playerPosition.key === "G") ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}
-              >
-                {rosterList.some(
-                  (player) => player.playerPosition.key === "G",
-                ) ? (
-                  <CheckCircleIcon className="h-6 w-6" />
-                ) : (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                )}
-              </div>
-              <span className="ml-2 text-sm">
-                {rosterList.some((player) => player.playerPosition.key === "G")
-                  ? "Mindestens ein Goalie (G) wurde festgelegt"
-                  : "Es wurde noch kein Goalie (G) festgelegt"}
-              </span>
-            </div>
-
-            {/* Feldspieler check indicator */}
-            <div className="flex items-center mt-4">
-              <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter((player) => player.playerPosition.key != "G").length >= minSkaterCount ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}
-              >
-                {rosterList.filter((player) => player.playerPosition.key != "G")
-                  .length >= minSkaterCount ? (
-                  <CheckCircleIcon className="h-6 w-6" />
-                ) : (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                )}
-              </div>
-              <span className="ml-2 text-sm">
-                {rosterList.filter((player) => player.playerPosition.key != "G")
-                  .length >= minSkaterCount
-                  ? `Mindestens ${minSkaterCount} Feldspieler wurden festgelegt`
-                  : `Es müssen mindestens ${minSkaterCount} Feldspieler festgelegt werden`}
-              </span>
-            </div>
-
-            {/** Jersey No check indicator */}
-            <div className="flex items-center mt-4">
-              <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player) => player.player.jerseyNumber === 0) ? "bg-yellow-100 text-yellow-600" : "bg-green-100 text-green-600"}`}
-              >
-                {rosterList.some(
-                  (player) => player.player.jerseyNumber === 0,
-                ) ? (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                ) : (
-                  <CheckCircleIcon className="h-6 w-6" />
-                )}
-              </div>
-              <span className="ml-2 text-sm">
-                {rosterList.some((player) => player.player.jerseyNumber === 0)
-                  ? "Es fehlen noch Rückennummern"
-                  : "Alle Spieler müssen Rückennummern haben"}
-              </span>
-            </div>
-
-            {/* Double Jersey No check indicator */}
-            <div className="flex items-center mt-4">
-              <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.some((player, index) => rosterList.findIndex((p) => p.player.jerseyNumber === player.player.jerseyNumber) !== index) ? "bg-yellow-100 text-yellow-600" : "bg-green-100 text-green-600"}`}
-              >
-                {rosterList.some(
-                  (player, index) =>
-                    rosterList.findIndex(
-                      (p) =>
-                        p.player.jerseyNumber === player.player.jerseyNumber,
-                    ) !== index,
-                ) ? (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                ) : (
-                  <CheckCircleIcon className="h-6 w-6" />
-                )}
-              </div>
-              <span className="ml-2 text-sm">
-                {rosterList.some(
-                  (player, index) =>
-                    rosterList.findIndex(
-                      (p) =>
-                        p.player.jerseyNumber === player.player.jerseyNumber,
-                    ) !== index,
-                )
-                  ? "Doppelte Rückennummern vorhanden"
-                  : "Keine doppelten Rückennummern"}
-              </span>
-            </div>
-
-            {/* Called players check indicator */}
-            <div className="flex items-center mt-4">
-              <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center ${rosterList.filter((player) => player.called).length <= 5 ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}
-              >
-                {rosterList.filter((player) => player.called).length <= 5 ? (
-                  <CheckCircleIcon className="h-6 w-6" />
-                ) : (
-                  <ExclamationCircleIcon className="h-6 w-6" />
-                )}
-              </div>
-              <span className="ml-2 text-sm">
-                {rosterList.filter((player) => player.called).length <= 5
-                  ? `Hochgemeldete Spieler: ${rosterList.filter((player) => player.called).length} von 5`
-                  : `Zu viele hochgemeldete Spieler: ${rosterList.filter((player) => player.called).length} von max. 5`}
-              </span>
-            </div>
-          </div>
+          <RosterChecks checks={rosterChecks} />
         </div>
       </div>
 

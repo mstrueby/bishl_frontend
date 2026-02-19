@@ -26,7 +26,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { tournamentConfigs, allFinishTypes } from "../../../../tools/consts";
+import { tournamentConfigs, allFinishTypes, getMinSkaterCount } from "../../../../tools/consts";
 import {
   classNames,
   calculateMatchButtonPermissions,
@@ -695,6 +695,7 @@ export default function MatchDetails({
                   teamFlag="home"
                   isValidating={isValidatingHomeRoster}
                   onOpenPlayerCard={handleOpenPlayerCard}
+                  minSkaterCount={getMinSkaterCount(match.tournament.alias)}
                 />
                 <RosterList
                   teamName={match.away.fullName}
@@ -711,6 +712,7 @@ export default function MatchDetails({
                   teamFlag="away"
                   isValidating={isValidatingAwayRoster}
                   onOpenPlayerCard={handleOpenPlayerCard}
+                  minSkaterCount={getMinSkaterCount(match.tournament.alias)}
                 />
               </div>
             </div>
