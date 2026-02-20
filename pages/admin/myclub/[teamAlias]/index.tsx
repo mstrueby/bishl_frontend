@@ -34,14 +34,10 @@ const TeamPage: NextPage = () => {
   const [club, setClub] = useState<ClubValues | null>(null);
   const [team, setTeam] = useState<TeamValues | null>(null);
   const [players, setPlayers] = useState<PlayerValues[]>([]);
-  const [totalPlayers, setTotalPlayers] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const currentPage = parseInt(router.query.page as string) || 1;
-
-  // Redirect if not authenticated or authorized
   useEffect(() => {
     if (authLoading) return;
     
@@ -61,26 +57,19 @@ const TeamPage: NextPage = () => {
     try {
       setLoading(true);
 
-      // Get club by user's clubId
       const clubResponse = await apiClient.get(`/clubs/id/${user.club.clubId}`);
       const clubData = clubResponse.data?.data || clubResponse.data;
       setClub(clubData);
 
-      // Get team by alias
-      const teamResponse = await apiClient.get(`/clubs/${clubData.alias}/teams/${teamAlias}`);
-      const teamData = teamResponse.data?.data || teamResponse.data;
-      setTeam(teamData);
+      const [teamResponse, playersResponse] = await Promise.all([
+        apiClient.get(`/clubs/${clubData.alias}/teams/${teamAlias}`),
+        apiClient.get(`/players/clubs/${clubData.alias}/teams/${teamAlias}`, {
+          params: { sortby: 'lastName', all: 'true' }
+        })
+      ]);
 
-      // Get players of team
-      const playersResponse = await apiClient.get(`/players/clubs/${clubData.alias}/teams/${teamAlias}`, {
-        params: {
-          sortby: 'lastName',
-          all: 'true'
-        }
-      });
-
+      setTeam(teamResponse.data?.data || teamResponse.data);
       setPlayers(playersResponse.data?.results || playersResponse.data || []);
-      setTotalPlayers(playersResponse.data?.total || 0);
 
     } catch (error) {
       console.error('Error fetching data:', getErrorMessage(error));
@@ -89,32 +78,6 @@ const TeamPage: NextPage = () => {
       setLoading(false);
     }
   }, [user, teamAlias]);
-
-  const fetchPlayers = useCallback(async (page: number) => {
-    if (!club || !team) return;
-
-    try {
-      const playersResponse = await apiClient.get(`/players/clubs/${club.alias}/teams/${team.alias}`, {
-        params: {
-          page,
-          sortby: 'lastName',
-          all: 'true'
-        }
-      });
-      setPlayers(playersResponse.data?.results || playersResponse.data || []);
-    } catch (error) {
-      console.error('Error fetching players:', getErrorMessage(error));
-      setError(getErrorMessage(error));
-    }
-  }, [club, team]);
-
-  const handlePageChange = async (page: number) => {
-    await router.push({
-      pathname: router.pathname,
-      query: { ...router.query, page }
-    });
-    await fetchPlayers(page);
-  };
 
   const editPlayer = (teamAlias: string, PlayerId: string) => {
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
