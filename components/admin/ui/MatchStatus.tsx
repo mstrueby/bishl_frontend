@@ -148,6 +148,11 @@ const MatchStatus = ({ isOpen, onClose, match, onSuccess, onMatchUpdate, userRol
                   className="text-lg text-center font-bold leading-6 text-gray-900 mb-4">
                   Ergebnis bearbeiten
                 </Dialog.Title>
+                <div className="mb-3">
+                  <p className="text-sm text-gray-800">
+                    Änderungen am Status können <strong>nicht</strong> rückgängig gemacht werden.
+                  </p>
+                </div>
                 <form onSubmit={handleSubmit} className="mt-4 ">
                   <div className="space-y-6">
                     <MatchStatusSelect

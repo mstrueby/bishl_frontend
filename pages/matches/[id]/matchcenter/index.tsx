@@ -17,8 +17,8 @@ import {
 } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
-import apiClient from '../../../../lib/apiClient';
-import { getErrorMessage } from '../../../../lib/errorHandler';
+import apiClient from "../../../../lib/apiClient";
+import { getErrorMessage } from "../../../../lib/errorHandler";
 
 let BASE_URL = process.env["NEXT_PUBLIC_API_URL"];
 import {
@@ -27,7 +27,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { tournamentConfigs, allFinishTypes, getMinSkaterCount } from "../../../../tools/consts";
+import {
+  tournamentConfigs,
+  allFinishTypes,
+  getMinSkaterCount,
+} from "../../../../tools/consts";
 import {
   classNames,
   calculateMatchButtonPermissions,
@@ -103,14 +107,6 @@ export default function MatchDetails({
 
   const userRoles = user?.roles || [];
 
-  useEffect(() => {
-    if (user) {
-      console.log('MatchCenter user object:', JSON.stringify(user, null, 2));
-      console.log('MatchCenter user.roles:', user?.roles);
-      console.log('MatchCenter userRoles:', userRoles);
-    }
-  }, [user, userRoles]);
-
   const getBackLink = () => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
     // Check referrer if it exists
@@ -181,7 +177,9 @@ export default function MatchDetails({
     clubName?: string;
     clubLogoUrl?: string;
   } | null>(null);
-  const [playerDetails, setPlayerDetails] = useState<PlayerDetails | null>(null);
+  const [playerDetails, setPlayerDetails] = useState<PlayerDetails | null>(
+    null,
+  );
   const [isLoadingPlayerDetails, setIsLoadingPlayerDetails] = useState(false);
   {
     /**
@@ -217,14 +215,13 @@ export default function MatchDetails({
       roster: RosterPlayer[],
       team: { name: string },
     ) => {
-
       const calledPlayers = roster.filter((player) => player.called);
       if (calledPlayers.length === 0) return {};
 
       const statsPromises = calledPlayers.map(async (player) => {
         try {
           const response = await apiClient.get(
-            `/players/${player.player.playerId}`
+            `/players/${player.player.playerId}`,
           );
 
           const playerData = response.data as PlayerDetails;
@@ -314,12 +311,12 @@ export default function MatchDetails({
   // Roster validation callbacks
   const validateHomeRoster = useCallback(async () => {
     if (isValidatingHomeRoster) return;
-    
+
     try {
       setIsValidatingHomeRoster(true);
       const response = await apiClient.post(
         `/matches/${match._id}/home/roster/validate`,
-        {}
+        {},
       );
 
       if (response.status === 200 && response.data) {
@@ -343,12 +340,12 @@ export default function MatchDetails({
 
   const validateAwayRoster = useCallback(async () => {
     if (isValidatingAwayRoster) return;
-    
+
     try {
       setIsValidatingAwayRoster(true);
       const response = await apiClient.post(
         `/matches/${match._id}/away/roster/validate`,
-        {}
+        {},
       );
 
       if (response.status === 200 && response.data) {
@@ -371,33 +368,36 @@ export default function MatchDetails({
   }, [match._id, isValidatingAwayRoster]);
 
   // Open player card modal
-  const handleOpenPlayerCard = useCallback(async (ctx: { 
-    playerId: string; 
-    teamFlag: "home" | "away"; 
-    player: RosterPlayer 
-  }) => {
-    const team = ctx.teamFlag === "home" ? match.home : match.away;
-    
-    setSelectedPlayerContext({
-      ...ctx,
-      teamName: team.name,
-      teamLogoUrl: team.logo,
-      clubName: team.fullName,
-      clubLogoUrl: team.logo,
-    });
-    setIsPlayerCardOpen(true);
-    setIsLoadingPlayerDetails(true);
+  const handleOpenPlayerCard = useCallback(
+    async (ctx: {
+      playerId: string;
+      teamFlag: "home" | "away";
+      player: RosterPlayer;
+    }) => {
+      const team = ctx.teamFlag === "home" ? match.home : match.away;
 
-    try {
-      const response = await apiClient.get(`/players/${ctx.playerId}`);
-      setPlayerDetails(response.data);
-    } catch (error) {
-      console.error("Error fetching player details:", getErrorMessage(error));
-      setPlayerDetails(null);
-    } finally {
-      setIsLoadingPlayerDetails(false);
-    }
-  }, [match.home, match.away]);
+      setSelectedPlayerContext({
+        ...ctx,
+        teamName: team.name,
+        teamLogoUrl: team.logo,
+        clubName: team.fullName,
+        clubLogoUrl: team.logo,
+      });
+      setIsPlayerCardOpen(true);
+      setIsLoadingPlayerDetails(true);
+
+      try {
+        const response = await apiClient.get(`/players/${ctx.playerId}`);
+        setPlayerDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching player details:", getErrorMessage(error));
+        setPlayerDetails(null);
+      } finally {
+        setIsLoadingPlayerDetails(false);
+      }
+    },
+    [match.home, match.away],
+  );
 
   const handleClosePlayerCard = useCallback(() => {
     setIsPlayerCardOpen(false);
@@ -409,15 +409,12 @@ export default function MatchDetails({
   const updateSupplementaryField = async (fieldName: string, value: any) => {
     try {
       setSavingSupplementaryField(fieldName);
-      const response = await apiClient.patch(
-        `/matches/${match._id}`,
-        {
-          supplementarySheet: {
-            ...match.supplementarySheet,
-            [fieldName]: value,
-          },
-        }
-      );
+      const response = await apiClient.patch(`/matches/${match._id}`, {
+        supplementarySheet: {
+          ...match.supplementarySheet,
+          [fieldName]: value,
+        },
+      });
 
       if (response.status === 200) {
         setMatch({
@@ -429,7 +426,10 @@ export default function MatchDetails({
         });
       }
     } catch (error) {
-      console.error(`Error updating supplementary field ${fieldName}:`, getErrorMessage(error));
+      console.error(
+        `Error updating supplementary field ${fieldName}:`,
+        getErrorMessage(error),
+      );
     } finally {
       setSavingSupplementaryField(null);
     }
@@ -456,7 +456,10 @@ export default function MatchDetails({
               Sie haben keine Berechtigung, die Match Center für dieses Spiel
               aufzurufen.
             </p>
-            <Link href={`/matches/${match._id}`} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <Link
+              href={`/matches/${match._id}`}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
               Zurück zum Spiel
             </Link>
           </div>
@@ -543,7 +546,7 @@ export default function MatchDetails({
                               key: "INPROGRESS",
                               value: "Live",
                             },
-                          }
+                          },
                         );
 
                         if (response.status === 200) {
@@ -552,7 +555,10 @@ export default function MatchDetails({
                           setMatch(updatedMatch);
                         }
                       } catch (error) {
-                        console.error("Error updating match status:", getErrorMessage(error));
+                        console.error(
+                          "Error updating match status:",
+                          getErrorMessage(error),
+                        );
                       } finally {
                         setIsRefreshing(false);
                       }
@@ -734,8 +740,10 @@ export default function MatchDetails({
               <GoalsTab
                 match={match}
                 permissions={{
-                  showButtonScoresHome: permissions.showButtonScoresHome ?? false,
-                  showButtonScoresAway: permissions.showButtonScoresAway ?? false,
+                  showButtonScoresHome:
+                    permissions.showButtonScoresHome ?? false,
+                  showButtonScoresAway:
+                    permissions.showButtonScoresAway ?? false,
                   showButtonEvents: permissions.showButtonEvents ?? false,
                 }}
                 refreshMatchData={refreshMatchData}
@@ -752,8 +760,10 @@ export default function MatchDetails({
               <PenaltiesTab
                 match={match}
                 permissions={{
-                  showButtonPenaltiesHome: permissions.showButtonPenaltiesHome ?? false,
-                  showButtonPenaltiesAway: permissions.showButtonPenaltiesAway ?? false,
+                  showButtonPenaltiesHome:
+                    permissions.showButtonPenaltiesHome ?? false,
+                  showButtonPenaltiesAway:
+                    permissions.showButtonPenaltiesAway ?? false,
                   showButtonEvents: permissions.showButtonEvents ?? false,
                 }}
                 refreshMatchData={refreshMatchData}
@@ -769,7 +779,8 @@ export default function MatchDetails({
             <SupplementaryTab
               match={match}
               permissions={{
-                showButtonSupplementary: permissions.showButtonSupplementary ?? false,
+                showButtonSupplementary:
+                  permissions.showButtonSupplementary ?? false,
               }}
             />
           )}
@@ -887,7 +898,7 @@ export default function MatchDetails({
                     `/matches/${match._id}`,
                     {
                       matchSheetComplete: newCompleteStatus,
-                    }
+                    },
                   );
 
                   if (response.status === 200) {
@@ -941,7 +952,9 @@ export default function MatchDetails({
                 <span
                   aria-hidden="true"
                   className={classNames(
-                    match.matchSheetComplete ? "translate-x-5" : "translate-x-0",
+                    match.matchSheetComplete
+                      ? "translate-x-5"
+                      : "translate-x-0",
                     "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                   )}
                 />
@@ -1038,7 +1051,7 @@ export default function MatchDetails({
                                   value: "Beendet",
                                 },
                                 finishType: selectedFinishType,
-                              }
+                              },
                             );
 
                             if (response.status === 200) {
@@ -1048,7 +1061,10 @@ export default function MatchDetails({
                               setIsFinishDialogOpen(false);
                             }
                           } catch (error) {
-                            console.error("Error finishing match:", getErrorMessage(error));
+                            console.error(
+                              "Error finishing match:",
+                              getErrorMessage(error),
+                            );
                           } finally {
                             setIsRefreshing(false);
                           }
@@ -1175,10 +1191,10 @@ export default function MatchDetails({
           playerContext={selectedPlayerContext}
           playerDetails={playerDetails}
           calledMatchesCount={
-            selectedPlayerContext 
-              ? (selectedPlayerContext.teamFlag === "home" 
-                  ? homePlayerStats[selectedPlayerContext.playerId] 
-                  : awayPlayerStats[selectedPlayerContext.playerId]) ?? 0
+            selectedPlayerContext
+              ? ((selectedPlayerContext.teamFlag === "home"
+                  ? homePlayerStats[selectedPlayerContext.playerId]
+                  : awayPlayerStats[selectedPlayerContext.playerId]) ?? 0)
               : 0
           }
           currentSeasonName={match.season?.name || match.season?.alias}
@@ -1206,7 +1222,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     let matchdayOwner: MatchdayOwner | null = null;
     try {
       const matchdayResponse = await fetch(
-        `${baseUrl}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
+        `${baseUrl}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
       );
       if (matchdayResponse.ok) {
         const matchdayJson = await matchdayResponse.json();
@@ -1214,7 +1230,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         matchdayOwner = matchdayData?.owner || null;
       }
     } catch (error) {
-      console.error('Error fetching matchday owner:', error);
+      console.error("Error fetching matchday owner:", error);
     }
 
     return {

@@ -32,12 +32,7 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
   userRole,
 }) => {
 
-  console.log("CurrentStatus: ", currentStatus)
-  console.log("UserRole: ", userRole)
-  console.log("Statuses: ", statuses)
-  
   const allowedStatuses = useMemo(() => {
-    console.log("UserRoles: ", userRole)
     if (!userRole || !Array.isArray(userRole)) return [];
     
     // Admin has full access
@@ -79,9 +74,6 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
             {label}
           </Listbox.Label>
         )}
-        <p className="mt-1 text-xs text-amber-600">
-          Änderung des Status kann nicht rückgängig gemacht werden.
-        </p>
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
