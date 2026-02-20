@@ -31,10 +31,17 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
   currentStatus,
   userRole,
 }) => {
-  const allowedStatuses = useMemo(() => {
-    if (!userRole || userRole === 'ADMIN') return statuses;
 
+  console.log("CurrentStatus: ", currentStatus)
+  console.log("UserRole: ", userRole)
+  console.log("Statuses: ", statuses)
+  
+  const allowedStatuses = useMemo(() => {
+    console.log("UserRole: ", userRole)
+    if (!userRole) return [];
+    if (userRole === 'ADMIN') return statuses;
     const roleTransitions = transitionsByRole[userRole];
+    console.log("RoleTransitions: ", roleTransitions)
     if (!roleTransitions || !currentStatus) return statuses;
 
     const allowed = roleTransitions[currentStatus];

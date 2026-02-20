@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, Fragment } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import useAuth from "../../../../hooks/useAuth";
+import usePermissions from "../../../../hooks/usePermissions";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -97,8 +98,22 @@ export default function MatchDetails({
 }: MatchDetailsProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { isAdmin, isLeagueManager, isClubManager } = usePermissions();
   const { id } = router.query;
   const [match, setMatch] = useState<MatchValues>(initialMatch);
+
+  const userRole = isAdmin ? 'ADMIN'
+    : isLeagueManager ? 'LEAGUE_ADMIN'
+    : isClubManager ? 'CLUB_ADMIN'
+    : undefined;
+
+  useEffect(() => {
+    if (user) {
+      console.log('MatchCenter user object:', JSON.stringify(user, null, 2));
+      console.log('MatchCenter user.roles:', user?.roles);
+      console.log('MatchCenter derived userRole:', userRole);
+    }
+  }, [user, userRole]);
 
   const getBackLink = () => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
@@ -1144,12 +1159,7 @@ export default function MatchDetails({
           isOpen={isStatusDialogOpen}
           onClose={() => setIsStatusDialogOpen(false)}
           match={match}
-          userRole={
-            user?.roles?.includes('ADMIN') ? 'ADMIN'
-            : user?.roles?.includes('LEAGUE_ADMIN') ? 'LEAGUE_ADMIN'
-            : user?.roles?.includes('CLUB_ADMIN') ? 'CLUB_ADMIN'
-            : undefined
-          }
+          userRole={userRole}
           onSuccess={(updatedMatch) => {
             if (updatedMatch && updatedMatch._id) {
               setMatch({ ...match, ...updatedMatch });
