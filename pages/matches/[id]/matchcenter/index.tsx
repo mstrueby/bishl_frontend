@@ -1144,6 +1144,12 @@ export default function MatchDetails({
           isOpen={isStatusDialogOpen}
           onClose={() => setIsStatusDialogOpen(false)}
           match={match}
+          userRole={
+            user?.roles?.includes('ADMIN') ? 'ADMIN'
+            : user?.roles?.includes('LEAGUE_ADMIN') ? 'LEAGUE_ADMIN'
+            : user?.roles?.includes('CLUB_ADMIN') ? 'CLUB_ADMIN'
+            : undefined
+          }
           onSuccess={(updatedMatch) => {
             if (updatedMatch && updatedMatch._id) {
               setMatch({ ...match, ...updatedMatch });

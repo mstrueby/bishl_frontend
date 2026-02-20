@@ -1,7 +1,6 @@
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
-import { CldImage } from 'next-cloudinary';
 import { classNames } from '../../../tools/utils';
 
 interface MatchStatusSelectProps {
@@ -9,17 +8,46 @@ interface MatchStatusSelectProps {
   statuses: { key: string, value: string }[];
   onStatusChange: (key: string) => void;
   label?: string;
+  currentStatus?: string;
+  userRole?: string;
 }
+
+const transitionsByRole: Record<string, Record<string, string[]>> = {
+  LEAGUE_ADMIN: {
+    SCHEDULED: ['INPROGRESS', 'CANCELLED', 'FORFEITED'],
+    INPROGRESS: ['FINISHED'],
+  },
+  CLUB_ADMIN: {
+    SCHEDULED: ['INPROGRESS'],
+    INPROGRESS: ['FINISHED'],
+  },
+};
 
 const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
   selectedStatus,
   statuses = [],
   onStatusChange,
-  label = "Status"
+  label = "Status",
+  currentStatus,
+  userRole,
 }) => {
+  const allowedStatuses = useMemo(() => {
+    if (!userRole || userRole === 'ADMIN') return statuses;
+
+    const roleTransitions = transitionsByRole[userRole];
+    if (!roleTransitions || !currentStatus) return statuses;
+
+    const allowed = roleTransitions[currentStatus];
+    if (!allowed) return [];
+
+    return statuses.filter(
+      (s) => s.key === currentStatus || allowed.includes(s.key)
+    );
+  }, [statuses, currentStatus, userRole]);
+
   return (
     <Listbox
-      value={statuses.find(status => status.key === selectedStatus?.key)}
+      value={allowedStatuses.find(status => status.key === selectedStatus?.key)}
       onChange={(selected) => {
         if (selected) {
           onStatusChange(selected.key);
@@ -31,6 +59,9 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
             {label}
           </Listbox.Label>
         )}
+        <p className="mt-1 text-xs text-amber-600">
+          Änderung des Status kann nicht rückgängig gemacht werden.
+        </p>
         <div className="relative mt-2">
           <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
             <span className="flex items-center">
@@ -54,7 +85,7 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
             leaveTo="opacity-0"
           >
             <Listbox.Options className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {statuses.map((status) => (
+              {allowedStatuses.map((status) => (
                 <Listbox.Option
                   key={status.key}
                   value={status}

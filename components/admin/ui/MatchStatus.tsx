@@ -32,9 +32,10 @@ interface MatchEditProps {
   match: MatchValues;
   onSuccess: (updatedMatch: Partial<MatchValues>) => void;
   onMatchUpdate?: (updatedMatch: Partial<MatchValues>) => Promise<void>;
+  userRole?: string;
 }
 
-const MatchStatus = ({ isOpen, onClose, match, onSuccess, onMatchUpdate }: MatchEditProps) => {
+const MatchStatus = ({ isOpen, onClose, match, onSuccess, onMatchUpdate, userRole }: MatchEditProps) => {
   const initialEditData = {
     matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
     finishType: { key: match.finishType.key, value: match.finishType.value },
@@ -152,6 +153,8 @@ const MatchStatus = ({ isOpen, onClose, match, onSuccess, onMatchUpdate }: Match
                     <MatchStatusSelect
                       selectedStatus={editData.matchStatus}
                       statuses={allMatchStatuses.sort((a, b) => a.sortOrder - b.sortOrder)}
+                      currentStatus={match.matchStatus.key}
+                      userRole={userRole}
                       onStatusChange={(statusKey) => {
                         const selectedStatus = allMatchStatuses.find(v => v.key === statusKey);
                         if (selectedStatus) {
