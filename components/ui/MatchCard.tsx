@@ -175,6 +175,7 @@ const StatusMenu = ({
           }
         }}
         onMatchUpdate={onMatchUpdate}
+        userRole={user?.role || []}
       />
     </>
   );

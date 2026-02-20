@@ -32,7 +32,7 @@ interface MatchEditProps {
   match: MatchValues;
   onSuccess: (updatedMatch: Partial<MatchValues>) => void;
   onMatchUpdate?: (updatedMatch: Partial<MatchValues>) => Promise<void>;
-  userRole?: string;
+  userRole: string[];
 }
 
 const MatchStatus = ({ isOpen, onClose, match, onSuccess, onMatchUpdate, userRole }: MatchEditProps) => {

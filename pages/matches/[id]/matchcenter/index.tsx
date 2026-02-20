@@ -98,22 +98,18 @@ export default function MatchDetails({
 }: MatchDetailsProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const { isAdmin, isLeagueManager, isClubManager } = usePermissions();
   const { id } = router.query;
   const [match, setMatch] = useState<MatchValues>(initialMatch);
 
-  const userRole = isAdmin ? 'ADMIN'
-    : isLeagueManager ? 'LEAGUE_ADMIN'
-    : isClubManager ? 'CLUB_ADMIN'
-    : undefined;
+  const userRoles = user?.roles || [];
 
   useEffect(() => {
     if (user) {
       console.log('MatchCenter user object:', JSON.stringify(user, null, 2));
       console.log('MatchCenter user.roles:', user?.roles);
-      console.log('MatchCenter derived userRole:', userRole);
+      console.log('MatchCenter userRoles:', userRoles);
     }
-  }, [user, userRole]);
+  }, [user, userRoles]);
 
   const getBackLink = () => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
@@ -1159,7 +1155,7 @@ export default function MatchDetails({
           isOpen={isStatusDialogOpen}
           onClose={() => setIsStatusDialogOpen(false)}
           match={match}
-          userRole={userRole}
+          userRole={userRoles}
           onSuccess={(updatedMatch) => {
             if (updatedMatch && updatedMatch._id) {
               setMatch({ ...match, ...updatedMatch });

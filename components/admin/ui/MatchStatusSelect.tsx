@@ -9,7 +9,7 @@ interface MatchStatusSelectProps {
   onStatusChange: (key: string) => void;
   label?: string;
   currentStatus?: string;
-  userRole?: string;
+  userRole: string[];
 }
 
 const transitionsByRole: Record<string, Record<string, string[]>> = {
@@ -37,18 +37,31 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
   console.log("Statuses: ", statuses)
   
   const allowedStatuses = useMemo(() => {
-    console.log("UserRole: ", userRole)
-    if (!userRole) return [];
-    if (userRole === 'ADMIN') return statuses;
-    const roleTransitions = transitionsByRole[userRole];
-    console.log("RoleTransitions: ", roleTransitions)
-    if (!roleTransitions || !currentStatus) return statuses;
+    console.log("UserRoles: ", userRole)
+    if (!userRole || !Array.isArray(userRole)) return [];
+    
+    // Admin has full access
+    if (userRole.includes('ADMIN')) return statuses;
+    
+    // Check if any role has defined transitions
+    const allAllowedKeys = new Set<string>();
+    userRole.forEach(role => {
+      const roleTransitions = transitionsByRole[role];
+      if (roleTransitions && currentStatus) {
+        const allowed = roleTransitions[currentStatus];
+        if (allowed) {
+          allowed.forEach(key => allAllowedKeys.add(key));
+        }
+      }
+    });
 
-    const allowed = roleTransitions[currentStatus];
-    if (!allowed) return [];
+    if (allAllowedKeys.size === 0) {
+      // If no specific transitions found but roles exist, return current status at least
+      return statuses.filter(s => s.key === currentStatus);
+    }
 
     return statuses.filter(
-      (s) => s.key === currentStatus || allowed.includes(s.key)
+      (s) => s.key === currentStatus || allAllowedKeys.has(s.key)
     );
   }, [statuses, currentStatus, userRole]);
 
