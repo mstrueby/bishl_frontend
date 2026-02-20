@@ -85,6 +85,13 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const [passCheckMessage, setPassCheckMessage] = useState("");
   const [passCheckLoading, setPassCheckLoading] = useState(false);
   const [managedByISHDLoading, setManagedByISHDLoading] = useState(false);
+  const [isLastLicenceWarningOpen, setIsLastLicenceWarningOpen] = useState(false);
+  const [pendingRemoveLicence, setPendingRemoveLicence] = useState<{
+    assignment: Assignment;
+    team: AssignmentTeam;
+    values: PlayerValues;
+    setFieldValue: any;
+  } | null>(null);
 
   useEffect(() => {
     setSavedMasterData({
@@ -177,7 +184,17 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     }
   };
 
-  const handleRemoveLicence = async (
+  const isLastOwnClubLicence = (
+    assignment: Assignment,
+    team: AssignmentTeam,
+    values: PlayerValues,
+  ): boolean => {
+    if (assignment.clubId !== clubId) return false;
+    const ownClub = values.assignedTeams?.find((a) => a.clubId === clubId);
+    return ownClub ? ownClub.teams.length === 1 : false;
+  };
+
+  const handleRemoveLicenceRequest = (
     assignment: Assignment,
     team: AssignmentTeam,
     values: PlayerValues,
@@ -188,6 +205,20 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       return;
     }
 
+    if (isLastOwnClubLicence(assignment, team, values)) {
+      setPendingRemoveLicence({ assignment, team, values, setFieldValue });
+      setIsLastLicenceWarningOpen(true);
+    } else {
+      handleRemoveLicence(assignment, team, values, setFieldValue);
+    }
+  };
+
+  const handleRemoveLicence = async (
+    assignment: Assignment,
+    team: AssignmentTeam,
+    values: PlayerValues,
+    setFieldValue: any,
+  ) => {
     setLicenceLoading(true);
     setLicenceErrorMessage(null);
     try {
@@ -213,6 +244,14 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pass erfolgreich entfernt.");
+
+      const stillHasOwnClubLicence = (response.data.assignedTeams || []).some(
+        (a: Assignment) => a.clubId === clubId && a.teams.length > 0,
+      );
+      if (!stillHasOwnClubLicence && editMode) {
+        handleEditCancel(setFieldValue);
+      }
+
       licenceSectionRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -452,7 +491,12 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
         })}
         onSubmit={onSubmit}
       >
-        {({ values, handleChange, setFieldValue, resetForm }) => (
+        {({ values, handleChange, setFieldValue, resetForm }) => {
+          const hasNoOwnClubLicenceGlobal = !(values.assignedTeams || []).some(
+            (a) => a.clubId === clubId && a.teams.length > 0,
+          );
+
+          return (
           <Form>
             {/* Section 2: Editable master data */}
             <div className="mt-12" ref={masterSectionRef}>
@@ -469,10 +513,19 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                   <button
                     type="button"
                     onClick={() => setEditMode(true)}
-                    className="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    disabled={hasNoOwnClubLicenceGlobal}
+                    className={classNames(
+                      "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300",
+                      hasNoOwnClubLicenceGlobal
+                        ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                        : "bg-white text-gray-900 hover:bg-gray-50",
+                    )}
                   >
                     <PencilIcon
-                      className="-ml-0.5 h-5 w-5 text-gray-400"
+                      className={classNames(
+                        "-ml-0.5 h-5 w-5",
+                        hasNoOwnClubLicenceGlobal ? "text-gray-300" : "text-gray-400",
+                      )}
                       aria-hidden="true"
                     />
                     Bearbeiten
@@ -631,6 +684,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 (t) => t.licenseType === "LOAN",
               );
               const hasLoanLicence = isLoanClub;
+              const hasNoOwnClubLicence = !ownClubAssignment || ownClubAssignment.teams.length === 0;
+              const isDisabled = hasLoanLicence || hasNoOwnClubLicence;
 
               const sortedAssignedTeams = [...(values.assignedTeams || [])]
                 .sort((a, b) => {
@@ -685,10 +740,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         onClick={() =>
                           handleAutoOptimize(values, setFieldValue)
                         }
-                        disabled={licenceLoading || hasLoanLicence}
+                        disabled={licenceLoading || isDisabled}
                         className={classNames(
                           "flex-1 sm:flex-none inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-                          hasLoanLicence
+                          isDisabled
                             ? "bg-gray-50 text-gray-400 ring-gray-200 cursor-not-allowed"
                             : "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50",
                         )}
@@ -696,7 +751,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         <SparklesIcon
                           className={classNames(
                             "-ml-0.5 h-5 w-5",
-                            hasLoanLicence ? "text-gray-300" : "text-gray-400",
+                            isDisabled ? "text-gray-300" : "text-gray-400",
                           )}
                           aria-hidden="true"
                         />
@@ -707,10 +762,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         className="relative inline-block text-left flex-auto sm:flex-none"
                       >
                         <Menu.Button
-                          disabled={managedByISHDLoading}
+                          disabled={managedByISHDLoading || isDisabled}
                           className={classNames(
                             "w-full sm:w-auto inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset",
-                            managedByISHDLoading
+                            managedByISHDLoading || isDisabled
                               ? "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed"
                               : values.managedByISHD
                                 ? "bg-yellow-50 text-yellow-700 ring-yellow-600/20 hover:bg-yellow-100"
@@ -750,7 +805,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                         setFieldValue,
                                       )
                                     }
-                                    disabled={values.managedByISHD || hasLoanLicence}
+                                    disabled={values.managedByISHD || isDisabled}
                                     className={classNames(
                                       values.managedByISHD
                                         ? "bg-yellow-50 text-yellow-700"
@@ -781,7 +836,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                         setFieldValue,
                                       )
                                     }
-                                    disabled={!values.managedByISHD || hasLoanLicence}
+                                    disabled={!values.managedByISHD || isDisabled}
                                     className={classNames(
                                       !values.managedByISHD
                                         ? "bg-indigo-50 text-indigo-700"
@@ -813,10 +868,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           setEditingClubId(null);
                           setIsModalOpen(true);
                         }}
-                        disabled={hasLoanLicence}
+                        disabled={isDisabled}
                         className={classNames(
                           "flex-1 sm:flex-none inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-                          hasLoanLicence
+                          isDisabled
                             ? "bg-indigo-300 text-white cursor-not-allowed"
                             : "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600",
                         )}
@@ -919,6 +974,60 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {passCheckLoading ? "Wird gesendet..." : "Absenden"}
+                          </button>
+                        </div>
+                      </Dialog.Panel>
+                    </div>
+                  </Dialog>
+
+                  <Dialog
+                    open={isLastLicenceWarningOpen}
+                    onClose={() => {
+                      setIsLastLicenceWarningOpen(false);
+                      setPendingRemoveLicence(null);
+                    }}
+                    className="relative z-50"
+                  >
+                    <div
+                      className="fixed inset-0 bg-black/30"
+                      aria-hidden="true"
+                    />
+                    <div className="fixed inset-0 flex items-center justify-center p-4">
+                      <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white p-6 shadow-xl">
+                        <Dialog.Title className="text-lg font-semibold text-gray-900">
+                          Letzten Pass entfernen?
+                        </Dialog.Title>
+                        <p className="mt-3 text-sm text-gray-600">
+                          Wenn du den letzten Pass deines Vereins entfernst, kannst du diesen Spieler nicht mehr bearbeiten.
+                        </p>
+                        <div className="mt-5 flex justify-end gap-x-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsLastLicenceWarningOpen(false);
+                              setPendingRemoveLicence(null);
+                            }}
+                            className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                          >
+                            Abbrechen
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (pendingRemoveLicence) {
+                                handleRemoveLicence(
+                                  pendingRemoveLicence.assignment,
+                                  pendingRemoveLicence.team,
+                                  pendingRemoveLicence.values,
+                                  pendingRemoveLicence.setFieldValue,
+                                );
+                              }
+                              setIsLastLicenceWarningOpen(false);
+                              setPendingRemoveLicence(null);
+                            }}
+                            className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+                          >
+                            Entfernen
                           </button>
                         </div>
                       </Dialog.Panel>
@@ -1171,7 +1280,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                                           <button
                                                             type="button"
                                                             onClick={() =>
-                                                              handleRemoveLicence(
+                                                              handleRemoveLicenceRequest(
                                                                 assignment,
                                                                 team,
                                                                 values,
@@ -1241,7 +1350,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               </button>
             </div>
           </Form>
-        )}
+        );
+        }}
       </Formik>
     </>
   );
