@@ -1008,13 +1008,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                     )}
                                     {assignment.teams.map((team, teamIndex) => {
                                       const isValid = team.status === "VALID";
-                                      const isLastLicenceInOwnClub =
-                                        isOwnClub &&
-                                        assignment.teams.length === 1;
                                       const canRemove = !(
                                         (team.source === "ISHD" &&
-                                          initialValues.managedByISHD) ||
-                                        isLastLicenceInOwnClub
+                                          initialValues.managedByISHD)
                                       );
 
                                       return (
