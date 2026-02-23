@@ -50,9 +50,11 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
   const isEditMode = !!editingTeam;
   const effectiveClubId = editingClubId || clubId;
-  const effectiveClubName = editingClubId
-    ? currentAssignments.find(a => a.clubId === editingClubId)?.clubName || clubName
-    : clubName;
+  const editingAssignment = editingClubId
+    ? currentAssignments.find(a => a.clubId === editingClubId)
+    : null;
+  const effectiveClubName = editingAssignment?.clubName || clubName;
+  const effectiveClubAlias = editingAssignment?.clubAlias || "";
 
   useEffect(() => {
     if (isOpen) {
@@ -223,6 +225,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   <TeamAssignmentSelect
                     playerId={playerId}
                     clubId={effectiveClubId}
+                    clubAlias={effectiveClubAlias}
+                    clubName={effectiveClubName}
                     selectedTeamId={selectedTeam?.teamId || null}
                     onTeamChange={setSelectedTeam}
                     label="Mannschaft"

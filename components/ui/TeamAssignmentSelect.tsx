@@ -20,6 +20,8 @@ interface PossibleTeam {
 interface TeamAssignmentSelectProps {
   playerId: string;
   clubId: string;
+  clubAlias?: string;
+  clubName?: string;
   selectedTeamId: string | null;
   onTeamChange: (team: PossibleTeam | null) => void;
   label?: string;
@@ -35,6 +37,8 @@ interface TeamAssignmentSelectProps {
 const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   playerId,
   clubId,
+  clubAlias = "",
+  clubName: clubNameProp = "",
   selectedTeamId,
   onTeamChange,
   label = "Mannschaft",
@@ -54,74 +58,93 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [teamsResponse, configResponse] = await Promise.all([
-          apiClient.get(`/players/${playerId}/possible-teams`),
-          apiClient.get("/configs/player_assignment_window"),
-        ]);
 
-        const allTeams: PossibleTeam[] = teamsResponse.data || [];
-        const sortedAllTeams = [...allTeams].sort((a, b) => {
-          const orderA = ageGroupConfig.find(g => g.key === a.teamAgeGroup)?.sortOrder || 999;
-          const orderB = ageGroupConfig.find(g => g.key === b.teamAgeGroup)?.sortOrder || 999;
-          
-          if (orderA !== orderB) {
-            return orderA - orderB;
-          }
-          
-          return (a.teamAlias || "").localeCompare(b.teamAlias || "");
-        });
-
-        const filteredTeams = clubId
-          ? sortedAllTeams.filter((team) => team.clubId === clubId)
-          : sortedAllTeams;
-        setTeams(filteredTeams);
-
-        const configItems = configResponse.data?.items || [];
-        const enabledItem = configItems.find(
-          (item: any) => item.key === "ENABLED",
-        );
-        const startMonthItem = configItems.find(
-          (item: any) => item.key === "STARTMONTH",
-        );
-        const startDayItem = configItems.find(
-          (item: any) => item.key === "STARTDAY",
-        );
-        const endMonthItem = configItems.find(
-          (item: any) => item.key === "ENDMONTH",
-        );
-        const endDayItem = configItems.find(
-          (item: any) => item.key === "ENDDAY",
-        );
-
-        const isEnabled =
-          enabledItem?.value === "true" || enabledItem?.value === true;
-        const startMonth = parseInt(startMonthItem?.value || "1", 10);
-        const startDay = parseInt(startDayItem?.value || "1", 10);
-        const endMonth = parseInt(endMonthItem?.value || "12", 10);
-        const endDay = parseInt(endDayItem?.value || "31", 10);
-
-        if (isEnabled) {
-          const now = new Date();
-          const currentMonth = now.getMonth() + 1;
-          const currentDay = now.getDate();
-
-          const isAfterStart =
-            currentMonth > startMonth ||
-            (currentMonth === startMonth && currentDay >= startDay);
-          const isBeforeEnd =
-            currentMonth < endMonth ||
-            (currentMonth === endMonth && currentDay <= endDay);
-
-          const isInWindow = isAfterStart && isBeforeEnd;
-          setWindowEnabled(isInWindow);
-
-          if (!isInWindow) {
-            setWindowMessage(
-              `Passwechsel nur vom ${startDay}.${startMonth}. bis ${endDay}.${endMonth}. möglich`,
-            );
-          }
-        } else {
+        if (isAdmin && clubAlias) {
+          const teamsResponse = await apiClient.get(`/clubs/${clubAlias}/teams`);
+          const clubTeams = (teamsResponse.data || []).map((t: any) => ({
+            teamId: t._id,
+            teamName: t.name,
+            teamAlias: t.alias,
+            teamAgeGroup: t.ageGroup,
+            recommendedType: t.teamType || "",
+            status: t.active ? "VALID" : "INVALID",
+            clubId: clubId,
+            clubName: clubNameProp,
+          }));
+          const sorted = [...clubTeams].sort((a: PossibleTeam, b: PossibleTeam) => {
+            const orderA = ageGroupConfig.find(g => g.key === a.teamAgeGroup)?.sortOrder || 999;
+            const orderB = ageGroupConfig.find(g => g.key === b.teamAgeGroup)?.sortOrder || 999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.teamAlias || "").localeCompare(b.teamAlias || "");
+          });
+          setTeams(sorted);
           setWindowEnabled(true);
+        } else {
+          const [teamsResponse, configResponse] = await Promise.all([
+            apiClient.get(`/players/${playerId}/possible-teams`),
+            apiClient.get("/configs/player_assignment_window"),
+          ]);
+
+          const allTeams: PossibleTeam[] = teamsResponse.data || [];
+          const sortedAllTeams = [...allTeams].sort((a, b) => {
+            const orderA = ageGroupConfig.find(g => g.key === a.teamAgeGroup)?.sortOrder || 999;
+            const orderB = ageGroupConfig.find(g => g.key === b.teamAgeGroup)?.sortOrder || 999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.teamAlias || "").localeCompare(b.teamAlias || "");
+          });
+
+          const filteredTeams = clubId
+            ? sortedAllTeams.filter((team) => team.clubId === clubId)
+            : sortedAllTeams;
+          setTeams(filteredTeams);
+
+          const configItems = configResponse.data?.items || [];
+          const enabledItem = configItems.find(
+            (item: any) => item.key === "ENABLED",
+          );
+          const startMonthItem = configItems.find(
+            (item: any) => item.key === "STARTMONTH",
+          );
+          const startDayItem = configItems.find(
+            (item: any) => item.key === "STARTDAY",
+          );
+          const endMonthItem = configItems.find(
+            (item: any) => item.key === "ENDMONTH",
+          );
+          const endDayItem = configItems.find(
+            (item: any) => item.key === "ENDDAY",
+          );
+
+          const isEnabled =
+            enabledItem?.value === "true" || enabledItem?.value === true;
+          const startMonth = parseInt(startMonthItem?.value || "1", 10);
+          const startDay = parseInt(startDayItem?.value || "1", 10);
+          const endMonth = parseInt(endMonthItem?.value || "12", 10);
+          const endDay = parseInt(endDayItem?.value || "31", 10);
+
+          if (isEnabled) {
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentDay = now.getDate();
+
+            const isAfterStart =
+              currentMonth > startMonth ||
+              (currentMonth === startMonth && currentDay >= startDay);
+            const isBeforeEnd =
+              currentMonth < endMonth ||
+              (currentMonth === endMonth && currentDay <= endDay);
+
+            const isInWindow = isAfterStart && isBeforeEnd;
+            setWindowEnabled(isInWindow);
+
+            if (!isInWindow) {
+              setWindowMessage(
+                `Passwechsel nur vom ${startDay}.${startMonth}. bis ${endDay}.${endMonth}. möglich`,
+              );
+            }
+          } else {
+            setWindowEnabled(true);
+          }
         }
       } catch (error) {
         console.error("Error fetching possible teams:", error);
@@ -131,10 +154,10 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
       }
     };
 
-    if (playerId && (clubId || isAdmin)) {
+    if (playerId && (clubId || (isAdmin && clubAlias))) {
       fetchData();
     }
-  }, [playerId, clubId, isAdmin]);
+  }, [playerId, clubId, clubAlias, isAdmin]);
 
   const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
   const isISHDManaged = managedByISHD && licenceSource === "ISHD";
