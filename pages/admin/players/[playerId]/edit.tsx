@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import PlayerAdminForm from "../../../../components/admin/PlayerAdminForm";
+import PlayerForm from "../../../../components/admin/PlayerForm";
 import Layout from "../../../../components/Layout";
 import SectionHeader from "../../../../components/admin/SectionHeader";
+import WkoRules from "../../../../components/admin/wko/WkoRules";
 import { PlayerValues } from "../../../../types/PlayerValues";
 import ErrorMessage from "../../../../components/ui/ErrorMessage";
-import { ClubValues } from "../../../../types/ClubValues";
 import useAuth from "../../../../hooks/useAuth";
 import usePermissions from "../../../../hooks/usePermissions";
 import { UserRole } from "../../../../lib/auth";
 import LoadingState from "../../../../components/ui/LoadingState";
 import apiClient from "../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../lib/errorHandler";
+import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
 
 const Edit: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -20,12 +21,13 @@ const Edit: NextPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [dataLoading, setDataLoading] = useState<boolean>(true);
-  const [clubs, setClubs] = useState<ClubValues[]>([]);
   const [player, setPlayer] = useState<PlayerValues | null>(null);
+  const [wkoRules, setWkoRules] = useState<any[]>([]);
+  const [dynamicRules, setDynamicRules] = useState<any>(null);
+  const [assignmentWindow, setAssignmentWindow] = useState<any>(null);
   const router = useRouter();
   const { playerId } = router.query;
 
-  // 1. Auth redirect check
   useEffect(() => {
     if (authLoading) return;
 
@@ -39,21 +41,29 @@ const Edit: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole, router]);
 
-  // 2. Data fetching
   useEffect(() => {
     if (authLoading || !user || !playerId) return;
 
     const fetchData = async () => {
       try {
-        // Fetch clubs
-        const clubsResponse = await apiClient.get("/clubs", {
-          params: { active: true },
-        });
-        setClubs(clubsResponse.data);
+        const [playerResponse, wkoResponse, assignmentWindowResponse] = await Promise.all([
+          apiClient.get(`/players/${playerId}`),
+          apiClient.get("/players/wko-rules"),
+          apiClient.get("/configs/player_assignment_window"),
+        ]);
 
-        // Fetch player
-        const playerResponse = await apiClient.get(`/players/${playerId}`);
         setPlayer(playerResponse.data);
+
+        const responseData = wkoResponse.data;
+        if (responseData?.data?.wko_rules) {
+          setWkoRules(responseData.data.wko_rules);
+          setDynamicRules(responseData.data.dynamic_rules || null);
+        } else if (responseData?.wko_rules) {
+          setWkoRules(responseData.wko_rules);
+          setDynamicRules(responseData.dynamic_rules || null);
+        }
+
+        setAssignmentWindow(assignmentWindowResponse.data);
       } catch (error) {
         console.error("Error fetching data:", getErrorMessage(error));
         setError(getErrorMessage(error));
@@ -67,42 +77,32 @@ const Edit: NextPage = () => {
   const onSubmit = async (values: PlayerValues) => {
     setError(null);
     setLoading(true);
-    values.birthdate = new Date(values.birthdate).toISOString();
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         const excludedFields = [
           "_id",
           "stats",
-          "source",
           "legacyId",
           "createDate",
-          "displayFirstName",
-          "displayLastName",
           "ageGroup",
           "overAge",
         ];
         if (excludedFields.includes(key)) return;
 
-        // Handle image/imageUrl specially
-        if (key === 'image' || key === 'imageUrl') {
+        if (key === "image" || key === "imageUrl") {
           if (value instanceof File) {
-            // New file upload
-            formData.append('image', value);
+            formData.append("image", value);
           } else if (value === null) {
-            // Image was removed - signal backend to delete
-            formData.append('imageUrl', '');
+            formData.append("imageUrl", "");
           }
-          // If value is a string (existing URL), don't append anything - backend keeps existing
           return;
         }
 
-        // Handle File objects (from ImageUpload)
         if (value instanceof File) {
           formData.append(key, value);
           return;
         }
-        // Handle FileList (legacy support)
         if (value instanceof FileList) {
           Array.from(value).forEach((file) => formData.append(key, file));
           return;
@@ -131,8 +131,6 @@ const Edit: NextPage = () => {
           formData.append(key, value);
         }
       });
-      // log formData fields
-      console.log('FormData entries:', Array.from(formData.entries()));
 
       const response = await apiClient.patch(
         `/players/${player?._id}`,
@@ -156,6 +154,10 @@ const Edit: NextPage = () => {
     }
   };
 
+  const handlePlayerUpdate = (updatedPlayer: PlayerValues) => {
+    setPlayer(updatedPlayer);
+  };
+
   const handleCancel = () => {
     router.push(`/admin/players`);
   };
@@ -170,7 +172,6 @@ const Edit: NextPage = () => {
     setError(null);
   };
 
-  // 3. Loading state
   if (authLoading || dataLoading) {
     return (
       <Layout>
@@ -179,7 +180,6 @@ const Edit: NextPage = () => {
     );
   }
 
-  // 4. Auth guard
   if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) return null;
 
   if (!player) {
@@ -219,25 +219,45 @@ const Edit: NextPage = () => {
     managedByISHD: player.managedByISHD || false,
     sex: player.sex || "",
     playUpTrackings: player.playUpTrackings || [],
-    suspensions: player.suspensions || []
+    suspensions: player.suspensions || [],
   };
 
-  const sectionTitle = "Spieler bearbeiten";
+  const sectionTitle = `${initialValues.firstName} ${initialValues.lastName}`;
 
   return (
     <Layout>
-      <SectionHeader title={sectionTitle} />
+      <SectionHeader
+        title={sectionTitle}
+        backLink="/admin/players"
+      />
 
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
-      <PlayerAdminForm
+      <PlayerForm
         initialValues={initialValues}
         onSubmit={onSubmit}
+        onPlayerUpdate={handlePlayerUpdate}
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
-        clubs={clubs}
+        isAdmin={true}
       />
+
+      <WkoRules rules={wkoRules} dynamicRules={dynamicRules} assignmentWindow={assignmentWindow} />
+
+      <div className="mt-8 flex justify-end py-4 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          <ArrowUturnLeftIcon
+            className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400"
+            aria-hidden="true"
+          />
+          Zurück
+        </button>
+      </div>
     </Layout>
   );
 };

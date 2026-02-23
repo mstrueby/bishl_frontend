@@ -29,7 +29,9 @@ import {
   ArrowUturnLeftIcon,
   FlagIcon,
   ChevronDownIcon,
+  CursorArrowRaysIcon,
 } from "@heroicons/react/24/outline";
+import { LicenseStatus, LicenseInvalidReasonCode } from "../../types/PlayerValues";
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -38,9 +40,10 @@ interface PlayerFormProps {
   enableReinitialize: boolean;
   handleCancel: () => void;
   loading: boolean;
-  clubId: string;
-  clubName: string;
+  clubId?: string;
+  clubName?: string;
   clubEmail?: string;
+  isAdmin?: boolean;
 }
 
 
@@ -51,9 +54,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   enableReinitialize,
   handleCancel,
   loading,
-  clubId,
-  clubName,
+  clubId = "",
+  clubName = "",
   clubEmail,
+  isAdmin = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -92,6 +96,36 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     values: PlayerValues;
     setFieldValue: any;
   } | null>(null);
+  const [stammdatenEditMode, setStammdatenEditMode] = useState(false);
+  const [stammdatenLoading, setStammdatenLoading] = useState(false);
+  const [stammdatenForm, setStammdatenForm] = useState({
+    firstName: initialValues.firstName,
+    lastName: initialValues.lastName,
+    birthdate: initialValues.birthdate ? new Date(initialValues.birthdate).toLocaleDateString("en-CA", { timeZone: "Europe/Berlin" }) : "",
+    sex: initialValues.sex,
+  });
+  const [savedStammdaten, setSavedStammdaten] = useState({
+    firstName: initialValues.firstName,
+    lastName: initialValues.lastName,
+    birthdate: initialValues.birthdate,
+    sex: initialValues.sex,
+    ageGroup: initialValues.ageGroup,
+    fullFaceReq: initialValues.fullFaceReq,
+  });
+  const stammdatenSectionRef = useRef<HTMLDivElement>(null);
+  const [stammdatenSuccessMessage, setStammdatenSuccessMessage] = useState<string | null>(null);
+  const [stammdatenErrorMessage, setStammdatenErrorMessage] = useState<string | null>(null);
+  const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
+  const [overrideTeam, setOverrideTeam] = useState<AssignmentTeam | null>(null);
+  const [overrideAssignment, setOverrideAssignment] = useState<Assignment | null>(null);
+  const [overrideForm, setOverrideForm] = useState({
+    status: LicenseStatus.UNKNOWN,
+    invalidReasonCodes: [] as LicenseInvalidReasonCode[],
+    adminOverride: false,
+    overrideReason: "",
+    overrideDate: "",
+  });
+  const [overrideLoading, setOverrideLoading] = useState(false);
 
   useEffect(() => {
     setSavedMasterData({
@@ -99,6 +133,23 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       displayLastName: initialValues.displayLastName,
       imageUrl: initialValues.imageUrl,
       imageVisible: initialValues.imageVisible,
+    });
+  }, [initialValues]);
+
+  useEffect(() => {
+    setSavedStammdaten({
+      firstName: initialValues.firstName,
+      lastName: initialValues.lastName,
+      birthdate: initialValues.birthdate,
+      sex: initialValues.sex,
+      ageGroup: initialValues.ageGroup,
+      fullFaceReq: initialValues.fullFaceReq,
+    });
+    setStammdatenForm({
+      firstName: initialValues.firstName,
+      lastName: initialValues.lastName,
+      birthdate: initialValues.birthdate ? new Date(initialValues.birthdate).toLocaleDateString("en-CA", { timeZone: "Europe/Berlin" }) : "",
+      sex: initialValues.sex,
     });
   }, [initialValues]);
 
@@ -380,6 +431,121 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     }
   };
 
+  const handleStammdatenSave = async () => {
+    setStammdatenLoading(true);
+    setStammdatenErrorMessage(null);
+    try {
+      const formData = new FormData();
+      formData.append("firstName", stammdatenForm.firstName);
+      formData.append("lastName", stammdatenForm.lastName);
+      formData.append("birthdate", new Date(stammdatenForm.birthdate).toISOString());
+      formData.append("sex", stammdatenForm.sex);
+
+      const response = await apiClient.patch(
+        `/players/${initialValues._id}`,
+        formData,
+      );
+
+      setSavedStammdaten({
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
+        birthdate: response.data.birthdate,
+        sex: response.data.sex,
+        ageGroup: response.data.ageGroup,
+        fullFaceReq: response.data.fullFaceReq,
+      });
+
+      onPlayerUpdate(response.data);
+      setStammdatenEditMode(false);
+      setStammdatenSuccessMessage("Stammdaten erfolgreich gespeichert.");
+      setTimeout(() => setStammdatenSuccessMessage(null), 3000);
+      stammdatenSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } catch (error) {
+      console.error("Error saving stammdaten:", error);
+      setStammdatenErrorMessage("Fehler beim Speichern der Stammdaten.");
+    } finally {
+      setStammdatenLoading(false);
+    }
+  };
+
+  const handleStammdatenCancel = () => {
+    setStammdatenForm({
+      firstName: savedStammdaten.firstName,
+      lastName: savedStammdaten.lastName,
+      birthdate: savedStammdaten.birthdate ? new Date(savedStammdaten.birthdate).toLocaleDateString("en-CA", { timeZone: "Europe/Berlin" }) : "",
+      sex: savedStammdaten.sex,
+    });
+    setStammdatenEditMode(false);
+    setStammdatenErrorMessage(null);
+  };
+
+  const handleOpenOverrideDialog = (assignment: Assignment, team: AssignmentTeam) => {
+    setOverrideAssignment(assignment);
+    setOverrideTeam(team);
+    setOverrideForm({
+      status: team.status || LicenseStatus.UNKNOWN,
+      invalidReasonCodes: team.invalidReasonCodes || [],
+      adminOverride: team.adminOverride || false,
+      overrideReason: team.overrideReason || "",
+      overrideDate: team.overrideDate || "",
+    });
+    setIsOverrideDialogOpen(true);
+  };
+
+  const handleOverrideSave = async (values: PlayerValues, setFieldValue: any) => {
+    if (!overrideAssignment || !overrideTeam) return;
+    setOverrideLoading(true);
+    try {
+      const updatedAssignments = values.assignedTeams.map((a) => {
+        if (a.clubId === overrideAssignment.clubId) {
+          return {
+            ...a,
+            teams: a.teams.map((t) => {
+              if (t.teamId === overrideTeam.teamId) {
+                return {
+                  ...t,
+                  status: overrideForm.status,
+                  invalidReasonCodes: overrideForm.status === LicenseStatus.VALID ? [] : overrideForm.invalidReasonCodes,
+                  adminOverride: overrideForm.adminOverride,
+                  overrideReason: overrideForm.adminOverride ? overrideForm.overrideReason : "",
+                  overrideDate: overrideForm.adminOverride ? overrideForm.overrideDate : "",
+                };
+              }
+              return t;
+            }),
+          };
+        }
+        return a;
+      });
+
+      const formData = new FormData();
+      formData.append("assignedTeams", JSON.stringify(updatedAssignments));
+
+      const response = await apiClient.patch(
+        `/players/${initialValues._id}`,
+        formData,
+      );
+      setFieldValue("assignedTeams", response.data.assignedTeams);
+      onPlayerUpdate(response.data);
+      showLicenceSuccess("Überschreibung erfolgreich gespeichert.");
+      setIsOverrideDialogOpen(false);
+      setOverrideTeam(null);
+      setOverrideAssignment(null);
+      licenceSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } catch (error) {
+      console.error("Error saving override:", error);
+      showLicenceError("Fehler beim Speichern der Überschreibung.");
+    } finally {
+      setOverrideLoading(false);
+    }
+  };
+
   const handleEditCancel = (setFieldValue: any) => {
     setFieldValue("displayFirstName", savedMasterData.displayFirstName);
     setFieldValue("displayLastName", savedMasterData.displayLastName);
@@ -413,69 +579,183 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
   return (
     <>
-      {/* Section 1: Non-editable master data */}
-      <div className="mt-8">
-        <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
-          Stammdaten
-        </h3>
-        <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
-          Diese Daten werden durch die Passstelle verwaltet und können nicht
-          geändert werden.
-        </p>
-      </div>
-      <div className="mt-6 border-t border-b border-gray-100">
-        <dl className="divide-y divide-gray-100">
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm/6 font-medium text-gray-900">
-              Name, Vorname
-            </dt>
-            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-              {initialValues.lastName}, {initialValues.firstName}
-            </dd>
+      {/* Section 1: Master data (editable for admins) */}
+      <div className="mt-8" ref={stammdatenSectionRef}>
+        <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+          <div>
+            <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
+              Stammdaten
+            </h3>
+            <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
+              {isAdmin
+                ? "Diese Daten können von Administratoren bearbeitet werden."
+                : "Diese Daten werden durch die Passstelle verwaltet und können nicht geändert werden."}
+            </p>
           </div>
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm/6 font-medium text-gray-900">
-              Geburtsdatum
-            </dt>
-            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-              {new Date(initialValues.birthdate).toLocaleDateString("de-DE", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
-            </dd>
-          </div>
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm/6 font-medium text-gray-900">Geschlecht</dt>
-            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-              <Badge info={initialValues.sex} />
-            </dd>
-          </div>
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm/6 font-medium text-gray-900">
-              Altersklasse
-            </dt>
-            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-              <Badge
-                info={
-                  initialValues.ageGroup ? `${initialValues.ageGroup}` : "?"
-                }
+          {isAdmin && !stammdatenEditMode && (
+            <button
+              type="button"
+              onClick={() => setStammdatenEditMode(true)}
+              className="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+              <PencilIcon
+                className="-ml-0.5 h-5 w-5 text-gray-400"
+                aria-hidden="true"
               />
-            </dd>
+              Bearbeiten
+            </button>
+          )}
+        </div>
+
+        {stammdatenSuccessMessage && (
+          <div className="mt-4">
+            <SuccessMessage
+              message={stammdatenSuccessMessage}
+              onClose={() => setStammdatenSuccessMessage(null)}
+            />
           </div>
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm/6 font-medium text-gray-900">Vollvisier</dt>
-            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-              <Badge
-                info={
-                  initialValues.fullFaceReq
-                    ? "erforderlich"
-                    : "nicht erforderlich"
-                }
+        )}
+        {stammdatenErrorMessage && (
+          <div className="mt-4">
+            <ErrorMessage
+              error={stammdatenErrorMessage}
+              onClose={() => setStammdatenErrorMessage(null)}
+            />
+          </div>
+        )}
+
+        {stammdatenEditMode && isAdmin ? (
+          <div className="mt-6 pt-2">
+            <div className="mt-2">
+              <label className="block text-sm font-medium leading-6 text-gray-900">Vorname</label>
+              <input
+                type="text"
+                value={stammdatenForm.firstName}
+                onChange={(e) => setStammdatenForm({ ...stammdatenForm, firstName: e.target.value })}
+                className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
-            </dd>
+            </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium leading-6 text-gray-900">Nachname</label>
+              <input
+                type="text"
+                value={stammdatenForm.lastName}
+                onChange={(e) => setStammdatenForm({ ...stammdatenForm, lastName: e.target.value })}
+                className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium leading-6 text-gray-900">Geburtsdatum</label>
+              <input
+                type="date"
+                value={stammdatenForm.birthdate}
+                onChange={(e) => setStammdatenForm({ ...stammdatenForm, birthdate: e.target.value })}
+                className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium leading-6 text-gray-900">Geschlecht</label>
+                <div className="space-x-4" role="group">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="stammdaten-sex"
+                      value="männlich"
+                      checked={stammdatenForm.sex === "männlich"}
+                      onChange={(e) => setStammdatenForm({ ...stammdatenForm, sex: e.target.value as "männlich" | "weiblich" })}
+                      className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-900">männlich</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="stammdaten-sex"
+                      value="weiblich"
+                      checked={stammdatenForm.sex === "weiblich"}
+                      onChange={(e) => setStammdatenForm({ ...stammdatenForm, sex: e.target.value as "männlich" | "weiblich" })}
+                      className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-900">weiblich</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-x-3">
+              <button
+                type="button"
+                onClick={handleStammdatenCancel}
+                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={handleStammdatenSave}
+                disabled={stammdatenLoading}
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+              >
+                {stammdatenLoading ? "Speichern..." : "Speichern"}
+              </button>
+            </div>
           </div>
-        </dl>
+        ) : (
+          <div className="mt-6 border-b border-gray-100">
+            <dl className="divide-y divide-gray-100">
+              <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt className="text-sm/6 font-medium text-gray-900">
+                  Name, Vorname
+                </dt>
+                <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                  {savedStammdaten.lastName}, {savedStammdaten.firstName}
+                </dd>
+              </div>
+              <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt className="text-sm/6 font-medium text-gray-900">
+                  Geburtsdatum
+                </dt>
+                <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                  {new Date(savedStammdaten.birthdate).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+                </dd>
+              </div>
+              <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt className="text-sm/6 font-medium text-gray-900">Geschlecht</dt>
+                <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                  <Badge info={savedStammdaten.sex} />
+                </dd>
+              </div>
+              <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt className="text-sm/6 font-medium text-gray-900">
+                  Altersklasse
+                </dt>
+                <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                  <Badge
+                    info={
+                      savedStammdaten.ageGroup ? `${savedStammdaten.ageGroup}` : "?"
+                    }
+                  />
+                </dd>
+              </div>
+              <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt className="text-sm/6 font-medium text-gray-900">Vollvisier</dt>
+                <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                  <Badge
+                    info={
+                      savedStammdaten.fullFaceReq
+                        ? "erforderlich"
+                        : "nicht erforderlich"
+                    }
+                  />
+                </dd>
+              </div>
+            </dl>
+          </div>
+        )}
       </div>
 
       <Formik
@@ -495,6 +775,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           const hasNoOwnClubLicenceGlobal = !(values.assignedTeams || []).some(
             (a) => a.clubId === clubId && a.teams.length > 0,
           );
+          const editDisabled = isAdmin ? false : hasNoOwnClubLicenceGlobal;
 
           return (
           <Form>
@@ -513,10 +794,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                   <button
                     type="button"
                     onClick={() => setEditMode(true)}
-                    disabled={hasNoOwnClubLicenceGlobal}
+                    disabled={editDisabled}
                     className={classNames(
                       "inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300",
-                      hasNoOwnClubLicenceGlobal
+                      editDisabled
                         ? "bg-gray-50 text-gray-400 cursor-not-allowed"
                         : "bg-white text-gray-900 hover:bg-gray-50",
                     )}
@@ -524,7 +805,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     <PencilIcon
                       className={classNames(
                         "-ml-0.5 h-5 w-5",
-                        hasNoOwnClubLicenceGlobal ? "text-gray-300" : "text-gray-400",
+                        editDisabled ? "text-gray-300" : "text-gray-400",
                       )}
                       aria-hidden="true"
                     />
@@ -685,7 +966,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               );
               const hasLoanLicence = isLoanClub;
               const hasNoOwnClubLicence = !ownClubAssignment || ownClubAssignment.teams.length === 0;
-              const isDisabled = hasLoanLicence || hasNoOwnClubLicence;
+              const isDisabled = isAdmin ? false : (hasLoanLicence || hasNoOwnClubLicence);
 
               const sortedAssignedTeams = [...(values.assignedTeams || [])]
                 .sort((a, b) => {
@@ -1034,6 +1315,147 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     </div>
                   </Dialog>
 
+                  {isAdmin && (
+                    <Dialog
+                      open={isOverrideDialogOpen}
+                      onClose={() => {
+                        setIsOverrideDialogOpen(false);
+                        setOverrideTeam(null);
+                        setOverrideAssignment(null);
+                      }}
+                      className="relative z-50"
+                    >
+                      <div
+                        className="fixed inset-0 bg-black/30"
+                        aria-hidden="true"
+                      />
+                      <div className="fixed inset-0 flex items-center justify-center p-4">
+                        <Dialog.Panel className="mx-auto max-w-md w-full rounded-lg bg-white p-6 shadow-xl">
+                          <Dialog.Title className="text-lg font-semibold text-gray-900 text-center pb-2">
+                            Pass überschreiben
+                          </Dialog.Title>
+                          {overrideTeam && (
+                            <p className="mt-1 text-sm text-gray-500 text-center">
+                              {overrideTeam.teamName}
+                            </p>
+                          )}
+
+                          <div className="mt-6 space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-900">Status</label>
+                              <select
+                                value={overrideForm.status}
+                                onChange={(e) => {
+                                  const newStatus = e.target.value as LicenseStatus;
+                                  setOverrideForm({
+                                    ...overrideForm,
+                                    status: newStatus,
+                                    invalidReasonCodes: newStatus === LicenseStatus.VALID ? [] : overrideForm.invalidReasonCodes,
+                                  });
+                                }}
+                                className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              >
+                                <option value={LicenseStatus.VALID}>VALID</option>
+                                <option value={LicenseStatus.INVALID}>INVALID</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-900">Ungültigkeitsgründe</label>
+                              <div className="mt-1 block w-full rounded-md border-0 py-1.5 px-3 text-gray-500 bg-gray-50 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 min-h-[2.25rem]">
+                                {overrideForm.status === LicenseStatus.VALID
+                                  ? ""
+                                  : (overrideForm.invalidReasonCodes || [])
+                                      .map((code) => invalidReasonCodeMap[code] || code)
+                                      .join(", ") || "Keine"}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-medium text-gray-900">Admin Override</label>
+                              <Switch
+                                checked={overrideForm.adminOverride}
+                                onChange={(checked: boolean) => {
+                                  setOverrideForm({
+                                    ...overrideForm,
+                                    adminOverride: checked,
+                                    overrideReason: checked ? overrideForm.overrideReason : "",
+                                    overrideDate: checked ? new Date().toISOString() : "",
+                                  });
+                                }}
+                                className={classNames(
+                                  overrideForm.adminOverride ? "bg-indigo-600" : "bg-gray-200",
+                                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                                )}
+                              >
+                                <span
+                                  className={classNames(
+                                    overrideForm.adminOverride ? "translate-x-5" : "translate-x-0",
+                                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                  )}
+                                />
+                              </Switch>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-900">Begründung</label>
+                              <textarea
+                                value={overrideForm.overrideReason}
+                                onChange={(e) =>
+                                  setOverrideForm({
+                                    ...overrideForm,
+                                    overrideReason: e.target.value,
+                                  })
+                                }
+                                disabled={!overrideForm.adminOverride}
+                                rows={3}
+                                className="mt-1 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:bg-gray-50 disabled:text-gray-400"
+                                placeholder="Grund für die Überschreibung..."
+                              />
+                            </div>
+
+                            {overrideForm.adminOverride && overrideForm.overrideDate && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-900">Überschreibungsdatum</label>
+                                <div className="mt-1 text-sm text-gray-500">
+                                  {new Date(overrideForm.overrideDate).toLocaleDateString("de-DE", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-6 flex justify-end gap-x-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsOverrideDialogOpen(false);
+                                setOverrideTeam(null);
+                                setOverrideAssignment(null);
+                              }}
+                              className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            >
+                              Abbrechen
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOverrideSave(values, setFieldValue)}
+                              disabled={overrideLoading}
+                              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                            >
+                              {overrideLoading ? "Speichern..." : "Speichern"}
+                            </button>
+                          </div>
+                        </Dialog.Panel>
+                      </div>
+                    </Dialog>
+                  )}
+
                   {sortedAssignedTeams.length > 0 ? (
                     <div className="mt-8">
                       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -1117,10 +1539,11 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                     )}
                                     {assignment.teams.map((team, teamIndex) => {
                                       const isValid = team.status === "VALID";
-                                      const canRemove = !(
+                                      const canRemove = isAdmin ? true : !(
                                         (team.source === "ISHD" &&
                                           initialValues.managedByISHD)
                                       );
+                                      const showActions = isAdmin || isOwnClub;
 
                                       return (
                                         <tr
@@ -1214,7 +1637,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                           <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500 text-center">
                                             {team.jerseyNo || "-"}
                                           </td>
-                                          {isOwnClub && (
+                                          {showActions && (
                                             <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium">
                                               <Menu
                                                 as="div"
@@ -1238,7 +1661,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                                   leaveFrom="transform opacity-100 scale-100"
                                                   leaveTo="transform opacity-0 scale-95"
                                                 >
-                                                  <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                                  <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                                     <div className="py-1">
                                                       <Menu.Item>
                                                         {({ active }) => (
@@ -1270,6 +1693,33 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                                           </button>
                                                         )}
                                                       </Menu.Item>
+                                                      {isAdmin && (
+                                                        <Menu.Item>
+                                                          {({ active }) => (
+                                                            <button
+                                                              type="button"
+                                                              onClick={() =>
+                                                                handleOpenOverrideDialog(
+                                                                  assignment,
+                                                                  team,
+                                                                )
+                                                              }
+                                                              className={classNames(
+                                                                active
+                                                                  ? "bg-gray-100 text-gray-900"
+                                                                  : "text-gray-700",
+                                                                "flex w-full items-center px-4 py-2 text-sm",
+                                                              )}
+                                                            >
+                                                              <CursorArrowRaysIcon
+                                                                className="mr-3 h-5 w-5 text-gray-400"
+                                                                aria-hidden="true"
+                                                              />
+                                                              Überschreiben
+                                                            </button>
+                                                          )}
+                                                        </Menu.Item>
+                                                      )}
                                                       <Menu.Item
                                                         disabled={!canRemove}
                                                       >

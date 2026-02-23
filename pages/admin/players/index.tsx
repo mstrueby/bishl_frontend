@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import axios, { AxiosError } from "axios";
 import { PlayerValues } from "../../../types/PlayerValues";
 import Layout from "../../../components/Layout";
 import SectionHeader from "../../../components/admin/SectionHeader";
 import SuccessMessage from "../../../components/ui/SuccessMessage";
-import DataList from "../../../components/admin/ui/DataList";
 import apiClient from "../../../lib/apiClient";
 import useAuth from "../../../hooks/useAuth";
 import { UserRole } from "../../../lib/auth";
 import usePermissions from "../../../hooks/usePermissions";
 import LoadingState from "../../../components/ui/LoadingState";
-import Pagination from "../../../components/ui/Pagination";
 import SearchBox from "../../../components/ui/SearchBox";
 
 const Players: NextPage = () => {

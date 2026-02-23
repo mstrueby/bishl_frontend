@@ -41,10 +41,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Changes (January 2026)
 
-### PlayerForm Refactoring
-- **Section 1 (Non-editable master data)**: Read-only display of ISHD-managed data (name, birthdate, sex, age group, full face requirement). Removed `managedByISHD` from this section as it's now editable.
-- **Section 2 (Editable master data)**: View/Edit mode pattern with Edit/Cancel/Save buttons. Fields include image upload, image visibility, display names, and `managedByISHD` toggle (ISHD/BISHL dropdown in edit mode, colored badge in view mode).
-- **Section 3 (Licence table)**: Full licence management with Auto-Optimize (Fix), Revalidate (Check), and Add (Neu) buttons. Context menu per row with Edit and Remove actions. Invalid reason codes displayed with human-readable descriptions.
+### PlayerForm Unified for ADMIN and CLUB_ADMIN
+- **PlayerAdminForm retired**: Removed `components/admin/PlayerAdminForm.tsx`. Both ADMIN and CLUB_ADMIN now use `PlayerForm`.
+- **isAdmin prop**: `PlayerForm` accepts `isAdmin?: boolean` (default false). `clubId` and `clubName` are now optional.
+- **Section 1 (Stammdaten)**: Read-only for CLUB_ADMIN. For ADMIN: shows "Bearbeiten" button, toggles to edit mode with fields for firstName, lastName, birthdate, sex. Saves via PATCH `/players/:id`. AgeGroup and fullFaceReq remain calculated/read-only.
+- **Section 2 (Änderbare Daten)**: Edit button always enabled for ADMIN (bypasses `hasNoOwnClubLicence` check).
+- **Section 3 (Spielerpässe)**: For ADMIN: context menu shown on ALL licence rows (not just own club), can remove any licence. `isDisabled` bypassed for admins. New "Überschreiben" menu item with `CursorArrowRaysIcon`.
+- **Admin Override Dialog**: HeadlessUI Dialog with fields: status (VALID/INVALID dropdown), invalidReasonCodes (read-only display, cleared if VALID), adminOverride (Switch), overrideReason (text, enabled when override=true), overrideDate (auto-set timestamp). Saves via PATCH `/players/:id` updating assignedTeams.
+- **Admin Edit Page** (`pages/admin/players/[playerId]/edit.tsx`): Uses PlayerForm with `isAdmin={true}`, fetches WKO rules and assignment window.
+- **Add Page** (`pages/admin/players/add.tsx`): Standalone Formik form for player creation (simple fields, no sections).
+- **Security**: CLUB_ADMIN's onSubmit excludes admin-only fields. Override dialog only rendered when `isAdmin` is true.
 
 ### New Components
 - **TeamAssignmentSelect** (`components/ui/TeamAssignmentSelect.tsx`): Dropdown for selecting teams from `/players/:id/possible-teams` API, with time-window restriction from `PLAYERASSIGNMENTWINDOW` config.
