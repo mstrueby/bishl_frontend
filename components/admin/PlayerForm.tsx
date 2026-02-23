@@ -1193,6 +1193,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     editingTeam={editingTeam}
                     editingClubId={editingClubId}
                     managedByISHD={values.managedByISHD}
+                    isAdmin={isAdmin}
                   />
 
                   <Dialog
@@ -1451,9 +1452,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
 
                   {sortedAssignedTeams.length > 0 ? (
                     <div className="mt-8">
-                      <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                        <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                          <table className="min-w-full border-b border-gray-200 mb-8">
+                      <div className="overflow-x-auto">
+                        <div className="inline-block min-w-full py-2 align-middle">
+                          <table className="min-w-full border-b border-gray-200 mb-28">
                             <thead className="bg-white uppercase text-sm font-medium text-gray-500">
                               <tr>
                                 <th
@@ -1488,7 +1489,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 </th>
                                 <th
                                   scope="col"
-                                  className="px-3 py-3.5 text-left"
+                                  className="px-3 py-3.5 text-center"
                                 >
                                   Aktiv
                                 </th>
@@ -1608,8 +1609,8 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                           <td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-500">
                                             {team.passNo || "-"}
                                           </td>
-                                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500">
-                                            <div className="flex items-center gap-x-2">
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-500 text-center">
+                                            <div className="flex items-center justify-center gap-x-2">
                                               <div
                                                 className={classNames(
                                                   "flex-none rounded-full p-1",
@@ -1620,7 +1621,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                               >
                                                 <div className="h-2 w-2 rounded-full bg-current" />
                                               </div>
-                                              <span className="text-gray-500">
+                                              <span className="hidden lg:block text-gray-500">
                                                 {team.active
                                                   ? "Aktiv"
                                                   : "Inaktiv"}

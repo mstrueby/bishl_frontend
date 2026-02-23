@@ -28,6 +28,7 @@ interface TeamAssignmentSelectProps {
   licenceType?: string;
   licenceSource?: string;
   assignedTeamIds?: string[];
+  isAdmin?: boolean;
 }
 
 
@@ -42,6 +43,7 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
   licenceType = "",
   licenceSource = "",
   assignedTeamIds = [],
+  isAdmin = false,
 }) => {
   const [teams, setTeams] = useState<PossibleTeam[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,9 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
           return (a.teamAlias || "").localeCompare(b.teamAlias || "");
         });
 
-        const filteredTeams = sortedAllTeams.filter((team) => team.clubId === clubId);
+        const filteredTeams = clubId
+          ? sortedAllTeams.filter((team) => team.clubId === clubId)
+          : sortedAllTeams;
         setTeams(filteredTeams);
 
         const configItems = configResponse.data?.items || [];
@@ -127,15 +131,15 @@ const TeamAssignmentSelect: React.FC<TeamAssignmentSelectProps> = ({
       }
     };
 
-    if (playerId && clubId) {
+    if (playerId && (clubId || isAdmin)) {
       fetchData();
     }
-  }, [playerId, clubId]);
+  }, [playerId, clubId, isAdmin]);
 
   const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
   const isISHDManaged = managedByISHD && licenceSource === "ISHD";
   const isLoan = licenceType === "LOAN";
-  const isDisabled = disabled || !windowEnabled || loading || isISHDManaged || isLoan;
+  const isDisabled = disabled || (!isAdmin && !windowEnabled) || loading || isISHDManaged || isLoan;
 
   const getStatusIndicator = (status: string) => {
     const isValid = status === "valid" || status === "VALID";

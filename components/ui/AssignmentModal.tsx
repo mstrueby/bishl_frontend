@@ -26,6 +26,7 @@ interface AssignmentModalProps {
   editingTeam?: AssignmentTeam | null;
   editingClubId?: string | null;
   managedByISHD?: boolean;
+  isAdmin?: boolean;
 }
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -39,6 +40,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   editingTeam = null,
   editingClubId = null,
   managedByISHD = false,
+  isAdmin = false,
 }) => {
   const [selectedTeam, setSelectedTeam] = useState<PossibleTeam | null>(null);
   const [jerseyNo, setJerseyNo] = useState<string>('');
@@ -47,6 +49,10 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const isEditMode = !!editingTeam;
+  const effectiveClubId = editingClubId || clubId;
+  const effectiveClubName = editingClubId
+    ? currentAssignments.find(a => a.clubId === editingClubId)?.clubName || clubName
+    : clubName;
 
   useEffect(() => {
     if (isOpen) {
@@ -60,8 +66,8 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           teamAgeGroup: editingTeam.teamAgeGroup,
           recommendedType: editingTeam.licenseType,
           status: editingTeam.status,
-          clubId: editingClubId || clubId,
-          clubName: clubName,
+          clubId: effectiveClubId,
+          clubName: effectiveClubName,
         });
       } else {
         setSelectedTeam(null);
@@ -70,7 +76,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
       }
       setError(null);
     }
-  }, [isOpen, editingTeam, editingClubId, clubId, clubName]);
+  }, [isOpen, editingTeam, effectiveClubId, effectiveClubName]);
 
   const handleCancel = () => {
     setSelectedTeam(null);
@@ -216,7 +222,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 <div className="mt-4 space-y-4">
                   <TeamAssignmentSelect
                     playerId={playerId}
-                    clubId={clubId}
+                    clubId={effectiveClubId}
                     selectedTeamId={selectedTeam?.teamId || null}
                     onTeamChange={setSelectedTeam}
                     label="Mannschaft"
@@ -224,6 +230,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     licenceType={editingTeam?.licenseType}
                     licenceSource={editingTeam?.source}
                     assignedTeamIds={currentAssignments.flatMap(a => a.teams.map(t => t.teamId))}
+                    isAdmin={isAdmin}
                   />
 
                   <div>
