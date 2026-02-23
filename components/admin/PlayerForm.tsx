@@ -1453,7 +1453,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     <div className="mt-8">
                       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                         <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                          <table className="relative min-w-full border-b border-gray-200 mb-8">
+                          <table className="min-w-full border-b border-gray-200 mb-8">
                             <thead className="bg-white uppercase text-sm font-medium text-gray-500">
                               <tr>
                                 <th
@@ -1654,7 +1654,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                                   leaveFrom="transform opacity-100 scale-100"
                                                   leaveTo="transform opacity-0 scale-95"
                                                 >
-                                                  <Menu.Items className="fixed md:absolute right-4 md:right-0 z-[100] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                                  <Menu.Items className="absolute right-0 z-[100] mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                                     <div className="py-1">
                                                       <Menu.Item>
                                                         {({ active }) => (
