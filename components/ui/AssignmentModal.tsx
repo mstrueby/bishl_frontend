@@ -1,8 +1,10 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition, Switch } from '@headlessui/react';
 import TeamAssignmentSelect from './TeamAssignmentSelect';
+import ClubSelect from './ClubSelect';
+import apiClient from '../../lib/apiClient';
 import { Assignment, AssignmentTeam, LicenseType, LicenseStatus, Source, ClubType } from '../../types/PlayerValues';
-import { TeamType } from '../../types/ClubValues';
+import { TeamType, ClubValues } from '../../types/ClubValues';
 
 interface PossibleTeam {
   teamId: string;
@@ -47,14 +49,37 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [active, setActive] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [clubs, setClubs] = useState<ClubValues[]>([]);
+  const [selectedClubId, setSelectedClubId] = useState<string>('');
+  const [clubsLoading, setClubsLoading] = useState(false);
 
   const isEditMode = !!editingTeam;
-  const effectiveClubId = editingClubId || clubId;
   const editingAssignment = editingClubId
     ? currentAssignments.find(a => a.clubId === editingClubId)
     : null;
   const effectiveClubName = editingAssignment?.clubName || clubName;
-  const effectiveClubAlias = editingAssignment?.clubAlias || "";
+
+  const teamSelectClubId = isAdmin
+    ? (isEditMode ? (editingClubId || clubId) : selectedClubId)
+    : clubId;
+
+  useEffect(() => {
+    if (isOpen && isAdmin && !isEditMode) {
+      const fetchClubs = async () => {
+        setClubsLoading(true);
+        try {
+          const response = await apiClient.get('/clubs');
+          setClubs(response.data || []);
+        } catch (err) {
+          console.error('Error fetching clubs:', err);
+          setClubs([]);
+        } finally {
+          setClubsLoading(false);
+        }
+      };
+      fetchClubs();
+    }
+  }, [isOpen, isAdmin, isEditMode]);
 
   useEffect(() => {
     if (isOpen) {
@@ -68,22 +93,30 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           teamAgeGroup: editingTeam.teamAgeGroup,
           recommendedType: editingTeam.licenseType,
           status: editingTeam.status,
-          clubId: effectiveClubId,
+          clubId: editingClubId || clubId,
           clubName: effectiveClubName,
         });
+        setSelectedClubId('');
       } else {
         setSelectedTeam(null);
         setJerseyNo('');
         setActive(false);
+        setSelectedClubId('');
       }
       setError(null);
     }
-  }, [isOpen, editingTeam, effectiveClubId, effectiveClubName]);
+  }, [isOpen, editingTeam, editingClubId, clubId, effectiveClubName]);
+
+  const handleClubChange = (newClubId: string) => {
+    setSelectedClubId(newClubId);
+    setSelectedTeam(null);
+  };
 
   const handleCancel = () => {
     setSelectedTeam(null);
     setJerseyNo('');
     setActive(false);
+    setSelectedClubId('');
     setError(null);
     onClose();
   };
@@ -91,6 +124,11 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const handleSave = async () => {
     if (!selectedTeam && !isEditMode) {
       setError('Bitte wähle eine Mannschaft aus.');
+      return;
+    }
+
+    if (isAdmin && !isEditMode && !selectedClubId) {
+      setError('Bitte wähle einen Verein aus.');
       return;
     }
 
@@ -141,6 +179,14 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           return assignment;
         });
       } else if (selectedTeam) {
+        const targetClubId = isAdmin ? selectedClubId : clubId;
+        const targetClubName = isAdmin
+          ? (clubs.find(c => c._id === selectedClubId)?.name || '')
+          : clubName;
+        const targetClubAlias = isAdmin
+          ? (clubs.find(c => c._id === selectedClubId)?.alias || '')
+          : '';
+
         const newTeamAssignment: AssignmentTeam = {
           teamId: selectedTeam.teamId,
           teamName: selectedTeam.teamName,
@@ -163,14 +209,14 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
         };
 
         const existingClubIndex = updatedAssignments.findIndex(
-          (assignment) => assignment.clubId === clubId
+          (assignment) => assignment.clubId === targetClubId
         );
 
         if (existingClubIndex === -1) {
           updatedAssignments.push({
-            clubId: clubId,
-            clubName: clubName,
-            clubAlias: '',
+            clubId: targetClubId,
+            clubName: targetClubName,
+            clubAlias: targetClubAlias,
             clubIshdId: '',
             clubType: ClubType.MAIN,
             teams: [newTeamAssignment],
@@ -194,6 +240,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   };
 
   const isFormComplete = isEditMode || selectedTeam !== null;
+  const noClubSelected = isAdmin && !isEditMode && !selectedClubId;
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -222,14 +269,47 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 )}
 
                 <div className="mt-4 space-y-4">
+                  {isAdmin && (
+                    isEditMode ? (
+                      <ClubSelect
+                        selectedClubId={editingClubId || clubId}
+                        clubs={[{
+                          _id: editingClubId || clubId,
+                          name: effectiveClubName,
+                          alias: editingAssignment?.clubAlias || '',
+                        } as ClubValues]}
+                        onClubChange={() => {}}
+                        label="Verein"
+                        disabled
+                      />
+                    ) : (
+                      clubsLoading ? (
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium leading-6 text-gray-900">
+                            Verein
+                          </label>
+                          <div className="mt-2 rounded-md bg-gray-100 py-2 pl-3 pr-3 text-sm text-gray-400 ring-1 ring-inset ring-gray-200">
+                            Laden...
+                          </div>
+                        </div>
+                      ) : (
+                        <ClubSelect
+                          selectedClubId={selectedClubId || null}
+                          clubs={clubs}
+                          onClubChange={handleClubChange}
+                          label="Verein"
+                        />
+                      )
+                    )
+                  )}
+
                   <TeamAssignmentSelect
                     playerId={playerId}
-                    clubId={effectiveClubId}
-                    clubAlias={effectiveClubAlias}
-                    clubName={effectiveClubName}
+                    clubId={teamSelectClubId}
                     selectedTeamId={selectedTeam?.teamId || null}
                     onTeamChange={setSelectedTeam}
                     label="Mannschaft"
+                    disabled={noClubSelected}
                     managedByISHD={managedByISHD}
                     licenceType={editingTeam?.licenseType}
                     licenceSource={editingTeam?.source}

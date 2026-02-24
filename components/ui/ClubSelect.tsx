@@ -10,18 +10,20 @@ interface ClubSelectProps {
   clubs: ClubValues[];
   onClubChange: (clubId: string) => void;
   label?: string;
+  disabled?: boolean;
 }
 
 const ClubSelect: React.FC<ClubSelectProps> = ({
   selectedClubId,
-  clubs = [], // Provide default empty array
+  clubs = [],
   onClubChange,
-  label = "Verein"
+  label = "Verein",
+  disabled = false,
 }) => {
   const selectedClub = clubs.find(club => club._id === selectedClubId);
 
   return (
-    <Listbox value={selectedClubId || ''} onChange={onClubChange}>
+    <Listbox value={selectedClubId || ''} onChange={onClubChange} disabled={disabled}>
       {({ open }) => (
         <>
           {label && (
@@ -30,7 +32,12 @@ const ClubSelect: React.FC<ClubSelectProps> = ({
             </Listbox.Label>
           )}
           <div className="relative mt-2 mb-4">
-            <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            <Listbox.Button className={classNames(
+              "relative w-full cursor-default rounded-md py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset sm:text-sm sm:leading-6",
+              disabled
+                ? "bg-gray-100 text-gray-500 ring-gray-200 cursor-not-allowed"
+                : "bg-white text-gray-900 ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            )}>
               <div className="flex items-center">
                 {selectedClub ? (
                   <>
