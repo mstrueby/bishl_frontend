@@ -246,7 +246,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setFieldValue: any,
   ) => {
     if (team.source === "ISHD" && initialValues.managedByISHD) {
-      showLicenceError("ISHD-Pässe können nicht entfernt werden.");
+      showLicenceError("ISHD-Pässe können nicht entfernt werden, solange die Verwaltung auf ISHD steht.");
       return;
     }
 
