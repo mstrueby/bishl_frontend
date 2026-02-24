@@ -46,6 +46,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
 }) => {
   const [selectedTeam, setSelectedTeam] = useState<PossibleTeam | null>(null);
   const [jerseyNo, setJerseyNo] = useState<string>('');
+  const [passNo, setPassNo] = useState<string>('');
   const [active, setActive] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +86,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     if (isOpen) {
       if (editingTeam) {
         setJerseyNo(editingTeam.jerseyNo?.toString() || '');
+        setPassNo(editingTeam.passNo || '');
         setActive(editingTeam.active || false);
         setSelectedTeam({
           teamId: editingTeam.teamId,
@@ -100,6 +102,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
       } else {
         setSelectedTeam(null);
         setJerseyNo('');
+        setPassNo('');
         setActive(false);
         setSelectedClubId('');
       }
@@ -115,6 +118,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const handleCancel = () => {
     setSelectedTeam(null);
     setJerseyNo('');
+    setPassNo('');
     setActive(false);
     setSelectedClubId('');
     setError(null);
@@ -152,6 +156,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
               ...assignment,
               teams: assignment.teams.map((team) => {
                 if (team.teamId === editingTeam.teamId) {
+                  const passNoUpdate = isAdmin ? { passNo: passNo.trim() } : {};
                   if (teamChanged && selectedTeam) {
                     return {
                       ...team,
@@ -162,6 +167,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                       licenseType: selectedTeam.recommendedType as LicenseType,
                       jerseyNo: jerseyNumber,
                       active: active,
+                      ...passNoUpdate,
                       modifyDate: new Date().toISOString(),
                     };
                   }
@@ -169,6 +175,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     ...team,
                     jerseyNo: jerseyNumber,
                     active: active,
+                    ...passNoUpdate,
                     modifyDate: new Date().toISOString(),
                   };
                 }
@@ -193,7 +200,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           teamAlias: selectedTeam.teamAlias,
           teamType: TeamType.COMPETITIVE,
           teamAgeGroup: selectedTeam.teamAgeGroup,
-          passNo: '',
+          passNo: isAdmin ? passNo.trim() : '',
           licenseType: selectedTeam.recommendedType as LicenseType,
           status: LicenseStatus.UNKNOWN,
           invalidReasonCodes: [],
@@ -316,6 +323,29 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     assignedTeamIds={currentAssignments.flatMap(a => a.teams.map(t => t.teamId))}
                     isAdmin={isAdmin}
                   />
+
+                  {isAdmin && (
+                    <div>
+                      <label htmlFor="passNo" className="block text-sm font-medium leading-6 text-gray-900">
+                        Passnummer
+                      </label>
+                      <input
+                        type="text"
+                        name="passNo"
+                        id="passNo"
+                        value={passNo}
+                        onChange={(e) => setPassNo(e.target.value)}
+                        disabled={isEditMode && editingTeam?.source === 'ISHD' && managedByISHD}
+                        autoComplete="off"
+                        className={`mt-2 block w-full rounded-md border-0 py-2 pl-3 pr-3 shadow-sm ring-1 ring-inset sm:text-sm sm:leading-6 ${
+                          isEditMode && editingTeam?.source === 'ISHD' && managedByISHD
+                            ? 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
+                            : 'text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600'
+                        }`}
+                        placeholder="Optional"
+                      />
+                    </div>
+                  )}
 
                   <div>
                     <label htmlFor="jerseyNo" className="block text-sm font-medium leading-6 text-gray-900">
