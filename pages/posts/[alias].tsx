@@ -100,7 +100,7 @@ export default function Post({ post }: { post?: PostValues }) {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const res = await apiClient.get("/posts/", {
+    const res = await apiClient.get("/posts", {
       params: {
         published: true,
         page: 1,

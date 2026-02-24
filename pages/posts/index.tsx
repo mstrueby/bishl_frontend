@@ -19,7 +19,7 @@ interface PostsProps {
 export const getStaticProps: GetStaticProps = async () => {
   let posts = null;
   try {
-    const res = await apiClient.get('/posts/', {
+    const res = await apiClient.get('/posts', {
       params: {
         published: true,
         page: 1,
