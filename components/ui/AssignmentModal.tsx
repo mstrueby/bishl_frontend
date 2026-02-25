@@ -113,12 +113,12 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   }, [isOpen, editingTeam, editingClubId, clubId, effectiveClubName]);
 
   const licenseTypeLabels: Record<string, string> = {
-    PRIMARY: 'Erstpass',
-    SECONDARY: 'Zweitpass',
-    OVERAGE: 'Over-Age',
-    LOAN: 'Leihpass',
-    HOBBY: 'Hobby',
-    SPECIAL: 'Sonderpass',
+    PRIMARY: 'PRIMARY',
+    SECONDARY: 'SECONDARY',
+    OVERAGE: 'OVERAGE',
+    LOAN: 'LOAN',
+    HOBBY: 'HOBBY',
+    SPECIAL: 'SPECIAL',
   };
 
   const handleClubChange = (newClubId: string) => {
