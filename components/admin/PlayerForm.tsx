@@ -1396,61 +1396,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       </div>
                     </Dialog>
 
-                    <Dialog
-                      open={isLastLicenceWarningOpen}
-                      onClose={() => {
-                        setIsLastLicenceWarningOpen(false);
-                        setPendingRemoveLicence(null);
-                      }}
-                      className="relative z-50"
-                    >
-                      <div
-                        className="fixed inset-0 bg-black/30"
-                        aria-hidden="true"
-                      />
-                      <div className="fixed inset-0 flex items-center justify-center p-4">
-                        <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white p-6 shadow-xl">
-                          <Dialog.Title className="text-lg font-semibold text-gray-900">
-                            Letzten Pass entfernen?
-                          </Dialog.Title>
-                          <p className="mt-3 text-sm text-gray-600">
-                            Wenn du den letzten Pass deines Vereins entfernst,
-                            kannst du diesen Spieler nicht mehr bearbeiten.
-                          </p>
-                          <div className="mt-5 flex justify-end gap-x-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsLastLicenceWarningOpen(false);
-                                setPendingRemoveLicence(null);
-                              }}
-                              className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                            >
-                              Abbrechen
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (pendingRemoveLicence) {
-                                  handleRemoveLicence(
-                                    pendingRemoveLicence.assignment,
-                                    pendingRemoveLicence.team,
-                                    pendingRemoveLicence.values,
-                                    pendingRemoveLicence.setFieldValue,
-                                  );
-                                }
-                                setIsLastLicenceWarningOpen(false);
-                                setPendingRemoveLicence(null);
-                              }}
-                              className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
-                            >
-                              Entfernen
-                            </button>
-                          </div>
-                        </Dialog.Panel>
-                      </div>
-                    </Dialog>
-
                     {isAdmin && (
                       <Dialog
                         open={isOverrideDialogOpen}
