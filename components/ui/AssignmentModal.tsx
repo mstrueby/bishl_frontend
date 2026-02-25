@@ -45,6 +45,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   isAdmin = false,
 }) => {
   const [selectedTeam, setSelectedTeam] = useState<PossibleTeam | null>(null);
+  const [selectedLicenseType, setSelectedLicenseType] = useState<string>('');
   const [jerseyNo, setJerseyNo] = useState<string>('');
   const [passNo, setPassNo] = useState<string>('');
   const [active, setActive] = useState<boolean>(false);
@@ -101,6 +102,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
         setSelectedClubId('');
       } else {
         setSelectedTeam(null);
+        setSelectedLicenseType('');
         setJerseyNo('');
         setPassNo('');
         setActive(false);
@@ -110,13 +112,33 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
     }
   }, [isOpen, editingTeam, editingClubId, clubId, effectiveClubName]);
 
+  const licenseTypeLabels: Record<string, string> = {
+    PRIMARY: 'Erstpass',
+    SECONDARY: 'Zweitpass',
+    OVERAGE: 'Over-Age',
+    LOAN: 'Leihpass',
+    HOBBY: 'Hobby',
+    SPECIAL: 'Sonderpass',
+  };
+
   const handleClubChange = (newClubId: string) => {
     setSelectedClubId(newClubId);
     setSelectedTeam(null);
+    setSelectedLicenseType('');
+  };
+
+  const handleTeamChange = (team: PossibleTeam | null) => {
+    setSelectedTeam(team);
+    if (team) {
+      setSelectedLicenseType(team.recommendedType || '');
+    } else {
+      setSelectedLicenseType('');
+    }
   };
 
   const handleCancel = () => {
     setSelectedTeam(null);
+    setSelectedLicenseType('');
     setJerseyNo('');
     setPassNo('');
     setActive(false);
@@ -201,7 +223,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           teamType: TeamType.COMPETITIVE,
           teamAgeGroup: selectedTeam.teamAgeGroup,
           passNo: isAdmin ? passNo.trim() : '',
-          licenseType: selectedTeam.recommendedType as LicenseType,
+          licenseType: (selectedLicenseType || selectedTeam.recommendedType) as LicenseType,
           status: LicenseStatus.UNKNOWN,
           invalidReasonCodes: [],
           adminOverride: false,
@@ -314,7 +336,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     playerId={playerId}
                     clubId={teamSelectClubId}
                     selectedTeamId={selectedTeam?.teamId || null}
-                    onTeamChange={setSelectedTeam}
+                    onTeamChange={handleTeamChange}
                     label="Mannschaft"
                     disabled={noClubSelected}
                     managedByISHD={managedByISHD}
@@ -323,6 +345,27 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     assignedTeamIds={currentAssignments.flatMap(a => a.teams.map(t => t.teamId))}
                     isAdmin={isAdmin}
                   />
+
+                  {!isEditMode && (
+                    <div>
+                      <label htmlFor="licenseType" className="block text-sm font-medium leading-6 text-gray-900">
+                        Passtyp
+                      </label>
+                      <select
+                        id="licenseType"
+                        value={selectedLicenseType}
+                        onChange={(e) => setSelectedLicenseType(e.target.value)}
+                        className="mt-2 block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      >
+                        <option value="">– Bitte wählen –</option>
+                        {Object.entries(licenseTypeLabels).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {isAdmin && (
                     <div>

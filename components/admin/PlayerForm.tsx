@@ -37,9 +37,19 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 import {
+  LicenseType,
   LicenseStatus,
   LicenseInvalidReasonCode,
 } from "../../types/PlayerValues";
+
+const licenseTypeLabels: Record<string, string> = {
+  PRIMARY: "Erstpass",
+  SECONDARY: "Zweitpass",
+  OVERAGE: "Over-Age",
+  LOAN: "Leihpass",
+  HOBBY: "Hobby",
+  SPECIAL: "Sonderpass",
+};
 
 interface PlayerFormProps {
   initialValues: PlayerValues;
@@ -136,6 +146,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const [overrideAssignment, setOverrideAssignment] =
     useState<Assignment | null>(null);
   const [overrideForm, setOverrideForm] = useState({
+    licenseType: LicenseType.UNKNOWN,
     status: LicenseStatus.UNKNOWN,
     invalidReasonCodes: [] as LicenseInvalidReasonCode[],
     adminOverride: false,
@@ -521,6 +532,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     setOverrideAssignment(assignment);
     setOverrideTeam(team);
     setOverrideForm({
+      licenseType: (team.licenseType as LicenseType) || LicenseType.UNKNOWN,
       status: team.status || LicenseStatus.UNKNOWN,
       invalidReasonCodes: team.invalidReasonCodes || [],
       adminOverride: team.adminOverride || false,
@@ -545,6 +557,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
               if (t.teamId === overrideTeam.teamId) {
                 return {
                   ...t,
+                  licenseType: overrideForm.licenseType,
                   status: overrideForm.status,
                   invalidReasonCodes:
                     overrideForm.status === LicenseStatus.VALID
@@ -1425,6 +1438,31 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                             )}
 
                             <div className="mt-6 space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-900">
+                                  Passtyp
+                                </label>
+                                <select
+                                  value={overrideForm.licenseType}
+                                  disabled={!overrideForm.adminOverride}
+                                  onChange={(e) =>
+                                    setOverrideForm({
+                                      ...overrideForm,
+                                      licenseType: e.target.value as LicenseType,
+                                    })
+                                  }
+                                  className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:bg-gray-50 disabled:text-gray-400"
+                                >
+                                  {Object.entries(licenseTypeLabels).map(
+                                    ([value, label]) => (
+                                      <option key={value} value={value}>
+                                        {label}
+                                      </option>
+                                    ),
+                                  )}
+                                </select>
+                              </div>
+
                               <div className="flex items-center justify-between">
                                 <label className="text-sm font-medium text-gray-900">
                                   Status überschreiben
