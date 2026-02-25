@@ -1138,7 +1138,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           return buttonDisabled ? (
                             <div
                               className={classNames(
-                                "w-full sm:w-auto inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed",
+                                "w-full sm:w-auto inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset cursor-not-allowed",
+                                values.managedByISHD
+                                  ? "bg-yellow-50/50 text-yellow-700/50 ring-yellow-600/10"
+                                  : "bg-indigo-50/50 text-indigo-700/50 ring-indigo-600/10",
                               )}
                             >
                               <span className="flex items-center justify-between w-full sm:w-auto">
@@ -1326,7 +1329,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           pendingRemoveData.team,
                           pendingRemoveData.values,
                         )
-                          ? "<br/><br/><strong>Hinweis:</strong> Dies ist der letzte Pass des Spielers für diesen Verein."
+                          ? " <strong>Hinweis:</strong> Dies ist der letzte Pass des Spielers für diesen Verein."
                           : ""
                       }`}
                       descriptionSubText="Diese Aktion kann nicht rückgängig gemacht werden."
