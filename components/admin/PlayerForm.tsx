@@ -96,9 +96,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   const [passCheckMessage, setPassCheckMessage] = useState("");
   const [passCheckLoading, setPassCheckLoading] = useState(false);
   const [managedByISHDLoading, setManagedByISHDLoading] = useState(false);
-  const [isLastLicenceWarningOpen, setIsLastLicenceWarningOpen] =
+  const [isRemoveConfirmationOpen, setIsRemoveConfirmationOpen] =
     useState(false);
-  const [pendingRemoveLicence, setPendingRemoveLicence] = useState<{
+  const [pendingRemoveData, setPendingRemoveData] = useState<{
     assignment: Assignment;
     team: AssignmentTeam;
     values: PlayerValues;
@@ -273,12 +273,21 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       return;
     }
 
-    if (isLastOwnClubLicence(assignment, team, values)) {
-      setPendingRemoveLicence({ assignment, team, values, setFieldValue });
-      setIsLastLicenceWarningOpen(true);
-    } else {
-      handleRemoveLicence(assignment, team, values, setFieldValue);
-    }
+    setPendingRemoveData({ assignment, team, values, setFieldValue });
+    setIsRemoveConfirmationOpen(true);
+  };
+
+  const confirmRemoveLicence = () => {
+    if (!pendingRemoveData) return;
+    const { assignment, team, values, setFieldValue } = pendingRemoveData;
+    handleRemoveLicence(assignment, team, values, setFieldValue);
+    setIsRemoveConfirmationOpen(false);
+    setPendingRemoveData(null);
+  };
+
+  const cancelRemoveLicence = () => {
+    setIsRemoveConfirmationOpen(false);
+    setPendingRemoveData(null);
   };
 
   const handleRemoveLicence = async (
