@@ -22,6 +22,7 @@ import {
   invalidReasonCodeMap,
   getLicenceTypeBadgeClass,
 } from "../../lib/constants";
+import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import {
   PencilIcon,
   SparklesIcon,
@@ -1298,6 +1299,29 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       editingClubId={editingClubId}
                       managedByISHD={values.managedByISHD}
                       isAdmin={isAdmin}
+                    />
+
+                    <DeleteConfirmationModal
+                      isOpen={isRemoveConfirmationOpen}
+                      onClose={cancelRemoveLicence}
+                      onConfirm={confirmRemoveLicence}
+                      title="Pass entfernen"
+                      description={`Möchtest du den Pass für <strong>${
+                        pendingRemoveData?.team.teamName
+                      }</strong> (${
+                        pendingRemoveData?.team.teamAgeGroup
+                      }) wirklich entfernen?${
+                        pendingRemoveData &&
+                        isLastOwnClubLicence(
+                          pendingRemoveData.assignment,
+                          pendingRemoveData.team,
+                          pendingRemoveData.values,
+                        )
+                          ? "<br/><br/><strong>Hinweis:</strong> Dies ist der letzte Pass des Spielers für diesen Verein."
+                          : ""
+                      }`}
+                      descriptionSubText="Diese Aktion kann nicht rückgängig gemacht werden."
+                      isLoading={licenceLoading}
                     />
 
                     <Dialog
