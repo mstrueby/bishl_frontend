@@ -82,10 +82,10 @@ const FormikEventPlayerSelect = forwardRef<EventPlayerSelectHandle, EventPlayerS
     setSelectedPlayer(eventPlayer);
     onChange(eventPlayer);
     if (helpers && helpers.setValue) {
-      helpers.setValue(eventPlayer);
+      helpers.setValue(eventPlayer, true);
     }
     if (helpers && helpers.setTouched) {
-      helpers.setTouched(true);
+      helpers.setTouched(false);
     }
 
     if (eventPlayer) {
