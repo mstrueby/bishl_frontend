@@ -109,7 +109,7 @@ export async function getStaticPaths() {
   let paths: { params: { tAlias: string } }[] = [];
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`);
     if (!res.ok) {
       return { paths, fallback: 'blocking' };
     }

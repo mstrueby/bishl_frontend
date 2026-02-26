@@ -1307,7 +1307,7 @@ export default function SupplementaryForm() {
             <div>
               <SectionHeaderSimple
                 title="Weitere Offizielle"
-                description="Dieser Bereich ist von den <strong>Zeitnehmern</strong> auszufüllen"
+                description="Dieser Bereich ist von den <strong>Schiedsrichtern</strong> auszufüllen"
               />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <OfficialCard

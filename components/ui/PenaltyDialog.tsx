@@ -61,7 +61,11 @@ const validationSchema = Yup.object().shape({
     key: Yup.string().required('Strafe-key ist erforderlich'),
     value: Yup.string().required('Strafe-value ist erforderlich')
   }).required('Strafcode ist erforderlich'),
-  penaltyMinutes: Yup.string().required('Strafminuten sind erforderlich'),
+  penaltyMinutes: Yup.string().when('isGM', {
+    is: true,
+    then: (schema) => schema.notRequired(),
+    otherwise: (schema) => schema.required('Strafminuten sind erforderlich'),
+  }),
   isGM: Yup.boolean(),
   isMP: Yup.boolean(),
 });
