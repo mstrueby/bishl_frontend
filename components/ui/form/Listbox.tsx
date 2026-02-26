@@ -19,20 +19,20 @@ interface ListboxProps extends ComponentPropsWithoutRef<'input'> {
 
 const MyListbox = ({ label, name, placeholder, showErrorText = true, options, tabIndex, ...props }: ListboxProps) => {
   const [field, meta, helpers] = useField(name);
-  const [selected, setSelected] = useState<ListboxOption | null>(null);
+  const [selected, setSelected] = useState<ListboxOption | undefined>(undefined);
 
   const handleChange = (event: ListboxOption) => {
     const index = options.findIndex(option => option.key === event.key);
-    setSelected(options[index] ?? null);
+    setSelected(options[index]);
     helpers.setValue(options[index]?.value ?? '');
   };
 
   useEffect(() => {
     if (field.value) {
       const index = options.findIndex(option => option.value === field.value);
-      setSelected(index > -1 ? options[index] : null);
+      setSelected(index > -1 ? options[index] : undefined);
     } else {
-      setSelected(null);
+      setSelected(undefined);
     }
   }, [field.value, options]);
 
