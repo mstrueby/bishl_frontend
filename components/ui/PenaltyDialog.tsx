@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import EventPlayerSelect from './EventPlayerSelect';
 import PenaltyCodeSelect from './PenaltyCodeSelect';
@@ -76,6 +76,13 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, 
   const [error, setError] = useState('');
   const matchTimeStartRef = useRef<HTMLInputElement>(null);
   const matchTimeEndRef = useRef<HTMLInputElement>(null);
+
+  const penaltyMinuteOptions = [
+    { key: '2', value: '2' },
+    { key: '5', value: '5' },
+    { key: '10', value: '10' },
+    { key: '20', value: '20' }
+  ];
 
   // Focus management when dialog opens
   useEffect(() => {
