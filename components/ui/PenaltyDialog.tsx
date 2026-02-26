@@ -70,21 +70,22 @@ const validationSchema = Yup.object().shape({
   isMP: Yup.boolean(),
 });
 
-const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, editPenalty }: PenaltyDialogProps) => {
-  const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const matchTimeStartRef = useRef<HTMLInputElement>(null);
-  const matchTimeEndRef = useRef<HTMLInputElement>(null);
+const penaltyMinuteOptions = [
+  { key: "2", value: "2" },
+  { key: "5", value: "5" },
+  { key: "10", value: "10" },
+  { key: "20", value: "20" },
+];
 
-  const penaltyMinuteOptions = [
-    { key: '2', value: '2' },
-    { key: '5', value: '5' },
-    { key: '10', value: '10' },
-    { key: '20', value: '20' }
-  ];
-
-  // Focus management when dialog opens
+const PenaltyDialog = ({
+  isOpen,
+  onClose,
+  matchId,
+  teamFlag,
+  roster,
+  onSuccess,
+  editPenalty,
+}: PenaltyDialogProps) => {
   useEffect(() => {
     if (isOpen) {
       setError('');
