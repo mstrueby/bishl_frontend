@@ -95,10 +95,6 @@ export function calculateMatchButtonPermissions(
     return permissions;
   }
 
-  const now = Date.now();
-  const matchStartTime = new Date(match.startDate).getTime();
-  const thirtyMinutesFromNow = now + 30 * 60 * 1000;
-
   // ADMIN/LEAGUE_ADMIN permissions - full access always
   if (isAdminOrLeagueAdmin) {
     permissions.showButtonEdit = true;
@@ -109,8 +105,8 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonEvents = true;
     }
 
-    // Roster permissions for starting soon or in progress matches
-    if (matchStartTime < thirtyMinutesFromNow) {
+    // Roster permissions for match day
+    if (isMatchDay) {
       permissions.showButtonRosterHome = true;
       permissions.showButtonRosterAway = true;
       permissions.showButtonMatchCenter = true;
@@ -126,11 +122,8 @@ export function calculateMatchButtonPermissions(
   ) {
     permissions.showButtonRosterHome = true;
 
-    // Additional permissions when match starts soon
-    if (
-      matchStartTime < thirtyMinutesFromNow &&
-      !isValidMatchdayOwner(matchdayOwner)
-    ) {
+    // Additional permissions when match day
+    if (isMatchDay && !isValidMatchdayOwner(matchdayOwner)) {
       permissions.showButtonRosterAway = true;
       permissions.showButtonStatus = true;
       permissions.showButtonMatchCenter = true;
@@ -149,13 +142,13 @@ export function calculateMatchButtonPermissions(
     user.club.clubId === match.away.clubId &&
     user.roles.includes("CLUB_ADMIN")
   ) {
-    // Can edit away roster if match is more than 30 minutes away
-    if (matchStartTime > thirtyMinutesFromNow) {
+    // Can edit away roster if it is not match day yet
+    if (!isMatchDay && !isMatchInPast) {
       permissions.showButtonRosterAway = true;
     }
 
-    // Can edit away roster if match starts soon but not in progress
-    if (matchStartTime < thirtyMinutesFromNow && !isMatchInProgress) {
+    // Can edit away roster if match day but not in progress
+    if (isMatchDay && !isMatchInProgress) {
       permissions.showButtonRosterAway = true;
     }
   }
