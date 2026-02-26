@@ -15,13 +15,6 @@ interface PenaltyCode {
   value: string;
 }
 
-interface PenaltyPlayer {
-  playerId: string;
-  firstName: string;
-  lastName: string;
-  jerseyNumber: number;
-}
-
 interface PenaltyDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -36,17 +29,17 @@ const validationSchema = Yup.object().shape({
   matchTimeStart: Yup.string()
     .required('Zeit ist erforderlich')
     .matches(/^\d{1,3}:\d{2}$/, 'Zeit muss im Format MM:SS sein')
-    .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function(value) {
+    .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function (value) {
       if (!value || !value.includes(':')) return false;
-      const [minutes, seconds] = value.split(':');
+      const [, seconds] = value.split(':');
       const secondsNum = parseInt(seconds, 10);
       return secondsNum >= 0 && secondsNum <= 59;
     }),
   matchTimeEnd: Yup.string()
     .matches(/^(\d{1,3}:\d{2})?$/, 'Zeit muss im Format MM:SS sein oder leer bleiben')
-    .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function(value) {
-      if (!value || value === '' || !value.includes(':')) return true; // Allow empty for optional field
-      const [minutes, seconds] = value.split(':');
+    .test('valid-seconds', 'Sekunden müssen zwischen 00-59 sein', function (value) {
+      if (!value || value === '' || !value.includes(':')) return true;
+      const [, seconds] = value.split(':');
       const secondsNum = parseInt(seconds, 10);
       return secondsNum >= 0 && secondsNum <= 59;
     })
@@ -55,11 +48,11 @@ const validationSchema = Yup.object().shape({
     playerId: Yup.string().required('Spieler ist erforderlich'),
     firstName: Yup.string().required(),
     lastName: Yup.string().required(),
-    jerseyNumber: Yup.number().required()
+    jerseyNumber: Yup.number().required(),
   }).required('Spieler ist erforderlich'),
   penaltyCode: Yup.object().shape({
     key: Yup.string().required('Strafe-key ist erforderlich'),
-    value: Yup.string().required('Strafe-value ist erforderlich')
+    value: Yup.string().required('Strafe-value ist erforderlich'),
   }).required('Strafcode ist erforderlich'),
   penaltyMinutes: Yup.string().when('isGM', {
     is: true,
@@ -71,10 +64,10 @@ const validationSchema = Yup.object().shape({
 });
 
 const penaltyMinuteOptions = [
-  { key: "2", value: "2" },
-  { key: "5", value: "5" },
-  { key: "10", value: "10" },
-  { key: "20", value: "20" },
+  { key: '2', value: '2' },
+  { key: '5', value: '5' },
+  { key: '10', value: '10' },
+  { key: '20', value: '20' },
 ];
 
 const PenaltyDialog = ({
@@ -86,27 +79,12 @@ const PenaltyDialog = ({
   onSuccess,
   editPenalty,
 }: PenaltyDialogProps) => {
-  useEffect(() => {
-    if (isOpen) {
-      setError('');
-      fetchPenaltyCodes();
-      
-      const timer = setTimeout(() => {
-        if (editPenalty) {
-          if (matchTimeEndRef.current) {
-            matchTimeEndRef.current.focus();
-          }
-        } else {
-          if (matchTimeStartRef.current) {
-            matchTimeStartRef.current.focus();
-          }
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, editPenalty]);
+  const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const matchTimeStartRef = useRef<HTMLInputElement>(null);
+  const matchTimeEndRef = useRef<HTMLInputElement>(null);
 
-  // Fetch penalty codes from API
   const fetchPenaltyCodes = async () => {
     try {
       const response = await apiClient.get('/configs/penaltycode');
@@ -117,13 +95,28 @@ const PenaltyDialog = ({
         console.error('Invalid penalty codes data format:', data);
         setPenaltyCodes([]);
       }
-    } catch (error) {
-      console.error('Error fetching penalty codes:', error);
+    } catch (err) {
+      console.error('Error fetching penalty codes:', err);
       setPenaltyCodes([]);
     }
   };
 
-  // save dialog
+  useEffect(() => {
+    if (isOpen) {
+      setError('');
+      fetchPenaltyCodes();
+
+      const timer = setTimeout(() => {
+        if (editPenalty) {
+          matchTimeEndRef.current?.focus();
+        } else {
+          matchTimeStartRef.current?.focus();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, editPenalty]);
+
   const handleSubmit = async (values: PenaltiesBase) => {
     setIsSubmitting(true);
     setError('');
@@ -136,38 +129,33 @@ const PenaltyDialog = ({
           playerId: values.penaltyPlayer.playerId,
           firstName: values.penaltyPlayer.firstName,
           lastName: values.penaltyPlayer.lastName,
-          jerseyNumber: values.penaltyPlayer.jerseyNumber
+          jerseyNumber: values.penaltyPlayer.jerseyNumber,
         },
         penaltyCode: {
           key: values.penaltyCode.key,
-          value: values.penaltyCode.value
+          value: values.penaltyCode.value,
         },
         penaltyMinutes: values.penaltyMinutes,
         isGM: values.isGM,
-        isMP: values.isMP
+        isMP: values.isMP,
       };
 
       if (editPenalty && editPenalty._id) {
-        const response = await apiClient.patch(
+        await apiClient.patch(
           `/matches/${matchId}/${teamFlag}/penalties/${editPenalty._id}`,
-          penaltyData
+          penaltyData,
         );
-        if (response.status === 200 || response.status === 304) {
-          console.log('Edit successful, closing dialog and refreshing data');
-        }
       } else {
-        const response = await apiClient.post(
+        await apiClient.post(
           `/matches/${matchId}/${teamFlag}/penalties`,
-          penaltyData
+          penaltyData,
         );
-        if (response.status === 201) {
-          console.log('Create penalty successful, closing dialog and refreshing data');
-        }
       }
       onSuccess();
       onClose();
-    } catch (error) {
-      console.error('Error saving penalty:', error);
+    } catch (err) {
+      console.error('Error saving penalty:', err);
+      setError('Fehler beim Speichern der Strafe');
     } finally {
       setIsSubmitting(false);
     }
@@ -201,16 +189,20 @@ const PenaltyDialog = ({
                   initialValues={{
                     matchTimeStart: editPenalty?.matchTimeStart || '',
                     matchTimeEnd: editPenalty?.matchTimeEnd || '',
-                    penaltyPlayer: editPenalty?.penaltyPlayer ? {
-                      playerId: editPenalty.penaltyPlayer.playerId,
-                      firstName: editPenalty.penaltyPlayer.firstName,
-                      lastName: editPenalty.penaltyPlayer.lastName,
-                      jerseyNumber: editPenalty.penaltyPlayer.jerseyNumber
-                    } : null,
-                    penaltyCode: editPenalty?.penaltyCode ? {
-                      key: editPenalty.penaltyCode.key,
-                      value: editPenalty.penaltyCode.value
-                    } : null,
+                    penaltyPlayer: editPenalty?.penaltyPlayer
+                      ? {
+                          playerId: editPenalty.penaltyPlayer.playerId,
+                          firstName: editPenalty.penaltyPlayer.firstName,
+                          lastName: editPenalty.penaltyPlayer.lastName,
+                          jerseyNumber: editPenalty.penaltyPlayer.jerseyNumber,
+                        }
+                      : null,
+                    penaltyCode: editPenalty?.penaltyCode
+                      ? {
+                          key: editPenalty.penaltyCode.key,
+                          value: editPenalty.penaltyCode.value,
+                        }
+                      : null,
                     penaltyMinutes: editPenalty?.penaltyMinutes?.toString() || '',
                     isGM: editPenalty?.isGM || false,
                     isMP: editPenalty?.isMP || false,
@@ -218,7 +210,6 @@ const PenaltyDialog = ({
                   validationSchema={validationSchema}
                   enableReinitialize={true}
                   onSubmit={(values, { setSubmitting }) => {
-                    // Validate that required fields are not null
                     if (!values.penaltyPlayer) {
                       setError('Spieler ist erforderlich');
                       setSubmitting(false);
@@ -229,23 +220,21 @@ const PenaltyDialog = ({
                       setSubmitting(false);
                       return;
                     }
-                    
-                    // Type assertion since we've validated these are not null
+
                     const validatedValues = {
                       ...values,
-                      penaltyMinutes: Number(values.penaltyMinutes), // Convert to number
+                      penaltyMinutes: Number(values.penaltyMinutes),
                     } as PenaltiesBase & {
                       penaltyPlayer: NonNullable<typeof values.penaltyPlayer>;
                       penaltyCode: NonNullable<typeof values.penaltyCode>;
                     };
-                    
+
                     handleSubmit(validatedValues);
                     setSubmitting(false);
                   }}
                 >
-                  {({ handleSubmit, setFieldValue, values }) => (
+                  {({ setFieldValue, values }) => (
                     <Form>
-                      {/* Match Time - Start */}
                       <div>
                         <InputMatchTime
                           name="matchTimeStart"
@@ -255,7 +244,6 @@ const PenaltyDialog = ({
                         />
                       </div>
 
-                      {/* Match Time - End (Optional) */}
                       <div>
                         <InputMatchTime
                           name="matchTimeEnd"
@@ -265,15 +253,12 @@ const PenaltyDialog = ({
                         />
                       </div>
 
-                      {/* Player Selection */}
                       <EventPlayerSelect
                         name="penaltyPlayer"
                         selectedPlayer={values.penaltyPlayer || null}
                         onChange={(eventPlayer) => {
                           setFieldValue('penaltyPlayer', eventPlayer);
-                          if (eventPlayer) {
-                            setError('');
-                          }
+                          if (eventPlayer) setError('');
                         }}
                         roster={roster}
                         label="Spieler"
@@ -283,7 +268,6 @@ const PenaltyDialog = ({
                         tabIndex={3}
                       />
 
-                      {/* Penalty Code Selection */}
                       <PenaltyCodeSelect
                         name="penaltyCode"
                         selectedPenaltyCode={values.penaltyCode}
@@ -299,7 +283,6 @@ const PenaltyDialog = ({
                         tabIndex={4}
                       />
 
-                      {/* Penalty Minutes */}
                       <Listbox
                         name="penaltyMinutes"
                         label="Strafminuten"
@@ -309,7 +292,6 @@ const PenaltyDialog = ({
                         tabIndex={5}
                       />
 
-                      {/* Penalty Type Toggles */}
                       <Toggle
                         name="isGM"
                         label="Spieldauer (GM)"
@@ -322,9 +304,7 @@ const PenaltyDialog = ({
                       />
 
                       {error && (
-                        <div className="text-red-600 text-sm mt-2">
-                          {error}
-                        </div>
+                        <div className="text-red-600 text-sm mt-2">{error}</div>
                       )}
 
                       <div className="mt-6 flex justify-end space-x-3">
@@ -343,9 +323,25 @@ const PenaltyDialog = ({
                           className="w-28 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmitting ? (
-                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"></path>
+                            <svg
+                              className="animate-spin h-4 w-4 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                              />
                             </svg>
                           ) : (
                             'Speichern'
