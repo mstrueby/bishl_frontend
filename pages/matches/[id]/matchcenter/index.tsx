@@ -1009,6 +1009,15 @@ export default function MatchDetails({
                     >
                       Spiel beenden
                     </Dialog.Title>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Bitte wählen Sie die Art des Spielendes aus.
+                      </p>
+                      <p className="text-sm text-red-700 mt-2">
+                        <strong>Hinweis:</strong> Diese Aktion kann nicht
+                        rückgängig gemacht werden.
+                      </p>
+                    </div>
 
                     <div className="mt-4">
                       <FinishTypeSelect
