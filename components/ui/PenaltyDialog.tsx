@@ -74,15 +74,29 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, 
   const [penaltyCodes, setPenaltyCodes] = useState<PenaltyCode[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const matchTimeStartRef = useRef<HTMLInputElement>(null);
+  const matchTimeEndRef = useRef<HTMLInputElement>(null);
 
-  const penaltyMinuteOptions = [
-    { key: '2', value: '2' },
-    { key: '5', value: '5' },
-    { key: '10', value: '10' },
-    { key: '20', value: '20' }
-  ];
-
-  
+  // Focus management when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setError('');
+      fetchPenaltyCodes();
+      
+      const timer = setTimeout(() => {
+        if (editPenalty) {
+          if (matchTimeEndRef.current) {
+            matchTimeEndRef.current.focus();
+          }
+        } else {
+          if (matchTimeStartRef.current) {
+            matchTimeStartRef.current.focus();
+          }
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, editPenalty]);
 
   // Fetch penalty codes from API
   const fetchPenaltyCodes = async () => {
@@ -100,19 +114,6 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, 
       setPenaltyCodes([]);
     }
   };
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchPenaltyCodes();
-    }
-  }, [isOpen]);
-
-  // Clear error when dialog opens
-  useEffect(() => {
-    if (isOpen) {
-      setError('');
-    }
-  }, [isOpen]);
 
   // save dialog
   const handleSubmit = async (values: PenaltiesBase) => {
@@ -242,6 +243,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, 
                           name="matchTimeStart"
                           label="Start"
                           tabIndex={1}
+                          ref={matchTimeStartRef}
                         />
                       </div>
 
@@ -251,6 +253,7 @@ const PenaltyDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, 
                           name="matchTimeEnd"
                           label="Ende"
                           tabIndex={2}
+                          ref={matchTimeEndRef}
                         />
                       </div>
 
