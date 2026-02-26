@@ -43,11 +43,19 @@ const validationSchema = Yup.object().shape({
 const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, editGoal }: GoalDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const matchTimeRef = useRef<HTMLInputElement>(null);
 
-  // Clear error when dialog opens
+  // Clear error and focus input when dialog opens
   useEffect(() => {
     if (isOpen) {
       setError('');
+      // Use a small timeout to ensure the dialog transition has started/finished
+      const timer = setTimeout(() => {
+        if (matchTimeRef.current) {
+          matchTimeRef.current.focus();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -157,6 +165,7 @@ const GoalDialog = ({ isOpen, onClose, matchId, teamFlag, roster, onSuccess, edi
                           name="matchTime"
                           label="Spielzeit"
                           tabIndex={1}
+                          ref={matchTimeRef}
                         />
                       </div>
 
