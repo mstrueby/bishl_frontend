@@ -5,7 +5,7 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { CldImage } from 'next-cloudinary';
 import { MatchValues, Roster, RosterPlayer, PenaltiesBase, ScoresBase } from '../../../types/MatchValues';
-import { MatchdayOwner } from '../../../types/TournamentValues'
+import { MatchdayOwner, MatchSettings } from '../../../types/TournamentValues'
 import Layout from '../../../components/Layout';
 import { getCookie } from 'cookies-next';
 import apiClient from '../../../lib/apiClient';
@@ -21,6 +21,46 @@ interface MatchDetailsProps {
   jwt?: string;
   userRoles?: string[];
   userClubId?: string | null;
+}
+
+// Period grouping helpers
+const timeToSeconds = (timeStr: string): number => {
+  const parts = timeStr.split(":").map(Number);
+  return parts[0] * 60 + (parts[1] || 0);
+};
+
+const getPeriodLabel = (totalSeconds: number, settings: MatchSettings): string => {
+  const periodNames: Record<number, string> = { 2: 'Halbzeit', 3: 'Drittel', 4: 'Viertel' };
+  const periodName = periodNames[settings.numOfPeriods] || 'Periode';
+  const regulationEndSeconds = settings.numOfPeriods * settings.periodLengthMin * 60;
+  if (totalSeconds < regulationEndSeconds) {
+    const periodIndex = Math.floor(totalSeconds / (settings.periodLengthMin * 60)) + 1;
+    return `${periodIndex}. ${periodName}`;
+  }
+  if (settings.numOfPeriodsOvertime <= 1 || settings.periodLengthMinOvertime === 0) {
+    return 'Verlängerung';
+  }
+  const overtimeSeconds = totalSeconds - regulationEndSeconds;
+  const overtimePeriod = Math.floor(overtimeSeconds / (settings.periodLengthMinOvertime * 60)) + 1;
+  return `${overtimePeriod}. Verlängerung`;
+};
+
+function groupByPeriod<T>(
+  items: T[],
+  getTimeStr: (item: T) => string,
+  settings: MatchSettings
+): { label: string; items: T[] }[] {
+  const groups: { label: string; items: T[] }[] = [];
+  for (const item of items) {
+    const label = getPeriodLabel(timeToSeconds(getTimeStr(item)), settings);
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) {
+      last.items.push(item);
+    } else {
+      groups.push({ label, items: [item] });
+    }
+  }
+  return groups;
 }
 
 interface RosterTableProps {
@@ -285,107 +325,88 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
         <h3 className="text-lg font-medium text-gray-900 mb-4">Tore</h3>
         <div className="bg-white rounded-md shadow-md overflow-hidden border">
           {(() => {
-            // Merge goals from both teams with team information
             const allGoals = [
-              ...(match.home.scores || []).map(goal => ({
-                ...goal,
-                teamName: match.home.fullName,
-                teamFlag: 'home'
-              })),
-              ...(match.away.scores || []).map(goal => ({
-                ...goal,
-                teamName: match.away.fullName,
-                teamFlag: 'away'
-              }))
+              ...(match.home.scores || []).map(goal => ({ ...goal, teamName: match.home.fullName, teamFlag: 'home' })),
+              ...(match.away.scores || []).map(goal => ({ ...goal, teamName: match.away.fullName, teamFlag: 'away' }))
             ];
 
-            // Sort by match time (convert mm:ss to seconds for proper sorting)
-            const sortedGoals = allGoals.sort((a, b) => {
-              const timeA = a.matchTime.split(":").map(Number);
-              const timeB = b.matchTime.split(":").map(Number);
-              const secondsA = timeA[0] * 60 + timeA[1];
-              const secondsB = timeB[0] * 60 + timeB[1];
-              return secondsA - secondsB;
-            });
+            const sortedGoals = allGoals.sort((a, b) => timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime));
 
-            // Calculate cumulative scores
             let homeScore = 0;
             let awayScore = 0;
             const goalsWithScore = sortedGoals.map(goal => {
-              if (goal.teamFlag === 'home') {
-                homeScore++;
-              } else {
-                awayScore++;
-              }
-              return {
-                ...goal,
-                currentScore: `${homeScore}-${awayScore}`
-              };
+              if (goal.teamFlag === 'home') homeScore++;
+              else awayScore++;
+              return { ...goal, currentScore: `${homeScore}-${awayScore}` };
             });
 
-            return goalsWithScore.length > 0 ? (
+            if (goalsWithScore.length === 0) {
+              return <div className="text-center py-8 text-sm text-gray-500">Keine Tore vorhanden</div>;
+            }
+
+            const groups = groupByPeriod(goalsWithScore, g => g.matchTime, match.matchSettings);
+
+            return (
               <ul className="divide-y divide-gray-200">
-                {goalsWithScore.map((goal, index) => (
-                  <li key={`${goal.teamFlag}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
-                    <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
-                      <CldImage
-                        src={goal.teamFlag === 'home' ? match.home.logo : match.away.logo}
-                        alt={goal.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
-                        width={32}
-                        height={32}
-                        gravity="center"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <div className="w-10 sm:w-16 flex-shrink-0 text-center">
-                      <div className="text-sm font-medium text-gray-900 mb-1">
-                        {goal.currentScore}
-                      </div>
-                      <div className="text-xs font-medium text-gray-600">
-                        {goal.matchTime}
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 text-center ml-6 mr-3">
-                      {goal.goalPlayer && goal.goalPlayer.imageUrl && goal.goalPlayer.imageVisible ? (
+                {groups.flatMap((group) => [
+                  <li key={`header-${group.label}`} className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {group.label}
+                  </li>,
+                  ...group.items.map((goal, index) => (
+                    <li key={`${goal.teamFlag}-${group.label}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
+                      <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                         <CldImage
-                          src={goal.goalPlayer.imageUrl}
-                          alt={`${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}`}
+                          src={goal.teamFlag === 'home' ? match.home.logo : match.away.logo}
+                          alt={goal.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
                           width={32}
                           height={32}
                           gravity="center"
-                          radius="max"
-                          className="w-8 h-8 object-cover"
+                          className="w-full h-full object-contain"
                         />
-                      ) : goal.goalPlayer ? (
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-xs font-medium text-gray-500">
-                            {goal.goalPlayer.displayFirstName?.charAt(0)}{goal.goalPlayer.displayLastName?.charAt(0)}
-                          </span>
+                      </div>
+                      <div className="w-10 sm:w-16 flex-shrink-0 text-center">
+                        <div className="text-sm font-medium text-gray-900 mb-1">
+                          {goal.currentScore}
                         </div>
-                      ) : null}
-                    </div>
-                    <div className="flex-grow">
-                      <div className="flex items-center">
-
+                        <div className="text-xs font-medium text-gray-600">
+                          {goal.matchTime}
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0 text-center ml-6 mr-3">
+                        {goal.goalPlayer && goal.goalPlayer.imageUrl && goal.goalPlayer.imageVisible ? (
+                          <CldImage
+                            src={goal.goalPlayer.imageUrl}
+                            alt={`${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}`}
+                            width={32}
+                            height={32}
+                            gravity="center"
+                            radius="max"
+                            className="w-8 h-8 object-cover"
+                          />
+                        ) : goal.goalPlayer ? (
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-xs font-medium text-gray-500">
+                              {goal.goalPlayer.displayFirstName?.charAt(0)}{goal.goalPlayer.displayLastName?.charAt(0)}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="flex-grow">
                         <p className="text-sm font-medium text-gray-900">
                           {goal.goalPlayer ? `${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
                         </p>
+                        {goal.assistPlayer ? (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {goal.assistPlayer.displayFirstName} {goal.assistPlayer.displayLastName}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-500 mt-1">Keine Vorlage</p>
+                        )}
                       </div>
-                      {goal.assistPlayer ? (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {goal.assistPlayer.displayFirstName} {goal.assistPlayer.displayLastName}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-gray-500 mt-1">Keine Vorlage</p>
-                      )}
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  ))
+                ])}
               </ul>
-            ) : (
-              <div className="text-center py-8 text-sm text-gray-500">
-                Keine Tore vorhanden
-              </div>
             );
           })()}
         </div>
@@ -396,68 +417,54 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
         <h3 className="text-lg font-medium text-gray-900 mb-4">Strafen</h3>
         <div className="bg-white rounded-md shadow-md overflow-hidden border">
           {(() => {
-            // Merge penalties from both teams with team information
             const allPenalties = [
-              ...(match.home.penalties || []).map(penalty => ({
-                ...penalty,
-                teamName: match.home.fullName,
-                teamFlag: 'home'
-              })),
-              ...(match.away.penalties || []).map(penalty => ({
-                ...penalty,
-                teamName: match.away.fullName,
-                teamFlag: 'away'
-              }))
+              ...(match.home.penalties || []).map(penalty => ({ ...penalty, teamName: match.home.fullName, teamFlag: 'home' })),
+              ...(match.away.penalties || []).map(penalty => ({ ...penalty, teamName: match.away.fullName, teamFlag: 'away' }))
             ];
 
-            // Sort by match time start (convert mm:ss to seconds for proper sorting)
-            const sortedPenalties = allPenalties.sort((a, b) => {
-              const timeA = a.matchTimeStart.split(":").map(Number);
-              const timeB = b.matchTimeStart.split(":").map(Number);
-              const secondsA = timeA[0] * 60 + timeA[1];
-              const secondsB = timeB[0] * 60 + timeB[1];
-              return secondsA - secondsB;
-            });
+            const sortedPenalties = allPenalties.sort((a, b) => timeToSeconds(a.matchTimeStart) - timeToSeconds(b.matchTimeStart));
 
-            return sortedPenalties.length > 0 ? (
+            if (sortedPenalties.length === 0) {
+              return <div className="text-center py-8 text-sm text-gray-500">Keine Strafen vorhanden</div>;
+            }
+
+            const groups = groupByPeriod(sortedPenalties, p => p.matchTimeStart, match.matchSettings);
+
+            return (
               <ul className="divide-y divide-gray-200">
-                {sortedPenalties.map((penalty, index) => (
-                  <li key={`${penalty.teamFlag}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
-                    <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
-                      <CldImage
-                        src={penalty.teamFlag === 'home' ? match.home.logo : match.away.logo}
-                        alt={penalty.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
-                        width={32}
-                        height={32}
-                        gravity="center"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <div className="w-10 sm:w-16 flex-shrink-0 text-sm font-medium text-gray-900 text-center">
-                      <div>{penalty.matchTimeStart}</div>
-                      {/**
-                      {penalty.matchTimeEnd && (
-                        <div className="text-xs text-gray-500">{penalty.matchTimeEnd}</div>
-                      )}
-                      */}
-                    </div>
-                    <div className="flex-grow ml-6">
-                      <p className="text-sm font-medium text-gray-900">
-                        {penalty.teamName}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {penalty.isGM && 'GM · '}
-                        {penalty.isMP && 'MP · '}
-                        {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
-                      </p>
-                    </div>
-                  </li>
-                ))}
+                {groups.flatMap((group) => [
+                  <li key={`header-${group.label}`} className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {group.label}
+                  </li>,
+                  ...group.items.map((penalty, index) => (
+                    <li key={`${penalty.teamFlag}-${group.label}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
+                      <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
+                        <CldImage
+                          src={penalty.teamFlag === 'home' ? match.home.logo : match.away.logo}
+                          alt={penalty.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
+                          width={32}
+                          height={32}
+                          gravity="center"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <div className="w-10 sm:w-16 flex-shrink-0 text-sm font-medium text-gray-900 text-center">
+                        <div>{penalty.matchTimeStart}</div>
+                      </div>
+                      <div className="flex-grow ml-6">
+                        <p className="text-sm font-medium text-gray-900">
+                          {penalty.teamName}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {penalty.isGM && 'GM · '}
+                          {penalty.isMP && 'MP · '}
+                          {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
+                        </p>
+                      </div>
+                    </li>
+                  ))
+                ])}
               </ul>
-            ) : (
-              <div className="text-center py-8 text-sm text-gray-500">
-                Keine Strafen vorhanden
-              </div>
             );
           })()}
         </div>
