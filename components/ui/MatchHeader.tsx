@@ -141,15 +141,17 @@ const MatchHeader: React.FC<MatchHeaderProps> = ({ match, isRefreshing, onRefres
                       <span>{match.away.stats.goalsFor}</span>
                     </div>
                     {periodScores.length > 0 && (
-                      <div className="mt-3 space-y-0.5">
-                        {periodScores.map((ps) => (
-                          <div key={ps.label} className="flex items-center justify-center gap-x-2 text-xs text-gray-500">
-                            <span className="w-20 text-right truncate">{ps.label}</span>
-                            <span className="font-medium text-gray-700 tabular-nums">
-                              {ps.homeGoals}&thinsp;:&thinsp;{ps.awayGoals}
+                      <div className="mt-2 text-sm sm:text-base font-medium text-gray-500 flex items-center justify-center gap-x-1">
+                        <span>(</span>
+                        {periodScores.map((ps, index) => (
+                          <React.Fragment key={ps.label}>
+                            <span className="tabular-nums">
+                              {ps.homeGoals}:{ps.awayGoals}
                             </span>
-                          </div>
+                            {index < periodScores.length - 1 && <span>,&nbsp;</span>}
+                          </React.Fragment>
                         ))}
+                        <span>)</span>
                       </div>
                     )}
                   </>
