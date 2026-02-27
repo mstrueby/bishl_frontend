@@ -634,31 +634,45 @@ export default function MatchDetails({
         </div>
       </div>
 
-      {/** Print match settings as unordered list */}
+      {/** Print match settings as data list */}
       <div className="py-6 mt-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4 px-2">
           Spieleinstellungen
         </h3>
-        <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border divide-y divide-gray-20 px-6 py-4">
-          <ul className="list-disc pl-5 text-sm text-gray-600 leading-6">
-            <li>Anzahl Perioden: {match.matchSettings.numOfPeriods}</li>
-            <li>
-              Periodenlänge: {match.matchSettings.periodLengthMin} Minuten
-            </li>
-            <li>
-              Verlängerung: {match.matchSettings.overtime ? (
-                <>
-                  Ja ({match.matchSettings.numOfPeriodsOvertime} ×{" "}
-                  {match.matchSettings.periodLengthMinOvertime} Minuten)
-                </>
-              ) : "Nein"}
-            </li>
-            <li>
-              Penalty-Schießen: {match.matchSettings.shootout ? "Ja" : "Nein"}
-            </li>
-            <li>Schiedsrichterpunkte: {match.matchSettings.refereePoints}</li>
-            <li>Quelle: {match.matchSettingsSource}</li>
-          </ul>
+        <div className="bg-white rounded-md shadow-md border overflow-hidden">
+          <div className="divide-y divide-gray-100">
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+              <span className="text-sm text-gray-600">Anzahl Perioden</span>
+              <span className="text-sm font-bold text-gray-900">{match.matchSettings.numOfPeriods}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+              <span className="text-sm text-gray-600">Periodenlänge</span>
+              <span className="text-sm font-bold text-gray-900">{match.matchSettings.periodLengthMin} Minuten</span>
+            </div>
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+              <span className="text-sm text-gray-600">Verlängerung</span>
+              <span className="text-sm font-bold text-gray-900">
+                {match.matchSettings.overtime ? (
+                  <>
+                    Ja ({match.matchSettings.numOfPeriodsOvertime} ×{" "}
+                    {match.matchSettings.periodLengthMinOvertime} Minuten)
+                  </>
+                ) : "Nein"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+              <span className="text-sm text-gray-600">Penalty-Schießen</span>
+              <span className="text-sm font-bold text-gray-900">{match.matchSettings.shootout ? "Ja" : "Nein"}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+              <span className="text-sm text-gray-600">Schiedsrichterpunkte</span>
+              <span className="text-sm font-bold text-gray-900">{match.matchSettings.refereePoints}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+              <span className="text-sm text-gray-600">Quelle</span>
+              <span className="text-sm font-bold text-gray-900">{match.matchSettingsSource}</span>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>
