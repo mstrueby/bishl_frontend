@@ -58,9 +58,35 @@ export function getPeriodScores(
 
   const groups = groupByPeriod(allGoals, g => g.matchTime, settings);
 
-  return groups.map(group => ({
-    label: group.label,
-    homeGoals: group.items.filter(g => g.teamFlag === 'home').length,
-    awayGoals: group.items.filter(g => g.teamFlag === 'away').length,
-  }));
+  // Initialize with regulation periods
+  const periodNames: Record<number, string> = { 2: 'Halbzeit', 3: 'Drittel', 4: 'Viertel' };
+  const periodName = periodNames[settings.numOfPeriods] || 'Periode';
+  
+  const result: PeriodScore[] = [];
+  for (let i = 1; i <= settings.numOfPeriods; i++) {
+    const label = `${i}. ${periodName}`;
+    const group = groups.find(g => g.label === label);
+    if (group) {
+      result.push({
+        label: group.label,
+        homeGoals: group.items.filter(g => g.teamFlag === 'home').length,
+        awayGoals: group.items.filter(g => g.teamFlag === 'away').length,
+      });
+    } else {
+      result.push({ label, homeGoals: 0, awayGoals: 0 });
+    }
+  }
+
+  // Add any additional periods (overtime, shootout) that have goals
+  for (const group of groups) {
+    if (!result.some(r => r.label === group.label)) {
+      result.push({
+        label: group.label,
+        homeGoals: group.items.filter(g => g.teamFlag === 'home').length,
+        awayGoals: group.items.filter(g => g.teamFlag === 'away').length,
+      });
+    }
+  }
+
+  return result;
 }

@@ -142,16 +142,14 @@ const MatchHeader: React.FC<MatchHeaderProps> = ({ match, isRefreshing, onRefres
                     </div>
                     {periodScores.length > 0 && (
                       <div className="mt-2 text-sm sm:text-base font-medium text-gray-500 flex items-center justify-center gap-x-1">
-                        <span>(</span>
                         {periodScores.map((ps, index) => (
                           <React.Fragment key={ps.label}>
                             <span className="tabular-nums">
                               {ps.homeGoals}:{ps.awayGoals}
                             </span>
-                            {index < periodScores.length - 1 && <span>,&nbsp;</span>}
+                            {index < periodScores.length - 1 && <span>,</span>}
                           </React.Fragment>
                         ))}
-                        <span>)</span>
                       </div>
                     )}
                   </>
