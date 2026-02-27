@@ -241,6 +241,21 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
         onRefresh={refreshMatchData}
       />
 
+      {/** Print match settings as unordered list */}
+      <div className="mt-4 mb-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Spielregeln</h3>
+        <ul className="list-disc pl-5 text-sm text-gray-600">
+          <li>Anzahl Perioden: {match.matchSettings.numOfPeriods}</li>
+          <li>Periodenlänge: {match.matchSettings.periodLengthMin} Minuten</li>
+          {match.matchSettings.overtime &&
+            <li>Verlängerung: {match.matchSettings.numOfPeriodsOvertime} × {match.matchSettings.periodLengthMinOvertime} Minuten</li>
+          }
+          {match.matchSettings.shootout && <li>Penalty-Schießen</li>}
+          <li>Schiedsrichterpunkte: {match.matchSettings.refereePoints}</li>
+          <li>Quelle: {match.matchSettingsSource}</li>
+        </ul>
+      </div>
+      
 
       {/* Roster */}
       <div className="mt-14 mb-10">
@@ -250,7 +265,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
             <RosterTable
               teamName={match.home.fullName}
               roster={match.home.roster?.players || []}
-              isPublished={match.home.roster?.published || false}
+              isPublished={match.home.roster?.status != 'DRAFT' || false}
             />
           </div>
 
@@ -259,7 +274,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
             <RosterTable
               teamName={match.away.fullName}
               roster={match.away.roster?.players || []}
-              isPublished={match.away.roster?.published || false}
+              isPublished={match.away.roster?.status != 'DRAFT' || false}
             />
           </div>
         </div>

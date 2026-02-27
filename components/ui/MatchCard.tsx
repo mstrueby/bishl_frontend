@@ -40,6 +40,7 @@ const StatusMenu = ({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const { user } = useAuth();
+  const userRoles = user?.roles || [];
   const router = useRouter();
 
   return (
@@ -175,7 +176,7 @@ const StatusMenu = ({
           }
         }}
         onMatchUpdate={onMatchUpdate}
-        userRole={user?.role || []}
+        userRole={userRoles}
       />
     </>
   );

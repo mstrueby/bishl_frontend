@@ -1,3 +1,5 @@
+import { MatchSettings } from "./TournamentValues"
+
 export interface EventPlayer {
   playerId: string;
   firstName: string;
@@ -220,4 +222,6 @@ export interface MatchValues {
   referee2?: Referee;
   matchSheetComplete?: boolean;
   supplementarySheet?: SupplementarySheet;
+  matchSettings: MatchSettings;
+  matchSettingsSource: string;
 }
