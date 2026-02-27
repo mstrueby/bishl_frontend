@@ -5,6 +5,7 @@ import { MatchValues } from '../../types/MatchValues';
 import { tournamentConfigs } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import MatchStatusBadge from './MatchStatusBadge';
+import { getPeriodScores } from '../../utils/matchPeriods';
 
 interface MatchHeaderProps {
   match: MatchValues;
@@ -124,14 +125,36 @@ const MatchHeader: React.FC<MatchHeaderProps> = ({ match, isRefreshing, onRefres
               case 'SCHEDULED':
               case 'CANCELLED':
                 return null;
-              default:
+              default: {
+                const periodScores = match.matchSettings
+                  ? getPeriodScores(
+                      match.home.scores || [],
+                      match.away.scores || [],
+                      match.matchSettings
+                    )
+                  : [];
                 return (
-                  <div className="text-2xl sm:text-4xl font-bold space-x-1 sm:space-x-4">
-                    <span>{match.home.stats.goalsFor}</span>
-                    <span>:</span>
-                    <span>{match.away.stats.goalsFor}</span>
-                  </div>
+                  <>
+                    <div className="text-2xl sm:text-4xl font-bold space-x-1 sm:space-x-4">
+                      <span>{match.home.stats.goalsFor}</span>
+                      <span>:</span>
+                      <span>{match.away.stats.goalsFor}</span>
+                    </div>
+                    {periodScores.length > 0 && (
+                      <div className="mt-3 space-y-0.5">
+                        {periodScores.map((ps) => (
+                          <div key={ps.label} className="flex items-center justify-center gap-x-2 text-xs text-gray-500">
+                            <span className="w-20 text-right truncate">{ps.label}</span>
+                            <span className="font-medium text-gray-700 tabular-nums">
+                              {ps.homeGoals}&thinsp;:&thinsp;{ps.awayGoals}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 );
+              }
             }
           })()}
         </div>

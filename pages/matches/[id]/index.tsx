@@ -4,14 +4,9 @@ import useAuth from "../../../hooks/useAuth";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { CldImage } from "next-cloudinary";
-import {
-  MatchValues,
-  Roster,
-  RosterPlayer,
-  PenaltiesBase,
-  ScoresBase,
-} from "../../../types/MatchValues";
-import { MatchdayOwner, MatchSettings } from "../../../types/TournamentValues";
+import { MatchValues, RosterPlayer } from "../../../types/MatchValues";
+import { MatchdayOwner } from "../../../types/TournamentValues";
+import { timeToSeconds, groupByPeriod } from "../../../utils/matchPeriods";
 import Layout from "../../../components/Layout";
 import { getCookie } from "cookies-next";
 import apiClient from "../../../lib/apiClient";
@@ -27,59 +22,6 @@ interface MatchDetailsProps {
   jwt?: string;
   userRoles?: string[];
   userClubId?: string | null;
-}
-
-// Period grouping helpers
-const timeToSeconds = (timeStr: string): number => {
-  const parts = timeStr.split(":").map(Number);
-  return parts[0] * 60 + (parts[1] || 0);
-};
-
-const getPeriodLabel = (
-  totalSeconds: number,
-  settings: MatchSettings,
-): string => {
-  const periodNames: Record<number, string> = {
-    2: "Halbzeit",
-    3: "Drittel",
-    4: "Viertel",
-  };
-  const periodName = periodNames[settings.numOfPeriods] || "Periode";
-  const regulationEndSeconds =
-    settings.numOfPeriods * settings.periodLengthMin * 60;
-  if (totalSeconds < regulationEndSeconds) {
-    const periodIndex =
-      Math.floor(totalSeconds / (settings.periodLengthMin * 60)) + 1;
-    return `${periodIndex}. ${periodName}`;
-  }
-  if (
-    settings.numOfPeriodsOvertime <= 1 ||
-    settings.periodLengthMinOvertime === 0
-  ) {
-    return "Verlängerung";
-  }
-  const overtimeSeconds = totalSeconds - regulationEndSeconds;
-  const overtimePeriod =
-    Math.floor(overtimeSeconds / (settings.periodLengthMinOvertime * 60)) + 1;
-  return `${overtimePeriod}. Verlängerung`;
-};
-
-function groupByPeriod<T>(
-  items: T[],
-  getTimeStr: (item: T) => string,
-  settings: MatchSettings,
-): { label: string; items: T[] }[] {
-  const groups: { label: string; items: T[] }[] = [];
-  for (const item of items) {
-    const label = getPeriodLabel(timeToSeconds(getTimeStr(item)), settings);
-    const last = groups[groups.length - 1];
-    if (last && last.label === label) {
-      last.items.push(item);
-    } else {
-      groups.push({ label, items: [item] });
-    }
-  }
-  return groups;
 }
 
 interface RosterTableProps {
