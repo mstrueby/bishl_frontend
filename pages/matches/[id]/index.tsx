@@ -1,19 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import useAuth from '../../../hooks/useAuth';
-import { GetServerSideProps } from 'next';
-import { useRouter } from 'next/router';
-import { CldImage } from 'next-cloudinary';
-import { MatchValues, Roster, RosterPlayer, PenaltiesBase, ScoresBase } from '../../../types/MatchValues';
-import { MatchdayOwner, MatchSettings } from '../../../types/TournamentValues'
-import Layout from '../../../components/Layout';
-import { getCookie } from 'cookies-next';
-import apiClient from '../../../lib/apiClient';
-import { getErrorMessage } from '../../../lib/errorHandler';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { tournamentConfigs } from '../../../tools/consts';
-import { calculateMatchButtonPermissions } from '../../../tools/utils';
-import MatchHeader from '../../../components/ui/MatchHeader';
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import useAuth from "../../../hooks/useAuth";
+import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { CldImage } from "next-cloudinary";
+import {
+  MatchValues,
+  Roster,
+  RosterPlayer,
+  PenaltiesBase,
+  ScoresBase,
+} from "../../../types/MatchValues";
+import { MatchdayOwner, MatchSettings } from "../../../types/TournamentValues";
+import Layout from "../../../components/Layout";
+import { getCookie } from "cookies-next";
+import apiClient from "../../../lib/apiClient";
+import { getErrorMessage } from "../../../lib/errorHandler";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { tournamentConfigs } from "../../../tools/consts";
+import { calculateMatchButtonPermissions } from "../../../tools/utils";
+import MatchHeader from "../../../components/ui/MatchHeader";
 
 interface MatchDetailsProps {
   match: MatchValues;
@@ -29,26 +35,39 @@ const timeToSeconds = (timeStr: string): number => {
   return parts[0] * 60 + (parts[1] || 0);
 };
 
-const getPeriodLabel = (totalSeconds: number, settings: MatchSettings): string => {
-  const periodNames: Record<number, string> = { 2: 'Halbzeit', 3: 'Drittel', 4: 'Viertel' };
-  const periodName = periodNames[settings.numOfPeriods] || 'Periode';
-  const regulationEndSeconds = settings.numOfPeriods * settings.periodLengthMin * 60;
+const getPeriodLabel = (
+  totalSeconds: number,
+  settings: MatchSettings,
+): string => {
+  const periodNames: Record<number, string> = {
+    2: "Halbzeit",
+    3: "Drittel",
+    4: "Viertel",
+  };
+  const periodName = periodNames[settings.numOfPeriods] || "Periode";
+  const regulationEndSeconds =
+    settings.numOfPeriods * settings.periodLengthMin * 60;
   if (totalSeconds < regulationEndSeconds) {
-    const periodIndex = Math.floor(totalSeconds / (settings.periodLengthMin * 60)) + 1;
+    const periodIndex =
+      Math.floor(totalSeconds / (settings.periodLengthMin * 60)) + 1;
     return `${periodIndex}. ${periodName}`;
   }
-  if (settings.numOfPeriodsOvertime <= 1 || settings.periodLengthMinOvertime === 0) {
-    return 'Verlängerung';
+  if (
+    settings.numOfPeriodsOvertime <= 1 ||
+    settings.periodLengthMinOvertime === 0
+  ) {
+    return "Verlängerung";
   }
   const overtimeSeconds = totalSeconds - regulationEndSeconds;
-  const overtimePeriod = Math.floor(overtimeSeconds / (settings.periodLengthMinOvertime * 60)) + 1;
+  const overtimePeriod =
+    Math.floor(overtimeSeconds / (settings.periodLengthMinOvertime * 60)) + 1;
   return `${overtimePeriod}. Verlängerung`;
 };
 
 function groupByPeriod<T>(
   items: T[],
   getTimeStr: (item: T) => string,
-  settings: MatchSettings
+  settings: MatchSettings,
 ): { label: string; items: T[] }[] {
   const groups: { label: string; items: T[] }[] = [];
   for (const item of items) {
@@ -70,18 +89,28 @@ interface RosterTableProps {
 }
 
 // Reusable RosterTable component
-const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished }) => {
+const RosterTable: React.FC<RosterTableProps> = ({
+  teamName,
+  roster,
+  isPublished,
+}) => {
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = (rosterToSort: RosterPlayer[]) => {
     if (!rosterToSort || rosterToSort.length === 0) return [];
 
     return [...rosterToSort].sort((a, b) => {
       // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-      const positionPriority = { 'C': 1, 'A': 2, 'G': 3, 'F': 4 };
+      const positionPriority = { C: 1, A: 2, G: 3, F: 4 };
 
       // Get priorities
-      const posA = positionPriority[a.playerPosition.key as keyof typeof positionPriority] || 99;
-      const posB = positionPriority[b.playerPosition.key as keyof typeof positionPriority] || 99;
+      const posA =
+        positionPriority[
+          a.playerPosition.key as keyof typeof positionPriority
+        ] || 99;
+      const posB =
+        positionPriority[
+          b.playerPosition.key as keyof typeof positionPriority
+        ] || 99;
 
       // First sort by position priority
       if (posA !== posB) {
@@ -133,7 +162,6 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
             <tbody className="bg-white divide-y divide-gray-200">
               {sortedRoster.map((player) => (
                 <tr key={player.player.playerId}>
-
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">
                     {player.player.jerseyNumber}
                   </td>
@@ -155,11 +183,15 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                           <span className="text-xs font-medium text-gray-500">
-                            {player.player.displayFirstName?.charAt(0)}{player.player.displayLastName?.charAt(0)}
+                            {player.player.displayFirstName?.charAt(0)}
+                            {player.player.displayLastName?.charAt(0)}
                           </span>
                         </div>
                       )}
-                      <span>{player.player.displayFirstName} {player.player.displayLastName}</span>
+                      <span>
+                        {player.player.displayFirstName}{" "}
+                        {player.player.displayLastName}
+                      </span>
                     </div>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
@@ -169,7 +201,7 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
                     {player.assists || 0}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                    {(player.points || 0)}
+                    {player.points || 0}
                   </td>
                   {/**
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
@@ -182,7 +214,9 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
           </table>
         ) : (
           <div className="text-center py-4 text-sm text-gray-500">
-            {!isPublished ? 'Aufstellung noch nicht veröffentlicht' : 'Keine Aufstellung verfügbar'}
+            {!isPublished
+              ? "Aufstellung noch nicht eingereicht"
+              : "Keine Aufstellung verfügbar"}
           </div>
         )}
       </div>
@@ -190,7 +224,10 @@ const RosterTable: React.FC<RosterTableProps> = ({ teamName, roster, isPublished
   );
 };
 
-export default function MatchDetails({ match: initialMatch, matchdayOwner }: MatchDetailsProps) {
+export default function MatchDetails({
+  match: initialMatch,
+  matchdayOwner,
+}: MatchDetailsProps) {
   const [match, setMatch] = useState<MatchValues>(initialMatch);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
@@ -206,7 +243,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
       const response = await apiClient.get(`/matches/${id}`);
       setMatch(response.data);
     } catch (error) {
-      console.error('Error refreshing match data:', getErrorMessage(error));
+      console.error("Error refreshing match data:", getErrorMessage(error));
     } finally {
       setIsRefreshing(false);
     }
@@ -216,7 +253,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (match.matchStatus.key === 'INPROGRESS') {
+    if (match.matchStatus.key === "INPROGRESS") {
       interval = setInterval(() => {
         refreshMatchData();
       }, 30000); // Refresh every 30 seconds for live matches
@@ -227,21 +264,48 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
     };
   }, [match.matchStatus.key, id, refreshMatchData]);
 
-  const RefereeInfo = ({ assigned, referee = {}, position }: { assigned: boolean, referee?: any, position: number }) => (
+  const RefereeInfo = ({
+    assigned,
+    referee = {},
+    position,
+  }: {
+    assigned: boolean;
+    referee?: any;
+    position: number;
+  }) => (
     <div className="flex items-center px-6 py-4">
       <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-        {assigned ? `${referee?.firstName?.charAt(0) || ''}${referee?.lastName?.charAt(0) || ''}` : (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        {assigned ? (
+          `${referee?.firstName?.charAt(0) || ""}${referee?.lastName?.charAt(0) || ""}`
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
         )}
       </div>
       <div className="ml-4">
-        <p className={`text-sm font-medium ${assigned ? 'text-gray-900' : 'text-gray-400'}`}>
-          {assigned ? `${referee?.firstName || ''} ${referee?.lastName || ''}` : 'Nicht zugewiesen'}
+        <p
+          className={`text-sm font-medium ${assigned ? "text-gray-900" : "text-gray-400"}`}
+        >
+          {assigned
+            ? `${referee?.firstName || ""} ${referee?.lastName || ""}`
+            : "Nicht zugewiesen"}
         </p>
         <p className="text-xs text-gray-500">
-          {assigned && referee?.clubName ? referee.clubName : `Schiedsrichter ${position}`}
+          {assigned && referee?.clubName
+            ? referee.clubName
+            : `Schiedsrichter ${position}`}
         </p>
       </div>
     </div>
@@ -255,22 +319,35 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
           aria-label="Back to tournament"
           className="flex items-center"
         >
-          <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
+          <ChevronLeftIcon
+            aria-hidden="true"
+            className="h-3 w-3 text-gray-400"
+          />
           <span className="ml-2">
             {tournamentConfigs[match.tournament.alias]?.name}
           </span>
         </Link>
 
         {(() => {
-          const permissions = calculateMatchButtonPermissions(user, match, matchdayOwner, false);
-          return permissions.showButtonMatchCenter && (
-            <Link
-              href={`/matches/${match._id}/matchcenter/`}
-              className="flex items-center"
-            >
-              <span className="mr-2">Match Center</span>
-              <ChevronRightIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
-            </Link>
+          const permissions = calculateMatchButtonPermissions(
+            user,
+            match,
+            matchdayOwner,
+            false,
+          );
+          return (
+            permissions.showButtonMatchCenter && (
+              <Link
+                href={`/matches/${match._id}/matchcenter/`}
+                className="flex items-center"
+              >
+                <span className="mr-2">Match Center</span>
+                <ChevronRightIcon
+                  aria-hidden="true"
+                  className="h-3 w-3 text-gray-400"
+                />
+              </Link>
+            )
           );
         })()}
       </div>
@@ -281,22 +358,6 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
         onRefresh={refreshMatchData}
       />
 
-      {/** Print match settings as unordered list */}
-      <div className="mt-4 mb-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Spielregeln</h3>
-        <ul className="list-disc pl-5 text-sm text-gray-600">
-          <li>Anzahl Perioden: {match.matchSettings.numOfPeriods}</li>
-          <li>Periodenlänge: {match.matchSettings.periodLengthMin} Minuten</li>
-          {match.matchSettings.overtime &&
-            <li>Verlängerung: {match.matchSettings.numOfPeriodsOvertime} × {match.matchSettings.periodLengthMinOvertime} Minuten</li>
-          }
-          {match.matchSettings.shootout && <li>Penalty-Schießen</li>}
-          <li>Schiedsrichterpunkte: {match.matchSettings.refereePoints}</li>
-          <li>Quelle: {match.matchSettingsSource}</li>
-        </ul>
-      </div>
-      
-
       {/* Roster */}
       <div className="mt-14 mb-10">
         <div className="flex flex-col md:flex-row md:space-x-4">
@@ -305,7 +366,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
             <RosterTable
               teamName={match.home.fullName}
               roster={match.home.roster?.players || []}
-              isPublished={match.home.roster?.status != 'DRAFT' || false}
+              isPublished={match.home.roster?.status != "DRAFT" || false}
             />
           </div>
 
@@ -314,7 +375,7 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
             <RosterTable
               teamName={match.away.fullName}
               roster={match.away.roster?.players || []}
-              isPublished={match.away.roster?.status != 'DRAFT' || false}
+              isPublished={match.away.roster?.status != "DRAFT" || false}
             />
           </div>
         </div>
@@ -326,38 +387,70 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
         <div className="bg-white rounded-md shadow-md overflow-hidden border">
           {(() => {
             const allGoals = [
-              ...(match.home.scores || []).map(goal => ({ ...goal, teamName: match.home.fullName, teamFlag: 'home' })),
-              ...(match.away.scores || []).map(goal => ({ ...goal, teamName: match.away.fullName, teamFlag: 'away' }))
+              ...(match.home.scores || []).map((goal) => ({
+                ...goal,
+                teamName: match.home.fullName,
+                teamFlag: "home",
+              })),
+              ...(match.away.scores || []).map((goal) => ({
+                ...goal,
+                teamName: match.away.fullName,
+                teamFlag: "away",
+              })),
             ];
 
-            const sortedGoals = allGoals.sort((a, b) => timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime));
+            const sortedGoals = allGoals.sort(
+              (a, b) => timeToSeconds(a.matchTime) - timeToSeconds(b.matchTime),
+            );
 
             let homeScore = 0;
             let awayScore = 0;
-            const goalsWithScore = sortedGoals.map(goal => {
-              if (goal.teamFlag === 'home') homeScore++;
+            const goalsWithScore = sortedGoals.map((goal) => {
+              if (goal.teamFlag === "home") homeScore++;
               else awayScore++;
               return { ...goal, currentScore: `${homeScore}-${awayScore}` };
             });
 
             if (goalsWithScore.length === 0) {
-              return <div className="text-center py-8 text-sm text-gray-500">Keine Tore vorhanden</div>;
+              return (
+                <div className="text-center py-8 text-sm text-gray-500">
+                  Keine Tore vorhanden
+                </div>
+              );
             }
 
-            const groups = groupByPeriod(goalsWithScore, g => g.matchTime, match.matchSettings);
+            const groups = groupByPeriod(
+              goalsWithScore,
+              (g) => g.matchTime,
+              match.matchSettings,
+            );
 
             return (
               <ul className="divide-y divide-gray-200">
                 {groups.flatMap((group) => [
-                  <li key={`header-${group.label}`} className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <li
+                    key={`header-${group.label}`}
+                    className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                  >
                     {group.label}
                   </li>,
                   ...group.items.map((goal, index) => (
-                    <li key={`${goal.teamFlag}-${group.label}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
+                    <li
+                      key={`${goal.teamFlag}-${group.label}-${index}`}
+                      className="flex items-center py-4 px-4 sm:px-6"
+                    >
                       <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                         <CldImage
-                          src={goal.teamFlag === 'home' ? match.home.logo : match.away.logo}
-                          alt={goal.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
+                          src={
+                            goal.teamFlag === "home"
+                              ? match.home.logo
+                              : match.away.logo
+                          }
+                          alt={
+                            goal.teamFlag === "home"
+                              ? match.home.tinyName
+                              : match.away.tinyName
+                          }
                           width={32}
                           height={32}
                           gravity="center"
@@ -373,7 +466,9 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
                         </div>
                       </div>
                       <div className="flex-shrink-0 text-center ml-6 mr-3">
-                        {goal.goalPlayer && goal.goalPlayer.imageUrl && goal.goalPlayer.imageVisible ? (
+                        {goal.goalPlayer &&
+                        goal.goalPlayer.imageUrl &&
+                        goal.goalPlayer.imageVisible ? (
                           <CldImage
                             src={goal.goalPlayer.imageUrl}
                             alt={`${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}`}
@@ -386,25 +481,31 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
                         ) : goal.goalPlayer ? (
                           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                             <span className="text-xs font-medium text-gray-500">
-                              {goal.goalPlayer.displayFirstName?.charAt(0)}{goal.goalPlayer.displayLastName?.charAt(0)}
+                              {goal.goalPlayer.displayFirstName?.charAt(0)}
+                              {goal.goalPlayer.displayLastName?.charAt(0)}
                             </span>
                           </div>
                         ) : null}
                       </div>
                       <div className="flex-grow">
                         <p className="text-sm font-medium text-gray-900">
-                          {goal.goalPlayer ? `${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}` : 'Unbekannt'}
+                          {goal.goalPlayer
+                            ? `${goal.goalPlayer.displayFirstName} ${goal.goalPlayer.displayLastName}`
+                            : "Unbekannt"}
                         </p>
                         {goal.assistPlayer ? (
                           <p className="text-xs text-gray-500 mt-1">
-                            {goal.assistPlayer.displayFirstName} {goal.assistPlayer.displayLastName}
+                            {goal.assistPlayer.displayFirstName}{" "}
+                            {goal.assistPlayer.displayLastName}
                           </p>
                         ) : (
-                          <p className="text-xs text-gray-500 mt-1">Keine Vorlage</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Keine Vorlage
+                          </p>
                         )}
                       </div>
                     </li>
-                  ))
+                  )),
                 ])}
               </ul>
             );
@@ -418,30 +519,64 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
         <div className="bg-white rounded-md shadow-md overflow-hidden border">
           {(() => {
             const allPenalties = [
-              ...(match.home.penalties || []).map(penalty => ({ ...penalty, teamName: match.home.fullName, teamFlag: 'home' })),
-              ...(match.away.penalties || []).map(penalty => ({ ...penalty, teamName: match.away.fullName, teamFlag: 'away' }))
+              ...(match.home.penalties || []).map((penalty) => ({
+                ...penalty,
+                teamName: match.home.fullName,
+                teamFlag: "home",
+              })),
+              ...(match.away.penalties || []).map((penalty) => ({
+                ...penalty,
+                teamName: match.away.fullName,
+                teamFlag: "away",
+              })),
             ];
 
-            const sortedPenalties = allPenalties.sort((a, b) => timeToSeconds(a.matchTimeStart) - timeToSeconds(b.matchTimeStart));
+            const sortedPenalties = allPenalties.sort(
+              (a, b) =>
+                timeToSeconds(a.matchTimeStart) -
+                timeToSeconds(b.matchTimeStart),
+            );
 
             if (sortedPenalties.length === 0) {
-              return <div className="text-center py-8 text-sm text-gray-500">Keine Strafen vorhanden</div>;
+              return (
+                <div className="text-center py-8 text-sm text-gray-500">
+                  Keine Strafen vorhanden
+                </div>
+              );
             }
 
-            const groups = groupByPeriod(sortedPenalties, p => p.matchTimeStart, match.matchSettings);
+            const groups = groupByPeriod(
+              sortedPenalties,
+              (p) => p.matchTimeStart,
+              match.matchSettings,
+            );
 
             return (
               <ul className="divide-y divide-gray-200">
                 {groups.flatMap((group) => [
-                  <li key={`header-${group.label}`} className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <li
+                    key={`header-${group.label}`}
+                    className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                  >
                     {group.label}
                   </li>,
                   ...group.items.map((penalty, index) => (
-                    <li key={`${penalty.teamFlag}-${group.label}-${index}`} className="flex items-center py-4 px-4 sm:px-6">
+                    <li
+                      key={`${penalty.teamFlag}-${group.label}-${index}`}
+                      className="flex items-center py-4 px-4 sm:px-6"
+                    >
                       <div className="flex-shrink-0 w-[32px] h-[32px] sm:w-[32px] sm:h-[32px] mx-auto mr-6">
                         <CldImage
-                          src={penalty.teamFlag === 'home' ? match.home.logo : match.away.logo}
-                          alt={penalty.teamFlag === 'home' ? match.home.tinyName : match.away.tinyName}
+                          src={
+                            penalty.teamFlag === "home"
+                              ? match.home.logo
+                              : match.away.logo
+                          }
+                          alt={
+                            penalty.teamFlag === "home"
+                              ? match.home.tinyName
+                              : match.away.tinyName
+                          }
                           width={32}
                           height={32}
                           gravity="center"
@@ -456,13 +591,15 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
                           {penalty.teamName}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
-                          {penalty.isGM && 'GM · '}
-                          {penalty.isMP && 'MP · '}
-                          {penalty.penaltyMinutes} Min. · {penalty.penaltyCode.key} - {penalty.penaltyCode.value}
+                          {penalty.isGM && "GM · "}
+                          {penalty.isMP && "MP · "}
+                          {penalty.penaltyMinutes} Min. ·{" "}
+                          {penalty.penaltyCode.key} -{" "}
+                          {penalty.penaltyCode.value}
                         </p>
                       </div>
                     </li>
-                  ))
+                  )),
                 ])}
               </ul>
             );
@@ -472,27 +609,65 @@ export default function MatchDetails({ match: initialMatch, matchdayOwner }: Mat
 
       {/* Referees Section */}
       <div className="py-6 mt-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Schiedsrichter</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Schiedsrichter
+        </h3>
         <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border divide-y divide-gray-200">
           {match.referee1 ? (
-            <RefereeInfo assigned={true} referee={match.referee1} position={1} />
+            <RefereeInfo
+              assigned={true}
+              referee={match.referee1}
+              position={1}
+            />
           ) : (
             <RefereeInfo assigned={false} position={1} />
           )}
           {match.referee2 ? (
-            <RefereeInfo assigned={true} referee={match.referee2} position={2} />
+            <RefereeInfo
+              assigned={true}
+              referee={match.referee2}
+              position={2}
+            />
           ) : (
             <RefereeInfo assigned={false} position={2} />
           )}
         </div>
       </div>
-    </Layout >
+
+      {/** Print match settings as unordered list */}
+      <div className="py-6 mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Spieleinstellungen
+        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center bg-white rounded-md shadow-md border divide-y divide-gray-20 px-6 py-4">
+          <ul className="list-disc pl-5 text-sm text-gray-600 leading-6">
+            <li>Anzahl Perioden: {match.matchSettings.numOfPeriods}</li>
+            <li>
+              Periodenlänge: {match.matchSettings.periodLengthMin} Minuten
+            </li>
+            <li>
+              Verlängerung: {match.matchSettings.overtime ? (
+                <>
+                  Ja ({match.matchSettings.numOfPeriodsOvertime} ×{" "}
+                  {match.matchSettings.periodLengthMinOvertime} Minuten)
+                </>
+              ) : "Nein"}
+            </li>
+            <li>
+              Penalty-Schießen: {match.matchSettings.shootout ? "Ja" : "Nein"}
+            </li>
+            <li>Schiedsrichterpunkte: {match.matchSettings.refereePoints}</li>
+            <li>Quelle: {match.matchSettingsSource}</li>
+          </ul>
+        </div>
+      </div>
+    </Layout>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
-  const jwt = (getCookie('jwt', context) || '') as string;
+  const jwt = (getCookie("jwt", context) || "") as string;
 
   try {
     // Fetch match data
@@ -500,7 +675,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const match = matchResponse.data;
 
     // Validate match data structure
-    if (!match || !match.tournament || !match.season || !match.round || !match.matchday) {
+    if (
+      !match ||
+      !match.tournament ||
+      !match.season ||
+      !match.round ||
+      !match.matchday
+    ) {
       console.error("Invalid match data structure:", match);
       return { notFound: true };
     }
@@ -510,8 +691,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     if (jwt) {
       try {
-        const userResponse = await apiClient.get('/users/me', {
-          headers: { Authorization: `Bearer ${jwt}` }
+        const userResponse = await apiClient.get("/users/me", {
+          headers: { Authorization: `Bearer ${jwt}` },
         });
         const userData = userResponse.data;
         userRoles = userData.roles || [];
@@ -528,7 +709,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // Fetch matchday owner data
     const matchdayResponse = await apiClient.get(
-      `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`
+      `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
     );
     const matchdayData = matchdayResponse.data;
 
@@ -539,12 +720,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         jwt,
         userRoles,
         userClubId: userClubId || null,
-      }
+      },
     };
   } catch (error) {
     console.error("Error fetching server side props:", getErrorMessage(error));
     return {
-      notFound: true
+      notFound: true,
     };
   }
 };
