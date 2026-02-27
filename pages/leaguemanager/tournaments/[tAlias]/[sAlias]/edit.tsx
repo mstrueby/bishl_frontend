@@ -96,6 +96,7 @@ const Edit: NextPage<EditProps> = ({ jwt, season, tAlias, sAlias }) => {
     name: season?.name || '',
     alias: season?.alias || '',
     published: season?.published || false,
+    matchSettings: season?.matchSettings || {}
   };
 
   const formProps = {

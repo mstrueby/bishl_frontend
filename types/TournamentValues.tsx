@@ -114,6 +114,7 @@ export interface SeasonValues {
   name: string;
   alias: string;
   published: boolean;
+  matchSettings: MatchSettings;
   links?: {
     self: string;
     rounds: string;
