@@ -583,15 +583,15 @@ export default function MatchDetails({
         </h3>
         <div className="bg-white rounded-md shadow-md border overflow-hidden">
           <div className="divide-y divide-gray-100">
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
               <span className="text-sm text-gray-600">Anzahl Perioden</span>
               <span className="text-sm font-bold text-gray-900">{match.matchSettings.numOfPeriods}</span>
             </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
               <span className="text-sm text-gray-600">Periodenlänge</span>
               <span className="text-sm font-bold text-gray-900">{match.matchSettings.periodLengthMin} Minuten</span>
             </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
               <span className="text-sm text-gray-600">Verlängerung</span>
               <span className="text-sm font-bold text-gray-900">
                 {match.matchSettings.overtime ? (
@@ -602,15 +602,15 @@ export default function MatchDetails({
                 ) : "Nein"}
               </span>
             </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
               <span className="text-sm text-gray-600">Penalty-Schießen</span>
               <span className="text-sm font-bold text-gray-900">{match.matchSettings.shootout ? "Ja" : "Nein"}</span>
             </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
               <span className="text-sm text-gray-600">Schiedsrichterpunkte</span>
               <span className="text-sm font-bold text-gray-900">{match.matchSettings.refereePoints}</span>
             </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 hover:bg-gray-50 transition-colors">
+            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
               <span className="text-sm text-gray-600">Quelle</span>
               <span className="text-sm font-bold text-gray-900">{match.matchSettingsSource}</span>
             </div>

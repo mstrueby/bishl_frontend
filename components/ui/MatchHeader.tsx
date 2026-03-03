@@ -147,7 +147,7 @@ const MatchHeader: React.FC<MatchHeaderProps> = ({ match, isRefreshing, onRefres
                             <span className="tabular-nums">
                               {ps.homeGoals}:{ps.awayGoals}
                             </span>
-                            {index < periodScores.length - 1 && <span>,</span>}
+                            {index < periodScores.length - 1 && <span>&nbsp;·&nbsp;</span>}
                           </React.Fragment>
                         ))}
                       </div>
