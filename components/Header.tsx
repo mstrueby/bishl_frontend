@@ -143,7 +143,6 @@ const youth = tournamentConfigs.filter((config: { name: string }) =>
     "Schülerliga LK2",
     "Bambini",
     "Bambini LK2",
-    "Mini",
   ].includes(config.name),
 );
 
@@ -204,9 +203,11 @@ const Header = () => {
                     <Link href="/calendar" className={item}>
                       Kalender
                     </Link>
+                    {/**
                     <Link href="/tournaments/tag-der-meister" className={item}>
                       Tag der Meister
                     </Link>
+                    */}
                     <Menu as="div" className="relative inline-block text-left">
                       {({ close }) => (
                         <>
