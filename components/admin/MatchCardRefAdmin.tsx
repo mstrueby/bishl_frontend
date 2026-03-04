@@ -9,7 +9,6 @@ import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevels } from '
 import { classNames } from '../../tools/utils';
 import apiClient from '../../lib/apiClient';
 import { CldImage } from 'next-cloudinary';
-import useAuth from '../../hooks/useAuth';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -19,7 +18,6 @@ type MatchCardRefAdminProps = {
 };
 
 const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignments }) => {
-  const { user } = useAuth();
   const { home, away, startDate, venue } = match;
   const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
@@ -86,21 +84,21 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
   isDisabled = false;
   //}
 
-  const updateAssignmentStatus = async (assignmentId: string, status: string, position: number) => {
+  const updateAssignmentStatus = async (assignmentId: string, status: string, position: number, refereeUserId: string = '') => {
     let newId: string = ''
     try {
       const method = assignmentId ? 'patch' : 'post';
       const endpoint = assignmentId ? `${BASE_URL}/assignments/${assignmentId}` : `${BASE_URL}/assignments/`;
 
       // Determine the referee ID based on the assignment state
-      let refereeId = '';
-      if (position === 1 && referee1) refereeId = referee1.userId;
-      if (position === 2 && referee2) refereeId = referee2.userId;
+      let refereeId = refereeUserId;
+      if (!refereeId && position === 1 && referee1) refereeId = referee1.userId;
+      if (!refereeId && position === 2 && referee2) refereeId = referee2.userId;
 
       // If we are assigning a referee, we need their ID. If unassigning (deleting), assignmentId is sufficient.
       const body = assignmentId
         ? { status: status, refAdmin: true, position: position }
-        : { matchId: match._id, userId: user?._id, status: status, refAdmin: true, position: position };
+        : { matchId: match._id, userId: refereeId, status: status, refAdmin: true, position: position };
 
       { console.log("endpoint", endpoint) }
       { console.log('Body: ', body) }

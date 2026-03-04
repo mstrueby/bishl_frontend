@@ -14,7 +14,7 @@ function classNames(...classes: string[]) {
 type RefereeSelectProps = {
   assignments: AssignmentValues[];
   position: number;
-  onConfirm: (assignmentId: string, status: string, position: number) => void;
+  onConfirm: (assignmentId: string, status: string, position: number, refereeUserId: string) => void;
   assignmentId?: string;
   initialStatus?: string;
   disabled?: boolean;
@@ -114,7 +114,7 @@ const RefereeSelect: React.FC<RefereeSelectProps> = ({
                     onClick={async () => {
                       if (selected) {
                         setConfirmLoading(true);
-                        await onConfirm(selected._id, 'ASSIGNED', position);
+                        await onConfirm(selected._id, 'ASSIGNED', position, selected.referee.userId);
                         setSelected(null);
                         setConfirmLoading(false);
                       }
