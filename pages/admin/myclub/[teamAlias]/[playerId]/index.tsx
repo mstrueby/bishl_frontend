@@ -231,6 +231,7 @@ const Edit: NextPage = () => {
         clubId={clubId}
         clubName={clubName}
         clubEmail={clubEmail}
+        assignmentWindow={assignmentWindow}
       />
 
       <WkoRules rules={wkoRules} dynamicRules={dynamicRules} assignmentWindow={assignmentWindow} />

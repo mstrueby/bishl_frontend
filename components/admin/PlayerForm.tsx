@@ -62,6 +62,7 @@ interface PlayerFormProps {
   clubName?: string;
   clubEmail?: string;
   isAdmin?: boolean;
+  assignmentWindow?: any;
 }
 
 const PlayerForm: React.FC<PlayerFormProps> = ({
@@ -75,6 +76,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   clubName = "",
   clubEmail,
   isAdmin = false,
+  assignmentWindow,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -154,6 +156,28 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
     overrideDate: "",
   });
   const [overrideLoading, setOverrideLoading] = useState(false);
+
+  const isOutsideAssignmentWindow = (() => {
+    if (isAdmin || !assignmentWindow?.value) return false;
+    const getValue = (key: string) =>
+      assignmentWindow.value.find((v: any) => v.key === key)?.value;
+    const enabled = getValue('ENABLED');
+    if (!enabled) return false;
+    const startMonth: number = getValue('START_MONTH');
+    const startDay: number = getValue('START_DAY');
+    const endMonth: number = getValue('END_MONTH');
+    const endDay: number = getValue('END_DAY');
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentDay = now.getDate();
+    const afterStart =
+      currentMonth > startMonth ||
+      (currentMonth === startMonth && currentDay >= startDay);
+    const beforeEnd =
+      currentMonth < endMonth ||
+      (currentMonth === endMonth && currentDay <= endDay);
+    return !(afterStart && beforeEnd);
+  })();
 
   useEffect(() => {
     setSavedMasterData({
@@ -1073,6 +1097,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 const isDisabled = isAdmin
                   ? false
                   : hasLoanLicence || hasNoOwnClubLicence;
+                const isWindowOrRuleDisabled = isDisabled || isOutsideAssignmentWindow;
 
                 const sortedAssignedTeams = [...(values.assignedTeams || [])]
                   .sort((a, b) => {
@@ -1129,10 +1154,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           onClick={() =>
                             handleAutoOptimize(values, setFieldValue)
                           }
-                          disabled={licenceLoading || isDisabled}
+                          disabled={licenceLoading || isWindowOrRuleDisabled}
                           className={classNames(
                             "flex-1 sm:flex-none inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-                            isDisabled
+                            isWindowOrRuleDisabled
                               ? "bg-gray-50 text-gray-400 ring-gray-200 cursor-not-allowed"
                               : "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50",
                           )}
@@ -1140,7 +1165,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           <SparklesIcon
                             className={classNames(
                               "-ml-0.5 h-5 w-5",
-                              isDisabled ? "text-gray-300" : "text-gray-400",
+                              isWindowOrRuleDisabled ? "text-gray-300" : "text-gray-400",
                             )}
                             aria-hidden="true"
                           />
@@ -1148,7 +1173,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         </button>
                         {(() => {
                           const buttonDisabled =
-                            managedByISHDLoading || isDisabled;
+                            managedByISHDLoading || isWindowOrRuleDisabled;
                           return buttonDisabled ? (
                             <div
                               className={classNames(
@@ -1273,10 +1298,10 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                             setEditingClubId(null);
                             setIsModalOpen(true);
                           }}
-                          disabled={isDisabled}
+                          disabled={isWindowOrRuleDisabled}
                           className={classNames(
                             "flex-1 sm:flex-none inline-flex items-center justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-                            isDisabled
+                            isWindowOrRuleDisabled
                               ? "bg-indigo-300 text-white cursor-not-allowed"
                               : "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600",
                           )}
@@ -1325,6 +1350,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       editingClubId={editingClubId}
                       managedByISHD={values.managedByISHD}
                       isAdmin={isAdmin}
+                      lockTeamChange={!isAdmin && isOutsideAssignmentWindow}
                     />
 
                     <DeleteConfirmationModal
@@ -1894,7 +1920,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                                           )}
                                                           <Menu.Item
                                                             disabled={
-                                                              !canRemove
+                                                              !canRemove || (!isAdmin && isOutsideAssignmentWindow)
                                                             }
                                                           >
                                                             {({

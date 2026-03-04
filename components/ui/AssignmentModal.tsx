@@ -29,6 +29,7 @@ interface AssignmentModalProps {
   editingClubId?: string | null;
   managedByISHD?: boolean;
   isAdmin?: boolean;
+  lockTeamChange?: boolean;
 }
 
 const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -43,6 +44,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
   editingClubId = null,
   managedByISHD = false,
   isAdmin = false,
+  lockTeamChange = false,
 }) => {
   const [selectedTeam, setSelectedTeam] = useState<PossibleTeam | null>(null);
   const [selectedLicenseType, setSelectedLicenseType] = useState<string>('');
@@ -338,7 +340,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     selectedTeamId={selectedTeam?.teamId || null}
                     onTeamChange={handleTeamChange}
                     label="Mannschaft"
-                    disabled={noClubSelected}
+                    disabled={noClubSelected || (isEditMode && lockTeamChange)}
                     managedByISHD={managedByISHD}
                     licenceType={editingTeam?.licenseType}
                     licenceSource={editingTeam?.source}
