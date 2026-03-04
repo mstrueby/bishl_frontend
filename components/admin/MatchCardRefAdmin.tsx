@@ -134,6 +134,21 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
       }
 
       assignments.splice(0, assignments.length, ...updatedAssignments);
+
+      // Immediately show the assigned referee without waiting for a page refresh
+      const assignedEntry = updatedAssignments.find(a => a.referee.userId === refereeId);
+      if (assignedEntry) {
+        const refereeData = {
+          userId: assignedEntry.referee.userId,
+          firstName: assignedEntry.referee.firstName,
+          lastName: assignedEntry.referee.lastName,
+          clubId: assignedEntry.referee.clubId,
+          clubName: assignedEntry.referee.clubName,
+          points: assignedEntry.referee.points ?? 0,
+        };
+        if (position === 1) setReferee1(refereeData);
+        if (position === 2) setReferee2(refereeData);
+      }
     } catch (error) {
       console.error('Error updating assignment:', error);
     }
