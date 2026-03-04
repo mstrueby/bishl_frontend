@@ -56,7 +56,7 @@ const MatchCardRef: React.FC<{ match: MatchValues, assignment?: AssignmentValues
 
       try {
         const response = await apiClient.get(
-          `/matches/?tournament=${match.tournament.alias}&season=${match.season.alias}&round=${match.round.alias}&matchday=${match.matchday.alias}`
+          `/matches?tournament=${match.tournament.alias}&season=${match.season.alias}&round=${match.round.alias}&matchday=${match.matchday.alias}`
         );
         setMatchdayMatches(response.data);
       } catch (error) {
