@@ -246,40 +246,9 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setFieldValue("assignedTeams", response.data.assignedTeams);
       onPlayerUpdate(response.data);
       showLicenceSuccess("Pässe erfolgreich optimiert.");
-      licenceSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
     } catch (error) {
       console.error("Error auto-optimizing:", error);
       showLicenceError("Fehler bei der Optimierung.");
-    } finally {
-      setLicenceLoading(false);
-    }
-  };
-
-  const handleRevalidate = async (values: PlayerValues, setFieldValue: any) => {
-    setLicenceLoading(true);
-    setLicenceErrorMessage(null);
-    try {
-      const response = await apiClient.post(
-        `/players/${initialValues._id}/revalidate`,
-        {
-          assignedTeams: values.assignedTeams,
-          resetClassification: true,
-          resetValidation: true,
-        },
-      );
-      setFieldValue("assignedTeams", response.data.assignedTeams);
-      onPlayerUpdate(response.data);
-      showLicenceSuccess("Pässe erfolgreich validiert.");
-      licenceSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    } catch (error) {
-      console.error("Error revalidating:", error);
-      showLicenceError("Fehler bei der Validierung.");
     } finally {
       setLicenceLoading(false);
     }
@@ -363,11 +332,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       if (!stillHasOwnClubLicence && editMode) {
         handleEditCancel(setFieldValue);
       }
-
-      licenceSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
     } catch (error) {
       console.error("Error removing licence:", error);
       showLicenceError("Fehler beim Entfernen des Passes.");
@@ -397,10 +361,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
           ? "Pass erfolgreich aktualisiert."
           : "Neuer Pass erfolgreich hinzugefügt.",
       );
-      licenceSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
     } catch (error) {
       console.error("Error saving assignment:", error);
       throw error;
@@ -619,10 +579,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
       setIsOverrideDialogOpen(false);
       setOverrideTeam(null);
       setOverrideAssignment(null);
-      licenceSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
     } catch (error) {
       console.error("Error saving override:", error);
       showLicenceError("Fehler beim Speichern der Überschreibung.");
@@ -1315,6 +1271,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       </div>
                     </div>
 
+                    {/** disable licence success message
                     {licenceSuccessMessage && (
                       <div className="mt-4">
                         <SuccessMessage
@@ -1323,6 +1280,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                         />
                       </div>
                     )}
+                    */}
                     {licenceErrorMessage && (
                       <div className="mt-4">
                         <ErrorMessage
