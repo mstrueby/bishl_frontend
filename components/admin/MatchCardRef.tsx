@@ -83,7 +83,7 @@ const MatchCardRef: React.FC<{ match: MatchValues, assignment?: AssignmentValues
 
       let response;
       if (isNewAssignment) {
-        response = await apiClient.post('/assignments/', body);
+        response = await apiClient.post('/assignments', body);
       } else {
         response = await apiClient.patch(`/assignments/${localAssignment?._id}`, body);
       }
