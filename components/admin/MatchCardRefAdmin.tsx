@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState } from 'react';
 import { MatchValues } from '../../types/MatchValues';
 import { AssignmentValues } from '../../types/AssignmentValues';
 import { Referee } from '../../types/MatchValues';
@@ -7,8 +7,9 @@ import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
 import { tournamentConfigs, allRefereeAssignmentStatuses, refereeLevels } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
-import apiClient from '../../lib/apiClient'; // Assuming apiClient is configured for token management
+import apiClient from '../../lib/apiClient';
 import { CldImage } from 'next-cloudinary';
+import useAuth from '../../hooks/useAuth';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,6 +19,7 @@ type MatchCardRefAdminProps = {
 };
 
 const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignments }) => {
+  const { user } = useAuth();
   const { home, away, startDate, venue } = match;
   const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
   const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
@@ -98,7 +100,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
       // If we are assigning a referee, we need their ID. If unassigning (deleting), assignmentId is sufficient.
       const body = assignmentId
         ? { status: status, refAdmin: true, position: position }
-        : { matchId: match._id, userId: 'temp-user-id', status: status, refAdmin: true, position: position }; // Placeholder for new assignment
+        : { matchId: match._id, userId: user?._id, status: status, refAdmin: true, position: position };
 
       { console.log("endpoint", endpoint) }
       { console.log('Body: ', body) }
