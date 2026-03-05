@@ -15,6 +15,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { tournamentConfigs } from "../../../tools/consts";
 import { calculateMatchButtonPermissions } from "../../../tools/utils";
 import MatchHeader from "../../../components/ui/MatchHeader";
+import MatchSettingsDisplay from "../../../components/ui/MatchSettingsDisplay";
 
 interface MatchDetailsProps {
   match: MatchValues;
@@ -576,47 +577,10 @@ export default function MatchDetails({
         </div>
       </div>
 
-      {/** Print match settings as data list */}
-      <div className="py-6 mt-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-4 px-2">
-          Spieleinstellungen
-        </h3>
-        <div className="bg-white rounded-md shadow-md border overflow-hidden">
-          <div className="divide-y divide-gray-100">
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600">Anzahl Perioden</span>
-              <span className="text-sm font-bold text-gray-900">{match.matchSettings.numOfPeriods}</span>
-            </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600">Periodenlänge</span>
-              <span className="text-sm font-bold text-gray-900">{match.matchSettings.periodLengthMin} Minuten</span>
-            </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600">Verlängerung</span>
-              <span className="text-sm font-bold text-gray-900">
-                {match.matchSettings.overtime ? (
-                  <>
-                    Ja ({match.matchSettings.numOfPeriodsOvertime} ×{" "}
-                    {match.matchSettings.periodLengthMinOvertime} Minuten)
-                  </>
-                ) : "Nein"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600">Penalty-Schießen</span>
-              <span className="text-sm font-bold text-gray-900">{match.matchSettings.shootout ? "Ja" : "Nein"}</span>
-            </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600">Schiedsrichterpunkte</span>
-              <span className="text-sm font-bold text-gray-900">{match.matchSettings.refereePoints}</span>
-            </div>
-            <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600">Quelle</span>
-              <span className="text-sm font-bold text-gray-900">{match.matchSettingsSource}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MatchSettingsDisplay
+        matchSettings={match.matchSettings}
+        matchSettingsSource={match.matchSettingsSource}
+      />
     </Layout>
   );
 }

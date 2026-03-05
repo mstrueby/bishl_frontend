@@ -26,6 +26,7 @@ import Standings from "../../../../components/ui/Standings";
 import { classNames } from "../../../../tools/utils";
 import { MatchRefreshProvider } from "../../../../context/MatchRefreshContext";
 import { mutate } from "swr";
+import MatchSettingsDisplay from "../../../../components/ui/MatchSettingsDisplay";
 
 interface SeasonHubProps {
   season: SeasonValues;
@@ -121,6 +122,12 @@ export default function SeasonHub({
       .map((match) => match._id)
       .filter(Boolean) as string[];
   }, [displayMatches]);
+
+  const displayMatchSettings = useMemo(() => {
+    if (pageMode === "MATCHDAY") return selectedMatchday?.matchSettings;
+    if (pageMode === "ROUND") return currentRound?.matchSettings;
+    return season.matchSettings;
+  }, [pageMode, selectedMatchday, currentRound, season]);
 
   // Memoized callback for match updates
   const handleMatchUpdate = useCallback(async () => {
@@ -884,6 +891,10 @@ export default function SeasonHub({
                 : "Keine Spiele für diese Runde"}
           </p>
         </div>
+      )}
+
+      {displayMatchSettings && (
+        <MatchSettingsDisplay matchSettings={displayMatchSettings} />
       )}
     </Layout>
   );

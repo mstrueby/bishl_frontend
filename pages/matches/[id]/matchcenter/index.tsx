@@ -38,6 +38,7 @@ import {
 } from "../../../../tools/utils";
 import MatchStatusBadge from "../../../../components/ui/MatchStatusBadge";
 import MatchHeader from "../../../../components/ui/MatchHeader";
+import MatchSettingsDisplay from "../../../../components/ui/MatchSettingsDisplay";
 import Badge from "../../../../components/ui/Badge";
 import FinishTypeSelect from "../../../../components/admin/ui/FinishTypeSelect";
 import MatchStatus from "../../../../components/admin/ui/MatchStatus";
@@ -962,6 +963,11 @@ export default function MatchDetails({
             </button>
           </div>
         </div>
+
+        <MatchSettingsDisplay
+          matchSettings={match.matchSettings}
+          matchSettingsSource={match.matchSettingsSource}
+        />
 
         {/* Finish Match Dialog */}
         <Transition appear show={isFinishDialogOpen} as={Fragment}>
