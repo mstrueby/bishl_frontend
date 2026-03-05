@@ -135,7 +135,7 @@ const Add: NextPage = () => {
         }
       });
 
-      const response = await apiClient.post("/players/", formData);
+      const response = await apiClient.post("/players", formData);
       if (response.status === 201) {
         router.push(
           {
@@ -151,7 +151,16 @@ const Add: NextPage = () => {
       }
     } catch (error: any) {
       console.error("Error adding player:", error);
-      setError(error.response?.data?.detail || "Ein Fehler ist aufgetreten.");
+      const apiError = error.response?.data?.error;
+      if (apiError?.status_code === 400 && apiError?.details?.field === 'player') {
+        const { firstName, lastName, birthdate } = apiError.details;
+        setError(
+          `Spieler*in <strong>${firstName} ${lastName}</strong> (geb. ${birthdate}) existiert bereits. ` +
+          `Bitte suche den Eintrag in der <a href="/admin/players" class="underline font-semibold">Spielerliste</a>.`
+        );
+      } else {
+        setError(apiError?.message || "Ein Fehler ist aufgetreten.");
+      }
     } finally {
       setLoading(false);
     }
@@ -221,7 +230,6 @@ const Add: NextPage = () => {
             <div className="mt-6 mb-2">
               <SexRadioGroup />
             </div>
-            <Toggle name="fullFaceReq" label="Vollvisier erforderlich" />
 
             {values.imageUrl ? (
               <div className="mt-8">
