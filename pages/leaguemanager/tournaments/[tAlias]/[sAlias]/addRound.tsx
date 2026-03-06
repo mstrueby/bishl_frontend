@@ -51,7 +51,15 @@ export default function Add({ jwt }: AddProps) {
       numOfPeriodsOvertime: 1,
       periodLengthMinOvertime: 5,
       shootout: false,
-      refereePoints: 0
+      refereePoints: 0,
+      breakLengthMin: 10,
+      regularStrengthOvertime: 4, 
+      suddenDeath: false,
+      minorPenaltySec: 120,
+      majorPenaltySec: 300,
+      gameMisconductPenaltySec: 600, 
+      regularStrength: 4,
+      minPenaltyKillStrength: 2 
     }
   };
 

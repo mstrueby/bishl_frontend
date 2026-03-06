@@ -50,11 +50,19 @@ export interface MatchdayOwner {
 export interface MatchSettings {
   numOfPeriods: number;
   periodLengthMin: number;
+  breakLengthMin: number;
   overtime: boolean;
   numOfPeriodsOvertime: number;
   periodLengthMinOvertime: number;
+  regularStrengthOvertime: number;
+  suddenDeath: boolean;
   shootout: boolean;
   refereePoints: number;
+  minorPenaltySec: number;
+  majorPenaltySec: number;
+  gameMisconductPenaltySec: number;
+  regularStrength: number;
+  minPenaltyKillStrength: number;
 }
 
 // Define a Matchday interface
