@@ -138,8 +138,8 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
           </div>
           {matchSettings.notes && (
             <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600">Weitere Anmerkungen</span>
-              <span className="text-sm  text-gray-900">
+              <span className="text-sm text-gray-600 mr-6">Weitere Anmerkungen</span>
+              <span className="text-xs  text-gray-900">
                 {matchSettings.notes}
               </span>
             </div>
