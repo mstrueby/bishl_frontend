@@ -25,6 +25,10 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
             <span className="text-sm font-bold text-gray-900">{matchSettings.periodLengthMin} Minuten</span>
           </div>
           <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
+            <span className="text-sm text-gray-600">Pause</span>
+            <span className="text-sm font-bold text-gray-900">{matchSettings.breakLengthMin} Minuten</span>
+          </div>
+          <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
             <span className="text-sm text-gray-600">Verlängerung</span>
             <span className="text-sm font-bold text-gray-900">
               {matchSettings.overtime ? (
@@ -38,6 +42,13 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
           <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
             <span className="text-sm text-gray-600">Penalty-Schießen</span>
             <span className="text-sm font-bold text-gray-900">{matchSettings.shootout ? "Ja" : "Nein"}</span>
+          </div>
+          <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
+            <span className="text-sm text-gray-600">Dauer kleine Strafe</span>
+            <span className="text-sm font-bold text-gray-900">
+              {Math.floor(matchSettings.minorPenaltySec / 60)}:
+              {(matchSettings.minorPenaltySec % 60).toString().padStart(2, "0")}
+            </span>
           </div>
           <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
             <span className="text-sm text-gray-600">Schiedsrichterpunkte</span>
