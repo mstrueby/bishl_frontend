@@ -129,6 +129,12 @@ export default function SeasonHub({
     return season.matchSettings;
   }, [pageMode, selectedMatchday, currentRound, season]);
 
+  const displayMatchSettingsSource = useMemo(() => {
+    if (pageMode === "MATCHDAY") return selectedMatchday?.matchSettingsSource;
+    if (pageMode === "ROUND") return currentRound?.matchSettingsSource;
+    return season.matchSettingsSource;
+  }, [pageMode, selectedMatchday, currentRound, season]);
+
   // Memoized callback for match updates
   const handleMatchUpdate = useCallback(async () => {
     // Trigger revalidation of the page data
@@ -894,7 +900,10 @@ export default function SeasonHub({
       )}
 
       {displayMatchSettings && (
-        <MatchSettingsDisplay matchSettings={displayMatchSettings} />
+        <MatchSettingsDisplay
+          matchSettings={displayMatchSettings}
+          matchSettingsSource={displayMatchSettingsSource}
+        />
       )}
     </Layout>
   );

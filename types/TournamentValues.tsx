@@ -63,6 +63,7 @@ export interface MatchSettings {
   gameMisconductPenaltySec: number;
   regularStrength: number;
   minPenaltyKillStrength: number;
+  notes: string;
 }
 
 // Define a Matchday interface
@@ -80,6 +81,7 @@ export interface MatchdayValues {
   createStats: boolean;
   published: boolean;
   matchSettings: MatchSettings;
+  matchSettingsSource?: string;
   standings?: Record<string, StandingsTeam>;
   owner?: MatchdayOwner;
   links?: {
@@ -108,6 +110,7 @@ export interface RoundValues {
     value: string;
   };
   matchSettings: MatchSettings;
+  matchSettingsSource?: string;
   standings?: Record<string, StandingsTeam>;
   links?: {
     self: string;
@@ -123,6 +126,7 @@ export interface SeasonValues {
   alias: string;
   published: boolean;
   matchSettings: MatchSettings;
+  matchSettingsSource?: string;
   links?: {
     self: string;
     rounds: string;
