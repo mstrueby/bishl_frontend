@@ -59,7 +59,8 @@ export default function Add({ jwt }: AddProps) {
       majorPenaltySec: 300,
       gameMisconductPenaltySec: 600, 
       regularStrength: 4,
-      minPenaltyKillStrength: 2 
+      minPenaltyKillStrength: 2,
+      notes: ''
     }
   };
 
