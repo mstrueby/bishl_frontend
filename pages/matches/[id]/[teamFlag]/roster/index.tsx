@@ -29,6 +29,7 @@ import {
   ChevronLeftIcon,
   TrashIcon,
   PencilIcon,
+  PencilSquareIcon,
   CheckIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -55,9 +56,10 @@ import MatchStatusBadge from "../../../../../components/ui/MatchStatusBadge";
 import MatchHeader from "../../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../../components/admin/SectionHeader";
 import { tournamentConfigs, getMinSkaterCount } from "../../../../../tools/consts";
-import { UserRole } from "../../../../../lib/auth";
+import { UserRole, hasRole } from "../../../../../lib/auth";
 import { validateRoster, isRosterComplete } from "../../../../../utils/rosterValidation";
 import RosterChecks from "../../../../../components/ui/RosterChecks";
+import TeamChangeConfirmDialog from "../../../../../components/matches/roster/TeamChangeConfirmDialog";
 
 interface AvailablePlayer {
   _id: string;
@@ -199,6 +201,8 @@ const RosterPage = () => {
   );
   const [showLineupOnly, setShowLineupOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [teamChangePlayer, setTeamChangePlayer] = useState<AvailablePlayerWithRoster | null>(null);
+  const [isTeamChangeLoading, setIsTeamChangeLoading] = useState(false);
 
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = React.useCallback(
@@ -1355,6 +1359,65 @@ const RosterPage = () => {
     setModalError(null);
   };
 
+  const handleConfirmTeamChange = async () => {
+    if (!teamChangePlayer || !matchTeam) return;
+    setIsTeamChangeLoading(true);
+    try {
+      let fullPlayer: PlayerValues | undefined = playerDetailsMap[teamChangePlayer._id];
+      if (!fullPlayer) {
+        const res = await apiClient.get(`/players/${teamChangePlayer._id}`);
+        fullPlayer = res.data as PlayerValues;
+      }
+      if (!fullPlayer || !fullPlayer.assignedTeams) {
+        throw new Error("Spielerdaten konnten nicht geladen werden.");
+      }
+      const updatedAssignedTeams: Assignment[] = fullPlayer.assignedTeams.map(
+        (assignment) => ({
+          ...assignment,
+          teams: assignment.teams.map((t) => {
+            if (t.teamId === teamChangePlayer.originalTeamId) {
+              return { ...t, teamId: matchTeam.teamId };
+            }
+            return t;
+          }),
+        })
+      );
+      const formData = new FormData();
+      formData.append("assignedTeams", JSON.stringify(updatedAssignedTeams));
+      const response = await apiClient.patch(`/players/${teamChangePlayer._id}`, formData);
+      const updatedPlayer: PlayerValues = response.data;
+      const updatedAssignment = updatedPlayer.assignedTeams
+        ?.flatMap((a) => a.teams)
+        .find((t) => t.teamId === matchTeam.teamId);
+      setTablePlayers((prev) =>
+        prev.map((p) => {
+          if (p._id !== teamChangePlayer._id) return p;
+          return {
+            ...p,
+            called: false,
+            originalTeamId: null,
+            originalTeamName: null,
+            originalTeamAlias: null,
+            eligibilityStatus: updatedAssignment?.status || p.eligibilityStatus,
+            status: updatedAssignment?.status || p.status,
+            licenseType: updatedAssignment?.licenseType || p.licenseType,
+          };
+        })
+      );
+      if (updatedPlayer) {
+        setPlayerDetailsMap((prev) => ({
+          ...prev,
+          [teamChangePlayer._id]: updatedPlayer,
+        }));
+      }
+      setTeamChangePlayer(null);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setIsTeamChangeLoading(false);
+    }
+  };
+
   const handleSaveRoster = async () => {
     setSavingRoster(true);
     setError("");
@@ -1859,6 +1922,20 @@ const RosterPage = () => {
                                   ? playerStats[player._id]
                                   : "–"}
                               </span>
+                              {playerStats[player._id] >= 5 &&
+                                hasRole(user, UserRole.CLUB_ADMIN) && (
+                                  <button
+                                    type="button"
+                                    title="Lizenz auf dieses Team umschreiben"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTeamChangePlayer(player);
+                                    }}
+                                    className="ml-0.5 inline-flex items-center rounded p-0.5 text-red-600 hover:bg-red-50 hover:text-red-800 focus:outline-none focus:ring-1 focus:ring-red-400"
+                                  >
+                                    <PencilSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                                  </button>
+                                )}
                             </>
                           )}
                         </div>
@@ -2863,6 +2940,21 @@ const RosterPage = () => {
           </div>
         </Dialog>
       </Transition>
+
+      {/* Team Change Confirmation Dialog */}
+      <TeamChangeConfirmDialog
+        isOpen={teamChangePlayer !== null}
+        onClose={() => setTeamChangePlayer(null)}
+        onConfirm={handleConfirmTeamChange}
+        isLoading={isTeamChangeLoading}
+        playerName={
+          teamChangePlayer
+            ? `${teamChangePlayer.firstName} ${teamChangePlayer.lastName}`
+            : ""
+        }
+        fromTeamName={teamChangePlayer?.originalTeamName || ""}
+        toTeamName={matchTeam?.name || ""}
+      />
     </Layout>
   );
 };
