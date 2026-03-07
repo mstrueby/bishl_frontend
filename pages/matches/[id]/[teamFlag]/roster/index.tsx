@@ -1384,6 +1384,7 @@ const RosterPage = () => {
       );
       const formData = new FormData();
       formData.append("assignedTeams", JSON.stringify(updatedAssignedTeams));
+      formData.append("managedByISHD", "false");
       const response = await apiClient.patch(`/players/${teamChangePlayer._id}`, formData);
       const updatedPlayer: PlayerValues = response.data;
       const updatedAssignment = updatedPlayer.assignedTeams
