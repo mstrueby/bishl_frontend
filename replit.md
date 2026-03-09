@@ -26,9 +26,9 @@ Preferred communication style: Simple, everyday language.
 - **Caching**: `playerDetailsMap` + `fetchingCalledPlayersRef` prevent duplicate API calls
 
 ### 5-Match Call-Up Rule
-- Called-up players with 5+ `calledMatches` are forced to `INVALID` status regardless of their underlying license status
+- Called-up players with 5+ counted call-ups are forced to `INVALID` status regardless of their underlying license status
 - Applied in 4 locations: initial roster merge, useEffect status fetch (cached + API), and handleConfirmCallUp
-- Call-up dialog fetch now extracts `calledMatches` from player stats (season/tournament/team match) and adds to `playerStats` map on confirm
+- Call-up count is derived from `player.playUpTrackings` (not `stats[].calledMatches`): filter by `tournamentAlias`/`seasonAlias`, count occurrences where `counted === true`; helper in `utils/countCalledMatches.ts`
 - Red pill badge correctly shows count, INVALID status badge shown, red row background applied
 
 ### RosterPlayer Field Integration (licenseType, source, invalidReasonCodes)

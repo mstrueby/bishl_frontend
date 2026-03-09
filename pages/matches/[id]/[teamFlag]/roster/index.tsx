@@ -15,6 +15,7 @@ import {
   LicenseType,
   LicenseStatus,
 } from "../../../../../types/PlayerValues";
+import { countCalledMatches } from "../../../../../utils/countCalledMatches";
 import apiClient from "../../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../../lib/errorHandler";
 import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass, invalidReasonCodeMap } from "../../../../../lib/constants";
@@ -993,23 +994,13 @@ const RosterPage = () => {
           );
 
           const playerData = response.data;
-          if (playerData.stats && Array.isArray(playerData.stats)) {
-            const matchingStats = playerData.stats.find(
-              (stat: any) =>
-                stat.season?.alias === match.season.alias &&
-                stat.tournament?.alias === match.tournament.alias &&
-                stat.team?.name === matchTeam.name,
-            );
-
-            return {
-              playerId: player.player.playerId,
-              calledMatches: matchingStats?.calledMatches || 0,
-            };
-          }
-
           return {
             playerId: player.player.playerId,
-            calledMatches: 0,
+            calledMatches: countCalledMatches(
+              playerData,
+              match.tournament.alias,
+              match.season.alias,
+            ),
           };
         } catch (error) {
           console.error(
@@ -1097,13 +1088,11 @@ const RosterPage = () => {
                     team && team.teamId === selectedCallUpTeam._id,
                 );
 
-              const matchingStats = player.stats?.find(
-                (stat: any) =>
-                  stat.season?.alias === match?.season?.alias &&
-                  stat.tournament?.alias === match?.tournament?.alias &&
-                  stat.team?.name === matchTeam?.name,
+              const calledMatches = countCalledMatches(
+                player,
+                match?.tournament?.alias ?? "",
+                match?.season?.alias ?? "",
               );
-              const calledMatches = matchingStats?.calledMatches || 0;
 
               return {
                 _id: player._id,

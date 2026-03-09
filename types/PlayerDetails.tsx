@@ -1,3 +1,5 @@
+import { PlayUpTracking } from "./PlayerValues";
+
 export interface PlayerStat {
   season?: { alias: string; name: string };
   tournament?: { alias: string; name: string };
@@ -19,6 +21,7 @@ export interface PlayerAssignedTeam {
 export interface PlayerDetails {
   stats?: PlayerStat[];
   assignedTeams?: PlayerAssignedTeam[];
+  playUpTrackings?: PlayUpTracking[];
   birthDate?: string;
   fullFaceReq?: boolean;
 }

@@ -47,7 +47,8 @@ import PenaltyDialog from "../../../../components/ui/PenaltyDialog";
 import RosterList from "../../../../components/ui/RosterList";
 import PlayerCardModal from "../../../../components/ui/PlayerCardModal";
 import { sortRoster } from "../../../../utils/matchRoster";
-import { PlayerDetails, PlayerStat } from "../../../../types/PlayerDetails";
+import { PlayerDetails } from "../../../../types/PlayerDetails";
+import { countCalledMatches } from "../../../../utils/countCalledMatches";
 import GoalsTab from "../../../../components/matchcenter/GoalsTab";
 import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
 import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
@@ -226,24 +227,13 @@ export default function MatchDetails({
           );
 
           const playerData = response.data as PlayerDetails;
-          if (playerData.stats && Array.isArray(playerData.stats)) {
-            // Find stats that match the current match context
-            const matchingStats = playerData.stats.find(
-              (stat: PlayerStat) =>
-                stat.season?.alias === match.season.alias &&
-                stat.tournament?.alias === match.tournament.alias &&
-                stat.team?.name === team.name,
-            );
-
-            return {
-              playerId: player.player.playerId,
-              calledMatches: matchingStats?.calledMatches || 0,
-            };
-          }
-
           return {
             playerId: player.player.playerId,
-            calledMatches: 0,
+            calledMatches: countCalledMatches(
+              playerData,
+              match.tournament.alias,
+              match.season.alias,
+            ),
           };
         } catch (error) {
           console.error(
