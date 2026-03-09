@@ -6,7 +6,6 @@ export interface PlayerStat {
   goals?: number;
   assists?: number;
   points?: number;
-  calledMatches?: number;
 }
 
 export interface PlayerAssignedTeam {
