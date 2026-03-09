@@ -81,6 +81,10 @@ export function calculateMatchButtonPermissions(
   };
   if (!user) return permissions;
 
+  const isDev = process.env.NODE_ENV === 'development';
+  const isDemo = process.env.NEXT_PUBLIC_IS_DEMO === 'true';
+  const isProd = !isDev && !isDemo;
+
   const matchDate = new Date(match.startDate).setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
   const isMatchInPast = matchDate < today;
@@ -171,6 +175,23 @@ export function calculateMatchButtonPermissions(
     // Events button only shown in match center when match is in progress
     if (isMatchCenter && isMatchInProgress) {
       permissions.showButtonEvents = true;
+    }
+  }
+
+  // Non-prod only: allow matchday owners and home club admins to edit match fixtures
+  if (!isProd) {
+    const isHomeClubAdminForEdit =
+      user.club &&
+      user.club.clubId === match.home.clubId &&
+      user.roles.includes("CLUB_ADMIN");
+    const isMatchdayOwnerForEdit =
+      user.club &&
+      isValidMatchdayOwner(matchdayOwner) &&
+      matchdayOwner &&
+      user.club.clubId === matchdayOwner.clubId &&
+      user.roles.includes("CLUB_ADMIN");
+    if (isHomeClubAdminForEdit || isMatchdayOwnerForEdit) {
+      permissions.showButtonEdit = true;
     }
   }
 
