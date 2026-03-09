@@ -72,7 +72,7 @@ const TeamChangeConfirmDialog: React.FC<TeamChangeConfirmDialogProps> = ({
                             Diese Aktion ist permanent und kann nicht rückgängig gemacht werden.
                           </p>
                           <p className="mt-1 text-xs text-red-700">
-                            Der Teamwechsel wird sofort wirksam — auch wenn der Spielbericht noch nicht gespeichert oder abgebrochen wird.
+                            Der Teamwechsel wird sofort wirksam — auch wenn die Aufstellung nicht gespeichert oder abgebrochen wird.
                           </p>
                         </div>
                       </div>

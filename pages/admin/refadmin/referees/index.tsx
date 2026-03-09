@@ -137,7 +137,8 @@ const Referees: NextPage = () => {
       alias: referee._id,
       description: [
         referee.referee?.club?.clubName || 'Kein Verein',
-        referee.referee?.passNo ? `${referee.referee?.passNo}` : ''
+        referee.referee?.passNo ? `${referee.referee?.passNo}` : '',
+        referee.referee?.ishdLevel ? `${referee.referee?.ishdLevel}` : ''
       ].filter(Boolean),
       category: referee.referee?.level !== undefined && referee.referee.level !== "n/a" ? referee.referee.level : undefined,
       count: referee.referee?.points,
