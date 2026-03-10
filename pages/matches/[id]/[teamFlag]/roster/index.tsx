@@ -56,7 +56,7 @@ import RosterPDF from "../../../../../components/pdf/RosterPDF";
 import MatchStatusBadge from "../../../../../components/ui/MatchStatusBadge";
 import MatchHeader from "../../../../../components/ui/MatchHeader";
 import SectionHeader from "../../../../../components/admin/SectionHeader";
-import { tournamentConfigs, getMinSkaterCount } from "../../../../../tools/consts";
+import { tournamentConfigs } from "../../../../../tools/consts";
 import { UserRole, hasRole } from "../../../../../lib/auth";
 import { validateRoster, isRosterComplete } from "../../../../../utils/rosterValidation";
 import RosterChecks from "../../../../../components/ui/RosterChecks";
@@ -510,7 +510,10 @@ const RosterPage = () => {
     }
   }, [match, router.query.from]);
 
-  const minSkaterCount = match ? getMinSkaterCount(match.tournament.alias) : 4;
+  const minSkaterCount = match?.matchSettings?.minimumStartingStrength?.skater ?? 4;
+  const minGoalieCount = match?.matchSettings?.minimumStartingStrength?.goalie ?? 1;
+  const maxCallUpPlayers = match?.matchSettings?.maxCallUpPlayers ?? 5;
+  const maxCallUpAppearances = match?.matchSettings?.maxCallUpAppearances ?? 5;
 
   // Calculate permissions for this user and match
   const permissions =
@@ -539,8 +542,8 @@ const RosterPage = () => {
   // Check if all requirements are met for publishing the roster
   // Uses tablePlayers (selected rows) as the source of truth for validation
   const rosterChecks = React.useMemo(
-    () => validateRoster(rosterList, { minSkaterCount }),
-    [rosterList, minSkaterCount],
+    () => validateRoster(rosterList, { minSkaterCount, minGoalieCount, maxCallUpPlayers }),
+    [rosterList, minSkaterCount, minGoalieCount, maxCallUpPlayers],
   );
 
   const isRosterValid = () => isRosterComplete(rosterChecks);
@@ -692,7 +695,7 @@ const RosterPage = () => {
             rosterPosition: (rp.playerPosition.key as 'C' | 'A' | 'G' | 'F') || 'F',
             statusDiff: false,
             assignedStatus: rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID',
-            eligibilityStatus: (playerStats[rp.player.playerId] || 0) >= 5 ? 'INVALID' : (rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID'),
+            eligibilityStatus: (playerStats[rp.player.playerId] || 0) >= maxCallUpAppearances ? 'INVALID' : (rp.assignedTeam?.status || rp.eligibilityStatus || 'VALID'),
           }));
         
         const allPlayers = [...merged, ...calledUpPlayersFromRoster];
@@ -778,7 +781,7 @@ const RosterPage = () => {
             if (updates[p._id]) {
               const newStatus = updates[p._id].eligibilityStatus;
               const callUps = playerStats[p._id] || 0;
-              const finalStatus = callUps >= 5 ? 'INVALID' : newStatus;
+              const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
               return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
             }
             return p;
@@ -831,7 +834,7 @@ const RosterPage = () => {
               if (updates[p._id]) {
                 const newStatus = updates[p._id].eligibilityStatus;
                 const callUps = playerStats[p._id] || 0;
-                const finalStatus = callUps >= 5 ? 'INVALID' : newStatus;
+                const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
                 return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
               }
               return p;
@@ -1201,7 +1204,7 @@ const RosterPage = () => {
 
     // NEW: Also add to tablePlayers for the new table UI
     const callUps = selectedCallUpPlayer.calledMatches ?? playerStats[selectedCallUpPlayer._id] ?? 0;
-    const eligibilityStatus = callUps >= 5 ? 'INVALID' : selectedCallUpPlayer.status;
+    const eligibilityStatus = callUps >= maxCallUpAppearances ? 'INVALID' : selectedCallUpPlayer.status;
 
     setPlayerStats((prev) => ({
       ...prev,
@@ -1912,7 +1915,7 @@ const RosterPage = () => {
                                   ? playerStats[player._id]
                                   : "–"}
                               </span>
-                              {playerStats[player._id] >= 5 &&
+                              {playerStats[player._id] >= maxCallUpAppearances &&
                                 hasRole(user, UserRole.CLUB_ADMIN) && (
                                   <button
                                     type="button"

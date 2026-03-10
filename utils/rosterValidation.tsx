@@ -8,13 +8,14 @@ export interface RosterCheckResult {
 
 export function validateRoster(
   roster: RosterPlayer[],
-  options: { minSkaterCount: number }
+  options: { minSkaterCount: number; minGoalieCount: number; maxCallUpPlayers: number }
 ): RosterCheckResult[] {
-  const { minSkaterCount } = options;
+  const { minSkaterCount, minGoalieCount, maxCallUpPlayers } = options;
 
   const hasCaptain = roster.some((p) => p.playerPosition.key === 'C');
   const hasAssistant = roster.some((p) => p.playerPosition.key === 'A');
-  const hasGoalie = roster.some((p) => p.playerPosition.key === 'G');
+  const goalieCount = roster.filter((p) => p.playerPosition.key === 'G').length;
+  const hasMinGoalies = goalieCount >= minGoalieCount;
   const skaterCount = roster.filter((p) => p.playerPosition.key !== 'G').length;
   const hasMinSkaters = skaterCount >= minSkaterCount;
   const hasZeroJersey = roster.some((p) => p.player.jerseyNumber === 0);
@@ -23,7 +24,7 @@ export function validateRoster(
     (num, i) => jerseyNumbers.indexOf(num) !== i,
   );
   const calledCount = roster.filter((p) => p.called).length;
-  const calledWithinLimit = calledCount <= 5;
+  const calledWithinLimit = calledCount <= maxCallUpPlayers;
 
   return [
     {
@@ -42,10 +43,10 @@ export function validateRoster(
     },
     {
       key: 'goalie',
-      passed: hasGoalie,
-      label: hasGoalie
-        ? 'Mindestens ein Goalie (G) wurde festgelegt'
-        : 'Es wurde noch kein Goalie (G) festgelegt',
+      passed: hasMinGoalies,
+      label: hasMinGoalies
+        ? `Mindestens ${minGoalieCount} Goalie(s) (G) wurden festgelegt`
+        : `Es müssen mindestens ${minGoalieCount} Goalie(s) (G) festgelegt werden`,
     },
     {
       key: 'minSkaters',
@@ -72,8 +73,8 @@ export function validateRoster(
       key: 'calledPlayers',
       passed: calledWithinLimit,
       label: calledWithinLimit
-        ? `Hochgemeldete Spieler: ${calledCount} von 5`
-        : `Zu viele hochgemeldete Spieler: ${calledCount} von max. 5`,
+        ? `Hochgemeldete Spieler: ${calledCount} von ${maxCallUpPlayers}`
+        : `Zu viele hochgemeldete Spieler: ${calledCount} von max. ${maxCallUpPlayers}`,
     },
   ];
 }

@@ -31,6 +31,8 @@ interface RosterListProps {
   isValidating?: boolean;
   teamId?: string;
   minSkaterCount?: number;
+  minGoalieCount?: number;
+  maxCallUpPlayers?: number;
 }
 
 const positionTooltips: Record<string, string> = {
@@ -63,7 +65,9 @@ const RosterList: React.FC<RosterListProps> = ({
   teamFlag = "home",
   isValidating = false,
   teamId,
-  minSkaterCount = 4
+  minSkaterCount = 4,
+  minGoalieCount = 1,
+  maxCallUpPlayers = 5
 }) => {
   const defaultSortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
     if (!rosterToSort || rosterToSort.length === 0) return [];
@@ -513,7 +517,7 @@ const RosterList: React.FC<RosterListProps> = ({
         )}
         {sortedRoster.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-200">
-            <RosterChecks checks={validateRoster(sortedRoster, { minSkaterCount })} />
+            <RosterChecks checks={validateRoster(sortedRoster, { minSkaterCount, minGoalieCount, maxCallUpPlayers })} />
           </div>
         )}
       </div>
