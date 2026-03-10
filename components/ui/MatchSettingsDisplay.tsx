@@ -40,6 +40,15 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
           </div>
           <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
             <span className="text-sm text-gray-600">
+              Mindestantrittsstärke (F+G)
+            </span>
+            <span className="text-sm font-bold text-gray-900">
+              {matchSettings.minimumStartingStrength.skater} +{" "}
+              {matchSettings.minimumStartingStrength.goalie}
+            </span>
+          </div>
+          <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
+            <span className="text-sm text-gray-600">
               Mindestanzahl bei Unterzahl
             </span>
             <span className="text-sm font-bold text-gray-900">
@@ -91,11 +100,11 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
             </span>
           </div>
 
-          <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-            <span className="text-sm text-gray-600">Strafen</span>
+          <div className="bg-gray-100 flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
+            <span className="text-xs text-gray-600 font-semibold uppercase">Strafen</span>
           </div>
 
-          <div className="bg-gray-50 border-y border-gray-100 divide-y divide-gray-300">
+          <div className="bg-gray-50/50 border-y border-gray-100 divide-y divide-gray-300">
             <div className="flex justify-between items-center py-2 px-6 sm:px-10 transition-colors">
               <span className="text-xs text-gray-500 tracking-wider">
                 Dauer kleine Strafe
@@ -131,6 +140,14 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
             </div>
           </div>
           <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
+            <span className="text-sm text-gray-600">
+              Max. hochgemeldete Spieler
+            </span>
+            <span className="text-sm font-bold text-gray-900">
+              {matchSettings.maxCallUpPlayers}
+            </span>
+          </div>
+          <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
             <span className="text-sm text-gray-600">Schiedsrichterpunkte</span>
             <span className="text-sm font-bold text-gray-900">
               {matchSettings.refereePoints}
@@ -138,7 +155,9 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
           </div>
           {matchSettings.notes && (
             <div className="flex justify-between items-center py-3 px-4 sm:px-8 transition-colors">
-              <span className="text-sm text-gray-600 mr-6">Weitere Anmerkungen</span>
+              <span className="text-sm text-gray-600 mr-6">
+                Weitere Anmerkungen
+              </span>
               <span className="text-xs  text-gray-900">
                 {matchSettings.notes}
               </span>

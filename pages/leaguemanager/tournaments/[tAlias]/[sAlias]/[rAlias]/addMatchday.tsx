@@ -7,7 +7,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import LayoutAdm from '../../../../../../components/LayoutAdm';
 import MatchdayForm from '../../../../../../components/leaguemanager/MatchdayForm';
-import { MatchdayValues } from '../../../../../../types/TournamentValues';
+import { MatchdayValues, CallUpMode } from '../../../../../../types/TournamentValues';
 import ErrorMessage from '../../../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../../../components/leaguemanager/navData';
 
@@ -56,7 +56,14 @@ export default function Add({ jwt }: AddProps) {
       gameMisconductPenaltySec: 600, 
       regularStrength: 4,
       minPenaltyKillStrength: 2,
-      notes: ''
+      notes: '',
+      callUpMode: CallUpMode.LOCKED,
+      maxCallUpAppearances: 5,
+      maxCallUpPlayers: 5,
+      minimumStartingStrength: {
+        skater: 4,
+        goalie: 1,
+      }
     }
   };
 

@@ -47,6 +47,16 @@ export interface MatchdayOwner {
   clubAlias: string;
 }
 
+export enum CallUpMode {
+  LOCKED = "LOCKED",
+  DECIDE = "DECIDE",
+}
+
+interface MinimumStartingStrength {
+  skater: number;
+  goalie: number;
+}
+
 export interface MatchSettings {
   numOfPeriods: number;
   periodLengthMin: number;
@@ -64,6 +74,10 @@ export interface MatchSettings {
   regularStrength: number;
   minPenaltyKillStrength: number;
   notes: string;
+  callUpMode: CallUpMode;
+  maxCallUpAppearances: number;
+  maxCallUpPlayers: number;
+  minimumStartingStrength: MinimumStartingStrength;
 }
 
 // Define a Matchday interface

@@ -7,7 +7,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import LayoutAdm from '../../../../../components/LayoutAdm';
 import RoundForm from '../../../../../components/leaguemanager/RoundForm';
-import { RoundValues } from '../../../../../types/TournamentValues';
+import { RoundValues, CallUpMode } from '../../../../../types/TournamentValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../../components/leaguemanager/navData';
 
@@ -60,7 +60,14 @@ export default function Add({ jwt }: AddProps) {
       gameMisconductPenaltySec: 600, 
       regularStrength: 4,
       minPenaltyKillStrength: 2,
-      notes: ''
+      notes: '',
+      callUpMode: CallUpMode.LOCKED,
+      maxCallUpAppearances: 0,
+      maxCallUpPlayers: 0,
+      minimumStartingStrength: {
+        skater: 0,
+        goalie: 0,
+      }
     }
   };
 
