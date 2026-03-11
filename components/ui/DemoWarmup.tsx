@@ -31,7 +31,7 @@ export default function DemoWarmup() {
   const [fadingOut, setFadingOut] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [slow, setSlow] = useState(false);
-  const cancelRef = useRef<() => void>();
+  const cancelRef = useRef<(() => void) | undefined>(undefined);
 
   const startPolling = useCallback(() => {
     if (!API_URL) return;
