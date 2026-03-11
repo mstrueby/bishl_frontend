@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const POLL_INTERVAL = 3000;
-const MAX_ATTEMPTS = 30;
+const FAST_POLL_INTERVAL = 3000;
+const SLOW_POLL_INTERVAL = 10000;
+const FAST_POLL_ATTEMPTS = 30;
 
 function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const controller = new AbortController();
@@ -12,52 +13,59 @@ function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   );
 }
 
+async function tryPing(baseUrl: string): Promise<boolean> {
+  try {
+    const res = await fetchWithTimeout(`${baseUrl}/health`, 10000);
+    if (res.ok) return true;
+  } catch {}
+  try {
+    const res = await fetchWithTimeout(`${baseUrl}/`, 10000);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export default function DemoWarmup() {
   const [backendReady, setBackendReady] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [timedOut, setTimedOut] = useState(false);
-
-  const pingBackend = useCallback(async (): Promise<boolean> => {
-    if (!API_URL) return false;
-    try {
-      const res = await fetchWithTimeout(`${API_URL}/health`, 10000);
-      return res.ok;
-    } catch {
-      return false;
-    }
-  }, []);
+  const [slow, setSlow] = useState(false);
+  const cancelRef = useRef<() => void>();
 
   const startPolling = useCallback(() => {
+    if (!API_URL) return;
+    if (cancelRef.current) cancelRef.current();
+
     let cancelled = false;
+    cancelRef.current = () => { cancelled = true; };
     let attempt = 0;
 
     async function poll() {
-      while (!cancelled && attempt < MAX_ATTEMPTS) {
-        const ok = await pingBackend();
-        if (ok) {
-          if (!cancelled) {
-            setTimedOut(false);
-            setBackendReady(true);
-            setFadingOut(true);
-          }
+      while (!cancelled) {
+        const ok = await tryPing(API_URL!);
+        if (ok && !cancelled) {
+          setSlow(false);
+          setBackendReady(true);
+          setFadingOut(true);
           return;
         }
         attempt++;
-        await new Promise((r) => setTimeout(r, POLL_INTERVAL));
-      }
-      if (!cancelled) {
-        setTimedOut(true);
+        if (attempt === FAST_POLL_ATTEMPTS && !cancelled) {
+          setSlow(true);
+        }
+        const interval = attempt < FAST_POLL_ATTEMPTS ? FAST_POLL_INTERVAL : SLOW_POLL_INTERVAL;
+        await new Promise((r) => setTimeout(r, interval));
       }
     }
 
     poll();
-    return () => { cancelled = true; };
-  }, [pingBackend]);
+  }, []);
 
   useEffect(() => {
     if (!API_URL) return;
-    return startPolling();
+    startPolling();
+    return () => { if (cancelRef.current) cancelRef.current(); };
   }, [startPolling]);
 
   useEffect(() => {
@@ -78,25 +86,17 @@ export default function DemoWarmup() {
       } ${
         backendReady
           ? 'bg-green-600 text-white'
-          : timedOut
-            ? 'bg-red-600 text-white'
+          : slow
+            ? 'bg-orange-600 text-white'
             : 'bg-amber-500 text-white'
       }`}
     >
       {backendReady ? (
         <span>Server is ready!</span>
-      ) : timedOut ? (
+      ) : slow ? (
         <>
-          <span>Server is still starting up.</span>
-          <button
-            onClick={() => {
-              setTimedOut(false);
-              startPolling();
-            }}
-            className="ml-1 underline hover:no-underline"
-          >
-            Retry
-          </button>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          <span>Server is still starting up, retrying...</span>
         </>
       ) : (
         <>
