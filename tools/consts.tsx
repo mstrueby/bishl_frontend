@@ -66,12 +66,18 @@ export const ageGroupConfig: AgeGroupRule[] = [
     sortOrder: 2,
     altKey: "Damen",
     canAlsoPlayIn: ["HERREN"],
-    canPlayOverAgeIn: ["U19"],
+  },
+  {
+    key: "U21",
+    value: "U21",
+    sortOrder: 3,
+    altKey: "U21",
+    canAlsoPlayIn: ["HERREN", "DAMEN"],
   },
   {
     key: "U19",
     value: "U19",
-    sortOrder: 3,
+    sortOrder: 4,
     altKey: "Junioren",
     canAlsoPlayIn: ["HERREN"],
     canPlayOverAgeIn: ["U16"],
@@ -80,7 +86,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
   {
     key: "U16",
     value: "U16",
-    sortOrder: 4,
+    sortOrder: 5,
     altKey: "Jugend",
     canAlsoPlayIn: ["U19", "DAMEN"],
     canPlayOverAgeIn: ["U13"],
@@ -89,7 +95,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
   {
     key: "U13",
     value: "U13",
-    sortOrder: 5,
+    sortOrder: 6,
     altKey: "Schüler",
     canAlsoPlayIn: ["U16"],
     canPlayOverAgeIn: ["U10"],
@@ -98,7 +104,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
   {
     key: "U10",
     value: "U10",
-    sortOrder: 6,
+    sortOrder: 7,
     altKey: "Bambini",
     canAlsoPlayIn: ["U13"],
     requiresOverAge: true,
@@ -107,7 +113,7 @@ export const ageGroupConfig: AgeGroupRule[] = [
   {
     key: "U8",
     value: "U8",
-    sortOrder: 7,
+    sortOrder: 8,
     altKey: "Mini",
     canAlsoPlayIn: ["U10"],
     maxOverAgePlayers: 2,
