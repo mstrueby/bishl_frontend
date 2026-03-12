@@ -79,7 +79,8 @@ export default function DemoWarmup() {
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-3 px-4 py-2 text-sm transition-all duration-700 ${
+      style={{ zIndex: 9999 }}
+      className={`fixed top-0 left-0 right-0 flex items-center justify-center gap-3 px-4 py-2 text-sm transition-all duration-700 ${
         fadingOut
           ? 'opacity-0 -translate-y-full'
           : 'opacity-100 translate-y-0'
