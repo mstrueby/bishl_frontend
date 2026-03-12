@@ -18,6 +18,7 @@ export const getServerSideProps: GetServerSideProps<ClubPageProps> = async (cont
     const response = await apiClient.get('/clubs', {
       params: {
         page: 1,
+        active: true,
         page_size: 100
       }
     });

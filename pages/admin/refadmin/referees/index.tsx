@@ -40,7 +40,7 @@ const Referees: NextPage = () => {
   // Fetch referees function for reuse
   const fetchReferees = async () => {
     try {
-      const res = await apiClient.get("/users/referees");
+      const res = await apiClient.get("/users/referees", { params: { all: true } });
       setReferees(res.data || []);
     } catch (error) {
       if (error) {
