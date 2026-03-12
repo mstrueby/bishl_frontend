@@ -991,7 +991,7 @@ export default function SupplementaryForm() {
 
         // Fetch all referees
         try {
-          const refereesResponse = await apiClient.get("/users/referees");
+          const refereesResponse = await apiClient.get("/users/referees", { params: { all: true, active: true }});
           console.log(
             "Supplementary page: Referees fetched",
             refereesResponse.data?.length,
