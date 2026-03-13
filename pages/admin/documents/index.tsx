@@ -199,6 +199,9 @@ const Documents: NextPage = () => {
         imageSrc =
           "https://res.cloudinary.com/dajtykxvp/image/upload/v1732112197/icons/xlsx.png";
         break;
+      case "xlsm":
+        imageSrc = "https://res.cloudinary.com/dajtykxvp/image/upload/v1773440785/icons/xlsm.png"
+        break;
       case "pptx":
       case "ppt":
         imageSrc =
