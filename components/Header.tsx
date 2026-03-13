@@ -567,6 +567,7 @@ const Header = () => {
                   </span>
                   Kalender
                 </DisclosureButton>
+                {/**
                 {tournamentConfigs
                   .filter((config) => config.name === "Tag der Meister")
                   .map((item) => (
@@ -588,6 +589,7 @@ const Header = () => {
                       {item.name}
                     </DisclosureButton>
                   ))}
+                */}
 
                 {men.map((item, index) => (
                   <DisclosureButton
