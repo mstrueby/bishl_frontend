@@ -6,6 +6,7 @@ export function countCalledMatches(
   tournamentAlias: string,
   seasonAlias: string,
   callUpType: CallUpType = CallUpType.MATCH,
+  currentMatchdayId?: string,
 ): number {
   const countedOccurrences = (player.playUpTrackings ?? [])
     .filter(
@@ -17,7 +18,11 @@ export function countCalledMatches(
     .filter((o) => o.counted);
 
   if (callUpType === CallUpType.MATCHDAY) {
-    const distinctMatchdayIds = new Set(countedOccurrences.map((o) => o.matchdayId));
+    const distinctMatchdayIds = new Set(
+      countedOccurrences
+        .filter((o) => !currentMatchdayId || o.matchdayId !== currentMatchdayId)
+        .map((o) => o.matchdayId),
+    );
     return distinctMatchdayIds.size;
   }
 

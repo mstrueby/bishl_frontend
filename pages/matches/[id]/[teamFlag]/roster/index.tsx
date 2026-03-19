@@ -128,6 +128,7 @@ const RosterPage = () => {
     clubName: string;
     clubAlias: string;
   } | null>(null);
+  const [currentMatchdayId, setCurrentMatchdayId] = useState<string | null>(null);
 
   // Calculate back link once during initialization
   const getBackLink = () => {
@@ -490,6 +491,7 @@ const RosterPage = () => {
             `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`,
           );
           setMatchdayOwner(matchdayResponse.data?.owner || null);
+          setCurrentMatchdayId(matchdayResponse.data?._id || null);
         } catch (error) {
           console.error("Error fetching matchday owner:", error);
         }
@@ -1006,6 +1008,7 @@ const RosterPage = () => {
               match.tournament.alias,
               match.season.alias,
               callUpType,
+              currentMatchdayId ?? undefined,
             ),
           };
         } catch (error) {
@@ -1099,6 +1102,7 @@ const RosterPage = () => {
                 match?.tournament?.alias ?? "",
                 match?.season?.alias ?? "",
                 callUpType,
+                currentMatchdayId ?? undefined,
               );
 
               return {
