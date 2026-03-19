@@ -25,6 +25,7 @@ import {
   Assignment,
   AssignmentTeam,
 } from "../../../../../types/PlayerValues";
+import { CallUpType } from "../../../../../types/TournamentValues";
 import { Listbox, Transition, Switch, Dialog } from "@headlessui/react";
 import {
   ChevronLeftIcon,
@@ -514,6 +515,7 @@ const RosterPage = () => {
   const minGoalieCount = match?.matchSettings?.minimumStartingStrength?.goalie ?? 1;
   const maxCallUpPlayers = match?.matchSettings?.maxCallUpPlayers ?? 5;
   const maxCallUpAppearances = match?.matchSettings?.maxCallUpAppearances ?? 5;
+  const callUpType = match?.matchSettings?.callUpType ?? CallUpType.MATCH;
 
   // Calculate permissions for this user and match
   const permissions =
@@ -1003,6 +1005,7 @@ const RosterPage = () => {
               playerData,
               match.tournament.alias,
               match.season.alias,
+              callUpType,
             ),
           };
         } catch (error) {
@@ -1095,6 +1098,7 @@ const RosterPage = () => {
                 player,
                 match?.tournament?.alias ?? "",
                 match?.season?.alias ?? "",
+                callUpType,
               );
 
               return {
