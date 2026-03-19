@@ -237,6 +237,7 @@ const AssignmentModal: React.FC<AssignmentModalProps> = ({
           modifyDate: new Date().toISOString(),
           active: active,
           jerseyNo: jerseyNumber,
+          isCallable: true
         };
 
         const existingClubIndex = updatedAssignments.findIndex(
