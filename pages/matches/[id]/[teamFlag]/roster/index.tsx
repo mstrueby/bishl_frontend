@@ -791,7 +791,7 @@ const RosterPage = () => {
     );
 
     if (playersToFetch.length === 0) {
-      const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
+      const updates: Record<string, { eligibilityStatus: string; status: string; isCallable?: boolean }> = {};
       calledPlayersNeedingStatus.forEach((p) => {
         const cached = playerDetailsMap[p._id];
         if (cached) {
@@ -799,7 +799,11 @@ const RosterPage = () => {
             ?.flatMap((a: Assignment) => a.teams || [])
             .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
           if (assignedTeam?.status) {
-            updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
+            updates[p._id] = {
+              eligibilityStatus: assignedTeam.status,
+              status: assignedTeam.status,
+              isCallable: assignedTeam.isCallable,
+            };
           }
         }
       });
@@ -809,8 +813,9 @@ const RosterPage = () => {
             if (updates[p._id]) {
               const newStatus = updates[p._id].eligibilityStatus;
               const callUps = playerStats[p._id] || 0;
-              const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
-              return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
+              const freshIsCallable = updates[p._id].isCallable ?? p.isCallable;
+              const finalStatus = (callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
+              return { ...p, eligibilityStatus: finalStatus, status: finalStatus, isCallable: freshIsCallable };
             }
             return p;
           })
@@ -843,7 +848,7 @@ const RosterPage = () => {
         setPlayerDetailsMap((prev) => ({ ...prev, ...newDetailsMap }));
 
         const allDetails = { ...playerDetailsMap, ...newDetailsMap };
-        const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
+        const updates: Record<string, { eligibilityStatus: string; status: string; isCallable?: boolean }> = {};
         calledPlayersNeedingStatus.forEach((p) => {
           const details = allDetails[p._id];
           if (details) {
@@ -851,7 +856,11 @@ const RosterPage = () => {
               ?.flatMap((a: Assignment) => a.teams || [])
               .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
             if (assignedTeam?.status) {
-              updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
+              updates[p._id] = {
+                eligibilityStatus: assignedTeam.status,
+                status: assignedTeam.status,
+                isCallable: assignedTeam.isCallable,
+              };
             }
           }
         });
@@ -862,8 +871,9 @@ const RosterPage = () => {
               if (updates[p._id]) {
                 const newStatus = updates[p._id].eligibilityStatus;
                 const callUps = playerStats[p._id] || 0;
-                const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
-                return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
+                const freshIsCallable = updates[p._id].isCallable ?? p.isCallable;
+                const finalStatus = (callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
+                return { ...p, eligibilityStatus: finalStatus, status: finalStatus, isCallable: freshIsCallable };
               }
               return p;
             })
@@ -1073,10 +1083,13 @@ const RosterPage = () => {
         const callUps = playerStats[p._id];
         if (callUps === undefined) return p;
         const shouldBeInvalid = callUps >= maxCallUpAppearances && p.isCallable !== false;
-        const targetStatus = shouldBeInvalid ? "INVALID" : p.eligibilityStatus;
+        // Use p.status (the clean assignment status, never overwritten by DECIDE logic)
+        // as the fallback when the player no longer needs to be invalid
+        const targetStatus = shouldBeInvalid ? "INVALID" : (p.status || "VALID");
         if (p.eligibilityStatus !== targetStatus) {
           anyChanged = true;
-          return { ...p, eligibilityStatus: targetStatus, status: targetStatus };
+          // Only update eligibilityStatus, not status, so p.status stays clean
+          return { ...p, eligibilityStatus: targetStatus };
         }
         return p;
       });
@@ -1508,13 +1521,19 @@ const RosterPage = () => {
       formData.append("managedByISHD", "false");
       const response = await apiClient.patch(`/players/${decidePlayer._id}`, formData);
       const updatedPlayer: PlayerValues = response.data;
+      // Look up the clean status from the API response for the origin team assignment
+      const originAssignment = updatedPlayer.assignedTeams
+        ?.flatMap((a) => a.teams)
+        .find((t) => t.teamId === originTeamId);
+      const cleanStatus = originAssignment?.status || "VALID";
       setTablePlayers((prev) =>
         prev.map((p) => {
           if (p._id !== decidePlayer._id) return p;
           return {
             ...p,
             isCallable: false,
-            eligibilityStatus: p.status || "VALID",
+            eligibilityStatus: cleanStatus,
+            status: cleanStatus,
           };
         })
       );
