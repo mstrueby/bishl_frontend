@@ -2081,23 +2081,6 @@ const RosterPage = () => {
                                 ))}
                             </>
                           )}
-                          {!player.called &&
-                            callUpMode === CallUpMode.DECIDE &&
-                            playerStats[player._id] >= maxCallUpAppearances &&
-                            player.isCallable !== false &&
-                            hasRole(user, UserRole.CLUB_ADMIN) && (
-                              <button
-                                type="button"
-                                title="Entscheidung über Lizenz treffen"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDecidePlayer(player);
-                                }}
-                                className="ml-0.5 inline-flex items-center rounded p-0.5 text-red-600 hover:bg-red-50 hover:text-red-800 focus:outline-none focus:ring-1 focus:ring-red-400"
-                              >
-                                <PencilSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                              </button>
-                            )}
                         </div>
                       </td>
 
