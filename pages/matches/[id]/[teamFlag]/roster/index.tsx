@@ -814,7 +814,7 @@ const RosterPage = () => {
               const newStatus = updates[p._id].eligibilityStatus;
               const callUps = playerStats[p._id] || 0;
               const freshIsCallable = updates[p._id].isCallable ?? p.isCallable;
-              const finalStatus = (callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
+              const finalStatus = (callUpMode === CallUpMode.DECIDE && callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
               return { ...p, eligibilityStatus: finalStatus, status: finalStatus, isCallable: freshIsCallable };
             }
             return p;
@@ -872,7 +872,7 @@ const RosterPage = () => {
                 const newStatus = updates[p._id].eligibilityStatus;
                 const callUps = playerStats[p._id] || 0;
                 const freshIsCallable = updates[p._id].isCallable ?? p.isCallable;
-                const finalStatus = (callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
+                const finalStatus = (callUpMode === CallUpMode.DECIDE && callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
                 return { ...p, eligibilityStatus: finalStatus, status: finalStatus, isCallable: freshIsCallable };
               }
               return p;
@@ -1022,13 +1022,16 @@ const RosterPage = () => {
     return jerseyNumbers.length !== new Set(jerseyNumbers).size;
   }, [tablePlayers]);
 
-  // Fetch player stats for called players
+  // Fetch player stats for called players (and all rostered players in DECIDE mode)
   useEffect(() => {
     const fetchPlayerStats = async () => {
       if (!match || !matchTeam) return;
 
-      const calledPlayers = rosterList.filter((player) => player.called);
-      const statsPromises = calledPlayers.map(async (player) => {
+      const playersToFetch = callUpMode === CallUpMode.DECIDE
+        ? rosterList
+        : rosterList.filter((player) => player.called);
+
+      const statsPromises = playersToFetch.map(async (player) => {
         try {
           const response = await apiClient.get(
             `/players/${player.player.playerId}`,
@@ -1069,7 +1072,11 @@ const RosterPage = () => {
       setPlayerStats((prev) => ({ ...prev, ...statsMap }));
     };
 
-    if (rosterList.some((player) => player.called)) {
+    const shouldFetch = callUpMode === CallUpMode.DECIDE
+      ? rosterList.length > 0
+      : rosterList.some((player) => player.called);
+
+    if (shouldFetch) {
       fetchPlayerStats();
     }
   }, [rosterList, match, matchTeam]);
@@ -2025,6 +2032,24 @@ const RosterPage = () => {
                       {/* Called indicator */}
                       <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center gap-2 text-center">
+                          {!player.called &&
+                            callUpMode === CallUpMode.DECIDE &&
+                            playerStats[player._id] !== undefined &&
+                            playerStats[player._id] >= maxCallUpAppearances &&
+                            player.isCallable !== false &&
+                            hasRole(user, UserRole.CLUB_ADMIN) && (
+                              <button
+                                type="button"
+                                title="Entscheidung über Lizenz treffen"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDecidePlayer(player);
+                                }}
+                                className="inline-flex items-center rounded p-0.5 text-red-600 hover:bg-red-50 hover:text-red-800 focus:outline-none focus:ring-1 focus:ring-red-400"
+                              >
+                                <PencilSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                              </button>
+                            )}
                           {player.called && (
                             <>
                               <ArrowUpIcon
@@ -3115,6 +3140,7 @@ const RosterPage = () => {
           decidePlayer?.originalTeamName || matchTeam?.name || ""
         }
         toTeamName={matchTeam?.name || ""}
+        canUpgrade={!!decidePlayer?.originalTeamId}
       />
     </Layout>
   );
