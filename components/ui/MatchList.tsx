@@ -16,6 +16,7 @@ interface MatchListProps {
     clubName: string;
     clubAlias: string;
   } | null;
+  matchdayOwners?: Record<string, { clubId: string; clubName: string; clubAlias: string }>;
 }
 
 const MatchList: React.FC<MatchListProps> = ({
@@ -25,6 +26,7 @@ const MatchList: React.FC<MatchListProps> = ({
   from,
   onMatchUpdate,
   matchdayOwner,
+  matchdayOwners = {},
 }) => {
   const [activeTab, setActiveTab] = useState<string>('');
 
@@ -132,15 +134,21 @@ const MatchList: React.FC<MatchListProps> = ({
   if (mode === 'MATCHDAY') {
     return (
       <div className="space-y-4">
-        {matches.map((match) => (
-          <MatchCard
-            key={match._id || match.matchId}
-            match={match}
-            from={from}
-            onMatchUpdate={onMatchUpdate}
-            matchdayOwner={matchdayOwner}
-          />
-        ))}
+        {matches.map((match) => {
+          const ownerKey = match.round?.alias && match.matchday?.alias
+            ? `${match.round.alias}::${match.matchday.alias}`
+            : null;
+          const owner = (ownerKey && matchdayOwners[ownerKey]) || matchdayOwner || null;
+          return (
+            <MatchCard
+              key={match._id || match.matchId}
+              match={match}
+              from={from}
+              onMatchUpdate={onMatchUpdate}
+              matchdayOwner={owner}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -242,6 +250,14 @@ const MatchList: React.FC<MatchListProps> = ({
           <div className="space-y-8">
             {groupByMatchday(activeMatches).map(([mdAlias, mdMatches]) => {
               const matchday = matchdays.find(md => md.alias === mdAlias);
+              // Use round alias from first match in group for composite key
+              const roundAlias = mdMatches[0]?.round?.alias;
+              const ownerKey = roundAlias ? `${roundAlias}::${mdAlias}` : null;
+              const groupOwner =
+                (ownerKey && matchdayOwners[ownerKey]) ||
+                matchday?.owner ||
+                matchdayOwner ||
+                null;
               return (
                 <div key={mdAlias}>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -254,7 +270,7 @@ const MatchList: React.FC<MatchListProps> = ({
                         match={match}
                         from={from}
                         onMatchUpdate={onMatchUpdate}
-                        matchdayOwner={matchdayOwner}
+                        matchdayOwner={groupOwner}
                       />
                     ))}
                   </div>
@@ -264,15 +280,26 @@ const MatchList: React.FC<MatchListProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {activeMatches.map((match) => (
-              <MatchCard
-                key={match._id || match.matchId}
-                match={match}
-                from={from}
-                onMatchUpdate={onMatchUpdate}
-                matchdayOwner={matchdayOwner}
-              />
-            ))}
+            {activeMatches.map((match) => {
+              const md = matchdays.find(md => md.alias === match.matchday?.alias);
+              const ownerKey = match.round?.alias && match.matchday?.alias
+                ? `${match.round.alias}::${match.matchday.alias}`
+                : null;
+              const owner =
+                (ownerKey && matchdayOwners[ownerKey]) ||
+                md?.owner ||
+                matchdayOwner ||
+                null;
+              return (
+                <MatchCard
+                  key={match._id || match.matchId}
+                  match={match}
+                  from={from}
+                  onMatchUpdate={onMatchUpdate}
+                  matchdayOwner={owner}
+                />
+              );
+            })}
           </div>
         )}
       </>

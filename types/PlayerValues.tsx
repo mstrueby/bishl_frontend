@@ -1,4 +1,5 @@
 import { TeamType } from "./ClubValues"
+import { CallUpType } from "./MatchdayValues"
   
 export enum Source {
   ISHD = "ISHD",
@@ -81,6 +82,7 @@ export interface AssignmentTeam {
   modifyDate: string; // e.g. "2025-01-16T11:36:45.395Z"
   active: boolean;
   jerseyNo?: number;
+  isCallable: boolean;
 }
 
 export interface Assignment {
@@ -93,9 +95,13 @@ export interface Assignment {
 }
 
 export interface PlayUpOccurrence {
+  type: CallUpType; // e.g. "MATCH", "MATCHDAY"
+  counted: boolean;
   matchId: string;
   matchStartDate: string; // e.g. "2025-01-16T11:36:45.395Z"
-  counted: boolean;
+  matchdayId: string;
+  matchdayName: string;
+  matchdayStartDate: string;
 }
 
 export interface PlayUpTracking {

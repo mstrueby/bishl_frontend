@@ -42,6 +42,7 @@ interface SeasonHubProps {
     clubName: string;
     clubAlias: string;
   } | null;
+  matchdayOwners: Record<string, { clubId: string; clubName: string; clubAlias: string }>;
   tAlias: string;
   sAlias: string;
   rAlias?: string;
@@ -61,6 +62,7 @@ export default function SeasonHub({
   selectedRoundMatchdays,
   selectedMatchday,
   matchdayOwner,
+  matchdayOwners,
   tAlias,
   sAlias,
   rAlias,
@@ -851,6 +853,7 @@ export default function SeasonHub({
                   from={`/tournaments/${tAlias}/${sAlias}${rAlias ? `/${rAlias}` : ""}${mdAlias ? `/${mdAlias}` : ""}`}
                   onMatchUpdate={handleMatchUpdate}
                   matchdayOwner={matchdayOwner}
+                  matchdayOwners={matchdayOwners}
                 />
               </MatchRefreshProvider>
             </div>
@@ -1023,6 +1026,66 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       }
     }
 
+    // Build a matchday-alias → owner map so MatchList can grant permissions
+    // across all view modes (MATCHDAY, ROUND, SEASON).
+    // The individual matchday endpoint reliably returns the owner field,
+    // whereas the list endpoint may not.
+    const matchdayOwners: Record<string, { clubId: string; clubName: string; clubAlias: string }> = {};
+
+    // Keys use "roundAlias::matchdayAlias" to avoid collisions when two rounds
+    // share the same matchday alias (e.g. "1-spieltag" in multiple rounds).
+    if (mdAlias && rAlias && matchdayOwner) {
+      // MATCHDAY mode: owner already fetched above
+      matchdayOwners[`${rAlias}::${mdAlias}`] = matchdayOwner;
+    } else if (rAlias && selectedRoundMatchdays.length > 0) {
+      // ROUND mode: fetch each matchday individually in parallel
+      await Promise.allSettled(
+        selectedRoundMatchdays.map((md: MatchdayValues) =>
+          apiClient
+            .get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${rAlias}/matchdays/${md.alias}`)
+            .then((res) => {
+              if (res.data?.owner?.clubId) {
+                matchdayOwners[`${rAlias}::${md.alias}`] = res.data.owner;
+              }
+            })
+            .catch(() => { /* ignore individual fetch errors */ }),
+        ),
+      );
+    } else if (!rAlias) {
+      // SEASON mode: fetch all published rounds' matchday lists, then each
+      // matchday individually to guarantee owner data is present.
+      const publishedRounds: RoundValues[] = allRounds.filter((r: RoundValues) => r.published);
+
+      const roundMatchdayLists = await Promise.allSettled(
+        publishedRounds.map((round: RoundValues) =>
+          apiClient
+            .get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${round.alias}/matchdays`)
+            .then((res) => ({ roundAlias: round.alias, matchdays: (res.data || []) as MatchdayValues[] }))
+            .catch(() => ({ roundAlias: round.alias, matchdays: [] as MatchdayValues[] })),
+        ),
+      );
+
+      const individualFetches = roundMatchdayLists
+        .filter(
+          (r): r is PromiseFulfilledResult<{ roundAlias: string; matchdays: MatchdayValues[] }> =>
+            r.status === "fulfilled",
+        )
+        .flatMap(({ value: { roundAlias, matchdays } }) =>
+          matchdays.map((md: MatchdayValues) =>
+            apiClient
+              .get(`/tournaments/${tAlias}/seasons/${sAlias}/rounds/${roundAlias}/matchdays/${md.alias}`)
+              .then((res) => {
+                if (res.data?.owner?.clubId) {
+                  matchdayOwners[`${roundAlias}::${md.alias}`] = res.data.owner;
+                }
+              })
+              .catch(() => { /* ignore */ }),
+          ),
+        );
+
+      await Promise.allSettled(individualFetches);
+    }
+
     return {
       props: {
         season,
@@ -1058,6 +1121,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           }),
         selectedMatchday,
         matchdayOwner: matchdayOwner || null,
+        matchdayOwners,
         tAlias,
         sAlias,
         rAlias: rAlias || null,

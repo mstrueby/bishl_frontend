@@ -47,6 +47,11 @@ export interface MatchdayOwner {
   clubAlias: string;
 }
 
+export enum CallUpType {
+  MATCHDAY = "MATCHDAY",
+  MATCH = "MATCH"
+}
+
 export enum CallUpMode {
   LOCKED = "LOCKED",
   DECIDE = "DECIDE",
@@ -74,6 +79,7 @@ export interface MatchSettings {
   regularStrength: number;
   minPenaltyKillStrength: number;
   notes: string;
+  callUpType: CallUpType;
   callUpMode: CallUpMode;
   maxCallUpAppearances: number;
   maxCallUpPlayers: number;
