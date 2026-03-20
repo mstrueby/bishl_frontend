@@ -25,7 +25,7 @@ import {
   Assignment,
   AssignmentTeam,
 } from "../../../../../types/PlayerValues";
-import { CallUpType, CallUpMode } from "../../../../../types/TournamentValues";
+import { CallUpType } from "../../../../../types/TournamentValues";
 import { Listbox, Transition, Switch, Dialog } from "@headlessui/react";
 import {
   ChevronLeftIcon,
@@ -62,7 +62,6 @@ import { UserRole, hasRole } from "../../../../../lib/auth";
 import { validateRoster, isRosterComplete } from "../../../../../utils/rosterValidation";
 import RosterChecks from "../../../../../components/ui/RosterChecks";
 import TeamChangeConfirmDialog from "../../../../../components/matches/roster/TeamChangeConfirmDialog";
-import CallUpDecisionDialog from "../../../../../components/matches/roster/CallUpDecisionDialog";
 
 interface AvailablePlayer {
   _id: string;
@@ -87,7 +86,6 @@ interface AvailablePlayer {
   licenseType?: string;
   calledMatches?: number;
   invalidReasonCodes?: string[];
-  isCallable?: boolean;
 }
 
 // Extended player type for the new interactive table
@@ -208,8 +206,6 @@ const RosterPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [teamChangePlayer, setTeamChangePlayer] = useState<AvailablePlayerWithRoster | null>(null);
   const [isTeamChangeLoading, setIsTeamChangeLoading] = useState(false);
-  const [decidePlayer, setDecidePlayer] = useState<AvailablePlayerWithRoster | null>(null);
-  const [isDecideLoading, setIsDecideLoading] = useState(false);
 
   // Sort roster by position order: C, A, G, F, then by jersey number
   const sortRoster = React.useCallback(
@@ -454,7 +450,6 @@ const RosterPage = () => {
                   status: assignedTeam.status,
                   licenseType: assignedTeam.licenseType,
                   invalidReasonCodes: assignedTeam.invalidReasonCodes || [],
-                  isCallable: assignedTeam.isCallable ?? true,
                 }
               : null;
           })
@@ -496,25 +491,7 @@ const RosterPage = () => {
             `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`,
           );
           setMatchdayOwner(matchdayResponse.data?.owner || null);
-          const fetchedMatchdayId: string | null = matchdayResponse.data?._id || null;
-          setCurrentMatchdayId(fetchedMatchdayId);
-
-          // In DECIDE mode, pre-compute call-up counts for ALL players using data
-          // already in memory so non-called players at the limit get flagged too
-          if (matchData.matchSettings?.callUpMode === CallUpMode.DECIDE) {
-            const modeCallUpType = matchData.matchSettings?.callUpType ?? CallUpType.MATCH;
-            const initialStats: { [playerId: string]: number } = {};
-            allTeamsPlayers.forEach((p) => {
-              initialStats[p._id] = countCalledMatches(
-                p,
-                matchData.tournament.alias,
-                matchData.season.alias,
-                modeCallUpType,
-                fetchedMatchdayId ?? undefined,
-              );
-            });
-            setPlayerStats(initialStats);
-          }
+          setCurrentMatchdayId(matchdayResponse.data?._id || null);
         } catch (error) {
           console.error("Error fetching matchday owner:", error);
         }
@@ -541,7 +518,6 @@ const RosterPage = () => {
   const maxCallUpPlayers = match?.matchSettings?.maxCallUpPlayers ?? 5;
   const maxCallUpAppearances = match?.matchSettings?.maxCallUpAppearances ?? 5;
   const callUpType = match?.matchSettings?.callUpType ?? CallUpType.MATCH;
-  const callUpMode = match?.matchSettings?.callUpMode ?? CallUpMode.LOCKED;
 
   // Calculate permissions for this user and match
   const permissions =
@@ -791,7 +767,7 @@ const RosterPage = () => {
     );
 
     if (playersToFetch.length === 0) {
-      const updates: Record<string, { eligibilityStatus: string; status: string; isCallable?: boolean }> = {};
+      const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
       calledPlayersNeedingStatus.forEach((p) => {
         const cached = playerDetailsMap[p._id];
         if (cached) {
@@ -799,11 +775,7 @@ const RosterPage = () => {
             ?.flatMap((a: Assignment) => a.teams || [])
             .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
           if (assignedTeam?.status) {
-            updates[p._id] = {
-              eligibilityStatus: assignedTeam.status,
-              status: assignedTeam.status,
-              isCallable: assignedTeam.isCallable,
-            };
+            updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
           }
         }
       });
@@ -813,9 +785,8 @@ const RosterPage = () => {
             if (updates[p._id]) {
               const newStatus = updates[p._id].eligibilityStatus;
               const callUps = playerStats[p._id] || 0;
-              const freshIsCallable = updates[p._id].isCallable ?? p.isCallable;
-              const finalStatus = (callUpMode === CallUpMode.DECIDE && callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
-              return { ...p, eligibilityStatus: finalStatus, status: finalStatus, isCallable: freshIsCallable };
+              const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
+              return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
             }
             return p;
           })
@@ -848,7 +819,7 @@ const RosterPage = () => {
         setPlayerDetailsMap((prev) => ({ ...prev, ...newDetailsMap }));
 
         const allDetails = { ...playerDetailsMap, ...newDetailsMap };
-        const updates: Record<string, { eligibilityStatus: string; status: string; isCallable?: boolean }> = {};
+        const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
         calledPlayersNeedingStatus.forEach((p) => {
           const details = allDetails[p._id];
           if (details) {
@@ -856,11 +827,7 @@ const RosterPage = () => {
               ?.flatMap((a: Assignment) => a.teams || [])
               .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
             if (assignedTeam?.status) {
-              updates[p._id] = {
-                eligibilityStatus: assignedTeam.status,
-                status: assignedTeam.status,
-                isCallable: assignedTeam.isCallable,
-              };
+              updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
             }
           }
         });
@@ -871,9 +838,8 @@ const RosterPage = () => {
               if (updates[p._id]) {
                 const newStatus = updates[p._id].eligibilityStatus;
                 const callUps = playerStats[p._id] || 0;
-                const freshIsCallable = updates[p._id].isCallable ?? p.isCallable;
-                const finalStatus = (callUpMode === CallUpMode.DECIDE && callUps >= maxCallUpAppearances && freshIsCallable !== false) ? 'INVALID' : newStatus;
-                return { ...p, eligibilityStatus: finalStatus, status: finalStatus, isCallable: freshIsCallable };
+                const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
+                return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
               }
               return p;
             })
@@ -1022,16 +988,13 @@ const RosterPage = () => {
     return jerseyNumbers.length !== new Set(jerseyNumbers).size;
   }, [tablePlayers]);
 
-  // Fetch player stats for called players (and all rostered players in DECIDE mode)
+  // Fetch player stats for called players
   useEffect(() => {
     const fetchPlayerStats = async () => {
       if (!match || !matchTeam) return;
 
-      const playersToFetch = callUpMode === CallUpMode.DECIDE
-        ? rosterList
-        : rosterList.filter((player) => player.called);
-
-      const statsPromises = playersToFetch.map(async (player) => {
+      const calledPlayers = rosterList.filter((player) => player.called);
+      const statsPromises = calledPlayers.map(async (player) => {
         try {
           const response = await apiClient.get(
             `/players/${player.player.playerId}`,
@@ -1069,40 +1032,13 @@ const RosterPage = () => {
         {} as { [playerId: string]: number },
       );
 
-      setPlayerStats((prev) => ({ ...prev, ...statsMap }));
+      setPlayerStats(statsMap);
     };
 
-    const shouldFetch = callUpMode === CallUpMode.DECIDE
-      ? rosterList.length > 0
-      : rosterList.some((player) => player.called);
-
-    if (shouldFetch) {
+    if (rosterList.some((player) => player.called)) {
       fetchPlayerStats();
     }
   }, [rosterList, match, matchTeam]);
-
-  // In DECIDE mode, sync eligibilityStatus for all players whose call-up count is at the limit
-  useEffect(() => {
-    if (callUpMode !== CallUpMode.DECIDE) return;
-    setTablePlayers((prev) => {
-      let anyChanged = false;
-      const updated = prev.map((p) => {
-        const callUps = playerStats[p._id];
-        if (callUps === undefined) return p;
-        const shouldBeInvalid = callUps >= maxCallUpAppearances && p.isCallable !== false;
-        // Use p.status (the clean assignment status, never overwritten by DECIDE logic)
-        // as the fallback when the player no longer needs to be invalid
-        const targetStatus = shouldBeInvalid ? "INVALID" : (p.status || "VALID");
-        if (p.eligibilityStatus !== targetStatus) {
-          anyChanged = true;
-          // Only update eligibilityStatus, not status, so p.status stays clean
-          return { ...p, eligibilityStatus: targetStatus };
-        }
-        return p;
-      });
-      return anyChanged ? updated : prev;
-    });
-  }, [playerStats]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch teams from the same club with the same age group
   useEffect(() => {
@@ -1423,19 +1359,13 @@ const RosterPage = () => {
     setModalError(null);
   };
 
-  const handleConfirmTeamChange = async (playerOverride?: AvailablePlayerWithRoster) => {
-    const targetPlayer = playerOverride ?? teamChangePlayer;
-    if (!targetPlayer || !matchTeam) return;
-    const isDecideUpgrade = !!playerOverride;
-    if (isDecideUpgrade) {
-      setIsDecideLoading(true);
-    } else {
-      setIsTeamChangeLoading(true);
-    }
+  const handleConfirmTeamChange = async () => {
+    if (!teamChangePlayer || !matchTeam) return;
+    setIsTeamChangeLoading(true);
     try {
-      let fullPlayer: PlayerValues | undefined = playerDetailsMap[targetPlayer._id];
+      let fullPlayer: PlayerValues | undefined = playerDetailsMap[teamChangePlayer._id];
       if (!fullPlayer) {
-        const res = await apiClient.get(`/players/${targetPlayer._id}`);
+        const res = await apiClient.get(`/players/${teamChangePlayer._id}`);
         fullPlayer = res.data as PlayerValues;
       }
       if (!fullPlayer || !fullPlayer.assignedTeams) {
@@ -1445,7 +1375,7 @@ const RosterPage = () => {
         (assignment) => ({
           ...assignment,
           teams: assignment.teams.map((t) => {
-            if (t.teamId === targetPlayer.originalTeamId) {
+            if (t.teamId === teamChangePlayer.originalTeamId) {
               return { ...t, teamId: matchTeam.teamId };
             }
             return t;
@@ -1455,14 +1385,14 @@ const RosterPage = () => {
       const formData = new FormData();
       formData.append("assignedTeams", JSON.stringify(updatedAssignedTeams));
       formData.append("managedByISHD", "false");
-      const response = await apiClient.patch(`/players/${targetPlayer._id}`, formData);
+      const response = await apiClient.patch(`/players/${teamChangePlayer._id}`, formData);
       const updatedPlayer: PlayerValues = response.data;
       const updatedAssignment = updatedPlayer.assignedTeams
         ?.flatMap((a) => a.teams)
         .find((t) => t.teamId === matchTeam.teamId);
       setTablePlayers((prev) =>
         prev.map((p) => {
-          if (p._id !== targetPlayer._id) return p;
+          if (p._id !== teamChangePlayer._id) return p;
           return {
             ...p,
             called: false,
@@ -1478,78 +1408,14 @@ const RosterPage = () => {
       if (updatedPlayer) {
         setPlayerDetailsMap((prev) => ({
           ...prev,
-          [targetPlayer._id]: updatedPlayer,
+          [teamChangePlayer._id]: updatedPlayer,
         }));
       }
-      if (isDecideUpgrade) {
-        setDecidePlayer(null);
-      } else {
-        setTeamChangePlayer(null);
-      }
+      setTeamChangePlayer(null);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
-      if (isDecideUpgrade) {
-        setIsDecideLoading(false);
-      } else {
-        setIsTeamChangeLoading(false);
-      }
-    }
-  };
-
-  const handleKeepOriginTeam = async () => {
-    if (!decidePlayer || !matchTeam) return;
-    setIsDecideLoading(true);
-    try {
-      let fullPlayer: PlayerValues | undefined = playerDetailsMap[decidePlayer._id];
-      if (!fullPlayer) {
-        const res = await apiClient.get(`/players/${decidePlayer._id}`);
-        fullPlayer = res.data as PlayerValues;
-      }
-      if (!fullPlayer || !fullPlayer.assignedTeams) {
-        throw new Error("Spielerdaten konnten nicht geladen werden.");
-      }
-      // The "origin" team is the team the player is registered with:
-      // for called players that's originalTeamId; for non-called it's matchTeam.teamId
-      const originTeamId = decidePlayer.originalTeamId || matchTeam.teamId;
-      const updatedAssignedTeams: Assignment[] = fullPlayer.assignedTeams.map(
-        (assignment) => ({
-          ...assignment,
-          teams: assignment.teams.map((t) => {
-            if (t.teamId === originTeamId) {
-              return { ...t, isCallable: false };
-            }
-            return t;
-          }),
-        })
-      );
-      const formData = new FormData();
-      formData.append("assignedTeams", JSON.stringify(updatedAssignedTeams));
-      formData.append("managedByISHD", "false");
-      const response = await apiClient.patch(`/players/${decidePlayer._id}`, formData);
-      const updatedPlayer: PlayerValues = response.data;
-      // Look up the clean status from the API response for the origin team assignment
-      const originAssignment = updatedPlayer.assignedTeams
-        ?.flatMap((a) => a.teams)
-        .find((t) => t.teamId === originTeamId);
-      const cleanStatus = originAssignment?.status || "VALID";
-      setTablePlayers((prev) =>
-        prev.map((p) => {
-          if (p._id !== decidePlayer._id) return p;
-          return {
-            ...p,
-            isCallable: false,
-            eligibilityStatus: cleanStatus,
-            status: cleanStatus,
-          };
-        })
-      );
-      setPlayerDetailsMap((prev) => ({ ...prev, [decidePlayer._id]: updatedPlayer }));
-      setDecidePlayer(null);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setIsDecideLoading(false);
+      setIsTeamChangeLoading(false);
     }
   };
 
@@ -2032,24 +1898,6 @@ const RosterPage = () => {
                       {/* Called indicator */}
                       <td className="hidden lg:table-cell px-3 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center gap-2 text-center">
-                          {!player.called &&
-                            callUpMode === CallUpMode.DECIDE &&
-                            playerStats[player._id] !== undefined &&
-                            playerStats[player._id] >= maxCallUpAppearances &&
-                            player.isCallable !== false &&
-                            hasRole(user, UserRole.CLUB_ADMIN) && (
-                              <button
-                                type="button"
-                                title="Entscheidung über Lizenz treffen"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDecidePlayer(player);
-                                }}
-                                className="inline-flex items-center rounded p-0.5 text-red-600 hover:bg-red-50 hover:text-red-800 focus:outline-none focus:ring-1 focus:ring-red-400"
-                              >
-                                <PencilSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                              </button>
-                            )}
                           {player.called && (
                             <>
                               <ArrowUpIcon
@@ -2076,22 +1924,7 @@ const RosterPage = () => {
                                   : "–"}
                               </span>
                               {playerStats[player._id] >= maxCallUpAppearances &&
-                                hasRole(user, UserRole.CLUB_ADMIN) &&
-                                (callUpMode === CallUpMode.DECIDE ? (
-                                  player.isCallable !== false && (
-                                    <button
-                                      type="button"
-                                      title="Entscheidung über Lizenz treffen"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setDecidePlayer(player);
-                                      }}
-                                      className="ml-0.5 inline-flex items-center rounded p-0.5 text-red-600 hover:bg-red-50 hover:text-red-800 focus:outline-none focus:ring-1 focus:ring-red-400"
-                                    >
-                                      <PencilSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                                    </button>
-                                  )
-                                ) : (
+                                hasRole(user, UserRole.CLUB_ADMIN) && (
                                   <button
                                     type="button"
                                     title="Lizenz auf dieses Team umschreiben"
@@ -2103,7 +1936,7 @@ const RosterPage = () => {
                                   >
                                     <PencilSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
                                   </button>
-                                ))}
+                                )}
                             </>
                           )}
                         </div>
@@ -3122,25 +2955,6 @@ const RosterPage = () => {
         }
         fromTeamName={teamChangePlayer?.originalTeamName || ""}
         toTeamName={matchTeam?.name || ""}
-      />
-
-      {/* Call-Up Decision Dialog (DECIDE mode) */}
-      <CallUpDecisionDialog
-        isOpen={decidePlayer !== null}
-        onClose={() => setDecidePlayer(null)}
-        onKeepOrigin={handleKeepOriginTeam}
-        onUpgrade={() => decidePlayer && handleConfirmTeamChange(decidePlayer)}
-        isLoading={isDecideLoading}
-        playerName={
-          decidePlayer
-            ? `${decidePlayer.firstName} ${decidePlayer.lastName}`
-            : ""
-        }
-        fromTeamName={
-          decidePlayer?.originalTeamName || matchTeam?.name || ""
-        }
-        toTeamName={matchTeam?.name || ""}
-        canUpgrade={!!decidePlayer?.originalTeamId}
       />
     </Layout>
   );

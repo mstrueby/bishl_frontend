@@ -1,5 +1,5 @@
 import { TeamType } from "./ClubValues"
-import { CallUpType } from "./TournamentValues"
+import { CallUpType } from "./MatchdayValues"
   
 export enum Source {
   ISHD = "ISHD",

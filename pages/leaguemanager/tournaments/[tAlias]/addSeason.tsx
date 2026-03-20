@@ -7,7 +7,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import LayoutAdm from '../../../../components/LayoutAdm';
 import SeasonForm from '../../../../components/leaguemanager/SeasonForm';
-import { SeasonValues, CallUpMode, CallUpType } from '../../../../types/TournamentValues';
+import { SeasonValues, CallUpMode } from '../../../../types/TournamentValues';
 import ErrorMessage from '../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../components/leaguemanager/navData';
 
@@ -52,7 +52,6 @@ export default function Add({ jwt }: AddProps) {
       regularStrength: 4,
       minPenaltyKillStrength: 2,
       notes: '',
-      callUpType: CallUpType.MATCH,
       callUpMode: CallUpMode.LOCKED,
       maxCallUpAppearances: 0,
       maxCallUpPlayers: 0,
