@@ -1,17 +1,21 @@
 // page to add a new season to a tournament
 // /leaguemanager/tournaments/[tAlias]/addSeason
-import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
-import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
-import LayoutAdm from '../../../../components/LayoutAdm';
-import SeasonForm from '../../../../components/leaguemanager/SeasonForm';
-import { SeasonValues, CallUpMode } from '../../../../types/TournamentValues';
-import ErrorMessage from '../../../../components/ui/ErrorMessage';
-import { navData } from '../../../../components/leaguemanager/navData';
+import { useState, useEffect } from "react";
+import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { getCookie } from "cookies-next";
+import axios from "axios";
+import LayoutAdm from "../../../../components/LayoutAdm";
+import SeasonForm from "../../../../components/leaguemanager/SeasonForm";
+import {
+  SeasonValues,
+  CallUpType,
+  CallUpMode,
+} from "../../../../types/TournamentValues";
+import ErrorMessage from "../../../../components/ui/ErrorMessage";
+import { navData } from "../../../../components/leaguemanager/navData";
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/tournaments/"
+let BASE_URL = process.env["NEXT_PUBLIC_API_URL"] + "/tournaments/";
 
 interface AddProps {
   jwt: string;
@@ -19,11 +23,11 @@ interface AddProps {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const jwt = getCookie('jwt', { req, res });
+  const jwt = getCookie("jwt", { req, res });
   //const tournamentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments/`);
   //const allTournamentsData: TournamentFormValues[] = await tournamentsResponse.json();
   return { props: { jwt } };
-}
+};
 
 export default function Add({ jwt }: AddProps) {
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +36,8 @@ export default function Add({ jwt }: AddProps) {
   const { tAlias } = router.query;
 
   const initialValues: SeasonValues = {
-    name: '',
-    alias: '',
+    name: "",
+    alias: "",
     published: false,
     matchSettings: {
       numOfPeriods: 3,
@@ -44,22 +48,23 @@ export default function Add({ jwt }: AddProps) {
       shootout: false,
       refereePoints: 0,
       breakLengthMin: 10,
-      regularStrengthOvertime: 4, 
+      regularStrengthOvertime: 4,
       suddenDeath: false,
       minorPenaltySec: 120,
       majorPenaltySec: 300,
-      gameMisconductPenaltySec: 600, 
+      gameMisconductPenaltySec: 600,
       regularStrength: 4,
       minPenaltyKillStrength: 2,
-      notes: '',
+      notes: "",
       callUpMode: CallUpMode.LOCKED,
       maxCallUpAppearances: 0,
       maxCallUpPlayers: 0,
       minimumStartingStrength: {
         skater: 4,
         goalie: 1,
-      }
-    }
+      },
+      callUpType: CallUpType.MATCH,
+    },
   };
 
   const onSubmit = async (values: SeasonValues) => {
@@ -69,30 +74,38 @@ export default function Add({ jwt }: AddProps) {
     //const url = selectedTournament ? `${BASE_URL}${selectedTournament.alias}/seasons/` : BASE_URL;
     try {
       const response = await axios({
-        method: 'post',
+        method: "post",
         url: `${BASE_URL}${tAlias}/seasons/`,
         data: JSON.stringify(values),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${jwt}`,
         },
       });
       if (response.status === 201) {
-        router.push({
-          pathname: `/leaguemanager/tournaments/${tAlias}`,
-          query: { message: `Die neue Saison ${values.alias} wurde erfolgreich angelegt.` }
-        }, `/leaguemanager/tournaments/${tAlias}`);
+        router.push(
+          {
+            pathname: `/leaguemanager/tournaments/${tAlias}`,
+            query: {
+              message: `Die neue Saison ${values.alias} wurde erfolgreich angelegt.`,
+            },
+          },
+          `/leaguemanager/tournaments/${tAlias}`,
+        );
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         // If the error has a response with data and a message, set that as the error
-        const errorMessage = error.response.data?.message || error.response.data?.detail || 'Ein Fehler ist aufgetreten.';
+        const errorMessage =
+          error.response.data?.message ||
+          error.response.data?.detail ||
+          "Ein Fehler ist aufgetreten.";
         setError(errorMessage);
       } else {
         // Fallback error message if response is not present or no message is found
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } finally {
       setLoading(false);
@@ -102,8 +115,8 @@ export default function Add({ jwt }: AddProps) {
   const handleCancel = () => {
     router.push({
       pathname: `/leaguemanager/tournaments/${tAlias}`,
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (error) {
@@ -125,12 +138,9 @@ export default function Add({ jwt }: AddProps) {
   };
 
   return (
-    <LayoutAdm
-      navData={navData}
-      sectionTitle='Neue Saison'
-    >
+    <LayoutAdm navData={navData} sectionTitle="Neue Saison">
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
       <SeasonForm {...formProps} />
     </LayoutAdm>
-  )
+  );
 }

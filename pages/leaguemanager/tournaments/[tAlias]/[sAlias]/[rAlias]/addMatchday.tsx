@@ -7,7 +7,7 @@ import { getCookie } from 'cookies-next';
 import axios from 'axios';
 import LayoutAdm from '../../../../../../components/LayoutAdm';
 import MatchdayForm from '../../../../../../components/leaguemanager/MatchdayForm';
-import { MatchdayValues, CallUpMode } from '../../../../../../types/TournamentValues';
+import { MatchdayValues, CallUpType, CallUpMode } from '../../../../../../types/TournamentValues';
 import ErrorMessage from '../../../../../../components/ui/ErrorMessage';
 import { navData } from '../../../../../../components/leaguemanager/navData';
 
@@ -63,7 +63,9 @@ export default function Add({ jwt }: AddProps) {
       minimumStartingStrength: {
         skater: 4,
         goalie: 1,
-      }
+      },
+      callUpType: CallUpType.MATCH,
+      
     }
   };
 

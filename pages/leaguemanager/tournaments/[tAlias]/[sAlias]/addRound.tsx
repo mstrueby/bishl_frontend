@@ -1,26 +1,30 @@
 // page to add a new round to a season
 // /leaguemanager/tournaments/[tAlias]/[sAlias]/addRound
-import { useState, useEffect } from 'react'
-import { GetServerSideProps } from 'next';
-import { useRouter } from 'next/router';
-import { getCookie } from 'cookies-next';
-import axios from 'axios';
-import LayoutAdm from '../../../../../components/LayoutAdm';
-import RoundForm from '../../../../../components/leaguemanager/RoundForm';
-import { RoundValues, CallUpMode } from '../../../../../types/TournamentValues';
-import ErrorMessage from '../../../../../components/ui/ErrorMessage';
-import { navData } from '../../../../../components/leaguemanager/navData';
+import { useState, useEffect } from "react";
+import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { getCookie } from "cookies-next";
+import axios from "axios";
+import LayoutAdm from "../../../../../components/LayoutAdm";
+import RoundForm from "../../../../../components/leaguemanager/RoundForm";
+import {
+  RoundValues,
+  CallUpType,
+  CallUpMode,
+} from "../../../../../types/TournamentValues";
+import ErrorMessage from "../../../../../components/ui/ErrorMessage";
+import { navData } from "../../../../../components/leaguemanager/navData";
 
-let BASE_URL = process.env['NEXT_PUBLIC_API_URL'] + "/tournaments/"
+let BASE_URL = process.env["NEXT_PUBLIC_API_URL"] + "/tournaments/";
 
 interface AddProps {
   jwt: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const jwt = getCookie('jwt', { req, res });
+  const jwt = getCookie("jwt", { req, res });
   return { props: { jwt } };
-}
+};
 
 export default function Add({ jwt }: AddProps) {
   const [error, setError] = useState<string | null>(null);
@@ -29,20 +33,20 @@ export default function Add({ jwt }: AddProps) {
   const { tAlias, sAlias } = router.query;
 
   const initialValues: RoundValues = {
-    name: '',
-    alias: '',
+    name: "",
+    alias: "",
     createStandings: false,
     createStats: false,
     published: false,
     startDate: null,
     endDate: null,
     matchdaysType: {
-      key: '',
-      value: ''
+      key: "",
+      value: "",
     },
     matchdaysSortedBy: {
-      key: '',
-      value: ''
+      key: "",
+      value: "",
     },
     matchSettings: {
       numOfPeriods: 3,
@@ -53,22 +57,23 @@ export default function Add({ jwt }: AddProps) {
       shootout: false,
       refereePoints: 0,
       breakLengthMin: 10,
-      regularStrengthOvertime: 4, 
+      regularStrengthOvertime: 4,
       suddenDeath: false,
       minorPenaltySec: 120,
       majorPenaltySec: 300,
-      gameMisconductPenaltySec: 600, 
+      gameMisconductPenaltySec: 600,
       regularStrength: 4,
       minPenaltyKillStrength: 2,
-      notes: '',
+      notes: "",
       callUpMode: CallUpMode.LOCKED,
       maxCallUpAppearances: 0,
       maxCallUpPlayers: 0,
       minimumStartingStrength: {
         skater: 0,
         goalie: 0,
-      }
-    }
+      },
+      callUpType: CallUpType.MATCH,
+    },
   };
 
   const onSubmit = async (values: RoundValues) => {
@@ -77,28 +82,36 @@ export default function Add({ jwt }: AddProps) {
     console.log(values);
     try {
       const response = await axios({
-        method: 'post',
+        method: "post",
         url: `${BASE_URL}${tAlias}/seasons/${sAlias}/rounds/`,
         data: JSON.stringify(values),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${jwt}`,
         },
       });
       if (response.status === 201) {
-        router.push({
-          pathname: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${values.alias}`,
-          query: { message: `Die neue Runde ${values.alias} wurde erfolgreich angelegt.` }
-        }, `/leaguemanager/tournaments/${tAlias}/${sAlias}/${values.alias}`);
+        router.push(
+          {
+            pathname: `/leaguemanager/tournaments/${tAlias}/${sAlias}/${values.alias}`,
+            query: {
+              message: `Die neue Runde ${values.alias} wurde erfolgreich angelegt.`,
+            },
+          },
+          `/leaguemanager/tournaments/${tAlias}/${sAlias}/${values.alias}`,
+        );
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage = error.response.data?.message || error.response.data?.detail || 'Ein Fehler ist aufgetreten.';
+        const errorMessage =
+          error.response.data?.message ||
+          error.response.data?.detail ||
+          "Ein Fehler ist aufgetreten.";
         setError(errorMessage);
       } else {
-        setError('Ein unerwarteter Fehler ist aufgetreten.');
+        setError("Ein unerwarteter Fehler ist aufgetreten.");
       }
     } finally {
       setLoading(false);
@@ -108,8 +121,8 @@ export default function Add({ jwt }: AddProps) {
   const handleCancel = () => {
     router.push({
       pathname: `/leaguemanager/tournaments/${tAlias}/${sAlias}`,
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (error) {
@@ -131,12 +144,9 @@ export default function Add({ jwt }: AddProps) {
   };
 
   return (
-    <LayoutAdm
-      navData={navData}
-      sectionTitle='Neue Runde'
-    >
+    <LayoutAdm navData={navData} sectionTitle="Neue Runde">
       {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
       <RoundForm {...formProps} />
     </LayoutAdm>
-  )
+  );
 }
