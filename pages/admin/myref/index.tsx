@@ -102,7 +102,7 @@ const MyRef: NextPage = () => {
         if (assignment) {
           return apiClient.patch(`/assignments/${assignment._id}`, { status });
         } else {
-          return apiClient.post('/assignments/', { matchId: match._id, status });
+          return apiClient.post('/assignments', { matchId: match._id, status });
         }
       });
       await Promise.all(promises);
