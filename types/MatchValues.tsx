@@ -1,4 +1,12 @@
-import { MatchSettings } from "./TournamentValues"
+import { MatchSettings } from "./TournamentValues";
+import { AssignmentReferee, AssignmentStatus } from "./AssignmentValues";
+
+enum RosterStatus {
+  DRAFT = "DRAFT",
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
+  INVALID = "INVALID",
+}
 
 export interface EventPlayer {
   playerId: string;
@@ -65,13 +73,6 @@ interface Staff {
   role: string;
 }
 
-enum RosterStatus {
-  DRAFT = "DRAFT",
-  SUBMITTED = "SUBMITTED",
-  APPROVED = "APPROVED",
-  INVALID = "INVALID",
-}
-
 export interface Roster {
   players: RosterPlayer[];
   status: RosterStatus | string;
@@ -126,13 +127,8 @@ export interface Team {
   penalties?: PenaltiesBase[];
 }
 
-export interface Referee {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  clubId?: string;
-  clubName?: string;
-  points: number;
+export interface MatchReferee extends AssignmentReferee {
+  assignmentStatus: AssignmentStatus;
 }
 
 export interface RefereePaymentDetails {
@@ -218,8 +214,8 @@ export interface MatchValues {
   };
   startDate: Date;
   published: boolean;
-  referee1?: Referee;
-  referee2?: Referee;
+  referee1?: MatchReferee;
+  referee2?: MatchReferee;
   matchSheetComplete?: boolean;
   supplementarySheet?: SupplementarySheet;
   matchSettings: MatchSettings;

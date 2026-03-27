@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { MatchValues } from '../../types/MatchValues';
-import { AssignmentValues } from '../../types/AssignmentValues';
-import { Referee } from '../../types/MatchValues';
+import { RefereeLevel } from '../../types/UserValues';
+import { AssignmentStatus, AssignmentValues } from '../../types/AssignmentValues';
+import { MatchReferee, MatchValues } from '../../types/MatchValues';
 import { CalendarIcon, MapPinIcon, XCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid';
 import RefereeSelect from '../ui/RefereeSelect';
@@ -19,8 +19,8 @@ type MatchCardRefAdminProps = {
 
 const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignments }) => {
   const { home, away, startDate, venue } = match;
-  const [referee1, setReferee1] = useState<Referee | null>(match.referee1 || null);
-  const [referee2, setReferee2] = useState<Referee | null>(match.referee2 || null);
+  const [referee1, setReferee1] = useState<MatchReferee | null>(match.referee1 || null);
+  const [referee2, setReferee2] = useState<MatchReferee | null>(match.referee2 || null);
   const [deleteConfirmationMap, setDeleteConfirmationMap] = useState<{ [key: string]: boolean }>({});
   const [unassignLoading, setUnassignLoading] = useState<{ [key: string]: boolean }>({});
   const timeoutRef = React.useRef<{ [key: string]: NodeJS.Timeout }>({});
@@ -127,7 +127,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
         const newAssignment = {
           _id: newId,
           matchId: match._id,
-          referee: { userId: refereeId, firstName: 'TBD', lastName: 'TBD', level: 'TBD' }, // Basic info for new assignment
+          referee: { userId: refereeId, firstName: 'TBD', lastName: 'TBD', level: RefereeLevel.NA }, // Basic info for new assignment
           status: status,
         };
         updatedAssignments.push(newAssignment as any); // Cast to any to satisfy type
@@ -167,7 +167,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, assignment
       // Update the local assignments array with the new status
       const updatedAssignments = assignments.map(a =>
         a.referee.userId === assignment.referee.userId
-          ? { ...a, _id: '', status: 'AVAILABLE' }
+          ? { ...a, _id: '', status: AssignmentStatus.AVAILABLE }
           : a
       );
       assignments.splice(0, assignments.length, ...updatedAssignments);
