@@ -149,7 +149,7 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
             ref={isSelected ? selectedRef : undefined}
             onClick={() => onDaySelect(day.date)}
             className={`
-              flex-shrink-0 relative flex items-center justify-center rounded-lg transition-colors border border-gray-200
+              flex-shrink-0 flex flex-col items-center justify-center rounded-lg transition-colors border border-gray-200
               ${isSelected
                 ? 'ring-2 ring-indigo-500 bg-indigo-50'
                 : hasMatches
@@ -157,22 +157,22 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
                   : 'hover:bg-gray-50 bg-white opacity-50'
               }
             `}
-            style={{ width: 64, height: 100 }}
+            style={{ width: 80, height: 80 }}
           >
-            <div className="absolute inset-0">
-              <RingDiagram counts={day.counts} size={64} />
+            <div className="relative flex-shrink-0" style={{ width: 60, height: 60 }}>
+              <RingDiagram counts={day.counts} size={60} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+                <span className={`text-xs font-medium ${isSelected ? 'text-indigo-600' : 'text-gray-500'}`}>
+                  {weekday}
+                </span>
+                <span className={`text-base font-bold ${isSelected ? 'text-indigo-700' : hasMatches ? 'text-gray-800' : 'text-gray-400'}`}>
+                  {dayNum}
+                </span>
+              </div>
             </div>
-            <div className="relative flex flex-col items-center justify-center leading-none">
-              <span className={`text-xs font-medium ${isSelected ? 'text-indigo-600' : 'text-gray-500'}`}>
-                {weekday}
-              </span>
-              <span className={`text-xl font-bold ${isSelected ? 'text-indigo-700' : hasMatches ? 'text-gray-800' : 'text-gray-400'}`}>
-                {dayNum}
-              </span>
-              <span className="text-xs text-gray-400 mt-0.5">
-                {day.counts.totalMatches} Spiele
-              </span>
-            </div>
+            <span className="text-[10px] text-gray-400 leading-none mt-1">
+              {day.counts.totalMatches} Spiele
+            </span>
           </button>
         );
       })}
