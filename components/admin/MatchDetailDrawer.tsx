@@ -211,7 +211,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
   onDataChanged,
 }) => {
   const [detailData, setDetailData] = useState<RefToolOptions | null>(null);
-  const [assignedAssignments, setAssignedAssignments] = useState<
+  const [existingAssignments, setExistingAssignments] = useState<
     AssignmentValues[]
   >([]);
   const [loading, setLoading] = useState(false);
@@ -230,18 +230,19 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
             assignmentStatus: [
               AssignmentStatus.ASSIGNED,
               AssignmentStatus.ACCEPTED,
+              AssignmentStatus.REQUESTED,
             ],
           },
         }),
       ]);
       setDetailData(detailRes.data);
-      setAssignedAssignments(
+      setExistingAssignments(
         Array.isArray(assignmentsRes.data) ? assignmentsRes.data : [],
       );
     } catch (err) {
       console.error("Error fetching match detail:", err);
       setDetailData(null);
-      setAssignedAssignments([]);
+      setExistingAssignments([]);
     } finally {
       setLoading(false);
     }
@@ -250,7 +251,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
   useEffect(() => {
     if (open && match) {
       setDetailData(null);
-      setAssignedAssignments([]);
+      setExistingAssignments([]);
       setSearchQuery("");
       setShowUnavailable(false);
       fetchDetail(match._id);
@@ -280,10 +281,13 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
 
   const handleAssign = async (referee: RefToolReferee, position: 1 | 2) => {
     try {
-      if (referee._id) {
+      const existing = existingAssignments.find(
+        (a) => a.referee.userId === referee.userId,
+      );
+      if (existing) {
         await apiClient({
           method: "patch",
-          url: `/assignments/${referee._id}`,
+          url: `/assignments/${existing._id}`,
           data: { status: AssignmentStatus.ASSIGNED, position, refAdmin: true },
         });
       } else {
@@ -308,7 +312,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
 
   const handleRemove = async (referee: RefToolReferee) => {
     try {
-      const assignmentId = assignedAssignments.find(
+      const assignmentId = existingAssignments.find(
         (a) => a.referee.userId === referee.userId,
       )?._id;
 
@@ -479,7 +483,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                           >
                             <span className="flex items-center gap-2">
                               Angefragt
-                              <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-bold text-yellow-800">
+                              <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-bold text-yellow-800">
                                 {filteredRequested.length}
                               </span>
                             </span>
@@ -514,7 +518,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                         >
                           <span className="flex items-center gap-2">
                             Verfügbar
-                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-bold text-gray-700">
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-700">
                               {filteredAvailable.length}
                             </span>
                           </span>
@@ -556,7 +560,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                         >
                           <span className="flex items-center gap-2">
                             Nicht verfügbar
-                            <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-bold text-red-700">
+                            <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">
                               {filteredUnavailable.length}
                             </span>
                           </span>
