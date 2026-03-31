@@ -144,7 +144,7 @@ const RefAdmin: NextPage = () => {
 
   const allMatches: RefToolMatch[] = matchListData
     .flatMap(d => d.matches)
-    .filter(m => activeTournaments.size === 0 || activeTournaments.has(m.tournament.alias))
+    .filter(m => activeTournaments.has(m.tournament.alias))
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
   const tournamentSummaries: TournamentSummary[] = matchListData.flatMap(d => d.tournamentSummary);

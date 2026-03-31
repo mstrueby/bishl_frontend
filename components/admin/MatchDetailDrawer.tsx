@@ -224,46 +224,33 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
     minute: '2-digit',
   });
 
-  const pos1Assigned = detailData?.assigned.find(r => r.position === 1) ?? null;
-  const pos2Assigned = detailData?.assigned.find(r => r.position === 2) ?? null;
-
-  const matchReferee1 = match.referee1 ? {
-    userId: match.referee1.userId,
-    firstName: match.referee1.firstName,
-    lastName: match.referee1.lastName,
-    level: match.referee1.level,
-    clubId: match.referee1.clubId,
-    clubName: match.referee1.clubName,
-    logoUrl: match.referee1.logoUrl,
-  } : null;
-
-  const matchReferee2 = match.referee2 ? {
-    userId: match.referee2.userId,
-    firstName: match.referee2.firstName,
-    lastName: match.referee2.lastName,
-    level: match.referee2.level,
-    clubId: match.referee2.clubId,
-    clubName: match.referee2.clubName,
-    logoUrl: match.referee2.logoUrl,
-  } : null;
-
-  const assignedRef1 = detailData?.assigned.find(r =>
-    matchReferee1 ? r.userId === matchReferee1.userId : r.position === 1
-  ) ?? null;
-  const assignedRef2 = detailData?.assigned.find(r =>
-    matchReferee2 ? r.userId === matchReferee2.userId : r.position === 2
-  ) ?? null;
+  const assignedRef1 = detailData?.assigned.find(r => r.position === 1) ?? null;
+  const assignedRef2 = detailData?.assigned.find(r => r.position === 2) ?? null;
 
   const pos1Taken = assignedRef1 !== null;
   const pos2Taken = assignedRef2 !== null;
 
   const handleAssign = async (referee: RefToolReferee, position: 1 | 2) => {
     try {
-      await apiClient({
-        method: 'patch',
-        url: `/assignments/${referee._id}`,
-        data: { status: AssignmentStatus.ASSIGNED, position, refAdmin: true },
-      });
+      if (referee._id) {
+        await apiClient({
+          method: 'patch',
+          url: `/assignments/${referee._id}`,
+          data: { status: AssignmentStatus.ASSIGNED, position, refAdmin: true },
+        });
+      } else {
+        await apiClient({
+          method: 'post',
+          url: '/assignments',
+          data: {
+            matchId: match._id,
+            userId: referee.userId,
+            status: AssignmentStatus.ASSIGNED,
+            position,
+            refAdmin: true,
+          },
+        });
+      }
       await fetchDetail(match._id);
       onDataChanged?.();
     } catch (err) {
