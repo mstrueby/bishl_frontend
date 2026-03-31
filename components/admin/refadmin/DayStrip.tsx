@@ -42,9 +42,17 @@ const RingDiagram: React.FC<{ counts: SummaryCounts; size?: number }> = ({ count
     { count: unassigned, color: '#ef4444' },
   ].filter(s => s.count > 0);
 
+  if (segments.length === 1) {
+    return (
+      <svg width={size} height={size}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={segments[0].color} strokeWidth={strokeWidth} />
+      </svg>
+    );
+  }
+
   const numSegments = segments.length;
-  const GAP_DEG = numSegments > 1 ? 4 : 0;
-  const totalGapDeg = numSegments > 1 ? numSegments * GAP_DEG : 0;
+  const GAP_DEG = 4;
+  const totalGapDeg = numSegments * GAP_DEG;
   const usableDeg = 360 - totalGapDeg;
 
   let currentAngle = 0;
