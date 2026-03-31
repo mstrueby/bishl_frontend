@@ -46,7 +46,7 @@ const TournamentFilter: React.FC<TournamentFilterProps> = ({ summaries, activeTo
   });
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'thin' }}>
+    <div className="flex gap-2 overflow-x-auto px-1 pt-1 pb-1" style={{ scrollbarWidth: 'thin' }}>
       {sorted.map((summary) => {
         const config = tournamentConfigs[summary.tournamentAlias];
         if (!config) return null;
