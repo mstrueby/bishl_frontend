@@ -187,6 +187,8 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
   const [detailData, setDetailData] = useState<RefToolOptions | null>(null);
   const [assignedAssignments, setAssignedAssignments] = useState<AssignmentValues[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showRequested, setShowRequested] = useState(true);
+  const [showAvailable, setShowAvailable] = useState(true);
   const [showUnavailable, setShowUnavailable] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -404,45 +406,65 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
 
                         {filteredRequested.length > 0 && (
                           <div className="mt-4">
-                            <h4 className="text-xs font-semibold text-gray-500 mb-1">
-                              Angefragt ({filteredRequested.length})
-                            </h4>
-                            <div className="divide-y divide-gray-100">
-                              {filteredRequested.map(ref => (
-                                <RefereeItem
-                                  key={ref.userId}
-                                  referee={ref}
-                                  pos1Taken={pos1Taken}
-                                  pos2Taken={pos2Taken}
-                                  matchId={match._id}
-                                  onAssign={handleAssign}
-                                />
-                              ))}
-                            </div>
+                            <button
+                              onClick={() => setShowRequested(v => !v)}
+                              className="flex w-full items-center justify-between text-xs font-semibold text-gray-500 hover:text-gray-700"
+                            >
+                              <span>Angefragt ({filteredRequested.length})</span>
+                              {showRequested
+                                ? <ChevronUpIcon className="h-4 w-4" />
+                                : <ChevronDownIcon className="h-4 w-4" />
+                              }
+                            </button>
+                            {showRequested && (
+                              <div className="mt-2 divide-y divide-gray-100">
+                                {filteredRequested.map(ref => (
+                                  <RefereeItem
+                                    key={ref.userId}
+                                    referee={ref}
+                                    pos1Taken={pos1Taken}
+                                    pos2Taken={pos2Taken}
+                                    matchId={match._id}
+                                    onAssign={handleAssign}
+                                  />
+                                ))}
+                              </div>
+                            )}
                           </div>
                         )}
                       </section>
 
                       {/* Section 2: Available */}
                       <section>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                          Verfügbar ({filteredAvailable.length})
-                        </h3>
-                        {filteredAvailable.length > 0 ? (
-                          <div className="divide-y divide-gray-100">
-                            {filteredAvailable.map(ref => (
-                              <RefereeItem
-                                key={ref.userId}
-                                referee={ref}
-                                pos1Taken={pos1Taken}
-                                pos2Taken={pos2Taken}
-                                matchId={match._id}
-                                onAssign={handleAssign}
-                              />
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-gray-400 italic">Keine verfügbaren Schiedsrichter</p>
+                        <button
+                          onClick={() => setShowAvailable(v => !v)}
+                          className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
+                        >
+                          <span>Verfügbar ({filteredAvailable.length})</span>
+                          {showAvailable
+                            ? <ChevronUpIcon className="h-4 w-4" />
+                            : <ChevronDownIcon className="h-4 w-4" />
+                          }
+                        </button>
+                        {showAvailable && (
+                          <>
+                            {filteredAvailable.length > 0 ? (
+                              <div className="mt-2 divide-y divide-gray-100">
+                                {filteredAvailable.map(ref => (
+                                  <RefereeItem
+                                    key={ref.userId}
+                                    referee={ref}
+                                    pos1Taken={pos1Taken}
+                                    pos2Taken={pos2Taken}
+                                    matchId={match._id}
+                                    onAssign={handleAssign}
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="mt-2 text-sm text-gray-400 italic">Keine verfügbaren Schiedsrichter</p>
+                            )}
+                          </>
                         )}
                       </section>
 

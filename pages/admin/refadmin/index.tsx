@@ -15,7 +15,7 @@ import { UserRole } from '../../../lib/auth';
 import usePermissions from '../../../hooks/usePermissions';
 import LoadingState from '../../../components/ui/LoadingState';
 import { classNames } from '../../../tools/utils';
-import { MapPinIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const RefAdmin: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -32,6 +32,7 @@ const RefAdmin: NextPage = () => {
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [activeTournaments, setActiveTournaments] = useState<Set<string>>(new Set());
   const [groupByVenue, setGroupByVenue] = useState(false);
+  const [expandedVenues, setExpandedVenues] = useState<Set<string>>(new Set());
   const [selectedMatch, setSelectedMatch] = useState<RefToolMatch | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -131,6 +132,13 @@ const RefAdmin: NextPage = () => {
     }
   }, [selectedDate, fetchMatches]);
 
+  // Reset expandedVenues when groupByVenue is toggled
+  useEffect(() => {
+    if (!groupByVenue) {
+      setExpandedVenues(new Set());
+    }
+  }, [groupByVenue]);
+
   if (authLoading) {
     return (
       <Layout>
@@ -176,26 +184,51 @@ const RefAdmin: NextPage = () => {
 
       const sortedVenues = Object.keys(byVenue).sort((a, b) => a.localeCompare(b));
 
+      // Initialize expandedVenues with all venues if not already set
+      if (expandedVenues.size === 0 && sortedVenues.length > 0) {
+        setExpandedVenues(new Set(sortedVenues));
+      }
+
       return (
         <div className="space-y-6">
-          {sortedVenues.map(venueName => (
-            <div key={venueName}>
-              <div className="flex items-center gap-1.5 mb-2 px-1">
-                <MapPinIcon className="h-4 w-4 text-gray-400" />
-                <span className="text-sm font-semibold text-gray-600">
-                  {venueName}
-                  <span className="ml-1.5 text-xs font-normal text-gray-400">
-                    ({byVenue[venueName].length})
+          {sortedVenues.map(venueName => {
+            const isExpanded = expandedVenues.has(venueName);
+            return (
+              <div key={venueName}>
+                <button
+                  onClick={() => {
+                    const newExpanded = new Set(expandedVenues);
+                    if (isExpanded) {
+                      newExpanded.delete(venueName);
+                    } else {
+                      newExpanded.add(venueName);
+                    }
+                    setExpandedVenues(newExpanded);
+                  }}
+                  className="flex items-center gap-1.5 w-full px-1 py-1 hover:bg-gray-50 rounded transition-colors"
+                >
+                  <MapPinIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm font-semibold text-gray-600 flex-1 text-left">
+                    {venueName}
+                    <span className="ml-1.5 text-xs font-normal text-gray-400">
+                      ({byVenue[venueName].length})
+                    </span>
                   </span>
-                </span>
+                  {isExpanded
+                    ? <ChevronUpIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    : <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  }
+                </button>
+                {isExpanded && (
+                  <div className="space-y-2 mt-2">
+                    {byVenue[venueName].map(m => (
+                      <MatchCardRefAdmin key={m._id} match={m} onOpenDetail={handleOpenDetail} />
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
-                {byVenue[venueName].map(m => (
-                  <MatchCardRefAdmin key={m._id} match={m} onOpenDetail={handleOpenDetail} />
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       );
     }
