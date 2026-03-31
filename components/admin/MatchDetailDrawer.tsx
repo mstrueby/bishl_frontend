@@ -3,7 +3,7 @@ import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { CldImage } from 'next-cloudinary';
 import { RefToolMatch, RefToolOptions, RefToolReferee } from '../../types/RefToolValues';
-import { AssignmentStatus } from '../../types/AssignmentValues';
+import { AssignmentStatus, AssignmentValues } from '../../types/AssignmentValues';
 import { tournamentConfigs, refereeLevels } from '../../tools/consts';
 import { classNames } from '../../tools/utils';
 import apiClient from '../../lib/apiClient';
@@ -185,6 +185,7 @@ interface MatchDetailDrawerProps {
 
 const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onClose, onDataChanged }) => {
   const [detailData, setDetailData] = useState<RefToolOptions | null>(null);
+  const [assignedAssignments, setAssignedAssignments] = useState<AssignmentValues[]>([]);
   const [loading, setLoading] = useState(false);
   const [showUnavailable, setShowUnavailable] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,11 +193,18 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
   const fetchDetail = useCallback(async (matchId: string) => {
     setLoading(true);
     try {
-      const res = await apiClient.get(`/reftool/matches/${matchId}`);
-      setDetailData(res.data);
+      const [detailRes, assignmentsRes] = await Promise.all([
+        apiClient.get(`/reftool/matches/${matchId}`),
+        apiClient.get(`/assignments/matches/${matchId}`, {
+          params: { assignmentStatus: [AssignmentStatus.ASSIGNED, AssignmentStatus.ACCEPTED] },
+        }),
+      ]);
+      setDetailData(detailRes.data);
+      setAssignedAssignments(Array.isArray(assignmentsRes.data) ? assignmentsRes.data : []);
     } catch (err) {
       console.error('Error fetching match detail:', err);
       setDetailData(null);
+      setAssignedAssignments([]);
     } finally {
       setLoading(false);
     }
@@ -205,6 +213,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
   useEffect(() => {
     if (open && match) {
       setDetailData(null);
+      setAssignedAssignments([]);
       setSearchQuery('');
       setShowUnavailable(false);
       fetchDetail(match._id);
@@ -260,15 +269,14 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
 
   const handleRemove = async (referee: RefToolReferee) => {
     try {
-      const assignmentId = referee._id || detailData?.assigned.find(
-        r => r.userId === referee.userId && (r.position === 1 || r.position === 2)
-      )?._id;
-      
+      const assignmentId =
+        assignedAssignments.find(a => a.referee.userId === referee.userId)?._id;
+
       if (!assignmentId) {
-        console.error('Assignment ID not found for referee:', referee);
+        console.error('Assignment ID not found for referee:', referee.userId);
         return;
       }
-      
+
       await apiClient.delete(`/assignments/${assignmentId}`);
       await fetchDetail(match._id);
       onDataChanged?.();
