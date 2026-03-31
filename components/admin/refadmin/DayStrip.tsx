@@ -149,7 +149,7 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
             ref={isSelected ? selectedRef : undefined}
             onClick={() => onDaySelect(day.date)}
             className={`
-              flex-shrink-0 relative flex items-center justify-center rounded-lg transition-colors
+              flex-shrink-0 relative flex items-center justify-center rounded-lg transition-colors border border-gray-200
               ${isSelected
                 ? 'ring-2 ring-indigo-500 bg-indigo-50'
                 : hasMatches
@@ -168,6 +168,9 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
               </span>
               <span className={`text-xl font-bold ${isSelected ? 'text-indigo-700' : hasMatches ? 'text-gray-800' : 'text-gray-400'}`}>
                 {dayNum}
+              </span>
+              <span className="text-xs text-gray-400 mt-0.5">
+                {day.counts.totalMatches} Spiele
               </span>
             </div>
           </button>
