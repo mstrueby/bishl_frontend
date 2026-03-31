@@ -90,9 +90,14 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, onOpenDeta
     referee1 || referee2 ? 'bg-yellow-400' :
     'bg-red-400';
 
+  const slotHover =
+    referee1 && referee2 ? 'hover:bg-green-50' :
+    referee1 || referee2 ? 'hover:bg-yellow-50' :
+    'hover:bg-red-50';
+
   return (
     <div
-      className="bg-white rounded-xl border-2 border-gray-200 shadow-md overflow-hidden"
+      className={classNames("bg-white rounded-xl border-2 border-gray-200 shadow-md overflow-hidden transition-colors", slotHover)}
     >
       <div className="flex items-stretch">
         {/* Assignment status indicator */}
