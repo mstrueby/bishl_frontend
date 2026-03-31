@@ -133,7 +133,7 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
   return (
     <div
       ref={scrollRef}
-      className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+      className="flex gap-2 overflow-x-auto px-1 pt-1 pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
       style={{ scrollbarWidth: 'thin' }}
     >
       {days.map((day) => {
@@ -170,7 +170,7 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
                 </span>
               </div>
             </div>
-            <span className="text-[10px] text-gray-400 leading-none mt-1">
+            <span className="text-[10px] text-gray-600 leading-none mt-1">
               {day.counts.totalMatches} Spiele
             </span>
           </button>
