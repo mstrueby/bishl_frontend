@@ -336,8 +336,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
     );
   };
 
-  const showUnavailableDueToSearch = searchQuery.trim().length > 0;
-  const shouldShowUnavailable = showUnavailable || showUnavailableDueToSearch;
+  const isSearching = searchQuery.trim().length > 0;
 
   const filteredRequested = sortByLevel(
     detailData?.requested.filter(matchesSearch) ?? [],
@@ -348,6 +347,11 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
   const filteredUnavailable = sortByLevel(
     detailData?.unavailable.filter(matchesSearch) ?? [],
   );
+
+  // Expand sections when searching
+  const shouldShowRequested = isSearching || showRequested;
+  const shouldShowAvailable = isSearching || showAvailable;
+  const shouldShowUnavailable = isSearching || showUnavailable;
 
   return (
     <Dialog
@@ -474,13 +478,13 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                             className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
                           >
                             <span>Angefragt ({filteredRequested.length})</span>
-                            {showRequested ? (
+                            {shouldShowRequested ? (
                               <ChevronUpIcon className="h-4 w-4" />
                             ) : (
                               <ChevronDownIcon className="h-4 w-4" />
                             )}
                           </button>
-                          {showRequested && (
+                          {shouldShowRequested && (
                             <div className="mt-2 divide-y divide-gray-100">
                               {filteredRequested.map((ref) => (
                                 <RefereeItem
@@ -504,13 +508,13 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                           className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
                         >
                           <span>Verfügbar ({filteredAvailable.length})</span>
-                          {showAvailable ? (
+                          {shouldShowAvailable ? (
                             <ChevronUpIcon className="h-4 w-4" />
                           ) : (
                             <ChevronDownIcon className="h-4 w-4" />
                           )}
                         </button>
-                        {showAvailable && (
+                        {shouldShowAvailable && (
                           <>
                             {filteredAvailable.length > 0 ? (
                               <div className="mt-2 divide-y divide-gray-100">
@@ -541,7 +545,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                           className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
                         >
                           <span>
-                            Nicht verfügbar ({detailData.unavailable.length})
+                            Nicht verfügbar ({filteredUnavailable.length})
                           </span>
                           {shouldShowUnavailable ? (
                             <ChevronUpIcon className="h-4 w-4" />
@@ -549,28 +553,29 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                             <ChevronDownIcon className="h-4 w-4" />
                           )}
                         </button>
-                        {shouldShowUnavailable &&
-                          filteredUnavailable.length > 0 && (
-                            <div className="mt-2 divide-y divide-gray-100">
-                              {filteredUnavailable.map((ref) => (
-                                <RefereeItem
-                                  key={ref.userId}
-                                  referee={ref}
-                                  pos1Taken={pos1Taken}
-                                  pos2Taken={pos2Taken}
-                                  matchId={match._id}
-                                  onAssign={handleAssign}
-                                  showAssignButtons={false}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        {shouldShowUnavailable &&
-                          filteredUnavailable.length === 0 && (
-                            <p className="mt-2 text-sm text-gray-400 italic">
-                              Keine Einträge
-                            </p>
-                          )}
+                        {shouldShowUnavailable && (
+                          <>
+                            {filteredUnavailable.length > 0 ? (
+                              <div className="mt-2 divide-y divide-gray-100">
+                                {filteredUnavailable.map((ref) => (
+                                  <RefereeItem
+                                    key={ref.userId}
+                                    referee={ref}
+                                    pos1Taken={pos1Taken}
+                                    pos2Taken={pos2Taken}
+                                    matchId={match._id}
+                                    onAssign={handleAssign}
+                                    showAssignButtons={false}
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="mt-2 text-sm text-gray-400 italic">
+                                Keine Einträge
+                              </p>
+                            )}
+                          </>
+                        )}
                       </section>
                     </div>
                   ) : (
