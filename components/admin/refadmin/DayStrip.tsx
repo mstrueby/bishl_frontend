@@ -171,7 +171,7 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
               </div>
             </div>
             <span className="text-[10px] text-gray-600 leading-none mt-1">
-              {day.counts.totalMatches} Spiele
+              {day.counts.totalMatches} {day.counts.totalMatches === 1 ? 'Spiel' : 'Spiele'}
             </span>
           </button>
         );
