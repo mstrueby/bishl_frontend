@@ -586,10 +586,10 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex-shrink-0 border-t border-gray-200 px-4 py-4 sm:px-6">
+                <div className="flex-shrink-0 border-t border-gray-200 px-4 py-4 sm:px-6 flex justify-end">
                   <button
                     onClick={onClose}
-                    className="w-full rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   >
                     Schließen
                   </button>
