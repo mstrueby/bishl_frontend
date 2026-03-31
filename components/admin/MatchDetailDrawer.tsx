@@ -477,7 +477,12 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                             onClick={() => setShowRequested((v) => !v)}
                             className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
                           >
-                            <span>Angefragt ({filteredRequested.length})</span>
+                            <span className="flex items-center gap-2">
+                              Angefragt
+                              <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-bold text-yellow-800">
+                                {filteredRequested.length}
+                              </span>
+                            </span>
                             {shouldShowRequested ? (
                               <ChevronUpIcon className="h-4 w-4" />
                             ) : (
@@ -507,7 +512,12 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                           onClick={() => setShowAvailable((v) => !v)}
                           className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
                         >
-                          <span>Verfügbar ({filteredAvailable.length})</span>
+                          <span className="flex items-center gap-2">
+                            Verfügbar
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-bold text-gray-700">
+                              {filteredAvailable.length}
+                            </span>
+                          </span>
                           {shouldShowAvailable ? (
                             <ChevronUpIcon className="h-4 w-4" />
                           ) : (
@@ -544,8 +554,11 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                           onClick={() => setShowUnavailable((v) => !v)}
                           className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
                         >
-                          <span>
-                            Nicht verfügbar ({filteredUnavailable.length})
+                          <span className="flex items-center gap-2">
+                            Nicht verfügbar
+                            <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-bold text-red-700">
+                              {filteredUnavailable.length}
+                            </span>
                           </span>
                           {shouldShowUnavailable ? (
                             <ChevronUpIcon className="h-4 w-4" />
