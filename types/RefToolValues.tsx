@@ -3,9 +3,9 @@ import { RefereeLevel } from "./UserValues";
 import { AssignmentReferee } from "./AssignmentValues";
 
 export interface RefToolReferee extends AssignmentReferee {
-  assignmentId: string;
+  _id: string;
   status: string;
-  position: number;
+  position: number | null;
 }
 
 export interface RefToolOptions {

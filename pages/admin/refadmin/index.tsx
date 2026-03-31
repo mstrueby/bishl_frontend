@@ -1,178 +1,137 @@
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { MatchValues } from '../../../types/MatchValues';
-import { AssignmentValues } from '../../../types/AssignmentValues';
-import { TournamentValues } from '../../../types/TournamentValues';
-import Layout from "../../../components/Layout";
-import SectionHeader from "../../../components/admin/SectionHeader";
-import MatchCardRefAdmin from "../../../components/admin/MatchCardRefAdmin";
+import { RefToolMatch, RefToolMatchList, TournamentSummary } from '../../../types/RefToolValues';
+import Layout from '../../../components/Layout';
+import SectionHeader from '../../../components/admin/SectionHeader';
+import MatchCardRefAdmin from '../../../components/admin/MatchCardRefAdmin';
+import MatchDetailDrawer from '../../../components/admin/MatchDetailDrawer';
+import MonthNav from '../../../components/admin/refadmin/MonthNav';
+import DayStrip from '../../../components/admin/refadmin/DayStrip';
+import TournamentFilter from '../../../components/admin/refadmin/TournamentFilter';
 import apiClient from '../../../lib/apiClient';
 import useAuth from '../../../hooks/useAuth';
 import { UserRole } from '../../../lib/auth';
 import usePermissions from '../../../hooks/usePermissions';
 import LoadingState from '../../../components/ui/LoadingState';
-
-interface FilterState {
-  tournament: string;
-  showUnassignedOnly: boolean;
-  date_from?: string;
-  date_to?: string;
-}
+import { classNames } from '../../../tools/utils';
+import { MapPinIcon } from '@heroicons/react/24/outline';
 
 const RefAdmin: NextPage = () => {
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
-  const [matches, setMatches] = useState<MatchValues[]>([]);
-  const [matchAssignments, setMatchAssignments] = useState<{ [key: string]: AssignmentValues[] }>({});
-  const [tournaments, setTournaments] = useState<TournamentValues[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterState>({ 
-    tournament: 'all', 
-    showUnassignedOnly: false,
-    date_from: new Date().toISOString().split('T')[0]
-  });
   const router = useRouter();
 
-  // Auth redirect check
+  const now = new Date();
+  const [selectedYear, setSelectedYear] = useState<number>(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth() + 1);
+  const [selectedDate, setSelectedDate] = useState<string | null>(
+    now.toISOString().split('T')[0]
+  );
+  const [matchListData, setMatchListData] = useState<RefToolMatchList[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [activeTournaments, setActiveTournaments] = useState<Set<string>>(new Set());
+  const [groupByVenue, setGroupByVenue] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<RefToolMatch | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   useEffect(() => {
     if (authLoading) return;
-
     if (!user) {
       router.push('/login');
       return;
     }
-
     if (!hasAnyRole([UserRole.ADMIN, UserRole.REF_ADMIN])) {
       router.push('/');
     }
   }, [authLoading, user, hasAnyRole, router]);
 
-  // Data fetching function
-  const fetchData = useCallback(async (filterParams: FilterState) => {
-    setDataLoading(true);
+  const fetchMatches = useCallback(async (date: string) => {
+    setMatchesLoading(true);
     try {
-      // Build query parameters
-      const params: any = {
-        date_from: filterParams.date_from || new Date().toISOString().split('T')[0]
-      };
-      if (filterParams.date_to) params.date_to = filterParams.date_to;
-      if (filterParams.tournament !== 'all') params.tournament = filterParams.tournament;
-      if (filterParams.showUnassignedOnly) params.assigned = false;
-
-      // Fetch matches
-      const matchesRes = await apiClient.get('/matches', { params });
-
-      if (!matchesRes.data || !Array.isArray(matchesRes.data)) {
-        throw new Error('Invalid matches data received');
-      }
-
-      // Sort matches by date, venue, and time
-      const sortedMatches = [...matchesRes.data].sort((a, b) => {
-        // First sort by date only (ignore time component)
-        const dateA = new Date(a.startDate).setHours(0, 0, 0, 0);
-        const dateB = new Date(b.startDate).setHours(0, 0, 0, 0);
-        
-        if (dateA !== dateB) {
-          return dateA - dateB;
-        }
-        
-        // When dates are the same, sort by venue name to group matches by venue
-        const venueA = a.venue.name.toLowerCase();
-        const venueB = b.venue.name.toLowerCase();
-        
-        if (venueA !== venueB) {
-          return venueA.localeCompare(venueB);
-        }
-        
-        // Finally, for matches at the same venue on the same day, sort by time
-        const timeA = new Date(a.startDate).getTime();
-        const timeB = new Date(b.startDate).getTime();
-        return timeA - timeB;
+      const res = await apiClient.get('/reftool/matches', {
+        params: { start_date: date, end_date: date },
       });
-
-      setMatches(sortedMatches);
-
-      // Fetch assignments for each match if we have matches
-      if (sortedMatches.length > 0) {
-        const assignmentPromises = sortedMatches.map((match: MatchValues) =>
-          apiClient.get(`/assignments/matches/${match._id}`, {
-            params: {
-              assignmentStatus: ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE']
-            }
-          })
-          .then(response => response)
-          .catch(error => {
-            console.error(`Error fetching assignments for match ${match._id}:`, error);
-            return { data: [] }; // Return empty array on error for individual match
-          })
-        );
-
-        const assignmentResults = await Promise.all(assignmentPromises);
-        const assignmentsMap = assignmentResults.reduce((acc, result, index) => {
-          if (result && Array.isArray(result.data)) {
-            // Filter assignments to only include relevant statuses
-            const filteredAssignments = result.data.filter((assignment: AssignmentValues) =>
-              ['AVAILABLE', 'REQUESTED', 'ASSIGNED', 'ACCEPTED', 'UNAVAILABLE'].includes(assignment.status)
-            );
-            if (filteredAssignments.length > 0) {
-              acc[sortedMatches[index]._id] = filteredAssignments.map((assignment: AssignmentValues) => ({
-                ...assignment,
-                position: assignment.position || 1
-              }));
-            }
-          }
-          return acc;
-        }, {} as { [key: string]: AssignmentValues[] });
-
-        setMatchAssignments(assignmentsMap);
-      } else {
-        setMatchAssignments({});
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setMatches([]);
-      setMatchAssignments({});
+      const data: RefToolMatchList[] = Array.isArray(res.data) ? res.data : [];
+      setMatchListData(data);
+      const allAliases = new Set<string>(
+        data.flatMap(d => d.tournamentSummary.map(t => t.tournamentAlias))
+      );
+      setActiveTournaments(allAliases);
+    } catch (err) {
+      console.error('Error fetching matches:', err);
+      setMatchListData([]);
+      setActiveTournaments(new Set());
     } finally {
-      setDataLoading(false);
+      setMatchesLoading(false);
     }
   }, []);
 
-  // Fetch tournaments on mount
-  useEffect(() => {
-    const fetchTournaments = async () => {
-      try {
-        const response = await apiClient.get('/tournaments', {
-          params: { active: true }
-        });
-        const tournamentsData = Array.isArray(response.data) ? response.data : [];
-        setTournaments(tournamentsData);
-      } catch (error) {
-        console.error('Error fetching tournaments:', error);
-        setTournaments([]);
-      }
-    };
-
-    if (!authLoading && user && hasAnyRole([UserRole.ADMIN, UserRole.REF_ADMIN])) {
-      fetchTournaments();
-    }
-  }, [authLoading, user, hasAnyRole]);
-
-  // Data fetch when filter changes
   useEffect(() => {
     if (authLoading || !user) return;
     if (!hasAnyRole([UserRole.ADMIN, UserRole.REF_ADMIN])) return;
+    if (selectedDate) {
+      fetchMatches(selectedDate);
+    }
+  }, [authLoading, user, hasAnyRole, selectedDate, fetchMatches]);
 
-    fetchData(filter);
-  }, [authLoading, user, hasAnyRole, filter, fetchData]);
+  const handlePrevMonth = () => {
+    setSelectedDate(null);
+    setMatchListData([]);
+    setActiveTournaments(new Set());
+    if (selectedMonth === 1) {
+      setSelectedYear(y => y - 1);
+      setSelectedMonth(12);
+    } else {
+      setSelectedMonth(m => m - 1);
+    }
+  };
 
-  const handleFilterChange = useCallback((newFilter: FilterState) => {
-    setFilter(newFilter);
-  }, []);
+  const handleNextMonth = () => {
+    setSelectedDate(null);
+    setMatchListData([]);
+    setActiveTournaments(new Set());
+    if (selectedMonth === 12) {
+      setSelectedYear(y => y + 1);
+      setSelectedMonth(1);
+    } else {
+      setSelectedMonth(m => m + 1);
+    }
+  };
 
-  // Loading state
-  if (authLoading || dataLoading) {
+  const handleDaySelect = (date: string) => {
+    setSelectedDate(date);
+    setActiveTournaments(new Set());
+  };
+
+  const handleTournamentToggle = (alias: string) => {
+    setActiveTournaments(prev => {
+      const next = new Set(prev);
+      if (next.has(alias)) {
+        next.delete(alias);
+      } else {
+        next.add(alias);
+      }
+      return next;
+    });
+  };
+
+  const handleOpenDetail = (match: RefToolMatch) => {
+    setSelectedMatch(match);
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
+  const handleDataChanged = useCallback(() => {
+    if (selectedDate) {
+      fetchMatches(selectedDate);
+    }
+  }, [selectedDate, fetchMatches]);
+
+  if (authLoading) {
     return (
       <Layout>
         <SectionHeader title="Schiedsrichter Administration" />
@@ -181,34 +140,149 @@ const RefAdmin: NextPage = () => {
     );
   }
 
-  // Auth guard
   if (!hasAnyRole([UserRole.ADMIN, UserRole.REF_ADMIN])) return null;
+
+  const allMatches: RefToolMatch[] = matchListData
+    .flatMap(d => d.matches)
+    .filter(m => activeTournaments.size === 0 || activeTournaments.has(m.tournament.alias))
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+  const tournamentSummaries: TournamentSummary[] = matchListData.flatMap(d => d.tournamentSummary);
+
+  const renderMatchList = () => {
+    if (matchesLoading) return <LoadingState />;
+    if (!selectedDate) {
+      return (
+        <p className="text-center text-gray-400 text-sm mt-8">
+          Bitte einen Tag auswählen
+        </p>
+      );
+    }
+    if (allMatches.length === 0) {
+      return (
+        <p className="text-center text-gray-400 text-sm mt-8">
+          Keine Spiele an diesem Tag
+        </p>
+      );
+    }
+
+    if (groupByVenue) {
+      const byVenue = allMatches.reduce<Record<string, RefToolMatch[]>>((acc, m) => {
+        const venueName = m.venue.name;
+        if (!acc[venueName]) acc[venueName] = [];
+        acc[venueName].push(m);
+        return acc;
+      }, {});
+
+      const sortedVenues = Object.keys(byVenue).sort((a, b) => a.localeCompare(b));
+
+      return (
+        <div className="space-y-6">
+          {sortedVenues.map(venueName => (
+            <div key={venueName}>
+              <div className="flex items-center gap-1.5 mb-2 px-1">
+                <MapPinIcon className="h-4 w-4 text-gray-400" />
+                <span className="text-sm font-semibold text-gray-600">
+                  {venueName}
+                  <span className="ml-1.5 text-xs font-normal text-gray-400">
+                    ({byVenue[venueName].length})
+                  </span>
+                </span>
+              </div>
+              <div className="space-y-2">
+                {byVenue[venueName].map(m => (
+                  <MatchCardRefAdmin key={m._id} match={m} onOpenDetail={handleOpenDetail} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2">
+        {allMatches.map(m => (
+          <MatchCardRefAdmin key={m._id} match={m} onOpenDetail={handleOpenDetail} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <Layout>
-      <SectionHeader 
-        title="Schiedsrichter Administration"
-        filter="true"
-        currentFilter={filter}
-        tournaments={tournaments}
-        onFilterChange={handleFilterChange}
-      />
+      <SectionHeader title="Schiedsrichter Administration" />
 
-      <div className="mt-8 space-y-6">
-        {matches && matches.length > 0 ? (
-          matches.map((match) => (
-            <MatchCardRefAdmin 
-              key={match._id} 
-              match={match} 
-              assignments={matchAssignments[match._id] || []}
-            />
-          ))
-        ) : (
-          <p className="text-center text-gray-500 mt-8">Keine Spiele vorhanden</p>
+      <div className="space-y-4">
+        {/* Month navigation */}
+        <MonthNav
+          year={selectedYear}
+          month={selectedMonth}
+          onPrev={handlePrevMonth}
+          onNext={handleNextMonth}
+        />
+
+        {/* Day strip */}
+        <DayStrip
+          year={selectedYear}
+          month={selectedMonth}
+          selectedDate={selectedDate}
+          onDaySelect={handleDaySelect}
+        />
+
+        {/* Divider */}
+        {selectedDate && (
+          <div className="pt-2 space-y-3">
+            {/* Tournament filter */}
+            {tournamentSummaries.length > 0 && (
+              <TournamentFilter
+                summaries={tournamentSummaries}
+                activeTournaments={activeTournaments}
+                onToggle={handleTournamentToggle}
+              />
+            )}
+
+            {/* Group by venue toggle */}
+            {!matchesLoading && allMatches.length > 0 && (
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setGroupByVenue(v => !v)}
+                  className={classNames(
+                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset transition-colors',
+                    groupByVenue
+                      ? 'bg-indigo-50 text-indigo-700 ring-indigo-300'
+                      : 'bg-white text-gray-600 ring-gray-300 hover:bg-gray-50'
+                  )}
+                >
+                  <MapPinIcon className="h-3.5 w-3.5" />
+                  Nach Spielstätte gruppieren
+                </button>
+              </div>
+            )}
+
+            {/* Match list */}
+            <div className="mt-2">
+              {renderMatchList()}
+            </div>
+          </div>
+        )}
+
+        {!selectedDate && !matchesLoading && (
+          <div className="mt-4">
+            {renderMatchList()}
+          </div>
         )}
       </div>
+
+      {/* Match detail drawer */}
+      <MatchDetailDrawer
+        match={selectedMatch}
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        onDataChanged={handleDataChanged}
+      />
     </Layout>
   );
-}
+};
 
 export default RefAdmin;

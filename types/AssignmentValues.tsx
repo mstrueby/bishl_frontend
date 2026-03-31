@@ -16,7 +16,7 @@ export interface AssignmentReferee {
   clubName?: string;
   logoUrl?: string;
   level: RefereeLevel;
-  points: number;
+  points?: number;
 }
 
 export interface AssignmentValues {
