@@ -157,7 +157,7 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
                   : 'hover:bg-gray-50 bg-white opacity-50'
               }
             `}
-            style={{ width: 64, height: 64 }}
+            style={{ width: 64, height: 100 }}
           >
             <div className="absolute inset-0">
               <RingDiagram counts={day.counts} size={64} />
