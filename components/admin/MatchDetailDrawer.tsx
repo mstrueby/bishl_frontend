@@ -306,7 +306,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
   const filteredUnavailable = sortByLevel(detailData?.unavailable.filter(matchesSearch) ?? []);
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
+    <Dialog open={open} onClose={onClose} className="relative z-50" unmount={false}>
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-gray-900/60 transition-opacity duration-500 ease-in-out data-[closed]:opacity-0"

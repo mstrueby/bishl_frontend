@@ -221,7 +221,7 @@ const RefAdmin: NextPage = () => {
                   }
                 </button>
                 {isExpanded && (
-                  <div className="space-y-2 mt-2">
+                  <div className="space-y-4 mt-2">
                     {byVenue[venueName].map(m => (
                       <MatchCardRefAdmin key={m._id} match={m} onOpenDetail={handleOpenDetail} />
                     ))}

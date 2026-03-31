@@ -87,7 +87,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, onOpenDeta
 
   return (
     <div
-      className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+      className="bg-white rounded-xl border-2 border-gray-200 shadow-md overflow-hidden"
     >
       <div className="flex items-stretch">
         {/* Section 1: Tournament + Date + Venue */}
