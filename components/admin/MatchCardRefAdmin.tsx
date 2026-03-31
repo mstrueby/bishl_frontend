@@ -85,14 +85,16 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, onOpenDeta
       return (iA === -1 ? 999 : iA) - (iB === -1 ? 999 : iB);
     });
 
+  const assignedCount = refSummary?.assignedCount ?? 0;
+
   const slotColor =
-    referee1 && referee2 ? 'bg-green-500' :
-    referee1 || referee2 ? 'bg-yellow-400' :
+    assignedCount >= 2 ? 'bg-green-500' :
+    assignedCount === 1 ? 'bg-yellow-400' :
     'bg-red-400';
 
   const slotHover =
-    referee1 && referee2 ? 'hover:bg-green-50' :
-    referee1 || referee2 ? 'hover:bg-yellow-50' :
+    assignedCount >= 2 ? 'hover:bg-green-50' :
+    assignedCount === 1 ? 'hover:bg-yellow-50' :
     'hover:bg-red-50';
 
   return (
