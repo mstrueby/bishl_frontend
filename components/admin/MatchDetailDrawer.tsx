@@ -260,7 +260,16 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({ match, open, onCl
 
   const handleRemove = async (referee: RefToolReferee) => {
     try {
-      await apiClient.delete(`/assignments/${referee._id}`);
+      const assignmentId = referee._id || detailData?.assigned.find(
+        r => r.userId === referee.userId && (r.position === 1 || r.position === 2)
+      )?._id;
+      
+      if (!assignmentId) {
+        console.error('Assignment ID not found for referee:', referee);
+        return;
+      }
+      
+      await apiClient.delete(`/assignments/${assignmentId}`);
       await fetchDetail(match._id);
       onDataChanged?.();
     } catch (err) {
