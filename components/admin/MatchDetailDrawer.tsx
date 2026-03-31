@@ -429,16 +429,6 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                     </button>
                   </div>
 
-                  {/* Search box */}
-                  <div className="mt-3">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Schiedsrichter suchen…"
-                      className="w-full rounded-md bg-white/10 px-3 py-1.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-white/50"
-                    />
-                  </div>
                 </div>
 
                 {/* Scrollable content */}
@@ -464,6 +454,17 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                             label="Pos 2"
                             referee={assignedRef2}
                             onRemove={handleRemove}
+                          />
+                        </div>
+
+                        {/* Search box */}
+                        <div className="mt-4 pt-2 border-t border-gray-200">
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Schiedsrichter suchen…"
+                            className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                           />
                         </div>
 
