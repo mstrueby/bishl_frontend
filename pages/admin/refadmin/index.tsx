@@ -132,12 +132,18 @@ const RefAdmin: NextPage = () => {
     }
   }, [selectedDate, fetchMatches]);
 
-  // Reset expandedVenues when groupByVenue is toggled
+  // Sync expandedVenues with current venues whenever groupByVenue or matches change
   useEffect(() => {
     if (!groupByVenue) {
       setExpandedVenues(new Set());
+      return;
     }
-  }, [groupByVenue]);
+    const allMatchesNow = matchListData
+      .flatMap(d => d.matches)
+      .filter(m => activeTournaments.has(m.tournament.alias));
+    const venues = Array.from(new Set(allMatchesNow.map(m => m.venue.name)));
+    setExpandedVenues(new Set(venues));
+  }, [groupByVenue, matchListData, activeTournaments]);
 
   if (authLoading) {
     return (
@@ -184,11 +190,6 @@ const RefAdmin: NextPage = () => {
 
       const sortedVenues = Object.keys(byVenue).sort((a, b) => a.localeCompare(b));
 
-      // Initialize expandedVenues with all venues if not already set
-      if (expandedVenues.size === 0 && sortedVenues.length > 0) {
-        setExpandedVenues(new Set(sortedVenues));
-      }
-
       return (
         <div className="space-y-6">
           {sortedVenues.map(venueName => {
@@ -234,7 +235,7 @@ const RefAdmin: NextPage = () => {
     }
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-4">
         {allMatches.map(m => (
           <MatchCardRefAdmin key={m._id} match={m} onOpenDetail={handleOpenDetail} />
         ))}
