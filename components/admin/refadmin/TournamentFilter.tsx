@@ -59,21 +59,15 @@ const TournamentFilter: React.FC<TournamentFilterProps> = ({ summaries, activeTo
             key={summary.tournamentAlias}
             onClick={() => onToggle(summary.tournamentAlias)}
             className={classNames(
-              'flex-shrink-0 px-3 py-2 rounded-lg border text-left transition-all min-w-[80px]',
+              'flex-shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset transition-colors',
               isActive
-                ? `${config.bdgColLight} border-transparent shadow-sm`
-                : 'bg-white border-gray-200 opacity-50 hover:opacity-75'
+                ? 'bg-indigo-50 text-indigo-700 ring-indigo-300'
+                : 'bg-white text-gray-600 ring-gray-300 hover:bg-gray-50'
             )}
           >
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold">{config.name}</span>
-              <span className={classNames(
-                'inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-bold',
-                isActive ? config.bdgColLight : 'bg-gray-100 text-gray-500'
-              )}>
-                {config.tinyName} {totalCount}
-              </span>
-            </div>
+            <span className="md:hidden">{config.tinyName}</span>
+            <span className="hidden md:inline">{config.name}</span>
+            <span>{totalCount}</span>
             <StatusBar counts={summary.counts} />
           </button>
         );

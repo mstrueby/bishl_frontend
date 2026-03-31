@@ -161,7 +161,7 @@ const RefAdmin: NextPage = () => {
     if (allMatches.length === 0) {
       return (
         <p className="text-center text-gray-400 text-sm mt-8">
-          Keine Spiele an diesem Tag
+          Keine Spiele für diesen Filter gefunden
         </p>
       );
     }
