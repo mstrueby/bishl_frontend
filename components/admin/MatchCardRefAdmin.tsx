@@ -85,11 +85,18 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({ match, onOpenDeta
       return (iA === -1 ? 999 : iA) - (iB === -1 ? 999 : iB);
     });
 
+  const slotColor =
+    referee1 && referee2 ? 'bg-green-500' :
+    referee1 || referee2 ? 'bg-yellow-400' :
+    'bg-red-400';
+
   return (
     <div
       className="bg-white rounded-xl border-2 border-gray-200 shadow-md overflow-hidden"
     >
       <div className="flex items-stretch">
+        {/* Assignment status indicator */}
+        <div className={`w-1 flex-shrink-0 ${slotColor}`} />
         {/* Section 1: Tournament + Date + Venue */}
         <div className="flex flex-col justify-between px-3 py-3 w-1/4 min-w-0 border-r border-gray-100">
           <div>
