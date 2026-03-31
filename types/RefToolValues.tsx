@@ -1,5 +1,20 @@
 import { MatchValues } from "./MatchValues";
 import { RefereeLevel } from "./UserValues";
+import { AssignmentReferee } from "./AssignmentValues";
+
+export interface RefToolReferee extends AssignmentReferee {
+  assignmentId: string;
+  status: string;
+  position: number;
+}
+
+export interface RefToolOptions {
+  matchId: string;
+  assigned: RefToolReferee[];
+  requested: RefToolReferee[];
+  available: RefToolReferee[];
+  unavailable: RefToolReferee[];
+}
 
 export interface RefSummary {
   assignedCount: number;
@@ -8,28 +23,32 @@ export interface RefSummary {
   unavailableCount: number;
   requestsByLevel: {
     [level in RefereeLevel]: number;
-  }
-
+  };
 }
 
-export interface TournamentSummaryCounts {
+export interface SummaryCounts {
   totalMatches: number;
   fullyAssigned: number;
   partiallyAssigned: number;
   unassigned: number;
 }
 
-export interface TournamentSummary {
-  tournamentAlias: string;
-  counts: TournamentSummaryCounts
+export interface DayStrip {
+  date: string;
+  counts: SummaryCounts;
 }
 
-export interface DayGroup {
-  date: string;
-  matches: MatchValues[];
-  tournamentSummary: TournamentSummary[]
+export interface TournamentSummary {
+  tournamentAlias: string;
+  counts: SummaryCounts;
 }
 
 export interface RefToolMatch extends MatchValues {
-  
+  refSummary: RefSummary;
+}
+
+export interface RefToolMatchList {
+  date: string;
+  matches: RefToolMatch[];
+  tournamentSummary: TournamentSummary[];
 }
