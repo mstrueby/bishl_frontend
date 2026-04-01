@@ -231,6 +231,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               AssignmentStatus.ASSIGNED,
               AssignmentStatus.ACCEPTED,
               AssignmentStatus.REQUESTED,
+              AssignmentStatus.UNAVAILABLE,
             ],
           },
         }),
