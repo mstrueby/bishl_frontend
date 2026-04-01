@@ -151,7 +151,8 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
         day14.setDate(day14.getDate() + 14);
         
         const isInWeek2 = dateObj >= day7 && dateObj <= day14;
-        const shadowClass = isInWeek2 ? 'shadow-lg shadow-orange-300' : '';
+        const borderClass = isInWeek2 ? 'border-orange-500' : 'border-gray-200';
+        const ringClass = isInWeek2 ? 'ring-orange-500' : 'ring-indigo-500';
 
         return (
           <button
@@ -159,9 +160,9 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
             ref={isSelected ? selectedRef : undefined}
             onClick={() => onDaySelect(day.date)}
             className={`
-              flex-shrink-0 flex flex-col items-center justify-center rounded-lg transition-colors border border-gray-200 ${shadowClass}
+              flex-shrink-0 flex flex-col items-center justify-center rounded-lg transition-colors border ${borderClass}
               ${isSelected
-                ? 'ring-2 ring-indigo-500 bg-indigo-50'
+                ? `ring-2 ${ringClass} ${isInWeek2 ? 'bg-orange-50' : 'bg-indigo-50'}`
                 : hasMatches
                   ? 'hover:bg-gray-50 bg-white'
                   : 'hover:bg-gray-50 bg-white opacity-50'
