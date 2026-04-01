@@ -47,24 +47,28 @@ const RefAdmin: NextPage = () => {
     }
   }, [authLoading, user, hasAnyRole, router]);
 
-  const fetchMatches = useCallback(async (date: string) => {
-    setMatchesLoading(true);
+  const fetchMatches = useCallback(async (date: string, resetFilter = true) => {
+    if (resetFilter) setMatchesLoading(true);
     try {
       const res = await apiClient.get('/reftool/matches', {
         params: { start_date: date, end_date: date },
       });
       const data: RefToolMatchList[] = Array.isArray(res.data) ? res.data : [];
       setMatchListData(data);
-      const allAliases = new Set<string>(
-        data.flatMap(d => d.tournamentSummary.map(t => t.tournamentAlias))
-      );
-      setActiveTournaments(allAliases);
+      if (resetFilter) {
+        const allAliases = new Set<string>(
+          data.flatMap(d => d.tournamentSummary.map(t => t.tournamentAlias))
+        );
+        setActiveTournaments(allAliases);
+      }
     } catch (err) {
       console.error('Error fetching matches:', err);
-      setMatchListData([]);
-      setActiveTournaments(new Set());
+      if (resetFilter) {
+        setMatchListData([]);
+        setActiveTournaments(new Set());
+      }
     } finally {
-      setMatchesLoading(false);
+      if (resetFilter) setMatchesLoading(false);
     }
   }, []);
 
@@ -128,7 +132,7 @@ const RefAdmin: NextPage = () => {
 
   const handleDataChanged = useCallback(() => {
     if (selectedDate) {
-      fetchMatches(selectedDate);
+      fetchMatches(selectedDate, false);
     }
   }, [selectedDate, fetchMatches]);
 
