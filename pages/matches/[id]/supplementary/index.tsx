@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import {
   MatchValues,
   SupplementarySheet,
-  Referee,
+  MatchReferee,
 } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";

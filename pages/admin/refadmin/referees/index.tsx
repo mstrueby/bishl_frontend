@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import React from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { UserValues, RefereeValues } from '../../../../types/UserValues';
+import { UserValues, UserReferee } from '../../../../types/UserValues';
 import Layout from "../../../../components/Layout";
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
@@ -64,7 +64,7 @@ const Referees: NextPage = () => {
     router.push(`/admin/refadmin/referees/${id}/edit`);
   };
 
-  const toggleActive = async (refereeId: string, refereeDoc: RefereeValues | undefined) => {
+  const toggleActive = async (refereeId: string, refereeDoc: UserReferee | undefined) => {
     try {
       const updatedRefereeDoc = {
         ...refereeDoc,

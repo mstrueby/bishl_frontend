@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import RefereeForm from '../../../../../components/admin/RefereeForm';
 import Layout from '../../../../../components/Layout';
 import SectionHeader from '../../../../../components/admin/SectionHeader';
-import { UserValues } from '../../../../../types/UserValues';
+import { UserValues, RefereeLevel } from '../../../../../types/UserValues';
 import { ClubValues } from '../../../../../types/ClubValues';
 import ErrorMessage from '../../../../../components/ui/ErrorMessage';
 import LoadingState from '../../../../../components/ui/LoadingState';
@@ -153,12 +153,12 @@ const Edit: NextPage = () => {
       ...referee.referee,
       passNo: referee.referee.passNo || '',
       ishdLevel: referee.referee.ishdLevel || '',
-      level: referee.referee.level || 'n/a',
+      level: referee.referee.level || RefereeLevel.NA,
       active: referee.referee.active ?? false,
       points: referee.referee.points ?? 0,
       club: referee.referee.club || undefined
     } : {
-      level: 'n/a',
+      level: RefereeLevel.NA,
       passNo: '',
       ishdLevel: '',
       active: false,
