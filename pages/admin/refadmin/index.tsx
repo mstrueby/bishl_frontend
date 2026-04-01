@@ -213,12 +213,13 @@ const RefAdmin: NextPage = () => {
                   className="flex items-center gap-1.5 w-full px-1 py-2 mb-4 rounded transition-colors border-b border-gray-200"
                 >
                   <MapPinIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-gray-600 hover:text-gray-800 flex-1 text-left">
+                  <span className="text-sm font-semibold text-gray-600 hover:text-gray-800 text-left">
                     {venueName}
+                    <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700">
+                      {byVenue[venueName].length}
+                    </span>
                   </span>
-                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700">
-                    {byVenue[venueName].length}
-                  </span>
+                  <div className="flex-1" />
                   {isExpanded
                     ? <ChevronUpIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
                     : <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
