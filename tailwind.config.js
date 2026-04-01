@@ -81,6 +81,13 @@ module.exports = {
     'ring-yellow-400/20',
     'ring-yellow-600/10',
 
+    // Border colors
+    'border-orange-500',
+
+    // Orange extras (DayStrip week-2 highlight)
+    'bg-orange-50',
+    'ring-orange-500',
+
     // Fill colors
     'fill-blue-500',
     'fill-green-500',
