@@ -244,7 +244,6 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
                   const colorMatch = config.background.match(/bg-(\w+)-\d+/);
                   const colorName = colorMatch?.[1] ?? "gray";
                   const countPillBg = `bg-${colorName}-100`;
-                  const countPillText = `text-${colorName}-700`;
                   return (
                     <span
                       key={level}
@@ -260,7 +259,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
                         className={classNames(
                           "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-semibold",
                           countPillBg,
-                          countPillText,
+                          config.text,
                         )}
                       >
                         {count}
