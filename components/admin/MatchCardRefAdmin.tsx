@@ -215,7 +215,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
 
         {/* Section 4: RefSummary + Chevron */}
         <div className="flex items-center w-1/4 min-w-0 pl-3 pr-2 py-3 gap-2">
-          <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex-1 min-w-0 space-y-3">
             {/* Row 1: status pills */}
             <div className="flex flex-wrap gap-2">
               {(refSummary?.requestedCount ?? 0) > 0 && (
@@ -236,7 +236,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
             </div>
             {/* Row 2: requested levels */}
             {requestedLevels.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {requestedLevels.map(([level, count]) => {
                   const config =
                     refereeLevels[level as keyof typeof refereeLevels] ??
@@ -244,11 +244,12 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
                   const colorMatch = config.background.match(/bg-(\w+)-\d+/);
                   const colorName = colorMatch?.[1] ?? "gray";
                   const countPillBg = `bg-${colorName}-100`;
+                  const countPillRing = config.ring;
                   return (
                     <span
                       key={level}
                       className={classNames(
-                        "inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
+                        "inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium ring-1 ring-inset",
                         config.background,
                         config.text,
                         config.ring,
@@ -257,9 +258,10 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
                       {level}
                       <span
                         className={classNames(
-                          "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-semibold",
+                          "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset",
                           countPillBg,
                           config.text,
+                          countPillRing
                         )}
                       >
                         {count}
