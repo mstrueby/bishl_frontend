@@ -21,28 +21,27 @@ const MonthNav: React.FC<MonthNavProps> = ({ year, month, onPrev, onNext, onToda
         {GERMAN_MONTHS[month - 1]} {year}
       </span>
 
-      <div className="relative flex items-center rounded-md bg-white shadow-sm outline outline-1 -outline-offset-1 outline-gray-300 md:items-stretch">
+      <div className="flex items-center">
         <button
           type="button"
           onClick={onPrev}
-          className="flex h-9 w-12 items-center justify-center rounded-l-md pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
+          className="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
           aria-label="Vorheriger Monat"
         >
           <ChevronLeftIcon aria-hidden="true" className="size-5" />
         </button>
-        <span className="relative -mx-px h-5 w-px bg-gray-300" />
         <button
           type="button"
           onClick={onToday}
-          className="px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative h-9"
+          className="hidden border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative h-9 md:block"
         >
           Heute
         </button>
-        <span className="relative -mx-px h-5 w-px bg-gray-300" />
+        <span className="relative -mx-px h-5 w-px bg-gray-300 md:hidden" />
         <button
           type="button"
           onClick={onNext}
-          className="flex h-9 w-12 items-center justify-center rounded-r-md pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50"
+          className="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50"
           aria-label="Nächster Monat"
         >
           <ChevronRightIcon aria-hidden="true" className="size-5" />
