@@ -285,7 +285,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
       const existing = existingAssignments.find(
         (a) => a.referee.userId === referee.userId,
       );
-      if (existing) {
+      if (existing?._id) {
         await apiClient({
           method: "patch",
           url: `/assignments/${existing._id}`,
