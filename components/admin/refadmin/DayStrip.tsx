@@ -143,13 +143,23 @@ const DayStrip: React.FC<DayStripProps> = ({ year, month, selectedDate, onDaySel
         const isSelected = day.date === selectedDate;
         const hasMatches = day.counts.totalMatches > 0;
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const day7 = new Date(today);
+        day7.setDate(day7.getDate() + 7);
+        const day14 = new Date(today);
+        day14.setDate(day14.getDate() + 14);
+        
+        const isInWeek2 = dateObj >= day7 && dateObj <= day14;
+        const shadowClass = isInWeek2 ? 'shadow-lg shadow-orange-300' : '';
+
         return (
           <button
             key={day.date}
             ref={isSelected ? selectedRef : undefined}
             onClick={() => onDaySelect(day.date)}
             className={`
-              flex-shrink-0 flex flex-col items-center justify-center rounded-lg transition-colors border border-gray-200
+              flex-shrink-0 flex flex-col items-center justify-center rounded-lg transition-colors border border-gray-200 ${shadowClass}
               ${isSelected
                 ? 'ring-2 ring-indigo-500 bg-indigo-50'
                 : hasMatches
