@@ -30,10 +30,19 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
     match;
   const tournamentConfig = tournamentConfigs[match.tournament.alias];
 
-  const formattedDate = new Date(startDate).toLocaleString("de-DE", {
+  const formattedDateShort = new Date(startDate).toLocaleString("de-DE", {
     weekday: "short",
     day: "numeric",
     month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const formattedDateLong = new Date(startDate).toLocaleString("de-DE", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    year: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -130,6 +139,104 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
         ? "hover:bg-yellow-50"
         : "hover:bg-red-50";
 
+  const defaultLogo =
+    "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png";
+
+  const StatusPills = () => (
+    <div className="flex flex-wrap gap-1.5">
+      {(refSummary?.requestedCount ?? 0) > 0 && (
+        <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700">
+          {refSummary.requestedCount}
+        </span>
+      )}
+      {(refSummary?.availableCount ?? 0) > 0 && (
+        <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
+          {refSummary.availableCount}
+        </span>
+      )}
+      {(refSummary?.unavailableCount ?? 0) > 0 && (
+        <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-700">
+          {refSummary.unavailableCount}
+        </span>
+      )}
+    </div>
+  );
+
+  const LevelBadges = ({ countOnly }: { countOnly?: boolean }) => (
+    <div className="flex flex-wrap gap-1.5">
+      {requestedLevels.map(([level, count]) => {
+        const config =
+          refereeLevels[level as keyof typeof refereeLevels] ??
+          refereeLevels["n/a"];
+        const colorMatch = config.background.match(/bg-(\w+)-\d+/);
+        const colorName = colorMatch?.[1] ?? "gray";
+        const countPillBg = `bg-${colorName}-100`;
+        const countPillRing = config.ring;
+        if (countOnly) {
+          return (
+            <span
+              key={level}
+              className={classNames(
+                "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset",
+                config.background,
+                config.text,
+                config.ring,
+              )}
+            >
+              {count}
+            </span>
+          );
+        }
+        return (
+          <span
+            key={level}
+            className={classNames(
+              "inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium ring-1 ring-inset",
+              config.background,
+              config.text,
+              config.ring,
+            )}
+          >
+            {level}
+            <span
+              className={classNames(
+                "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset",
+                countPillBg,
+                config.text,
+                countPillRing,
+              )}
+            >
+              {count}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+
+  const TournamentBadge = () =>
+    tournamentConfig ? (
+      <span
+        className={classNames(
+          "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
+          tournamentConfig.bdgColLight,
+        )}
+      >
+        {tournamentConfig.tinyName}
+        {match.round.name !== "Hauptrunde" && ` – ${match.round.name}`}
+      </span>
+    ) : null;
+
+  const ChevronButton = () => (
+    <button
+      onClick={() => onOpenDetail(match)}
+      className="flex-shrink-0 rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
+      aria-label="Details öffnen"
+    >
+      <ChevronRightIcon className="h-5 w-5" />
+    </button>
+  );
+
   return (
     <div
       className={classNames(
@@ -138,148 +245,153 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
       )}
     >
       <div className="flex items-stretch">
-        {/* Assignment status indicator */}
+        {/* Left color bar - visible on all sizes */}
         <div className={`w-1 flex-shrink-0 ${slotColor}`} />
-        {/* Section 1: Tournament + Date + Venue */}
-        <div className="flex flex-col justify-between px-3 py-3 w-1/4 min-w-0 border-r border-gray-100">
-          <div>
-            {tournamentConfig && (
-              <span
-                className={classNames(
-                  "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
-                  tournamentConfig.bdgColLight,
-                )}
-              >
-                {tournamentConfig.tinyName}
-                {match.round.name !== "Hauptrunde" && ` – ${match.round.name}`}
-              </span>
-            )}
+
+        {/* ── MOBILE layout (hidden on sm+) ── */}
+        <div className="flex-1 min-w-0 sm:hidden px-3 py-3 space-y-2">
+          {/* Row 1: tournament badge + chevron */}
+          <div className="flex items-center justify-between">
+            <TournamentBadge />
+            <ChevronButton />
           </div>
-          <div className="mt-2 space-y-1">
-            <div className="flex items-center gap-1">
+
+          {/* Row 2: date (left) + venue (right) */}
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-1 min-w-0">
               <CalendarIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
               <span className="text-xs text-gray-600 truncate">
-                {formattedDate}
+                {formattedDateShort}
               </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 min-w-0 justify-end">
               <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
               <span className="text-xs text-gray-600 truncate">
                 {venue.name}
               </span>
             </div>
           </div>
-        </div>
 
-        {/* Section 2: Teams */}
-        <div className="flex flex-col justify-center gap-2 px-3 py-3 w-1/4 min-w-0 border-r border-gray-100">
-          <div className="flex items-center gap-2">
-            <CldImage
-              src={
-                home.logo ||
-                "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
-              }
-              alt={home.tinyName}
-              width={28}
-              height={28}
-              crop="fit"
-              className="h-7 w-7 flex-shrink-0 object-contain"
-            />
-            <span className="text-sm font-medium text-gray-700 truncate">
-              {home.shortName}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CldImage
-              src={
-                away.logo ||
-                "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
-              }
-              alt={away.tinyName}
-              width={28}
-              height={28}
-              crop="fit"
-              className="h-7 w-7 flex-shrink-0 object-contain"
-            />
-            <span className="text-sm font-medium text-gray-700 truncate">
-              {away.shortName}
-            </span>
-          </div>
-        </div>
-
-        {/* Section 3: Assigned referees */}
-        <div className="flex flex-col justify-center gap-2 px-3 py-3 w-1/4 min-w-0 border-r border-gray-100">
-          <RefSlot referee={referee1} label="Pos 1 frei" />
-          <RefSlot referee={referee2} label="Pos 2 frei" />
-        </div>
-
-        {/* Section 4: RefSummary + Chevron */}
-        <div className="flex items-center w-1/4 min-w-0 pl-3 pr-2 py-3 gap-2">
-          <div className="flex-1 min-w-0 space-y-3">
-            {/* Row 1: status pills */}
-            <div className="flex flex-wrap gap-2">
-              {(refSummary?.requestedCount ?? 0) > 0 && (
-                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700">
-                  {refSummary.requestedCount}
-                </span>
-              )}
-              {(refSummary?.availableCount ?? 0) > 0 && (
-                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
-                  {refSummary.availableCount}
-                </span>
-              )}
-              {(refSummary?.unavailableCount ?? 0) > 0 && (
-                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-700">
-                  {refSummary.unavailableCount}
-                </span>
-              )}
+          {/* Row 3: home logo+name (left) vs away name+logo (right) */}
+          <div className="flex items-center justify-between gap-2">
+            {/* home */}
+            <div className="flex items-center gap-2 min-w-0">
+              <CldImage
+                src={home.logo || defaultLogo}
+                alt={home.tinyName}
+                width={24}
+                height={24}
+                crop="fit"
+                className="h-6 w-6 flex-shrink-0 object-contain"
+              />
+              <span className="text-sm font-medium text-gray-700 truncate">
+                {home.shortName}
+              </span>
             </div>
-            {/* Row 2: requested levels */}
-            {requestedLevels.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {requestedLevels.map(([level, count]) => {
-                  const config =
-                    refereeLevels[level as keyof typeof refereeLevels] ??
-                    refereeLevels["n/a"];
-                  const colorMatch = config.background.match(/bg-(\w+)-\d+/);
-                  const colorName = colorMatch?.[1] ?? "gray";
-                  const countPillBg = `bg-${colorName}-100`;
-                  const countPillRing = config.ring;
-                  return (
-                    <span
-                      key={level}
-                      className={classNames(
-                        "inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium ring-1 ring-inset",
-                        config.background,
-                        config.text,
-                        config.ring,
-                      )}
-                    >
-                      {level}
-                      <span
-                        className={classNames(
-                          "inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset",
-                          countPillBg,
-                          config.text,
-                          countPillRing
-                        )}
-                      >
-                        {count}
-                      </span>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
+            {/* away (mirrored: name then logo) */}
+            <div className="flex items-center gap-2 min-w-0 justify-end">
+              <span className="text-sm font-medium text-gray-700 truncate">
+                {away.shortName}
+              </span>
+              <CldImage
+                src={away.logo || defaultLogo}
+                alt={away.tinyName}
+                width={24}
+                height={24}
+                crop="fit"
+                className="h-6 w-6 flex-shrink-0 object-contain"
+              />
+            </div>
           </div>
-          {/* Chevron */}
-          <button
-            onClick={() => onOpenDetail(match)}
-            className="flex-shrink-0 rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
-            aria-label="Details öffnen"
-          >
-            <ChevronRightIcon className="h-5 w-5" />
-          </button>
+
+          {/* Row 4: referees side by side (50/50) */}
+          <div className="flex gap-2">
+            <div className="w-1/2 min-w-0">
+              <RefSlot referee={referee1} label="Pos 1 frei" />
+            </div>
+            <div className="w-1/2 min-w-0">
+              <RefSlot referee={referee2} label="Pos 2 frei" />
+            </div>
+          </div>
+
+          {/* Row 5: status pills (left 50%) + level badges count-only (right 50%) */}
+          <div className="flex gap-2 items-start">
+            <div className="w-1/2 min-w-0">
+              <StatusPills />
+            </div>
+            <div className="w-1/2 min-w-0">
+              <LevelBadges countOnly />
+            </div>
+          </div>
+        </div>
+
+        {/* ── DESKTOP layout (hidden on mobile, flex on sm+) ── */}
+        <div className="hidden sm:flex items-stretch flex-1 min-w-0">
+          {/* Section 1: Tournament + Date + Venue */}
+          <div className="flex flex-col justify-between px-3 py-3 w-1/4 min-w-0 border-r border-gray-100">
+            <div>
+              <TournamentBadge />
+            </div>
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center gap-1">
+                <CalendarIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
+                <span className="text-xs text-gray-600 truncate">
+                  {formattedDateLong}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
+                <span className="text-xs text-gray-600 truncate">
+                  {venue.name}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Teams */}
+          <div className="flex flex-col justify-center gap-2 px-3 py-3 w-1/4 min-w-0 border-r border-gray-100">
+            <div className="flex items-center gap-2">
+              <CldImage
+                src={home.logo || defaultLogo}
+                alt={home.tinyName}
+                width={28}
+                height={28}
+                crop="fit"
+                className="h-7 w-7 flex-shrink-0 object-contain"
+              />
+              <span className="text-sm font-medium text-gray-700 truncate">
+                {home.shortName}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CldImage
+                src={away.logo || defaultLogo}
+                alt={away.tinyName}
+                width={28}
+                height={28}
+                crop="fit"
+                className="h-7 w-7 flex-shrink-0 object-contain"
+              />
+              <span className="text-sm font-medium text-gray-700 truncate">
+                {away.shortName}
+              </span>
+            </div>
+          </div>
+
+          {/* Section 3: Assigned referees */}
+          <div className="flex flex-col justify-center gap-2 px-3 py-3 w-1/4 min-w-0 border-r border-gray-100">
+            <RefSlot referee={referee1} label="Pos 1 frei" />
+            <RefSlot referee={referee2} label="Pos 2 frei" />
+          </div>
+
+          {/* Section 4: RefSummary + Chevron */}
+          <div className="flex items-center w-1/4 min-w-0 pl-3 pr-2 py-3 gap-2">
+            <div className="flex-1 min-w-0 space-y-3">
+              <StatusPills />
+              {requestedLevels.length > 0 && <LevelBadges />}
+            </div>
+            <ChevronButton />
+          </div>
         </div>
       </div>
     </div>
