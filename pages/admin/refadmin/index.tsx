@@ -210,10 +210,10 @@ const RefAdmin: NextPage = () => {
                     }
                     setExpandedVenues(newExpanded);
                   }}
-                  className="flex items-center gap-1.5 w-full px-1 py-1 hover:bg-gray-50 rounded transition-colors"
+                  className="flex items-center gap-1.5 w-full px-1 py-2 mb-4 rounded transition-colors border-b border-gray-200"
                 >
                   <MapPinIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-gray-600 flex-1 text-left">
+                  <span className="text-sm font-semibold text-gray-500 hover:text-gray-700 flex-1 text-left">
                     {venueName}
                     <span className="ml-1.5 text-xs font-normal text-gray-400">
                       ({byVenue[venueName].length})
@@ -282,11 +282,11 @@ const RefAdmin: NextPage = () => {
 
             {/* Group by venue toggle */}
             {!matchesLoading && allMatches.length > 0 && (
-              <div className="flex justify-end">
+              <div className="flex justify-start sm:justify-end">
                 <button
                   onClick={() => setGroupByVenue(v => !v)}
                   className={classNames(
-                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset transition-colors',
+                    'flex-1 sm:flex-none inline-flex items-center justify-center sm:justify-start gap-1.5 rounded-full px-3 py-2 text-xs font-semibold ring-1 ring-inset transition-colors mt-4 sm:mt-0',
                     groupByVenue
                       ? 'bg-indigo-50 text-indigo-700 ring-indigo-300'
                       : 'bg-white text-gray-600 ring-gray-300 hover:bg-gray-50'

@@ -480,7 +480,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                         <div className="mt-4">
                           <button
                             onClick={() => setShowRequested((v) => !v)}
-                            className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
+                            className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700 py-2 mb-4 border-b border-gray-200"
                           >
                             <span className="flex items-center gap-2">
                               Angefragt
@@ -515,7 +515,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                       <section>
                         <button
                           onClick={() => setShowAvailable((v) => !v)}
-                          className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
+                          className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700  py-2 mb-4 border-b border-gray-200"
                         >
                           <span className="flex items-center gap-2">
                             Verfügbar
@@ -557,7 +557,7 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                       <section>
                         <button
                           onClick={() => setShowUnavailable((v) => !v)}
-                          className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
+                          className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700  py-2 mb-4 border-b border-gray-200"
                         >
                           <span className="flex items-center gap-2">
                             Nicht verfügbar
