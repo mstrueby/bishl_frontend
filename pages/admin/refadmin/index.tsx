@@ -104,6 +104,15 @@ const RefAdmin: NextPage = () => {
     }
   };
 
+  const handleToday = () => {
+    const today = new Date();
+    setSelectedYear(today.getFullYear());
+    setSelectedMonth(today.getMonth() + 1);
+    setSelectedDate(today.toISOString().split('T')[0]);
+    setMatchListData([]);
+    setActiveTournaments(new Set());
+  };
+
   const handleDaySelect = (date: string) => {
     setSelectedDate(date);
     setActiveTournaments(new Set());
@@ -152,7 +161,7 @@ const RefAdmin: NextPage = () => {
   if (authLoading) {
     return (
       <Layout>
-        <SectionHeader title="Schiedsrichter Administration" />
+        <SectionHeader title="Schiri-Tool" />
         <LoadingState />
       </Layout>
     );
@@ -259,6 +268,7 @@ const RefAdmin: NextPage = () => {
           month={selectedMonth}
           onPrev={handlePrevMonth}
           onNext={handleNextMonth}
+          onToday={handleToday}
         />
 
         {/* Day strip */}
