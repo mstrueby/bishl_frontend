@@ -248,6 +248,8 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
 
   return (
     <div
+      key={match._id}
+      id={match._id}
       className={classNames(
         "bg-white rounded-xl border-2 border-gray-200 shadow-md overflow-hidden transition-colors",
         slotHover,
