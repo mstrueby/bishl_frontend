@@ -123,6 +123,17 @@ const MyRef: NextPage = () => {
 
   if (!hasAnyRole([UserRole.REFEREE])) return null;
 
+  if (user?.referee?.active === false) {
+    return (
+      <Layout>
+        <SectionHeader title="Meine Schiedsrichtereinsätze" />
+        <p className="text-center text-gray-500 mt-8">
+          Du bist kein aktiver Schiedsrichter. Wende dich an das Schiedsrichterwesen.
+        </p>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <SectionHeader
