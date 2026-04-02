@@ -86,7 +86,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
     if (!referee) {
       return (
         <div className="flex items-center gap-2 text-gray-400">
-          <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
+          <div className="h-7 w-7 rounded-full border bg-gray-100 flex items-center justify-center">
             <span className="text-xs text-gray-300">?</span>
           </div>
           <span className="text-xs text-gray-400 italic">{label}</span>
@@ -237,6 +237,15 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
     </button>
   );
 
+  const PrimaryButton = () => (
+    <button
+      onClick={() => onOpenDetail(match)}
+      className="w-full inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 py-1.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+    >
+      Details
+    </button>
+  );
+
   return (
     <div
       className={classNames(
@@ -249,11 +258,10 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
         <div className={`w-1 flex-shrink-0 ${slotColor}`} />
 
         {/* ── MOBILE layout (hidden on sm+) ── */}
-        <div className="flex-1 min-w-0 sm:hidden px-3 py-3 space-y-2">
-          {/* Row 1: tournament badge + chevron */}
-          <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0 sm:hidden px-3 py-3 space-y-3">
+          {/* Row 1: tournament badge */}
+          <div>
             <TournamentBadge />
-            <ChevronButton />
           </div>
 
           {/* Row 2: date (left) + venue (right) */}
@@ -305,7 +313,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
           </div>
 
           {/* Row 4: referees side by side (50/50) */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 border-t border-gray-200 pt-3">
             <div className="w-1/2 min-w-0">
               <RefSlot referee={referee1} label="Pos 1 frei" />
             </div>
@@ -322,6 +330,11 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
             <div className="w-1/2 min-w-0">
               <LevelBadges countOnly />
             </div>
+          </div>
+
+          {/* Row 6: primary button */}
+          <div className="pt-2 border-t border-gray-200">
+            <PrimaryButton />
           </div>
         </div>
 
