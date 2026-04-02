@@ -259,7 +259,7 @@ const RefAdmin: NextPage = () => {
 
   return (
     <Layout>
-      <SectionHeader title="Schiedsrichter Administration" />
+      <SectionHeader title="Schiedsrichter einteilen" />
 
       <div className="space-y-4">
         {/* Month navigation */}
