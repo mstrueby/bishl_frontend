@@ -323,9 +323,9 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
           </div>
 
           {/* Row 5: status pills + level badges count-only */}
-          <div className="flex gap-3 items-center flex-wrap">
+          <div className="flex gap-4 items-center flex-wrap">
             <StatusPills />
-            <LevelBadges countOnly />
+            <LevelBadges />
           </div>
 
           {/* Row 6: primary button */}
