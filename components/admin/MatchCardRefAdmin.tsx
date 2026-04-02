@@ -329,7 +329,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
           </div>
 
           {/* Row 6: primary button */}
-          <div className="pt-2">
+          <div>
             <PrimaryButton />
           </div>
         </div>
