@@ -128,7 +128,7 @@ const MyRef: NextPage = () => {
       <Layout>
         <SectionHeader title="Meine Schiedsrichtereinsätze" />
         <p className="text-center text-gray-500 mt-8">
-          Du bist kein aktiver Schiedsrichter. Wende dich an das Schiedsrichterwesen.
+          Du bist für Schiedsrichtereinsätze nicht aktiviert. Wende dich an das Schiedsrichterwesen.
         </p>
       </Layout>
     );
