@@ -281,7 +281,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
           </div>
 
           {/* Row 3: home logo+name (left) vs away name+logo (right) */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-4">
             {/* home */}
             <div className="flex items-center gap-2 min-w-0">
               <CldImage
@@ -313,7 +313,7 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
           </div>
 
           {/* Row 4: referees side by side (50/50) */}
-          <div className="flex gap-2 border-t border-b border-gray-200 py-3">
+          <div className="flex gap-4 border-t border-b border-gray-200 py-3">
             <div className="w-1/2 min-w-0">
               <RefSlot referee={referee1} label="Pos 1 frei" />
             </div>
