@@ -322,8 +322,8 @@ const MatchCardRefAdmin: React.FC<MatchCardRefAdminProps> = ({
             </div>
           </div>
 
-          {/* Row 5: status pills (left 50%) + level badges count-only (right 50%) */}
-          <div className="flex gap-3 items-start flex-wrap">
+          {/* Row 5: status pills + level badges count-only */}
+          <div className="flex gap-3 items-center flex-wrap">
             <StatusPills />
             <LevelBadges countOnly />
           </div>
