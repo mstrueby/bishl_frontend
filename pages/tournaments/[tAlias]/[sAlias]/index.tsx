@@ -1096,15 +1096,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           ),
         allRounds: allRounds
           .filter((r: RoundValues) => r.published)
-          .sort((a: RoundValues, b: RoundValues) => {
-            if (a.startDate && b.startDate) {
-              return (
-                new Date(a.startDate).getTime() -
-                new Date(b.startDate).getTime()
-              );
-            }
-            return a.alias.localeCompare(b.alias);
-          }),
+          .sort((a: RoundValues, b: RoundValues) => a.sortOrder - b.sortOrder),
         selectedSeasonMatches,
         selectedRoundMatches,
         selectedMatchdayMatches,
