@@ -1648,7 +1648,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                   </th>
                                   <th
                                     scope="col"
-                                    className="py-3.5 pl-3 pr-4 sm:pr-3"
+                                    className="relative py-3.5 pl-3 pr-4 sm:pr-3 overflow-hidden"
                                   >
                                     <span className="sr-only">Aktionen</span>
                                   </th>
