@@ -94,6 +94,7 @@ const Edit: NextPage<EditProps> = ({ jwt, round, tAlias, sAlias, rAlias }) => {
   const initialValues: RoundValues = {
     name: round?.name || '',
     alias: round?.alias || '',
+    sortOrder: round?.sortOrder || 0,
     createStandings: round?.createStandings || false,
     createStats: round?.createStats || false,
     startDate: round?.startDate || null,

@@ -35,6 +35,7 @@ export default function Add({ jwt }: AddProps) {
   const initialValues: RoundValues = {
     name: "",
     alias: "",
+    sortOrder: 0,
     createStandings: false,
     createStats: false,
     published: false,

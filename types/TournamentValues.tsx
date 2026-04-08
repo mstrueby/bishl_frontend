@@ -116,6 +116,7 @@ export interface RoundValues {
   _id?: string;
   name: string;
   alias: string;
+  sortOrder: number;
   createStandings: boolean;
   createStats: boolean;
   published: boolean;
