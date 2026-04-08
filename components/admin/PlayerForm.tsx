@@ -1601,7 +1601,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                     {sortedAssignedTeams.length > 0 ? (
                       <div className="mt-8">
                         <div className="overflow-x-auto">
-                          <div className="inline-block min-w-full py-2 align-middle">
                             <table className="min-w-full border-b border-gray-200 mb-28">
                               <thead className="bg-white uppercase text-sm font-medium text-gray-500">
                                 <tr>
@@ -1935,7 +1934,6 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                 })}
                               </tbody>
                             </table>
-                          </div>
                         </div>
                       </div>
                     ) : (
