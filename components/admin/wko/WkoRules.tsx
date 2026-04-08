@@ -204,8 +204,8 @@ const WkoRules: React.FC<WkoRulesProps> = ({
                         <span className="font-bold text-gray-900">
                           {l.group || (l.default ? "Andere" : "")}
                         </span>
-                        <span className="font-normal">
-                          {l.year_range || l.default}
+                        <span className="font-normal text-right pl-4">
+                          {l.rule || l.default}
                         </span>
                       </div>
                     </div>
