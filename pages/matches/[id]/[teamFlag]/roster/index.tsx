@@ -1426,7 +1426,7 @@ const RosterPage = () => {
 
     const newStatus = (rosterStatus === "INVALID" || rosterStatus === "APPROVED") 
       ? "SUBMITTED" 
-      : (localSubmitted ? "SUBMITTED" : "DRAFT");
+      : ((localSubmitted || match.matchStatus.key === "FINISHED") ? "SUBMITTED" : "DRAFT");
 
     const rosterUpdate: any = {
       players: rosterList,
@@ -2397,8 +2397,10 @@ const RosterPage = () => {
                   const isFinished = match.matchStatus.key === "FINISHED";
                   const isSubmitted = rosterStatus === "SUBMITTED";
 
-                  if (isFinished) {
+                  if (isFinished && isSubmitted) {
                     return "Aufstellung ist abgegeben (Spiel beendet)";
+                  } else if (isFinished && !isSubmitted) {
+                    return "Aufstellung noch nicht eingereicht – wird beim Speichern als eingereicht markiert.";
                   } else if (isSubmitted) {
                     return "Aufstellung wurde abgegeben und kann nicht mehr bearbeitet werden.";
                   } else {
