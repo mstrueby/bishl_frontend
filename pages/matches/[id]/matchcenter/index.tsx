@@ -564,7 +564,8 @@ export default function MatchDetails({
           </div>
 
           {/* Middle Section with Start/Finish Button */}
-          <div className="w-1/3 flex justify-center items-center space-x-2">
+          <div className="w-1/3 flex justify-center items-center">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             {permissions.showButtonStatus && (
               <>
                 {match.matchStatus.key === "SCHEDULED" && (
@@ -667,6 +668,7 @@ export default function MatchDetails({
                 )}
               </>
             )}
+            </div>
           </div>
 
           {/* Away Team Buttons */}
