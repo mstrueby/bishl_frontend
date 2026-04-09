@@ -519,13 +519,13 @@ export default function MatchDetails({
                 <>
                   <button
                     onClick={() => setIsHomeGoalDialogOpen(true)}
-                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex h-10 items-center justify-center px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tor
                   </button>
                   <button
                     onClick={() => setIsHomePenaltyDialogOpen(true)}
-                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex h-10 items-center justify-center px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Strafe
                   </button>
@@ -534,10 +534,11 @@ export default function MatchDetails({
                       setHomeTimeoutPeriods(match.home.timeouts ?? []);
                       setIsHomeTimeoutDialogOpen(true);
                     }}
-                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex h-10 items-center justify-center px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    <span>Timeout</span>
-                    <span className="ml-1.5 flex flex-col items-center gap-[1px]">
+                    <span className="flex flex-col items-center leading-none">
+                      <span>Timeout</span>
+                      <span className="mt-1 flex items-center gap-1.5">
                       {Array.from(
                         { length: match.matchSettings.numOfPeriods },
                         (_, i) => i + 1,
@@ -548,12 +549,16 @@ export default function MatchDetails({
                             key={period}
                             className={
                               taken
-                                ? "block w-1.5 h-1.5 rounded-full border-2 border-gray-700 bg-transparent"
-                                : "block w-1.5 h-1.5 rounded-full bg-yellow-400"
+                                ? "block h-1.5 rounded-full bg-gray-300 ring-1 ring-gray-700"
+                                : "block h-1.5 rounded-full bg-yellow-500"
                             }
+                            style={{
+                              width: `clamp(10px, ${(100 / match.matchSettings.numOfPeriods).toFixed(2)}%, 22px)`,
+                            }}
                           />
                         );
                       })}
+                      </span>
                     </span>
                   </button>
                 </>
@@ -674,13 +679,13 @@ export default function MatchDetails({
                 <>
                   <button
                     onClick={() => setIsAwayGoalDialogOpen(true)}
-                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex h-10 items-center justify-center px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tor
                   </button>
                   <button
                     onClick={() => setIsAwayPenaltyDialogOpen(true)}
-                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex h-10 items-center justify-center px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Strafe
                   </button>
@@ -689,10 +694,11 @@ export default function MatchDetails({
                       setAwayTimeoutPeriods(match.away.timeouts ?? []);
                       setIsAwayTimeoutDialogOpen(true);
                     }}
-                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex h-10 items-center justify-center px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    <span>Timeout</span>
-                    <span className="ml-1.5 flex flex-col items-center gap-[1px]">
+                    <span className="flex flex-col items-center leading-none">
+                      <span>Timeout</span>
+                      <span className="mt-1 flex items-center gap-1.5">
                       {Array.from(
                         { length: match.matchSettings.numOfPeriods },
                         (_, i) => i + 1,
@@ -703,12 +709,16 @@ export default function MatchDetails({
                             key={period}
                             className={
                               taken
-                                ? "block w-1.5 h-1.5 rounded-full border-2 border-gray-700 bg-transparent"
-                                : "block w-1.5 h-1.5 rounded-full bg-yellow-400"
+                                ? "block h-1.5 rounded-full bg-gray-300 ring-1 ring-gray-700"
+                                : "block h-1.5 rounded-full bg-yellow-500"
                             }
+                            style={{
+                              width: `clamp(10px, ${(100 / match.matchSettings.numOfPeriods).toFixed(2)}%, 22px)`,
+                            }}
                           />
                         );
                       })}
+                      </span>
                     </span>
                   </button>
                 </>
