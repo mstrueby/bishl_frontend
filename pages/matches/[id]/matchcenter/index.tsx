@@ -538,7 +538,7 @@ export default function MatchDetails({
                   >
                     <span className="flex flex-col items-center leading-none">
                       <span>Timeout</span>
-                      <span className="mt-1 flex items-center gap-1">
+                      <span className="mt-1 flex w-full items-center gap-1">
                         {Array.from(
                           { length: match.matchSettings.numOfPeriods },
                           (_, i) => i + 1,
@@ -549,12 +549,9 @@ export default function MatchDetails({
                               key={period}
                               className={
                                 taken
-                                  ? "block h-1.5 rounded-full bg-gray-300 ring-1 ring-gray-700"
-                                  : "block h-1.5 rounded-full bg-yellow-500"
+                                  ? "h-1.5 flex-1 rounded-full bg-gray-300 ring-1 ring-gray-700"
+                                  : "h-1.5 flex-1 rounded-full bg-yellow-500"
                               }
-                              style={{
-                                width: `clamp(8px, ${(100 / match.matchSettings.numOfPeriods).toFixed(2)}%, 16px)`,
-                              }}
                             />
                           );
                         })}
@@ -698,7 +695,7 @@ export default function MatchDetails({
                   >
                     <span className="flex flex-col items-center leading-none">
                       <span>Timeout</span>
-                      <span className="mt-1 flex items-center gap-1">
+                      <span className="mt-1 flex w-full items-center gap-1">
                         {Array.from(
                           { length: match.matchSettings.numOfPeriods },
                           (_, i) => i + 1,
@@ -709,12 +706,9 @@ export default function MatchDetails({
                               key={period}
                               className={
                                 taken
-                                  ? "block h-1.5 rounded-full bg-gray-300 ring-1 ring-gray-700"
-                                  : "block h-1.5 rounded-full bg-yellow-500"
+                                  ? "h-1.5 flex-1 rounded-full bg-gray-300 ring-1 ring-gray-700"
+                                  : "h-1.5 flex-1 rounded-full bg-yellow-500"
                               }
-                              style={{
-                                width: `clamp(8px, ${(100 / match.matchSettings.numOfPeriods).toFixed(2)}%, 16px)`,
-                              }}
                             />
                           );
                         })}
