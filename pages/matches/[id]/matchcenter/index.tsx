@@ -549,7 +549,7 @@ export default function MatchDetails({
                               key={period}
                               className={
                                 taken
-                                  ? "h-1.5 flex-1 rounded-full bg-gray-300 ring-1 ring-gray-700"
+                                  ? "h-1.5 flex-1 rounded-full bg-gray-300"
                                   : "h-1.5 flex-1 rounded-full bg-yellow-500"
                               }
                             />
@@ -706,7 +706,7 @@ export default function MatchDetails({
                               key={period}
                               className={
                                 taken
-                                  ? "h-1.5 flex-1 rounded-full bg-gray-300 ring-1 ring-gray-700"
+                                  ? "h-1.5 flex-1 rounded-full bg-gray-300"
                                   : "h-1.5 flex-1 rounded-full bg-yellow-500"
                               }
                             />
