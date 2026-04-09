@@ -381,7 +381,7 @@ const RosterList: React.FC<RosterListProps> = ({
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-14">POS.</th>
                 <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[50x]">SPIELER</th>
                 {showGoalieAppearance && (
-                  <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                  <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                     <div className="flex gap-2 justify-center">
                       {periods.map(p => (
                         <span key={p} className="w-4 text-center">{p}</span>
@@ -467,7 +467,7 @@ const RosterList: React.FC<RosterListProps> = ({
 
                     {/* Goalie Appearance */}
                     {showGoalieAppearance && (
-                      <td className="px-2 py-2 whitespace-nowrap text-center border-l border-gray-200">
+                      <td className="px-2 py-2 whitespace-nowrap text-center border-r border-gray-200">
                         {player.playerPosition.key === 'G' && (
                           <div className="flex gap-2 justify-center">
                             {periods.map(period => (
