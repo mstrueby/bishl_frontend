@@ -1426,7 +1426,7 @@ const RosterPage = () => {
 
     const newStatus = (rosterStatus === "INVALID" || rosterStatus === "APPROVED") 
       ? "SUBMITTED" 
-      : ((localSubmitted || match.matchStatus.key === "FINISHED") ? "SUBMITTED" : "DRAFT");
+      : ((localSubmitted || match?.matchStatus.key === "FINISHED") ? "SUBMITTED" : "DRAFT");
 
     const rosterUpdate: any = {
       players: rosterList,
