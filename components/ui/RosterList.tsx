@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { RosterPlayer } from '../../types/MatchValues';
@@ -89,6 +89,18 @@ const RosterList: React.FC<RosterListProps> = ({
     });
     return initial;
   });
+
+  useEffect(() => {
+    setGoalieAppearances(prev => {
+      const synced = { ...prev };
+      roster.forEach(player => {
+        if (player.playerPosition.key === 'G') {
+          synced[player.player.playerId] = player.periodsPlayed ?? [];
+        }
+      });
+      return synced;
+    });
+  }, [roster]);
 
   const handleGoalieAppearanceChange = async (playerId: string, period: number, checked: boolean) => {
     const current = goalieAppearances[playerId] ?? [];
