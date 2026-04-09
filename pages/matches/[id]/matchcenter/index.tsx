@@ -169,6 +169,11 @@ export default function MatchDetails({
   >(null);
   const [isValidatingHomeRoster, setIsValidatingHomeRoster] = useState(false);
   const [isValidatingAwayRoster, setIsValidatingAwayRoster] = useState(false);
+  const [isHomeTimeoutDialogOpen, setIsHomeTimeoutDialogOpen] = useState(false);
+  const [isAwayTimeoutDialogOpen, setIsAwayTimeoutDialogOpen] = useState(false);
+  const [homeTimeoutPeriods, setHomeTimeoutPeriods] = useState<number[]>([]);
+  const [awayTimeoutPeriods, setAwayTimeoutPeriods] = useState<number[]>([]);
+  const [isSavingTimeout, setIsSavingTimeout] = useState(false);
   const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
   const [selectedPlayerContext, setSelectedPlayerContext] = useState<{
     playerId: string;
@@ -516,6 +521,15 @@ export default function MatchDetails({
                   >
                     Strafe
                   </button>
+                  <button
+                    onClick={() => {
+                      setHomeTimeoutPeriods(match.home.timeouts ?? []);
+                      setIsHomeTimeoutDialogOpen(true);
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Timeout
+                  </button>
                 </>
               )}
             </div>
@@ -643,6 +657,15 @@ export default function MatchDetails({
                     className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Strafe
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAwayTimeoutPeriods(match.away.timeouts ?? []);
+                      setIsAwayTimeoutDialogOpen(true);
+                    }}
+                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Timeout
                   </button>
                 </>
               )}
@@ -1188,6 +1211,264 @@ export default function MatchDetails({
             }
           }}
         />
+
+        {/* Home Team Timeout Dialog */}
+        <Transition appear show={isHomeTimeoutDialogOpen} as={Fragment}>
+          <Dialog
+            as="div"
+            className="fixed inset-0 z-10"
+            onClose={() => setIsHomeTimeoutDialogOpen(false)}
+          >
+            <div className="fixed inset-0 bg-black/30 transition-opacity" />
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex items-center justify-center min-h-full p-4">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
+                >
+                  <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
+                    >
+                      Timeout – {match.home.shortName}
+                    </Dialog.Title>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Wähle die Dritteln aus, in denen ein Timeout genommen wurde.
+                    </p>
+                    <div className="space-y-3">
+                      {Array.from(
+                        { length: match.matchSettings.numOfPeriods },
+                        (_, i) => i + 1,
+                      ).map((period) => (
+                        <label
+                          key={period}
+                          className="flex items-center space-x-3 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            checked={homeTimeoutPeriods.includes(period)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setHomeTimeoutPeriods((prev) =>
+                                  [...prev, period].sort((a, b) => a - b),
+                                );
+                              } else {
+                                setHomeTimeoutPeriods((prev) =>
+                                  prev.filter((p) => p !== period),
+                                );
+                              }
+                            }}
+                          />
+                          <span className="text-sm text-gray-700">
+                            Drittel {period}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="mt-6 flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        onClick={() => setIsHomeTimeoutDialogOpen(false)}
+                      >
+                        Abbrechen
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSavingTimeout}
+                        className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={async () => {
+                          try {
+                            setIsSavingTimeout(true);
+                            const response = await apiClient.patch(
+                              `/matches/${match._id}`,
+                              {
+                                home: {
+                                  timeouts: homeTimeoutPeriods,
+                                },
+                              },
+                            );
+                            if (response.status === 200) {
+                              await refreshMatchData();
+                              setIsHomeTimeoutDialogOpen(false);
+                            }
+                          } catch (error) {
+                            console.error(
+                              "Error saving home timeouts:",
+                              getErrorMessage(error),
+                            );
+                          } finally {
+                            setIsSavingTimeout(false);
+                          }
+                        }}
+                      >
+                        {isSavingTimeout ? (
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                            ></path>
+                          </svg>
+                        ) : null}
+                        Speichern
+                      </button>
+                    </div>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
+
+        {/* Away Team Timeout Dialog */}
+        <Transition appear show={isAwayTimeoutDialogOpen} as={Fragment}>
+          <Dialog
+            as="div"
+            className="fixed inset-0 z-10"
+            onClose={() => setIsAwayTimeoutDialogOpen(false)}
+          >
+            <div className="fixed inset-0 bg-black/30 transition-opacity" />
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex items-center justify-center min-h-full p-4">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
+                >
+                  <Dialog.Panel className="w-full max-w-md p-6 text-left align-middle transition-all transform bg-white shadow-xl rounded-xl">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg text-center font-bold leading-6 text-gray-900 mb-4"
+                    >
+                      Timeout – {match.away.shortName}
+                    </Dialog.Title>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Wähle die Dritteln aus, in denen ein Timeout genommen wurde.
+                    </p>
+                    <div className="space-y-3">
+                      {Array.from(
+                        { length: match.matchSettings.numOfPeriods },
+                        (_, i) => i + 1,
+                      ).map((period) => (
+                        <label
+                          key={period}
+                          className="flex items-center space-x-3 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            checked={awayTimeoutPeriods.includes(period)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setAwayTimeoutPeriods((prev) =>
+                                  [...prev, period].sort((a, b) => a - b),
+                                );
+                              } else {
+                                setAwayTimeoutPeriods((prev) =>
+                                  prev.filter((p) => p !== period),
+                                );
+                              }
+                            }}
+                          />
+                          <span className="text-sm text-gray-700">
+                            Drittel {period}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="mt-6 flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        onClick={() => setIsAwayTimeoutDialogOpen(false)}
+                      >
+                        Abbrechen
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSavingTimeout}
+                        className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={async () => {
+                          try {
+                            setIsSavingTimeout(true);
+                            const response = await apiClient.patch(
+                              `/matches/${match._id}`,
+                              {
+                                away: {
+                                  timeouts: awayTimeoutPeriods,
+                                },
+                              },
+                            );
+                            if (response.status === 200) {
+                              await refreshMatchData();
+                              setIsAwayTimeoutDialogOpen(false);
+                            }
+                          } catch (error) {
+                            console.error(
+                              "Error saving away timeouts:",
+                              getErrorMessage(error),
+                            );
+                          } finally {
+                            setIsSavingTimeout(false);
+                          }
+                        }}
+                      >
+                        {isSavingTimeout ? (
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v2a6 6 0 00-6 6H4z"
+                            ></path>
+                          </svg>
+                        ) : null}
+                        Speichern
+                      </button>
+                    </div>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
 
         {/* Player Card Modal */}
         <PlayerCardModal

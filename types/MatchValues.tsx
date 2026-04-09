@@ -125,6 +125,7 @@ export interface Team {
   roster?: Roster;
   scores?: ScoresBase[];
   penalties?: PenaltiesBase[];
+  timeouts?: number[];
 }
 
 export interface MatchReferee extends AssignmentReferee {
