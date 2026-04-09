@@ -433,9 +433,9 @@ export default function MatchDetails({
 
   const getPeriodLabel = (numOfPeriods: number, period: number): string => {
     if (numOfPeriods === 1) return "komplettes Spiel";
-    if (numOfPeriods === 2) return `Halbzeit ${period}`;
-    if (numOfPeriods === 3) return `Drittel ${period}`;
-    if (numOfPeriods === 4) return `Viertel ${period}`;
+    if (numOfPeriods === 2) return `${period}. Halbzeit`;
+    if (numOfPeriods === 3) return `${period}. Drittel`;
+    if (numOfPeriods === 4) return `${period}. Viertel`;
     return `Periode ${period}`;
   };
 
@@ -519,13 +519,13 @@ export default function MatchDetails({
                 <>
                   <button
                     onClick={() => setIsHomeGoalDialogOpen(true)}
-                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tor
                   </button>
                   <button
                     onClick={() => setIsHomePenaltyDialogOpen(true)}
-                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Strafe
                   </button>
@@ -534,9 +534,27 @@ export default function MatchDetails({
                       setHomeTimeoutPeriods(match.home.timeouts ?? []);
                       setIsHomeTimeoutDialogOpen(true);
                     }}
-                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    Timeout
+                    <span>Timeout</span>
+                    <span className="ml-1.5 flex flex-col items-center gap-[1px]">
+                      {Array.from(
+                        { length: match.matchSettings.numOfPeriods },
+                        (_, i) => i + 1,
+                      ).map((period) => {
+                        const taken = (match.home.timeouts ?? []).includes(period);
+                        return (
+                          <span
+                            key={period}
+                            className={
+                              taken
+                                ? "block w-1.5 h-1.5 rounded-full border-2 border-gray-700 bg-transparent"
+                                : "block w-1.5 h-1.5 rounded-full bg-yellow-400"
+                            }
+                          />
+                        );
+                      })}
+                    </span>
                   </button>
                 </>
               )}
@@ -656,13 +674,13 @@ export default function MatchDetails({
                 <>
                   <button
                     onClick={() => setIsAwayGoalDialogOpen(true)}
-                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Tor
                   </button>
                   <button
                     onClick={() => setIsAwayPenaltyDialogOpen(true)}
-                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Strafe
                   </button>
@@ -671,9 +689,27 @@ export default function MatchDetails({
                       setAwayTimeoutPeriods(match.away.timeouts ?? []);
                       setIsAwayTimeoutDialogOpen(true);
                     }}
-                    className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center justify-center h-7 px-3 border border-gray-300 shadow-md text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    Timeout
+                    <span>Timeout</span>
+                    <span className="ml-1.5 flex flex-col items-center gap-[1px]">
+                      {Array.from(
+                        { length: match.matchSettings.numOfPeriods },
+                        (_, i) => i + 1,
+                      ).map((period) => {
+                        const taken = (match.away.timeouts ?? []).includes(period);
+                        return (
+                          <span
+                            key={period}
+                            className={
+                              taken
+                                ? "block w-1.5 h-1.5 rounded-full border-2 border-gray-700 bg-transparent"
+                                : "block w-1.5 h-1.5 rounded-full bg-yellow-400"
+                            }
+                          />
+                        );
+                      })}
+                    </span>
                   </button>
                 </>
               )}
