@@ -777,6 +777,8 @@ export default function MatchDetails({
                   isValidating={isValidatingHomeRoster}
                   onOpenPlayerCard={handleOpenPlayerCard}
                   minSkaterCount={getMinSkaterCount(match.tournament.alias)}
+                  matchId={match._id}
+                  numOfPeriods={match.matchSettings.numOfPeriods}
                 />
                 <RosterList
                   teamName={match.away.fullName}
@@ -794,6 +796,8 @@ export default function MatchDetails({
                   isValidating={isValidatingAwayRoster}
                   onOpenPlayerCard={handleOpenPlayerCard}
                   minSkaterCount={getMinSkaterCount(match.tournament.alias)}
+                  matchId={match._id}
+                  numOfPeriods={match.matchSettings.numOfPeriods}
                 />
               </div>
             </div>

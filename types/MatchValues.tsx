@@ -59,6 +59,7 @@ export interface RosterPlayer {
   calledFromTeam?: CalledFromTeam;
   assignedTeam?: AssignedTeam;
   matchStats?: MatchStats;
+  periodsPlayed?: number[];
 }
 
 interface Coach {

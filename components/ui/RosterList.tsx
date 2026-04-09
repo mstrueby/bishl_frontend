@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { RosterPlayer } from '../../types/MatchValues';
@@ -13,6 +13,8 @@ import { ClipLoader } from 'react-spinners';
 import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass, invalidReasonCodeMap } from '../../lib/constants';
 import { validateRoster } from '../../utils/rosterValidation';
 import RosterChecks from './RosterChecks';
+import apiClient from '../../lib/apiClient';
+import { getErrorMessage } from '../../lib/errorHandler';
 
 interface RosterListProps {
   teamName: string;
@@ -33,6 +35,8 @@ interface RosterListProps {
   minSkaterCount?: number;
   minGoalieCount?: number;
   maxCallUpPlayers?: number;
+  matchId?: string;
+  numOfPeriods?: number;
 }
 
 const positionTooltips: Record<string, string> = {
@@ -67,8 +71,44 @@ const RosterList: React.FC<RosterListProps> = ({
   teamId,
   minSkaterCount = 4,
   minGoalieCount = 1,
-  maxCallUpPlayers = 5
+  maxCallUpPlayers = 5,
+  matchId,
+  numOfPeriods = 0
 }) => {
+  const showGoalieAppearance = !!(matchId && numOfPeriods && numOfPeriods > 0);
+  const periods = showGoalieAppearance
+    ? Array.from({ length: numOfPeriods }, (_, i) => i + 1)
+    : [];
+
+  const [goalieAppearances, setGoalieAppearances] = useState<Record<string, number[]>>(() => {
+    const initial: Record<string, number[]> = {};
+    roster.forEach(player => {
+      if (player.playerPosition.key === 'G') {
+        initial[player.player.playerId] = player.periodsPlayed ?? [];
+      }
+    });
+    return initial;
+  });
+
+  const handleGoalieAppearanceChange = async (playerId: string, period: number, checked: boolean) => {
+    const current = goalieAppearances[playerId] ?? [];
+    const updated = checked
+      ? [...current, period].sort((a, b) => a - b)
+      : current.filter(p => p !== period);
+
+    setGoalieAppearances(prev => ({ ...prev, [playerId]: updated }));
+
+    try {
+      await apiClient.patch(
+        `/matches/${matchId}/${teamFlag}/roster/players/${playerId}/goalie-appearance`,
+        { periodsPlayed: updated }
+      );
+    } catch (error) {
+      console.error('Fehler beim Speichern der Torhüter-Einsatz:', getErrorMessage(error));
+      setGoalieAppearances(prev => ({ ...prev, [playerId]: current }));
+    }
+  };
+
   const defaultSortRoster = (rosterToSort: RosterPlayer[]): RosterPlayer[] => {
     if (!rosterToSort || rosterToSort.length === 0) return [];
 
@@ -328,6 +368,15 @@ const RosterList: React.FC<RosterListProps> = ({
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10">NR.</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-14">POS.</th>
                 <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[50x]">SPIELER</th>
+                {showGoalieAppearance && (
+                  <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                    <div className="flex gap-2 justify-center">
+                      {periods.map(p => (
+                        <span key={p} className="w-4 text-center">{p}</span>
+                      ))}
+                    </div>
+                  </th>
+                )}
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">TYP</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">QUELLE</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">PASS-NR.</th>
@@ -403,6 +452,25 @@ const RosterList: React.FC<RosterListProps> = ({
                         </div>
                       </div>
                     </td>
+
+                    {/* Goalie Appearance */}
+                    {showGoalieAppearance && (
+                      <td className="px-2 py-2 whitespace-nowrap text-center border-l border-gray-200">
+                        {player.playerPosition.key === 'G' && (
+                          <div className="flex gap-2 justify-center">
+                            {periods.map(period => (
+                              <input
+                                key={period}
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                                checked={(goalieAppearances[player.player.playerId] ?? []).includes(period)}
+                                onChange={(e) => handleGoalieAppearanceChange(player.player.playerId, period, e.target.checked)}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                    )}
 
                     {/* Licence Type */}
                     <td className="px-2 py-2 whitespace-nowrap text-center">
@@ -494,7 +562,7 @@ const RosterList: React.FC<RosterListProps> = ({
             {/* Table Footer with Player Count Summary */}
             <tfoot className="bg-gray-50">
               <tr>
-                <td colSpan={14} className="px-3 py-3">
+                <td colSpan={showGoalieAppearance ? 14 : 13} className="px-3 py-3">
                   <div className="flex justify-between text-sm text-gray-900">
                     <span>
                       Feldspieler: <span className="font-medium">{sortedRoster.filter(player => player.playerPosition.key !== 'G').length}</span>
