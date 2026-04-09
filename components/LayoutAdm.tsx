@@ -7,7 +7,6 @@ import { useRouter } from "next/router";
 import HeroIcon from './HeroIcon';
 import { XMarkIcon, Bars3BottomLeftIcon, ChevronRightIcon, PencilIcon, PlusCircleIcon } from '@heroicons/react/24/solid';
 import { NavData } from '../types/NavData';
-import { Description } from '@headlessui/react/dist/components/description/description';
 
 export default function LayoutAdm({
   children,
