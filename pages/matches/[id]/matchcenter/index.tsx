@@ -431,6 +431,14 @@ export default function MatchDetails({
     }
   };
 
+  const getPeriodLabel = (numOfPeriods: number, period: number): string => {
+    if (numOfPeriods === 1) return "komplettes Spiel";
+    if (numOfPeriods === 2) return `Halbzeit ${period}`;
+    if (numOfPeriods === 3) return `Drittel ${period}`;
+    if (numOfPeriods === 4) return `Viertel ${period}`;
+    return `Periode ${period}`;
+  };
+
   const permissions = calculateMatchButtonPermissions(
     user,
     match,
@@ -1239,7 +1247,7 @@ export default function MatchDetails({
                       Timeout – {match.home.shortName}
                     </Dialog.Title>
                     <p className="text-sm text-gray-500 mb-4">
-                      Wähle die Dritteln aus, in denen ein Timeout genommen wurde.
+                      Wähle die Spielabschnitte aus, in denen ein Timeout genommen wurde.
                     </p>
                     <div className="space-y-3">
                       {Array.from(
@@ -1267,7 +1275,7 @@ export default function MatchDetails({
                             }}
                           />
                           <span className="text-sm text-gray-700">
-                            Drittel {period}
+                            {getPeriodLabel(match.matchSettings.numOfPeriods, period)}
                           </span>
                         </label>
                       ))}
@@ -1368,7 +1376,7 @@ export default function MatchDetails({
                       Timeout – {match.away.shortName}
                     </Dialog.Title>
                     <p className="text-sm text-gray-500 mb-4">
-                      Wähle die Dritteln aus, in denen ein Timeout genommen wurde.
+                      Wähle die Spielabschnitte aus, in denen ein Timeout genommen wurde.
                     </p>
                     <div className="space-y-3">
                       {Array.from(
@@ -1396,7 +1404,7 @@ export default function MatchDetails({
                             }}
                           />
                           <span className="text-sm text-gray-700">
-                            Drittel {period}
+                            {getPeriodLabel(match.matchSettings.numOfPeriods, period)}
                           </span>
                         </label>
                       ))}
