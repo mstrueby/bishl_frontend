@@ -652,7 +652,7 @@ const RosterPage = () => {
             imageVisible: rp.player.imageVisible ?? true,
             passNo: rp.passNumber || '',
             jerseyNo: rp.player.jerseyNumber,
-            called: rp.called || true,
+            called: !!rp.called,
             originalTeamId: rp.calledFromTeam?.teamId || null,
             originalTeamName: rp.calledFromTeam?.teamName || null,
             originalTeamAlias: rp.calledFromTeam?.teamAlias || null,
@@ -669,7 +669,9 @@ const RosterPage = () => {
           }));
         
         const allPlayers = [...merged, ...calledUpPlayersFromRoster];
-        allPlayers.sort((a, b) => a.firstName.localeCompare(b.firstName));
+        allPlayers.sort((a, b) =>
+          a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName)
+        );
         return allPlayers;
       }
 
@@ -714,7 +716,9 @@ const RosterPage = () => {
       );
 
       const combined = [...prev, ...newTablePlayers];
-      combined.sort((a, b) => a.firstName.localeCompare(b.firstName));
+      combined.sort((a, b) =>
+        a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName)
+      );
       return combined;
     });
   }, [allAvailablePlayersList, initialRosterData]);
