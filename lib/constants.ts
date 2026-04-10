@@ -12,6 +12,7 @@ export const invalidReasonCodeMap: Record<string, string> = {
   LOAN_AGE_GROUP_CONFLICT: "Leihpass-Altersklassenkonflikt",
   SUSPENDED: "Gesperrt",
   CALLED_LIMIT_EXCEEDED: "Maximales Hochspielen überschritten",
+  NOT_ASSIGNED_TO_TEAM: "Keinem Team zugeordnet",
 };
 
 export const licenceTypeBadgeColors: Record<string, string> = {

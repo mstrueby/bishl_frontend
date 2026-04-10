@@ -1,5 +1,6 @@
 import { MatchSettings } from "./TournamentValues";
 import { AssignmentReferee, AssignmentStatus } from "./AssignmentValues";
+import { TeamPartnership } from "./ClubValues";
 
 enum RosterStatus {
   DRAFT = "DRAFT",
@@ -123,6 +124,7 @@ export interface Team {
   tinyName: string;
   logo: string;
   stats: TeamStats;
+  teamPartnership?: TeamPartnership[];
   roster?: Roster;
   scores?: ScoresBase[];
   penalties?: PenaltiesBase[];

@@ -326,74 +326,31 @@ const RosterPage = () => {
         const teamData: TeamValues = teamResponse.data;
         setTeam(teamData);
 
-        // Fetch available players from the current team
-        const teamPlayerResponse = await apiClient.get(
-          `/players/clubs/${matchTeamData.clubAlias}/teams/${matchTeamData.teamAlias}`,
+        // Fetch all eligible players (primary team + partnerships) via the pool endpoint
+        const poolResponse = await apiClient.get(
+          `/players/clubs/${matchTeamData.clubAlias}/teams/${matchTeamData.teamAlias}/pool`,
           {
             params: {
               sortby: "lastName",
-              all: true,
             },
           },
         );
-        const teamPlayers: PlayerValues[] = Array.isArray(
-          teamPlayerResponse.data,
-        )
-          ? teamPlayerResponse.data
+        const poolPlayers: PlayerValues[] = Array.isArray(poolResponse.data)
+          ? poolResponse.data
           : [];
-        let allTeamsPlayers: PlayerValues[] = [];
-        let additionalPlayers: PlayerValues[] = [];
-        let additionalTeamsIds: string[] = [];
 
-        // Handle team partnerships if they exist
-        if (
-          teamData.teamPartnership &&
-          Array.isArray(teamData.teamPartnership) &&
-          teamData.teamPartnership.length > 0
-        ) {
-          for (const partnership of teamData.teamPartnership) {
-            if (partnership.clubAlias && partnership.teamAlias) {
-              try {
-                const partnerTeamResponse = await apiClient.get(
-                  `/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`,
-                );
-                const partnerTeam = partnerTeamResponse.data;
-                if (partnerTeam && partnerTeam._id) {
-                  additionalTeamsIds.push(partnerTeam._id);
-                }
-
-                const playersResponse = await apiClient.get(
-                  `/players/clubs/${partnership.clubAlias}/teams/${partnership.teamAlias}`,
-                  {
-                    params: {
-                      sortby: "lastName",
-                      all: true,
-                    },
-                  },
-                );
-
-                const partnershipPlayers = Array.isArray(playersResponse.data)
-                  ? playersResponse.data
-                  : [];
-
-                additionalPlayers = [
-                  ...additionalPlayers,
-                  ...partnershipPlayers,
-                ];
-              } catch (error) {
-                console.error(
-                  `Error fetching players from partnership:`,
-                  getErrorMessage(error),
-                );
-              }
-            }
-          }
+        // Build a lookup from teamAlias → partnership entry using data already
+        // embedded in the match document (matchTeamData.teamPartnership)
+        const partnershipByAlias: Record<string, { teamId: string; teamName: string; teamAlias: string }> = {};
+        for (const p of (matchTeamData.teamPartnership || [])) {
+          partnershipByAlias[p.teamAlias] = {
+            teamId: p.teamId,
+            teamName: p.teamName,
+            teamAlias: p.teamAlias,
+          };
         }
 
-        // Combine the players from the current team and all additional players
-        allTeamsPlayers = [...teamPlayers, ...additionalPlayers];
-
-        const availablePlayers: AvailablePlayer[] = allTeamsPlayers
+        const availablePlayers: AvailablePlayer[] = poolPlayers
           .map((teamPlayer: PlayerValues): AvailablePlayer | null => {
             if (
               !teamPlayer.assignedTeams ||
@@ -402,28 +359,31 @@ const RosterPage = () => {
               return null;
             }
 
+            // Determine whether this player comes from a partner team
+            const isPartnerPlayer =
+              !!teamPlayer.sourceTeamAlias &&
+              teamPlayer.sourceTeamAlias !== matchTeamData.teamAlias;
+
+            // Find the team ID to match against the player's assignedTeams
+            const targetTeamId = isPartnerPlayer && teamPlayer.sourceTeamAlias
+              ? partnershipByAlias[teamPlayer.sourceTeamAlias]?.teamId
+              : matchTeamData.teamId;
+
+            if (!targetTeamId) return null;
+
             const assignedTeam = teamPlayer.assignedTeams
               .flatMap((assignment: Assignment) => assignment.teams || [])
-              .find((team: AssignmentTeam) => {
-                if (!team) return false;
-                if (team.teamId === matchTeamData.teamId) return true;
-                return additionalTeamsIds.some((id) => id === team.teamId);
-              });
+              .find((team: AssignmentTeam) => team && team.teamId === targetTeamId);
 
-            const isFromYoungerTeam = additionalTeamsIds.some(
-              (id) => assignedTeam && assignedTeam.teamId === id,
-            );
-
+            // Resolve originalTeamInfo from the match's embedded partnership data
             let originalTeamInfo: { id: string; name: string; alias: string } | null = null;
-            if (isFromYoungerTeam && assignedTeam) {
-              const originalTeam = clubData.teams.find(
-                (t) => t._id === assignedTeam.teamId,
-              );
-              if (originalTeam) {
+            if (isPartnerPlayer && teamPlayer.sourceTeamAlias) {
+              const partnerEntry = partnershipByAlias[teamPlayer.sourceTeamAlias];
+              if (partnerEntry) {
                 originalTeamInfo = {
-                  id: originalTeam._id,
-                  name: originalTeam.name,
-                  alias: originalTeam.alias,
+                  id: partnerEntry.teamId,
+                  name: partnerEntry.teamName,
+                  alias: partnerEntry.teamAlias,
                 };
               }
             }

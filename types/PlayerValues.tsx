@@ -177,4 +177,6 @@ export interface PlayerValues {
   ageGroup: string;
   overAge: boolean;
   managedByISHD?: boolean;
+  sourceClubAlias?: string;
+  sourceTeamAlias?: string;
 }
