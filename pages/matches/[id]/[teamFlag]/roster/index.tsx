@@ -339,11 +339,13 @@ const RosterPage = () => {
           ? poolResponse.data
           : [];
 
-        // Build a lookup from teamAlias → partnership entry using data already
-        // embedded in the match document (matchTeamData.teamPartnership)
-        const partnershipByAlias: Record<string, { teamId: string; teamName: string; teamAlias: string }> = {};
+        // Build a composite-key lookup (clubAlias:teamAlias) → partnership entry
+        // using data already embedded in the match document. Using both aliases
+        // avoids collisions when partner clubs happen to share a team alias.
+        const partnershipByKey: Record<string, { teamId: string; teamName: string; teamAlias: string }> = {};
         for (const p of (matchTeamData.teamPartnership || [])) {
-          partnershipByAlias[p.teamAlias] = {
+          const key = `${p.clubAlias}:${p.teamAlias}`;
+          partnershipByKey[key] = {
             teamId: p.teamId,
             teamName: p.teamName,
             teamAlias: p.teamAlias,
@@ -364,9 +366,16 @@ const RosterPage = () => {
               !!teamPlayer.sourceTeamAlias &&
               teamPlayer.sourceTeamAlias !== matchTeamData.teamAlias;
 
+            // Resolve the partnership entry using the composite key
+            const partnerKey =
+              isPartnerPlayer && teamPlayer.sourceClubAlias && teamPlayer.sourceTeamAlias
+                ? `${teamPlayer.sourceClubAlias}:${teamPlayer.sourceTeamAlias}`
+                : null;
+            const partnerEntry = partnerKey ? partnershipByKey[partnerKey] : null;
+
             // Find the team ID to match against the player's assignedTeams
-            const targetTeamId = isPartnerPlayer && teamPlayer.sourceTeamAlias
-              ? partnershipByAlias[teamPlayer.sourceTeamAlias]?.teamId
+            const targetTeamId = isPartnerPlayer
+              ? partnerEntry?.teamId
               : matchTeamData.teamId;
 
             if (!targetTeamId) return null;
@@ -377,15 +386,12 @@ const RosterPage = () => {
 
             // Resolve originalTeamInfo from the match's embedded partnership data
             let originalTeamInfo: { id: string; name: string; alias: string } | null = null;
-            if (isPartnerPlayer && teamPlayer.sourceTeamAlias) {
-              const partnerEntry = partnershipByAlias[teamPlayer.sourceTeamAlias];
-              if (partnerEntry) {
-                originalTeamInfo = {
-                  id: partnerEntry.teamId,
-                  name: partnerEntry.teamName,
-                  alias: partnerEntry.teamAlias,
-                };
-              }
+            if (isPartnerPlayer && partnerEntry) {
+              originalTeamInfo = {
+                id: partnerEntry.teamId,
+                name: partnerEntry.teamName,
+                alias: partnerEntry.teamAlias,
+              };
             }
 
             return assignedTeam
