@@ -205,15 +205,15 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonEdit = true;
       permissions.showButtonStatus = true;
       permissions.showButtonMatchCenter = true;
+      permissions.showButtonRosterHome = true;
+      permissions.showButtonRosterAway = true;
+      permissions.showButtonSupplementary = true;
 
       if (isMatchCenter) {
-        permissions.showButtonRosterHome = true;
-        permissions.showButtonRosterAway = true;
         permissions.showButtonScoresHome = true;
         permissions.showButtonScoresAway = true;
         permissions.showButtonPenaltiesHome = true;
         permissions.showButtonPenaltiesAway = true;
-        permissions.showButtonSupplementary = true;
       }
     } else {
       // Non-admin users
