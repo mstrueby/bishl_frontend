@@ -569,7 +569,7 @@ export default function MatchDetails({
               {match.matchStatus.key === "FINISHED" && (
                 <div className="inline-flex h-10 items-center justify-center px-3 text-xs font-medium text-gray-700">
                   <span className="flex flex-col items-center leading-none">
-                    <span>{match.home.shortName}</span>
+                    <span>Timeouts</span>
                     <span className="mt-1 flex w-full items-center gap-1">
                       {Array.from(
                         { length: match.matchSettings.numOfPeriods },
@@ -753,7 +753,7 @@ export default function MatchDetails({
               {match.matchStatus.key === "FINISHED" && (
                 <div className="inline-flex h-10 items-center justify-center px-3 text-xs font-medium text-gray-700">
                   <span className="flex flex-col items-center leading-none">
-                    <span>{match.away.shortName}</span>
+                    <span>Timeouts</span>
                     <span className="mt-1 flex w-full items-center gap-1">
                       {Array.from(
                         { length: match.matchSettings.numOfPeriods },
