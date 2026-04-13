@@ -388,7 +388,7 @@ const Home: NextPage<PostsProps> = ({
               refCount === 2
                 ? "text-green-500 bg-green-500/20"
                 : refCount === 1
-                  ? "text-yellow-500 bg-yellow-500/20"
+                  ? "text-yellow-500 bg-yellow-500/30"
                   : "text-red-500 bg-red-500/20";
             const tooltip =
               refCount === 2
