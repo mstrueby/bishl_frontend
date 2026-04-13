@@ -451,7 +451,8 @@ export default function MatchDetails({
   const isAdminOrLeagueAdmin =
     userRoles.includes("ADMIN") || userRoles.includes("LEAGUE_ADMIN");
   const showEventButtons =
-    isAdminOrLeagueAdmin && match.matchStatus.key === "INPROGRESS";
+    !!permissions.showButtonMatchCenter &&
+    match.matchStatus.key === "INPROGRESS";
 
   // Don't render the page if user doesn't have permission
   if (!hasMatchCenterPermission) {
