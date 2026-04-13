@@ -384,19 +384,30 @@ const Home: NextPage<PostsProps> = ({
         <div className="space-y-3 flex-1 p-4">
           {displayedMatches.map((match) => {
             const refCount = (match.referee1 ? 1 : 0) + (match.referee2 ? 1 : 0);
-            const dotColor =
+            const dotClass =
               refCount === 2
-                ? "bg-green-500"
+                ? "text-green-500 bg-green-500/20"
                 : refCount === 1
-                  ? "bg-yellow-400"
-                  : "bg-red-500";
+                  ? "text-yellow-500 bg-yellow-500/20"
+                  : "text-red-500 bg-red-500/20";
+            const tooltip =
+              refCount === 2
+                ? "2 Schiedsrichter eingeteilt"
+                : refCount === 1
+                  ? "1 Schiedsrichter eingeteilt"
+                  : "Kein Schiedsrichter eingeteilt";
             return (
               <div
                 key={match._id}
                 className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`} />
+                  <div
+                    className={`flex-none rounded-full p-1 ${dotClass}`}
+                    title={tooltip}
+                  >
+                    <div className="h-2 w-2 rounded-full bg-current" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-900">
                       {match.home.shortName} - {match.away.shortName}
