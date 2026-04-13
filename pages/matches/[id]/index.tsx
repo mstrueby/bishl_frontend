@@ -91,7 +91,6 @@ const RosterTable: React.FC<RosterTableProps> = ({
                 </th>
                 {hasGoalies && (
                   <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Per.
                   </th>
                 )}
                 <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
