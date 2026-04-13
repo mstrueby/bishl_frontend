@@ -2,7 +2,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  
+
+  ...(process.env.NODE_ENV === 'development' && process.env.REPLIT_DEV_DOMAIN
+    ? { allowedDevOrigins: [process.env.REPLIT_DEV_DOMAIN] }
+    : {}),
+
   images: {
     remotePatterns: [
       {
