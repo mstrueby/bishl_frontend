@@ -43,6 +43,10 @@ const StatusMenu = ({
   const userRoles = user?.roles || [];
   const router = useRouter();
 
+  const isMatchFinished =
+    match?.matchStatus?.key !== "INPROGRESS" &&
+    match?.matchStatus?.key !== "SCHEDULED";
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ml-1">
@@ -109,7 +113,7 @@ const StatusMenu = ({
                   )}
                 </Menu.Item>
               )}
-              {permissions.showButtonRosterHome && (
+              {permissions.showButtonRosterHome && !isMatchFinished && (
                 <Menu.Item>
                   {({ active }) => (
                     <button
@@ -128,7 +132,7 @@ const StatusMenu = ({
                   )}
                 </Menu.Item>
               )}
-              {permissions.showButtonRosterAway && (
+              {permissions.showButtonRosterAway && !isMatchFinished && (
                 <Menu.Item>
                   {({ active }) => (
                     <button
@@ -227,7 +231,6 @@ const MatchCard: React.FC<{
     user,
     displayMatch,
     matchdayOwner || undefined,
-    false,
   );
 
   return (

@@ -82,7 +82,7 @@ const GoalRegisterForm = () => {
   }, [authLoading, user, id, teamFlag]);
 
   // Calculate permissions
-  const permissions = match && user ? calculateMatchButtonPermissions(user, match, undefined, true) : {
+  const permissions = match && user ? calculateMatchButtonPermissions(user, match, undefined) : {
     showButtonScoresHome: false,
     showButtonScoresAway: false
   };

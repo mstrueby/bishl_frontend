@@ -276,7 +276,6 @@ export default function MatchDetails({
             user,
             match,
             matchdayOwner,
-            false,
           );
           return (
             permissions.showButtonMatchCenter && (

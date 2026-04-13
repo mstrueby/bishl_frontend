@@ -24,7 +24,6 @@ export interface MatchButtonPermissions {
   showButtonScoresAway?: boolean;
   showButtonPenaltiesHome?: boolean;
   showButtonPenaltiesAway?: boolean;
-  showButtonEvents?: boolean;
   showButtonMatchCenter?: boolean;
   showButtonSupplementary?: boolean;
 }
@@ -64,7 +63,6 @@ export function calculateMatchButtonPermissions(
   user: User | null,
   match: Match,
   matchdayOwner?: MatchdayOwner,
-  isMatchCenter: boolean = false,
 ): MatchButtonPermissions {
   const permissions: MatchButtonPermissions = {
     showButtonEdit: false,
@@ -75,7 +73,6 @@ export function calculateMatchButtonPermissions(
     showButtonScoresAway: false,
     showButtonPenaltiesHome: false,
     showButtonPenaltiesAway: false,
-    showButtonEvents: false,
     showButtonMatchCenter: false,
     showButtonSupplementary: false,
   };
@@ -104,11 +101,6 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
 
-    // Events button only shown in match center when match is in progress
-    if (isMatchCenter && isMatchInProgress) {
-      permissions.showButtonEvents = true;
-    }
-
     // Roster permissions for match day
     if (isMatchDay) {
       permissions.showButtonRosterHome = true;
@@ -132,11 +124,6 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonStatus = true;
       permissions.showButtonMatchCenter = true;
       permissions.showButtonSupplementary = true;
-
-      // Events button only shown in match center when match is in progress
-      if (isMatchCenter && isMatchInProgress) {
-        permissions.showButtonEvents = true;
-      }
     }
   }
 
@@ -171,11 +158,6 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonStatus = true;
     permissions.showButtonMatchCenter = true;
     permissions.showButtonSupplementary = true;
-
-    // Events button only shown in match center when match is in progress
-    if (isMatchCenter && isMatchInProgress) {
-      permissions.showButtonEvents = true;
-    }
   }
 
   // Non-prod only: allow matchday owners and home club admins to edit match fixtures
@@ -205,16 +187,13 @@ export function calculateMatchButtonPermissions(
       permissions.showButtonEdit = true;
       permissions.showButtonStatus = true;
       permissions.showButtonMatchCenter = true;
-
-      if (isMatchCenter) {
-        permissions.showButtonRosterHome = true;
-        permissions.showButtonRosterAway = true;
-        permissions.showButtonScoresHome = true;
-        permissions.showButtonScoresAway = true;
-        permissions.showButtonPenaltiesHome = true;
-        permissions.showButtonPenaltiesAway = true;
-        permissions.showButtonSupplementary = true;
-      }
+      permissions.showButtonRosterHome = true;
+      permissions.showButtonRosterAway = true;
+      permissions.showButtonScoresHome = true;
+      permissions.showButtonScoresAway = true;
+      permissions.showButtonPenaltiesHome = true;
+      permissions.showButtonPenaltiesAway = true;
+      permissions.showButtonSupplementary = true;
     } else {
       // Non-admin users
       const isHomeClubAdmin = user.club &&
@@ -242,10 +221,6 @@ export function calculateMatchButtonPermissions(
         permissions.showButtonStatus = false;
         permissions.showButtonMatchCenter = false;
         permissions.showButtonSupplementary = false;
-
-        if (isMatchCenter) {
-          permissions.showButtonEvents = false;
-        }
       }
     }
   }
@@ -258,14 +233,10 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonRosterAway = false;
     permissions.showButtonMatchCenter = false;
     permissions.showButtonSupplementary = false;
-
-    if (isMatchCenter) {
-      permissions.showButtonScoresHome = false;
-      permissions.showButtonScoresAway = false;
-      permissions.showButtonPenaltiesHome = false;
-      permissions.showButtonPenaltiesAway = false;
-      permissions.showButtonEvents = false;
-    }
+    permissions.showButtonScoresHome = false;
+    permissions.showButtonScoresAway = false;
+    permissions.showButtonPenaltiesHome = false;
+    permissions.showButtonPenaltiesAway = false;
   }
 
   return permissions;

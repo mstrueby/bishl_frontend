@@ -443,9 +443,15 @@ export default function MatchDetails({
     user,
     match,
     matchdayOwner,
-    true,
   );
   const hasMatchCenterPermission = permissions.showButtonMatchCenter;
+
+  // Event buttons (Tor / Strafe) are only shown inside the matchcenter while
+  // the match is live. This is purely a UI concern, not a permission concern.
+  const isAdminOrLeagueAdmin =
+    userRoles.includes("ADMIN") || userRoles.includes("LEAGUE_ADMIN");
+  const showEventButtons =
+    isAdminOrLeagueAdmin && match.matchStatus.key === "INPROGRESS";
 
   // Don't render the page if user doesn't have permission
   if (!hasMatchCenterPermission) {
@@ -515,7 +521,7 @@ export default function MatchDetails({
           {/* Home Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              {permissions.showButtonEvents && (
+              {showEventButtons && (
                 <>
                   <button
                     onClick={() => setIsHomeGoalDialogOpen(true)}
@@ -674,7 +680,7 @@ export default function MatchDetails({
           {/* Away Team Buttons */}
           <div className="w-1/3 flex justify-center">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              {permissions.showButtonEvents && (
+              {showEventButtons && (
                 <>
                   <button
                     onClick={() => setIsAwayGoalDialogOpen(true)}
@@ -812,7 +818,7 @@ export default function MatchDetails({
                     permissions.showButtonScoresHome ?? false,
                   showButtonScoresAway:
                     permissions.showButtonScoresAway ?? false,
-                  showButtonEvents: permissions.showButtonEvents ?? false,
+                  showButtonEvents: showEventButtons,
                 }}
                 refreshMatchData={refreshMatchData}
                 setIsHomeGoalDialogOpen={setIsHomeGoalDialogOpen}
@@ -832,7 +838,7 @@ export default function MatchDetails({
                     permissions.showButtonPenaltiesHome ?? false,
                   showButtonPenaltiesAway:
                     permissions.showButtonPenaltiesAway ?? false,
-                  showButtonEvents: permissions.showButtonEvents ?? false,
+                  showButtonEvents: showEventButtons,
                 }}
                 refreshMatchData={refreshMatchData}
                 setIsHomePenaltyDialogOpen={setIsHomePenaltyDialogOpen}
