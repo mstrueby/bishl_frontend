@@ -101,8 +101,8 @@ export function calculateMatchButtonPermissions(
     permissions.showButtonEdit = true;
     permissions.showButtonStatus = true;
 
-    // Roster permissions for match day
-    if (isMatchDay) {
+    // Roster permissions for match day or in-progress matches
+    if (isMatchDay || isMatchInProgress) {
       permissions.showButtonRosterHome = true;
       permissions.showButtonRosterAway = true;
       permissions.showButtonMatchCenter = true;

@@ -446,12 +446,12 @@ export default function MatchDetails({
   );
   const hasMatchCenterPermission = permissions.showButtonMatchCenter;
 
-  // Event buttons (Tor / Strafe) are only shown inside the matchcenter while
-  // the match is live. This is purely a UI concern, not a permission concern.
+  // Event buttons (Tor / Strafe / Timeout) are shown inside the matchcenter
+  // while the match is live, for any user who has matchcenter access.
   const isAdminOrLeagueAdmin =
     userRoles.includes("ADMIN") || userRoles.includes("LEAGUE_ADMIN");
   const showEventButtons =
-    isAdminOrLeagueAdmin && match.matchStatus.key === "INPROGRESS";
+    hasMatchCenterPermission && match.matchStatus.key === "INPROGRESS";
 
   // Don't render the page if user doesn't have permission
   if (!hasMatchCenterPermission) {
