@@ -382,22 +382,34 @@ const Home: NextPage<PostsProps> = ({
           )}
         </div>
         <div className="space-y-3 flex-1 p-4">
-          {displayedMatches.map((match) => (
-            <div
-              key={match._id}
-              className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
-            >
-              <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">
-                  {match.home.shortName} - {match.away.shortName}
+          {displayedMatches.map((match) => {
+            const refCount = (match.referee1 ? 1 : 0) + (match.referee2 ? 1 : 0);
+            const dotColor =
+              refCount === 2
+                ? "bg-green-500"
+                : refCount === 1
+                  ? "bg-yellow-400"
+                  : "bg-red-500";
+            return (
+              <div
+                key={match._id}
+                className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-900">
+                      {match.home.shortName} - {match.away.shortName}
+                    </div>
+                    <div className="text-xs text-gray-500">{match.venue.name}</div>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500">{match.venue.name}</div>
+                <div className="text-sm text-gray-400 font-medium">
+                  {formatTime(match.startDate)}
+                </div>
               </div>
-              <div className="text-sm text-gray-400 font-medium">
-                {formatTime(match.startDate)}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         {hasMoreThanThree && (
           <div className="p-2 border-t border-gray-900/5 bg-gray-50">
