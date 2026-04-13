@@ -566,6 +566,31 @@ export default function MatchDetails({
                   </button>
                 </>
               )}
+              {match.matchStatus.key === "FINISHED" && (
+                <div className="inline-flex h-10 items-center justify-center px-3 text-xs font-medium text-gray-700">
+                  <span className="flex flex-col items-center leading-none">
+                    <span>{match.home.shortName}</span>
+                    <span className="mt-1 flex w-full items-center gap-1">
+                      {Array.from(
+                        { length: match.matchSettings.numOfPeriods },
+                        (_, i) => i + 1,
+                      ).map((period) => {
+                        const taken = (match.home.timeouts ?? []).includes(period);
+                        return (
+                          <span
+                            key={period}
+                            className={
+                              taken
+                                ? "h-1.5 flex-1 rounded-full bg-gray-300"
+                                : "h-1.5 flex-1 rounded-full bg-yellow-500"
+                            }
+                          />
+                        );
+                      })}
+                    </span>
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -724,6 +749,31 @@ export default function MatchDetails({
                     </span>
                   </button>
                 </>
+              )}
+              {match.matchStatus.key === "FINISHED" && (
+                <div className="inline-flex h-10 items-center justify-center px-3 text-xs font-medium text-gray-700">
+                  <span className="flex flex-col items-center leading-none">
+                    <span>{match.away.shortName}</span>
+                    <span className="mt-1 flex w-full items-center gap-1">
+                      {Array.from(
+                        { length: match.matchSettings.numOfPeriods },
+                        (_, i) => i + 1,
+                      ).map((period) => {
+                        const taken = (match.away.timeouts ?? []).includes(period);
+                        return (
+                          <span
+                            key={period}
+                            className={
+                              taken
+                                ? "h-1.5 flex-1 rounded-full bg-gray-300"
+                                : "h-1.5 flex-1 rounded-full bg-yellow-500"
+                            }
+                          />
+                        );
+                      })}
+                    </span>
+                  </span>
+                </div>
               )}
             </div>
           </div>
