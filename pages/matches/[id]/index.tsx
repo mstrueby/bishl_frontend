@@ -391,30 +391,45 @@ export default function MatchDetails({
               return { ...goal, currentScore: `${homeScore}-${awayScore}` };
             });
 
-            if (goalsWithScore.length === 0) {
-              return (
-                <div className="text-center py-8 text-sm text-gray-500">
-                  Keine Tore vorhanden
-                </div>
-              );
-            }
-
-            const groups = groupByPeriod(
+            const eventGroups = groupByPeriod(
               goalsWithScore,
               (g) => g.matchTime,
               match.matchSettings,
             );
 
+            const periodNames: Record<number, string> = { 2: "Halbzeit", 3: "Drittel", 4: "Viertel" };
+            const periodName = periodNames[match.matchSettings.numOfPeriods] || "Periode";
+            const regulationLabels = Array.from(
+              { length: match.matchSettings.numOfPeriods },
+              (_, i) => `${i + 1}. ${periodName}`,
+            );
+            const allGroups = [
+              ...regulationLabels.map((label) => ({
+                label,
+                items: eventGroups.find((g) => g.label === label)?.items ?? [],
+              })),
+              ...eventGroups.filter((g) => !regulationLabels.includes(g.label)),
+            ];
+
             return (
               <ul className="divide-y divide-gray-200">
-                {groups.flatMap((group) => [
+                {allGroups.flatMap((group) => [
                   <li
                     key={`header-${group.label}`}
                     className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider"
                   >
                     {group.label}
                   </li>,
-                  ...group.items.map((goal, index) => (
+                  ...(group.items.length === 0
+                    ? [
+                        <li
+                          key={`empty-${group.label}`}
+                          className="px-4 py-4 text-sm text-gray-400 text-center italic"
+                        >
+                          Kein Tor in diesem Abschnitt
+                        </li>,
+                      ]
+                    : group.items.map((goal, index) => (
                     <li
                       key={`${goal.teamFlag}-${group.label}-${index}`}
                       className="flex items-center py-4 px-4 sm:px-6"
@@ -485,7 +500,7 @@ export default function MatchDetails({
                         )}
                       </div>
                     </li>
-                  )),
+                  ))),
                 ])}
               </ul>
             );
@@ -517,30 +532,45 @@ export default function MatchDetails({
                 timeToSeconds(b.matchTimeStart),
             );
 
-            if (sortedPenalties.length === 0) {
-              return (
-                <div className="text-center py-8 text-sm text-gray-500">
-                  Keine Strafen vorhanden
-                </div>
-              );
-            }
-
-            const groups = groupByPeriod(
+            const eventGroups = groupByPeriod(
               sortedPenalties,
               (p) => p.matchTimeStart,
               match.matchSettings,
             );
 
+            const periodNames: Record<number, string> = { 2: "Halbzeit", 3: "Drittel", 4: "Viertel" };
+            const periodName = periodNames[match.matchSettings.numOfPeriods] || "Periode";
+            const regulationLabels = Array.from(
+              { length: match.matchSettings.numOfPeriods },
+              (_, i) => `${i + 1}. ${periodName}`,
+            );
+            const allGroups = [
+              ...regulationLabels.map((label) => ({
+                label,
+                items: eventGroups.find((g) => g.label === label)?.items ?? [],
+              })),
+              ...eventGroups.filter((g) => !regulationLabels.includes(g.label)),
+            ];
+
             return (
               <ul className="divide-y divide-gray-200">
-                {groups.flatMap((group) => [
+                {allGroups.flatMap((group) => [
                   <li
                     key={`header-${group.label}`}
                     className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider"
                   >
                     {group.label}
                   </li>,
-                  ...group.items.map((penalty, index) => (
+                  ...(group.items.length === 0
+                    ? [
+                        <li
+                          key={`empty-${group.label}`}
+                          className="px-4 py-4 text-sm text-gray-400 text-center italic"
+                        >
+                          Keine Strafe in diesem Abschnitt
+                        </li>,
+                      ]
+                    : group.items.map((penalty, index) => (
                     <li
                       key={`${penalty.teamFlag}-${group.label}-${index}`}
                       className="flex items-center py-4 px-4 sm:px-6"
@@ -579,7 +609,7 @@ export default function MatchDetails({
                         </p>
                       </div>
                     </li>
-                  )),
+                  ))),
                 ])}
               </ul>
             );
