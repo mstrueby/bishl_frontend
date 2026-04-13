@@ -426,7 +426,7 @@ export default function MatchDetails({
                           key={`empty-${group.label}`}
                           className="px-4 py-4 text-sm text-gray-400 text-center italic"
                         >
-                          Kein Tor in diesem Abschnitt
+                          Keine Tore in diesem Abschnitt
                         </li>,
                       ]
                     : group.items.map((goal, index) => (
@@ -567,7 +567,7 @@ export default function MatchDetails({
                           key={`empty-${group.label}`}
                           className="px-4 py-4 text-sm text-gray-400 text-center italic"
                         >
-                          Keine Strafe in diesem Abschnitt
+                          Keine Strafen in diesem Abschnitt
                         </li>,
                       ]
                     : group.items.map((penalty, index) => (
