@@ -492,7 +492,7 @@ const RosterPage = () => {
           user,
           match,
           matchdayOwner || undefined,
-          backLink.includes("matchcenter"),
+        backLink.includes("matchcenter"),
         )
       : {
           showButtonRosterHome: false,
