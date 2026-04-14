@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react';
+import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
 import { classNames } from '../../../tools/utils';
@@ -8,61 +8,18 @@ interface MatchStatusSelectProps {
   statuses: { key: string, value: string }[];
   onStatusChange: (key: string) => void;
   label?: string;
-  currentStatus?: string;
-  userRole: string[];
 }
-
-const transitionsByRole: Record<string, Record<string, string[]>> = {
-  LEAGUE_ADMIN: {
-    SCHEDULED: ['INPROGRESS', 'CANCELLED', 'FORFEITED'],
-    INPROGRESS: ['FINISHED'],
-  },
-  CLUB_ADMIN: {
-    SCHEDULED: ['INPROGRESS'],
-    INPROGRESS: ['FINISHED'],
-  },
-};
 
 const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
   selectedStatus,
   statuses = [],
   onStatusChange,
   label = "Status",
-  currentStatus,
-  userRole,
 }) => {
-
-  const allowedStatuses = useMemo(() => {
-    if (!userRole || !Array.isArray(userRole)) return [];
-    
-    // Admin has full access
-    if (userRole.includes('ADMIN')) return statuses;
-    
-    // Check if any role has defined transitions
-    const allAllowedKeys = new Set<string>();
-    userRole.forEach(role => {
-      const roleTransitions = transitionsByRole[role];
-      if (roleTransitions && currentStatus) {
-        const allowed = roleTransitions[currentStatus];
-        if (allowed) {
-          allowed.forEach(key => allAllowedKeys.add(key));
-        }
-      }
-    });
-
-    if (allAllowedKeys.size === 0) {
-      // If no specific transitions found but roles exist, return current status at least
-      return statuses.filter(s => s.key === currentStatus);
-    }
-
-    return statuses.filter(
-      (s) => s.key === currentStatus || allAllowedKeys.has(s.key)
-    );
-  }, [statuses, currentStatus, userRole]);
 
   return (
     <Listbox
-      value={allowedStatuses.find(status => status.key === selectedStatus?.key)}
+      value={statuses.find(status => status.key === selectedStatus?.key)}
       onChange={(selected) => {
         if (selected) {
           onStatusChange(selected.key);
@@ -97,7 +54,7 @@ const MatchStatusSelect: React.FC<MatchStatusSelectProps> = ({
             leaveTo="opacity-0"
           >
             <Listbox.Options className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {allowedStatuses.map((status) => (
+              {statuses.map((status) => (
                 <Listbox.Option
                   key={status.key}
                   value={status}

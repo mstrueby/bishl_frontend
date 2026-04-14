@@ -4,7 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { MatchValues } from "../../../types/MatchValues";
 import MatchStatusSelect from "./MatchStatusSelect";
 import FinishTypeSelect from "./FinishTypeSelect";
-import { allMatchStatuses, allFinishTypes } from "../../../tools/consts";
+import { allFinishTypes } from "../../../tools/consts";
 import { CldImage } from "next-cloudinary";
 import apiClient from "../../../lib/apiClient";
 
@@ -40,7 +40,6 @@ const MatchStatus = ({
   match,
   onSuccess,
   onMatchUpdate,
-  userRole,
 }: MatchEditProps) => {
   const initialEditData = {
     matchStatus: { key: match.matchStatus.key, value: match.matchStatus.value },
@@ -60,6 +59,27 @@ const MatchStatus = ({
   };
   const [editData, setEditData] = useState<EditData>(initialEditData);
   const [loading, setLoading] = useState<boolean>(false);
+  const [allowedTransitions, setAllowedTransitions] = useState<{ key: string; value: string }[]>([
+    { key: match.matchStatus.key, value: match.matchStatus.value },
+  ]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const fetchAllowedTransitions = async () => {
+      try {
+        const response = await apiClient.get(`/matches/${match._id}/allowed-transitions`);
+        if (response.data?.success) {
+          const current = { key: match.matchStatus.key, value: match.matchStatus.value };
+          const transitions: { key: string; value: string }[] = response.data.data;
+          setAllowedTransitions([current, ...transitions]);
+        }
+      } catch (error) {
+        console.error("Error fetching allowed transitions:", error);
+        setAllowedTransitions([{ key: match.matchStatus.key, value: match.matchStatus.value }]);
+      }
+    };
+    fetchAllowedTransitions();
+  }, [isOpen, match._id, match.matchStatus.key, match.matchStatus.value]);
 
   useEffect(() => {
     setEditData({
@@ -179,13 +199,9 @@ const MatchStatus = ({
                   <div className="space-y-6">
                     <MatchStatusSelect
                       selectedStatus={editData.matchStatus}
-                      statuses={allMatchStatuses.sort(
-                        (a, b) => a.sortOrder - b.sortOrder,
-                      )}
-                      currentStatus={match.matchStatus.key}
-                      userRole={userRole}
+                      statuses={allowedTransitions}
                       onStatusChange={(statusKey) => {
-                        const selectedStatus = allMatchStatuses.find(
+                        const selectedStatus = allowedTransitions.find(
                           (v) => v.key === statusKey,
                         );
                         if (selectedStatus) {
