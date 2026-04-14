@@ -68,11 +68,9 @@ const MatchStatus = ({
     const fetchAllowedTransitions = async () => {
       try {
         const response = await apiClient.get(`/matches/${match._id}/allowed-transitions`);
-        if (response.data?.success) {
-          const current = { key: match.matchStatus.key, value: match.matchStatus.value };
-          const transitions: { key: string; value: string }[] = response.data.data;
-          setAllowedTransitions([current, ...transitions]);
-        }
+        const transitions: { key: string; value: string }[] = response.data || [];
+        const current = { key: match.matchStatus.key, value: match.matchStatus.value };
+        setAllowedTransitions([current, ...transitions]);
       } catch (error) {
         console.error("Error fetching allowed transitions:", error);
         setAllowedTransitions([{ key: match.matchStatus.key, value: match.matchStatus.value }]);
