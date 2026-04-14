@@ -8,7 +8,6 @@ import { MatchValues, RosterPlayer } from "../../../types/MatchValues";
 import { MatchdayOwner } from "../../../types/TournamentValues";
 import { timeToSeconds, groupByPeriod } from "../../../utils/matchPeriods";
 import Layout from "../../../components/Layout";
-import { getCookie } from "cookies-next";
 import apiClient from "../../../lib/apiClient";
 import { getErrorMessage } from "../../../lib/errorHandler";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -20,9 +19,6 @@ import MatchSettingsDisplay from "../../../components/ui/MatchSettingsDisplay";
 interface MatchDetailsProps {
   match: MatchValues;
   matchdayOwner: MatchdayOwner;
-  jwt?: string;
-  userRoles?: string[];
-  userClubId?: string | null;
 }
 
 interface RosterTableProps {
@@ -654,7 +650,6 @@ export default function MatchDetails({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
-  const jwt = (getCookie("jwt", context) || "") as string;
 
   try {
     // Fetch match data
@@ -673,27 +668,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       return { notFound: true };
     }
 
-    let userRoles: string[] = [];
-    let userClubId: string | null = null;
-
-    if (jwt) {
-      try {
-        const userResponse = await apiClient.get("/users/me", {
-          headers: { Authorization: `Bearer ${jwt}` },
-        });
-        const userData = userResponse.data;
-        userRoles = userData.roles || [];
-
-        // Get user's club ID if available
-        if (userData.club && userData.club.clubId) {
-          userClubId = userData.club.clubId;
-        }
-      } catch (userError) {
-        // User fetch failed, continue without user data
-        console.error("Error fetching user data:", getErrorMessage(userError));
-      }
-    }
-
     // Fetch matchday owner data
     const matchdayResponse = await apiClient.get(
       `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
@@ -704,9 +678,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       props: {
         match,
         matchdayOwner: matchdayData.owner,
-        jwt,
-        userRoles,
-        userClubId: userClubId || null,
       },
     };
   } catch (error) {
