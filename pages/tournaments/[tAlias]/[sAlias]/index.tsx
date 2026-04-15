@@ -23,6 +23,7 @@ import {
 import { MatchValues } from "../../../../types/MatchValues";
 import MatchList from "../../../../components/ui/MatchList";
 import Standings from "../../../../components/ui/Standings";
+import RoundCard from "../../../../components/ui/RoundCard";
 import { classNames } from "../../../../tools/utils";
 import { MatchRefreshProvider } from "../../../../context/MatchRefreshContext";
 import { mutate } from "swr";
@@ -202,7 +203,7 @@ export default function SeasonHub({
     ? `${matchdayName}`
     : roundName
       ? `Spielplan und Tabelle`
-      : `Spielplan`;
+      : `Übersicht`;
 
   // Determine if this is the current season (for canonical URL)
   const isCurrentSeason =
@@ -428,7 +429,7 @@ export default function SeasonHub({
       </div>
 
       {/* Cascading Filters Bar for ROUND, MATCHDAY */}
-      <div className="py-4 mb-6 sm:mb-10">
+      {pageMode !== "SEASON" && <div className="py-4 mb-6 sm:mb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Round Selector */}
           <div>
@@ -771,7 +772,24 @@ export default function SeasonHub({
             )}
           </div>
         </div>
-      </div>
+      </div>}
+
+      {/* Season Mode: Round Cards Hub */}
+      {pageMode === "SEASON" && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Runden</h2>
+          <div className="flex flex-col gap-4">
+            {allRounds.map((round) => (
+              <RoundCard
+                key={round.alias}
+                round={round}
+                tAlias={tAlias}
+                sAlias={sAlias}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tab Menu for ROUND mode with standings */}
       {pageMode === "ROUND" &&
@@ -830,8 +848,8 @@ export default function SeasonHub({
           </div>
         )}
 
-      {/* Matches Display - Context-aware based on page mode */}
-      {displayMatches.length > 0 ? (
+      {/* Matches Display - Context-aware based on page mode (not shown in SEASON mode) */}
+      {pageMode !== "SEASON" && (displayMatches.length > 0 ? (
         <>
           {/* Show match list when not in ROUND mode with standings, or when tab is "spielplan" */}
           {(pageMode !== "ROUND" ||
@@ -893,16 +911,14 @@ export default function SeasonHub({
       ) : (
         <div className="text-center py-12">
           <p className={`text-sm text-gray-500 mb-0`}>
-            {pageMode === "SEASON"
-              ? "Keine Spiele für diese Saison"
-              : pageMode === "MATCHDAY"
-                ? "Keine Spiele für diesen Spieltag"
-                : "Keine Spiele für diese Runde"}
+            {pageMode === "MATCHDAY"
+              ? "Keine Spiele für diesen Spieltag"
+              : "Keine Spiele für diese Runde"}
           </p>
         </div>
-      )}
+      ))}
 
-      {displayMatchSettings && (
+      {pageMode !== "SEASON" && displayMatchSettings && (
         <MatchSettingsDisplay
           matchSettings={displayMatchSettings}
           matchSettingsSource={displayMatchSettingsSource}
