@@ -163,12 +163,12 @@ const MenuItemLink = React.forwardRef<HTMLAnchorElement, MenuItemLinkProps>(
     <Link href={href} className={className} ref={ref}>
       {children}
     </Link>
-  )
+  ),
 );
 
-MenuItemLink.displayName = 'MenuItemLink';
+MenuItemLink.displayName = "MenuItemLink";
 
-const isDemo = process.env.NEXT_PUBLIC_IS_DEMO === 'true';
+const isDemo = process.env.NEXT_PUBLIC_IS_DEMO === "true";
 
 const Header = () => {
   const router = useRouter();
@@ -188,7 +188,10 @@ const Header = () => {
               {/* Navigation (tablet, desktop) */}
               <div className="flex items-center">
                 <div className="flex-shrink-0 flex items-center justify-center">
-                  <Link href="/" className="hover:cursor-pointer flex justify-center items-center">
+                  <Link
+                    href="/"
+                    className="hover:cursor-pointer flex justify-center items-center"
+                  >
                     <Image
                       src="https://res.cloudinary.com/dajtykxvp/image/upload/v1730372755/logos/bishl_logo.svg"
                       alt="Logo"
@@ -447,7 +450,8 @@ const Header = () => {
                           )}
                           {/* PLAYER_ADMIN items */}
                           {(user.roles?.includes("PLAYER_ADMIN") ||
-                            user.roles?.includes("ADMIN")) && (
+                            user.roles?.includes("ADMIN") ||
+                            user.roles?.includes("LEAGUE_ADMIN")) && (
                             <>
                               <MenuItem>
                                 <MenuItemLink

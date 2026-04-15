@@ -182,6 +182,8 @@ const Edit: NextPage = () => {
 
   if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) return null;
 
+  const isReadOnly = !hasAnyRole([UserRole.ADMIN]);
+
   if (!player) {
     return (
       <Layout>
@@ -240,7 +242,8 @@ const Edit: NextPage = () => {
         enableReinitialize={true}
         handleCancel={handleCancel}
         loading={loading}
-        isAdmin={true}
+        isAdmin={!isReadOnly}
+        readOnly={isReadOnly}
       />
 
       <WkoRules rules={wkoRules} dynamicRules={dynamicRules} assignmentWindow={assignmentWindow} />

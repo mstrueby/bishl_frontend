@@ -40,7 +40,7 @@ const Edit: NextPage = () => {
       return;
     }
     
-    if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN, UserRole.LEAGUE_ADMIN])) {
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN])) {
       router.push('/');
     }
   }, [authLoading, user, hasAnyRole, router]);
@@ -180,11 +180,9 @@ const Edit: NextPage = () => {
     );
   }
 
-  if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN, UserRole.LEAGUE_ADMIN]) || !player) {
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN]) || !player) {
     return null;
   }
-
-  const isReadOnly = !hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN]);
 
   const initialValues: PlayerValues = {
     _id: player._id || '',
@@ -234,7 +232,6 @@ const Edit: NextPage = () => {
         clubName={clubName}
         clubEmail={clubEmail}
         assignmentWindow={assignmentWindow}
-        readOnly={isReadOnly}
       />
 
       <WkoRules rules={wkoRules} dynamicRules={dynamicRules} assignmentWindow={assignmentWindow} />
