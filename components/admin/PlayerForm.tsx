@@ -63,6 +63,7 @@ interface PlayerFormProps {
   clubEmail?: string;
   isAdmin?: boolean;
   assignmentWindow?: any;
+  readOnly?: boolean;
 }
 
 const PlayerForm: React.FC<PlayerFormProps> = ({
@@ -77,6 +78,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
   clubEmail,
   isAdmin = false,
   assignmentWindow,
+  readOnly = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -633,7 +635,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 : "Diese Daten werden durch die Passstelle verwaltet und können nicht geändert werden."}
             </p>
           </div>
-          {isAdmin && !stammdatenEditMode && (
+          {isAdmin && !stammdatenEditMode && !readOnly && (
             <button
               type="button"
               onClick={() => setStammdatenEditMode(true)}
@@ -873,7 +875,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       Diese Daten können für die Anzeige angepasst werden.
                     </p>
                   </div>
-                  {!editMode && (
+                  {!editMode && !readOnly && (
                     <button
                       type="button"
                       onClick={() => setEditMode(true)}
@@ -1093,7 +1095,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                       <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
                         Spielerpässe
                       </h3>
-                      <div className="flex flex-wrap items-center gap-2">
+                      {!readOnly && <div className="flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={() => setIsPassCheckModalOpen(true)}
@@ -1268,7 +1270,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                           />
                           <span className="hidden sm:inline">Neu</span>
                         </button>
-                      </div>
+                      </div>}
                     </div>
 
                     {/** disable licence success message
@@ -1689,7 +1691,7 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                                             initialValues.managedByISHD
                                           );
                                           const showActions =
-                                            isAdmin || isOwnClub;
+                                            !readOnly && (isAdmin || isOwnClub);
 
                                           return (
                                             <tr
