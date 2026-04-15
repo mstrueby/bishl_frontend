@@ -282,7 +282,7 @@ const MatchCard: React.FC<{
               <MatchStatusBadge
                 statusKey={displayMatch?.matchStatus?.key || "SCHEDULED"}
                 finishTypeKey={displayMatch?.finishType?.key || ""}
-                statusValue={displayMatch?.matchStatus?.value || "Angesetzt"}
+                statusValue={displayMatch?.matchStatus?.value || "angesetzt"}
                 finishTypeValue={displayMatch?.finishType?.value || ""}
               />
             </div>
@@ -483,7 +483,7 @@ const MatchCard: React.FC<{
           <MatchStatusBadge
             statusKey={displayMatch?.matchStatus?.key || "SCHEDULED"}
             finishTypeKey={displayMatch?.finishType?.key || ""}
-            statusValue={displayMatch?.matchStatus?.value || "Angesetzt"}
+            statusValue={displayMatch?.matchStatus?.value || "angesetzt"}
             finishTypeValue={displayMatch?.finishType?.value || ""}
           />
         </div>

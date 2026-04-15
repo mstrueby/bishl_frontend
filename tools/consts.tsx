@@ -441,7 +441,7 @@ export const refereeLevels = {
 export const allMatchStatuses = [
   {
     key: "SCHEDULED",
-    value: "Angesetzt",
+    value: "angesetzt",
     sortOrder: 1
   },
   {
@@ -451,17 +451,17 @@ export const allMatchStatuses = [
   },
   {
     key: "FINISHED",
-    value: "Beendet",
+    value: "beendet",
     sortOrder: 3
   },
   {
     key: "CANCELLED",
-    value: "Abgesagt",
+    value: "abgesagt",
     sortOrder: 4
   },
   {
     key: "FORFEITED",
-    value: "Gewertet",
+    value: "gewertet",
     sortOrder: 5
   }
 ];

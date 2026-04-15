@@ -1186,7 +1186,7 @@ export default function MatchDetails({
                               {
                                 matchStatus: {
                                   key: "FINISHED",
-                                  value: "Beendet",
+                                  value: "beendet",
                                 },
                                 finishType: selectedFinishType,
                               },

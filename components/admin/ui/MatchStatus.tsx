@@ -188,7 +188,7 @@ const MatchStatus = ({
                   Ergebnis bearbeiten
                 </Dialog.Title>
                 <div className="mb-3">
-                  <p className="text-sm text-gray-800">
+                  <p className="text-sm text-red-700">
                     Änderungen am Status können <strong>nicht</strong>{" "}
                     rückgängig gemacht werden.
                   </p>
