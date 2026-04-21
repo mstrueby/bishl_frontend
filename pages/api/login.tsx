@@ -13,6 +13,7 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
     
+    let httpStatus: number | undefined;
     try {
       const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
         method: 'POST',
@@ -20,12 +21,14 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         body: JSON.stringify({ email, password })
       })
 
+      httpStatus = result.status;
+
       let data;
       const responseText = await result.text();
       try {
         data = JSON.parse(responseText);
       } catch (parseError) {
-        console.error('Response text:', responseText);
+        console.error(`Login parse error: HTTP ${httpStatus} - Invalid JSON response`);
         throw new Error('Invalid JSON response from server');
       }
 
@@ -45,7 +48,9 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(result.status).json({ error: data.detail || 'Authentication failed' })
       }
     } catch (error) {
-      console.error('Login error:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      const statusPart = httpStatus !== undefined ? ` HTTP ${httpStatus}` : '';
+      console.error(`Login error:${statusPart} - ${message}`);
       res.status(500).json({ error: 'Internal server error during login' })
     }
   } else {
