@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 import { withRateLimit } from '../../lib/rateLimit';
 import { withCSRF } from '../../lib/csrf';
+import { logApiError } from '../../lib/apiLogger';
 
 const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
@@ -28,7 +29,7 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       try {
         data = JSON.parse(responseText);
       } catch (parseError) {
-        console.error(`Login parse error: HTTP ${httpStatus} - Invalid JSON response`);
+        logApiError('login', httpStatus, 'Invalid JSON response');
         throw new Error('Invalid JSON response from server');
       }
 
@@ -48,9 +49,7 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(result.status).json({ error: data.detail || 'Authentication failed' })
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      const statusPart = httpStatus !== undefined ? ` HTTP ${httpStatus}` : '';
-      console.error(`Login error:${statusPart} - ${message}`);
+      logApiError('login', httpStatus, 'Unexpected error during login');
       res.status(500).json({ error: 'Internal server error during login' })
     }
   } else {

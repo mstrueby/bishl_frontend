@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withAuth } from '../../lib/serverAuth';
 import axios from 'axios';
+import { logApiError } from '../../lib/apiLogger';
 
 const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'GET') {
@@ -23,12 +24,12 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(200).json(userData);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.error(`User fetch error: HTTP ${error.response.status} - Failed to fetch user`);
+        logApiError('user', error.response.status, 'Failed to fetch user');
         res.status(error.response.status).json({
           error: error.response.data?.detail || 'Failed to fetch user'
         });
       } else {
-        console.error('User fetch error: unexpected error');
+        logApiError('user', undefined, 'Unexpected error fetching user');
         res.status(500).json({ error: 'Internal server error' });
       }
     }
