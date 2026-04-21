@@ -96,7 +96,7 @@ After each major refactoring task, manually test:
 - [ ] Login/Logout flow
 - [ ] Admin dashboard access
 - [ ] Form submissions (any one form)
-- [ ] Match center (basic functionality)
+- [ ] Matchcenter (basic functionality)
 - [ ] Calendar view loads
 - [ ] Tournament page loads
 - [ ] Permission checks work
@@ -141,7 +141,7 @@ After each major refactoring task, manually test:
 2. **Page Testing Priority**
    - Authentication pages (login, logout)
    - Admin dashboard
-   - Match center
+   - Matchcenter
    - Tournament pages (after Task #18 URL refactoring)
 
 3. **E2E Testing (Playwright)**

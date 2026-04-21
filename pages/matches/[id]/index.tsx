@@ -315,7 +315,7 @@ export default function MatchDetails({
                 href={`/matches/${match._id}/matchcenter/`}
                 className="flex items-center"
               >
-                <span className="mr-2">Match Center</span>
+                <span className="mr-2">Matchcenter</span>
                 <ChevronRightIcon
                   aria-hidden="true"
                   className="h-3 w-3 text-gray-400"

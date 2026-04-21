@@ -1522,7 +1522,7 @@ const RosterPage = () => {
         <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
         <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
           {backLink.includes("/matchcenter")
-            ? "Match Center"
+            ? "Matchcenter"
             : backLink.includes("/calendar")
               ? "Kalender"
               : tournamentConfigs[match.tournament.alias]?.name}

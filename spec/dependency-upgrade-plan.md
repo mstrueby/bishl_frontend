@@ -227,7 +227,7 @@ npm install next@latest
 - [ ] Admin dashboard access
 - [ ] Form submissions (club, team, player, match)
 - [ ] Image uploads (Cloudinary)
-- [ ] Match center functionality
+- [ ] Matchcenter functionality
 - [ ] Tournament pages
 - [ ] Calendar view
 - [ ] PDF generation

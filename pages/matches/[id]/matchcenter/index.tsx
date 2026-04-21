@@ -463,7 +463,7 @@ export default function MatchDetails({
               Nicht berechtigt
             </h2>
             <p className="text-gray-500 mb-4">
-              Sie haben keine Berechtigung, die Match Center für dieses Spiel
+              Sie haben keine Berechtigung, die Matchcenter für dieses Spiel
               aufzurufen.
             </p>
             <Link
@@ -482,7 +482,7 @@ export default function MatchDetails({
     <>
       <Head>
         <title>
-          Match Center - {match.home.shortName} - {match.away.shortName}
+          Matchcenter - {match.home.shortName} - {match.away.shortName}
         </title>
       </Head>
       <Layout>
@@ -494,7 +494,7 @@ export default function MatchDetails({
             />
             <span className="ml-2">
               {backLink.includes("/matchcenter")
-                ? "Match Center"
+                ? "Matchcenter"
                 : backLink.includes("/calendar")
                   ? "Kalender"
                   : tournamentConfigs[match.tournament.alias]?.name}
