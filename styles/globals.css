@@ -1,4 +1,14 @@
 
+/* Navigation progress bar — fixed overlay, never displaces content */
+.nav-progress-bar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 /* Add styles for the listbox options to appear above the dialog and be larger */
 .headlessui-listbox-options {
   z-index: 50 !important;
