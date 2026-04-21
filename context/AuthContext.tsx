@@ -16,10 +16,9 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
     const checkAuth = async () => {
       try {
         setLoading(true);
-        
-        // Check if we have an access token first
+
         const accessToken = localStorage.getItem('access_token');
-        
+
         if (!accessToken) {
           console.log('No access token found');
           setUser(null);
@@ -28,32 +27,85 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
           return;
         }
 
-        // Fetch CSRF token first
         const csrfResponse = await fetch('/api/csrf-token');
         const csrfData = await csrfResponse.json();
         if (csrfData.csrfToken) {
           localStorage.setItem('csrf_token', csrfData.csrfToken);
         }
 
-        // Fetch user data with access token
-        const userResponse = await fetch('/api/user', {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
+        const fetchUser = (token: string) =>
+          fetch('/api/user', {
+            credentials: 'include',
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+
+        let userResponse = await fetchUser(accessToken);
+
+        if (userResponse.status === 401) {
+          const refreshToken = localStorage.getItem('refresh_token');
+
+          if (refreshToken) {
+            try {
+              const refreshResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/users/refresh`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ refresh_token: refreshToken }),
+                }
+              );
+
+              if (refreshResponse.ok) {
+                const refreshData = await refreshResponse.json();
+                const newAccessToken =
+                  refreshData?.data?.access_token || refreshData?.access_token;
+                const newRefreshToken =
+                  refreshData?.data?.refresh_token || refreshData?.refresh_token;
+
+                if (newAccessToken) {
+                  localStorage.setItem('access_token', newAccessToken);
+                  if (newRefreshToken) {
+                    localStorage.setItem('refresh_token', newRefreshToken);
+                  }
+                  userResponse = await fetchUser(newAccessToken);
+                } else {
+                  localStorage.removeItem('access_token');
+                  localStorage.removeItem('refresh_token');
+                  setUser(null);
+                  setAuthError(null);
+                  return;
+                }
+              } else {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                setUser(null);
+                setAuthError(null);
+                return;
+              }
+            } catch (refreshErr) {
+              console.error('Token refresh failed during auth check:', refreshErr);
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('refresh_token');
+              setUser(null);
+              setAuthError(null);
+              return;
+            }
+          } else {
+            localStorage.removeItem('access_token');
+            setUser(null);
+            setAuthError(null);
+            return;
           }
-        });
-        
+        }
+
         if (userResponse.ok) {
           const userData = await userResponse.json();
-          // The /api/user endpoint should already extract the data field,
-          // but handle both cases for safety
           const user = userData.data || userData;
           console.log('User loaded from AuthContext:', user._id);
           setUser(user);
           setAuthError(null);
         } else {
           console.log('Failed to fetch user, clearing tokens');
-          // Clear invalid tokens
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           setUser(null);
@@ -72,7 +124,6 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
       checkAuth();
     }
   }, [isClient]);
-
 
   const contextValue = useMemo(() => ({
     user,
