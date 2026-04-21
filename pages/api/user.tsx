@@ -23,7 +23,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(200).json(userData);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.error('User fetch error:', error.response.status, error.response.data?.detail || error.message);
+        console.error(`User fetch error: HTTP ${error.response.status} - Failed to fetch user`);
         res.status(error.response.status).json({
           error: error.response.data?.detail || 'Failed to fetch user'
         });
