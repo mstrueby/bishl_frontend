@@ -26,7 +26,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (axios.isAxiosError(error) && error.response) {
         logApiError('user', error.response.status, 'Failed to fetch user');
         res.status(error.response.status).json({
-          error: error.response.data?.detail || 'Failed to fetch user'
+          error: 'Failed to fetch user'
         });
       } else {
         logApiError('user', undefined, 'Unexpected error fetching user');

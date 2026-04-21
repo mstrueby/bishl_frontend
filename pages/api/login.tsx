@@ -46,7 +46,7 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           expires_in
         })
       } else {
-        res.status(result.status).json({ error: data.detail || 'Authentication failed' })
+        res.status(result.status).json({ error: 'Authentication failed' })
       }
     } catch (error) {
       logApiError('login', httpStatus, 'Unexpected error during login');
