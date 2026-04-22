@@ -7,8 +7,8 @@ import DemoWarmup from '../components/ui/DemoWarmup';
 import '../styles/globals.css'
 
 const progress = new ProgressBar({
-  size: 3,
-  color: '#c2410c',
+  size: 4,
+  color: '#c20c0c',
   className: 'nav-progress-bar',
   delay: 80,
 });
