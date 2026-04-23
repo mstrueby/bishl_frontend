@@ -7,13 +7,14 @@ import {
   ScoresBase,
   PenaltiesBase,
 } from "../../../../types/MatchValues";
-import { timeToSeconds } from "../../../../utils/matchPeriods";
+import { timeToSeconds, getPeriodLabel } from "../../../../utils/matchPeriods";
 import Layout from "../../../../components/Layout";
 import apiClient from "../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../lib/errorHandler";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { tournamentConfigs } from "../../../../tools/consts";
 import MatchHeader from "../../../../components/ui/MatchHeader";
+import MatchStatusBadge from "../../../../components/ui/MatchStatusBadge";
 import LoadingState from "../../../../components/ui/LoadingState";
 
 const POLL_INTERVAL_MS = 15000;
@@ -193,9 +194,12 @@ export default function LiveMatch() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600" />
         </span>
-        <span className="text-sm font-semibold uppercase tracking-wide text-red-600">
-          Live
-        </span>
+        <MatchStatusBadge
+          statusKey={match.matchStatus.key}
+          statusValue={match.matchStatus.value}
+          finishTypeKey={match.finishType?.key}
+          finishTypeValue={match.finishType?.value}
+        />
         {isRefreshing && (
           <span className="text-xs text-gray-400 ml-1">Aktualisierung…</span>
         )}
@@ -219,6 +223,10 @@ export default function LiveMatch() {
                   : match.away.tinyName;
 
               if (event.kind === "goal") {
+                const periodLabel = getPeriodLabel(
+                  event.timeSeconds,
+                  match.matchSettings,
+                );
                 return (
                   <div
                     key={`goal-${index}`}
@@ -236,11 +244,12 @@ export default function LiveMatch() {
                       />
                     </div>
 
-                    {/* Time */}
-                    <div className="flex-shrink-0 w-12 text-center">
-                      <span className="text-sm font-semibold text-gray-800">
+                    {/* Time + Period */}
+                    <div className="flex-shrink-0 w-16 text-center">
+                      <span className="text-sm font-semibold text-gray-800 block">
                         {event.matchTime}
                       </span>
+                      <span className="text-xs text-gray-400">{periodLabel}</span>
                     </div>
 
                     {/* Goal badge */}
@@ -277,6 +286,13 @@ export default function LiveMatch() {
               }
 
               // Penalty event
+              const penaltyPeriodLabel = getPeriodLabel(
+                event.timeSeconds,
+                match.matchSettings,
+              );
+              const pc = event.penaltyCode as Record<string, string>;
+              const pcKey = pc["key"] ?? "";
+              const pcValue = pc["value"] ?? "";
               return (
                 <div
                   key={`penalty-${index}`}
@@ -294,10 +310,13 @@ export default function LiveMatch() {
                     />
                   </div>
 
-                  {/* Time */}
-                  <div className="flex-shrink-0 w-12 text-center">
-                    <span className="text-sm font-medium text-gray-600">
+                  {/* Time + Period */}
+                  <div className="flex-shrink-0 w-16 text-center">
+                    <span className="text-sm font-medium text-gray-600 block">
                       {event.matchTimeStart}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {penaltyPeriodLabel}
                     </span>
                   </div>
 
@@ -316,10 +335,7 @@ export default function LiveMatch() {
                     <p className="text-xs text-gray-500 truncate">
                       {event.isGM && "GM · "}
                       {event.isMP && "MP · "}
-                      {event.penaltyMinutes} Min. ·{" "}
-                      {(event.penaltyCode as { key: string; value: string }).key}{" "}
-                      –{" "}
-                      {(event.penaltyCode as { key: string; value: string }).value}
+                      {event.penaltyMinutes} Min. · {pcKey} – {pcValue}
                     </p>
                   </div>
 
