@@ -9,6 +9,7 @@ import { MatchdayOwner } from "../../../types/TournamentValues";
 import { timeToSeconds, groupByPeriod } from "../../../utils/matchPeriods";
 import Layout from "../../../components/Layout";
 import apiClient from "../../../lib/apiClient";
+import axios from "axios";
 import { getErrorMessage } from "../../../lib/errorHandler";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { tournamentConfigs } from "../../../tools/consts";
@@ -648,13 +649,34 @@ export default function MatchDetails({
   );
 }
 
+// A lightweight axios instance for SSR — no retry interceptors, hard 8 s timeout.
+const ssrClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  timeout: 8000,
+  headers: { "Content-Type": "application/json" },
+});
+
+// Unwrap the standardised { success, data } envelope if present.
+function unwrapData(responseData: any) {
+  if (
+    responseData &&
+    typeof responseData === "object" &&
+    "success" in responseData
+  ) {
+    return responseData.data;
+  }
+  return responseData;
+}
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
+  console.log(`[getServerSideProps] /matches/${id} - starting fetch`);
 
   try {
-    // Fetch match data
-    const matchResponse = await apiClient.get(`/matches/${id}`);
-    const match = matchResponse.data;
+    // Fetch match data — fails fast at 8 s, no retries.
+    const matchResponse = await ssrClient.get(`/matches/${id}`);
+    const match = unwrapData(matchResponse.data);
+    console.log(`[getServerSideProps] /matches/${id} - match fetched`);
 
     // Validate match data structure
     if (
@@ -668,20 +690,28 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       return { notFound: true };
     }
 
-    // Fetch matchday owner data
-    const matchdayResponse = await apiClient.get(
+    // Fetch matchday owner data — fails fast at 8 s, no retries.
+    const matchdayResponse = await ssrClient.get(
       `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
     );
-    const matchdayData = matchdayResponse.data;
+    const matchdayData = unwrapData(matchdayResponse.data);
+    console.log(`[getServerSideProps] /matches/${id} - matchday fetched`);
 
     return {
       props: {
         match,
-        matchdayOwner: matchdayData.owner,
+        matchdayOwner: matchdayData?.owner ?? null,
       },
     };
-  } catch (error) {
-    console.error("Error fetching server side props:", getErrorMessage(error));
+  } catch (error: any) {
+    console.error(
+      `[getServerSideProps] /matches/${id} - error: ${getErrorMessage(error)}`,
+      {
+        code: error?.code,
+        status: error?.response?.status,
+        body: error?.response?.data,
+      },
+    );
     return {
       notFound: true,
     };
