@@ -207,9 +207,10 @@ export default function MatchDetails() {
 
   // Initial data fetch with status-based routing
   useEffect(() => {
-    if (!id) return;
+    if (!router.isReady || typeof id !== "string") return;
 
     const fetchMatchData = async () => {
+      let redirecting = false;
       try {
         setIsLoading(true);
         setFetchError(null);
@@ -218,6 +219,7 @@ export default function MatchDetails() {
 
         const status = fetchedMatch.matchStatus.key;
         if (status === "INPROGRESS") {
+          redirecting = true;
           router.replace(`/matches/${id}/live`);
           return;
         }
@@ -226,6 +228,7 @@ export default function MatchDetails() {
           status === "CANCELLED" ||
           status === "FORFEITED"
         ) {
+          redirecting = true;
           router.replace("/404");
           return;
         }
@@ -245,12 +248,15 @@ export default function MatchDetails() {
         console.error("Error fetching match:", getErrorMessage(error));
         setFetchError(getErrorMessage(error));
       } finally {
-        setIsLoading(false);
+        // Keep spinner visible while navigating away to avoid error flash
+        if (!redirecting) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchMatchData();
-  }, [id]);
+  }, [router.isReady, id]);
 
   // Manual refresh (for the refresh button in MatchHeader)
   const refreshMatchData = useCallback(async () => {
