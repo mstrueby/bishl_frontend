@@ -229,7 +229,7 @@ export default function LiveMatch() {
                 );
                 return (
                   <div
-                    key={`goal-${index}`}
+                    key={event._id ?? `goal-${index}`}
                     className="flex items-center py-3 px-4 sm:px-6 gap-x-3"
                   >
                     {/* Team logo */}
@@ -295,7 +295,7 @@ export default function LiveMatch() {
               const pcValue = pc["value"] ?? "";
               return (
                 <div
-                  key={`penalty-${index}`}
+                  key={event._id ?? `penalty-${index}`}
                   className="flex items-center py-3 px-4 sm:px-6 gap-x-3 bg-gray-50"
                 >
                   {/* Team logo */}
