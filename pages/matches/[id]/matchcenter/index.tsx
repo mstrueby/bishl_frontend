@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback, Fragment } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import useAuth from "../../../../hooks/useAuth";
-import usePermissions from "../../../../hooks/usePermissions";
-import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { CldImage } from "next-cloudinary";
@@ -19,8 +17,7 @@ import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
 import apiClient from "../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../lib/errorHandler";
-
-let BASE_URL = process.env["NEXT_PUBLIC_API_URL"];
+import LoadingState from "../../../../components/ui/LoadingState";
 import {
   CalendarIcon,
   MapPinIcon,
@@ -54,8 +51,8 @@ import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
 import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
 
 interface MatchDetailsProps {
-  match: MatchValues;
-  matchdayOwner: MatchdayOwner;
+  match?: MatchValues;
+  matchdayOwner?: MatchdayOwner | null;
 }
 
 interface EditMatchData {
@@ -98,38 +95,30 @@ const InfoCard: React.FC<InfoCardProps> = ({
   );
 };
 
-export default function MatchDetails({
-  match: initialMatch,
-  matchdayOwner,
-}: MatchDetailsProps) {
+export default function MatchDetails(_props: MatchDetailsProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
-  const [match, setMatch] = useState<MatchValues>(initialMatch);
+  const [match, setMatch] = useState<MatchValues | null>(null);
+  const [matchdayOwner, setMatchdayOwner] = useState<MatchdayOwner | null>(null);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   const userRoles = user?.roles || [];
 
-  const getBackLink = () => {
+  const getBackLink = (m: MatchValues) => {
     const referrer = typeof window !== "undefined" ? document.referrer : "";
-    // Check referrer if it exists
-    if (
-      referrer &&
-      referrer.includes(`/tournaments/${match.tournament.alias}`)
-    ) {
-      return `/tournaments/${match.tournament.alias}`;
-    }
-    // Check if there's a query parameter indicating source
-    else if (router.query.from === "tournament") {
-      return `/tournaments/${match.tournament.alias}`;
+    if (referrer && referrer.includes(`/tournaments/${m.tournament.alias}`)) {
+      return `/tournaments/${m.tournament.alias}`;
+    } else if (router.query.from === "tournament") {
+      return `/tournaments/${m.tournament.alias}`;
     } else if (router.query.from === "calendar") {
       return `/calendar`;
-    }
-    // Default to match sheet
-    else {
-      return `/matches/${match._id}`;
+    } else {
+      return `/matches/${m._id}`;
     }
   };
-  const [backLink] = useState(() => getBackLink());
+  const [backLink, setBackLink] = useState<string>("");
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
@@ -208,6 +197,38 @@ export default function MatchDetails({
     return validTabs.includes(tab as string) ? (tab as string) : "roster";
   }, [router.query]);
 
+  // Fetch match and matchday data client-side
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchData = async () => {
+      setIsPageLoading(true);
+      try {
+        const matchResponse = await apiClient.get(`/matches/${id}`);
+        const fetchedMatch: MatchValues = matchResponse.data;
+        setMatch(fetchedMatch);
+        setBackLink(getBackLink(fetchedMatch));
+
+        try {
+          const matchdayResponse = await apiClient.get(
+            `/tournaments/${fetchedMatch.tournament.alias}/seasons/${fetchedMatch.season.alias}/rounds/${fetchedMatch.round.alias}/matchdays/${fetchedMatch.matchday.alias}`,
+          );
+          setMatchdayOwner(matchdayResponse.data?.owner || null);
+        } catch (err) {
+          console.error("Error fetching matchday owner:", getErrorMessage(err));
+        }
+      } catch (error) {
+        console.error("Error fetching match data:", getErrorMessage(error));
+        setFetchError(true);
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+
+    fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
   // Update active tab when query parameter changes
   useEffect(() => {
     const newActiveTab = getActiveTabFromQuery();
@@ -236,8 +257,8 @@ export default function MatchDetails({
             playerId: player.player.playerId,
             calledMatches: countCalledMatches(
               playerData,
-              match.tournament.alias,
-              match.season.alias,
+              match!.tournament.alias,
+              match!.season.alias,
             ),
           };
         } catch (error) {
@@ -263,6 +284,7 @@ export default function MatchDetails({
     };
 
     const fetchAllPlayerStats = async () => {
+      if (!match) return;
       // Fetch home team stats
       if (
         match.home.roster &&
@@ -306,7 +328,7 @@ export default function MatchDetails({
 
   // Roster validation callbacks
   const validateHomeRoster = useCallback(async () => {
-    if (isValidatingHomeRoster) return;
+    if (!match || isValidatingHomeRoster) return;
 
     try {
       setIsValidatingHomeRoster(true);
@@ -316,26 +338,29 @@ export default function MatchDetails({
       );
 
       if (response.status === 200 && response.data) {
-        setMatch((prevMatch) => ({
-          ...prevMatch,
-          home: {
-            ...prevMatch.home,
-            roster: {
-              ...prevMatch.home.roster,
-              ...response.data,
+        setMatch((prevMatch) => {
+          if (!prevMatch) return prevMatch;
+          return {
+            ...prevMatch,
+            home: {
+              ...prevMatch.home,
+              roster: {
+                ...prevMatch.home.roster,
+                ...response.data,
+              },
             },
-          },
-        }));
+          };
+        });
       }
     } catch (error) {
       console.error("Error validating home roster:", getErrorMessage(error));
     } finally {
       setIsValidatingHomeRoster(false);
     }
-  }, [match._id, isValidatingHomeRoster]);
+  }, [match, isValidatingHomeRoster]);
 
   const validateAwayRoster = useCallback(async () => {
-    if (isValidatingAwayRoster) return;
+    if (!match || isValidatingAwayRoster) return;
 
     try {
       setIsValidatingAwayRoster(true);
@@ -345,23 +370,26 @@ export default function MatchDetails({
       );
 
       if (response.status === 200 && response.data) {
-        setMatch((prevMatch) => ({
-          ...prevMatch,
-          away: {
-            ...prevMatch.away,
-            roster: {
-              ...prevMatch.away.roster,
-              ...response.data,
+        setMatch((prevMatch) => {
+          if (!prevMatch) return prevMatch;
+          return {
+            ...prevMatch,
+            away: {
+              ...prevMatch.away,
+              roster: {
+                ...prevMatch.away.roster,
+                ...response.data,
+              },
             },
-          },
-        }));
+          };
+        });
       }
     } catch (error) {
       console.error("Error validating away roster:", getErrorMessage(error));
     } finally {
       setIsValidatingAwayRoster(false);
     }
-  }, [match._id, isValidatingAwayRoster]);
+  }, [match, isValidatingAwayRoster]);
 
   // Open player card modal
   const handleOpenPlayerCard = useCallback(
@@ -370,6 +398,7 @@ export default function MatchDetails({
       teamFlag: "home" | "away";
       player: RosterPlayer;
     }) => {
+      if (!match) return;
       const team = ctx.teamFlag === "home" ? match.home : match.away;
 
       setSelectedPlayerContext({
@@ -392,7 +421,7 @@ export default function MatchDetails({
         setIsLoadingPlayerDetails(false);
       }
     },
-    [match.home, match.away],
+    [match],
   );
 
   const handleClosePlayerCard = useCallback(() => {
@@ -403,6 +432,7 @@ export default function MatchDetails({
 
   // Function to handle supplementary sheet field updates
   const updateSupplementaryField = async (fieldName: string, value: any) => {
+    if (!match) return;
     try {
       setSavingSupplementaryField(fieldName);
       const response = await apiClient.patch(`/matches/${match._id}`, {
@@ -439,10 +469,41 @@ export default function MatchDetails({
     return `Periode ${period}`;
   };
 
+  if (isPageLoading) {
+    return (
+      <Layout>
+        <LoadingState message="Matchcenter wird geladen..." />
+      </Layout>
+    );
+  }
+
+  if (fetchError || !match) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Spiel nicht gefunden
+            </h2>
+            <p className="text-gray-500 mb-4">
+              Die Spieldaten konnten nicht geladen werden.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              Zur Startseite
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   const permissions = calculateMatchButtonPermissions(
     user,
     match,
-    matchdayOwner,
+    matchdayOwner ?? undefined,
   );
   const hasMatchCenterPermission = permissions.showButtonMatchCenter;
 
@@ -463,7 +524,7 @@ export default function MatchDetails({
               Nicht berechtigt
             </h2>
             <p className="text-gray-500 mb-4">
-              Sie haben keine Berechtigung, die Match Center für dieses Spiel
+              Sie haben keine Berechtigung, die Matchcenter für dieses Spiel
               aufzurufen.
             </p>
             <Link
@@ -482,7 +543,7 @@ export default function MatchDetails({
     <>
       <Head>
         <title>
-          Match Center - {match.home.shortName} - {match.away.shortName}
+          Matchcenter - {match.home.shortName} - {match.away.shortName}
         </title>
       </Head>
       <Layout>
@@ -494,7 +555,7 @@ export default function MatchDetails({
             />
             <span className="ml-2">
               {backLink.includes("/matchcenter")
-                ? "Match Center"
+                ? "Matchcenter"
                 : backLink.includes("/calendar")
                   ? "Kalender"
                   : tournamentConfigs[match.tournament.alias]?.name}
@@ -1601,44 +1662,3 @@ export default function MatchDetails({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params as { id: string };
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  try {
-    // Only fetch match data (public data) - use fetch directly for server-side
-    const matchResponse = await fetch(`${baseUrl}/matches/${id}`);
-    if (!matchResponse.ok) {
-      throw new Error(`Failed to fetch match: ${matchResponse.status}`);
-    }
-    const matchJson = await matchResponse.json();
-    const match = matchJson.data || matchJson;
-
-    // Fetch matchday owner data
-    let matchdayOwner: MatchdayOwner | null = null;
-    try {
-      const matchdayResponse = await fetch(
-        `${baseUrl}/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
-      );
-      if (matchdayResponse.ok) {
-        const matchdayJson = await matchdayResponse.json();
-        const matchdayData = matchdayJson.data || matchdayJson;
-        matchdayOwner = matchdayData?.owner || null;
-      }
-    } catch (error) {
-      console.error("Error fetching matchday owner:", error);
-    }
-
-    return {
-      props: {
-        match,
-        matchdayOwner,
-      },
-    };
-  } catch (error) {
-    console.error("Error in getServerSideProps:", error);
-    return {
-      notFound: true,
-    };
-  }
-};

@@ -16,7 +16,7 @@ This document outlines the technical requirements and implementation strategy fo
 ## Core Requirements
 
 ### 1. Offline Functionality
-- Match center must work without internet connectivity
+- Matchcenter must work without internet connectivity
 - Data entry for scores, penalties, roster changes must be possible offline
 - Sync with backend API when connection is restored
 
@@ -147,7 +147,7 @@ Tasks:
 
 #### 2.1 Display Controller
 ```typescript
-// Match Center (Primary Screen)
+// Matchcenter (Primary Screen)
 - Control interface
 - Data entry forms
 - Connection status indicator
@@ -312,14 +312,14 @@ Strategy:
 
 ### Online Mode:
 ```
-User Input → Match Center UI → API → Database
+User Input → Matchcenter UI → API → Database
                 ↓
         Public Display (via postMessage)
 ```
 
 ### Offline Mode:
 ```
-User Input → Match Center UI → IndexedDB → Operation Queue
+User Input → Matchcenter UI → IndexedDB → Operation Queue
                 ↓
         Public Display (via postMessage)
 ```
@@ -364,7 +364,7 @@ IndexedDB Update → UI Refresh → Public Display Update
 ### User Workflows:
 
 #### Pre-Match Setup (Online):
-1. Open match center
+1. Open Matchcenter
 2. Verify rosters loaded
 3. Open secondary display
 4. Position on public screen
@@ -428,7 +428,7 @@ IndexedDB Update → UI Refresh → Public Display Update
 ## Success Metrics
 
 ### Functionality:
-- ✅ 100% match center features work offline
+- ✅ 100% Matchcenter features work offline
 - ✅ Public display updates <100ms
 - ✅ Sync success rate >99%
 - ✅ Data loss rate: 0%

@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { setCookie } from 'cookies-next';
 import { generateCSRFToken } from '../../lib/csrf';
+import { logApiError } from '../../lib/apiLogger';
 
 export default function handler(
   req: NextApiRequest,
@@ -11,19 +12,24 @@ export default function handler(
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const csrfToken = generateCSRFToken();
-  
-  // Set CSRF token in HTTP-only cookie
-  setCookie('csrf-token', csrfToken, {
-    req,
-    res,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 60 * 60 * 24, // 24 hours
-    path: '/',
-  } as any);
+  try {
+    const csrfToken = generateCSRFToken();
 
-  // Return token for client to include in request headers
-  res.status(200).json({ csrfToken });
+    // Set CSRF token in HTTP-only cookie
+    setCookie('csrf-token', csrfToken, {
+      req,
+      res,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/',
+    } as any);
+
+    // Return token for client to include in request headers
+    res.status(200).json({ csrfToken });
+  } catch (error) {
+    logApiError('csrf-token', undefined, 'Failed to generate CSRF token');
+    res.status(500).json({ error: 'Internal server error' });
+  }
 }

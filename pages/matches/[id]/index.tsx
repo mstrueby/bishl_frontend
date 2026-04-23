@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import useAuth from "../../../hooks/useAuth";
-import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { CldImage } from "next-cloudinary";
 import { MatchValues, RosterPlayer } from "../../../types/MatchValues";
@@ -15,11 +14,8 @@ import { tournamentConfigs } from "../../../tools/consts";
 import { calculateMatchButtonPermissions } from "../../../tools/utils";
 import MatchHeader from "../../../components/ui/MatchHeader";
 import MatchSettingsDisplay from "../../../components/ui/MatchSettingsDisplay";
+import LoadingState from "../../../components/ui/LoadingState";
 
-interface MatchDetailsProps {
-  match: MatchValues;
-  matchdayOwner: MatchdayOwner;
-}
 
 interface RosterTableProps {
   teamName: string;
@@ -199,17 +195,70 @@ const RosterTable: React.FC<RosterTableProps> = ({
   );
 };
 
-export default function MatchDetails({
-  match: initialMatch,
-  matchdayOwner,
-}: MatchDetailsProps) {
-  const [match, setMatch] = useState<MatchValues>(initialMatch);
+export default function MatchDetails() {
+  const [match, setMatch] = useState<MatchValues | null>(null);
+  const [matchdayOwner, setMatchdayOwner] = useState<MatchdayOwner | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
 
-  // Refresh match data function
+  // Initial data fetch with status-based routing
+  useEffect(() => {
+    if (!router.isReady || typeof id !== "string") return;
+
+    const fetchMatchData = async () => {
+      let redirecting = false;
+      try {
+        setIsLoading(true);
+        setFetchError(null);
+        const response = await apiClient.get(`/matches/${id}`);
+        const fetchedMatch: MatchValues = response.data;
+
+        const status = fetchedMatch.matchStatus.key;
+        if (status === "INPROGRESS") {
+          redirecting = true;
+          router.replace(`/matches/${id}/live`);
+          return;
+        }
+        if (
+          status === "SCHEDULED" ||
+          status === "CANCELLED" ||
+          status === "FORFEITED"
+        ) {
+          redirecting = true;
+          router.replace("/404");
+          return;
+        }
+
+        // FINISHED — set match and fetch matchday owner
+        setMatch(fetchedMatch);
+
+        try {
+          const matchdayResponse = await apiClient.get(
+            `/tournaments/${fetchedMatch.tournament.alias}/seasons/${fetchedMatch.season.alias}/rounds/${fetchedMatch.round.alias}/matchdays/${fetchedMatch.matchday.alias}`,
+          );
+          setMatchdayOwner(matchdayResponse.data?.owner ?? null);
+        } catch {
+          setMatchdayOwner(null);
+        }
+      } catch (error) {
+        console.error("Error fetching match:", getErrorMessage(error));
+        setFetchError(getErrorMessage(error));
+      } finally {
+        // Keep spinner visible while navigating away to avoid error flash
+        if (!redirecting) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchMatchData();
+  }, [router.isReady, id]);
+
+  // Manual refresh (for the refresh button in MatchHeader)
   const refreshMatchData = useCallback(async () => {
     if (!id || isRefreshing) return;
 
@@ -223,21 +272,6 @@ export default function MatchDetails({
       setIsRefreshing(false);
     }
   }, [id, isRefreshing]);
-
-  // Auto-refresh if match is in progress
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (match.matchStatus.key === "INPROGRESS") {
-      interval = setInterval(() => {
-        refreshMatchData();
-      }, 30000); // Refresh every 30 seconds for live matches
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [match.matchStatus.key, id, refreshMatchData]);
 
   const RefereeInfo = ({
     assigned,
@@ -286,6 +320,24 @@ export default function MatchDetails({
     </div>
   );
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <LoadingState message="Spiel wird geladen..." />
+      </Layout>
+    );
+  }
+
+  if (fetchError || !match) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <p className="text-gray-500">Spiel nicht gefunden.</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="flex items-center justify-between text-gray-500 hover:text-gray-700 text-sm font-base">
@@ -307,7 +359,7 @@ export default function MatchDetails({
           const permissions = calculateMatchButtonPermissions(
             user,
             match,
-            matchdayOwner,
+            matchdayOwner ?? undefined,
           );
           return (
             permissions.showButtonMatchCenter && (
@@ -315,7 +367,7 @@ export default function MatchDetails({
                 href={`/matches/${match._id}/matchcenter/`}
                 className="flex items-center"
               >
-                <span className="mr-2">Match Center</span>
+                <span className="mr-2">Matchcenter</span>
                 <ChevronRightIcon
                   aria-hidden="true"
                   className="h-3 w-3 text-gray-400"
@@ -648,42 +700,3 @@ export default function MatchDetails({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params as { id: string };
-
-  try {
-    // Fetch match data
-    const matchResponse = await apiClient.get(`/matches/${id}`);
-    const match = matchResponse.data;
-
-    // Validate match data structure
-    if (
-      !match ||
-      !match.tournament ||
-      !match.season ||
-      !match.round ||
-      !match.matchday
-    ) {
-      console.error("Invalid match data structure:", match);
-      return { notFound: true };
-    }
-
-    // Fetch matchday owner data
-    const matchdayResponse = await apiClient.get(
-      `/tournaments/${match.tournament.alias}/seasons/${match.season.alias}/rounds/${match.round.alias}/matchdays/${match.matchday.alias}`,
-    );
-    const matchdayData = matchdayResponse.data;
-
-    return {
-      props: {
-        match,
-        matchdayOwner: matchdayData.owner,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching server side props:", getErrorMessage(error));
-    return {
-      notFound: true,
-    };
-  }
-};

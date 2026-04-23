@@ -1259,7 +1259,7 @@ export default function SupplementaryForm() {
             aria-hidden="true"
             className="h-3 w-3 text-gray-400"
           />
-          <span className="ml-2">Match Center</span>
+          <span className="ml-2">Matchcenter</span>
         </Link>
 
         <MatchHeader match={match} isRefreshing={false} onRefresh={() => {}} />

@@ -268,10 +268,10 @@ const PenaltyRegisterForm = () => {
 
   return (
     <Layout>
-      <Link href={`/matches/${match._id}/matchcenter?tab=penalties`} className="flex items-center" aria-label="Back to Match Center">
+      <Link href={`/matches/${match._id}/matchcenter?tab=penalties`} className="flex items-center" aria-label="Back to Matchcenter">
         <ChevronLeftIcon aria-hidden="true" className="h-3 w-3 text-gray-400" />
         <span className="ml-2 text-sm font-base text-gray-500 hover:text-gray-700">
-          Match Center
+          Matchcenter
         </span>
       </Link>
 

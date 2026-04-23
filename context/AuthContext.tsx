@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useMemo, ReactNode } from 'react';
+import apiClient from '../lib/apiClient';
 
 const AuthContext = createContext({});
 
@@ -16,10 +17,9 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
     const checkAuth = async () => {
       try {
         setLoading(true);
-        
-        // Check if we have an access token first
+
         const accessToken = localStorage.getItem('access_token');
-        
+
         if (!accessToken) {
           console.log('No access token found');
           setUser(null);
@@ -28,37 +28,17 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
           return;
         }
 
-        // Fetch CSRF token first
         const csrfResponse = await fetch('/api/csrf-token');
         const csrfData = await csrfResponse.json();
         if (csrfData.csrfToken) {
           localStorage.setItem('csrf_token', csrfData.csrfToken);
         }
 
-        // Fetch user data with access token
-        const userResponse = await fetch('/api/user', {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-        
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          // The /api/user endpoint should already extract the data field,
-          // but handle both cases for safety
-          const user = userData.data || userData;
-          console.log('User loaded from AuthContext:', user._id);
-          setUser(user);
-          setAuthError(null);
-        } else {
-          console.log('Failed to fetch user, clearing tokens');
-          // Clear invalid tokens
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          setUser(null);
-          setAuthError(null);
-        }
+        const response = await apiClient.get('/users/me');
+        const userData = response.data;
+        console.log('User loaded from AuthContext:', userData._id);
+        setUser(userData);
+        setAuthError(null);
       } catch (error) {
         console.error('Auth check failed:', error);
         setUser(null);
@@ -72,7 +52,6 @@ export const AuthProvider = ({ children }: {children: ReactNode}) => {
       checkAuth();
     }
   }, [isClient]);
-
 
   const contextValue = useMemo(() => ({
     user,

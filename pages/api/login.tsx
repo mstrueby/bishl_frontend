@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 import { withRateLimit } from '../../lib/rateLimit';
 import { withCSRF } from '../../lib/csrf';
+import { logApiError } from '../../lib/apiLogger';
 
 const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
@@ -13,6 +14,7 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
     
+    let httpStatus: number | undefined;
     try {
       const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
         method: 'POST',
@@ -20,12 +22,14 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         body: JSON.stringify({ email, password })
       })
 
+      httpStatus = result.status;
+
       let data;
       const responseText = await result.text();
       try {
         data = JSON.parse(responseText);
       } catch (parseError) {
-        console.error('Response text:', responseText);
+        logApiError('login', httpStatus, 'Invalid JSON response');
         throw new Error('Invalid JSON response from server');
       }
 
@@ -42,10 +46,10 @@ const loginHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           expires_in
         })
       } else {
-        res.status(result.status).json({ error: data.detail || 'Authentication failed' })
+        res.status(result.status).json({ error: 'Authentication failed' })
       }
     } catch (error) {
-      console.error('Login error:', error);
+      logApiError('login', httpStatus, 'Unexpected error during login');
       res.status(500).json({ error: 'Internal server error during login' })
     }
   } else {
