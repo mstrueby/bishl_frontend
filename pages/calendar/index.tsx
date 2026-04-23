@@ -656,9 +656,15 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                           paddingRight: '1px'
                         }}
                       >
-                        <Link
-                          href={`/matches/${event._id}`}
-                          className={`group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
+                        {(() => {
+                          const statusKey = event.matchStatus?.key;
+                          const href =
+                            statusKey === 'FINISHED'
+                              ? `/matches/${event._id}`
+                              : statusKey === 'INPROGRESS'
+                              ? `/matches/${event._id}/live`
+                              : null;
+                          const itemClass = `group absolute inset-1 flex flex-col rounded-lg border-l-4 p-2 text-xs/5  overflow-hidden ${(() => {
                             switch (event.tournament.alias) {
                               case 'regionalliga-ost':
                                 return 'bg-red-400/10 text-red-600 border-red-600/50 hover:bg-red-200/50';
@@ -685,39 +691,47 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                               default:
                                 return '';
                             }
-                          })()}`}
-                        >
-                          <p className="block sm:hidden order-1 font-semibold truncate">
-                            {columnCount >= 2
-                              ? `${event.home.tinyName} - ${event.away.tinyName}`
-                              : `${event.home.shortName} - ${event.away.shortName}`}
-                          </p>
-                          <p className="hidden sm:block order-1 font-semibold truncate">
-                            {`${columnCount === 1
-                              ? event.home.fullName
-                              : columnCount <= 3
-                                ? event.home.shortName
-                                : event.home.tinyName
-                              } - ${columnCount === 1
-                                ? event.away.fullName
-                                : columnCount <= 3
-                                  ? event.away.shortName
-                                  : event.away.tinyName
-                              }`}
-                          </p>
-                          <p className="order-1 truncate">
-                            {event.venue.name}
-                          </p>
-                          <p className="flex items-center gap-x-1.5 truncate">
-                            <time dateTime={new Date(event.startDate).toISOString()}>
-                              {format(new Date(event.startDate), 'HH:mm', { locale: de })}
-                            </time>
-                            <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
-                              <circle r={1} cx={1} cy={1} />
-                            </svg>
-                            {tournamentConfigs[event.tournament.alias]?.tinyName || event.tournament.name}
-                          </p>
-                        </Link>
+                          })()}`;
+                          const content = (
+                            <>
+                              <p className="block sm:hidden order-1 font-semibold truncate">
+                                {columnCount >= 2
+                                  ? `${event.home.tinyName} - ${event.away.tinyName}`
+                                  : `${event.home.shortName} - ${event.away.shortName}`}
+                              </p>
+                              <p className="hidden sm:block order-1 font-semibold truncate">
+                                {`${columnCount === 1
+                                  ? event.home.fullName
+                                  : columnCount <= 3
+                                    ? event.home.shortName
+                                    : event.home.tinyName
+                                  } - ${columnCount === 1
+                                    ? event.away.fullName
+                                    : columnCount <= 3
+                                      ? event.away.shortName
+                                      : event.away.tinyName
+                                  }`}
+                              </p>
+                              <p className="order-1 truncate">
+                                {event.venue.name}
+                              </p>
+                              <p className="flex items-center gap-x-1.5 truncate">
+                                <time dateTime={new Date(event.startDate).toISOString()}>
+                                  {format(new Date(event.startDate), 'HH:mm', { locale: de })}
+                                </time>
+                                <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
+                                  <circle r={1} cx={1} cy={1} />
+                                </svg>
+                                {tournamentConfigs[event.tournament.alias]?.tinyName || event.tournament.name}
+                              </p>
+                            </>
+                          );
+                          return href ? (
+                            <Link href={href} className={itemClass}>{content}</Link>
+                          ) : (
+                            <div className={itemClass}>{content}</div>
+                          );
+                        })()}
                       </li>
                     );
                   })}
