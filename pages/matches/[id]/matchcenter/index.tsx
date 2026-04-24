@@ -1548,8 +1548,6 @@ export default function MatchDetails(_props: MatchDetailsProps) {
           roster={selectedPlayerCardData?.roster ?? []}
           teamName={selectedPlayerCardData?.teamName}
           teamLogoUrl={selectedPlayerCardData?.teamLogoUrl}
-          tournamentAlias={match.tournament?.alias}
-          seasonAlias={match.season?.alias}
         />
       </Layout>
     </>

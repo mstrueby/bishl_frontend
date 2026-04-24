@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -14,8 +14,6 @@ interface PlayerCardModalProps {
   roster: RosterPlayer[];
   teamName?: string;
   teamLogoUrl?: string;
-  tournamentAlias?: string;
-  seasonAlias?: string;
 }
 
 const positionTooltips: Record<string, string> = {
@@ -83,23 +81,31 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
 
   const currentPlayer: RosterPlayer | null = roster.length > 0 ? (roster[currentIndex] ?? null) : initialPlayer;
 
-  const fetchDetails = useCallback(async (playerId: string) => {
-    setIsLoading(true);
-    setPlayerDetails(null);
-    try {
-      const response = await apiClient.get(`/players/${playerId}`);
-      setPlayerDetails(response.data);
-    } catch (error) {
-      console.error('Error fetching player details:', getErrorMessage(error));
-      setPlayerDetails(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     if (!isOpen || !currentPlayer) return;
-    fetchDetails(currentPlayer.player.playerId);
+
+    const controller = new AbortController();
+    setIsLoading(true);
+    setPlayerDetails(null);
+
+    apiClient.get(`/players/${currentPlayer.player.playerId}`, { signal: controller.signal })
+      .then(response => {
+        setPlayerDetails(response.data);
+      })
+      .catch(error => {
+        if (!controller.signal.aborted) {
+          console.error('Error fetching player details:', getErrorMessage(error));
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, currentIndex]);
 
