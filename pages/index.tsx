@@ -383,7 +383,8 @@ const Home: NextPage<PostsProps> = ({
         </div>
         <div className="space-y-3 flex-1 p-4">
           {displayedMatches.map((match) => {
-            const refCount = (match.referee1 ? 1 : 0) + (match.referee2 ? 1 : 0);
+            const refCount =
+              (match.referee1 ? 1 : 0) + (match.referee2 ? 1 : 0);
             const dotClass =
               refCount === 2
                 ? "text-green-500 bg-green-500/20"
@@ -412,7 +413,9 @@ const Home: NextPage<PostsProps> = ({
                     <div className="text-sm font-medium text-gray-900">
                       {match.home.shortName} - {match.away.shortName}
                     </div>
-                    <div className="text-xs text-gray-500">{match.venue.name}</div>
+                    <div className="text-xs text-gray-500">
+                      {match.venue.name}
+                    </div>
                   </div>
                 </div>
                 <div className="text-sm text-gray-400 font-medium">
@@ -594,12 +597,14 @@ const Home: NextPage<PostsProps> = ({
               {match.venue.name}
             </p>
           </div>
-          <Link
-            href={`/matches/${match._id}`}
-            className="text-indigo-600 hover:text-indigo-800 font-medium"
-          >
-            Spielbericht
-          </Link>
+          {match.matchStatus.key === "INPROGRESS" && (
+            <Link
+              href={`/matches/${match._id}`}
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              Spielbericht
+            </Link>
+          )}
         </div>
       </div>
     );

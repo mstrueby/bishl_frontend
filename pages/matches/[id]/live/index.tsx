@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import useAuth from "../../../../hooks/useAuth";
 import { useRouter } from "next/router";
 import { CldImage } from "next-cloudinary";
 import {
@@ -11,8 +12,10 @@ import { timeToSeconds, getPeriodLabel } from "../../../../utils/matchPeriods";
 import Layout from "../../../../components/Layout";
 import apiClient from "../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../lib/errorHandler";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { tournamentConfigs } from "../../../../tools/consts";
+import { calculateMatchButtonPermissions } from "../../../../tools/utils";
+import { MatchdayOwner } from "../../../../types/TournamentValues";
 import MatchHeader from "../../../../components/ui/MatchHeader";
 import MatchStatusBadge from "../../../../components/ui/MatchStatusBadge";
 import LoadingState from "../../../../components/ui/LoadingState";
@@ -35,11 +38,13 @@ type FeedEvent = GoalEvent | PenaltyEvent;
 
 export default function LiveMatch() {
   const [match, setMatch] = useState<MatchValues | null>(null);
+  const [matchdayOwner, setMatchdayOwner] = useState<MatchdayOwner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const router = useRouter();
+  const { user } = useAuth();
   const { id } = router.query;
 
   const applyMatchData = useCallback(
@@ -66,7 +71,18 @@ export default function LiveMatch() {
         setIsLoading(true);
         setFetchError(null);
         const response = await apiClient.get(`/matches/${id}`);
-        applyMatchData(response.data, true);
+        const fetchedMatch: MatchValues = response.data;
+        const stayed = applyMatchData(fetchedMatch, true);
+        if (stayed) {
+          try {
+            const matchdayResponse = await apiClient.get(
+              `/tournaments/${fetchedMatch.tournament.alias}/seasons/${fetchedMatch.season.alias}/rounds/${fetchedMatch.round.alias}/matchdays/${fetchedMatch.matchday.alias}`,
+            );
+            setMatchdayOwner(matchdayResponse.data?.owner ?? null);
+          } catch {
+            setMatchdayOwner(null);
+          }
+        }
       } catch (error) {
         console.error("Error fetching live match:", getErrorMessage(error));
         setFetchError(getErrorMessage(error));
@@ -169,7 +185,7 @@ export default function LiveMatch() {
   return (
     <Layout>
       {/* Back navigation */}
-      <div className="flex items-center text-gray-500 hover:text-gray-700 text-sm font-base mb-2">
+      <div className="flex items-center justify-between text-gray-500 hover:text-gray-700 text-sm font-base">
         <Link
           href={`/tournaments/${match.tournament.alias}`}
           aria-label="Zurück zum Turnier"
@@ -180,6 +196,29 @@ export default function LiveMatch() {
             {tournamentConfigs[match.tournament.alias]?.name}
           </span>
         </Link>
+
+        {(() => {
+          const permissions = calculateMatchButtonPermissions(
+            user,
+            match,
+            matchdayOwner ?? undefined,
+          );
+          return (
+            permissions.showButtonMatchCenter && (
+              <Link
+                href={`/matches/${match._id}/matchcenter/`}
+                className="flex items-center"
+              >
+                <span className="mr-2">Matchcenter</span>
+                <ChevronRightIcon
+                  aria-hidden="true"
+                  className="h-3 w-3 text-gray-400"
+                />
+              </Link>
+            )
+          );
+        })()}
+        
       </div>
 
       <MatchHeader
