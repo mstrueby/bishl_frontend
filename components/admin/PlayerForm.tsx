@@ -1947,6 +1947,60 @@ const PlayerForm: React.FC<PlayerFormProps> = ({
                 );
               })()}
 
+              {/* Section 4: Current season statistics */}
+              {(() => {
+                const currentSeason = process.env.NEXT_PUBLIC_CURRENT_SEASON;
+                const currentStats = (values.stats || []).filter(
+                  (s) => s.season.alias === currentSeason,
+                );
+                return (
+                  <div className="mt-12">
+                    <div className="border-b border-gray-200 pb-4">
+                      <h3 className="text-base/7 font-semibold text-gray-900 uppercase">
+                        Statistik {currentSeason}
+                      </h3>
+                      <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
+                        Spielstatistiken der aktuellen Saison.
+                      </p>
+                    </div>
+                    {currentStats.length === 0 ? (
+                      <div className="mt-4 py-6 text-center text-sm text-gray-500">
+                        Noch keine Spiele in dieser Saison
+                      </div>
+                    ) : (
+                      <div className="mt-4 overflow-x-auto">
+                        <table className="min-w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-gray-100">
+                              <th className="py-2 pr-4 text-left font-medium text-gray-500 whitespace-nowrap">Team</th>
+                              <th className="py-2 pr-4 text-left font-medium text-gray-500 whitespace-nowrap">Turnier</th>
+                              <th className="py-2 pr-4 text-center font-medium text-gray-500">SP</th>
+                              <th className="py-2 pr-4 text-center font-medium text-gray-500">T</th>
+                              <th className="py-2 pr-4 text-center font-medium text-gray-500">A</th>
+                              <th className="py-2 pr-4 text-center font-medium text-gray-500">Pkt</th>
+                              <th className="py-2 text-center font-medium text-gray-500">StM</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-50">
+                            {currentStats.map((s, idx) => (
+                              <tr key={idx} className="hover:bg-gray-50">
+                                <td className="py-2 pr-4 text-gray-900 whitespace-nowrap">{s.team.shortName || s.team.name}</td>
+                                <td className="py-2 pr-4 text-gray-500 whitespace-nowrap">{s.tournament.name}</td>
+                                <td className="py-2 pr-4 text-center text-gray-900">{s.gamesPlayed}</td>
+                                <td className="py-2 pr-4 text-center text-gray-900">{s.goals}</td>
+                                <td className="py-2 pr-4 text-center text-gray-900">{s.assists}</td>
+                                <td className="py-2 pr-4 text-center font-semibold text-gray-900">{s.points}</td>
+                                <td className="py-2 text-center text-gray-900">{s.penaltyMinutes}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               <div className="mt-8 flex justify-end py-4 border-t border-gray-200">
                 <button
                   type="button"
