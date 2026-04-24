@@ -1,27 +1,20 @@
-import { PlayUpTracking } from "./PlayerValues";
+import { Assignment, PlayUpTracking } from "./PlayerValues";
 
 export interface PlayerStat {
   season?: { alias: string; name: string };
   tournament?: { alias: string; name: string };
-  team?: { name: string };
+  team?: { name: string; fullName?: string; shortName?: string; tinyName?: string };
   gamesPlayed?: number;
   goals?: number;
   assists?: number;
   points?: number;
-}
-
-export interface PlayerAssignedTeam {
-  team?: { name: string; fullName: string };
-  licenceType?: string;
-  passNumber?: string;
-  source?: string;
-  status?: string;
+  penaltyMinutes?: number;
 }
 
 export interface PlayerDetails {
   stats?: PlayerStat[];
-  assignedTeams?: PlayerAssignedTeam[];
+  assignedTeams?: Assignment[];
   playUpTrackings?: PlayUpTracking[];
-  birthDate?: string;
+  birthdate?: string;
   fullFaceReq?: boolean;
 }

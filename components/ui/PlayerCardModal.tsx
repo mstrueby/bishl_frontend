@@ -4,8 +4,11 @@ import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/2
 import Image from 'next/image';
 import { RosterPlayer } from '../../types/MatchValues';
 import { PlayerDetails } from '../../types/PlayerDetails';
+import { AssignmentTeam } from '../../types/PlayerValues';
 import apiClient from '../../lib/apiClient';
 import { getErrorMessage } from '../../lib/errorHandler';
+
+const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
 
 interface PlayerCardModalProps {
   isOpen: boolean;
@@ -241,7 +244,7 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                           <div className="mt-3 text-sm">
                             <span className="text-gray-500">Geburtsdatum:</span>{' '}
                             <span className="text-gray-900">
-                              {isLoading ? '…' : formatBirthDate(playerDetails?.birthDate)}
+                              {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
                             </span>
                           </div>
 
@@ -273,103 +276,113 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                         <div className="p-6 border-b">
                           <h3 className="text-base font-semibold text-gray-900 mb-3">Lizenzen</h3>
 
-                          {playerDetails?.assignedTeams && playerDetails.assignedTeams.length > 0 ? (
-                            <div className="overflow-x-auto">
-                              <table className="min-w-full text-sm">
-                                <thead>
-                                  <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
-                                    <th className="pb-2 pr-3 w-4"></th>
-                                    <th className="pb-2 pr-4">Team</th>
-                                    <th className="pb-2 pr-4">Typ</th>
-                                    <th className="pb-2 pr-4">Quelle</th>
-                                    <th className="pb-2">Pass-Nr.</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                  {playerDetails.assignedTeams.map((assignment, idx) => (
-                                    <tr key={idx} className="text-sm">
-                                      <td className="py-2 pr-3">
-                                        <span
-                                          className={`inline-block w-2.5 h-2.5 rounded-full ${getLicenceStatusColor(assignment.status)}`}
-                                          title={assignment.status ?? ''}
-                                        ></span>
-                                      </td>
-                                      <td className="py-2 pr-4 text-gray-900">
-                                        {assignment.team?.fullName || assignment.team?.name || '–'}
-                                      </td>
-                                      <td className="py-2 pr-4">
-                                        {assignment.licenceType ? (
-                                          <span className="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                                            {assignment.licenceType}
-                                          </span>
-                                        ) : (
-                                          <span className="text-gray-400">–</span>
-                                        )}
-                                      </td>
-                                      <td className="py-2 pr-4">
-                                        {assignment.source ? (
-                                          <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                            {assignment.source}
-                                          </span>
-                                        ) : (
-                                          <span className="text-gray-400">–</span>
-                                        )}
-                                      </td>
-                                      <td className="py-2">
-                                        {(assignment.passNumber || currentPlayer.passNumber) ? (
-                                          <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                            {assignment.passNumber || currentPlayer.passNumber}
-                                          </span>
-                                        ) : (
-                                          <span className="text-gray-400">–</span>
-                                        )}
-                                      </td>
+                          {(() => {
+                            const flatTeams: (AssignmentTeam & { clubName: string })[] =
+                              (playerDetails?.assignedTeams ?? []).flatMap((a) =>
+                                (a.teams ?? []).map((t) => ({ ...t, clubName: a.clubName }))
+                              );
+                            return flatTeams.length > 0 ? (
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full text-sm">
+                                  <thead>
+                                    <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                                      <th className="pb-2 pr-3 w-4"></th>
+                                      <th className="pb-2 pr-4">Team</th>
+                                      <th className="pb-2 pr-4">Typ</th>
+                                      <th className="pb-2 pr-4">Quelle</th>
+                                      <th className="pb-2">Pass-Nr.</th>
                                     </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-gray-500">Keine Lizenzdaten verfügbar.</p>
-                          )}
+                                  </thead>
+                                  <tbody className="divide-y divide-gray-100">
+                                    {flatTeams.map((t, idx) => (
+                                      <tr key={idx} className="text-sm">
+                                        <td className="py-2 pr-3">
+                                          <span
+                                            className={`inline-block w-2.5 h-2.5 rounded-full ${getLicenceStatusColor(t.status)}`}
+                                            title={t.status ?? ''}
+                                          ></span>
+                                        </td>
+                                        <td className="py-2 pr-4 text-gray-900">
+                                          {t.teamName || '–'}
+                                        </td>
+                                        <td className="py-2 pr-4">
+                                          {t.licenseType ? (
+                                            <span className="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                              {t.licenseType}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400">–</span>
+                                          )}
+                                        </td>
+                                        <td className="py-2 pr-4">
+                                          {t.source ? (
+                                            <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                              {t.source}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400">–</span>
+                                          )}
+                                        </td>
+                                        <td className="py-2">
+                                          {t.passNo ? (
+                                            <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                              {t.passNo}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400">–</span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-500">Keine Lizenzdaten verfügbar.</p>
+                            );
+                          })()}
                         </div>
 
                         {/* Statistiken Block */}
                         <div className="p-6 border-b">
                           <h3 className="text-base font-semibold text-gray-900 mb-3">Statistiken</h3>
 
-                          {playerDetails?.stats && playerDetails.stats.length > 0 ? (
-                            <div className="overflow-x-auto">
-                              <table className="min-w-full text-sm">
-                                <thead>
-                                  <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
-                                    <th className="pb-2 pr-4">Saison</th>
-                                    <th className="pb-2 pr-4">Turnier</th>
-                                    <th className="pb-2 pr-4">Team</th>
-                                    <th className="pb-2 pr-3 text-center w-10">Sp</th>
-                                    <th className="pb-2 pr-3 text-center w-10">T</th>
-                                    <th className="pb-2 pr-3 text-center w-10">V</th>
-                                    <th className="pb-2 text-center w-10">P</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                  {playerDetails.stats.map((stat, idx) => (
-                                    <tr key={idx} className="text-gray-700">
-                                      <td className="py-2 pr-4 text-gray-500 text-xs">{stat.season?.name || stat.season?.alias || '–'}</td>
-                                      <td className="py-2 pr-4">{stat.tournament?.name || stat.tournament?.alias || '–'}</td>
-                                      <td className="py-2 pr-4">{stat.team?.name || '–'}</td>
-                                      <td className="py-2 pr-3 text-center font-medium">{stat.gamesPlayed ?? 0}</td>
-                                      <td className="py-2 pr-3 text-center font-medium">{stat.goals ?? 0}</td>
-                                      <td className="py-2 pr-3 text-center font-medium">{stat.assists ?? 0}</td>
-                                      <td className="py-2 text-center font-medium">{stat.points ?? 0}</td>
+                          {(() => {
+                            const allStats = playerDetails?.stats ?? [];
+                            const currentStats = CURRENT_SEASON
+                              ? allStats.filter((s) => s.season?.alias === CURRENT_SEASON)
+                              : allStats;
+                            return currentStats.length > 0 ? (
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full text-sm">
+                                  <thead>
+                                    <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                                      <th className="pb-2 pr-4">Turnier</th>
+                                      <th className="pb-2 pr-4">Team</th>
+                                      <th className="pb-2 pr-3 text-center w-10">Sp</th>
+                                      <th className="pb-2 pr-3 text-center w-10">T</th>
+                                      <th className="pb-2 pr-3 text-center w-10">V</th>
+                                      <th className="pb-2 text-center w-10">P</th>
                                     </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-gray-500">Keine Statistikdaten verfügbar.</p>
-                          )}
+                                  </thead>
+                                  <tbody className="divide-y divide-gray-100">
+                                    {currentStats.map((stat, idx) => (
+                                      <tr key={idx} className="text-gray-700">
+                                        <td className="py-2 pr-4">{stat.tournament?.name || stat.tournament?.alias || '–'}</td>
+                                        <td className="py-2 pr-4">{stat.team?.name || '–'}</td>
+                                        <td className="py-2 pr-3 text-center font-medium">{stat.gamesPlayed ?? 0}</td>
+                                        <td className="py-2 pr-3 text-center font-medium">{stat.goals ?? 0}</td>
+                                        <td className="py-2 pr-3 text-center font-medium">{stat.assists ?? 0}</td>
+                                        <td className="py-2 text-center font-medium">{stat.points ?? 0}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-500">Keine Statistikdaten verfügbar.</p>
+                            );
+                          })()}
                         </div>
                       </>
                     )}
