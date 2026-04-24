@@ -363,8 +363,8 @@ const RosterPage = () => {
 
             // Determine whether this player comes from a partner team
             const isPartnerPlayer =
-              !!teamPlayer.sourceTeamAlias &&
-              teamPlayer.sourceTeamAlias !== matchTeamData.teamAlias;
+              !!teamPlayer.sourceClubAlias &&
+              teamPlayer.sourceClubAlias !== matchTeamData.clubAlias;
 
             // Resolve the partnership entry using the composite key
             const partnerKey =
