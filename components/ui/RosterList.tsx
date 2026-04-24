@@ -23,7 +23,6 @@ interface RosterListProps {
   showEditButton?: boolean;
   editUrl?: string;
   sortRoster?: (roster: RosterPlayer[]) => RosterPlayer[];
-  playerStats?: {[playerId: string]: number};
   teamLogoUrl?: string;
   eligibilityTimestamp?: string | Date | null;
   canValidateRoster?: boolean;
@@ -60,7 +59,6 @@ const RosterList: React.FC<RosterListProps> = ({
   showEditButton = false,
   editUrl,
   sortRoster,
-  playerStats,
   teamLogoUrl,
   eligibilityTimestamp,
   canValidateRoster = false,
@@ -392,7 +390,7 @@ const RosterList: React.FC<RosterListProps> = ({
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">TYP</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">QUELLE</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">PASS-NR.</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">HOCH</th>
+                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">HOCH</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">T</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">V</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">P</th>
@@ -513,21 +511,10 @@ const RosterList: React.FC<RosterListProps> = ({
                         <div className="flex items-center gap-1.5 justify-center">
                           <ArrowUpIcon className="h-3 w-3 text-gray-600 flex-shrink-0" aria-hidden="true" />
                           {player.calledFromTeam?.teamName && (
-                            <span className="text-xs text-gray-700 truncate max-w-[60px]">
+                            <span className="text-xs text-gray-700 truncate max-w-[80px]">
                               {player.calledFromTeam.teamName}
                             </span>
                           )}
-                          <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                            playerStats && playerStats[player.player.playerId] !== undefined && playerStats[player.player.playerId] <= 3
-                              ? 'bg-green-50 text-green-800 ring-green-600/20'
-                              : playerStats && playerStats[player.player.playerId] === 4
-                              ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
-                              : 'bg-red-50 text-red-600 ring-red-500/20'
-                          }`}>
-                            {playerStats && playerStats[player.player.playerId] !== undefined
-                              ? playerStats[player.player.playerId]
-                              : '–'}
-                          </span>
                         </div>
                       ) : (
                         <span className="text-gray-400">–</span>

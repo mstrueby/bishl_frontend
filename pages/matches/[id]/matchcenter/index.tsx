@@ -11,7 +11,6 @@ import {
   RosterPlayer,
   PenaltiesBase,
   ScoresBase,
-  SupplementarySheet,
 } from "../../../../types/MatchValues";
 import { MatchdayOwner } from "../../../../types/TournamentValues";
 import Layout from "../../../../components/Layout";
@@ -44,8 +43,6 @@ import PenaltyDialog from "../../../../components/ui/PenaltyDialog";
 import RosterList from "../../../../components/ui/RosterList";
 import PlayerCardModal from "../../../../components/ui/PlayerCardModal";
 import { sortRoster } from "../../../../utils/matchRoster";
-import { PlayerDetails } from "../../../../types/PlayerDetails";
-import { countCalledMatches } from "../../../../utils/countCalledMatches";
 import GoalsTab from "../../../../components/matchcenter/GoalsTab";
 import PenaltiesTab from "../../../../components/matchcenter/PenaltiesTab";
 import SupplementaryTab from "../../../../components/matchcenter/SupplementaryTab";
@@ -145,12 +142,6 @@ export default function MatchDetails(_props: MatchDetailsProps) {
   const [editingAwayGoal, setEditingAwayGoal] = useState<
     ScoresBase | undefined
   >(undefined);
-  const [homePlayerStats, setHomePlayerStats] = useState<{
-    [playerId: string]: number;
-  }>({});
-  const [awayPlayerStats, setAwayPlayerStats] = useState<{
-    [playerId: string]: number;
-  }>({});
   const [isSavingMatchSheetComplete, setIsSavingMatchSheetComplete] =
     useState(false);
   const [savingSupplementaryField, setSavingSupplementaryField] = useState<
@@ -164,19 +155,12 @@ export default function MatchDetails(_props: MatchDetailsProps) {
   const [awayTimeoutPeriods, setAwayTimeoutPeriods] = useState<number[]>([]);
   const [isSavingTimeout, setIsSavingTimeout] = useState(false);
   const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
-  const [selectedPlayerContext, setSelectedPlayerContext] = useState<{
-    playerId: string;
-    teamFlag: "home" | "away";
+  const [selectedPlayerCardData, setSelectedPlayerCardData] = useState<{
     player: RosterPlayer;
-    teamName?: string;
+    roster: RosterPlayer[];
+    teamName: string;
     teamLogoUrl?: string;
-    clubName?: string;
-    clubLogoUrl?: string;
   } | null>(null);
-  const [playerDetails, setPlayerDetails] = useState<PlayerDetails | null>(
-    null,
-  );
-  const [isLoadingPlayerDetails, setIsLoadingPlayerDetails] = useState(false);
   {
     /**
   const [editData, setEditData] = useState<EditMatchData>({
@@ -236,80 +220,6 @@ export default function MatchDetails(_props: MatchDetailsProps) {
       setActiveTab(newActiveTab);
     }
   }, [router.query.tab, activeTab, getActiveTabFromQuery]);
-
-  // Fetch player stats for called players
-  useEffect(() => {
-    const fetchPlayerStats = async (
-      roster: RosterPlayer[],
-      team: { name: string },
-    ) => {
-      const calledPlayers = roster.filter((player) => player.called);
-      if (calledPlayers.length === 0) return {};
-
-      const statsPromises = calledPlayers.map(async (player) => {
-        try {
-          const response = await apiClient.get(
-            `/players/${player.player.playerId}`,
-          );
-
-          const playerData = response.data as PlayerDetails;
-          return {
-            playerId: player.player.playerId,
-            calledMatches: countCalledMatches(
-              playerData,
-              match!.tournament.alias,
-              match!.season.alias,
-            ),
-          };
-        } catch (error) {
-          console.error(
-            `Error fetching stats for player ${player.player.playerId}:`,
-            getErrorMessage(error),
-          );
-          return {
-            playerId: player.player.playerId,
-            calledMatches: 0,
-          };
-        }
-      });
-
-      const statsResults = await Promise.all(statsPromises);
-      return statsResults.reduce(
-        (acc, stat) => {
-          acc[stat.playerId] = stat.calledMatches;
-          return acc;
-        },
-        {} as { [playerId: string]: number },
-      );
-    };
-
-    const fetchAllPlayerStats = async () => {
-      if (!match) return;
-      // Fetch home team stats
-      if (
-        match.home.roster &&
-        match.home.roster.players.some((player: RosterPlayer) => player.called)
-      ) {
-        const homeStats = await fetchPlayerStats(match.home.roster.players, {
-          name: match.home.name,
-        });
-        setHomePlayerStats(homeStats);
-      }
-
-      // Fetch away team stats
-      if (
-        match.away.roster &&
-        match.away.roster.players.some((player: RosterPlayer) => player.called)
-      ) {
-        const awayStats = await fetchPlayerStats(match.away.roster.players, {
-          name: match.away.name,
-        });
-        setAwayPlayerStats(awayStats);
-      }
-    };
-
-    fetchAllPlayerStats();
-  }, [match]);
 
   // Refresh match data function
   const refreshMatchData = useCallback(async () => {
@@ -393,41 +303,32 @@ export default function MatchDetails(_props: MatchDetailsProps) {
 
   // Open player card modal
   const handleOpenPlayerCard = useCallback(
-    async (ctx: {
+    (ctx: {
       playerId: string;
       teamFlag: "home" | "away";
       player: RosterPlayer;
     }) => {
       if (!match) return;
       const team = ctx.teamFlag === "home" ? match.home : match.away;
-
-      setSelectedPlayerContext({
-        ...ctx,
+      const teamRoster = sortRoster(
+        ctx.teamFlag === "home"
+          ? match.home.roster?.players ?? []
+          : match.away.roster?.players ?? [],
+      );
+      setSelectedPlayerCardData({
+        player: ctx.player,
+        roster: teamRoster,
         teamName: team.name,
         teamLogoUrl: team.logo,
-        clubName: team.fullName,
-        clubLogoUrl: team.logo,
       });
       setIsPlayerCardOpen(true);
-      setIsLoadingPlayerDetails(true);
-
-      try {
-        const response = await apiClient.get(`/players/${ctx.playerId}`);
-        setPlayerDetails(response.data);
-      } catch (error) {
-        console.error("Error fetching player details:", getErrorMessage(error));
-        setPlayerDetails(null);
-      } finally {
-        setIsLoadingPlayerDetails(false);
-      }
     },
     [match],
   );
 
   const handleClosePlayerCard = useCallback(() => {
     setIsPlayerCardOpen(false);
-    setSelectedPlayerContext(null);
-    setPlayerDetails(null);
+    setSelectedPlayerCardData(null);
   }, []);
 
   // Function to handle supplementary sheet field updates
@@ -884,7 +785,6 @@ export default function MatchDetails(_props: MatchDetailsProps) {
                   showEditButton={permissions.showButtonRosterHome ?? false}
                   editUrl={`/matches/${match._id}/home/roster?from=matchcenter`}
                   sortRoster={sortRoster}
-                  playerStats={homePlayerStats}
                   teamLogoUrl={match.home.logo}
                   rosterStatus={match.home.roster?.status}
                   eligibilityTimestamp={match.home.roster?.eligibilityTimestamp}
@@ -903,7 +803,6 @@ export default function MatchDetails(_props: MatchDetailsProps) {
                   showEditButton={permissions.showButtonRosterAway ?? false}
                   editUrl={`/matches/${match._id}/away/roster?from=matchcenter`}
                   sortRoster={sortRoster}
-                  playerStats={awayPlayerStats}
                   teamLogoUrl={match.away.logo}
                   rosterStatus={match.away.roster?.status}
                   eligibilityTimestamp={match.away.roster?.eligibilityTimestamp}
@@ -1645,17 +1544,12 @@ export default function MatchDetails(_props: MatchDetailsProps) {
         <PlayerCardModal
           isOpen={isPlayerCardOpen}
           onClose={handleClosePlayerCard}
-          playerContext={selectedPlayerContext}
-          playerDetails={playerDetails}
-          calledMatchesCount={
-            selectedPlayerContext
-              ? ((selectedPlayerContext.teamFlag === "home"
-                  ? homePlayerStats[selectedPlayerContext.playerId]
-                  : awayPlayerStats[selectedPlayerContext.playerId]) ?? 0)
-              : 0
-          }
-          currentSeasonName={match.season?.name || match.season?.alias}
-          isLoading={isLoadingPlayerDetails}
+          initialPlayer={selectedPlayerCardData?.player ?? null}
+          roster={selectedPlayerCardData?.roster ?? []}
+          teamName={selectedPlayerCardData?.teamName}
+          teamLogoUrl={selectedPlayerCardData?.teamLogoUrl}
+          tournamentAlias={match.tournament?.alias}
+          seasonAlias={match.season?.alias}
         />
       </Layout>
     </>
