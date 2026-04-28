@@ -372,7 +372,7 @@ const Home: NextPage<PostsProps> = ({
                   )}
                 </div>
                 <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
-                  <div className="hidden sm:block min-w-0">
+                  <div className="min-w-0">
                     <p className="block sm:hidden text-sm font-medium text-gray-900 truncate text-right">
                       {match.home.tinyName}
                     </p>
@@ -408,7 +408,7 @@ const Home: NextPage<PostsProps> = ({
                     height={28}
                     className="object-contain flex-shrink-0"
                   />
-                  <div className="hidden sm:block min-w-0">
+                  <div className="min-w-0">
                     <p className="block sm:hidden text-sm font-medium text-gray-900 truncate">
                       {match.away.tinyName}
                     </p>
