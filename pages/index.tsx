@@ -334,9 +334,14 @@ const Home: NextPage<PostsProps> = ({
         const matchStart = new Date(match.startDate);
         if (now < matchStart) {
           return (
-            <p className="text-sm font-semibold text-gray-700 whitespace-nowrap text-center">
+            <div
+              className={classNames(
+                "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset",
+                "bg-gray-100 text-gray-700 ring-gray-200",
+              )}
+            >
               {formatTime(match.startDate)}
-            </p>
+            </div>
           );
         }
         return (
