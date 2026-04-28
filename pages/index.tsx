@@ -439,10 +439,10 @@ const Home: NextPage<PostsProps> = ({
                   borderColor,
                 )}
               >
-                {href ? (
-                  <Link href={href} className="absolute inset-0" aria-label="Zum Spiel" />
-                ) : null}
                 {rowContent}
+                {href ? (
+                  <Link href={href} className="absolute inset-0 z-10" aria-label="Zum Spiel" />
+                ) : null}
               </li>
             );
           })}
