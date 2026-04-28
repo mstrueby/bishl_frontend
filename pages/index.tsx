@@ -316,7 +316,7 @@ const Home: NextPage<PostsProps> = ({
             </p>
             {(match.finishType.key === "SHOOTOUT" ||
               match.finishType.key === "OVERTIME") && (
-              <span className="text-xs font-medium text-gray-400 whitespace-nowrap">
+              <span className="text-[10px] font-medium text-gray-400 whitespace-nowrap">
                 {match.finishType.key === "SHOOTOUT" ? "(PS)" : "(V)"}
               </span>
             )}
@@ -437,7 +437,7 @@ const Home: NextPage<PostsProps> = ({
               <li
                 key={match._id}
                 className={classNames(
-                  "relative flex items-center gap-x-3 px-4 py-4 hover:bg-gray-50 sm:px-6 border-l-4 border-t border-t-gray-100 first:border-t-0",
+                  "relative flex items-center gap-x-3 px-4 h-14 overflow-hidden hover:bg-gray-50 sm:px-6 border-l-4 border-t border-t-gray-100 first:border-t-0",
                   borderColor,
                 )}
               >
