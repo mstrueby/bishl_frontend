@@ -397,7 +397,13 @@ const Home: NextPage<PostsProps> = ({
                   />
                 </div>
                 <div className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center">
-                  {renderCenter(match)}
+                  {match.matchStatus.key === "SCHEDULED" ? (
+                    <div className="flex flex-col items-center justify-center leading-tight">
+                      {renderCenter(match)}
+                    </div>
+                  ) : (
+                    renderCenter(match)
+                  )}
                 </div>
                 <div className="flex-1 flex items-center gap-3 min-w-0">
                   <Image
@@ -543,7 +549,7 @@ const Home: NextPage<PostsProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className="text-sm text-gray-400 font-medium">
+                <div className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
                   {formatTime(match.startDate)}
                 </div>
               </div>
