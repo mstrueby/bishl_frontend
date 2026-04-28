@@ -15,11 +15,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from "@heroicons/react/20/solid";
-import {
-  CalendarIcon,
-  MapPinIcon,
-  EllipsisVerticalIcon,
-} from "@heroicons/react/24/outline";
+import { MapPinIcon } from "@heroicons/react/24/outline";
 import { CldImage } from "next-cloudinary";
 import SuccessMessage from "../components/ui/SuccessMessage";
 import TournamentSelect from "../components/ui/TournamentSelect";
@@ -168,78 +164,6 @@ const Home: NextPage<PostsProps> = ({
     }
   }, [selectedTournament, displayMatches]);
 
-  // Helper function to get time slot for a match
-  const getTimeSlot = (date: Date) => {
-    const hour = new Date(date).getHours();
-
-    if (hour < 10) {
-      return { key: "morning", label: "Morgens", description: "Vor 10 Uhr" };
-    } else if (hour < 12) {
-      return {
-        key: "beforenoon",
-        label: "Vormittags",
-        description: "10-12 Uhr",
-      };
-    } else if (hour < 14) {
-      return { key: "noon", label: "Mittags", description: "12-14 Uhr" };
-    } else if (hour < 16) {
-      return {
-        key: "afternoon",
-        label: "Nachmittags",
-        description: "14-16 Uhr",
-      };
-    } else if (hour < 18) {
-      return {
-        key: "lateafternoon",
-        label: "Später Nachmittag",
-        description: "16-18 Uhr",
-      };
-    } else if (hour < 20) {
-      return { key: "evening", label: "Abends", description: "18-20 Uhr" };
-    } else {
-      return { key: "night", label: "Heute Nacht", description: "Ab 20 Uhr" };
-    }
-  };
-
-  // Group matches by time slots
-  const groupMatchesByTimeSlot = (matches: MatchValues[]) => {
-    const groups: {
-      [key: string]: {
-        label: string;
-        description: string;
-        matches: MatchValues[];
-      };
-    } = {};
-
-    matches.forEach((match) => {
-      const timeSlot = getTimeSlot(match.startDate);
-      if (!groups[timeSlot.key]) {
-        groups[timeSlot.key] = {
-          label: timeSlot.label,
-          description: timeSlot.description,
-          matches: [],
-        };
-      }
-      groups[timeSlot.key].matches.push(match);
-    });
-
-    // Sort groups by time order
-    const sortedGroups = Object.entries(groups).sort(([keyA], [keyB]) => {
-      const order = [
-        "morning",
-        "beforenoon",
-        "noon",
-        "afternoon",
-        "lateafternoon",
-        "evening",
-        "night",
-      ];
-      return order.indexOf(keyA) - order.indexOf(keyB);
-    });
-
-    return sortedGroups.map(([key, group]) => group);
-  };
-
   // Categorize matches
   const categorizeMatches = (matches: MatchValues[]) => {
     const now = new Date();
@@ -326,6 +250,205 @@ const Home: NextPage<PostsProps> = ({
       }
       return newSet;
     });
+  };
+
+  // Group matches by tournament, sorted by sortOrder then startDate
+  const groupByTournament = (
+    matches: MatchValues[],
+  ): { alias: string; matches: MatchValues[] }[] => {
+    const sorted = [...matches].sort((a, b) => {
+      const orderA = tournamentConfigs[a.tournament.alias]?.sortOrder ?? 999;
+      const orderB = tournamentConfigs[b.tournament.alias]?.sortOrder ?? 999;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+    });
+
+    const groups: { alias: string; matches: MatchValues[] }[] = [];
+    const seen = new Set<string>();
+
+    for (const match of sorted) {
+      const alias = match.tournament.alias;
+      if (!seen.has(alias)) {
+        seen.add(alias);
+        groups.push({ alias, matches: [] });
+      }
+      groups.find((g) => g.alias === alias)!.matches.push(match);
+    }
+
+    return groups;
+  };
+
+  // Compact list row component for a single match
+  const MatchList = ({ matches }: { matches: MatchValues[] }) => {
+    const now = new Date();
+
+    const getRowBorderColor = (match: MatchValues) => {
+      if (match.matchStatus.key === "INPROGRESS") return "border-l-red-500";
+      if (match.matchStatus.key === "FINISHED") return "border-l-gray-500";
+      if (match.matchStatus.key === "SCHEDULED") {
+        const matchStart = new Date(match.startDate);
+        if (now < matchStart) return "border-l-green-500";
+        const config = tournamentConfigs[match.tournament.alias];
+        if (config) {
+          const matchEnd = new Date(
+            matchStart.getTime() + config.matchLenMin * 60 * 1000,
+          );
+          if (now <= matchEnd) return "border-l-red-500";
+        }
+        return "border-l-gray-500";
+      }
+      return "border-l-gray-300";
+    };
+
+    const getMatchHref = (match: MatchValues): string | null => {
+      if (match.matchStatus.key === "INPROGRESS")
+        return `/matches/${match._id}/live`;
+      if (match.matchStatus.key === "FINISHED") return `/matches/${match._id}`;
+      return null;
+    };
+
+    const renderCenter = (match: MatchValues) => {
+      if (match.matchStatus.key === "FINISHED") {
+        return (
+          <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
+            {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+            {(match.finishType.key === "SHOOTOUT" ||
+              match.finishType.key === "OVERTIME") && (
+              <span className="text-xs font-medium text-gray-400 ml-1">
+                {match.finishType.key === "SHOOTOUT" ? "(PS)" : "(V)"}
+              </span>
+            )}
+          </p>
+        );
+      }
+      if (match.matchStatus.key === "INPROGRESS") {
+        return (
+          <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
+            {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+          </p>
+        );
+      }
+      if (match.matchStatus.key === "SCHEDULED") {
+        const matchStart = new Date(match.startDate);
+        if (now < matchStart) {
+          return (
+            <p className="text-sm font-semibold text-gray-700 whitespace-nowrap text-center">
+              {formatTime(match.startDate)}
+            </p>
+          );
+        }
+        return (
+          <p className="text-md font-bold text-gray-400 whitespace-nowrap text-center">
+            - : -
+          </p>
+        );
+      }
+      return null;
+    };
+
+    return (
+      <div className="bg-white shadow-md rounded-lg border overflow-hidden">
+        <ul
+          role="list"
+          className="divide-y divide-gray-100 overflow-hidden bg-white"
+        >
+          {matches.map((match) => {
+            const href = getMatchHref(match);
+            const borderColor = getRowBorderColor(match);
+            const item = tournamentConfigs[match.tournament.alias];
+
+            const rowContent = (
+              <>
+                <div className="flex-shrink-0 w-16">
+                  {item && (
+                    <span
+                      className={classNames(
+                        "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset",
+                        item.bdgColLight,
+                      )}
+                    >
+                      {item.tinyName}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
+                  <div className="hidden sm:block min-w-0">
+                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate text-right">
+                      {match.home.tinyName}
+                    </p>
+                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate text-right">
+                      {match.home.shortName}
+                    </p>
+                    <p className="hidden lg:block text-sm font-medium text-gray-900 truncate text-right">
+                      {match.home.fullName}
+                    </p>
+                  </div>
+                  <Image
+                    src={
+                      match.home.logo ||
+                      "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                    }
+                    alt={match.home.tinyName}
+                    width={28}
+                    height={28}
+                    className="object-contain flex-shrink-0"
+                  />
+                </div>
+                <div className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center">
+                  {renderCenter(match)}
+                </div>
+                <div className="flex-1 flex items-center gap-3 min-w-0">
+                  <Image
+                    src={
+                      match.away.logo ||
+                      "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
+                    }
+                    alt={match.away.tinyName}
+                    width={28}
+                    height={28}
+                    className="object-contain flex-shrink-0"
+                  />
+                  <div className="hidden sm:block min-w-0">
+                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate">
+                      {match.away.tinyName}
+                    </p>
+                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate">
+                      {match.away.shortName}
+                    </p>
+                    <p className="hidden lg:block text-sm font-medium text-gray-900 truncate">
+                      {match.away.fullName}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-shrink-0 w-5">
+                  {href && (
+                    <ChevronRightIcon
+                      aria-hidden="true"
+                      className="size-5 flex-none text-gray-400"
+                    />
+                  )}
+                </div>
+              </>
+            );
+
+            return (
+              <li
+                key={match._id}
+                className={classNames(
+                  "relative flex items-center gap-x-3 px-4 py-4 hover:bg-gray-50 sm:px-6 border-l-4",
+                  borderColor,
+                )}
+              >
+                {href ? (
+                  <Link href={href} className="absolute inset-0" aria-label="Zum Spiel" />
+                ) : null}
+                {rowContent}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
   };
 
   // TournamentCard component for grouped upcoming matches
@@ -684,9 +807,9 @@ const Home: NextPage<PostsProps> = ({
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-grid-cols-2 lg:grid-cols-3 gap-6">
-                        {live.map((match) => (
-                          <MatchCard key={match._id} match={match} />
+                      <div className="space-y-4">
+                        {groupByTournament(live).map((group) => (
+                          <MatchList key={group.alias} matches={group.matches} />
                         ))}
                       </div>
                     </div>
@@ -704,49 +827,11 @@ const Home: NextPage<PostsProps> = ({
                           </div>
                         </div>
                       </div>
-                      {upcoming.length > 6 ? (
-                        // Group by time slots when more than 6 matches
-                        <div className="space-y-8">
-                          {groupMatchesByTimeSlot(
-                            upcoming.sort(
-                              (a, b) =>
-                                new Date(a.startDate).getTime() -
-                                new Date(b.startDate).getTime(),
-                            ),
-                          ).map((group, groupIndex) => (
-                            <div key={groupIndex}>
-                              <div className="mb-6 mt-8">
-                                <div className="flex flex-wrap items-baseline">
-                                  <h4 className="ml-2 text-base font-semibold text-gray-900">
-                                    {group.label}
-                                  </h4>
-                                  <p className="ml-2 truncate text-sm text-gray-500">
-                                    {group.description}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {group.matches.map((match) => (
-                                  <MatchCard key={match._id} match={match} />
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        // Show all matches without grouping when 6 or fewer
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {upcoming
-                            .sort(
-                              (a, b) =>
-                                new Date(a.startDate).getTime() -
-                                new Date(b.startDate).getTime(),
-                            )
-                            .map((match) => (
-                              <MatchCard key={match._id} match={match} />
-                            ))}
-                        </div>
-                      )}
+                      <div className="space-y-4">
+                        {groupByTournament(upcoming).map((group) => (
+                          <MatchList key={group.alias} matches={group.matches} />
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -762,140 +847,10 @@ const Home: NextPage<PostsProps> = ({
                           </div>
                         </div>
                       </div>
-                      <div className="bg-white shadow-md rounded-lg border overflow-hidden">
-                        <ul
-                          role="list"
-                          className="divide-y divide-gray-100 overflow-hidden bg-white shadow-xs outline-1 outline-gray-900/5 sm:rounded-xl"
-                        >
-                          {finished
-                            .sort((a, b) => {
-                              // First sort by tournament sortOrder
-                              const tournamentConfigA =
-                                tournamentConfigs[a.tournament.alias];
-                              const tournamentConfigB =
-                                tournamentConfigs[b.tournament.alias];
-                              const sortOrderA =
-                                tournamentConfigA?.sortOrder || 999;
-                              const sortOrderB =
-                                tournamentConfigB?.sortOrder || 999;
-
-                              if (sortOrderA !== sortOrderB) {
-                                return sortOrderA - sortOrderB;
-                              }
-
-                              // Then sort by startDate (most recent first)
-                              return (
-                                new Date(b.startDate).getTime() -
-                                new Date(a.startDate).getTime()
-                              );
-                            })
-                            .map((match) => (
-                              <li
-                                key={match._id}
-                                className="relative flex items-center gap-x-4 px-4 py-5 hover:bg-gray-50 sm:px-6 border-b border-gray-100 last:border-b-0"
-                              >
-                                <div className="flex-shrink-0 w-16">
-                                  {(() => {
-                                    const item =
-                                      tournamentConfigs[match.tournament.alias];
-                                    if (item) {
-                                      return (
-                                        <span
-                                          className={classNames(
-                                            "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset",
-                                            item.bdgColLight,
-                                          )}
-                                        >
-                                          {item.tinyName}
-                                        </span>
-                                      );
-                                    }
-                                  })()}
-                                </div>
-                                <div className="flex-1 flex items-center justify-end gap-4">
-                                  <div className="hidden sm:block">
-                                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate">
-                                      {match.home.tinyName}
-                                    </p>
-                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate">
-                                      {match.home.shortName}
-                                    </p>
-                                    <p className="hidden lg:block text-sm font-medium text-gray-900 truncate">
-                                      {match.home.fullName}
-                                    </p>
-                                  </div>
-                                  <Image
-                                    src={
-                                      match.home.logo ||
-                                      "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
-                                    }
-                                    alt={match.home.tinyName}
-                                    width={28}
-                                    height={28}
-                                    className="object-contain flex-shrink-0"
-                                  />
-                                </div>
-                                <Link
-                                  href={`/matches/${match._id}`}
-                                  className="flex-shrink-0 w-20 sm:w-24 flex items-center justify-center cursor-pointer"
-                                >
-                                  <span className="absolute inset-x-0 -top-px bottom-0" />
-                                  {match.matchStatus.key === "FINISHED" ? (
-                                    <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-                                      {match.home.stats.goalsFor} :{" "}
-                                      {match.away.stats.goalsFor}
-                                      {(match.finishType.key === "SHOOTOUT" ||
-                                        match.finishType.key ===
-                                          "OVERTIME") && (
-                                        <span className="text-xs font-medium text-gray-400 ml-1">
-                                          {match.finishType.key === "SHOOTOUT"
-                                            ? "(PS)"
-                                            : "(V)"}
-                                        </span>
-                                      )}
-                                    </p>
-                                  ) : match.matchStatus.key === "SCHEDULED" ? (
-                                    <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-                                      - : -
-                                    </p>
-                                  ) : (
-                                    <p className="text-xs font-medium text-gray-400 lowercase whitespace-nowrap text-center">
-                                      {match.matchStatus.value}
-                                    </p>
-                                  )}
-                                </Link>
-                                <div className="flex-1 flex items-center gap-4">
-                                  <Image
-                                    src={
-                                      match.away.logo ||
-                                      "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png"
-                                    }
-                                    alt={match.away.tinyName}
-                                    width={28}
-                                    height={28}
-                                    className="object-contain flex-shrink-0"
-                                  />
-                                  <div className="hidden sm:block">
-                                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate">
-                                      {match.away.tinyName}
-                                    </p>
-                                    <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate">
-                                      {match.away.shortName}
-                                    </p>
-                                    <p className="hidden lg:block text-sm font-medium text-gray-900 truncate">
-                                      {match.away.fullName}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex-shrink-0">
-                                  <ChevronRightIcon
-                                    aria-hidden="true"
-                                    className="size-5 flex-none text-gray-400"
-                                  />
-                                </div>
-                              </li>
-                            ))}
-                        </ul>
+                      <div className="space-y-4">
+                        {groupByTournament(finished).map((group) => (
+                          <MatchList key={group.alias} matches={group.matches} />
+                        ))}
                       </div>
                     </div>
                   )}
