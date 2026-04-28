@@ -549,7 +549,12 @@ const Home: NextPage<PostsProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                <div
+                  className={classNames(
+                    "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase ring-1 ring-inset",
+                    "bg-gray-100 text-gray-700 ring-gray-200",
+                  )}
+                >
                   {formatTime(match.startDate)}
                 </div>
               </div>
