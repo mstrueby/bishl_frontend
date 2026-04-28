@@ -310,15 +310,17 @@ const Home: NextPage<PostsProps> = ({
     const renderCenter = (match: MatchValues) => {
       if (match.matchStatus.key === "FINISHED") {
         return (
-          <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-            {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+          <div className="flex flex-col items-center justify-center leading-tight">
+            <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
+              {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+            </p>
             {(match.finishType.key === "SHOOTOUT" ||
               match.finishType.key === "OVERTIME") && (
-              <span className="text-xs font-medium text-gray-400 ml-1">
+              <span className="text-xs font-medium text-gray-400 whitespace-nowrap">
                 {match.finishType.key === "SHOOTOUT" ? "(PS)" : "(V)"}
               </span>
             )}
-          </p>
+          </div>
         );
       }
       if (match.matchStatus.key === "INPROGRESS") {
@@ -373,7 +375,7 @@ const Home: NextPage<PostsProps> = ({
                 </div>
                 <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
                   <div className="min-w-0">
-                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate text-right">
+                    <p className="hidden text-sm font-medium text-gray-900 truncate text-right">
                       {match.home.tinyName}
                     </p>
                     <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate text-right">
@@ -409,7 +411,7 @@ const Home: NextPage<PostsProps> = ({
                     className="object-contain flex-shrink-0"
                   />
                   <div className="min-w-0">
-                    <p className="block sm:hidden text-sm font-medium text-gray-900 truncate">
+                    <p className="hidden text-sm font-medium text-gray-900 truncate">
                       {match.away.tinyName}
                     </p>
                     <p className="hidden sm:max-lg:block text-sm font-medium text-gray-900 truncate">
