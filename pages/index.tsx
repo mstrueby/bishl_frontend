@@ -350,7 +350,7 @@ const Home: NextPage<PostsProps> = ({
       <div className="bg-white shadow-md rounded-lg border overflow-hidden">
         <ul
           role="list"
-          className="divide-y divide-gray-100 overflow-hidden bg-white"
+          className="overflow-hidden bg-white"
         >
           {matches.map((match) => {
             const href = getMatchHref(match);
@@ -435,7 +435,7 @@ const Home: NextPage<PostsProps> = ({
               <li
                 key={match._id}
                 className={classNames(
-                  "relative flex items-center gap-x-3 px-4 py-4 hover:bg-gray-50 sm:px-6 border-l-4",
+                  "relative flex items-center gap-x-3 px-4 py-4 hover:bg-gray-50 sm:px-6 border-l-4 border-t border-t-gray-100 first:border-t-0",
                   borderColor,
                 )}
               >
