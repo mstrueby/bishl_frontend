@@ -48,10 +48,10 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player }) => {
 
 const GoalCard: React.FC<{ event: GoalEvent }> = ({ event }) => (
   <div className="flex items-center gap-x-2.5 py-2.5 px-3">
-    <PlayerAvatar player={event.goalPlayer} />
-    <div className="flex-shrink-0 text-xs font-bold text-orange-700 bg-orange-100 rounded-full w-5 h-5 flex items-center justify-center">
+    <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
       T
     </div>
+    <PlayerAvatar player={event.goalPlayer} />
     <div className="min-w-0 flex-grow">
       <p className="text-sm font-semibold text-gray-900 truncate">
         #{event.goalPlayer.jerseyNumber}{" "}
@@ -80,10 +80,10 @@ const PenaltyCard: React.FC<{ event: PenaltyEvent }> = ({ event }) => {
   const pcValue = pc["value"] ?? "";
   return (
     <div className="flex items-center gap-x-2.5 py-2.5 px-3 bg-gray-50">
-      <PlayerAvatar player={event.penaltyPlayer} />
       <div className="flex-shrink-0 text-xs font-bold text-gray-600 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
         S
       </div>
+      <PlayerAvatar player={event.penaltyPlayer} />
       <div className="min-w-0 flex-grow">
         <p className="text-sm font-medium text-gray-700 truncate">
           #{event.penaltyPlayer.jerseyNumber}{" "}
@@ -150,14 +150,15 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, settings }) => {
       ? <GoalCard event={event} />
       : <PenaltyCard event={event} />;
 
+    const isGoal = event.kind === "goal";
+    const accentBorder = isGoal ? "border-l-[3px] border-l-orange-600" : "border-l-[3px] border-l-gray-400";
+
     return (
       <div key={eventKey} className="relative mb-1">
-        {/* Mobile layout: stacked with colored side accent */}
+        {/* Mobile layout: stacked with event-type colored left accent, side offset by team */}
         <div
-          className={`md:hidden bg-white border rounded-md shadow-sm overflow-hidden ${
-            isHome
-              ? "mr-10 border-l-[3px] border-l-orange-300"
-              : "ml-10 border-r-[3px] border-r-gray-300"
+          className={`md:hidden bg-white border rounded-md shadow-sm overflow-hidden ${accentBorder} ${
+            isHome ? "mr-10" : "ml-10"
           }`}
         >
           {cardContent}

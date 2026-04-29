@@ -259,7 +259,7 @@ export default function LiveMatch() {
 
       {/* Tab navigation */}
       <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav className="-mb-px flex justify-center space-x-8" aria-label="Tabs">
           {TABS.map((tab) => (
             <button
               key={tab.id}
