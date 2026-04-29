@@ -60,7 +60,7 @@ const GoalCard: React.FC<GoalCardProps> = ({ event, teamLogo }) => (
         height={24}
         className="w-6 h-6 object-contain"
       />
-      <span className="text-[10px] font-light text-gray-400 tabular-nums leading-none">{event.matchTime}</span>
+      <span className="text-[11px] font-medium text-gray-600 tabular-nums leading-tight">{event.matchTime}</span>
     </div>
     <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
       T
@@ -101,7 +101,7 @@ const PenaltyCard: React.FC<PenaltyCardProps> = ({ event, teamLogo }) => {
           height={24}
           className="w-6 h-6 object-contain"
         />
-        <span className="text-[10px] font-light text-gray-400 tabular-nums leading-none">{event.matchTimeStart}</span>
+        <span className="text-[11px] font-medium text-gray-600 tabular-nums leading-tight">{event.matchTimeStart}</span>
       </div>
       <div className="flex-shrink-0 text-xs font-bold text-gray-600 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
         S
