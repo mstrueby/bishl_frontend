@@ -52,7 +52,7 @@ interface GoalCardProps { event: GoalEvent; teamLogo?: string; }
 
 const GoalCard: React.FC<GoalCardProps> = ({ event, teamLogo }) => (
   <div className="flex items-center gap-x-2.5 py-2.5 px-3">
-    <div className="flex-shrink-0 flex flex-col items-center gap-y-0.5 w-8">
+    <div className="flex-shrink-0 flex items-center gap-x-1.5">
       <CldImage
         src={teamLogo || FALLBACK_LOGO}
         alt="Team logo"
@@ -60,7 +60,7 @@ const GoalCard: React.FC<GoalCardProps> = ({ event, teamLogo }) => (
         height={24}
         className="w-6 h-6 object-contain"
       />
-      <span className="text-[11px] font-medium text-gray-600 tabular-nums leading-tight">{event.matchTime}</span>
+      <span className="text-[10px] font-medium text-gray-700 tabular-nums leading-none">{event.matchTime}</span>
     </div>
     <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
       T
@@ -93,7 +93,7 @@ const PenaltyCard: React.FC<PenaltyCardProps> = ({ event, teamLogo }) => {
   const pcValue = pc["value"] ?? "";
   return (
     <div className="flex items-center gap-x-2.5 py-2.5 px-3 bg-gray-50">
-      <div className="flex-shrink-0 flex flex-col items-center gap-y-0.5 w-8">
+      <div className="flex-shrink-0 flex items-center gap-x-1.5">
         <CldImage
           src={teamLogo || FALLBACK_LOGO}
           alt="Team logo"
@@ -101,7 +101,7 @@ const PenaltyCard: React.FC<PenaltyCardProps> = ({ event, teamLogo }) => {
           height={24}
           className="w-6 h-6 object-contain"
         />
-        <span className="text-[11px] font-medium text-gray-600 tabular-nums leading-tight">{event.matchTimeStart}</span>
+        <span className="text-[10px] font-medium text-gray-700 tabular-nums leading-none">{event.matchTimeStart}</span>
       </div>
       <div className="flex-shrink-0 text-xs font-bold text-gray-600 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
         S
