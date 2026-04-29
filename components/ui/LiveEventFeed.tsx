@@ -51,7 +51,7 @@ const FALLBACK_LOGO = "https://res.cloudinary.com/dajtykxvp/image/upload/v170164
 interface GoalCardProps { event: GoalEvent; teamLogo?: string; }
 
 const GoalCard: React.FC<GoalCardProps> = ({ event, teamLogo }) => (
-  <div className="flex items-center gap-x-2.5 py-2.5 px-3">
+  <div className="flex items-center gap-x-4 py-2.5 px-3">
     <div className="flex-shrink-0 flex items-center gap-x-1.5">
       <CldImage
         src={teamLogo || FALLBACK_LOGO}
@@ -92,7 +92,7 @@ const PenaltyCard: React.FC<PenaltyCardProps> = ({ event, teamLogo }) => {
   const pcKey = pc["key"] ?? "";
   const pcValue = pc["value"] ?? "";
   return (
-    <div className="flex items-center gap-x-2.5 py-2.5 px-3 bg-gray-50">
+    <div className="flex items-center gap-x-4 py-2.5 px-3 bg-gray-50">
       <div className="flex-shrink-0 flex items-center gap-x-1.5">
         <CldImage
           src={teamLogo || FALLBACK_LOGO}
