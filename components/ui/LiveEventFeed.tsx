@@ -49,7 +49,7 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player }) => {
 interface GoalCardProps { event: GoalEvent; score?: { home: number; away: number }; }
 
 const GoalCard: React.FC<GoalCardProps> = ({ event, score }) => (
-  <div className="flex items-center gap-x-4 py-2.5 px-3">
+  <div className="flex items-center gap-x-6 py-2.5 px-3">
     <div className="flex-shrink-0 flex flex-col items-center gap-y-1 w-8">
       <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
         T
@@ -90,7 +90,7 @@ const PenaltyCard: React.FC<PenaltyCardProps> = ({ event }) => {
   const pcKey = pc["key"] ?? "";
   const pcValue = pc["value"] ?? "";
   return (
-    <div className="flex items-center gap-x-6 py-2.5 px-3 bg-gray-50">
+  <div className="flex items-center gap-x-6 py-2.5 px-3 bg-gray-50">
       <div className="flex-shrink-0 flex flex-col items-center gap-y-1 w-8">
         <div className="flex-shrink-0 text-xs font-bold text-gray-600 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
           S
