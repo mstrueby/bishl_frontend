@@ -46,8 +46,22 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player }) => {
   );
 };
 
-const GoalCard: React.FC<{ event: GoalEvent }> = ({ event }) => (
+const FALLBACK_LOGO = "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png";
+
+interface GoalCardProps { event: GoalEvent; teamLogo?: string; }
+
+const GoalCard: React.FC<GoalCardProps> = ({ event, teamLogo }) => (
   <div className="flex items-center gap-x-2.5 py-2.5 px-3">
+    <div className="flex-shrink-0 flex flex-col items-center gap-y-0.5 w-8">
+      <CldImage
+        src={teamLogo || FALLBACK_LOGO}
+        alt="Team logo"
+        width={24}
+        height={24}
+        className="w-6 h-6 object-contain"
+      />
+      <span className="text-[10px] font-light text-gray-400 tabular-nums leading-none">{event.matchTime}</span>
+    </div>
     <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
       T
     </div>
@@ -68,18 +82,27 @@ const GoalCard: React.FC<{ event: GoalEvent }> = ({ event }) => (
         <p className="text-xs text-gray-400 italic">Keine Vorlage</p>
       )}
     </div>
-    <div className="flex-shrink-0 text-xs font-semibold text-gray-700 tabular-nums">
-      {event.matchTime}
-    </div>
   </div>
 );
 
-const PenaltyCard: React.FC<{ event: PenaltyEvent }> = ({ event }) => {
+interface PenaltyCardProps { event: PenaltyEvent; teamLogo?: string; }
+
+const PenaltyCard: React.FC<PenaltyCardProps> = ({ event, teamLogo }) => {
   const pc = event.penaltyCode as Record<string, string>;
   const pcKey = pc["key"] ?? "";
   const pcValue = pc["value"] ?? "";
   return (
     <div className="flex items-center gap-x-2.5 py-2.5 px-3 bg-gray-50">
+      <div className="flex-shrink-0 flex flex-col items-center gap-y-0.5 w-8">
+        <CldImage
+          src={teamLogo || FALLBACK_LOGO}
+          alt="Team logo"
+          width={24}
+          height={24}
+          className="w-6 h-6 object-contain"
+        />
+        <span className="text-[10px] font-light text-gray-400 tabular-nums leading-none">{event.matchTimeStart}</span>
+      </div>
       <div className="flex-shrink-0 text-xs font-bold text-gray-600 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
         S
       </div>
@@ -95,9 +118,6 @@ const PenaltyCard: React.FC<{ event: PenaltyEvent }> = ({ event }) => {
           {event.isMP && "MP · "}
           {event.penaltyMinutes} Min. · {pcKey} – {pcValue}
         </p>
-      </div>
-      <div className="flex-shrink-0 text-xs font-semibold text-gray-600 tabular-nums">
-        {event.matchTimeStart}
       </div>
     </div>
   );
@@ -128,7 +148,7 @@ interface LiveEventFeedProps {
   settings: MatchSettings;
 }
 
-const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, settings }) => {
+const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings }) => {
   const numOfPeriods = settings.numOfPeriods ?? 1;
   const showSubheaders = numOfPeriods > 1;
   const groups = showSubheaders ? buildPeriodGroups(feed, settings) : null;
@@ -146,9 +166,10 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, settings }) => {
     const eventKey = event._id ?? `event-${event.teamFlag}-${index}`;
     const dotColor = isHome ? "bg-orange-400" : "bg-gray-400";
 
+    const teamLogo = isHome ? match.home.logo : match.away.logo;
     const cardContent = event.kind === "goal"
-      ? <GoalCard event={event} />
-      : <PenaltyCard event={event} />;
+      ? <GoalCard event={event} teamLogo={teamLogo} />
+      : <PenaltyCard event={event} teamLogo={teamLogo} />;
 
     const isGoal = event.kind === "goal";
     const accentBorder = isHome
