@@ -134,12 +134,18 @@ interface LiveEventFeedProps {
   feed: FeedEvent[];
   match: MatchValues;
   settings: MatchSettings;
+  sortOrder?: "asc" | "desc";
 }
 
-const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings }) => {
+const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings, sortOrder = "asc" }) => {
   const numOfPeriods = settings.numOfPeriods ?? 1;
   const showSubheaders = numOfPeriods > 1;
-  const groups = showSubheaders ? buildPeriodGroups(feed, settings) : null;
+
+  const sortedFeed = [...feed].sort((a, b) =>
+    sortOrder === "desc" ? b.timeSeconds - a.timeSeconds : a.timeSeconds - b.timeSeconds
+  );
+
+  const groups = showSubheaders ? buildPeriodGroups(sortedFeed, settings) : null;
 
   if (feed.length === 0) {
     return (
@@ -201,7 +207,7 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings }) 
       <div className="relative">
         <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gray-200 -translate-x-1/2" />
         <div className="relative">
-          {feed.map((event, index) => renderEventRow(event, index))}
+          {sortedFeed.map((event, index) => renderEventRow(event, index))}
         </div>
       </div>
     );

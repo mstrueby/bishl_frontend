@@ -279,7 +279,7 @@ export default function LiveMatch() {
       {/* Tab content */}
       {activeTab === "ticker" && (
         <div className="mb-4">
-          <LiveEventFeed feed={feed} match={match} settings={settings} />
+          <LiveEventFeed feed={feed} match={match} settings={settings} sortOrder="desc" />
         </div>
       )}
 
