@@ -56,11 +56,6 @@ const GoalCard: React.FC<GoalCardProps> = ({ event, score }) => (
       </div>
       <span className="text-[10px] font-medium text-gray-600 tabular-nums leading-none">{event.matchTime}</span>
     </div>
-    {score !== undefined && (
-      <div className="flex-shrink-0 text-sm font-bold text-gray-800 tabular-nums min-w-[2.5rem] text-center">
-        {score.home}:{score.away}
-      </div>
-    )}
     <div className="flex items-center gap-x-2.5 min-w-0 flex-grow">
       <PlayerAvatar player={event.goalPlayer} />
       <div className="min-w-0 flex-grow">
@@ -80,6 +75,11 @@ const GoalCard: React.FC<GoalCardProps> = ({ event, score }) => (
       )}
       </div>
     </div>
+    {score !== undefined && (
+      <div className="flex-shrink-0 text-sm font-bold text-gray-800 tabular-nums min-w-[2.5rem] text-center">
+        {score.home}:{score.away}
+      </div>
+    )}
   </div>
 );
 
