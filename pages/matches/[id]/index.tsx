@@ -208,9 +208,9 @@ export default function MatchDetails() {
 
       {/* Roster */}
       <div className="mt-14 mb-10">
-        <div className="flex flex-col md:flex-row md:space-x-4">
+        <div className="flex flex-col lg:flex-row lg:space-x-4">
           {/* Home team roster */}
-          <div className="w-full md:w-1/2 mb-6 md:mb-0">
+          <div className="w-full lg:w-1/2 mb-6 lg:mb-0 min-w-0">
             <RosterTable
               teamName={match.home.fullName}
               roster={match.home.roster?.players || []}
@@ -220,7 +220,7 @@ export default function MatchDetails() {
           </div>
 
           {/* Away team roster */}
-          <div className="w-full md:w-1/2 mt-4 md:mt-0">
+          <div className="w-full lg:w-1/2 mt-4 lg:mt-0 min-w-0">
             <RosterTable
               teamName={match.away.fullName}
               roster={match.away.roster?.players || []}

@@ -285,7 +285,7 @@ export default function LiveMatch() {
 
       {activeTab === "aufstellung" && (
         <div className="mb-8">
-          <div className="hidden md:flex gap-8 mb-4">
+          <div className="hidden lg:flex gap-8 mb-4">
             <div className="flex-1 text-center font-semibold text-gray-700">
               {match.home.fullName}
             </div>
@@ -293,8 +293,8 @@ export default function LiveMatch() {
               {match.away.fullName}
             </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1">
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 min-w-0">
               <RosterTable
                 teamName={match.home.fullName}
                 roster={match.home.roster?.players ?? []}
@@ -302,7 +302,7 @@ export default function LiveMatch() {
                 numOfPeriods={numOfPeriods}
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <RosterTable
                 teamName={match.away.fullName}
                 roster={match.away.roster?.players ?? []}
