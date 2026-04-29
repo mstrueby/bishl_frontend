@@ -216,16 +216,22 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings, so
   return (
     <div className="relative">
       <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gray-200 -translate-x-1/2" />
-      {groups.map((group) => (
-        <div key={group.label} className="relative">
+      {groups.map((group) => {
+        const label = (
           <div className="relative z-10 flex justify-center my-4">
             <span className="bg-white border border-gray-200 rounded-full px-4 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide shadow-sm">
               {group.label}
             </span>
           </div>
-          {group.events.map((event, index) => renderEventRow(event, index))}
-        </div>
-      ))}
+        );
+        return (
+          <div key={group.label} className="relative">
+            {sortOrder !== "desc" && label}
+            {group.events.map((event, index) => renderEventRow(event, index))}
+            {sortOrder === "desc" && label}
+          </div>
+        );
+      })}
     </div>
   );
 };
