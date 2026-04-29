@@ -151,11 +151,13 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, settings }) => {
       : <PenaltyCard event={event} />;
 
     const isGoal = event.kind === "goal";
-    const accentBorder = isGoal ? "border-l-[3px] border-l-orange-600" : "border-l-[3px] border-l-gray-400";
+    const accentBorder = isHome
+      ? isGoal ? "border-l-[3px] border-l-orange-600" : "border-l-[3px] border-l-gray-400"
+      : isGoal ? "border-r-[3px] border-r-orange-600" : "border-r-[3px] border-r-gray-400";
 
     return (
       <div key={eventKey} className="relative mb-1">
-        {/* Mobile layout: stacked with event-type colored left accent, side offset by team */}
+        {/* Mobile layout: home=left border, away=right border; color by event type */}
         <div
           className={`md:hidden bg-white border rounded-md shadow-sm overflow-hidden ${accentBorder} ${
             isHome ? "mr-10" : "ml-10"
