@@ -46,27 +46,19 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player }) => {
   );
 };
 
-const FALLBACK_LOGO = "https://res.cloudinary.com/dajtykxvp/image/upload/v1701640413/logos/bishl_logo.png";
+interface GoalCardProps { event: GoalEvent; }
 
-interface GoalCardProps { event: GoalEvent; teamLogo?: string; }
-
-const GoalCard: React.FC<GoalCardProps> = ({ event, teamLogo }) => (
-  <div className="flex items-center gap-x-4 py-2.5 px-3">
-    <div className="flex-shrink-0 flex items-center gap-x-1.5">
-      <CldImage
-        src={teamLogo || FALLBACK_LOGO}
-        alt="Team logo"
-        width={24}
-        height={24}
-        className="w-6 h-6 object-contain"
-      />
-      <span className="text-[10px] font-medium text-gray-700 tabular-nums leading-none">{event.matchTime}</span>
+const GoalCard: React.FC<GoalCardProps> = ({ event }) => (
+  <div className="flex items-center gap-x-6 py-2.5 px-3">
+    <div className="flex-shrink-0 flex flex-col items-center gap-y-0.5 w-8">
+      <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
+        T
+      </div>
+      <span className="text-[10px] font-medium text-gray-600 tabular-nums leading-none">{event.matchTime}</span>
     </div>
-    <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
-      T
-    </div>
-    <PlayerAvatar player={event.goalPlayer} />
-    <div className="min-w-0 flex-grow">
+    <div className="flex items-center gap-x-2.5 min-w-0 flex-grow">
+      <PlayerAvatar player={event.goalPlayer} />
+      <div className="min-w-0 flex-grow">
       <p className="text-sm font-semibold text-gray-900 truncate">
         #{event.goalPlayer.jerseyNumber}{" "}
         {event.goalPlayer.displayFirstName ?? event.goalPlayer.firstName}{" "}
@@ -74,40 +66,35 @@ const GoalCard: React.FC<GoalCardProps> = ({ event, teamLogo }) => (
       </p>
       {event.assistPlayer ? (
         <p className="text-xs text-gray-500 truncate">
-          Assist: #{event.assistPlayer.jerseyNumber}{" "}
+          Vorlage: #{event.assistPlayer.jerseyNumber}{" "}
           {event.assistPlayer.displayFirstName ?? event.assistPlayer.firstName}{" "}
           {event.assistPlayer.displayLastName ?? event.assistPlayer.lastName}
         </p>
       ) : (
         <p className="text-xs text-gray-400 italic">Keine Vorlage</p>
       )}
+      </div>
     </div>
   </div>
 );
 
-interface PenaltyCardProps { event: PenaltyEvent; teamLogo?: string; }
+interface PenaltyCardProps { event: PenaltyEvent; }
 
-const PenaltyCard: React.FC<PenaltyCardProps> = ({ event, teamLogo }) => {
+const PenaltyCard: React.FC<PenaltyCardProps> = ({ event }) => {
   const pc = event.penaltyCode as Record<string, string>;
   const pcKey = pc["key"] ?? "";
   const pcValue = pc["value"] ?? "";
   return (
-    <div className="flex items-center gap-x-4 py-2.5 px-3 bg-gray-50">
-      <div className="flex-shrink-0 flex items-center gap-x-1.5">
-        <CldImage
-          src={teamLogo || FALLBACK_LOGO}
-          alt="Team logo"
-          width={24}
-          height={24}
-          className="w-6 h-6 object-contain"
-        />
-        <span className="text-[10px] font-medium text-gray-700 tabular-nums leading-none">{event.matchTimeStart}</span>
+    <div className="flex items-center gap-x-6 py-2.5 px-3 bg-gray-50">
+      <div className="flex-shrink-0 flex flex-col items-center gap-y-0.5 w-8">
+        <div className="flex-shrink-0 text-xs font-bold text-gray-600 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
+          S
+        </div>
+        <span className="text-[10px] font-medium text-gray-600 tabular-nums leading-none">{event.matchTimeStart}</span>
       </div>
-      <div className="flex-shrink-0 text-xs font-bold text-gray-600 bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center">
-        S
-      </div>
-      <PlayerAvatar player={event.penaltyPlayer} />
-      <div className="min-w-0 flex-grow">
+      <div className="flex items-center gap-x-2.5 min-w-0 flex-grow">
+        <PlayerAvatar player={event.penaltyPlayer} />
+        <div className="min-w-0 flex-grow">
         <p className="text-sm font-medium text-gray-700 truncate">
           #{event.penaltyPlayer.jerseyNumber}{" "}
           {event.penaltyPlayer.displayFirstName ?? event.penaltyPlayer.firstName}{" "}
@@ -118,6 +105,7 @@ const PenaltyCard: React.FC<PenaltyCardProps> = ({ event, teamLogo }) => {
           {event.isMP && "MP · "}
           {event.penaltyMinutes} Min. · {pcKey} – {pcValue}
         </p>
+        </div>
       </div>
     </div>
   );
@@ -166,10 +154,9 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings }) 
     const eventKey = event._id ?? `event-${event.teamFlag}-${index}`;
     const dotColor = isHome ? "bg-orange-400" : "bg-gray-400";
 
-    const teamLogo = isHome ? match.home.logo : match.away.logo;
     const cardContent = event.kind === "goal"
-      ? <GoalCard event={event} teamLogo={teamLogo} />
-      : <PenaltyCard event={event} teamLogo={teamLogo} />;
+      ? <GoalCard event={event} />
+      : <PenaltyCard event={event} />;
 
     const isGoal = event.kind === "goal";
     const accentBorder = isHome
