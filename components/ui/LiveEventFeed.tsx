@@ -46,16 +46,21 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({ player }) => {
   );
 };
 
-interface GoalCardProps { event: GoalEvent; }
+interface GoalCardProps { event: GoalEvent; score?: { home: number; away: number }; }
 
-const GoalCard: React.FC<GoalCardProps> = ({ event }) => (
-  <div className="flex items-center gap-x-6 py-2.5 px-3">
+const GoalCard: React.FC<GoalCardProps> = ({ event, score }) => (
+  <div className="flex items-center gap-x-4 py-2.5 px-3">
     <div className="flex-shrink-0 flex flex-col items-center gap-y-1 w-8">
       <div className="flex-shrink-0 text-xs font-bold text-white bg-orange-700 rounded-full w-5 h-5 flex items-center justify-center">
         T
       </div>
       <span className="text-[10px] font-medium text-gray-600 tabular-nums leading-none">{event.matchTime}</span>
     </div>
+    {score !== undefined && (
+      <div className="flex-shrink-0 text-sm font-bold text-gray-800 tabular-nums min-w-[2.5rem] text-center">
+        {score.home}:{score.away}
+      </div>
+    )}
     <div className="flex items-center gap-x-2.5 min-w-0 flex-grow">
       <PlayerAvatar player={event.goalPlayer} />
       <div className="min-w-0 flex-grow">
@@ -145,6 +150,19 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings, so
     sortOrder === "desc" ? b.timeSeconds - a.timeSeconds : a.timeSeconds - b.timeSeconds
   );
 
+  // Compute running score for each goal in chronological order
+  const goalScoreMap = new Map<string, { home: number; away: number }>();
+  const chronologicalGoals = feed
+    .filter((e): e is GoalEvent => e.kind === "goal")
+    .sort((a, b) => a.timeSeconds - b.timeSeconds);
+  let homeCount = 0;
+  let awayCount = 0;
+  for (const goal of chronologicalGoals) {
+    if (goal.teamFlag === "home") homeCount++; else awayCount++;
+    const key = goal._id ?? `goal-${goal.teamFlag}-${goal.timeSeconds}`;
+    goalScoreMap.set(key, { home: homeCount, away: awayCount });
+  }
+
   const groups = showSubheaders ? buildPeriodGroups(sortedFeed, settings) : null;
 
   if (feed.length === 0) {
@@ -160,8 +178,12 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, match, settings, so
     const eventKey = event._id ?? `event-${event.teamFlag}-${index}`;
     const dotColor = isHome ? "bg-orange-400" : "bg-gray-400";
 
+    const goalScore = event.kind === "goal"
+      ? goalScoreMap.get(event._id ?? `goal-${event.teamFlag}-${event.timeSeconds}`)
+      : undefined;
+
     const cardContent = event.kind === "goal"
-      ? <GoalCard event={event} />
+      ? <GoalCard event={event} score={goalScore} />
       : <PenaltyCard event={event} />;
 
     const isGoal = event.kind === "goal";
