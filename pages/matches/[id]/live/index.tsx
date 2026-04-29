@@ -298,7 +298,7 @@ export default function LiveMatch() {
               <RosterTable
                 teamName={match.home.fullName}
                 roster={match.home.roster?.players ?? []}
-                isPublished={match.home.roster?.published ?? false}
+                isPublished={match.home.roster?.status != "DRAFT"}
                 numOfPeriods={numOfPeriods}
               />
             </div>
@@ -306,7 +306,7 @@ export default function LiveMatch() {
               <RosterTable
                 teamName={match.away.fullName}
                 roster={match.away.roster?.players ?? []}
-                isPublished={match.away.roster?.published ?? false}
+                isPublished={match.away.roster?.status != "DRAFT"}
                 numOfPeriods={numOfPeriods}
               />
             </div>
