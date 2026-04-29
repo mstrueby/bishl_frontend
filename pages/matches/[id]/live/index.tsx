@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import useAuth from "../../../../hooks/useAuth";
 import { useRouter } from "next/router";
-import { MatchValues } from "../../../../types/MatchValues";
+import { MatchValues, ScoresBase, PenaltiesBase } from "../../../../types/MatchValues";
 import Layout from "../../../../components/Layout";
 import apiClient from "../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../lib/errorHandler";
@@ -13,7 +13,8 @@ import { MatchdayOwner } from "../../../../types/TournamentValues";
 import MatchHeader from "../../../../components/ui/MatchHeader";
 import MatchStatusBadge from "../../../../components/ui/MatchStatusBadge";
 import LoadingState from "../../../../components/ui/LoadingState";
-import LiveEventFeed from "../../../../components/ui/LiveEventFeed";
+import LiveEventFeed, { FeedEvent, GoalEvent, PenaltyEvent } from "../../../../components/ui/LiveEventFeed";
+import { timeToSeconds } from "../../../../utils/matchPeriods";
 import RosterTable from "../../../../components/ui/RosterTable";
 
 const POLL_INTERVAL_MS = 15000;
@@ -52,14 +53,19 @@ export default function LiveMatch() {
     [id, router],
   );
 
-  // Sync active tab from URL query
+  // Sync active tab from URL query; normalize invalid values to "ticker"
   useEffect(() => {
     const { tab } = router.query;
     const valid = TABS.map((t) => t.id) as string[];
-    if (typeof tab === "string" && valid.includes(tab)) {
-      setActiveTab(tab as TabId);
+    const resolved: TabId =
+      typeof tab === "string" && valid.includes(tab) ? (tab as TabId) : "ticker";
+    setActiveTab(resolved);
+    if (typeof tab === "string" && !valid.includes(tab)) {
+      router.replace({ query: { ...router.query, tab: "ticker" } }, undefined, {
+        shallow: true,
+      });
     }
-  }, [router.query]);
+  }, [router.query.tab]);
 
   const handleTabChange = (tabId: TabId) => {
     setActiveTab(tabId);
@@ -154,6 +160,41 @@ export default function LiveMatch() {
   }
 
   const numOfPeriods = match.matchSettings?.numOfPeriods ?? 1;
+  const settings = match.matchSettings;
+
+  const goals: GoalEvent[] = [
+    ...(match.home.scores ?? []).map((g: ScoresBase) => ({
+      ...g,
+      kind: "goal" as const,
+      timeSeconds: timeToSeconds(g.matchTime),
+      teamFlag: "home" as const,
+    })),
+    ...(match.away.scores ?? []).map((g: ScoresBase) => ({
+      ...g,
+      kind: "goal" as const,
+      timeSeconds: timeToSeconds(g.matchTime),
+      teamFlag: "away" as const,
+    })),
+  ];
+
+  const penalties: PenaltyEvent[] = [
+    ...(match.home.penalties ?? []).map((p: PenaltiesBase) => ({
+      ...p,
+      kind: "penalty" as const,
+      timeSeconds: timeToSeconds(p.matchTimeStart),
+      teamFlag: "home" as const,
+    })),
+    ...(match.away.penalties ?? []).map((p: PenaltiesBase) => ({
+      ...p,
+      kind: "penalty" as const,
+      timeSeconds: timeToSeconds(p.matchTimeStart),
+      teamFlag: "away" as const,
+    })),
+  ];
+
+  const feed: FeedEvent[] = [...goals, ...penalties].sort(
+    (a, b) => a.timeSeconds - b.timeSeconds,
+  );
 
   return (
     <Layout>
@@ -238,7 +279,7 @@ export default function LiveMatch() {
       {/* Tab content */}
       {activeTab === "ticker" && (
         <div className="mb-4">
-          <LiveEventFeed match={match} />
+          <LiveEventFeed feed={feed} match={match} settings={settings} />
         </div>
       )}
 
