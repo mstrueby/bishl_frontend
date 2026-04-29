@@ -505,7 +505,7 @@ const Home: NextPage<PostsProps> = ({
         className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow flex flex-col"
         style={{ minHeight }}
       >
-        <div className="p-4 border-b border-gray-900/5 bg-gray-50">
+        <div className="px-4 py-3 border-b border-gray-900/5 bg-gray-50 flex items-center justify-between">
           {tournamentConfig && (
             <span
               className={classNames(
@@ -516,6 +516,12 @@ const Home: NextPage<PostsProps> = ({
               {tournamentConfig.tinyName}
             </span>
           )}
+          <Link
+            href={`/tournaments/${tournament.alias}`}
+            className="flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+          </Link>
         </div>
         <div className="space-y-3 flex-1 p-4">
           {displayedMatches.map((match) => {
