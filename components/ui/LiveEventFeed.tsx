@@ -156,7 +156,7 @@ const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ feed, settings }) => {
       : isGoal ? "border-r-[3px] border-r-orange-600" : "border-r-[3px] border-r-gray-400";
 
     return (
-      <div key={eventKey} className="relative mb-1">
+      <div key={eventKey} className="relative mb-3 md:mb-1">
         {/* Mobile layout: home=left border, away=right border; color by event type */}
         <div
           className={`md:hidden bg-white border rounded-md shadow-sm overflow-hidden ${accentBorder} ${
