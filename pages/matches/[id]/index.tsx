@@ -3,7 +3,7 @@ import Link from "next/link";
 import useAuth from "../../../hooks/useAuth";
 import { useRouter } from "next/router";
 import { CldImage } from "next-cloudinary";
-import { MatchValues, RosterPlayer } from "../../../types/MatchValues";
+import { MatchValues } from "../../../types/MatchValues";
 import { MatchdayOwner } from "../../../types/TournamentValues";
 import { timeToSeconds, groupByPeriod } from "../../../utils/matchPeriods";
 import Layout from "../../../components/Layout";
@@ -15,185 +15,7 @@ import { calculateMatchButtonPermissions } from "../../../tools/utils";
 import MatchHeader from "../../../components/ui/MatchHeader";
 import MatchSettingsDisplay from "../../../components/ui/MatchSettingsDisplay";
 import LoadingState from "../../../components/ui/LoadingState";
-
-
-interface RosterTableProps {
-  teamName: string;
-  roster: RosterPlayer[];
-  isPublished: boolean;
-  numOfPeriods: number;
-}
-
-// Reusable RosterTable component
-const RosterTable: React.FC<RosterTableProps> = ({
-  teamName,
-  roster,
-  isPublished,
-  numOfPeriods,
-}) => {
-  // Sort roster by position order: C, A, G, F, then by jersey number
-  const sortRoster = (rosterToSort: RosterPlayer[]) => {
-    if (!rosterToSort || rosterToSort.length === 0) return [];
-
-    return [...rosterToSort].sort((a, b) => {
-      // Define position priorities (C = 1, A = 2, G = 3, F = 4)
-      const positionPriority = { C: 1, A: 2, G: 3, F: 4 };
-
-      // Get priorities
-      const posA =
-        positionPriority[
-          a.playerPosition.key as keyof typeof positionPriority
-        ] || 99;
-      const posB =
-        positionPriority[
-          b.playerPosition.key as keyof typeof positionPriority
-        ] || 99;
-
-      // First sort by position priority
-      if (posA !== posB) {
-        return posA - posB;
-      }
-
-      // If positions are the same, sort by jersey number
-      return a.player.jerseyNumber - b.player.jerseyNumber;
-    });
-  };
-
-  const sortedRoster = sortRoster(roster || []);
-  const hasGoalies = sortedRoster.some((p) => p.playerPosition.key === "G");
-
-  return (
-    <div className="w-full">
-      <div className="text-left mb-3 block md:hidden">
-        <h4 className="text-md font-semibold">{teamName}</h4>
-      </div>
-      <div className="overflow-x-auto bg-white shadow-md rounded-md border">
-        {isPublished && sortedRoster && sortedRoster.length > 0 ? (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nr.
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pos.
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Spieler
-                </th>
-                {hasGoalies && (
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  </th>
-                )}
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  T
-                </th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  V
-                </th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  P
-                </th>
-                {/**
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  SM
-                </th>
-                */}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {sortedRoster.map((player) => {
-                const isGoalie = player.playerPosition.key === "G";
-                return (
-                  <tr key={player.player.playerId}>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 w-8 text-center">
-                      {player.player.jerseyNumber}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 w-4 text-center">
-                      {player.playerPosition.key}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center gap-x-3">
-                        {player.player.imageUrl && player.player.imageVisible ? (
-                          <CldImage
-                            src={player.player.imageUrl}
-                            alt={`${player.player.displayFirstName} ${player.player.displayLastName}`}
-                            width={32}
-                            height={32}
-                            gravity="center"
-                            radius="max"
-                            className="w-8 h-8 object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-xs font-medium text-gray-500">
-                              {player.player.displayFirstName?.charAt(0)}
-                              {player.player.displayLastName?.charAt(0)}
-                            </span>
-                          </div>
-                        )}
-                        <span>
-                          {player.player.displayFirstName}{" "}
-                          {player.player.displayLastName}
-                        </span>
-                      </div>
-                    </td>
-                    {hasGoalies && (
-                      <td className="px-3 py-2 whitespace-nowrap text-center">
-                        {isGoalie ? (
-                          <div className="flex items-center justify-center gap-1">
-                            {Array.from({ length: numOfPeriods }, (_, i) => i + 1).map((period) => {
-                              const played = (player.periodsPlayed ?? []).includes(period);
-                              return played ? (
-                                <span
-                                  key={period}
-                                  className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center text-xs font-medium text-white"
-                                >
-                                  {period}
-                                </span>
-                              ) : (
-                                <span
-                                  key={period}
-                                  className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-medium text-gray-400"
-                                >
-                                  {period}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        ) : null}
-                      </td>
-                    )}
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                      {player.goals || 0}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                      {player.assists || 0}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                      {player.points || 0}
-                    </td>
-                    {/**
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">
-                      {player.penaltyMinutes || 0}
-                    </td>
-                    */}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        ) : (
-          <div className="text-center py-4 text-sm text-gray-500">
-            {!isPublished
-              ? "Aufstellung noch nicht eingereicht"
-              : "Keine Aufstellung verfügbar"}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+import RosterTable from "../../../components/ui/RosterTable";
 
 export default function MatchDetails() {
   const [match, setMatch] = useState<MatchValues | null>(null);
@@ -386,9 +208,9 @@ export default function MatchDetails() {
 
       {/* Roster */}
       <div className="mt-14 mb-10">
-        <div className="flex flex-col md:flex-row md:space-x-4">
+        <div className="flex flex-col lg:flex-row lg:space-x-4">
           {/* Home team roster */}
-          <div className="w-full md:w-1/2 mb-6 md:mb-0">
+          <div className="w-full lg:w-1/2 mb-6 lg:mb-0 min-w-0">
             <RosterTable
               teamName={match.home.fullName}
               roster={match.home.roster?.players || []}
@@ -398,7 +220,7 @@ export default function MatchDetails() {
           </div>
 
           {/* Away team roster */}
-          <div className="w-full md:w-1/2 mt-4 md:mt-0">
+          <div className="w-full lg:w-1/2 mt-4 lg:mt-0 min-w-0">
             <RosterTable
               teamName={match.away.fullName}
               roster={match.away.roster?.players || []}

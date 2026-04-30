@@ -2,13 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import useAuth from "../../../../hooks/useAuth";
 import { useRouter } from "next/router";
-import { CldImage } from "next-cloudinary";
-import {
-  MatchValues,
-  ScoresBase,
-  PenaltiesBase,
-} from "../../../../types/MatchValues";
-import { timeToSeconds, getPeriodLabel } from "../../../../utils/matchPeriods";
+import { MatchValues, ScoresBase, PenaltiesBase } from "../../../../types/MatchValues";
 import Layout from "../../../../components/Layout";
 import apiClient from "../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../lib/errorHandler";
@@ -19,22 +13,18 @@ import { MatchdayOwner } from "../../../../types/TournamentValues";
 import MatchHeader from "../../../../components/ui/MatchHeader";
 import MatchStatusBadge from "../../../../components/ui/MatchStatusBadge";
 import LoadingState from "../../../../components/ui/LoadingState";
+import LiveEventFeed, { FeedEvent, GoalEvent, PenaltyEvent } from "../../../../components/ui/LiveEventFeed";
+import { timeToSeconds } from "../../../../utils/matchPeriods";
+import RosterTable from "../../../../components/ui/RosterTable";
 
 const POLL_INTERVAL_MS = 15000;
 
-interface GoalEvent extends ScoresBase {
-  kind: "goal";
-  timeSeconds: number;
-  teamFlag: "home" | "away";
-}
+const TABS = [
+  { id: "ticker", name: "Ticker" },
+  { id: "aufstellung", name: "Aufstellung" },
+] as const;
 
-interface PenaltyEvent extends PenaltiesBase {
-  kind: "penalty";
-  timeSeconds: number;
-  teamFlag: "home" | "away";
-}
-
-type FeedEvent = GoalEvent | PenaltyEvent;
+type TabId = (typeof TABS)[number]["id"];
 
 export default function LiveMatch() {
   const [match, setMatch] = useState<MatchValues | null>(null);
@@ -43,6 +33,7 @@ export default function LiveMatch() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>("ticker");
   const router = useRouter();
   const { user } = useAuth();
   const { id } = router.query;
@@ -61,6 +52,27 @@ export default function LiveMatch() {
     },
     [id, router],
   );
+
+  // Sync active tab from URL query; normalize invalid values to "ticker"
+  useEffect(() => {
+    const { tab } = router.query;
+    const valid = TABS.map((t) => t.id) as string[];
+    const resolved: TabId =
+      typeof tab === "string" && valid.includes(tab) ? (tab as TabId) : "ticker";
+    setActiveTab(resolved);
+    if (typeof tab === "string" && !valid.includes(tab)) {
+      router.replace({ query: { ...router.query, tab: "ticker" } }, undefined, {
+        shallow: true,
+      });
+    }
+  }, [router.query.tab]);
+
+  const handleTabChange = (tabId: TabId) => {
+    setActiveTab(tabId);
+    router.push({ query: { ...router.query, tab: tabId } }, undefined, {
+      shallow: true,
+    });
+  };
 
   // Initial fetch
   useEffect(() => {
@@ -115,7 +127,7 @@ export default function LiveMatch() {
     return () => clearInterval(interval);
   }, [router.isReady, id, isLoading, fetchError, applyMatchData]);
 
-  // Manual refresh (wired into MatchHeader's refresh button)
+  // Manual refresh
   const handleRefresh = useCallback(async () => {
     if (!id || isRefreshing) return;
     try {
@@ -147,15 +159,17 @@ export default function LiveMatch() {
     );
   }
 
-  // Build chronological event feed sorted newest-first
+  const numOfPeriods = match.matchSettings?.numOfPeriods ?? 1;
+  const settings = match.matchSettings;
+
   const goals: GoalEvent[] = [
-    ...(match.home.scores || []).map((g) => ({
+    ...(match.home.scores ?? []).map((g: ScoresBase) => ({
       ...g,
       kind: "goal" as const,
       timeSeconds: timeToSeconds(g.matchTime),
       teamFlag: "home" as const,
     })),
-    ...(match.away.scores || []).map((g) => ({
+    ...(match.away.scores ?? []).map((g: ScoresBase) => ({
       ...g,
       kind: "goal" as const,
       timeSeconds: timeToSeconds(g.matchTime),
@@ -164,13 +178,13 @@ export default function LiveMatch() {
   ];
 
   const penalties: PenaltyEvent[] = [
-    ...(match.home.penalties || []).map((p) => ({
+    ...(match.home.penalties ?? []).map((p: PenaltiesBase) => ({
       ...p,
       kind: "penalty" as const,
       timeSeconds: timeToSeconds(p.matchTimeStart),
       teamFlag: "home" as const,
     })),
-    ...(match.away.penalties || []).map((p) => ({
+    ...(match.away.penalties ?? []).map((p: PenaltiesBase) => ({
       ...p,
       kind: "penalty" as const,
       timeSeconds: timeToSeconds(p.matchTimeStart),
@@ -179,7 +193,7 @@ export default function LiveMatch() {
   ];
 
   const feed: FeedEvent[] = [...goals, ...penalties].sort(
-    (a, b) => b.timeSeconds - a.timeSeconds,
+    (a, b) => a.timeSeconds - b.timeSeconds,
   );
 
   return (
@@ -218,7 +232,6 @@ export default function LiveMatch() {
             )
           );
         })()}
-        
       </div>
 
       <MatchHeader
@@ -227,169 +240,62 @@ export default function LiveMatch() {
         onRefresh={handleRefresh}
       />
 
-      {/* LIVE indicator */}
-      <div className="flex items-center gap-x-2 mt-6 mb-4">
-        <span className="relative flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600" />
-        </span>
-        <MatchStatusBadge
-          statusKey={match.matchStatus.key}
-          statusValue={match.matchStatus.value}
-          finishTypeKey={match.finishType?.key}
-          finishTypeValue={match.finishType?.value}
-        />
-        {isRefreshing && (
-          <span className="text-xs text-gray-400 ml-1">Aktualisierung…</span>
-        )}
+      {/* Tab navigation */}
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="-mb-px flex justify-center space-x-8" aria-label="Tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab.id
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              {tab.name}
+            </button>
+          ))}
+        </nav>
       </div>
 
-      {/* Event feed */}
-      <div className="mb-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-3">Ereignisse</h3>
-        <div className="bg-white rounded-md shadow-md overflow-hidden border divide-y divide-gray-100">
-          {feed.length === 0 ? (
-            <div className="px-4 py-8 text-sm text-gray-400 text-center italic">
-              Noch keine Ereignisse
-            </div>
-          ) : (
-            feed.map((event, index) => {
-              const logo =
-                event.teamFlag === "home" ? match.home.logo : match.away.logo;
-              const tinyName =
-                event.teamFlag === "home"
-                  ? match.home.tinyName
-                  : match.away.tinyName;
-
-              if (event.kind === "goal") {
-                const periodLabel = getPeriodLabel(
-                  event.timeSeconds,
-                  match.matchSettings,
-                );
-                return (
-                  <div
-                    key={event._id ?? `goal-${index}`}
-                    className="flex items-center py-3 px-4 sm:px-6 gap-x-3"
-                  >
-                    {/* Team logo */}
-                    <div className="flex-shrink-0 w-8 h-8">
-                      <CldImage
-                        src={logo}
-                        alt={tinyName}
-                        width={32}
-                        height={32}
-                        gravity="center"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-
-                    {/* Time + Period */}
-                    <div className="flex-shrink-0 w-16 text-center">
-                      <span className="text-sm font-semibold text-gray-800 block">
-                        {event.matchTime}
-                      </span>
-                      <span className="text-xs text-gray-400">{periodLabel}</span>
-                    </div>
-
-                    {/* Goal badge */}
-                    <div className="flex-shrink-0 text-xs font-bold text-white bg-gray-800 rounded-full w-5 h-5 flex items-center justify-center">
-                      T
-                    </div>
-
-                    {/* Player info */}
-                    <div className="flex-grow min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
-                        #{event.goalPlayer.jerseyNumber}{" "}
-                        {event.goalPlayer.displayFirstName}{" "}
-                        {event.goalPlayer.displayLastName}
-                      </p>
-                      {event.assistPlayer ? (
-                        <p className="text-xs text-gray-500 truncate">
-                          Assist: #{event.assistPlayer.jerseyNumber}{" "}
-                          {event.assistPlayer.displayFirstName}{" "}
-                          {event.assistPlayer.displayLastName}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-gray-400">Keine Vorlage</p>
-                      )}
-                    </div>
-
-                    {/* Team label */}
-                    <div className="flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 uppercase">
-                        {tinyName}
-                      </span>
-                    </div>
-                  </div>
-                );
-              }
-
-              // Penalty event
-              const penaltyPeriodLabel = getPeriodLabel(
-                event.timeSeconds,
-                match.matchSettings,
-              );
-              const pc = event.penaltyCode as Record<string, string>;
-              const pcKey = pc["key"] ?? "";
-              const pcValue = pc["value"] ?? "";
-              return (
-                <div
-                  key={event._id ?? `penalty-${index}`}
-                  className="flex items-center py-3 px-4 sm:px-6 gap-x-3 bg-gray-50"
-                >
-                  {/* Team logo */}
-                  <div className="flex-shrink-0 w-8 h-8 opacity-60">
-                    <CldImage
-                      src={logo}
-                      alt={tinyName}
-                      width={32}
-                      height={32}
-                      gravity="center"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-
-                  {/* Time + Period */}
-                  <div className="flex-shrink-0 w-16 text-center">
-                    <span className="text-sm font-medium text-gray-600 block">
-                      {event.matchTimeStart}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {penaltyPeriodLabel}
-                    </span>
-                  </div>
-
-                  {/* Penalty badge */}
-                  <div className="flex-shrink-0 text-xs font-bold text-white bg-amber-500 rounded-full w-5 h-5 flex items-center justify-center">
-                    S
-                  </div>
-
-                  {/* Player + penalty info */}
-                  <div className="flex-grow min-w-0">
-                    <p className="text-sm font-medium text-gray-700 truncate">
-                      #{event.penaltyPlayer.jerseyNumber}{" "}
-                      {event.penaltyPlayer.displayFirstName}{" "}
-                      {event.penaltyPlayer.displayLastName}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {event.isGM && "GM · "}
-                      {event.isMP && "MP · "}
-                      {event.penaltyMinutes} Min. · {pcKey} – {pcValue}
-                    </p>
-                  </div>
-
-                  {/* Team label */}
-                  <div className="flex-shrink-0">
-                    <span className="text-xs font-medium text-gray-400 uppercase">
-                      {tinyName}
-                    </span>
-                  </div>
-                </div>
-              );
-            })
-          )}
+      {/* Tab content */}
+      {activeTab === "ticker" && (
+        <div className="mb-4">
+          <LiveEventFeed feed={feed} match={match} settings={settings} sortOrder="desc" />
         </div>
-      </div>
+      )}
+
+      {activeTab === "aufstellung" && (
+        <div className="mb-8">
+          <div className="hidden lg:flex gap-8 mb-4">
+            <div className="flex-1 text-center font-semibold text-gray-700">
+              {match.home.fullName}
+            </div>
+            <div className="flex-1 text-center font-semibold text-gray-700">
+              {match.away.fullName}
+            </div>
+          </div>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 min-w-0">
+              <RosterTable
+                teamName={match.home.fullName}
+                roster={match.home.roster?.players ?? []}
+                isPublished={match.home.roster?.status != "DRAFT"}
+                numOfPeriods={numOfPeriods}
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <RosterTable
+                teamName={match.away.fullName}
+                roster={match.away.roster?.players ?? []}
+                isPublished={match.away.roster?.status != "DRAFT"}
+                numOfPeriods={numOfPeriods}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Last updated footer */}
       {lastUpdated && (
