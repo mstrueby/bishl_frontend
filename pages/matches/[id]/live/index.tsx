@@ -240,23 +240,6 @@ export default function LiveMatch() {
         onRefresh={handleRefresh}
       />
 
-      {/* LIVE indicator */}
-      <div className="flex items-center gap-x-2 mt-6 mb-4">
-        <span className="relative flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600" />
-        </span>
-        <MatchStatusBadge
-          statusKey={match.matchStatus.key}
-          statusValue={match.matchStatus.value}
-          finishTypeKey={match.finishType?.key}
-          finishTypeValue={match.finishType?.value}
-        />
-        {isRefreshing && (
-          <span className="text-xs text-gray-400 ml-1">Aktualisierung…</span>
-        )}
-      </div>
-
       {/* Tab navigation */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex justify-center space-x-8" aria-label="Tabs">
