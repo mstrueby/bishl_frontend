@@ -2,18 +2,115 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { withAnyRole, getAccessToken } from '../../../lib/serverAuth';
 import { UserRole } from '../../../lib/auth';
 import { logApiError } from '../../../lib/apiLogger';
+import { MatchValues, Team, ScoresBase, PenaltiesBase, RosterPlayer } from '../../../types/MatchValues';
+import { PlayerValues } from '../../../types/PlayerValues';
 
 interface RecalcBody {
   tournament: string;
   season: string;
 }
 
-interface PlayerStatAggregate {
-  gamesPlayed: number;
+interface PlayerStatComputed {
   goals: number;
   assists: number;
-  points: number;
   penaltyMinutes: number;
+}
+
+interface PlayerSeasonAggregate {
+  teamAlias: string;
+  stats: {
+    gamesPlayed: number;
+    goals: number;
+    assists: number;
+    points: number;
+    penaltyMinutes: number;
+  };
+}
+
+interface PaginatedMatchResponse {
+  data?: MatchValues[];
+  pagination?: {
+    has_next: boolean;
+  };
+}
+
+interface PaginatedPlayerResponse {
+  data?: PlayerValues;
+}
+
+function buildStatsMap(
+  scores: ScoresBase[],
+  penalties: PenaltiesBase[]
+): Record<string, PlayerStatComputed> {
+  const statsMap: Record<string, PlayerStatComputed> = {};
+
+  const init = (pid: string) => {
+    if (!statsMap[pid]) statsMap[pid] = { goals: 0, assists: 0, penaltyMinutes: 0 };
+  };
+
+  for (const score of scores) {
+    if (score.goalPlayer?.playerId) {
+      init(score.goalPlayer.playerId);
+      statsMap[score.goalPlayer.playerId].goals += 1;
+    }
+    if (score.assistPlayer?.playerId) {
+      init(score.assistPlayer.playerId);
+      statsMap[score.assistPlayer.playerId].assists += 1;
+    }
+  }
+
+  for (const penalty of penalties) {
+    if (penalty.penaltyPlayer?.playerId) {
+      init(penalty.penaltyPlayer.playerId);
+      statsMap[penalty.penaltyPlayer.playerId].penaltyMinutes += penalty.penaltyMinutes ?? 0;
+    }
+  }
+
+  return statsMap;
+}
+
+function applyStatsToRoster(
+  players: RosterPlayer[],
+  statsMap: Record<string, PlayerStatComputed>
+): RosterPlayer[] {
+  return players.map((rp) => {
+    const pid = rp.player?.playerId;
+    const computed = statsMap[pid] ?? { goals: 0, assists: 0, penaltyMinutes: 0 };
+    return {
+      ...rp,
+      goals: computed.goals,
+      assists: computed.assists,
+      points: computed.goals + computed.assists,
+      penaltyMinutes: computed.penaltyMinutes,
+    };
+  });
+}
+
+function accumulatePlayerAggregates(
+  players: RosterPlayer[],
+  team: Team,
+  aggregates: Record<string, PlayerSeasonAggregate>
+): void {
+  for (const rp of players) {
+    const pid = rp.player?.playerId;
+    if (!pid) continue;
+
+    const teamAlias: string = rp.calledFromTeam?.teamAlias ?? team.teamAlias ?? '';
+
+    if (!aggregates[pid]) {
+      aggregates[pid] = {
+        teamAlias,
+        stats: { gamesPlayed: 0, goals: 0, assists: 0, points: 0, penaltyMinutes: 0 },
+      };
+    }
+
+    const agg = aggregates[pid].stats;
+    agg.gamesPlayed += 1;
+    agg.goals += rp.goals;
+    agg.assists += rp.assists;
+    agg.points += rp.points;
+    agg.penaltyMinutes += rp.penaltyMinutes;
+  }
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -22,7 +119,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(405).json({ message: `Method ${req.method} not allowed` });
   }
 
-  const { tournament, season } = req.body as Partial<RecalcBody>;
+  const { tournament, season } = (req.body ?? {}) as Partial<RecalcBody>;
 
   if (!tournament || !season) {
     return res.status(400).json({ error: 'Missing required fields: tournament and season' });
@@ -34,27 +131,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const authHeader = { Authorization: `Bearer ${accessToken}` };
+  const authHeader: Record<string, string> = { Authorization: `Bearer ${accessToken}` };
+  const jsonHeaders: Record<string, string> = { ...authHeader, 'Content-Type': 'application/json' };
 
   const errors: string[] = [];
   let matchesProcessed = 0;
   const updatedPlayerIds = new Set<string>();
-
-  // Per-player aggregate across all matches: playerId -> teamAlias -> stats
-  const playerAggregates: Record<
-    string,
-    { teamAlias: string; stats: PlayerStatAggregate }
-  > = {};
+  const playerAggregates: Record<string, PlayerSeasonAggregate> = {};
 
   try {
-    // 1. Fetch all finished matches for the tournament + season
-    let allMatches: any[] = [];
+    // 1. Fetch all FINISHED matches for the tournament + season (paginated)
+    const allMatches: MatchValues[] = [];
     let page = 1;
     const pageSize = 50;
 
     while (true) {
       const matchRes = await fetch(
-        `${apiUrl}/matches?tournament=${tournament}&season=${season}&matchStatus=FINISHED&page=${page}&pageSize=${pageSize}`,
+        `${apiUrl}/matches?tournament=${encodeURIComponent(tournament)}&season=${encodeURIComponent(season)}&matchStatus=FINISHED&page=${page}&page_size=${pageSize}`,
         { headers: authHeader }
       );
 
@@ -64,130 +157,76 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(502).json({ error: `Failed to fetch matches: ${matchRes.status}` });
       }
 
-      const matchData = await matchRes.json();
-      const matches: any[] = matchData?.data ?? matchData ?? [];
+      const matchData = (await matchRes.json()) as PaginatedMatchResponse | MatchValues[];
+      const matches: MatchValues[] = Array.isArray(matchData)
+        ? matchData
+        : (matchData as PaginatedMatchResponse).data ?? [];
 
-      if (!Array.isArray(matches) || matches.length === 0) break;
+      if (matches.length === 0) break;
+      allMatches.push(...matches);
 
-      allMatches = allMatches.concat(matches);
-
-      const pagination = matchData?.pagination;
-      if (!pagination || !pagination.has_next) break;
+      const pagination = Array.isArray(matchData) ? null : (matchData as PaginatedMatchResponse).pagination;
+      if (!pagination?.has_next) break;
       page++;
     }
 
-    // 2. Process each match
+    // 2. Compute and patch match-level roster stats
     for (const match of allMatches) {
       const matchId: string = match._id;
 
       try {
-        const sides = [
-          { sideKey: 'home', team: match.home },
-          { sideKey: 'away', team: match.away },
+        const sides: Array<{ key: 'home' | 'away'; team: Team }> = [
+          { key: 'home', team: match.home },
+          { key: 'away', team: match.away },
         ];
 
-        const updatedSides: Record<string, any> = {};
+        const patchBody: Partial<Pick<MatchValues, 'home' | 'away'>> = {};
 
-        for (const { sideKey, team } of sides) {
+        for (const { key, team } of sides) {
           if (!team) continue;
 
-          // Build playerId -> computed stats map from scores and penalties
-          const statsMap: Record<string, { goals: number; assists: number; penaltyMinutes: number }> = {};
+          const statsMap = buildStatsMap(
+            team.scores ?? [],
+            team.penalties ?? []
+          );
 
-          const initPlayer = (pid: string) => {
-            if (!statsMap[pid]) statsMap[pid] = { goals: 0, assists: 0, penaltyMinutes: 0 };
-          };
+          const updatedPlayers = applyStatsToRoster(
+            team.roster?.players ?? [],
+            statsMap
+          );
 
-          for (const score of team.scores ?? []) {
-            if (score.goalPlayer?.playerId) {
-              initPlayer(score.goalPlayer.playerId);
-              statsMap[score.goalPlayer.playerId].goals += 1;
-            }
-            if (score.assistPlayer?.playerId) {
-              initPlayer(score.assistPlayer.playerId);
-              statsMap[score.assistPlayer.playerId].assists += 1;
-            }
-          }
+          accumulatePlayerAggregates(updatedPlayers, team, playerAggregates);
 
-          for (const penalty of team.penalties ?? []) {
-            if (penalty.penaltyPlayer?.playerId) {
-              initPlayer(penalty.penaltyPlayer.playerId);
-              statsMap[penalty.penaltyPlayer.playerId].penaltyMinutes += penalty.penaltyMinutes ?? 0;
-            }
-          }
-
-          // Merge onto roster players
-          const updatedPlayers = (team.roster?.players ?? []).map((rp: any) => {
-            const pid: string = rp.player?.playerId;
-            const computed = statsMap[pid] ?? { goals: 0, assists: 0, penaltyMinutes: 0 };
-            return {
-              ...rp,
-              goals: computed.goals,
-              assists: computed.assists,
-              points: computed.goals + computed.assists,
-              penaltyMinutes: computed.penaltyMinutes,
-            };
-          });
-
-          updatedSides[sideKey] = {
+          patchBody[key] = {
             ...team,
             roster: {
-              ...(team.roster ?? {}),
+              ...(team.roster ?? { players: [], status: 'DRAFT', published: false }),
               players: updatedPlayers,
             },
           };
-
-          // Accumulate per-player season aggregates
-          for (const rp of updatedPlayers) {
-            const pid: string = rp.player?.playerId;
-            if (!pid) continue;
-
-            // Determine which team this player is playing for (use assigned team alias or team alias)
-            const teamAlias: string =
-              rp.calledFromTeam?.teamAlias ?? team.teamAlias ?? '';
-
-            if (!playerAggregates[pid]) {
-              playerAggregates[pid] = { teamAlias, stats: { gamesPlayed: 0, goals: 0, assists: 0, points: 0, penaltyMinutes: 0 } };
-            }
-            const agg = playerAggregates[pid].stats;
-            agg.gamesPlayed += 1;
-            agg.goals += rp.goals;
-            agg.assists += rp.assists;
-            agg.points += rp.points;
-            agg.penaltyMinutes += rp.penaltyMinutes;
-          }
         }
 
-        // PATCH the match with updated rosters
-        const patchBody: Record<string, any> = {};
-        if (updatedSides.home) patchBody.home = updatedSides.home;
-        if (updatedSides.away) patchBody.away = updatedSides.away;
+        const patchRes = await fetch(`${apiUrl}/matches/${matchId}`, {
+          method: 'PATCH',
+          headers: jsonHeaders,
+          body: JSON.stringify(patchBody),
+        });
 
-        if (Object.keys(patchBody).length > 0) {
-          const patchRes = await fetch(`${apiUrl}/matches/${matchId}`, {
-            method: 'PATCH',
-            headers: { ...authHeader, 'Content-Type': 'application/json' },
-            body: JSON.stringify(patchBody),
-          });
-
-          if (!patchRes.ok) {
-            const text = await patchRes.text();
-            errors.push(`Match ${matchId}: PATCH failed (${patchRes.status}) - ${text}`);
-          } else {
-            matchesProcessed++;
-          }
+        if (!patchRes.ok) {
+          const text = await patchRes.text();
+          errors.push(`Match ${matchId}: PATCH failed (${patchRes.status}) - ${text}`);
         } else {
           matchesProcessed++;
         }
-      } catch (matchErr: any) {
-        errors.push(`Match ${matchId}: ${matchErr?.message ?? String(matchErr)}`);
+      } catch (matchErr: unknown) {
+        const msg = matchErr instanceof Error ? matchErr.message : String(matchErr);
+        errors.push(`Match ${matchId}: ${msg}`);
       }
     }
 
     // 3. Aggregate and patch player card stats
     for (const [playerId, { teamAlias, stats: computed }] of Object.entries(playerAggregates)) {
       try {
-        // Fetch current player record
         const playerRes = await fetch(`${apiUrl}/players/${playerId}`, {
           headers: authHeader,
         });
@@ -197,19 +236,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           continue;
         }
 
-        const playerData = await playerRes.json();
-        const player: any = playerData?.data ?? playerData;
+        const playerData = (await playerRes.json()) as PaginatedPlayerResponse | PlayerValues;
+        const player: PlayerValues = 'data' in playerData && playerData.data
+          ? playerData.data
+          : playerData as PlayerValues;
 
-        // Replace/insert the stats entry for this tournament + season (keep others intact)
-        const existingStats: any[] = player.stats ?? [];
+        const existingStats = player.stats ?? [];
         const updatedStats = existingStats.filter(
-          (s: any) =>
-            !(s.tournament?.alias === tournament && s.season?.alias === season)
+          (s) => !(s.tournament?.alias === tournament && s.season?.alias === season)
         );
 
         updatedStats.push({
           tournament: { alias: tournament, name: tournament },
           season: { alias: season, name: season },
+          round: { alias: '', name: '' },
+          matchday: { alias: '', name: '' },
           team: { name: teamAlias, fullName: teamAlias, shortName: teamAlias, tinyName: teamAlias },
           gamesPlayed: computed.gamesPlayed,
           goals: computed.goals,
@@ -220,7 +261,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const patchRes = await fetch(`${apiUrl}/players/${playerId}`, {
           method: 'PATCH',
-          headers: { ...authHeader, 'Content-Type': 'application/json' },
+          headers: jsonHeaders,
           body: JSON.stringify({ stats: updatedStats }),
         });
 
@@ -230,8 +271,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         } else {
           updatedPlayerIds.add(playerId);
         }
-      } catch (playerErr: any) {
-        errors.push(`Player ${playerId}: ${playerErr?.message ?? String(playerErr)}`);
+      } catch (playerErr: unknown) {
+        const msg = playerErr instanceof Error ? playerErr.message : String(playerErr);
+        errors.push(`Player ${playerId}: ${msg}`);
       }
     }
 
@@ -240,9 +282,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       playersUpdated: updatedPlayerIds.size,
       errors,
     });
-  } catch (err: any) {
-    logApiError('recalc-stats', undefined, `Unexpected error: ${err?.message}`);
-    return res.status(500).json({ error: 'Internal server error', details: err?.message });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logApiError('recalc-stats', undefined, `Unexpected error: ${msg}`);
+    return res.status(500).json({ error: 'Internal server error', details: msg });
   }
 };
 
