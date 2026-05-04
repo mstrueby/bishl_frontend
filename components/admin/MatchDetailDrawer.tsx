@@ -583,7 +583,6 @@ const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                                     pos2Taken={pos2Taken}
                                     matchId={match._id}
                                     onAssign={handleAssign}
-                                    showAssignButtons={false}
                                   />
                                 ))}
                               </div>
