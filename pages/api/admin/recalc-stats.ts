@@ -163,7 +163,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         : (matchData as PaginatedMatchResponse).data ?? [];
 
       if (matches.length === 0) break;
-      allMatches.push(...matches);
+      // Client-side safety filter: only process FINISHED matches even if backend ignores the param
+      const finishedMatches = matches.filter(
+        (m) => m.matchStatus?.key === 'FINISHED'
+      );
+      allMatches.push(...finishedMatches);
 
       const pagination = Array.isArray(matchData) ? null : (matchData as PaginatedMatchResponse).pagination;
       if (!pagination?.has_next) break;
