@@ -6,10 +6,11 @@ import ClubForm from '../../../components/admin/ClubForm';
 import useAuth from '../../../hooks/useAuth';
 import usePermissions from '../../../hooks/usePermissions';
 import LoadingState from '../../../components/ui/LoadingState';
-import ErrorState from '../../../components/ui/ErrorState';
+import ErrorMessage from '../../../components/ui/ErrorMessage';
 import { UserRole } from '../../../lib/auth';
 import { ClubValues } from '../../../types/ClubValues';
 import apiClient from '../../../lib/apiClient';
+import { getErrorMessage } from '../../../lib/errorHandler';
 
 const initialClubValues: ClubValues = {
   _id: '',
@@ -35,10 +36,9 @@ export default function AddClubPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { hasAnyRole } = usePermissions();
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  // Auth redirect
   useEffect(() => {
     if (authLoading) return;
 
@@ -49,37 +49,49 @@ export default function AddClubPage() {
 
     if (!hasAnyRole([UserRole.ADMIN])) {
       router.push('/');
-      return;
     }
-
-    setIsAuthorized(true);
   }, [authLoading, user, hasAnyRole, router]);
 
+  useEffect(() => {
+    if (error) {
+      window.scrollTo(0, 0);
+    }
+  }, [error]);
+
   const handleSubmit = async (values: ClubValues) => {
+    setError(null);
     setFormLoading(true);
 
     try {
       const formData = new FormData();
-      formData.append('name', values.name);
-      formData.append('alias', values.alias);
-      formData.append('addressName', values.addressName);
-      formData.append('street', values.street);
-      formData.append('zipCode', values.zipCode);
-      formData.append('city', values.city);
-      formData.append('country', values.country);
-      formData.append('email', values.email);
-      formData.append('yearOfFoundation', String(values.yearOfFoundation));
-      formData.append('description', values.description);
-      formData.append('website', values.website);
-      formData.append('ishdId', String(values.ishdId));
-      formData.append('active', String(values.active));
-      formData.append('logoUrl', values.logoUrl);
-      formData.append('legacyId', String(values.legacyId));
+      Object.entries(values).forEach(([key, value]) => {
+        if (key === '_id' || key === 'teams') return;
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+        if (value instanceof FileList) {
+          Array.from(value).forEach((file) => formData.append(key, file));
+          return;
+        }
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+          return;
+        }
+        if (value !== null && value !== undefined) {
+          formData.append(key, value.toString());
+        }
+      });
 
-      await apiClient.post('/clubs', formData);
-      router.push('/admin/clubs');
-    } catch (error) {
-      console.error('Error creating club:', error);
+      const response = await apiClient.post('/clubs', formData);
+      if (response.status === 201) {
+        router.push({
+          pathname: '/admin/clubs',
+          query: { message: `Der neue Verein <strong>${values.name}</strong> wurde erfolgreich angelegt.` }
+        }, '/admin/clubs');
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setFormLoading(false);
     }
@@ -89,8 +101,11 @@ export default function AddClubPage() {
     router.push('/admin/clubs');
   };
 
-  // Show loading state while checking auth
-  if (authLoading || !isAuthorized) {
+  const handleCloseMessage = () => {
+    setError(null);
+  };
+
+  if (authLoading) {
     return (
       <LayoutAdm
         navData={[]}
@@ -100,24 +115,13 @@ export default function AddClubPage() {
           { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
         ]}
       >
-        <LoadingState message="Bereite Formular vor..." />
+        <LoadingState />
       </LayoutAdm>
     );
   }
 
-  if (!user) {
-    return (
-      <LayoutAdm
-        navData={[]}
-        sectionTitle="Verein hinzufügen"
-        breadcrumbs={[
-          { order: 1, name: 'Vereine', url: '/admin/clubs' },
-          { order: 2, name: 'Hinzufügen', url: '/admin/clubs/add' },
-        ]}
-      >
-        <ErrorState message="Nicht autorisiert" />
-      </LayoutAdm>
-    );
+  if (!hasAnyRole([UserRole.ADMIN])) {
+    return null;
   }
 
   return (
@@ -132,6 +136,8 @@ export default function AddClubPage() {
       <Head>
         <title>Verein hinzufügen | BISHL Admin</title>
       </Head>
+
+      {error && <ErrorMessage error={error} onClose={handleCloseMessage} />}
 
       <div className="space-y-10 divide-y divide-gray-900/10">
         <ClubForm
