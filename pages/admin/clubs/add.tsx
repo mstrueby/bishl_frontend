@@ -58,11 +58,25 @@ export default function AddClubPage() {
   const handleSubmit = async (values: ClubValues) => {
     setFormLoading(true);
 
-    // log values
-    console.log('Submitting club:', values)
-    
     try {
-      await apiClient.post('/clubs', values);
+      const formData = new FormData();
+      formData.append('name', values.name);
+      formData.append('alias', values.alias);
+      formData.append('addressName', values.addressName);
+      formData.append('street', values.street);
+      formData.append('zipCode', values.zipCode);
+      formData.append('city', values.city);
+      formData.append('country', values.country);
+      formData.append('email', values.email);
+      formData.append('yearOfFoundation', String(values.yearOfFoundation));
+      formData.append('description', values.description);
+      formData.append('website', values.website);
+      formData.append('ishdId', String(values.ishdId));
+      formData.append('active', String(values.active));
+      formData.append('logoUrl', values.logoUrl);
+      formData.append('legacyId', String(values.legacyId));
+
+      await apiClient.post('/clubs', formData);
       router.push('/admin/clubs');
     } catch (error) {
       console.error('Error creating club:', error);
