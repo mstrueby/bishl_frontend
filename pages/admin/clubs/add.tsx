@@ -57,6 +57,10 @@ export default function AddClubPage() {
 
   const handleSubmit = async (values: ClubValues) => {
     setFormLoading(true);
+
+    // log values
+    console.log('Submitting club:', values)
+    
     try {
       await apiClient.post('/clubs', values);
       router.push('/admin/clubs');
