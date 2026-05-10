@@ -1140,8 +1140,36 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       },
       revalidate: 60,
     };
-  } catch (error) {
-    console.error("Failed to fetch season hub data:", error);
-    return { notFound: true };
+  } catch (error: any) {
+    // Only serve a real 404 when the backend explicitly says the resource
+    // does not exist. Every other failure (network blip, 5xx, timeout) returns
+    // minimal fallback props with a short revalidation window so ISR keeps
+    // retrying and users never see a cached 404 page for a transient error.
+    if (error?.response?.status === 404) {
+      return { notFound: true };
+    }
+    console.error("Failed to fetch season hub data:", error?.message || error);
+    return {
+      props: {
+        season: { alias: sAlias, name: sAlias, published: false },
+        allSeasons: [],
+        allRounds: [],
+        selectedSeasonMatches: [],
+        selectedRoundMatches: [],
+        selectedMatchdayMatches: [],
+        selectedRoundMatchdays: [],
+        selectedMatchday: null,
+        matchdayOwner: null,
+        matchdayOwners: {},
+        tAlias,
+        sAlias,
+        rAlias: rAlias || null,
+        mdAlias: mdAlias || null,
+        tournamentName: tAlias,
+        roundName: null,
+        matchdayName: null,
+      },
+      revalidate: 10,
+    };
   }
 };
