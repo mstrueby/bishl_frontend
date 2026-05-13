@@ -622,7 +622,7 @@ function RefereePaymentCard({
   ) => {
     const num = parseComma(strVal);
     updateRefereePayment(refereeNumber, field, num);
-    setStr(num !== 0 ? String(num).replace(".", ",") : "");
+    setStr(num !== 0 ? num.toFixed(2).replace(".", ",") : "");
   };
 
   const refereeTitle = referee ? (
