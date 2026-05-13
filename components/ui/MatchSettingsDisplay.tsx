@@ -158,7 +158,7 @@ const MatchSettingsDisplay: React.FC<MatchSettingsDisplayProps> = ({
               <span className="text-sm text-gray-600 mr-6">
                 Weitere Anmerkungen
               </span>
-              <span className="text-xs  text-gray-900">
+              <span className="text-xs text-gray-900 text-right">
                 {matchSettings.notes}
               </span>
             </div>
