@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MatchValues } from '../../types/MatchValues';
 import { MatchdayValues } from '../../types/TournamentValues';
 import MatchCard from './MatchCard';
@@ -29,6 +29,16 @@ const MatchList: React.FC<MatchListProps> = ({
   matchdayOwners = {},
 }) => {
   const [activeTab, setActiveTab] = useState<string>('');
+  const mobileNavRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (mobileNavRef.current) {
+      const activeButton = mobileNavRef.current.querySelector<HTMLElement>('[data-active="true"]');
+      if (activeButton) {
+        activeButton.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [activeTab]);
 
   // Helper to get the start of a week (Monday)
   const getWeekStart = (date: Date): Date => {
@@ -189,6 +199,7 @@ const MatchList: React.FC<MatchListProps> = ({
           <div className="border-b border-gray-200 mb-6">
             {/* Mobile: Scrollable nav without scrollbar */}
             <nav 
+              ref={mobileNavRef}
               aria-label="Tabs" 
               className="sm:hidden -mb-px flex space-x-8 overflow-x-auto scrollbar-hide"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -196,6 +207,7 @@ const MatchList: React.FC<MatchListProps> = ({
               {tabs.map((tab) => (
                 <button
                   key={tab.key}
+                  data-active={currentTab === tab.key}
                   onClick={() => setActiveTab(tab.key)}
                   className={classNames(
                     currentTab === tab.key
