@@ -600,7 +600,7 @@ function RefereePaymentCard({
     (paymentData?.gameFees || 0);
 
   const numToStr = (val: number | undefined) =>
-    val != null && val !== 0 ? String(val).replace(".", ",") : "";
+    val != null && val !== 0 ? val.toFixed(2).replace(".", ",") : "";
 
   const [travelExpensesStr, setTravelExpensesStr] = useState(
     numToStr(paymentData?.travelExpenses),
