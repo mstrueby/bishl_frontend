@@ -794,6 +794,15 @@ const Home: NextPage<PostsProps> = ({
           />
         )}
 
+        {/* Full Width Image */}
+        <div className="relative w-full h-64 sm:h-96">
+          <CldImage
+            src="https://res.cloudinary.com/dajtykxvp/image/upload/c_fill,g_auto,h_250,w_970/b_rgb:000000,e_gradient_fade,y_-0.50/c_scale,co_rgb:ffffff,fl_relative,l_text:montserrat_25_style_light_align_center:Shop%20Now,w_0.5,y_0.18/v1778682168/Mirko_BISHL_kxyppi.png"
+            alt="Mirko"
+            fill
+            className="object-contain object-center"
+          />
+        </div> 
         {/* Today's Games Section */}
         {todaysMatches.length > 0 && (
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
