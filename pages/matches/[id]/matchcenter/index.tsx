@@ -962,7 +962,7 @@ export default function MatchDetails(_props: MatchDetailsProps) {
           </div>
 
           {/* Match Sheet Complete Toggle */}
-          {userRoles.some((role) =>
+          {userRoles.some((role: string) =>
             ["ADMIN", "LEAGUE_ADMIN"].includes(role),
           ) && (
             <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
