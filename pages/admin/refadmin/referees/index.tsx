@@ -32,7 +32,7 @@ const Referees: NextPage = () => {
       return;
     }
 
-    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) {
+    if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN, UserRole.REF_ADMIN])) {
       router.push("/");
     }
   }, [authLoading, user, hasAnyRole, router]);
@@ -113,7 +113,7 @@ const Referees: NextPage = () => {
   }
 
   // Auth guard
-  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN])) return null;
+  if (!hasAnyRole([UserRole.ADMIN, UserRole.LEAGUE_ADMIN, UserRole.REF_ADMIN])) return null;
 
   const sectionTitle = 'Schiedsrichter';
   const newLink = '/admin/refadmin/referees/add';
