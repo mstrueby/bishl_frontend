@@ -599,6 +599,32 @@ function RefereePaymentCard({
     (paymentData?.expenseAllowance || 0) +
     (paymentData?.gameFees || 0);
 
+  const numToStr = (val: number | undefined) =>
+    val != null && val !== 0 ? String(val).replace(".", ",") : "";
+
+  const [travelExpensesStr, setTravelExpensesStr] = useState(
+    numToStr(paymentData?.travelExpenses),
+  );
+  const [expenseAllowanceStr, setExpenseAllowanceStr] = useState(
+    numToStr(paymentData?.expenseAllowance),
+  );
+  const [gameFeesStr, setGameFeesStr] = useState(
+    numToStr(paymentData?.gameFees),
+  );
+
+  const parseComma = (val: string) =>
+    parseFloat(val.replace(",", ".")) || 0;
+
+  const handleBlur = (
+    field: "travelExpenses" | "expenseAllowance" | "gameFees",
+    strVal: string,
+    setStr: (s: string) => void,
+  ) => {
+    const num = parseComma(strVal);
+    updateRefereePayment(refereeNumber, field, num);
+    setStr(num !== 0 ? String(num).replace(".", ",") : "");
+  };
+
   const refereeTitle = referee ? (
     <div>
       <div className="text-xs font-medium text-gray-600 mb-2 uppercase">
@@ -643,13 +669,10 @@ function RefereePaymentCard({
                   type="text"
                   id={`referee${refereeNumber}TravelExpenses`}
                   placeholder="0,00"
-                  value={paymentData?.travelExpenses || 0}
-                  onChange={(e) =>
-                    updateRefereePayment(
-                      refereeNumber,
-                      "travelExpenses",
-                      parseFloat(e.target.value) || 0,
-                    )
+                  value={travelExpensesStr}
+                  onChange={(e) => setTravelExpensesStr(e.target.value)}
+                  onBlur={() =>
+                    handleBlur("travelExpenses", travelExpensesStr, setTravelExpensesStr)
                   }
                   aria-describedby="price-currency"
                   className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
@@ -676,13 +699,10 @@ function RefereePaymentCard({
                   type="text"
                   id={`referee${refereeNumber}ExpenseAllowance`}
                   placeholder="0,00"
-                  value={paymentData?.expenseAllowance || 0}
-                  onChange={(e) =>
-                    updateRefereePayment(
-                      refereeNumber,
-                      "expenseAllowance",
-                      parseFloat(e.target.value) || 0,
-                    )
+                  value={expenseAllowanceStr}
+                  onChange={(e) => setExpenseAllowanceStr(e.target.value)}
+                  onBlur={() =>
+                    handleBlur("expenseAllowance", expenseAllowanceStr, setExpenseAllowanceStr)
                   }
                   aria-describedby="price-currency"
                   className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
@@ -709,13 +729,10 @@ function RefereePaymentCard({
                   type="text"
                   id={`referee${refereeNumber}GameFees`}
                   placeholder="0,00"
-                  value={paymentData?.gameFees || 0}
-                  onChange={(e) =>
-                    updateRefereePayment(
-                      refereeNumber,
-                      "gameFees",
-                      parseFloat(e.target.value) || 0,
-                    )
+                  value={gameFeesStr}
+                  onChange={(e) => setGameFeesStr(e.target.value)}
+                  onBlur={() =>
+                    handleBlur("gameFees", gameFeesStr, setGameFeesStr)
                   }
                   aria-describedby="price-currency"
                   className="block min-w-0 grow bg-white py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6 text-right"
