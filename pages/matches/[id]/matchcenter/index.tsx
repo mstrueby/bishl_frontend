@@ -962,7 +962,10 @@ export default function MatchDetails(_props: MatchDetailsProps) {
           </div>
 
           {/* Match Sheet Complete Toggle */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+          {userRoles.some((role) =>
+            ["ADMIN", "LEAGUE_ADMIN"].includes(role),
+          ) && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-900">
                 Spielbericht vollständig
@@ -1044,7 +1047,8 @@ export default function MatchDetails(_props: MatchDetailsProps) {
                 />
               )}
             </button>
-          </div>
+            </div>
+          )}
         </div>
 
         <MatchSettingsDisplay
