@@ -382,6 +382,9 @@ const MatchCard: React.FC<{
             >
               {home?.fullName || "TBD"}
             </p>
+            {displayMatch?.tournament?.alias === "freundschaftsspiele" && home?.name && (
+              <p className="text-xs text-gray-400 truncate">{home.name}</p>
+            )}
           </div>
           {!(
             displayMatch?.matchStatus?.key === "SCHEDULED" ||
@@ -423,6 +426,9 @@ const MatchCard: React.FC<{
             >
               {away?.fullName || "TBD"}
             </p>
+            {displayMatch?.tournament?.alias === "freundschaftsspiele" && away?.name && (
+              <p className="text-xs text-gray-400 truncate">{away.name}</p>
+            )}
           </div>
           {!(
             displayMatch?.matchStatus?.key === "SCHEDULED" ||
