@@ -795,6 +795,7 @@ const Home: NextPage<PostsProps> = ({
         )}
 
         {/* Full Width Image */}
+        {/**
         <CldImage
           src="https://res.cloudinary.com/dajtykxvp/image/upload/v1778682168/Mirko_BISHL_kxyppi.png"
           alt="Mirko"
@@ -802,6 +803,7 @@ const Home: NextPage<PostsProps> = ({
           height={1414}
           className="w-full h-auto"
         />
+        */}
         {/* Today's Games Section */}
         {todaysMatches.length > 0 && (
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
