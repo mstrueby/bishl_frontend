@@ -169,7 +169,7 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/hobbyliga',
     bdgColDark: 'bg-stone-200/10 text-stone-400 ring-stone-200/20',
     bdgColLight: 'bg-stone-100 text-stone-600 ring-stone-800/10',
-    matchLenMin: 45,
+    matchLenMin: 40,
     active: true,
     sortOrder: 12,
   },
@@ -279,7 +279,7 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     href: '/tournaments/freundschaftsspiele',
     bdgColDark: 'bg-yellow-400/10 text-yellow-400 ring-yellow-400/20',
     bdgColLight: 'bg-yellow-50 text-yellow-700 ring-yellow-600/10',
-    matchLenMin: 125,
+    matchLenMin: 40,
     active: true,
     sortOrder: 999
   }
