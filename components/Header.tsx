@@ -128,6 +128,13 @@ const tournamentConfigs = [
     bdg_col_dark: "bg-yellow-400/10 text-yellow-400 ring-yellow-400/20",
     bdg_col_light: "bg-yellow-50 text-yellow-800 ring-yellow-600/20",
   },
+  {
+    name: "Freundschaftsspiele",
+    tiny_name: "FS",
+    href: "/tournaments/freundschaftsspiele",
+    bdg_col_dark: "bg-yellow-400/10 text-yellow-400 ring-yellow-400/20",
+    bdg_col_light: "bg-yellow-50 text-yellow-800 ring-yellow-600/20",
+  },
 ];
 
 const men = tournamentConfigs.filter((config: { name: string }) =>
@@ -297,6 +304,9 @@ const Header = () => {
                         </>
                       )}
                     </Menu>
+                    <Link href="/tournaments/freundschaftsspiele" className={item}>
+                      Freundschaftsspiele
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -632,6 +642,28 @@ const Header = () => {
                     {item.name}
                   </DisclosureButton>
                 ))}
+
+                {tournamentConfigs
+                  .filter((config) => config.name === "Freundschaftsspiele")
+                  .map((item) => (
+                    <DisclosureButton
+                      as={Link}
+                      key="tdm"
+                      href="/tournaments/freundschaftsspiele"
+                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white hover:no-underline"
+                    >
+                      <span
+                        key={item.name}
+                        className={classNames(
+                          "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-5 w-16",
+                          item.bdg_col_dark,
+                        )}
+                      >
+                        {item.tiny_name}
+                      </span>
+                      {item.name}
+                    </DisclosureButton>
+                  ))}
               </div>
             </DisclosurePanel>
           </Transition>

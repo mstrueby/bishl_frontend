@@ -272,6 +272,16 @@ export const tournamentConfigs: { [key: string]: TournamentConfig } = {
     matchLenMin: 125,
     active: true,
     sortOrder: 100
+  },
+  'freundschaftsspiele': {
+    name: 'Freundschaftsspiele',
+    tinyName: 'FS',
+    href: '/tournaments/freundschaftsspiele',
+    bdgColDark: 'bg-yellow-400/10 text-yellow-400 ring-yellow-400/20',
+    bdgColLight: 'bg-yellow-50 text-yellow-700 ring-yellow-600/10',
+    matchLenMin: 125,
+    active: true,
+    sortOrder: 999
   }
 };
 
