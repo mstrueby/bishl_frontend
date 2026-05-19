@@ -255,9 +255,10 @@ const MatchCard: React.FC<{
                       item.bdgColLight,
                     )}
                   >
-                    {item.tinyName}{" "}
-                    {displayMatch?.round?.name && displayMatch.round.name !== "Hauptrunde" &&
-                      `- ${displayMatch.round.name}`}
+                    {item.tinyName}
+                    {displayMatch?.round?.name &&
+                      displayMatch.round.name !== "Hauptrunde" &&
+                      displayMatch.round.name !== "Alle Spiele" && ` - ${displayMatch.round.name}`}
                   </span>
                 );
               }
