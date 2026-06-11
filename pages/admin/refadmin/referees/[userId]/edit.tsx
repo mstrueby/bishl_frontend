@@ -155,7 +155,7 @@ const Edit: NextPage = () => {
       ishdLevel: referee.referee.ishdLevel || '',
       level: referee.referee.level || RefereeLevel.NA,
       active: referee.referee.active ?? false,
-      points: referee.referee.points ?? 0,
+      points: referee.referee.points ?? [],
       club: referee.referee.club || undefined
     } : {
       level: RefereeLevel.NA,

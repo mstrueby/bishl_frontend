@@ -10,6 +10,17 @@ export enum RefereeLevel {
   P1 = 'P1'
 }
 
+interface RefereeTournamentPoints {
+  tournamentAlias: string;
+  points: number;
+  matches: string[];
+}
+
+interface RefereeSeasonPoints {
+  seasonAlias: string;
+  tournaments: RefereeTournamentPoints[]
+}
+
 export interface UserReferee {
   level: RefereeLevel;
   passNo: string;
@@ -20,7 +31,7 @@ export interface UserReferee {
     clubName: string;
     logoUrl: string;
   };
-  points: number;
+  points: RefereeSeasonPoints[];
 }
 
 export interface UserValues {
