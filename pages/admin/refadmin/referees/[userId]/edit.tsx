@@ -162,7 +162,7 @@ const Edit: NextPage = () => {
       passNo: '',
       ishdLevel: '',
       active: false,
-      points: 0
+      points: []
     },
     roles: referee.roles
   };
