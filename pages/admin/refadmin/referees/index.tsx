@@ -141,7 +141,13 @@ const Referees: NextPage = () => {
         referee.referee?.ishdLevel ? `${referee.referee?.ishdLevel}` : ''
       ].filter(Boolean),
       category: referee.referee?.level !== undefined && referee.referee.level !== "n/a" ? referee.referee.level : undefined,
-      count: referee.referee?.points,
+      count: (() => {
+        const currentSeason = process.env.NEXT_PUBLIC_CURRENT_SEASON;
+        const seasonPoints = referee.referee?.points?.find(p => p.seasonAlias === currentSeason);
+        return seasonPoints
+          ? seasonPoints.tournaments.reduce((sum, t) => sum + t.points, 0)
+          : 0;
+      })(),
       image: undefined,
       published: referee.referee?.active,
       featured: false,
