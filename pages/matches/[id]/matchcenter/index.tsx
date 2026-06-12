@@ -92,77 +92,6 @@ const InfoCard: React.FC<InfoCardProps> = ({
   );
 };
 
-async function updateRefereePoints(match: MatchValues): Promise<void> {
-  const refereeUserIds = [match.referee1?.userId, match.referee2?.userId].filter(
-    (id): id is string => Boolean(id)
-  );
-
-  for (const userId of refereeUserIds) {
-    try {
-      const userRes = await apiClient.get(`/users/${userId}`);
-      const userData = userRes.data;
-      const currentPoints: Array<{
-        seasonAlias: string;
-        tournaments: Array<{ tournamentAlias: string; points: number; matches: string[] }>;
-      }> = userData.referee?.points ?? [];
-
-      const seasonAlias = match.season.alias;
-      const tournamentAlias = match.tournament.alias;
-      const matchId = match._id;
-
-      let updatedPoints;
-      const seasonEntry = currentPoints.find((p) => p.seasonAlias === seasonAlias);
-
-      if (seasonEntry) {
-        const tournamentEntry = seasonEntry.tournaments.find(
-          (t) => t.tournamentAlias === tournamentAlias
-        );
-        if (tournamentEntry) {
-          const updatedMatches = tournamentEntry.matches.includes(matchId)
-            ? tournamentEntry.matches
-            : [...tournamentEntry.matches, matchId];
-          updatedPoints = currentPoints.map((p) =>
-            p.seasonAlias !== seasonAlias
-              ? p
-              : {
-                  ...p,
-                  tournaments: p.tournaments.map((t) =>
-                    t.tournamentAlias !== tournamentAlias
-                      ? t
-                      : { ...t, matches: updatedMatches, points: updatedMatches.length }
-                  ),
-                }
-          );
-        } else {
-          updatedPoints = currentPoints.map((p) =>
-            p.seasonAlias !== seasonAlias
-              ? p
-              : {
-                  ...p,
-                  tournaments: [
-                    ...p.tournaments,
-                    { tournamentAlias, points: 1, matches: [matchId] },
-                  ],
-                }
-          );
-        }
-      } else {
-        updatedPoints = [
-          ...currentPoints,
-          { seasonAlias, tournaments: [{ tournamentAlias, points: 1, matches: [matchId] }] },
-        ];
-      }
-
-      const updatedReferee = { ...userData.referee, points: updatedPoints };
-      const formData = new FormData();
-      formData.append('referee', JSON.stringify(updatedReferee));
-      await apiClient.patch(`/users/${userId}`, formData);
-    } catch (error) {
-      console.error(`Error updating referee points for user ${userId}:`, getErrorMessage(error));
-    }
-  }
-}
-
 export default function MatchDetails(_props: MatchDetailsProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -1232,8 +1161,6 @@ export default function MatchDetails(_props: MatchDetailsProps) {
                               const updatedMatch = response.data;
                               setMatch(updatedMatch);
                               setIsFinishDialogOpen(false);
-                              // Update referee points for all assigned referees
-                              await updateRefereePoints(updatedMatch);
                             }
                           } catch (error) {
                             console.error(
