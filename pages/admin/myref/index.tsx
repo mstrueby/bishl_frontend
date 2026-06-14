@@ -150,7 +150,8 @@ const MyRef: NextPage = () => {
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-4 sm:px-6 xl:px-8">
           <dt className="text-sm/6 font-medium text-gray-500">Punkte</dt>
           <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900">
-            {user?.referee?.points ?? 0}
+            {user?.referee?.points?.reduce((total, season) =>
+              total + season.tournaments.reduce((t, tournament) => t + tournament.points, 0), 0) ?? 0}
           </dd>
         </div>
       </dl>
