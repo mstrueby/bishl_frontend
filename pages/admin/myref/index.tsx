@@ -10,6 +10,7 @@ import MatchCardRef from "../../../components/admin/MatchCardRef";
 import apiClient from '../../../lib/apiClient';
 import useAuth from '../../../hooks/useAuth';
 import { UserRole } from '../../../lib/auth';
+import { RefereeSeasonPoints } from '../../../types/UserValues';
 import usePermissions from '../../../hooks/usePermissions';
 import LoadingState from '../../../components/ui/LoadingState';
 
@@ -152,7 +153,7 @@ const MyRef: NextPage = () => {
           <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900">
             {(() => {
               const currentSeason = process.env.NEXT_PUBLIC_CURRENT_SEASON;
-              const seasonPoints = user?.referee?.points?.find(p => p.seasonAlias === currentSeason);
+              const seasonPoints = user?.referee?.points?.find((p: RefereeSeasonPoints) => p.seasonAlias === currentSeason);
               return seasonPoints
                 ? seasonPoints.tournaments.reduce((sum, t) => sum + t.points, 0)
                 : 0;
