@@ -927,32 +927,14 @@ export default function SupplementaryForm() {
 
   // Fetch all data on mount
   useEffect(() => {
-    console.log("Supplementary page: fetchData effect triggered", {
-      authLoading,
-      user: !!user,
-      id,
-      routerReady: router.isReady,
-    });
-
-    if (authLoading || !user || !id) {
-      console.log("Supplementary page: fetchData guard return", {
-        authLoading,
-        user: !!user,
-        id,
-      });
-      return;
-    }
-
     const fetchData = async () => {
       try {
-        console.log("Supplementary page: Starting fetchData API calls");
         setPageLoading(true);
 
         // Fetch match data
         const matchResponse = await apiClient.get(`/matches/${id}`);
         const matchData: MatchValues = matchResponse.data;
-        console.log("Supplementary page: Match data fetched", matchData._id);
-
+        
         // Stabilize state updates
         setMatch(matchData);
         setFormData((prev) => {
@@ -972,7 +954,6 @@ export default function SupplementaryForm() {
           const matchdayResponse = await apiClient.get(
             `/tournaments/${matchData.tournament.alias}/seasons/${matchData.season.alias}/rounds/${matchData.round.alias}/matchdays/${matchData.matchday.alias}`,
           );
-          console.log("Supplementary page: Matchday owner fetched");
           const owner = matchdayResponse.data?.owner || null;
           setMatchdayOwner((prev) => (prev === owner ? prev : owner));
         } catch (error) {
@@ -992,10 +973,6 @@ export default function SupplementaryForm() {
               }
             }
           );
-          console.log(
-            "Supplementary page: Assignments fetched",
-            assignmentsResponse.data?.length
-          );
           const nextAssignments = assignmentsResponse.data || [];
           setAssignments((prev) => {
             if (JSON.stringify(prev) === JSON.stringify(nextAssignments))
@@ -1009,10 +986,6 @@ export default function SupplementaryForm() {
         // Fetch all referees
         try {
           const refereesResponse = await apiClient.get("/users/referees", { params: { all: true, active: true }});
-          console.log(
-            "Supplementary page: Referees fetched",
-            refereesResponse.data?.length,
-          );
           const nextReferees = refereesResponse.data || [];
           setAllReferees((prev) => {
             if (JSON.stringify(prev) === JSON.stringify(nextReferees))
@@ -1029,9 +1002,6 @@ export default function SupplementaryForm() {
         );
         setError(getErrorMessage(error));
       } finally {
-        console.log(
-          "Supplementary page: fetchData finished, setting loading to false",
-        );
         setPageLoading(false);
       }
     };
@@ -1070,8 +1040,6 @@ export default function SupplementaryForm() {
     const requestBody = {
       [`referee${selectedRefereePosition}`]: refereeData,
     };
-
-    console.log("Updating referee with data:", requestBody);
 
     try {
       const response = await apiClient.patch(
@@ -1140,7 +1108,6 @@ export default function SupplementaryForm() {
     setSuccessMessage(null);
 
     try {
-      console.log("Saving supplementary sheet with data:", formData);
       const response = await apiClient.patch(`/matches/${match._id}`, {
         supplementarySheet: { ...formData, isSaved: true },
       });
@@ -1148,7 +1115,6 @@ export default function SupplementaryForm() {
       // Ignore 304 Not Modified status
       if (response.status === 304) {
         setSuccessMessage("Keine Änderungen erforderlich");
-        console.log("No changes needed (304)");
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -1211,10 +1177,6 @@ export default function SupplementaryForm() {
 
   // Show loading state
   if (authLoading || pageLoading) {
-    console.log("Supplementary page: Rendering LoadingState", {
-      pageLoading,
-      authLoading,
-    });
     return (
       <Layout>
         <LoadingState message="Lade Zusatzblatt..." />
