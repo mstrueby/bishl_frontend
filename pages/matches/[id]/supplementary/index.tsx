@@ -1071,6 +1071,8 @@ export default function SupplementaryForm() {
       [`referee${selectedRefereePosition}`]: refereeData,
     };
 
+    console.log("Updating referee with data:", requestBody);
+
     try {
       const response = await apiClient.patch(
         `/matches/${match._id}`,
