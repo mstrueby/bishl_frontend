@@ -23,9 +23,9 @@ import SuccessMessage from "../../../../components/ui/SuccessMessage";
 import LoadingState from "../../../../components/ui/LoadingState";
 import { Dialog, Transition, Listbox } from "@headlessui/react";
 import { Fragment } from "react";
-import { AssignmentValues } from "../../../../types/AssignmentValues";
+import { AssignmentValues, AssignmentStatus } from "../../../../types/AssignmentValues";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { UserValues } from "../../../../types/UserValues";
+import { UserValues, RefereeLevel } from "../../../../types/UserValues";
 import apiClient from "../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../lib/errorHandler";
 
@@ -1056,15 +1056,15 @@ export default function SupplementaryForm() {
     if (!selectedReferee || !match) return;
 
     setIsRefereeUpdating(true);
-    const refereeData = {
+    const refereeData: MatchReferee = {
       userId: selectedReferee._id,
       firstName: selectedReferee.firstName,
       lastName: selectedReferee.lastName,
-      clubId: selectedReferee.referee?.club?.clubId || "",
-      clubName: selectedReferee.referee?.club?.clubName || "",
-      logoUrl: selectedReferee.referee?.club?.logoUrl || "",
-      points: selectedReferee.referee?.points || 0,
-      level: selectedReferee.referee?.level || "n/a",
+      clubId: selectedReferee.referee?.club?.clubId,
+      clubName: selectedReferee.referee?.club?.clubName,
+      logoUrl: selectedReferee.referee?.club?.logoUrl,
+      level: selectedReferee.referee?.level ?? RefereeLevel.NA,
+      assignmentStatus: AssignmentStatus.ASSIGNED,
     };
 
     const requestBody = {
