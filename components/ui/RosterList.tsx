@@ -389,7 +389,7 @@ const RosterList: React.FC<RosterListProps> = ({
                 )}
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">TYP</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">QUELLE</th>
-                <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">PASS-NR.</th>
+                {/* <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">PASS-NR.</th> */}
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">HOCH</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">T</th>
                 <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10 border-l border-gray-200">V</th>
@@ -498,12 +498,13 @@ const RosterList: React.FC<RosterListProps> = ({
                       )}
                     </td>
 
-                    {/* Pass Number */}
+                    {/* Pass Number 
                     <td className="px-2 py-2 whitespace-nowrap text-center">
                       <span className={passNoBadgeClass}>
                         {player.passNumber}
                       </span>
                     </td>
+                    */}
 
                     {/* Called/HOCH */}
                     <td className="px-2 py-2 whitespace-nowrap text-center">
