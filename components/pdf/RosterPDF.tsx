@@ -79,11 +79,13 @@ const styles = StyleSheet.create({
     width: '53%',
     paddingHorizontal: 4,
   },
+  /*
   passCell: {
     width: '20%',
     paddingHorizontal: 4,
     textAlign: 'center',
   },
+  */
   footer: {
     position: 'absolute',
     bottom: 20,
@@ -211,7 +213,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
             <Text style={styles.numberCell}>Nr.</Text>
             <Text style={styles.positionCell}>Pos.</Text>
             <Text style={styles.nameCell}>Name, Vorname</Text>
-            <Text style={styles.passCell}>Pass-Nr.</Text>
+            {/*<Text style={styles.passCell}>Pass-Nr.</Text>*/}
           </View>
 
         {(() => {
@@ -261,7 +263,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
               <Text style={styles.nameCell}>
                 {formatPlayerName(captain)}
               </Text>
-              <Text style={styles.passCell}>{captain ? (captain.passNumber || '') : ''}</Text>
+              {/* <Text style={styles.passCell}>{captain ? (captain.passNumber || '') : ''}</Text> */}
             </View>
           );
 
@@ -274,7 +276,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
               <Text style={styles.nameCell}>
                 {formatPlayerName(assistant)}
               </Text>
-              <Text style={styles.passCell}>{assistant ? (assistant.passNumber || '') : ''}</Text>
+              {/*<Text style={styles.passCell}>{assistant ? (assistant.passNumber || '') : ''}</Text>*/}
             </View>
           );
 
@@ -289,7 +291,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 <Text style={styles.nameCell}>
                   {formatPlayerName(goalie)}
                 </Text>
-                <Text style={styles.passCell}>{goalie ? (goalie.passNumber || '') : ''}</Text>
+                {/*<Text style={styles.passCell}>{goalie ? (goalie.passNumber || '') : ''}</Text>*/}
               </View>
             );
           }
@@ -305,7 +307,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 <Text style={styles.nameCell}>
                   {formatPlayerName(forward)}
                 </Text>
-                <Text style={styles.passCell}>{forward ? (forward.passNumber || '') : ''}</Text>
+                {/*<Text style={styles.passCell}>{forward ? (forward.passNumber || '') : ''}</Text>*/}
               </View>
             );
           }
