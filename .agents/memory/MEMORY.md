@@ -1,0 +1,1 @@
+- [Replit Nix cache mismatch](replit-nix-cache-mismatch.md) — publishing can retain stale language/tool paths after `.replit` changes; compare cached Nix paths with the current modules and lockfile.
