@@ -288,6 +288,8 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 {formatPlayerName(assistant)}
               </Text>
               {/*<Text style={styles.passCell}>{assistant ? (assistant.passNumber || '') : ''}</Text>*/}
+              <Text style={styles.callUpCell}>
+                
             </View>
           );
 
