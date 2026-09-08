@@ -86,6 +86,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   */
+  callUpCell: {
+    width: '20%',
+    paddingHorizontal: 4,
+    textAlign: 'center'
+  },
   footer: {
     position: 'absolute',
     bottom: 20,
@@ -214,6 +219,7 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
             <Text style={styles.positionCell}>Pos.</Text>
             <Text style={styles.nameCell}>Name, Vorname</Text>
             {/*<Text style={styles.passCell}>Pass-Nr.</Text>*/}
+            <Text style={styles.callUpCell}>Hochgemeldet von</Text>
           </View>
 
         {(() => {
@@ -264,6 +270,11 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 {formatPlayerName(captain)}
               </Text>
               {/* <Text style={styles.passCell}>{captain ? (captain.passNumber || '') : ''}</Text> */}
+              <Text style={styles.callUpCell}>
+                {captain?.called
+                  ? captain.calledFromTeam?.teamName || '(H)'
+                  : ''}
+              </Text>
             </View>
           );
 
