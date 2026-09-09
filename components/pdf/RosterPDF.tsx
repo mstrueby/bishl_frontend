@@ -219,7 +219,6 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
             <Text style={styles.positionCell}>Pos.</Text>
             <Text style={styles.nameCell}>Name, Vorname</Text>
             {/*<Text style={styles.passCell}>Pass-Nr.</Text>*/}
-            <Text style={styles.callUpCell}>Hochgemeldet von</Text>
           </View>
 
         {(() => {
@@ -270,11 +269,13 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 {formatPlayerName(captain)}
               </Text>
               {/* <Text style={styles.passCell}>{captain ? (captain.passNumber || '') : ''}</Text> */}
+              {/*
               <Text style={styles.callUpCell}>
                 {captain?.called
                   ? captain.calledFromTeam?.teamName || '(H)'
                   : ''}
               </Text>
+              */}
             </View>
           );
 
@@ -288,8 +289,6 @@ const RosterPDF = ({ teamFlag, matchDate, venue, roster, teamLogo, tournament, r
                 {formatPlayerName(assistant)}
               </Text>
               {/*<Text style={styles.passCell}>{assistant ? (assistant.passNumber || '') : ''}</Text>*/}
-              <Text style={styles.callUpCell}>
-                
             </View>
           );
 
