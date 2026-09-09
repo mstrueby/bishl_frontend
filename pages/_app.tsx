@@ -5,6 +5,7 @@ import ProgressBar from '@badrap/bar-of-progress'
 import { AuthProvider } from '../context/AuthContext';
 import DemoWarmup from '../components/ui/DemoWarmup';
 import '../styles/globals.css'
+import { Analytics } from '@vercel/analytics/next';
 
 const progress = new ProgressBar({
   size: 4,
@@ -31,6 +32,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         </>
       )}
       <Component {...pageProps} />
+      <Analytics />
     </AuthProvider>
   );
 }
