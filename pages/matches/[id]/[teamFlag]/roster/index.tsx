@@ -99,6 +99,40 @@ interface AvailablePlayerWithRoster extends AvailablePlayer {
   eligibilityStatus?: string;
 }
 
+const sortTablePlayersForView = (
+  players: AvailablePlayerWithRoster[],
+  lineupOnly: boolean,
+): AvailablePlayerWithRoster[] => {
+  return [...players].sort((a, b) => {
+    if (!lineupOnly) {
+      return (
+        a.firstName.localeCompare(b.firstName) ||
+        a.lastName.localeCompare(b.lastName)
+      );
+    }
+
+    const positionPriority: Record<string, number> = {
+      C: 1,
+      A: 2,
+      G: 3,
+      F: 4,
+    };
+    const posA = positionPriority[a.rosterPosition || "F"] || 99;
+    const posB = positionPriority[b.rosterPosition || "F"] || 99;
+
+    if (posA !== posB) return posA - posB;
+
+    const jerseyComparison =
+      (a.rosterJerseyNo || 999) - (b.rosterJerseyNo || 999);
+    if (jerseyComparison !== 0) return jerseyComparison;
+
+    return (
+      a.firstName.localeCompare(b.firstName) ||
+      a.lastName.localeCompare(b.lastName)
+    );
+  });
+};
+
 // Player position options
 const playerPositions = [
   { key: "F", value: "Feldspieler" },
@@ -902,10 +936,19 @@ const RosterPage = () => {
     });
   };
 
+  const handlePlayerViewToggle = () => {
+    const nextShowLineupOnly = !showLineupOnly;
+    setTablePlayers((prev) =>
+      sortTablePlayersForView(prev, nextShowLineupOnly),
+    );
+    setShowLineupOnly(nextShowLineupOnly);
+  };
+
   // NOTE: rosterList is now derived via useMemo from tablePlayers (see line ~170)
   // No sync useEffect needed - rosterList automatically updates when tablePlayers changes
 
-  // NEW: Get filtered and sorted table data based on current view settings
+  // Get filtered table data. Sorting is applied only when switching views so
+  // edits to position or jersey number do not move rows immediately.
   const getFilteredTablePlayers = React.useCallback(() => {
     let filtered = [...tablePlayers];
 
@@ -917,22 +960,6 @@ const RosterPage = () => {
     // Filter by lineup only toggle
     if (showLineupOnly) {
       filtered = filtered.filter((p) => p.selected);
-      // Sort by position for lineup view: C, A, G, then by jersey
-      filtered.sort((a, b) => {
-        const positionPriority: Record<string, number> = {
-          C: 1,
-          A: 2,
-          G: 3,
-          F: 4,
-        };
-        const posA = positionPriority[a.rosterPosition || "F"] || 99;
-        const posB = positionPriority[b.rosterPosition || "F"] || 99;
-        if (posA !== posB) return posA - posB;
-        return (a.rosterJerseyNo || 999) - (b.rosterJerseyNo || 999);
-      });
-    } else {
-      // Default sort by firstName
-      filtered.sort((a, b) => a.firstName.localeCompare(b.firstName));
     }
 
     // Filter by search term
@@ -1581,7 +1608,7 @@ const RosterPage = () => {
               {/* Aufstellung/Spielerliste Toggle Button */}
               <button
                 type="button"
-                onClick={() => setShowLineupOnly(!showLineupOnly)}
+                onClick={handlePlayerViewToggle}
                 className="w-32 bg-white ring-gray-300 hover:bg-gray-50
                   flex-1 sm:flex-none inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset"
                 title={showLineupOnly ? "Spielerliste anzeigen" : "Aufstellung anzeigen"}
