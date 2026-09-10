@@ -195,9 +195,9 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                   <>
                     {/* Header Section */}
                     <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b">
-                      <div className="grid grid-cols-1 sm:grid-cols-5 items-center gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-4">
                         {/* Avatar */}
-                        <div className="sm:col-span-2 flex justify-center">
+                        <div className="sm:col-span-4 flex justify-center">
                           {currentPlayer.player.imageUrl ? (
                             <Image
                               src={currentPlayer.player.imageUrl}
@@ -214,17 +214,17 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                         </div>
 
                         {/* Player Info */}
-                        <div className="sm:col-span-3 min-w-0">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex min-w-0 items-start gap-2">
+                        <div className="sm:col-span-8 min-w-0">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 items-start gap-1.5">
                               <span
-                                className="w-4 flex-shrink-0 pt-1 text-center text-sm font-medium text-gray-500"
+                                className="w-4 flex-shrink-0 pt-1.5 text-center text-sm text-gray-500"
                                 title={positionTooltips[currentPlayer.playerPosition.key] || currentPlayer.playerPosition.key}
                               >
                                 {currentPlayer.playerPosition.key}
                               </span>
-                              <span className="flex-shrink-0 pt-0.5 text-lg font-medium text-gray-600">
-                                {currentPlayer.player.jerseyNumber ?? '–'}
+                              <span className="flex-shrink-0 pt-0.5 text-lg font-semibold tabular-nums text-gray-700">
+                                #{currentPlayer.player.jerseyNumber ?? '–'}
                               </span>
                               <div className="min-w-0">
                                 <h2 className="text-2xl font-bold leading-tight text-gray-900">
