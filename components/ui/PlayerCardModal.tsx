@@ -38,6 +38,26 @@ const formatBirthDate = (dateStr: string | undefined): string => {
   }
 };
 
+const renderPositionBadge = (positionKey: string) => {
+  const classNameByPosition: Record<string, string> = {
+    C: 'rounded-full bg-gray-600 text-white',
+    A: 'rounded-full bg-gray-400 text-white',
+    G: 'rounded-full border border-gray-900 bg-white text-gray-900',
+    F: 'text-gray-900',
+  };
+
+  return (
+    <span
+      className={`inline-flex h-6 w-6 items-center justify-center text-xs font-semibold ${
+        classNameByPosition[positionKey] || classNameByPosition.F
+      }`}
+      title={positionTooltips[positionKey] || positionKey}
+    >
+      {positionKey}
+    </span>
+  );
+};
+
 const getPlayerInitials = (firstName: string, lastName: string): string =>
   `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
 
@@ -217,11 +237,8 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                         <div className="sm:col-span-8 min-w-0">
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex min-w-0 items-start gap-1.5">
-                              <span
-                                className="w-4 flex-shrink-0 pt-1.5 text-center text-sm text-gray-500"
-                                title={positionTooltips[currentPlayer.playerPosition.key] || currentPlayer.playerPosition.key}
-                              >
-                                {currentPlayer.playerPosition.key}
+                              <span className="flex-shrink-0">
+                                {renderPositionBadge(currentPlayer.playerPosition.key)}
                               </span>
                               <span className="flex-shrink-0 pt-0.5 text-lg font-semibold tabular-nums text-gray-700">
                                 #{currentPlayer.player.jerseyNumber ?? '–'}
