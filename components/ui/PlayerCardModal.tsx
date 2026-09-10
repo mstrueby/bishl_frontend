@@ -38,22 +38,6 @@ const formatBirthDate = (dateStr: string | undefined): string => {
   }
 };
 
-const renderPositionBadge = (key: string) => {
-  const isGoalie = key === 'G';
-  return (
-    <span
-      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${
-        isGoalie
-          ? 'bg-white text-gray-900 border-2 border-gray-900'
-          : 'bg-gray-900 text-white'
-      }`}
-      title={positionTooltips[key] || key}
-    >
-      {key}
-    </span>
-  );
-};
-
 const getPlayerInitials = (firstName: string, lastName: string): string =>
   `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
 
@@ -232,13 +216,24 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                         {/* Player Info */}
                         <div className="sm:col-span-3 min-w-0">
                           <div className="flex items-start justify-between gap-4">
-                            <div className="min-w-0">
-                              <h2 className="text-2xl font-bold text-gray-900">
-                                {currentPlayer.player.firstName} {currentPlayer.player.lastName}
-                              </h2>
-                              <p className="mt-1 text-sm text-gray-500">
-                                {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
-                              </p>
+                            <div className="flex min-w-0 items-start gap-2">
+                              <span
+                                className="w-4 flex-shrink-0 pt-1 text-center text-sm font-medium text-gray-500"
+                                title={positionTooltips[currentPlayer.playerPosition.key] || currentPlayer.playerPosition.key}
+                              >
+                                {currentPlayer.playerPosition.key}
+                              </span>
+                              <span className="flex-shrink-0 pt-0.5 text-lg font-medium text-gray-600">
+                                {currentPlayer.player.jerseyNumber ?? '–'}
+                              </span>
+                              <div className="min-w-0">
+                                <h2 className="text-2xl font-bold leading-tight text-gray-900">
+                                  {currentPlayer.player.firstName} {currentPlayer.player.lastName}
+                                </h2>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
+                                </p>
+                              </div>
                             </div>
 
                             {teamLogoUrl && (
@@ -252,12 +247,6 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                                 />
                               </div>
                             )}
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-4">
-                            <span className="text-lg text-gray-600">#{currentPlayer.player.jerseyNumber ?? '–'}</span>
-                            <span className="text-gray-400">–</span>
-                            {renderPositionBadge(currentPlayer.playerPosition.key)}
                           </div>
 
                           {/* Full Face Requirement Badge */}
