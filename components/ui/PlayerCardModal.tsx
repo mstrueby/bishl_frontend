@@ -43,7 +43,7 @@ const renderPositionBadge = (positionKey: string) => {
     C: 'rounded-full bg-gray-600 text-white',
     A: 'rounded-full bg-gray-400 text-white',
     G: 'rounded-full border border-gray-900 bg-white text-gray-900',
-    F: 'text-gray-900',
+    F: 'rounded-full bg-gray-50 text-gray-900 shadow-sm ring-1 ring-gray-200/80',
   };
 
   return (
@@ -236,19 +236,17 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                         {/* Player Info */}
                         <div className="sm:col-span-8 min-w-0">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="flex min-w-0 items-center gap-1.5">
-                                <span className="flex-shrink-0">
-                                  {renderPositionBadge(currentPlayer.playerPosition.key)}
-                                </span>
-                                <span className="flex-shrink-0 pt-0.5 text-lg font-semibold tabular-nums text-gray-700">
-                                  #{currentPlayer.player.jerseyNumber ?? '–'}
-                                </span>
-                                <h2 className="min-w-0 text-2xl font-bold leading-tight text-gray-900">
-                                  {currentPlayer.player.firstName} {currentPlayer.player.lastName}
-                                </h2>
-                              </div>
-                              <p className="mt-1 text-sm text-gray-500">
+                            <div className="grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-1.5">
+                              <span className="flex-shrink-0">
+                                {renderPositionBadge(currentPlayer.playerPosition.key)}
+                              </span>
+                              <span className="flex-shrink-0 pt-0.5 text-lg font-semibold tabular-nums text-gray-700">
+                                #{currentPlayer.player.jerseyNumber ?? '–'}
+                              </span>
+                              <h2 className="min-w-0 text-2xl font-bold leading-tight text-gray-900">
+                                {currentPlayer.player.firstName} {currentPlayer.player.lastName}
+                              </h2>
+                              <p className="col-start-3 mt-1 text-sm text-gray-500">
                                 {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
                               </p>
                             </div>
