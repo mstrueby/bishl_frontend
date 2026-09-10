@@ -361,7 +361,7 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                                 <table className="min-w-full text-sm">
                                   <thead>
                                     <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
-                                      <th className="pb-2 pr-4">Turnier</th>
+                                      <th className="pb-2 pr-4">Wettbewerb</th>
                                       <th className="pb-2 pr-4">Team</th>
                                       <th className="pb-2 pr-3 text-center w-10">Sp</th>
                                       <th className="pb-2 pr-3 text-center w-10">T</th>
