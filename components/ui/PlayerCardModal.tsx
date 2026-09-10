@@ -236,12 +236,12 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                         {/* Player Info */}
                         <div className="sm:col-span-8 min-w-0">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-1.5">
+                            <div className="grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-3">
                               <span className="flex-shrink-0">
                                 {renderPositionBadge(currentPlayer.playerPosition.key)}
                               </span>
                               <span className="flex-shrink-0 pt-0.5 text-lg font-semibold tabular-nums text-gray-700">
-                                #{currentPlayer.player.jerseyNumber ?? '–'}
+                                {currentPlayer.player.jerseyNumber ?? '–'}
                               </span>
                               <h2 className="min-w-0 text-2xl font-bold leading-tight text-gray-900">
                                 {currentPlayer.player.firstName} {currentPlayer.player.lastName}
