@@ -236,21 +236,21 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                         {/* Player Info */}
                         <div className="sm:col-span-8 min-w-0">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex min-w-0 items-start gap-1.5">
-                              <span className="flex-shrink-0">
-                                {renderPositionBadge(currentPlayer.playerPosition.key)}
-                              </span>
-                              <span className="flex-shrink-0 pt-0.5 text-lg font-semibold tabular-nums text-gray-700">
-                                #{currentPlayer.player.jerseyNumber ?? '–'}
-                              </span>
-                              <div className="min-w-0">
-                                <h2 className="text-2xl font-bold leading-tight text-gray-900">
+                            <div className="min-w-0">
+                              <div className="flex min-w-0 items-center gap-1.5">
+                                <span className="flex-shrink-0">
+                                  {renderPositionBadge(currentPlayer.playerPosition.key)}
+                                </span>
+                                <span className="flex-shrink-0 pt-0.5 text-lg font-semibold tabular-nums text-gray-700">
+                                  #{currentPlayer.player.jerseyNumber ?? '–'}
+                                </span>
+                                <h2 className="min-w-0 text-2xl font-bold leading-tight text-gray-900">
                                   {currentPlayer.player.firstName} {currentPlayer.player.lastName}
                                 </h2>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
-                                </p>
                               </div>
+                              <p className="mt-1 text-sm text-gray-500">
+                                {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
+                              </p>
                             </div>
 
                             {teamLogoUrl && (
