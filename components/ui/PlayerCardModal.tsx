@@ -7,6 +7,7 @@ import { PlayerDetails } from '../../types/PlayerDetails';
 import { AssignmentTeam } from '../../types/PlayerValues';
 import apiClient from '../../lib/apiClient';
 import { getErrorMessage } from '../../lib/errorHandler';
+import { getLicenceTypeBadgeClass } from '../../lib/constants';
 
 const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
 
@@ -24,14 +25,6 @@ const positionTooltips: Record<string, string> = {
   'A': 'Assistant',
   'G': 'Goalie',
   'F': 'Feldspieler'
-};
-
-const getLicenceStatusColor = (status: string | undefined): string => {
-  switch (status) {
-    case 'VALID': return 'bg-green-500';
-    case 'INVALID': return 'bg-red-500';
-    default: return 'bg-gray-400';
-  }
 };
 
 const formatBirthDate = (dateStr: string | undefined): string => {
@@ -63,6 +56,30 @@ const renderPositionBadge = (key: string) => {
 
 const getPlayerInitials = (firstName: string, lastName: string): string =>
   `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+
+const renderLicenceStatusBadge = (status: string | undefined) => {
+  if (status === 'INVALID') {
+    return (
+      <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
+        Ungültig
+      </span>
+    );
+  }
+
+  if (status === 'VALID') {
+    return (
+      <span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+        Gültig
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
+      Unbekannt
+    </span>
+  );
+};
 
 const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
   isOpen,
@@ -286,28 +303,21 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                                 <table className="min-w-full text-sm">
                                   <thead>
                                     <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
-                                      <th className="pb-2 pr-3 w-4"></th>
                                       <th className="pb-2 pr-4">Team</th>
                                       <th className="pb-2 pr-4">Typ</th>
                                       <th className="pb-2 pr-4">Quelle</th>
-                                      <th className="pb-2">Pass-Nr.</th>
+                                      <th className="pb-2 text-right">Status</th>
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-100">
                                     {flatTeams.map((t, idx) => (
                                       <tr key={idx} className="text-sm">
-                                        <td className="py-2 pr-3">
-                                          <span
-                                            className={`inline-block w-2.5 h-2.5 rounded-full ${getLicenceStatusColor(t.status)}`}
-                                            title={t.status ?? ''}
-                                          ></span>
-                                        </td>
                                         <td className="py-2 pr-4 text-gray-900">
                                           {t.teamName || '–'}
                                         </td>
                                         <td className="py-2 pr-4">
                                           {t.licenseType ? (
-                                            <span className="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                            <span className={getLicenceTypeBadgeClass(t.licenseType)}>
                                               {t.licenseType}
                                             </span>
                                           ) : (
@@ -323,14 +333,8 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                                             <span className="text-gray-400">–</span>
                                           )}
                                         </td>
-                                        <td className="py-2">
-                                          {t.passNo ? (
-                                            <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                              {t.passNo}
-                                            </span>
-                                          ) : (
-                                            <span className="text-gray-400">–</span>
-                                          )}
+                                        <td className="py-2 text-right">
+                                          {renderLicenceStatusBadge(t.status)}
                                         </td>
                                       </tr>
                                     ))}
