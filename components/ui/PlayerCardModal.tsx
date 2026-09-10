@@ -211,63 +211,58 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                   <>
                     {/* Header Section */}
                     <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b">
-                      <div className="flex items-start gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-5 items-center gap-6">
                         {/* Avatar */}
-                        <div className="flex-shrink-0">
+                        <div className="sm:col-span-2 flex justify-center">
                           {currentPlayer.player.imageUrl ? (
                             <Image
                               src={currentPlayer.player.imageUrl}
                               alt={`${currentPlayer.player.firstName} ${currentPlayer.player.lastName}`}
-                              width={112}
-                              height={112}
-                              className="rounded-full object-cover border-4 border-white shadow-lg"
+                              width={176}
+                              height={176}
+                              className="h-40 w-40 sm:h-44 sm:w-44 rounded-full object-cover border-4 border-white shadow-lg"
                             />
                           ) : (
-                            <span className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-gray-300 text-2xl font-bold text-gray-600 border-4 border-white shadow-lg">
+                            <span className="inline-flex h-40 w-40 sm:h-44 sm:w-44 items-center justify-center rounded-full bg-gray-300 text-4xl font-bold text-gray-600 border-4 border-white shadow-lg">
                               {getPlayerInitials(currentPlayer.player.firstName, currentPlayer.player.lastName)}
                             </span>
                           )}
                         </div>
 
                         {/* Player Info */}
-                        <div className="flex-1 min-w-0">
-                          <h2 className="text-2xl font-bold text-gray-900">
-                            {currentPlayer.player.firstName} {currentPlayer.player.lastName}
-                          </h2>
+                        <div className="sm:col-span-3 min-w-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0">
+                              <h2 className="text-2xl font-bold text-gray-900">
+                                {currentPlayer.player.firstName} {currentPlayer.player.lastName}
+                              </h2>
+                              <p className="mt-1 text-sm text-gray-500">
+                                {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
+                              </p>
+                            </div>
 
-                          <div className="flex items-center gap-2 mt-2">
+                            {teamLogoUrl && (
+                              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-white p-1.5 shadow-sm ring-1 ring-gray-200">
+                                <Image
+                                  src={teamLogoUrl}
+                                  alt={teamName ? `${teamName} Logo` : 'Teamlogo'}
+                                  width={56}
+                                  height={56}
+                                  className="h-14 w-14 object-contain"
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 mt-4">
                             <span className="text-lg text-gray-600">#{currentPlayer.player.jerseyNumber ?? '–'}</span>
                             <span className="text-gray-400">–</span>
                             {renderPositionBadge(currentPlayer.playerPosition.key)}
                           </div>
 
-                          {/* Team */}
-                          {teamName && (
-                            <div className="mt-3 flex items-center gap-2">
-                              {teamLogoUrl && (
-                                <Image
-                                  src={teamLogoUrl}
-                                  alt={teamName}
-                                  width={20}
-                                  height={20}
-                                  className="rounded object-contain"
-                                />
-                              )}
-                              <span className="text-sm text-gray-700">{teamName}</span>
-                            </div>
-                          )}
-
-                          {/* Personal Data */}
-                          <div className="mt-3 text-sm">
-                            <span className="text-gray-500">Geburtsdatum:</span>{' '}
-                            <span className="text-gray-900">
-                              {isLoading ? '…' : formatBirthDate(playerDetails?.birthdate)}
-                            </span>
-                          </div>
-
                           {/* Full Face Requirement Badge */}
                           {!isLoading && (
-                            <div className="mt-3">
+                            <div className="mt-4">
                               {playerDetails?.fullFaceReq === true ? (
                                 <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20">
                                   Vollvisier-Pflicht
