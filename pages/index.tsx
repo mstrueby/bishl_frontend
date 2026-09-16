@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { GetServerSideProps, NextPage } from "next";
+import { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { getCookie } from "cookies-next";
 import { PostValues } from "../types/PostValues";
 import { MatchValues } from "../types/MatchValues";
 import { TournamentValues } from "../types/TournamentValues";
+import {
+  HomePageMatchDay,
+  HomePageMatchSummary,
+  HomePagePostSummary,
+  HomePageTournamentSummary,
+} from "../types/HomePageValues";
 import Layout from "../components/Layout";
 import { getFuzzyDate } from "../tools/dateUtils";
 import {
@@ -24,28 +29,34 @@ import { classNames } from "../tools/utils";
 import { tournamentConfigs } from "../tools/consts";
 import Image from "next/image";
 import apiClient from "../lib/apiClient";
+import { toHomePageMatch, toHomePagePost } from "../lib/homePageData";
+
+const INITIAL_MATCH_ROWS = 5;
 
 interface PostsProps {
-  jwt: string | null;
-  posts: PostValues[];
-  todaysMatches: MatchValues[];
-  restOfWeekMatches: {
-    date: string;
-    dayName: string;
-    matches: MatchValues[];
-  }[];
-  tournaments: TournamentValues[];
+  generatedAt: string;
+  posts: HomePagePostSummary[];
+  todaysMatches: HomePageMatchSummary[];
+  restOfWeekMatches: HomePageMatchDay[];
+  tournaments: HomePageTournamentSummary[];
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const jwt = getCookie("jwt", context) || null;
-  let posts = null;
-  let todaysMatches = null;
-  let tournaments = null;
-  let restOfWeekMatches = null;
-
-  // Fetch posts with pagination
+const loadSection = async <T,>(
+  label: string,
+  loader: () => Promise<T>,
+): Promise<T> => {
   try {
+    return await loader();
+  } catch (error) {
+    console.error(`Error fetching ${label}:`, error);
+    throw error;
+  }
+};
+
+export const getStaticProps: GetStaticProps<PostsProps> = async () => {
+  const [posts, todaysMatches, restOfWeekMatches, tournaments] =
+    await Promise.all([
+      loadSection("posts", async () => {
     const res = await apiClient.get("/posts", {
       params: {
         published: true,
@@ -53,54 +64,53 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         page_size: 3,
       },
     });
-    // Response is already unwrapped by interceptor
-    posts = res.data || [];
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-  }
-
-  // Fetch today's matches
-  try {
-    const matchesRes = await apiClient.get("/matches/today");
-    todaysMatches = matchesRes.data || [];
-  } catch (error) {
-    console.error("Error fetching today's matches:", error);
-  }
-
-  // Fetch matches for rest of the week
-  try {
-    const restOfWeekRes = await apiClient.get("/matches/rest-of-week");
-    restOfWeekMatches = restOfWeekRes.data || [];
-  } catch (error) {
-    console.error("Error fetching rest of week matches:", error);
-  }
-
-  // Fetch tournaments
-  try {
-    const tournamentsRes = await apiClient.get("/tournaments", {
-      params: {
-        page: 1,
-        page_size: 100,
-      },
-    });
-    tournaments = tournamentsRes.data || [];
-  } catch (error) {
-    console.error("Error fetching tournaments:", error);
-  }
+        return ((res.data || []) as PostValues[]).map(toHomePagePost);
+      }),
+      loadSection("today's matches", async () => {
+        const response = await apiClient.get("/matches/today");
+        return ((response.data || []) as MatchValues[]).map(toHomePageMatch);
+      }),
+      loadSection("rest of week matches", async () => {
+        const response = await apiClient.get("/matches/rest-of-week");
+        return ((response.data || []) as Array<{
+          date: string;
+          matches: MatchValues[];
+        }>).map((day) => ({
+          date: day.date,
+          matches: (day.matches || []).map(toHomePageMatch),
+        }));
+      }),
+      loadSection("tournaments", async () => {
+        const response = await apiClient.get("/tournaments", {
+          params: {
+            page: 1,
+            page_size: 100,
+          },
+        });
+        return ((response.data || []) as TournamentValues[]).map(
+          (tournament): HomePageTournamentSummary => ({
+            _id: tournament._id || tournament.alias,
+            name: tournament.name,
+            alias: tournament.alias,
+          }),
+        );
+      }),
+    ]);
 
   return {
     props: {
-      jwt,
-      posts: posts || [],
-      todaysMatches: todaysMatches || [],
-      restOfWeekMatches: restOfWeekMatches || [],
-      tournaments: tournaments || [],
+      generatedAt: new Date().toISOString(),
+      posts,
+      todaysMatches,
+      restOfWeekMatches,
+      tournaments,
     },
+    revalidate: 60,
   };
 };
 
 const Home: NextPage<PostsProps> = ({
-  jwt,
+  generatedAt,
   posts = [],
   todaysMatches = [],
   restOfWeekMatches = [],
@@ -108,9 +118,7 @@ const Home: NextPage<PostsProps> = ({
 }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] =
-    useState<TournamentValues | null>(null);
-  const [filteredMatches, setFilteredMatches] =
-    useState<MatchValues[]>(todaysMatches);
+    useState<HomePageTournamentSummary | null>(null);
   const router = useRouter();
 
   // Use upcoming matches if no today's matches - memoize to prevent re-renders
@@ -125,6 +133,9 @@ const Home: NextPage<PostsProps> = ({
 
   // State to manage expanded tournaments
   const [expandedTournaments, setExpandedTournaments] = useState<Set<string>>(
+    new Set(),
+  );
+  const [expandedMatchGroups, setExpandedMatchGroups] = useState<Set<string>>(
     new Set(),
   );
 
@@ -151,22 +162,19 @@ const Home: NextPage<PostsProps> = ({
     }
   }, [router.query.message, router]);
 
-  // Filter matches by selected tournament
-  useEffect(() => {
-    if (selectedTournament) {
-      setFilteredMatches(
-        displayMatches.filter(
-          (match) => match.tournament.alias === selectedTournament.alias,
-        ),
-      );
-    } else {
-      setFilteredMatches(displayMatches);
-    }
-  }, [selectedTournament, displayMatches]);
+  const filteredMatches = useMemo(
+    () =>
+      selectedTournament
+        ? displayMatches.filter(
+            (match) => match.tournament.alias === selectedTournament.alias,
+          )
+        : displayMatches,
+    [selectedTournament, displayMatches],
+  );
 
   // Categorize matches
-  const categorizeMatches = (matches: MatchValues[]) => {
-    const now = new Date();
+  const categorizeMatches = (matches: HomePageMatchSummary[]) => {
+    const now = new Date(generatedAt);
 
     const live = matches.filter((match) => {
       // Always include matches that are explicitly marked as INPROGRESS
@@ -233,10 +241,11 @@ const Home: NextPage<PostsProps> = ({
   };
 
   // Shared formatTime function
-  const formatTime = (date: Date) => {
+  const formatTime = (date: string) => {
     return new Date(date).toLocaleTimeString("de-DE", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Europe/Berlin",
     });
   };
 
@@ -252,10 +261,22 @@ const Home: NextPage<PostsProps> = ({
     });
   };
 
+  const toggleMatchGroup = (groupKey: string) => {
+    setExpandedMatchGroups((previous) => {
+      const next = new Set(previous);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  };
+
   // Group matches by tournament, sorted by sortOrder then startDate
   const groupByTournament = (
-    matches: MatchValues[],
-  ): { alias: string; matches: MatchValues[] }[] => {
+    matches: HomePageMatchSummary[],
+  ): { alias: string; matches: HomePageMatchSummary[] }[] => {
     const sorted = [...matches].sort((a, b) => {
       const orderA = tournamentConfigs[a.tournament.alias]?.sortOrder ?? 999;
       const orderB = tournamentConfigs[b.tournament.alias]?.sortOrder ?? 999;
@@ -263,7 +284,7 @@ const Home: NextPage<PostsProps> = ({
       return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
     });
 
-    const groups: { alias: string; matches: MatchValues[] }[] = [];
+    const groups: { alias: string; matches: HomePageMatchSummary[] }[] = [];
     const seen = new Set<string>();
 
     for (const match of sorted) {
@@ -278,11 +299,40 @@ const Home: NextPage<PostsProps> = ({
     return groups;
   };
 
-  // Compact list row component for a single match
-  const MatchList = ({ matches }: { matches: MatchValues[] }) => {
-    const now = new Date();
+  const categorizedMatches = useMemo(
+    () => categorizeMatches(filteredMatches),
+    [filteredMatches],
+  );
+  const groupedLiveMatches = useMemo(
+    () => groupByTournament(categorizedMatches.live),
+    [categorizedMatches.live],
+  );
+  const groupedUpcomingMatches = useMemo(
+    () => groupByTournament(categorizedMatches.upcoming),
+    [categorizedMatches.upcoming],
+  );
+  const groupedFinishedMatches = useMemo(
+    () => groupByTournament(categorizedMatches.finished),
+    [categorizedMatches.finished],
+  );
 
-    const getRowBorderColor = (match: MatchValues) => {
+  // Compact list row component for a single match
+  const MatchList = ({
+    matches,
+    groupKey,
+  }: {
+    matches: HomePageMatchSummary[];
+    groupKey: string;
+  }) => {
+    const now = new Date(generatedAt);
+    const isExpanded = expandedMatchGroups.has(groupKey);
+    const hasMoreMatches = matches.length > INITIAL_MATCH_ROWS;
+    const displayedMatches =
+      hasMoreMatches && !isExpanded
+        ? matches.slice(0, INITIAL_MATCH_ROWS)
+        : matches;
+
+    const getRowBorderColor = (match: HomePageMatchSummary) => {
       if (match.matchStatus.key === "INPROGRESS") return "border-l-red-500";
       if (match.matchStatus.key === "FINISHED") return "border-l-gray-500";
       if (match.matchStatus.key === "SCHEDULED") {
@@ -300,19 +350,19 @@ const Home: NextPage<PostsProps> = ({
       return "border-l-gray-300";
     };
 
-    const getMatchHref = (match: MatchValues): string | null => {
+    const getMatchHref = (match: HomePageMatchSummary): string | null => {
       if (match.matchStatus.key === "INPROGRESS")
         return `/matches/${match._id}/live`;
       if (match.matchStatus.key === "FINISHED") return `/matches/${match._id}`;
       return null;
     };
 
-    const renderCenter = (match: MatchValues) => {
+    const renderCenter = (match: HomePageMatchSummary) => {
       if (match.matchStatus.key === "FINISHED") {
         return (
           <div className="flex flex-col items-center justify-center leading-tight">
             <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-              {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+              {match.home.goalsFor} : {match.away.goalsFor}
             </p>
             {(match.finishType.key === "SHOOTOUT" ||
               match.finishType.key === "OVERTIME") && (
@@ -326,7 +376,7 @@ const Home: NextPage<PostsProps> = ({
       if (match.matchStatus.key === "INPROGRESS") {
         return (
           <p className="text-md font-bold text-gray-900 whitespace-nowrap text-center">
-            {match.home.stats.goalsFor} : {match.away.stats.goalsFor}
+            {match.home.goalsFor} : {match.away.goalsFor}
           </p>
         );
       }
@@ -359,7 +409,7 @@ const Home: NextPage<PostsProps> = ({
           role="list"
           className="overflow-hidden bg-white"
         >
-          {matches.map((match) => {
+          {displayedMatches.map((match) => {
             const href = getMatchHref(match);
             const borderColor = getRowBorderColor(match);
             const item = tournamentConfigs[match.tournament.alias];
@@ -460,6 +510,30 @@ const Home: NextPage<PostsProps> = ({
             );
           })}
         </ul>
+        {hasMoreMatches && (
+          <div className="border-t border-gray-100 bg-gray-50 p-2">
+            <button
+              type="button"
+              onClick={() => toggleMatchGroup(groupKey)}
+              aria-expanded={isExpanded}
+              className="flex w-full items-center justify-center text-xs font-medium text-indigo-600 hover:text-indigo-800"
+            >
+              {isExpanded ? (
+                <>
+                  Weniger anzeigen
+                  <ChevronUpIcon className="ml-1 h-3 w-3" aria-hidden="true" />
+                </>
+              ) : (
+                <>
+                  {matches.length - INITIAL_MATCH_ROWS === 1
+                    ? "1 weiteres Spiel anzeigen"
+                    : `${matches.length - INITIAL_MATCH_ROWS} weitere Spiele anzeigen`}
+                  <ChevronDownIcon className="ml-1 h-3 w-3" aria-hidden="true" />
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -469,14 +543,14 @@ const Home: NextPage<PostsProps> = ({
     tournament,
     matches,
   }: {
-    tournament: TournamentValues;
-    matches: MatchValues[];
+    tournament: HomePageTournamentSummary;
+    matches: HomePageMatchSummary[];
   }) => {
     const tournamentConfig = tournamentConfigs[tournament.alias];
     const isExpanded = expandedTournaments.has(tournament.alias);
 
     // Sort matches
-    const sortedMatches = matches.sort((a, b) => {
+    const sortedMatches = [...matches].sort((a, b) => {
       // First sort by tournament sortOrder
       const tournamentConfigA = tournamentConfigs[a.tournament.alias];
       const tournamentConfigB = tournamentConfigs[b.tournament.alias];
@@ -526,7 +600,7 @@ const Home: NextPage<PostsProps> = ({
         <div className="space-y-3 flex-1 p-4">
           {displayedMatches.map((match) => {
             const refCount =
-              (match.referee1 ? 1 : 0) + (match.referee2 ? 1 : 0);
+              (match.hasReferee1 ? 1 : 0) + (match.hasReferee2 ? 1 : 0);
             const dotClass =
               refCount === 2
                 ? "text-green-500 bg-green-500/20"
@@ -599,12 +673,16 @@ const Home: NextPage<PostsProps> = ({
   };
 
   // MatchCard component for today's games
-  const MatchCard = ({ match }: { match: MatchValues }) => {
+  const MatchCard = ({ match }: { match: HomePageMatchSummary }) => {
     // Determine border color based on match status and date
     const getBorderColor = () => {
       // Check if match is today
-      const today = new Date().toDateString();
-      const matchDate = new Date(match.startDate).toDateString();
+      const dateFormatter = new Intl.DateTimeFormat("de-DE", {
+        dateStyle: "short",
+        timeZone: "Europe/Berlin",
+      });
+      const today = dateFormatter.format(new Date(generatedAt));
+      const matchDate = dateFormatter.format(new Date(match.startDate));
       const isToday = today === matchDate;
 
       switch (match.matchStatus.key) {
@@ -678,7 +756,7 @@ const Home: NextPage<PostsProps> = ({
             </div>
             <div className="flex-auto ml-6 truncate text-ellipsis">
               <p
-                className={`block text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+                className={`block text-base font-medium ${match.home.goalsFor > match.away.goalsFor ? "text-gray-800" : "text-gray-500"}`}
               >
                 {match.home.shortName}
               </p>
@@ -689,9 +767,9 @@ const Home: NextPage<PostsProps> = ({
             ) && (
               <div className="flex-none w-10">
                 <p
-                  className={`text-lg sm:max-md:text-base font-medium ${match.home.stats.goalsFor > match.away.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+                  className={`text-lg sm:max-md:text-base font-medium ${match.home.goalsFor > match.away.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
                 >
-                  {match.home.stats.goalsFor}
+                  {match.home.goalsFor}
                 </p>
               </div>
             )}
@@ -714,7 +792,7 @@ const Home: NextPage<PostsProps> = ({
             </div>
             <div className="flex-auto ml-6 w-full truncate">
               <p
-                className={`block text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? "text-gray-800" : "text-gray-500"}`}
+                className={`block text-base font-medium ${match.away.goalsFor > match.home.goalsFor ? "text-gray-800" : "text-gray-500"}`}
               >
                 {match.away.shortName}
               </p>
@@ -725,9 +803,9 @@ const Home: NextPage<PostsProps> = ({
             ) && (
               <div className="flex-none w-10">
                 <p
-                  className={`text-lg sm:max-md:text-base font-medium ${match.away.stats.goalsFor > match.home.stats.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
+                  className={`text-lg sm:max-md:text-base font-medium ${match.away.goalsFor > match.home.goalsFor ? "text-gray-800" : "text-gray-500"} text-right mx-2`}
                 >
-                  {match.away.stats.goalsFor}
+                  {match.away.goalsFor}
                 </p>
               </div>
             )}
@@ -757,29 +835,14 @@ const Home: NextPage<PostsProps> = ({
     );
   };
 
-  const postItems = posts
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime(),
-    )
-    .map((post: PostValues) => ({
-      _id: post._id,
-      title: post.title,
-      alias: post.alias,
-      author_firstname: post.author.firstName,
-      author_lastname: post.author.lastName,
-      content: post.content,
-      imageUrl: post.imageUrl,
-      createUser: post.createUser.firstName + " " + post.createUser.lastName,
-      createDate: new Date(post.createDate).toISOString(),
-      updateUser: post.updateUser
-        ? post.updateUser.firstName + " " + post.updateUser.lastName
-        : "-",
-      updateDate: new Date(post.updateDate).toISOString(),
-      published: post.published,
-      featured: post.featured,
-    }));
+  const postItems = useMemo(
+    () =>
+      [...posts].sort(
+        (a, b) =>
+          new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime(),
+      ),
+    [posts],
+  );
 
   return (
     <>
@@ -822,15 +885,9 @@ const Home: NextPage<PostsProps> = ({
               />
             </div>
 
-            {(() => {
-              // For today's matches, use existing logic
-              const { live, upcoming, finished } =
-                categorizeMatches(filteredMatches);
-
-              return (
-                <div className="space-y-20">
+            <div className="space-y-20">
                   {/* Live Games */}
-                  {live.length > 0 && (
+                  {categorizedMatches.live.length > 0 && (
                     <div>
                       <div className="min-w-0 flex-1">
                         <div className="border-b border-gray-200 pb-5 mb-6">
@@ -842,15 +899,19 @@ const Home: NextPage<PostsProps> = ({
                         </div>
                       </div>
                       <div className="space-y-4">
-                        {groupByTournament(live).map((group) => (
-                          <MatchList key={group.alias} matches={group.matches} />
+                        {groupedLiveMatches.map((group) => (
+                          <MatchList
+                            key={group.alias}
+                            groupKey={`live-${group.alias}`}
+                            matches={group.matches}
+                          />
                         ))}
                       </div>
                     </div>
                   )}
 
                   {/* Upcoming Games */}
-                  {upcoming.length > 0 && (
+                  {categorizedMatches.upcoming.length > 0 && (
                     <div>
                       <div className="min-w-0 flex-1">
                         <div className="border-b border-gray-200 pb-5 mb-6">
@@ -862,15 +923,19 @@ const Home: NextPage<PostsProps> = ({
                         </div>
                       </div>
                       <div className="space-y-4">
-                        {groupByTournament(upcoming).map((group) => (
-                          <MatchList key={group.alias} matches={group.matches} />
+                        {groupedUpcomingMatches.map((group) => (
+                          <MatchList
+                            key={group.alias}
+                            groupKey={`upcoming-${group.alias}`}
+                            matches={group.matches}
+                          />
                         ))}
                       </div>
                     </div>
                   )}
 
                   {/* Finished Games */}
-                  {finished.length > 0 && (
+                  {categorizedMatches.finished.length > 0 && (
                     <div>
                       <div className="min-w-0 flex-1">
                         <div className="border-b border-gray-200 pb-5 mb-6">
@@ -882,8 +947,12 @@ const Home: NextPage<PostsProps> = ({
                         </div>
                       </div>
                       <div className="space-y-4">
-                        {groupByTournament(finished).map((group) => (
-                          <MatchList key={group.alias} matches={group.matches} />
+                        {groupedFinishedMatches.map((group) => (
+                          <MatchList
+                            key={group.alias}
+                            groupKey={`finished-${group.alias}`}
+                            matches={group.matches}
+                          />
                         ))}
                       </div>
                     </div>
@@ -899,8 +968,6 @@ const Home: NextPage<PostsProps> = ({
                     </div>
                   )}
                 </div>
-              );
-            })()}
           </div>
         )}
 
@@ -942,11 +1009,6 @@ const Home: NextPage<PostsProps> = ({
                               _id: tournamentAlias,
                               name: match.tournament.name,
                               alias: match.tournament.alias,
-                              tinyName: match.tournament.alias,
-                              ageGroup: { key: "", value: "" },
-                              published: true,
-                              active: true,
-                              external: false,
                             },
                             matches: [],
                           };
@@ -956,7 +1018,10 @@ const Home: NextPage<PostsProps> = ({
                       },
                       {} as Record<
                         string,
-                        { tournament: TournamentValues; matches: MatchValues[] }
+                        {
+                          tournament: HomePageTournamentSummary;
+                          matches: HomePageMatchSummary[];
+                        }
                       >,
                     );
 
@@ -969,6 +1034,7 @@ const Home: NextPage<PostsProps> = ({
                                 "de-DE",
                                 {
                                   weekday: "long",
+                                  timeZone: "Europe/Berlin",
                                 },
                               )}
                             </h4>
@@ -979,6 +1045,7 @@ const Home: NextPage<PostsProps> = ({
                                   day: "2-digit",
                                   month: "short",
                                   year: "numeric",
+                                  timeZone: "Europe/Berlin",
                                 },
                               )}
                             </p>
@@ -1082,7 +1149,7 @@ const Home: NextPage<PostsProps> = ({
               */}
             </div>
             <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-              {postItems.map((post) => (
+              {postItems.map((post, postIndex) => (
                 <article
                   key={post._id}
                   className="flex flex-col items-start justify-between relative"
@@ -1105,7 +1172,19 @@ const Home: NextPage<PostsProps> = ({
                       crop="fill"
                       gravity="auto"
                       radius={18}
-                      priority
+                      priority={
+                        todaysMatches.length === 0 &&
+                        !restOfWeekMatches.some((day) => day.matches.length > 0) &&
+                        postIndex === 0
+                      }
+                      loading={
+                        todaysMatches.length === 0 &&
+                        !restOfWeekMatches.some((day) => day.matches.length > 0) &&
+                        postIndex === 0
+                          ? "eager"
+                          : "lazy"
+                      }
+                      sizes="(min-width: 1024px) 33vw, 100vw"
                     />
                   </div>
                   <div className="flex max-w-xl grow flex-col justify-between">
@@ -1114,7 +1193,7 @@ const Home: NextPage<PostsProps> = ({
                         dateTime={post.updateDate}
                         className="text-gray-500"
                       >
-                        {getFuzzyDate(post.updateDate)}
+                        {getFuzzyDate(post.updateDate, generatedAt)}
                       </time>
                       {/*<a
                         href={post.category.href}
@@ -1131,18 +1210,17 @@ const Home: NextPage<PostsProps> = ({
                           {post.title}
                         </Link>
                       </h3>
-                      <p
-                        className="mt-5 line-clamp-3 text-sm/6 text-gray-600"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
-                      ></p>
+                      <p className="mt-5 line-clamp-3 text-sm/6 text-gray-600">
+                        {post.excerpt}
+                      </p>
                     </div>
                     <div className="relative mt-8 flex items-center gap-x-4 justify-self-end">
                       <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                        {`${post.author_firstname[0]}${post.author_lastname[0]}`}
+                        {`${post.authorFirstName[0]}${post.authorLastName[0]}`}
                       </div>
                       <div className="text-sm/6">
                         <p className="font-extralight text-gray-900">
-                          {post.author_firstname}
+                          {post.authorFirstName}
                         </p>
                         {/*<p className="text-gray-600">{post.author.role}</p>*/}
                       </div>

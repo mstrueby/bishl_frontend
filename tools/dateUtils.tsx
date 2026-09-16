@@ -4,7 +4,10 @@
  * @returns {string} - A string describing the time difference.
  */
 
-export function getFuzzyDate(pastDate: Date | string): string {
+export function getFuzzyDate(
+  pastDate: Date | string,
+  referenceDate: Date | string = new Date(),
+): string {
   // Convert to Date object if pastDate is a string and ensure UTC handling
   const utcPastDate = typeof pastDate === 'string'
     ? new Date(pastDate)
@@ -14,7 +17,11 @@ export function getFuzzyDate(pastDate: Date | string): string {
     throw new Error('Invalid date');
   }
   // Use UTC timestamps for comparison to avoid timezone issues
-  const now = new Date();
+  const now =
+    typeof referenceDate === 'string' ? new Date(referenceDate) : referenceDate;
+  if (isNaN(now.getTime())) {
+    throw new Error('Invalid reference date');
+  }
   const diffInSeconds = Math.floor(
     (now.getTime() - utcPastDate.getTime()) / 1000
   );

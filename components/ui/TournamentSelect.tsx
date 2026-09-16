@@ -1,24 +1,30 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { TournamentValues } from '../../types/TournamentValues';
 import { BarsArrowUpIcon, CheckIcon, ChevronDownIcon, ChevronUpDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { classNames } from '../../tools/utils';
 import { tournamentConfigs } from '../../tools/consts';
 import Image from 'next/image';
 
-interface TournamentSelectProps {
-  selectedTournament: TournamentValues | null;
-  onTournamentChange: (tournament: TournamentValues | null) => void;
-  allTournamentsData: TournamentValues[];
+interface TournamentOption {
+  _id?: string;
+  name: string;
+  alias: string;
+}
+
+interface TournamentSelectProps<T extends TournamentOption> {
+  selectedTournament: T | null;
+  onTournamentChange: (tournament: T | null) => void;
+  allTournamentsData: T[];
   label?: string;
 }
-const TournamentSelect: React.FC<TournamentSelectProps> = ({
+
+const TournamentSelect = <T extends TournamentOption,>({
   selectedTournament: propSelectedTournament,
   onTournamentChange,
   allTournamentsData,
   label
-}) => {
-  const [selectedTournament, setSelectedTournament] = useState<TournamentValues | null>(propSelectedTournament);
+}: TournamentSelectProps<T>) => {
+  const [selectedTournament, setSelectedTournament] = useState<T | null>(propSelectedTournament);
 
   // When the 'propSelectedTournament' changes, update the local state
   useEffect(() => {

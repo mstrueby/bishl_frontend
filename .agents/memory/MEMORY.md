@@ -1,1 +1,2 @@
 - [Replit Nix cache mismatch](replit-nix-cache-mismatch.md) — publishing can retain stale language/tool paths after `.replit` changes; compare cached Nix paths with the current modules and lockfile.
+- [Homepage ISR failures](homepage-isr-failures.md) — regeneration errors must reject so the last good homepage remains cached; never convert API failures into empty sections.
