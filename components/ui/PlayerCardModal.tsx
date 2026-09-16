@@ -232,7 +232,7 @@ const PlayerCardModal: React.FC<PlayerCardModalProps> = ({
                             </span>
                           )}
                         </div>
-
+                        
                         {/* Player Info */}
                         <div className="sm:col-span-8 min-w-0">
                           <div className="flex items-start justify-between gap-3">
