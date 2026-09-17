@@ -242,11 +242,10 @@ const Home: NextPage<PostsProps> = ({
 
   // Shared formatTime function
   const formatTime = (date: string) => {
-    return new Date(date).toLocaleTimeString("de-DE", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Europe/Berlin",
-    });
+    const timeAsProvided = date.match(/T(\d{2}):(\d{2})/);
+    return timeAsProvided
+      ? `${timeAsProvided[1]}:${timeAsProvided[2]}`
+      : date;
   };
 
   const toggleTournament = (tournamentAlias: string) => {
