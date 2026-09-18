@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
@@ -30,6 +30,10 @@ const TeamPage: NextPage = () => {
   const { teamAlias } = router.query;
   const { user, loading: authLoading } = useAuth();
   const { isAuthenticated, hasAnyRole } = usePermissions();
+  const clubId = user?.club?.clubId;
+  const resolvedTeamAlias =
+    typeof teamAlias === 'string' ? teamAlias : null;
+  const loadedRequestKey = useRef<string | null>(null);
 
   const [club, setClub] = useState<ClubValues | null>(null);
   const [team, setTeam] = useState<TeamValues | null>(null);
@@ -52,18 +56,25 @@ const TeamPage: NextPage = () => {
   }, [authLoading, user, hasAnyRole, router]);
 
   const fetchData = useCallback(async () => {
-    if (!user || !teamAlias || typeof teamAlias !== 'string') return;
+    if (!clubId || !resolvedTeamAlias) {
+      setLoading(false);
+      return;
+    }
+
+    const requestKey = `${clubId}:${resolvedTeamAlias}`;
+    if (loadedRequestKey.current === requestKey) return;
+    loadedRequestKey.current = requestKey;
 
     try {
       setLoading(true);
 
-      const clubResponse = await apiClient.get(`/clubs/id/${user.club.clubId}`);
+      const clubResponse = await apiClient.get(`/clubs/id/${clubId}`);
       const clubData = clubResponse.data?.data || clubResponse.data;
       setClub(clubData);
 
       const [teamResponse, playersResponse] = await Promise.all([
-        apiClient.get(`/clubs/${clubData.alias}/teams/${teamAlias}`),
-        apiClient.get(`/players/clubs/${clubData.alias}/teams/${teamAlias}`, {
+        apiClient.get(`/clubs/${clubData.alias}/teams/${resolvedTeamAlias}`),
+        apiClient.get(`/players/clubs/${clubData.alias}/teams/${resolvedTeamAlias}`, {
           params: { sortby: 'lastName', all: 'true' }
         })
       ]);
@@ -72,12 +83,13 @@ const TeamPage: NextPage = () => {
       setPlayers(playersResponse.data?.results || playersResponse.data || []);
 
     } catch (error) {
+      loadedRequestKey.current = null;
       console.error('Error fetching data:', getErrorMessage(error));
       setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
-  }, [user, teamAlias]);
+  }, [clubId, resolvedTeamAlias]);
 
   const editPlayer = (teamAlias: string, PlayerId: string) => {
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
@@ -151,10 +163,10 @@ const TeamPage: NextPage = () => {
   }, [router]);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && user) {
-      fetchData();
+    if (!authLoading && isAuthenticated) {
+      void fetchData();
     }
-  }, [authLoading, isAuthenticated, user, fetchData]);
+  }, [authLoading, isAuthenticated, fetchData]);
 
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
