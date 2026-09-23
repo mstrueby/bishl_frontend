@@ -1,9 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { buildUrl } from 'cloudinary-build-url'
-import { ClubValues, TeamValues } from '../../../../types/ClubValues';
-import { PlayerValues } from '../../../../types/PlayerValues';
 import Layout from '../../../../components/Layout';
 import SectionHeader from "../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../components/ui/SuccessMessage';
@@ -15,6 +13,7 @@ import useAuth from '../../../../hooks/useAuth';
 import usePermissions from '../../../../hooks/usePermissions';
 import { UserRole } from '../../../../lib/auth';
 import apiClient from '../../../../lib/apiClient';
+import { useTeamPlayers, updateCachedPlayer } from '../../../../lib/teamPlayerCache';
 import { getErrorMessage } from '../../../../lib/errorHandler';
 import { licenceTypeBadgeColors } from '../../../../lib/constants';
 
@@ -33,14 +32,12 @@ const TeamPage: NextPage = () => {
   const clubId = user?.club?.clubId;
   const resolvedTeamAlias =
     typeof teamAlias === 'string' ? teamAlias : null;
-  const loadedRequestKey = useRef<string | null>(null);
-
-  const [club, setClub] = useState<ClubValues | null>(null);
-  const [team, setTeam] = useState<TeamValues | null>(null);
-  const [players, setPlayers] = useState<PlayerValues[]>([]);
+  const allowed = hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN]);
+  const { data, error: fetchError, isValidating, refresh } = useTeamPlayers(
+    clubId, resolvedTeamAlias, !authLoading && isAuthenticated && allowed,
+  );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
@@ -54,42 +51,6 @@ const TeamPage: NextPage = () => {
       router.push('/');
     }
   }, [authLoading, user, hasAnyRole, router]);
-
-  const fetchData = useCallback(async () => {
-    if (!clubId || !resolvedTeamAlias) {
-      setLoading(false);
-      return;
-    }
-
-    const requestKey = `${clubId}:${resolvedTeamAlias}`;
-    if (loadedRequestKey.current === requestKey) return;
-    loadedRequestKey.current = requestKey;
-
-    try {
-      setLoading(true);
-
-      const clubResponse = await apiClient.get(`/clubs/id/${clubId}`);
-      const clubData = clubResponse.data?.data || clubResponse.data;
-      setClub(clubData);
-
-      const [teamResponse, playersResponse] = await Promise.all([
-        apiClient.get(`/clubs/${clubData.alias}/teams/${resolvedTeamAlias}`),
-        apiClient.get(`/players/clubs/${clubData.alias}/teams/${resolvedTeamAlias}`, {
-          params: { sortby: 'lastName', all: 'true' }
-        })
-      ]);
-
-      setTeam(teamResponse.data?.data || teamResponse.data);
-      setPlayers(playersResponse.data?.results || playersResponse.data || []);
-
-    } catch (error) {
-      loadedRequestKey.current = null;
-      console.error('Error fetching data:', getErrorMessage(error));
-      setError(getErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  }, [clubId, resolvedTeamAlias]);
 
   const editPlayer = (teamAlias: string, PlayerId: string) => {
     router.push(`/admin/myclub/${teamAlias}/${PlayerId}`);
@@ -130,18 +91,22 @@ const TeamPage: NextPage = () => {
       const response = await apiClient.patch(`/players/${playerId}`, formData);
 
       if (response.status === 200) {
-        setPlayers(prev => prev.map(player => {
-          if (player._id !== playerId) return player;
-          return {
-            ...player,
-            assignedTeams: player.assignedTeams.map((item: any) => ({
+        if (clubId && resolvedTeamAlias) {
+          await updateCachedPlayer(clubId, resolvedTeamAlias, playerId, {
+            // The PATCH payload omits assignment metadata used by the list.
+            // Preserve it while applying the confirmed active-state change.
+            assignedTeams: response.data?.assignedTeams || assignedTeams.map((item: any) => ({
               ...item,
-              teams: item.teams.map((t: any) =>
-                t.teamId === teamId ? { ...t, active: !t.active } : t
+              teams: item.teams.map((assignedTeam: any) =>
+                assignedTeam.teamId === teamId
+                  ? { ...assignedTeam, active: !assignedTeam.active }
+                  : assignedTeam,
               ),
             })),
-          };
-        }));
+          });
+        }
+      } else {
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
       }
     } catch (error) {
       console.error('Error updating player status:', getErrorMessage(error));
@@ -162,12 +127,6 @@ const TeamPage: NextPage = () => {
     }
   }, [router]);
 
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      void fetchData();
-    }
-  }, [authLoading, isAuthenticated, fetchData]);
-
   const handleCloseSuccessMessage = () => {
     setSuccessMessage(null);
   };
@@ -176,8 +135,7 @@ const TeamPage: NextPage = () => {
     setError(null);
   };
 
-  // Show loading state while checking auth or fetching data
-  if (authLoading || loading || !club || !team) {
+  if (authLoading) {
     return (
       <Layout>
         <LoadingState />
@@ -186,10 +144,32 @@ const TeamPage: NextPage = () => {
   }
 
   // Auth guard (shouldn't reach here due to redirect, but just in case)
-  if (!hasAnyRole([UserRole.ADMIN, UserRole.CLUB_ADMIN])) {
+  if (!allowed) {
     return null;
   }
 
+  if (!data && !fetchError) {
+    return (
+      <Layout>
+        <LoadingState />
+      </Layout>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Layout>
+        <div role="alert" className="my-6 rounded-md bg-red-50 p-4 text-red-800">
+          Die Mannschaft konnte nicht geladen werden: {getErrorMessage(fetchError)}
+          <button type="button" disabled={isValidating} className="ml-3 underline disabled:opacity-50" onClick={() => void refresh()}>
+            {isValidating ? 'Wird geladen …' : 'Erneut versuchen'}
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
+  const { club, team, players } = data;
   
   const dataListItems = getDataListItems(players, team, editPlayer, toggleActive, true);
 
@@ -212,6 +192,15 @@ const TeamPage: NextPage = () => {
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
       {error && <ErrorMessage error={error} onClose={handleCloseError} />}
+      {isValidating && <p role="status" className="mb-4 text-sm text-gray-600">Mannschaft wird aktualisiert …</p>}
+      {fetchError && (
+        <div role="alert" className="mb-4 rounded-md bg-yellow-50 p-4 text-sm text-yellow-900">
+          Die Aktualisierung ist fehlgeschlagen. Die zuletzt geladenen Spieler bleiben sichtbar.
+          <button type="button" disabled={isValidating} className="ml-3 underline disabled:opacity-50" onClick={() => void refresh()}>
+            {isValidating ? 'Wird geladen …' : 'Erneut versuchen'}
+          </button>
+        </div>
+      )}
 
       <DataList
         items={dataListItems}

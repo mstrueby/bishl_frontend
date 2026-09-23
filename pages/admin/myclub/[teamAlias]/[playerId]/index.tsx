@@ -12,6 +12,7 @@ import useAuth from '../../../../../hooks/useAuth';
 import usePermissions from '../../../../../hooks/usePermissions';
 import { UserRole } from '../../../../../lib/auth';
 import apiClient from '../../../../../lib/apiClient';
+import { revalidateTeamPlayers, updateCachedPlayer } from '../../../../../lib/teamPlayerCache';
 import { getErrorMessage } from '../../../../../lib/errorHandler';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
@@ -139,6 +140,24 @@ const Edit: NextPage = () => {
 
       const response = await apiClient.patch(`/players/${player?._id}`, formData);
       if (response.status === 200) {
+        if (clubId && typeof teamAlias === 'string' && player?._id) {
+          // The PATCH may return no player. Keep submitted fields that this form
+          // actually sends, and use server values when a player is returned.
+          const changes: Partial<PlayerValues> = {};
+          formData.forEach((_, key) => {
+            if (key in values && key !== 'image' && key !== 'imageUrl') {
+              (changes as any)[key] = values[key as keyof PlayerValues];
+            }
+          });
+          if (formData.get('imageUrl') === '') changes.imageUrl = '';
+          if (response.data?._id === player._id) {
+            Object.assign(changes, response.data);
+          }
+          await updateCachedPlayer(clubId, teamAlias, player._id, changes);
+          if (formData.has('image') && !response.data?.imageUrl) {
+            void revalidateTeamPlayers(clubId, teamAlias);
+          }
+        }
         router.push({
           pathname: `/admin/myclub/${teamAlias}`,
           query: { message: `<strong>${values.displayFirstName} ${values.displayLastName}</strong> erfolgreich aktualisiert.` }
