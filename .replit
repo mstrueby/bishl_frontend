@@ -103,7 +103,6 @@ externalPort = 3000
 deploymentTarget = "cloudrun"
 build = ["sh", "-c", "NODE_ENV=production npm run build"]
 run = ["sh", "-c", "npm start"]
-publicDir = "public"
 
 [workflows]
 runButton = "Project"
