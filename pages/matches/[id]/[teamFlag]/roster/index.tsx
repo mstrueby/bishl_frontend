@@ -16,6 +16,7 @@ import {
   LicenseStatus,
 } from "../../../../../types/PlayerValues";
 import { countCalledMatches } from "../../../../../utils/countCalledMatches";
+import { useRosterCalledStats } from "../../../../../hooks/useRosterCalledStats";
 import apiClient from "../../../../../lib/apiClient";
 import { getErrorMessage } from "../../../../../lib/errorHandler";
 import { getLicenceTypeBadgeClass, getSourceBadgeClass, passNoBadgeClass, invalidReasonCodeMap } from "../../../../../lib/constants";
@@ -214,9 +215,6 @@ const RosterPage = () => {
   const [callUpModalError, setCallUpModalError] = useState<string | null>(null);
   const [loadingCallUpPlayers, setLoadingCallUpPlayers] = useState(false);
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
-  const [playerStats, setPlayerStats] = useState<{
-    [playerId: string]: number;
-  }>({});
   const [coachData, setCoachData] = useState({
     firstName: "",
     lastName: "",
@@ -231,6 +229,28 @@ const RosterPage = () => {
   );
 
   const [playerDetailsMap, setPlayerDetailsMap] = useState<Record<string, PlayerValues>>({});
+  const playerDetailsRef = useRef<Record<string, PlayerValues>>({});
+  const pendingPlayerDetailsRef = useRef<Partial<Record<string, Promise<PlayerValues>>>>({});
+
+  // Share in-flight player requests between eligibility checks and call-up stats.
+  const loadPlayerDetails = React.useCallback((playerId: string): Promise<PlayerValues> => {
+    if (playerDetailsRef.current[playerId]) return Promise.resolve(playerDetailsRef.current[playerId]);
+    if (pendingPlayerDetailsRef.current[playerId]) return pendingPlayerDetailsRef.current[playerId];
+    const request = apiClient.get(`/players/${playerId}`).then(response => {
+      const player = response.data as PlayerValues;
+      if (pendingPlayerDetailsRef.current[playerId] === request) {
+        playerDetailsRef.current[playerId] = player;
+        setPlayerDetailsMap(prev => ({ ...prev, [playerId]: player }));
+      }
+      return player;
+    }).finally(() => {
+      if (pendingPlayerDetailsRef.current[playerId] === request) {
+        delete pendingPlayerDetailsRef.current[playerId];
+      }
+    });
+    pendingPlayerDetailsRef.current[playerId] = request;
+    return request;
+  }, []);
 
   // NEW STATE: Interactive table-based player selection - SINGLE SOURCE OF TRUTH
   const [tablePlayers, setTablePlayers] = useState<AvailablePlayerWithRoster[]>(
@@ -494,6 +514,9 @@ const RosterPage = () => {
           setCurrentMatchdayId(matchdayResponse.data?._id || null);
         } catch (error) {
           console.error("Error fetching matchday owner:", error);
+          if (matchData.matchSettings?.callUpType === CallUpType.MATCHDAY) {
+            setError("Spieltag konnte nicht geladen werden. Hochmelde-Einsätze sind derzeit nicht verfügbar.");
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", getErrorMessage(error));
@@ -518,6 +541,26 @@ const RosterPage = () => {
   const maxCallUpPlayers = match?.matchSettings?.maxCallUpPlayers ?? 5;
   const maxCallUpAppearances = match?.matchSettings?.maxCallUpAppearances ?? 5;
   const callUpType = match?.matchSettings?.callUpType ?? CallUpType.MATCH;
+  const calledPlayerIds = rosterList.filter(player => player.called).map(player => player.player.playerId);
+  const calledIdsKey = JSON.stringify(calledPlayerIds.slice().sort());
+  // MATCHDAY counts must wait for the ID used to exclude the current matchday.
+  const statsContext = match && matchTeam && (callUpType !== CallUpType.MATCHDAY || currentMatchdayId)
+    ? {
+        matchId: match._id,
+        teamFlag,
+        tournamentAlias: match.tournament.alias,
+        seasonAlias: match.season.alias,
+        callUpType,
+        matchdayId: callUpType === CallUpType.MATCHDAY ? currentMatchdayId ?? undefined : undefined,
+      }
+    : null;
+  const {
+    counts: playerStats,
+    errors: playerStatsErrors,
+    seed: seedPlayerStats,
+    retry: retryPlayerStats,
+    invalidate: invalidatePlayerStats,
+  } = useRosterCalledStats(calledPlayerIds, statsContext, loadPlayerDetails);
 
   // Calculate permissions for this user and match
   const permissions =
@@ -770,7 +813,7 @@ const RosterPage = () => {
     );
 
     if (playersToFetch.length === 0) {
-      const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
+      const updates: Record<string, string> = {};
       calledPlayersNeedingStatus.forEach((p) => {
         const cached = playerDetailsMap[p._id];
         if (cached) {
@@ -778,22 +821,24 @@ const RosterPage = () => {
             ?.flatMap((a: Assignment) => a.teams || [])
             .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
           if (assignedTeam?.status) {
-            updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
+            updates[p._id] = assignedTeam.status;
           }
         }
       });
       if (Object.keys(updates).length > 0) {
-        setTablePlayers((prev) =>
-          prev.map((p) => {
-            if (updates[p._id]) {
-              const newStatus = updates[p._id].eligibilityStatus;
-              const callUps = playerStats[p._id] || 0;
-              const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
-              return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
-            }
-            return p;
-          })
-        );
+        setTablePlayers(prev => {
+          let changed = false;
+          const next = prev.map(p => {
+            const newStatus = updates[p._id];
+            if (!newStatus || !p.called || p.originalTeamId !== calledPlayersNeedingStatus.find(candidate => candidate._id === p._id)?.originalTeamId) return p;
+            const callUps = playerStats[p._id];
+            const finalStatus = callUps === undefined ? (newStatus === 'INVALID' ? 'INVALID' : 'UNKNOWN') : callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
+            if (p.assignedStatus === newStatus && p.status === newStatus && p.eligibilityStatus === finalStatus) return p;
+            changed = true;
+            return { ...p, assignedStatus: newStatus, eligibilityStatus: finalStatus, status: newStatus };
+          });
+          return changed ? next : prev;
+        });
       }
       return;
     }
@@ -805,8 +850,8 @@ const RosterPage = () => {
         const results = await Promise.all(
           playersToFetch.map(async (p) => {
             try {
-              const response = await apiClient.get(`/players/${p._id}`);
-              return { playerId: p._id, data: response.data as PlayerValues };
+              const data = await loadPlayerDetails(p._id);
+              return { playerId: p._id, data };
             } catch (error) {
               console.error(`Error fetching details for player ${p._id}:`, getErrorMessage(error));
               return { playerId: p._id, data: null };
@@ -822,7 +867,7 @@ const RosterPage = () => {
         setPlayerDetailsMap((prev) => ({ ...prev, ...newDetailsMap }));
 
         const allDetails = { ...playerDetailsMap, ...newDetailsMap };
-        const updates: Record<string, { eligibilityStatus: string; status: string }> = {};
+        const updates: Record<string, string> = {};
         calledPlayersNeedingStatus.forEach((p) => {
           const details = allDetails[p._id];
           if (details) {
@@ -830,23 +875,25 @@ const RosterPage = () => {
               ?.flatMap((a: Assignment) => a.teams || [])
               .find((t: AssignmentTeam) => t.teamId === p.originalTeamId);
             if (assignedTeam?.status) {
-              updates[p._id] = { eligibilityStatus: assignedTeam.status, status: assignedTeam.status };
+              updates[p._id] = assignedTeam.status;
             }
           }
         });
 
         if (Object.keys(updates).length > 0) {
-          setTablePlayers((prev) =>
-            prev.map((p) => {
-              if (updates[p._id]) {
-                const newStatus = updates[p._id].eligibilityStatus;
-                const callUps = playerStats[p._id] || 0;
-                const finalStatus = callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
-                return { ...p, eligibilityStatus: finalStatus, status: finalStatus };
-              }
-              return p;
-            })
-          );
+          setTablePlayers(prev => {
+            let changed = false;
+            const next = prev.map(p => {
+              const newStatus = updates[p._id];
+              if (!newStatus || !p.called || p.originalTeamId !== calledPlayersNeedingStatus.find(candidate => candidate._id === p._id)?.originalTeamId) return p;
+              const callUps = playerStats[p._id];
+              const finalStatus = callUps === undefined ? (newStatus === 'INVALID' ? 'INVALID' : 'UNKNOWN') : callUps >= maxCallUpAppearances ? 'INVALID' : newStatus;
+              if (p.assignedStatus === newStatus && p.status === newStatus && p.eligibilityStatus === finalStatus) return p;
+              changed = true;
+              return { ...p, assignedStatus: newStatus, eligibilityStatus: finalStatus, status: newStatus };
+            });
+            return changed ? next : prev;
+          });
         }
       } catch (error) {
         console.error("Error fetching called player details:", getErrorMessage(error));
@@ -854,7 +901,26 @@ const RosterPage = () => {
     };
 
     fetchDetails();
-  }, [tablePlayers, playerDetailsMap]);
+  }, [tablePlayers, playerDetailsMap, loadPlayerDetails]);
+
+  // A count arriving later (or failing) must update eligibility without
+  // refetching player details or treating an unknown count as zero.
+  useEffect(() => {
+    setTablePlayers(prev => {
+      let changed = false;
+      const next = prev.map(player => {
+        if (!player.selected || !player.called || !player.originalTeamId) return player;
+        const count = playerStats[player._id];
+        const baseStatus = player.assignedStatus || player.status || 'UNKNOWN';
+        const status = count === undefined ? (baseStatus === 'INVALID' ? 'INVALID' : 'UNKNOWN')
+          : count >= maxCallUpAppearances ? 'INVALID' : baseStatus;
+        if (player.eligibilityStatus === status) return player;
+        changed = true;
+        return { ...player, eligibilityStatus: status };
+      });
+      return changed ? next : prev;
+    });
+  }, [playerStats, maxCallUpAppearances, calledIdsKey]);
 
   // NEW: Handler to toggle player selection in table
   const handleTablePlayerToggle = (playerId: string) => {
@@ -984,58 +1050,6 @@ const RosterPage = () => {
     return jerseyNumbers.length !== new Set(jerseyNumbers).size;
   }, [tablePlayers]);
 
-  // Fetch player stats for called players
-  useEffect(() => {
-    const fetchPlayerStats = async () => {
-      if (!match || !matchTeam) return;
-
-      const calledPlayers = rosterList.filter((player) => player.called);
-      const statsPromises = calledPlayers.map(async (player) => {
-        try {
-          const response = await apiClient.get(
-            `/players/${player.player.playerId}`,
-          );
-
-          const playerData = response.data;
-          return {
-            playerId: player.player.playerId,
-            calledMatches: countCalledMatches(
-              playerData,
-              match.tournament.alias,
-              match.season.alias,
-              callUpType,
-              currentMatchdayId ?? undefined,
-            ),
-          };
-        } catch (error) {
-          console.error(
-            `Error fetching stats for player ${player.player.playerId}:`,
-            getErrorMessage(error),
-          );
-          return {
-            playerId: player.player.playerId,
-            calledMatches: 0,
-          };
-        }
-      });
-
-      const statsResults = await Promise.all(statsPromises);
-      const statsMap = statsResults.reduce(
-        (acc, stat) => {
-          acc[stat.playerId] = stat.calledMatches;
-          return acc;
-        },
-        {} as { [playerId: string]: number },
-      );
-
-      setPlayerStats(statsMap);
-    };
-
-    if (rosterList.some((player) => player.called)) {
-      fetchPlayerStats();
-    }
-  }, [rosterList, match, matchTeam]);
-
   // Fetch teams from the same club with the same age group
   useEffect(() => {
     if (isCallUpModalOpen && club && team) {
@@ -1065,6 +1079,7 @@ const RosterPage = () => {
   // Fetch players when a team is selected
   useEffect(() => {
     if (selectedCallUpTeam && club) {
+      let cancelled = false;
       setLoadingCallUpPlayers(true);
       setCallUpPlayers([]);
       setSelectedCallUpPlayer(null);
@@ -1075,8 +1090,6 @@ const RosterPage = () => {
             {
               params: {
                 sortby: "lastName",
-                ...(!includeInactivePlayers
-                  ? { active: "true" } : {}),
                 all: true
               },
             },
@@ -1093,13 +1106,13 @@ const RosterPage = () => {
                     team && team.teamId === selectedCallUpTeam._id,
                 );
 
-              const calledMatches = countCalledMatches(
+              const calledMatches = statsContext ? countCalledMatches(
                 player,
-                match?.tournament?.alias ?? "",
-                match?.season?.alias ?? "",
-                callUpType,
-                currentMatchdayId ?? undefined,
-              );
+                statsContext.tournamentAlias,
+                statsContext.seasonAlias,
+                statsContext.callUpType,
+                statsContext.matchdayId,
+              ) : undefined;
 
               return {
                 _id: player._id,
@@ -1129,28 +1142,32 @@ const RosterPage = () => {
                 player !== null,
             );
 
-          const rosterPlayerIds = rosterList.map((rp) => rp.player.playerId);
-          const filteredPlayers = formattedPlayers.filter(
-            (player: AvailablePlayer) => !rosterPlayerIds.includes(player._id),
-          );
-
-          setCallUpPlayers(filteredPlayers);
+          if (!cancelled) setCallUpPlayers(formattedPlayers);
         } catch (error) {
+          if (cancelled) return;
           console.error("Error fetching players:", getErrorMessage(error));
           setCallUpModalError("Fehler beim Laden der Spieler");
           setCallUpPlayers([]);
         } finally {
-          setLoadingCallUpPlayers(false);
+          if (!cancelled) setLoadingCallUpPlayers(false);
         }
       };
 
-      fetchPlayers();
+      void fetchPlayers();
+      return () => { cancelled = true; };
     } else {
       setCallUpPlayers([]);
       setSelectedCallUpPlayer(null);
       setLoadingCallUpPlayers(false);
     }
-  }, [selectedCallUpTeam, club, rosterList, includeInactivePlayers]);
+  }, [selectedCallUpTeam, club?.alias]);
+
+  const filteredCallUpPlayers = React.useMemo(() => {
+    const rosterPlayerIds = new Set(rosterList.map(rp => rp.player.playerId));
+    return callUpPlayers.filter(player =>
+      !rosterPlayerIds.has(player._id) && (includeInactivePlayers || player.active !== false),
+    );
+  }, [callUpPlayers, rosterList, includeInactivePlayers]);
 
   // Handler to close the success message
   const handleCloseSuccessMessage = () => {
@@ -1207,13 +1224,11 @@ const RosterPage = () => {
     });
 
     // NEW: Also add to tablePlayers for the new table UI
-    const callUps = selectedCallUpPlayer.calledMatches ?? playerStats[selectedCallUpPlayer._id] ?? 0;
-    const eligibilityStatus = callUps >= maxCallUpAppearances ? 'INVALID' : selectedCallUpPlayer.status;
+    const callUps = selectedCallUpPlayer.calledMatches ?? playerStats[selectedCallUpPlayer._id];
+    const eligibilityStatus = callUps === undefined ? 'UNKNOWN'
+      : callUps >= maxCallUpAppearances ? 'INVALID' : selectedCallUpPlayer.status;
 
-    setPlayerStats((prev) => ({
-      ...prev,
-      [selectedCallUpPlayer._id]: callUps,
-    }));
+    if (callUps !== undefined) seedPlayerStats(selectedCallUpPlayer._id, callUps);
 
     const newPlayer: AvailablePlayerWithRoster = {
       ...selectedCallUpPlayer,
@@ -1402,6 +1417,7 @@ const RosterPage = () => {
         })
       );
       if (updatedPlayer) {
+        playerDetailsRef.current[teamChangePlayer._id] = updatedPlayer;
         setPlayerDetailsMap((prev) => ({
           ...prev,
           [teamChangePlayer._id]: updatedPlayer,
@@ -1439,6 +1455,17 @@ const RosterPage = () => {
         rosterUpdate,
       );
       console.log("Roster successfully saved:", rosterResponse.data);
+      const previouslyCalled = initialRosterData.filter(player => player.called)
+        .map(player => player.player.playerId).sort().join(',');
+      const currentlyCalled = calledPlayerIds.slice().sort().join(',');
+      if (previouslyCalled !== currentlyCalled || newStatus !== rosterStatus) {
+        for (const playerId of calledPlayerIds) {
+          delete playerDetailsRef.current[playerId];
+          delete pendingPlayerDetailsRef.current[playerId];
+        }
+        invalidatePlayerStats();
+      }
+      setInitialRosterData(rosterList);
       setRosterStatus(newStatus);
       if (newStatus === "SUBMITTED") {
         setLocalSubmitted(true);
@@ -1912,13 +1939,28 @@ const RosterPage = () => {
                                     : playerStats[player._id] !== undefined &&
                                         playerStats[player._id] === maxCallUpAppearances - 1
                                       ? "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
-                                      : "bg-red-50 text-red-600 ring-red-500/20",
+                                      : playerStats[player._id] === undefined
+                                        ? "bg-gray-50 text-gray-600 ring-gray-500/20"
+                                        : "bg-red-50 text-red-600 ring-red-500/20",
                                 )}
                               >
                                 {playerStats[player._id] !== undefined
                                   ? playerStats[player._id]
                                   : "–"}
                               </span>
+                              {playerStatsErrors[player._id] && (
+                                <button
+                                  type="button"
+                                  className="text-xs text-red-700 underline"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    retryPlayerStats(player._id);
+                                  }}
+                                  title="Hochmelde-Einsätze erneut laden"
+                                >
+                                  Erneut laden
+                                </button>
+                              )}
                               {playerStats[player._id] >= maxCallUpAppearances &&
                                 hasRole(user, UserRole.CLUB_ADMIN) && (
                                   <button
@@ -2856,7 +2898,7 @@ const RosterPage = () => {
                         setSelectedCallUpPlayer(null);
                       }
                     }}
-                    roster={callUpPlayers.map((player) => ({
+                    roster={filteredCallUpPlayers.map((player) => ({
                       player: {
                         playerId: player._id,
                         firstName: player.firstName,
