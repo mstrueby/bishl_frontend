@@ -230,7 +230,7 @@ const RosterPage = () => {
 
   const [playerDetailsMap, setPlayerDetailsMap] = useState<Record<string, PlayerValues>>({});
   const playerDetailsRef = useRef<Record<string, PlayerValues>>({});
-  const pendingPlayerDetailsRef = useRef<Record<string, Promise<PlayerValues>>>({});
+  const pendingPlayerDetailsRef = useRef<Partial<Record<string, Promise<PlayerValues>>>>({});
 
   // Share in-flight player requests between eligibility checks and call-up stats.
   const loadPlayerDetails = React.useCallback((playerId: string): Promise<PlayerValues> => {
@@ -1023,58 +1023,6 @@ const RosterPage = () => {
     return jerseyNumbers.length !== new Set(jerseyNumbers).size;
   }, [tablePlayers]);
 
-  // Fetch player stats for called players
-  useEffect(() => {
-    const fetchPlayerStats = async () => {
-      if (!match || !matchTeam) return;
-
-      const calledPlayers = rosterList.filter((player) => player.called);
-      const statsPromises = calledPlayers.map(async (player) => {
-        try {
-          const response = await apiClient.get(
-            `/players/${player.player.playerId}`,
-          );
-
-          const playerData = response.data;
-          return {
-            playerId: player.player.playerId,
-            calledMatches: countCalledMatches(
-              playerData,
-              match.tournament.alias,
-              match.season.alias,
-              callUpType,
-              currentMatchdayId ?? undefined,
-            ),
-          };
-        } catch (error) {
-          console.error(
-            `Error fetching stats for player ${player.player.playerId}:`,
-            getErrorMessage(error),
-          );
-          return {
-            playerId: player.player.playerId,
-            calledMatches: 0,
-          };
-        }
-      });
-
-      const statsResults = await Promise.all(statsPromises);
-      const statsMap = statsResults.reduce(
-        (acc, stat) => {
-          acc[stat.playerId] = stat.calledMatches;
-          return acc;
-        },
-        {} as { [playerId: string]: number },
-      );
-
-      setPlayerStats(statsMap);
-    };
-
-    if (rosterList.some((player) => player.called)) {
-      fetchPlayerStats();
-    }
-  }, [rosterList, match, matchTeam]);
-
   // Fetch teams from the same club with the same age group
   useEffect(() => {
     if (isCallUpModalOpen && club && team) {
@@ -1246,13 +1194,11 @@ const RosterPage = () => {
     });
 
     // NEW: Also add to tablePlayers for the new table UI
-    const callUps = selectedCallUpPlayer.calledMatches ?? playerStats[selectedCallUpPlayer._id] ?? 0;
-    const eligibilityStatus = callUps >= maxCallUpAppearances ? 'INVALID' : selectedCallUpPlayer.status;
+    const callUps = selectedCallUpPlayer.calledMatches ?? playerStats[selectedCallUpPlayer._id];
+    const eligibilityStatus = callUps === undefined ? 'UNKNOWN'
+      : callUps >= maxCallUpAppearances ? 'INVALID' : selectedCallUpPlayer.status;
 
-    setPlayerStats((prev) => ({
-      ...prev,
-      [selectedCallUpPlayer._id]: callUps,
-    }));
+    if (callUps !== undefined) seedPlayerStats(selectedCallUpPlayer._id, callUps);
 
     const newPlayer: AvailablePlayerWithRoster = {
       ...selectedCallUpPlayer,

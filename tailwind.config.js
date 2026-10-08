@@ -19,6 +19,7 @@ module.exports = {
     'bg-red-400/10',
     'bg-orange-500',
     'bg-yellow-500',
+    'bg-yellow-400/10',
     'bg-yellow-200',
     'bg-yellow-50',
     'bg-gray-50',
@@ -81,6 +82,7 @@ module.exports = {
     'ring-pink-600/20',
     'ring-yellow-400/20',
     'ring-yellow-600/10',
+    'ring-yellow-600/20',
 
     // Border colors
     'border-orange-500',
