@@ -213,11 +213,11 @@ const Header = () => {
                     <Link href="/calendar" className={item}>
                       Kalender
                     </Link>
-                    {/**
+                    
                     <Link href="/tournaments/tag-der-meister" className={item}>
                       Tag der Meister
                     </Link>
-                    */}
+                    
                     <Menu as="div" className="relative inline-block text-left">
                       {({ close }) => (
                         <>
@@ -581,7 +581,7 @@ const Header = () => {
                   </span>
                   Kalender
                 </DisclosureButton>
-                {/**
+                
                 {tournamentConfigs
                   .filter((config) => config.name === "Tag der Meister")
                   .map((item) => (
@@ -603,7 +603,7 @@ const Header = () => {
                       {item.name}
                     </DisclosureButton>
                   ))}
-                */}
+                
 
                 {men.map((item, index) => (
                   <DisclosureButton
