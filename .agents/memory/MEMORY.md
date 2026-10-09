@@ -1,3 +1,4 @@
 - [Replit Nix cache mismatch](replit-nix-cache-mismatch.md) — publishing can retain stale language/tool paths after `.replit` changes; compare cached Nix paths with the current modules and lockfile.
 - [Homepage ISR failures](homepage-isr-failures.md) — regeneration errors must reject so the last good homepage remains cached; never convert API failures into empty sections.
 - [Match start-time display](match-start-time-display.md) — match times are wall-clock values; display the API’s literal HH:mm without timezone conversion.
+- [Quick team assignment](quick-team-assignment.md) — adding membership does not imply licence approval or permission to alter existing assignments.

@@ -15,7 +15,7 @@ interface FilterChangeParams {
   date_to?: string;
 }
 
-export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox, currentFilter, tournaments, descriptionBadge }: {
+export default function SectionHeader({ title, filter, newLink, onFilterChange, onBulkUpdate, description, descriptionLogoUrl, backLink, searchBox, currentFilter, tournaments, descriptionBadge, actions }: {
   title: string,
   filter?: string,
   newLink?: string,
@@ -25,6 +25,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
   descriptionLogoUrl?: string,
   backLink?: string,
   searchBox?: React.ReactNode,
+  actions?: React.ReactNode,
   currentFilter?: FilterChangeParams,
   tournaments?: TournamentValues[],
   descriptionBadge?: {
@@ -111,6 +112,7 @@ export default function SectionHeader({ title, filter, newLink, onFilterChange, 
             Zurück
           </button>
         )}
+        {actions}
         {newLink && (
           <button
             type="button"

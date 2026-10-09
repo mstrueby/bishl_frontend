@@ -8,7 +8,9 @@ import SectionHeader from "../../../../../../../components/admin/SectionHeader";
 import SuccessMessage from '../../../../../../../components/ui/SuccessMessage';
 import DataList from '../../../../../../../components/admin/ui/DataList';
 import { getDataListItems } from '../../../../../../../tools/playerItems';
-import { TeamValues } from "../../../../../../../types/ClubValues";
+import { ClubValues, TeamValues } from "../../../../../../../types/ClubValues";
+import { PlusCircleIcon } from '@heroicons/react/24/solid';
+import AddTeamPlayerDialog from '../../../../../../../components/admin/AddTeamPlayerDialog';
 import LoadingState from '../../../../../../../components/ui/LoadingState';
 import useAuth from '../../../../../../../hooks/useAuth';
 import usePermissions from '../../../../../../../hooks/usePermissions';
@@ -30,6 +32,9 @@ const Players: NextPage<PlayersProps> = () => {
   const { hasAnyRole } = usePermissions();
   const [players, setPlayers] = useState<PlayerValues[]>([]);
   const [team, setTeam] = useState<TeamValues | null>(null);
+  const [club, setClub] = useState<ClubValues | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [refreshError, setRefreshError] = useState('');
   const [clubName, setClubName] = useState<string>('');
   const [totalPlayers, setTotalPlayers] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -52,6 +57,15 @@ const Players: NextPage<PlayersProps> = () => {
   }, [authLoading, user, hasAnyRole, router]);
 
   // Data fetching
+  const refreshPlayers = useCallback(async () => {
+    const response = await apiClient.get(`/players/clubs/${cAlias}/teams/${tAlias}`, {
+      params: { sortby: 'lastName', all: 'true' },
+    });
+    const list = response.data?.results || response.data || [];
+    setPlayers(list);
+    setTotalPlayers(response.data?.total ?? list.length);
+  }, [cAlias, tAlias]);
+
   const fetchData = useCallback(async () => {
     if (authLoading || !user || !cAlias || !tAlias) return;
 
@@ -61,28 +75,21 @@ const Players: NextPage<PlayersProps> = () => {
       // Get club infos
       const clubResponse = await apiClient.get(`/clubs/${cAlias}`);
       setClubName(clubResponse.data?.name || '');
+      setClub(clubResponse.data || null);
 
       // Get team infos
       const teamResponse = await apiClient.get(`/clubs/${cAlias}/teams/${tAlias}`);
       setTeam(teamResponse.data || null);
 
       // Get players
-      const playersResponse = await apiClient.get(`/players/clubs/${cAlias}/teams/${tAlias}`, {
-        params: {
-          sortby: 'lastName',
-          all: 'true'
-        }
-      });
-
-      setPlayers(playersResponse.data?.results || playersResponse.data || []);
-      setTotalPlayers(playersResponse.data?.total || 0);
+      await refreshPlayers();
 
     } catch (error) {
         console.error('Error fetching data:', getErrorMessage(error));
       } finally {
         setDataLoading(false);
       }
-  }, [authLoading, user, cAlias, tAlias]);
+  }, [authLoading, user, cAlias, tAlias, refreshPlayers]);
 
   useEffect(() => {
     if (!authLoading && user && cAlias && tAlias) {
@@ -157,9 +164,41 @@ const Players: NextPage<PlayersProps> = () => {
         title={sectionTitle}
         description={description}
         backLink={backLink}
+        actions={
+          <button type="button" disabled={!club} onClick={() => setAddDialogOpen(true)}
+            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50">
+            <PlusCircleIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+            Hinzufügen
+          </button>
+        }
       />
 
       {successMessage && <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />}
+      {refreshError && (
+        <div role="alert" className="mb-4 text-sm text-red-600">
+          {refreshError}
+          <button type="button" className="ml-2 underline" onClick={async () => {
+            try {
+              await refreshPlayers();
+              setRefreshError('');
+            } catch (error) {
+              setRefreshError(`Liste konnte nicht aktualisiert werden: ${getErrorMessage(error)}`);
+            }
+          }}>Erneut laden</button>
+        </div>
+      )}
+      {addDialogOpen && club && (
+        <AddTeamPlayerDialog club={club} team={team} onClose={() => setAddDialogOpen(false)}
+          onAdded={async () => {
+            setSuccessMessage('Spieler wurde der Mannschaft erfolgreich hinzugefügt.');
+            setRefreshError('');
+            try {
+              await refreshPlayers();
+            } catch (error) {
+              setRefreshError(`Spieler wurde gespeichert, aber die Liste konnte nicht aktualisiert werden: ${getErrorMessage(error)}`);
+            }
+          }} />
+      )}
 
       <DataList
         items={dataLisItems}
