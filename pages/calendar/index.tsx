@@ -703,6 +703,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
                               case 'mini':
                                 return 'bg-pink-400/10 text-pink-600 border-pink-600 hover:bg-pink-200/50';
                               case 'freundschaftsspiele':
+                              case 'tag-der-meister':
                                 return 'bg-yellow-400/10 text-yellow-600 border-yellow-600 hover:bg-yellow-200/50';
                               default:
                                 return '';
