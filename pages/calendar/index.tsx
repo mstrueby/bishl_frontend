@@ -21,6 +21,11 @@ import type { VenueValues } from '../../types/VenueValues';
 import type { ClubValues, TeamValues } from '../../types/ClubValues';
 import type { TournamentValues } from '../../types/TournamentValues';
 import apiClient from '../../lib/apiClient';
+import {
+  calendarMatchdayKey,
+  loadCalendarMatchdayOwners,
+  type CalendarMatchdayOwners,
+} from '../../lib/calendarMatchdayOwners';
 
 const CURRENT_SEASON = process.env.NEXT_PUBLIC_CURRENT_SEASON;
 
@@ -29,8 +34,10 @@ interface CalendarProps {
   venues: VenueValues[];
   clubs: ClubValues[];
   tournaments: TournamentValues[];
+  matchdayOwners: CalendarMatchdayOwners;
 }
 export const getStaticProps: GetStaticProps = async () => {
+  let calendarData: Omit<CalendarProps, 'matchdayOwners'>;
   try {
     // Use apiClient for consistent response handling
     const matchesRes = await apiClient('/matches/calendar', {
@@ -74,14 +81,11 @@ export const getStaticProps: GetStaticProps = async () => {
       ? tournamentsRes.data
       : (tournamentsRes.data?.data || []);
 
-    return {
-      props: {
-        matches: matchesData,
-        venues: venuesData,
-        clubs: clubsData,
-        tournaments: tournamentsData
-      },
-      revalidate: 60
+    calendarData = {
+      matches: matchesData,
+      venues: venuesData,
+      clubs: clubsData,
+      tournaments: tournamentsData,
     };
   } catch (error: any) {
     // Only serve a real 404 when the backend explicitly says the resource
@@ -98,13 +102,21 @@ export const getStaticProps: GetStaticProps = async () => {
         venues: [],
         clubs: [],
         tournaments: [],
+        matchdayOwners: {},
       },
       revalidate: 10,
     };
   }
+  // Do not fall back to ownerless permissions if this lookup fails.
+  // Rejecting regeneration preserves the last successfully cached calendar.
+  const matchdayOwners = await loadCalendarMatchdayOwners(calendarData.matches);
+  return {
+    props: { ...calendarData, matchdayOwners },
+    revalidate: 60,
+  };
 };
 
-export default function Calendar({ matches, venues, clubs, tournaments }: CalendarProps) {
+export default function Calendar({ matches, venues, clubs, tournaments, matchdayOwners }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const container = useRef<HTMLDivElement>(null);
@@ -926,6 +938,7 @@ export default function Calendar({ matches, venues, clubs, tournaments }: Calend
               <MatchCard
                 key={match._id}
                 match={match}
+                matchdayOwner={matchdayOwners[calendarMatchdayKey(match)]}
                 // Wrapping handleMatchUpdate to ignore the `event` parameter
                 onMatchUpdate={() => handleMatchUpdate(match)}
                 from="calendar"
